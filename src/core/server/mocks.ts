@@ -45,6 +45,7 @@ export { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 export { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 export { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+export { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 export { securityServiceMock } from '@kbn/core-security-server-mocks';

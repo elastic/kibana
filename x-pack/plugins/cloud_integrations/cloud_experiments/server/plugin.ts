@@ -13,12 +13,13 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { get, has } from 'lodash';
-import type { LogMeta } from '@kbn/logging';
+import { filter, map } from 'rxjs';
+import type { LDMultiKindContext } from 'launchdarkly-node-server-sdk';
+import type { LogLevelId, LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server/types';
-import { filter, map } from 'rxjs';
-import { MetadataService } from '../common/metadata_service';
+import { initializeMetadata, MetadataService } from '../common/metadata_service';
 import { LaunchDarklyClient } from './launch_darkly_client';
 import { registerUsageCollector } from './usage';
 import type { CloudExperimentsConfigType } from './config';
@@ -31,7 +32,7 @@ import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
 
 interface CloudExperimentsPluginSetupDeps {
   cloud: CloudSetup;
-  usageCollection?: UsageCollectionSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 interface CloudExperimentsPluginStartDeps {
@@ -67,38 +68,47 @@ export class CloudExperimentsPlugin
       );
     }
     if (ldConfig) {
-      this.launchDarklyClient = new LaunchDarklyClient(
-        {
-          ...ldConfig,
-          kibana_version: initializerContext.env.packageInfo.version,
-        },
-        this.logger.get('launch_darkly')
-      );
+      // this.launchDarklyClient = new LaunchDarklyClient(
+      //   {
+      //     ...ldConfig,
+      //     kibana_version: initializerContext.env.packageInfo.version,
+      //   },
+      //   this.logger.get('launch_darkly')
+      // );
     }
   }
 
   public setup(core: CoreSetup, deps: CloudExperimentsPluginSetupDeps) {
-    if (deps.usageCollection) {
-      registerUsageCollector(deps.usageCollection, () => ({
-        launchDarklyClient: this.launchDarklyClient,
-      }));
-    }
+    core.logging.configure(
+      this.initializerContext.config.create<CloudExperimentsConfigType>().pipe(
+        map(({ launch_darkly: { client_log_level: clientLogLevel = 'none' } = {} }) => {
+          const logLevel = clientLogLevel.replace('none', 'off') as LogLevelId;
+          return { loggers: [{ name: 'launch-darkly', level: logLevel, appenders: [] }] };
+        })
+      )
+    );
+    registerUsageCollector(deps.usageCollection, () => ({
+      launchDarklyClient: this.launchDarklyClient, // TODO: Return the client from the OpenFeature Provider
+    }));
 
+    initializeMetadata({
+      metadataService: this.metadataService,
+      initializerContext: this.initializerContext,
+      cloud: deps.cloud,
+      featureFlags: core.featureFlags,
+      logger: this.logger,
+    });
+
+    // TODO: Legacy client. Remove when the migration is complete
     if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId) {
-      this.metadataService.setup({
-        // We use the Cloud Deployment ID as the userId in the Cloud Experiments
-        userId: deps.cloud.deploymentId,
-        kibanaVersion: this.initializerContext.env.packageInfo.version,
-        trialEndDate: deps.cloud.trialEndDate?.toISOString(),
-        isElasticStaff: deps.cloud.isElasticStaffOwned,
-      });
-
       // We only subscribe to the user metadata updates if Cloud is enabled.
       // This way, since the user is not identified, it cannot retrieve Feature Flags from LaunchDarkly when not running on Cloud.
       this.metadataService.userMetadata$
         .pipe(
           filter(Boolean), // Filter out undefined
-          map((userMetadata) => this.launchDarklyClient?.updateUserMetadata(userMetadata))
+          map((userMetadata) =>
+            this.launchDarklyClient?.updateUserMetadata(userMetadata as LDMultiKindContext)
+          )
         )
         .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
     }
@@ -146,7 +156,7 @@ export class CloudExperimentsPlugin
   private async addHasDataMetadata(
     core: CoreStart,
     dataViews: DataViewsServerPluginStart
-  ): Promise<{ hasData: boolean }> {
+  ): Promise<{ has_data: boolean }> {
     const dataViewsService = await dataViews.dataViewsServiceFactory(
       core.savedObjects.createInternalRepository(),
       core.elasticsearch.client.asInternalUser,
@@ -154,7 +164,7 @@ export class CloudExperimentsPlugin
       true // Ignore capabilities checks
     );
     return {
-      hasData: await dataViewsService.hasUserDataView(),
+      has_data: await dataViewsService.hasUserDataView(),
     };
   }
 }

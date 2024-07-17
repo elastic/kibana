@@ -217,6 +217,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       withContext: deps.executionContext.withContext,
       getAsLabels: deps.executionContext.getAsLabels,
     },
+    featureFlags: {
+      setProvider: deps.featureFlags.setProvider,
+      appendContext: deps.featureFlags.appendContext,
+    },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
@@ -331,6 +335,13 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getCapabilities: deps.elasticsearch.getCapabilities,
     },
     executionContext: deps.executionContext,
+    featureFlags: {
+      addHandler: deps.featureFlags.addHandler,
+      appendContext: deps.featureFlags.appendContext,
+      getBooleanValue: deps.featureFlags.getBooleanValue,
+      getStringValue: deps.featureFlags.getStringValue,
+      getNumberValue: deps.featureFlags.getNumberValue,
+    },
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,

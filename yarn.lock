@@ -3945,6 +3945,30 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-feature-flags-browser-internal@link:packages/core/feature-flags/core-feature-flags-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-feature-flags-browser-mocks@link:packages/core/feature-flags/core-feature-flags-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-feature-flags-browser@link:packages/core/feature-flags/core-feature-flags-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-feature-flags-server-internal@link:packages/core/feature-flags/core-feature-flags-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-feature-flags-server-mocks@link:packages/core/feature-flags/core-feature-flags-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-feature-flags-server@link:packages/core/feature-flags/core-feature-flags-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-history-block-plugin@link:test/plugin_functional/plugins/core_history_block":
   version "0.0.0"
   uid ""
@@ -5018,14 +5042,6 @@
   uid ""
 
 "@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-feature-flags-browser-internal@link:packages/core/feature-flags/core-feature-flags-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-feature-flags-browser@link:packages/core/feature-flags/core-feature-flags-browser":
   version "0.0.0"
   uid ""
 
@@ -7817,6 +7833,13 @@
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.3.0.tgz#59e98813fa3878402de7b9529cec1734597f9be7"
   integrity sha512-Z2TiqfC4zoiCB/JMzIrzRrdDYdfOCGjI2MDgNHDEwA/k3y5IZANFkNAc/nhfof/QrmOy0HjQtvjRLnEW8urqJQ==
+
+"@openfeature/launchdarkly-client-provider@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.0.tgz#47ad29671529595314fdb9497d078be0a744e006"
+  integrity sha512-iFe27RbuUxv4hDGJDmWJnxs5gpzU2d1xTxrGu/8z0gcbtXUAaYM6s4kglf63V2QzWV/Grot6P6bwSLlqeSDwMw==
+  dependencies:
+    lodash.isempty "4.4.0"
 
 "@openfeature/server-sdk@^1.15.0":
   version "1.15.0"
@@ -22289,7 +22312,7 @@ lodash.isboolean@^3.0.3:
   resolved "https://registry.yarnpkg.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz#6c2e171db2a257cd96802fd43b01b20d5f5870f6"
   integrity sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==
 
-lodash.isempty@^4.4.0:
+lodash.isempty@4.4.0, lodash.isempty@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.isempty/-/lodash.isempty-4.4.0.tgz#6f86cbedd8be4ec987be9aaf33c9684db1b31e7e"
   integrity sha1-b4bL7di+TsmHvpqvM8loTbGzHn4=

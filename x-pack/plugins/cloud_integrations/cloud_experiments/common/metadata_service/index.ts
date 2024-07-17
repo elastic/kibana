@@ -6,3 +6,4 @@
  */
 
 export { MetadataService } from './metadata_service';
+export { initializeMetadata } from './initialize_metadata';

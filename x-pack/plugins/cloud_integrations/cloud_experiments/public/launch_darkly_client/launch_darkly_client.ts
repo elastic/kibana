@@ -7,8 +7,8 @@
 
 import {
   type LDClient,
-  type LDSingleKindContext,
   type LDLogLevel,
+  type LDMultiKindContext,
 } from 'launchdarkly-js-client-sdk';
 import { BehaviorSubject, filter, firstValueFrom, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
@@ -23,6 +23,7 @@ export interface LaunchDarklyUserMetadata
   userId: string;
 }
 
+// TODO: Legacy client. Remove when the migration is complete
 export class LaunchDarklyClient {
   private initialized = false;
   private canceled = false;
@@ -41,15 +42,8 @@ export class LaunchDarklyClient {
     private readonly logger: Logger
   ) {}
 
-  public async updateUserMetadata(userMetadata: LaunchDarklyUserMetadata) {
+  public async updateUserMetadata(userMetadata: LDMultiKindContext): Promise<void> {
     if (this.canceled) return;
-
-    const { userId, ...userMetadataWithoutUserId } = userMetadata;
-    const launchDarklyUser: LDSingleKindContext = {
-      ...userMetadataWithoutUserId,
-      kind: 'user',
-      key: userId,
-    };
 
     let launchDarklyClient: LDClient | null = null;
     if (this.initialized) {
@@ -57,11 +51,11 @@ export class LaunchDarklyClient {
     }
 
     if (launchDarklyClient) {
-      await launchDarklyClient.identify(launchDarklyUser);
+      await launchDarklyClient.identify(userMetadata);
     } else {
       this.initialized = true;
       const { initialize, basicLogger } = await import('launchdarkly-js-client-sdk');
-      launchDarklyClient = initialize(this.ldConfig.client_id, launchDarklyUser, {
+      launchDarklyClient = initialize(this.ldConfig.client_id, userMetadata, {
         application: { id: 'kibana-browser', version: this.kibanaVersion },
         logger: basicLogger({ level: this.ldConfig.client_log_level }),
       });

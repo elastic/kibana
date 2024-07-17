@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { ClientProviderEvents } from './src/types';
-export type { EvaluationContext, FeatureFlagsSetup, FeatureFlagsStart } from './src/types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/feature-flags/core-feature-flags-browser-mocks'],
+};

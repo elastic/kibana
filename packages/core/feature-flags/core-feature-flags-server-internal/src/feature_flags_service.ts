@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { CoreContext } from '@kbn/core-base-browser-internal';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {
   EvaluationContext,
   FeatureFlagsSetup,
   FeatureFlagsStart,
-} from '@kbn/core-feature-flags-browser';
+} from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
-import { apm } from '@elastic/apm-rum';
-import { type Client, OpenFeature } from '@openfeature/web-sdk';
+import apm from 'elastic-apm-node';
+import { type Client, OpenFeature } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
 
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
-  private isProviderReadyPromise?: Promise<void>;
   private context: EvaluationContext = { kind: 'multi' };
 
   constructor(core: CoreContext) {
@@ -35,7 +34,7 @@ export class FeatureFlagsService {
   public setup(): FeatureFlagsSetup {
     return {
       setProvider: (provider) => {
-        this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
+        OpenFeature.setProvider(provider);
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
@@ -44,29 +43,27 @@ export class FeatureFlagsService {
   /**
    * Start lifecycle method
    */
-  public async start(): Promise<FeatureFlagsStart> {
-    await this.waitForProviderInitialization();
-
+  public start(): FeatureFlagsStart {
     return {
       addHandler: this.featureFlagsClient.addHandler.bind(this.featureFlagsClient),
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
-      getBooleanValue: (flagName: string, fallbackValue: boolean) => {
+      getBooleanValue: async (flagName: string, fallbackValue: boolean) => {
         // TODO: intercept with config overrides
-        const value = this.featureFlagsClient.getBooleanValue(flagName, fallbackValue);
+        const value = await this.featureFlagsClient.getBooleanValue(flagName, fallbackValue);
         apm.addLabels({ [`flag_${flagName}`]: value });
         // TODO: increment usage counter
         return value;
       },
-      getStringValue: (flagName: string, fallbackValue: string) => {
+      getStringValue: async (flagName: string, fallbackValue: string) => {
         // TODO: intercept with config overrides
-        const value = this.featureFlagsClient.getStringValue(flagName, fallbackValue);
+        const value = await this.featureFlagsClient.getStringValue(flagName, fallbackValue);
         apm.addLabels({ [`flag_${flagName}`]: value });
         // TODO: increment usage counter
         return value;
       },
-      getNumberValue: (flagName: string, fallbackValue: number) => {
+      getNumberValue: async (flagName: string, fallbackValue: number) => {
         // TODO: intercept with config overrides
-        const value = this.featureFlagsClient.getNumberValue(flagName, fallbackValue);
+        const value = await this.featureFlagsClient.getNumberValue(flagName, fallbackValue);
         apm.addLabels({ [`flag_${flagName}`]: value });
         // TODO: increment usage counter
         return value;
@@ -81,26 +78,12 @@ export class FeatureFlagsService {
     await OpenFeature.close();
   }
 
-  private async waitForProviderInitialization() {
-    // Adding a timeout here to avoid hanging the start for too long if the provider is unresponsive
-    let timeoutId: NodeJS.Timeout | undefined;
-    await Promise.race([
-      this.isProviderReadyPromise,
-      await new Promise((resolve) => {
-        timeoutId = setTimeout(resolve, 2 * 1000);
-      }).then(() => {
-        this.logger.warn('The feature flags provider took too long to initialize');
-      }),
-    ]);
-    clearTimeout(timeoutId);
-  }
-
   /**
    * Formats the provided context to fulfill the expected multi-context structure.
    * @param contextToAppend The {@link EvaluationContext} to append.
    * @private
    */
-  private async appendContext(contextToAppend: EvaluationContext): Promise<void> {
+  private appendContext(contextToAppend: EvaluationContext): void {
     // If no kind provided, default to the project|deployment level.
     const { kind = 'kibana', ...rest } = contextToAppend;
     // Format the context to fulfill the expected multi-context structure
@@ -109,6 +92,6 @@ export class FeatureFlagsService {
 
     // Merge the formatted context to append to the global context, and set it in the OpenFeature client.
     this.context = deepMerge(this.context, formattedContextToAppend);
-    await OpenFeature.setContext(this.context);
+    OpenFeature.setContext(this.context);
   }
 }

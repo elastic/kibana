@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Provider } from '@openfeature/web-sdk';
+import type { Provider } from '@openfeature/server-sdk';
 import {
-  ClientProviderEvents,
+  ServerProviderEvents,
   type EvaluationContext as OpenFeatureEvaluationContext,
   type Eventing,
 } from '@openfeature/core';
 
-export { ClientProviderEvents };
+export { ServerProviderEvents };
 
 /**
  * The evaluation context to use when retrieving the flags.
@@ -78,7 +78,7 @@ export interface FeatureFlagsSetup {
    * @param contextToAppend The additional keys that should be appended/modified in the evaluation context.
    * @public
    */
-  appendContext(contextToAppend: EvaluationContext): Promise<void>;
+  appendContext(contextToAppend: EvaluationContext): void;
 }
 
 /**
@@ -91,30 +91,30 @@ export interface FeatureFlagsStart {
    * Useful when the consumer needs to react to flag changes.
    * @public
    */
-  addHandler: Eventing<ClientProviderEvents>['addHandler'];
+  addHandler: Eventing<ServerProviderEvents>['addHandler'];
 
   /**
    * Appends new keys to the evaluation context.
    * @param contextToAppend The additional keys that should be appended/modified in the evaluation context.
    * @public
    */
-  appendContext(contextToAppend: EvaluationContext): Promise<void>;
+  appendContext(contextToAppend: EvaluationContext): void;
 
   /**
    * Evaluates a boolean flag
    * @public
    */
-  getBooleanValue(flagName: string, fallbackValue: boolean): boolean;
+  getBooleanValue(flagName: string, fallbackValue: boolean): Promise<boolean>;
 
   /**
    * Evaluates a string flag
    * @public
    */
-  getStringValue(flagName: string, fallbackValue: string): string;
+  getStringValue(flagName: string, fallbackValue: string): Promise<string>;
 
   /**
    * Evaluates a number flag
    * @public
    */
-  getNumberValue(flagName: string, fallbackValue: number): number;
+  getNumberValue(flagName: string, fallbackValue: number): Promise<number>;
 }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  type LDClient,
-  type LDFlagSet,
-  type LDLogLevel,
-  type LDSingleKindContext,
+import type {
+  LDClient,
+  LDFlagSet,
+  LDLogLevel,
+  LDMultiKindContext,
 } from '@launchdarkly/node-server-sdk';
 import { init, basicLogger } from '@launchdarkly/node-server-sdk';
 import type { Logger } from '@kbn/core/server';
@@ -40,9 +40,10 @@ export interface LaunchDarklyGetAllFlags {
   flagNames: string[];
 }
 
+// TODO: Legacy client. Remove when the migration is complete
 export class LaunchDarklyClient {
   private readonly launchDarklyClient: LDClient;
-  private launchDarklyUser?: LDSingleKindContext;
+  private launchDarklyUser?: LDMultiKindContext;
 
   constructor(ldConfig: LaunchDarklyClientConfig, private readonly logger: Logger) {
     this.launchDarklyClient = init(ldConfig.sdk_key, {
@@ -59,13 +60,8 @@ export class LaunchDarklyClient {
     );
   }
 
-  public updateUserMetadata(userMetadata: LaunchDarklyUserMetadata) {
-    const { userId, ...userMetadataWithoutUserId } = userMetadata;
-    this.launchDarklyUser = {
-      ...userMetadataWithoutUserId,
-      kind: 'user',
-      key: userId,
-    };
+  public updateUserMetadata(userMetadata: LDMultiKindContext) {
+    this.launchDarklyUser = userMetadata;
   }
 
   public async getVariation<Data>(configKey: string, defaultValue: Data): Promise<Data> {
