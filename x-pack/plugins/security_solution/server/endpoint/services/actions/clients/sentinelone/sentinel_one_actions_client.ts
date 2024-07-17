@@ -539,7 +539,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       switch (actionDetails.command) {
         case 'get-file':
           {
-            const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+            const agentResponse = await this.fetchEsResponseDocForAgentId<
+              ResponseActionGetFileOutputContent,
+              SentinelOneGetFileResponseMeta
+            >(actionId, agentId);
 
             // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
             // calling the download API, which would return the following error:
@@ -557,9 +560,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
         case 'running-processes':
           {
-            // FIXME:PT delete below and implement
-            const status = 'foo';
-            fileInfo.status = status;
+            // FIXME:PT define the `Meta` type
+            const agentResponse = await this.fetchEsResponseDocForAgentId<
+              GetProcessesActionOutputContent,
+              {}
+            >(actionId, agentId);
+
+            // TODO:PT query Sentinelone to see if file is still available
           }
           break;
 
@@ -591,7 +598,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     await this.ensureValidActionId(actionId);
 
-    const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+    const agentResponse = await this.fetchEsResponseDocForAgentId<
+      ResponseActionGetFileOutputContent,
+      SentinelOneGetFileResponseMeta
+    >(actionId, agentId);
 
     if (!agentResponse.meta?.activityLogEntryId) {
       throw new ResponseActionsClientError(
@@ -972,30 +982,18 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } as FetchScriptInfoResponse<TScriptOptions>;
   }
 
-  private async fetchGetFileResponseEsDocForAgentId(
-    actionId: string,
-    agentId: string
-  ): Promise<
-    LogsEndpointActionResponse<ResponseActionGetFileOutputContent, SentinelOneGetFileResponseMeta>
-  > {
+  private async fetchEsResponseDocForAgentId<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string, agentId: string): Promise<LogsEndpointActionResponse<TOutputContent, TMeta>> {
     const agentResponse = (
-      await this.fetchActionResponseEsDocs<
-        ResponseActionGetFileOutputContent,
-        SentinelOneGetFileResponseMeta
-      >(actionId, [agentId])
+      await this.fetchActionResponseEsDocs<TOutputContent, TMeta>(actionId, [agentId])
     )[agentId];
 
     if (!agentResponse) {
       throw new ResponseActionAgentResponseEsDocNotFound(
         `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
         404
-      );
-    }
-
-    if (agentResponse.EndpointActions.data.command !== 'get-file') {
-      throw new ResponseActionsClientError(
-        `Invalid action ID [${actionId}] - Not a get-file action: [${agentResponse.EndpointActions.data.command}]`,
-        400
       );
     }
 
