@@ -483,13 +483,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
     groupByFields.length === 0;
 
-  /**
-   * If we don't have ML field information, users can't meaningfully interact with these fields */
+  /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
     isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length);
 
   const isThresholdSuppressionDisabled = isThresholdRule && !enableThresholdSuppression;
 
+  /** Suppression fields are generally disabled if either:
+   * - License is insufficient (i.e. less than platinum)
+   * - An EQL Sequence is used
+   * - ML Field information is not available
+   */
   const areSuppressionFieldsDisabled =
     !isAlertSuppressionLicenseValid ||
     areSuppressionFieldsDisabledBySequence ||
@@ -523,51 +527,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [esqlSuppressionFields, mlSuppressionFields, ruleType, termsAggregationFields]);
 
-  /**
-   * Component that allows selection of suppression intervals disabled:
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - or for not threshold rule - when groupBy fields not selected
-   * - Eql sequence is used
-   * - ML Field information is not available
-   */
   const isGroupByChildrenDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
-
-  /**
-   * Per rule execution radio option is disabled
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - always disabled for threshold rule
-   *  - Eql sequence is used and suppression fields are in the default state
-   * - ML Field information is not available
-   */
   const isPerRuleExecutionDisabled = areSuppressionFieldsDisabled || isThresholdRule;
-
-  /**
-   * Per time period execution radio option is disabled
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - disabled for threshold rule when enabled suppression is not checked
-   * - Eql sequence is used and suppression fields are in the default state
-   * - ML Field information is not available
-   */
   const isPerTimePeriodDisabled = areSuppressionFieldsDisabled || isThresholdSuppressionDisabled;
-
-  /**
-   * Suppression duration is disabled when
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - when suppression by rule execution is selected in radio button
-   *  - when threshold suppression is not enabled and no group by fields selected
-   * -  Eql sequence is used and suppression fields are in the default state
-   * - ML Field information is not available
-   * */
   const isDurationDisabled =
-    !areSuppressionFieldsSelected &&
-    (areSuppressionFieldsDisabled || isThresholdSuppressionDisabled);
-
-  /**
-   * Suppression missing fields is disabled when
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - when no group by fields selected
-   * -  Eql sequence is used and suppression fields are in the default state
-   * */
+    (areSuppressionFieldsDisabled || isThresholdSuppressionDisabled) &&
+    !areSuppressionFieldsSelected;
   const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
 
   const GroupByChildren = useCallback(
