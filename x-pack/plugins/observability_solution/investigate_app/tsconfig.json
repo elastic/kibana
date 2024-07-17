@@ -26,7 +26,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/text-based-languages",
     "@kbn/lens-plugin",
     "@kbn/utility-types",
     "@kbn/esql",
@@ -48,15 +47,12 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/visualization-utils",
     "@kbn/unified-search-plugin",
-    "@kbn/alerts-ui-shared",
     "@kbn/es-query",
     "@kbn/server-route-repository",
     "@kbn/management-settings-ids",
-    "@kbn/dashboard-plugin",
     "@kbn/security-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/esql-datagrid",
-    "@kbn/observability-plugin",
-    "@kbn/rule-registry-plugin"
+    "@kbn/std"
   ],
 }
