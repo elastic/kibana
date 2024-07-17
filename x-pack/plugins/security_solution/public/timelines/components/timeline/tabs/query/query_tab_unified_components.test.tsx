@@ -74,8 +74,8 @@ jest.mock('react-router-dom', () => ({
 const SPECIAL_TEST_TIMEOUT = 50000;
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
-  if (feature === 'unifiedComponentsInTimelineEnabled') {
-    return true;
+  if (feature === 'unifiedComponentsInTimelineDisabled') {
+    return false;
   }
   return allowedExperimentalValues[feature];
 });
@@ -158,6 +158,14 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 let useTimelineEventsMock = jest.fn();
 
 describe('query tab with unified timeline', () => {
+  beforeAll(() => {
+    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      get() {
+        return true;
+      },
+    });
+  });
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
@@ -171,10 +179,6 @@ describe('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
-    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
-      value: true,
-      writable: false,
-    });
     useTimelineEventsMock = jest.fn(() => [
       false,
       {
@@ -782,8 +786,8 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
+            if (feature === 'unifiedComponentsInTimelineDisabled') {
+              return false;
             }
             if (feature === 'securitySolutionNotesEnabled') {
               return true;
@@ -797,7 +801,6 @@ describe('query tab with unified timeline', () => {
         'should have the notification dot & correct tooltip',
         async () => {
           renderTestComponents();
-
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
@@ -840,8 +843,8 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
+            if (feature === 'unifiedComponentsInTimelineDisabled') {
+              return false;
             }
             if (feature === 'securitySolutionNotesEnabled') {
               return false;
@@ -855,7 +858,6 @@ describe('query tab with unified timeline', () => {
         'should have the notification dot & correct tooltip',
         async () => {
           renderTestComponents();
-
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
@@ -977,9 +979,6 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
-            }
             if (feature === 'securitySolutionNotesEnabled') {
               return true;
             }
@@ -1022,9 +1021,6 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
-            }
             if (feature === 'securitySolutionNotesEnabled') {
               return false;
             }
