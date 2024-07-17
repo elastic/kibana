@@ -254,6 +254,7 @@ export function TrainedModelsDeploymentModal({
               fill
               onClick={forceSaveMappings}
               disabled={!allowForceSaveMappings}
+              isLoading={saveMappingsLoading}
               data-test-subj="forceSaveMappingsButton"
             >
               {i18n.translate(
