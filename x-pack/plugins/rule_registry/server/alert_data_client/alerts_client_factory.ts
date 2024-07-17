@@ -8,10 +8,7 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import {
-  AlertingAuthorization,
-  PluginStartContract as AlertingStart,
-} from '@kbn/alerting-plugin/server';
+import { AlertingAuthorization, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
@@ -26,7 +23,7 @@ export interface AlertsClientFactoryProps {
   ruleDataService: IRuleDataService | null;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
-  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
+  getAlertIndicesAlias: AlertingServerStart['getAlertIndicesAlias'];
 }
 
 export class AlertsClientFactory {
@@ -40,7 +37,7 @@ export class AlertsClientFactory {
   private ruleDataService!: IRuleDataService | null;
   private getRuleType!: RuleTypeRegistry['get'];
   private getRuleList!: RuleTypeRegistry['list'];
-  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
+  private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   public initialize(options: AlertsClientFactoryProps) {
     /**

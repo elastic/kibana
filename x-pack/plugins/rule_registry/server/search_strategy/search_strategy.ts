@@ -84,20 +84,22 @@ export const ruleRegistrySearchStrategyProvider = (
           )) as estypes.QueryDslQueryContainer;
         }
 
-        const authorizedRuleTypes =
-          featureIds.length > 0
-            ? await authorization.getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert, fIds)
-            : [];
+        const authorizedRuleTypes = await authorization.getAllAuthorizedRuleTypesFindOperation(
+          AlertingAuthorizationEntity.Alert,
+          fIds
+        );
 
         return { space, authzFilter, authorizedRuleTypes };
       };
       return from(getAsync(request.featureIds)).pipe(
         mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
-          const allRuleTypes = authorizedRuleTypes.map((art: { id: string }) => art.id);
-          const ruleTypes = (allRuleTypes ?? []).filter(
+          const authorizedRuleTypesIds = Array.from(authorizedRuleTypes.keys());
+          const ruleTypes = (authorizedRuleTypesIds ?? []).filter(
             (ruleTypeId: string) => !EXCLUDED_RULE_TYPE_IDS.includes(ruleTypeId)
           );
+
           const indices = alerting.getAlertIndicesAlias(ruleTypes, space?.id);
+
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
           }

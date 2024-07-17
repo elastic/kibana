@@ -44,9 +44,8 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
       featureIds: params.featureIds || [],
       spaceId: context.spaceId,
       getAlertIndicesAlias: context.getAlertIndicesAlias,
-      getAuthorizedRuleTypes: context.authorization.getAuthorizedRuleTypes.bind(
-        context.authorization
-      ),
+      getAllAuthorizedRuleTypesFindOperation:
+        context.authorization.getAllAuthorizedRuleTypesFindOperation.bind(context.authorization),
       ensureAuthorized: async ({
         ruleTypeId,
         consumer,

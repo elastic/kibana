@@ -45,12 +45,13 @@ export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export type { AlertingRulesConfig } from './config';
 export {
-  ReadOperations,
   AlertingAuthorizationFilterType,
   AlertingAuthorization,
+  ReadOperations,
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+
 export {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,

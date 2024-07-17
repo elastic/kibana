@@ -14,12 +14,12 @@ export type AlertingAuthorizationMock = jest.Mocked<Schema>;
 const createAlertingAuthorizationMock = () => {
   const mocked: AlertingAuthorizationMock = {
     ensureAuthorized: jest.fn(),
-    filterByRuleTypeAuthorization: jest.fn(),
-    getAuthorizationFilter: jest.fn(),
     getAuthorizedRuleTypes: jest.fn(),
     getFindAuthorizationFilter: jest.fn(),
-    getAugmentedRuleTypesWithAuthorization: jest.fn(),
     getSpaceId: jest.fn(),
+    getAllAuthorizedRuleTypes: jest.fn(),
+    getAllAuthorizedRuleTypesFindOperation: jest.fn(),
+    getAuthorizationFilter: jest.fn(),
   };
   return mocked;
 };

@@ -5,13 +5,29 @@
  * 2.0.
  */
 
-import { WriteOperations, ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
+import {
+  WriteOperations,
+  ReadOperations,
+  AlertingAuthorizationEntity,
+  RegistryAlertTypeWithAuth,
+} from '../../authorization';
 import { RulesClientContext } from '../types';
 
-export async function listRuleTypes(context: RulesClientContext) {
-  return await context.authorization.filterByRuleTypeAuthorization(
-    context.ruleTypeRegistry.list(),
+export async function listRuleTypes(
+  context: RulesClientContext
+): Promise<RegistryAlertTypeWithAuth[]> {
+  const registeredRuleTypes = context.ruleTypeRegistry.list();
+
+  const authorizedRuleTypes = await context.authorization.getAuthorizedRuleTypes(
+    new Set(Array.from(registeredRuleTypes.keys()).map((id) => id)),
     [ReadOperations.Get, WriteOperations.Create],
     AlertingAuthorizationEntity.Rule
   );
+
+  return Array.from(authorizedRuleTypes.entries())
+    .filter(([id, _]) => context.ruleTypeRegistry.has(id))
+    .map(([id, { authorizedConsumers }]) => ({
+      ...registeredRuleTypes.get(id)!,
+      authorizedConsumers,
+    }));
 }

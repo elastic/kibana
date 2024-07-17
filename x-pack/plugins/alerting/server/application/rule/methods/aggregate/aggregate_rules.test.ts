@@ -78,24 +78,28 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('aggregate()', () => {
-  const listedTypes = new Set<RegistryRuleType>([
-    {
-      actionGroups: [],
-      actionVariables: undefined,
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      recoveryActionGroup: RecoveredActionGroup,
-      id: 'myType',
-      name: 'myType',
-      category: 'test',
-      producer: 'myApp',
-      enabledInLicense: true,
-      hasAlertsMappings: false,
-      hasFieldsForAAD: false,
-      validLegacyConsumers: [],
-    },
+  const listedTypes = new Map<string, RegistryRuleType>([
+    [
+      'myType',
+      {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: 'myType',
+        name: 'myType',
+        category: 'test',
+        producer: 'myApp',
+        enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
+      },
+    ],
   ]);
+
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
@@ -161,26 +165,16 @@ describe('aggregate()', () => {
     });
 
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
-      new Set([
-        {
-          id: 'myType',
-          name: 'Test',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          defaultActionGroupId: 'default',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          recoveryActionGroup: RecoveredActionGroup,
-          category: 'test',
-          producer: 'alerts',
-          authorizedConsumers: {
-            myApp: { read: true, all: true },
+    authorization.getAuthorizedRuleTypes.mockResolvedValue(
+      new Map([
+        [
+          'myType',
+          {
+            authorizedConsumers: {
+              myApp: { read: true, all: true },
+            },
           },
-          enabledInLicense: true,
-          hasAlertsMappings: false,
-          hasFieldsForAAD: false,
-          validLegacyConsumers: [],
-        },
+        ],
       ])
     );
   });

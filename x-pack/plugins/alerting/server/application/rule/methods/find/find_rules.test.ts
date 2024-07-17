@@ -92,23 +92,26 @@ jest.mock('../../../../rules_client/common/map_sort_field', () => ({
 }));
 
 describe('find()', () => {
-  const listedTypes = new Set<RegistryRuleType>([
-    {
-      actionGroups: [],
-      recoveryActionGroup: RecoveredActionGroup,
-      actionVariables: undefined,
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      id: 'myType',
-      name: 'myType',
-      category: 'test',
-      producer: 'myApp',
-      enabledInLicense: true,
-      hasAlertsMappings: false,
-      hasFieldsForAAD: false,
-      validLegacyConsumers: [],
-    },
+  const listedTypes = new Map<string, RegistryRuleType>([
+    [
+      'myType',
+      {
+        actionGroups: [],
+        recoveryActionGroup: RecoveredActionGroup,
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        id: 'myType',
+        name: 'myType',
+        category: 'test',
+        producer: 'myApp',
+        enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
+      },
+    ],
   ]);
 
   beforeEach(() => {
@@ -162,26 +165,16 @@ describe('find()', () => {
     });
 
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
-      new Set([
-        {
-          id: 'myType',
-          name: 'Test',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          recoveryActionGroup: RecoveredActionGroup,
-          defaultActionGroupId: 'default',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          category: 'test',
-          producer: 'alerts',
-          authorizedConsumers: {
-            myApp: { read: true, all: true },
+    authorization.getAuthorizedRuleTypes.mockResolvedValue(
+      new Map([
+        [
+          'myType',
+          {
+            authorizedConsumers: {
+              myApp: { read: true, all: true },
+            },
           },
-          enabledInLicense: true,
-          hasAlertsMappings: false,
-          hasFieldsForAAD: false,
-          validLegacyConsumers: [],
-        },
+        ],
       ])
     );
   });
@@ -511,13 +504,34 @@ describe('find()', () => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
+
     const injectReferencesFn = jest.fn().mockReturnValue({
       bar: true,
       parameterThatIsSavedObjectId: '9',
     });
-    ruleTypeRegistry.list.mockReturnValue(
-      new Set([
-        ...listedTypes,
+
+    const ruleTypes = new Map<string, RegistryRuleType>([
+      [
+        'myType',
+        {
+          actionGroups: [],
+          recoveryActionGroup: RecoveredActionGroup,
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          id: 'myType',
+          name: 'myType',
+          category: 'test',
+          producer: 'myApp',
+          enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
+        },
+      ],
+      [
+        '123',
         {
           actionGroups: [],
           recoveryActionGroup: RecoveredActionGroup,
@@ -534,8 +548,10 @@ describe('find()', () => {
           hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
-      ])
-    );
+      ],
+    ]);
+
+    ruleTypeRegistry.list.mockReturnValue(ruleTypes);
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: 'myType',
       name: 'myType',
@@ -748,12 +764,33 @@ describe('find()', () => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
+
     const injectReferencesFn = jest.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
     });
-    ruleTypeRegistry.list.mockReturnValue(
-      new Set([
-        ...listedTypes,
+
+    const ruleTypes = new Map<string, RegistryRuleType>([
+      [
+        'myType',
+        {
+          actionGroups: [],
+          recoveryActionGroup: RecoveredActionGroup,
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          id: 'myType',
+          name: 'myType',
+          category: 'test',
+          producer: 'myApp',
+          enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
+        },
+      ],
+      [
+        '123',
         {
           actionGroups: [],
           recoveryActionGroup: RecoveredActionGroup,
@@ -770,8 +807,10 @@ describe('find()', () => {
           hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
-      ])
-    );
+      ],
+    ]);
+
+    ruleTypeRegistry.list.mockReturnValue(ruleTypes);
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: 'myType',
       name: 'myType',
@@ -790,6 +829,7 @@ describe('find()', () => {
       },
       validLegacyConsumers: [],
     }));
+
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
       name: 'Test',

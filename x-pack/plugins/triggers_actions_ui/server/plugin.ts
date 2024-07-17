@@ -6,10 +6,7 @@
  */
 
 import { Logger, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
-import {
-  PluginSetupContract as AlertingPluginSetup,
-  PluginStartContract as AlertingPluginStart,
-} from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute, createConfigRoute } from './routes';
@@ -21,11 +18,11 @@ export interface PluginStartContract {
 
 interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
 }
 
 interface TriggersActionsPluginStart {
-  alerting: AlertingPluginStart;
+  alerting: AlertingServerStart;
 }
 
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {

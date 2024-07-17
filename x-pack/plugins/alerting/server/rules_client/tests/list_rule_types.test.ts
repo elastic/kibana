@@ -88,6 +88,7 @@ describe('listRuleTypes', () => {
     hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
+
   const myAppAlertType: RegistryRuleType = {
     actionGroups: [],
     actionVariables: undefined,
@@ -104,7 +105,11 @@ describe('listRuleTypes', () => {
     hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
-  const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
+
+  const setOfAlertTypes = new Map<string, RegistryRuleType>([
+    [myAppAlertType.id, myAppAlertType],
+    [alertingAlertType.id, alertingAlertType],
+  ]);
 
   const authorizedConsumers = {
     alerts: { read: true, all: true },
@@ -118,12 +123,13 @@ describe('listRuleTypes', () => {
 
   test('should return a list of AlertTypes that exist in the registry', async () => {
     ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
-      new Set<RegistryAlertTypeWithAuth>([
-        { ...myAppAlertType, authorizedConsumers },
-        { ...alertingAlertType, authorizedConsumers },
+    authorization.getAuthorizedRuleTypes.mockResolvedValue(
+      new Map([
+        [myAppAlertType.id, { authorizedConsumers }],
+        [alertingAlertType.id, { authorizedConsumers }],
       ])
     );
+
     expect(await rulesClient.listRuleTypes()).toEqual(
       new Set([
         { ...myAppAlertType, authorizedConsumers },
@@ -133,39 +139,46 @@ describe('listRuleTypes', () => {
   });
 
   describe('authorization', () => {
-    const listedTypes = new Set<RegistryRuleType>([
-      {
-        actionGroups: [],
-        actionVariables: undefined,
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        id: 'myType',
-        name: 'myType',
-        category: 'test',
-        producer: 'myApp',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: [],
-      },
-      {
-        id: 'myOtherType',
-        name: 'Test',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        recoveryActionGroup: RecoveredActionGroup,
-        category: 'test',
-        producer: 'alerts',
-        enabledInLicense: true,
-        hasAlertsMappings: false,
-        hasFieldsForAAD: false,
-        validLegacyConsumers: [],
-      },
+    const listedTypes = new Map<string, RegistryRuleType>([
+      [
+        'myType',
+        {
+          actionGroups: [],
+          actionVariables: undefined,
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          recoveryActionGroup: RecoveredActionGroup,
+          id: 'myType',
+          name: 'myType',
+          category: 'test',
+          producer: 'myApp',
+          enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
+        },
+      ],
+      [
+        'myOtherType',
+        {
+          id: 'myOtherType',
+          name: 'Test',
+          actionGroups: [{ id: 'default', name: 'Default' }],
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          recoveryActionGroup: RecoveredActionGroup,
+          category: 'test',
+          producer: 'alerts',
+          enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
+        },
+      ],
     ]);
+
     beforeEach(() => {
       ruleTypeRegistry.list.mockReturnValue(listedTypes);
     });
@@ -191,7 +204,19 @@ describe('listRuleTypes', () => {
           validLegacyConsumers: [],
         },
       ]);
-      authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);
+
+      authorization.getAuthorizedRuleTypes.mockResolvedValue(
+        new Map([
+          [
+            'myType',
+            {
+              authorizedConsumers: {
+                myApp: { read: true, all: true },
+              },
+            },
+          ],
+        ])
+      );
 
       expect(await rulesClient.listRuleTypes()).toEqual(authorizedTypes);
     });

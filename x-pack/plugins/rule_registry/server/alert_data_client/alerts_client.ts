@@ -32,7 +32,7 @@ import {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import { RuleTypeParams, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -92,7 +92,7 @@ export interface ConstructorOptions {
   ruleDataService: IRuleDataService;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
-  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
+  getAlertIndicesAlias: AlertingServerStart['getAlertIndicesAlias'];
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -167,7 +167,7 @@ export class AlertsClient {
   private readonly ruleDataService: IRuleDataService;
   private readonly getRuleType: RuleTypeRegistry['get'];
   private readonly getRuleList: RuleTypeRegistry['list'];
-  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
+  private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -1143,12 +1143,13 @@ export class AlertsClient {
 
   public async getAuthorizedAlertsIndices(consumers: string[]): Promise<string[] | undefined> {
     try {
-      const authorizedRuleTypes = await this.authorization.getAuthorizedRuleTypes(
+      const authorizedRuleTypes = await this.authorization.getAllAuthorizedRuleTypesFindOperation(
         AlertingAuthorizationEntity.Alert,
         new Set(consumers)
       );
+
       const indices = this.getAlertIndicesAlias(
-        authorizedRuleTypes.map((art: { id: any }) => art.id),
+        Array.from(authorizedRuleTypes.keys()).map((id) => id),
         this.spaceId
       );
 
@@ -1169,7 +1170,7 @@ export class AlertsClient {
       if (featureIds.length > 0) {
         // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
         // return all of the features that you can access and does not care about your featureIds
-        const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
+        const augmentedRuleTypes = await this.authorization.getAllAuthorizedRuleTypes(
           featureIds,
           [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
           AlertingAuthorizationEntity.Alert
@@ -1178,13 +1179,16 @@ export class AlertsClient {
         // the user should be provided that features' alerts index.
         // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
         const authorizedFeatures = new Set<string>();
-        for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
+        for (const [ruleTypeId] of augmentedRuleTypes.authorizedRuleTypes.entries()) {
+          const ruleType = this.getRuleType(ruleTypeId);
           authorizedFeatures.add(ruleType.producer);
         }
+
         const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
           (feature): feature is ValidFeatureId =>
             featureIds.includes(feature) && isValidFeatureId(feature)
         );
+
         return validAuthorizedFeatures;
       }
       return featureIds;
@@ -1209,7 +1213,8 @@ export class AlertsClient {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const ruleTypeList = this.getRuleList();
     const fieldsForAAD = new Set<string>();
-    for (const rule of ruleTypeList) {
+
+    for (const rule of ruleTypeList.values()) {
       if (featureIds.includes(rule.producer) && rule.hasFieldsForAAD) {
         (rule.fieldsForAAD ?? []).forEach((f) => {
           fieldsForAAD.add(f);

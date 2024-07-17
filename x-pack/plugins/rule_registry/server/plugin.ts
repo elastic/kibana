@@ -16,10 +16,7 @@ import type {
   IContextProvider,
 } from '@kbn/core/server';
 
-import type {
-  PluginSetupContract as AlertingSetup,
-  PluginStartContract as AlertingStart,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -39,11 +36,11 @@ import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from '.
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
   data: DataPluginSetup;
-  alerting: AlertingSetup;
+  alerting: AlertingServerSetup;
 }
 
 export interface RuleRegistryPluginStartDependencies {
-  alerting: AlertingStart;
+  alerting: AlertingServerStart;
   data: DataPluginStart;
   spaces?: SpacesPluginStart;
 }
@@ -56,7 +53,7 @@ export interface RuleRegistryPluginSetupContract {
 
 export interface RuleRegistryPluginStartContract {
   getRacClientWithRequest: (req: KibanaRequest) => Promise<AlertsClient>;
-  alerting: AlertingStart;
+  alerting: AlertingServerStart;
 }
 
 export class RuleRegistryPlugin

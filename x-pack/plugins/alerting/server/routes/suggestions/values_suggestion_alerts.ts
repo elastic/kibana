@@ -27,6 +27,7 @@ import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterOpts,
   AlertingAuthorizationFilterType,
+  AuthorizedRuleTypes,
 } from '../../authorization';
 import { AlertingRequestHandlerContext } from '../../types';
 import { GetAlertIndicesAlias, ILicenseState } from '../../lib';
@@ -75,14 +76,16 @@ export function registerAlertsValueSuggestionsRoute(
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         let authorizationTuple;
-        let authorizedRuleType = [];
+        let authorizedRuleType: AuthorizedRuleTypes = new Map();
+
         try {
           const authorization = rulesClient.getAuthorization();
           authorizationTuple = await authorization.getFindAuthorizationFilter(
             AlertingAuthorizationEntity.Alert,
             alertingAuthorizationFilterOpts
           );
-          authorizedRuleType = await authorization.getAuthorizedRuleTypes(
+
+          authorizedRuleType = await authorization.getAllAuthorizedRuleTypesFindOperation(
             AlertingAuthorizationEntity.Alert,
             VALID_FEATURE_IDS
           );
@@ -93,8 +96,10 @@ export function registerAlertsValueSuggestionsRoute(
               error,
             })
           );
+
           throw error;
         }
+
         const spaceId = rulesClient.getSpaceId();
         const { filter: authorizationFilter } = authorizationTuple;
         const filters = [
@@ -103,9 +108,10 @@ export function registerAlertsValueSuggestionsRoute(
         ] as estypes.QueryDslQueryContainer[];
 
         const index = getAlertIndicesAlias!(
-          authorizedRuleType.map((art) => art.id),
+          Array.from(authorizedRuleType.keys()).map((id) => id),
           spaceId
         ).join(',');
+
         try {
           const body = await termsAggSuggestions(
             config,
