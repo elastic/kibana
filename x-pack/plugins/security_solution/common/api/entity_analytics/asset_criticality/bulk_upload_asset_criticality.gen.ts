@@ -33,20 +33,20 @@ export const AssetCriticalityBulkUploadStats = z.object({
   total: z.number().int(),
 });
 
-export type BulkUpsertAssetCriticalityDataRequestBody = z.infer<
-  typeof BulkUpsertAssetCriticalityDataRequestBody
+export type BulkUpsertAssetCriticalityRecordsRequestBody = z.infer<
+  typeof BulkUpsertAssetCriticalityRecordsRequestBody
 >;
-export const BulkUpsertAssetCriticalityDataRequestBody = z.object({
+export const BulkUpsertAssetCriticalityRecordsRequestBody = z.object({
   records: z.array(CreateAssetCriticalityRecord).min(1).max(1000),
 });
-export type BulkUpsertAssetCriticalityDataRequestBodyInput = z.input<
-  typeof BulkUpsertAssetCriticalityDataRequestBody
+export type BulkUpsertAssetCriticalityRecordsRequestBodyInput = z.input<
+  typeof BulkUpsertAssetCriticalityRecordsRequestBody
 >;
 
-export type BulkUpsertAssetCriticalityDataResponse = z.infer<
-  typeof BulkUpsertAssetCriticalityDataResponse
+export type BulkUpsertAssetCriticalityRecordsResponse = z.infer<
+  typeof BulkUpsertAssetCriticalityRecordsResponse
 >;
-export const BulkUpsertAssetCriticalityDataResponse = z.object({
+export const BulkUpsertAssetCriticalityRecordsResponse = z.object({
   errors: z.array(AssetCriticalityBulkUploadErrorItem),
   stats: AssetCriticalityBulkUploadStats,
 });

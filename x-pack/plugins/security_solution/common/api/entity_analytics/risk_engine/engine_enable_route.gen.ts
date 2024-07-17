@@ -16,8 +16,8 @@
 
 import { z } from 'zod';
 
-export type RiskEngineEnableErrorResponse = z.infer<typeof RiskEngineEnableErrorResponse>;
-export const RiskEngineEnableErrorResponse = z.object({
+export type EnableRiskEngineErrorResponse = z.infer<typeof EnableRiskEngineErrorResponse>;
+export const EnableRiskEngineErrorResponse = z.object({
   message: z.string(),
   full_error: z.string(),
 });

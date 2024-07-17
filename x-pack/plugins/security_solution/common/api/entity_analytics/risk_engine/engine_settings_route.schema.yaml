@@ -17,7 +17,7 @@ paths:
       x-labels: [ess, serverless]
       x-internal: true
       x-codegen-enabled: true
-      operationId: GetRiskEngineSettings
+      operationId: ReadRiskEngineSettings
       summary: Get the settings of the Risk Engine
       responses:
         '200':

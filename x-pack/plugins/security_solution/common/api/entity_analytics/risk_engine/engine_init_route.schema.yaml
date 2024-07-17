@@ -31,7 +31,7 @@ paths:
                   - result
                 properties:
                   result:
-                    $ref: '#/components/schemas/RiskEngineInitResult'
+                    $ref: '#/components/schemas/InitRiskEngineResult'
         '400':
           description: Task manager is unavailable
           content:
@@ -43,11 +43,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineInitErrorResponse'
+                $ref: '#/components/schemas/InitRiskEngineErrorResponse'
 
 components:
   schemas:
-    RiskEngineInitResult:
+    InitRiskEngineResult:
       type: object
       required:
         - risk_engine_enabled
@@ -69,7 +69,7 @@ components:
           items:
             type: string
 
-    RiskEngineInitErrorResponse:
+    InitRiskEngineErrorResponse:
       type: object
       required:
         - message

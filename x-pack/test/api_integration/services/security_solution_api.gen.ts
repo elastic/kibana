@@ -26,7 +26,7 @@ import { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/c
 import { BulkDeleteRulesPostRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
 import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
-import { BulkUpsertAssetCriticalityDataRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
+import { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
@@ -163,7 +163,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    bulkUpsertAssetCriticalityData(props: BulkUpsertAssetCriticalityDataProps) {
+    bulkUpsertAssetCriticalityRecords(props: BulkUpsertAssetCriticalityRecordsProps) {
       return supertest
         .post('/api/asset_criticality/bulk')
         .set('kbn-xsrf', 'true')
@@ -427,13 +427,6 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getRiskEngineSettings() {
-      return supertest
-        .get('/internal/risk_score/engine/settings')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     /**
      * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
      */
@@ -569,6 +562,13 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    readRiskEngineSettings() {
+      return supertest
+        .get('/internal/risk_score/engine/settings')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Retrieve a detection rule using the `rule_id` or `id` field.
      */
@@ -698,8 +698,8 @@ export interface BulkPatchRulesProps {
 export interface BulkUpdateRulesProps {
   body: BulkUpdateRulesRequestBodyInput;
 }
-export interface BulkUpsertAssetCriticalityDataProps {
-  body: BulkUpsertAssetCriticalityDataRequestBodyInput;
+export interface BulkUpsertAssetCriticalityRecordsProps {
+  body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
 }
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;

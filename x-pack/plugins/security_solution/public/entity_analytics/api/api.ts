@@ -41,7 +41,7 @@ import {
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import type { GetRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
+import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -224,7 +224,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Fetches risk engine settings
      */
     const fetchRiskEngineSettings = () =>
-      http.fetch<GetRiskEngineSettingsResponse>(RISK_ENGINE_SETTINGS_URL, {
+      http.fetch<ReadRiskEngineSettingsResponse>(RISK_ENGINE_SETTINGS_URL, {
         version: '1',
         method: 'GET',
       });

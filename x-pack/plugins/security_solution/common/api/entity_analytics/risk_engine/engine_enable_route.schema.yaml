@@ -45,11 +45,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineEnableErrorResponse'
+                $ref: '#/components/schemas/EnableRiskEngineErrorResponse'
 
 components:
   schemas:
-    RiskEngineEnableErrorResponse:
+    EnableRiskEngineErrorResponse:
       type: object
       required:
         - message

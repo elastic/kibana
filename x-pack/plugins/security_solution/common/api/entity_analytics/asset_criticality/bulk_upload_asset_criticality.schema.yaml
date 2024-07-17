@@ -14,7 +14,7 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: BulkUpsertAssetCriticalityData
+      operationId: BulkUpsertAssetCriticalityRecords
       summary: Bulk upsert asset criticality data, creating or updating records as needed
       requestBody:
         content:
