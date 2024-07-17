@@ -24,6 +24,7 @@ import {
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   FLEET_SETUP_LOCK_TYPE,
+  SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -120,6 +121,22 @@ export const getSavedObjectTypes = (
           status: { type: 'keyword' },
           uuid: { type: 'text' },
           started_at: { type: 'date' },
+        },
+      },
+    },
+    [SPACE_SETTINGS_SAVED_OBJECT_TYPE]: {
+      name: SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'single',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          // allowed_namespace_prefixes: { enabled: false },
+          // managed_by: { type: 'keyword', index: false },
         },
       },
     },
