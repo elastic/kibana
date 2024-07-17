@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import {
@@ -30,7 +31,7 @@ export const createContextAwarenessMocks = ({
     profile: {
       getCellRenderers: jest.fn((prev) => () => ({
         ...prev(),
-        rootProfile: () => 'root-profile',
+        rootProfile: () => <>root-profile</>,
       })),
     },
     resolve: jest.fn(() => ({
@@ -46,7 +47,7 @@ export const createContextAwarenessMocks = ({
     profile: {
       getCellRenderers: jest.fn((prev) => () => ({
         ...prev(),
-        rootProfile: () => 'data-source-profile',
+        rootProfile: () => <>data-source-profile</>,
       })),
     },
     resolve: jest.fn(() => ({
