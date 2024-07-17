@@ -77,6 +77,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
+import { isNumericType } from '../shared/esql_to_kibana_type';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,

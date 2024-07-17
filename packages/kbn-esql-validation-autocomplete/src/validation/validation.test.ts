@@ -351,7 +351,7 @@ describe('validation logic', () => {
       for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
-        testErrorsAndWarnings(`row var = (numberField ${op} 0)`, ['Unknown column [numberField]']);
+        testErrorsAndWarnings(`row var = (doubleField ${op} 0)`, ['Unknown column [doubleField]']);
         testErrorsAndWarnings(`row var = (NOT (5 ${op} 0))`, []);
         testErrorsAndWarnings(`row var = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
         testErrorsAndWarnings(`row var = now() ${op} now()`, []);
@@ -481,7 +481,7 @@ describe('validation logic', () => {
         "SyntaxError: missing 'info' at '<EOF>'",
       ]);
       testErrorsAndWarnings('show info', []);
-      testErrorsAndWarnings('show numberField', [
+      testErrorsAndWarnings('show doubleField', [
         "SyntaxError: token recognition error at: 'n'",
         "SyntaxError: token recognition error at: 'u'",
         "SyntaxError: token recognition error at: 'm'",
@@ -507,8 +507,8 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from index | limit a', [
         "SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL",
       ]);
-      testErrorsAndWarnings('from index | limit numberField', [
-        "SyntaxError: mismatched input 'numberField' expecting INTEGER_LITERAL",
+      testErrorsAndWarnings('from index | limit doubleField', [
+        "SyntaxError: mismatched input 'doubleField' expecting INTEGER_LITERAL",
       ]);
       testErrorsAndWarnings('from index | limit stringField', [
         "SyntaxError: mismatched input 'stringField' expecting INTEGER_LITERAL",
@@ -520,10 +520,16 @@ describe('validation logic', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP t ON a', []);
     });
 
-    describe('keep', () => {
+    describe.only('keep', () => {
       testErrorsAndWarnings('from index | keep ', ["SyntaxError: missing ID_PATTERN at '<EOF>'"]);
-      testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
-      testErrorsAndWarnings('from index | keep `stringField`, `numberField`, `dateField`', []);
+      testErrorsAndWarnings(
+        'from index | keep keywordField, doubleField, integerField, dateField',
+        []
+      );
+      testErrorsAndWarnings(
+        'from index | keep `keywordField`, `doubleField`, `integerField`, `dateField`',
+        []
+      );
       testErrorsAndWarnings('from index | keep 4.5', [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
@@ -531,27 +537,27 @@ describe('validation logic', () => {
         "SyntaxError: missing ID_PATTERN at '<EOF>'",
       ]);
       testErrorsAndWarnings('from index | keep `4.5`', ['Unknown column [4.5]']);
-      testErrorsAndWarnings('from index | keep missingField, numberField, dateField', [
+      testErrorsAndWarnings('from index | keep missingField, doubleField, dateField', [
         'Unknown column [missingField]',
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
-      testErrorsAndWarnings('from index | project stringField, numberField, dateField', [
+      testErrorsAndWarnings('from index | project stringField, doubleField, dateField', [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
-      testErrorsAndWarnings('from index | PROJECT stringField, numberField, dateField', [
+      testErrorsAndWarnings('from index | PROJECT stringField, doubleField, dateField', [
         "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
-      testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
+      testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
-      testErrorsAndWarnings('from index | keep s*', []);
+      testErrorsAndWarnings('from index | keep k*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
-      testErrorsAndWarnings('from index | keep s*Field', []);
-      testErrorsAndWarnings('from index | keep string*Field', []);
-      testErrorsAndWarnings('from index | keep s*, n*', []);
+      testErrorsAndWarnings('from index | keep k*Field', []);
+      testErrorsAndWarnings('from index | keep key*Field', []);
+      testErrorsAndWarnings('from index | keep k*, i*', []);
       testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
       testErrorsAndWarnings('from index | keep *m', ['Unknown column [*m]']);
       testErrorsAndWarnings('from index | keep d*m', ['Unknown column [d*m]']);
@@ -564,25 +570,25 @@ describe('validation logic', () => {
       );
 
       testErrorsAndWarnings(
-        `FROM index | STATS ROUND(AVG(numberField * 1.5)), COUNT(*), MIN(numberField * 10) | KEEP \`MIN(numberField * 10)\``,
+        `FROM index | STATS ROUND(AVG(doubleField * 1.5)), COUNT(*), MIN(doubleField * 10) | KEEP \`MIN(doubleField * 10)\``,
         []
       );
       testErrorsAndWarnings(
-        `FROM index | STATS COUNT(*), MIN(numberField * 10), MAX(numberField)| KEEP \`COUNT(*)\``,
+        `FROM index | STATS COUNT(*), MIN(doubleField * 10), MAX(doubleField)| KEEP \`COUNT(*)\``,
         []
       );
     });
 
     describe('drop', () => {
       testErrorsAndWarnings('from index | drop ', ["SyntaxError: missing ID_PATTERN at '<EOF>'"]);
-      testErrorsAndWarnings('from index | drop stringField, numberField, dateField', []);
+      testErrorsAndWarnings('from index | drop stringField, doubleField, dateField', []);
       testErrorsAndWarnings('from index | drop 4.5', [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
         "SyntaxError: missing ID_PATTERN at '.'",
         "SyntaxError: missing ID_PATTERN at '<EOF>'",
       ]);
-      testErrorsAndWarnings('from index | drop missingField, numberField, dateField', [
+      testErrorsAndWarnings('from index | drop missingField, doubleField, dateField', [
         'Unknown column [missingField]',
       ]);
       testErrorsAndWarnings('from index | drop `any#Char$Field`', []);
@@ -612,11 +618,11 @@ describe('validation logic', () => {
         ['Drop [@timestamp] will remove all time filters to the search results']
       );
       testErrorsAndWarnings(
-        `FROM index | STATS ROUND(AVG(numberField * 1.5)), COUNT(*), MIN(numberField * 10) | DROP \`MIN(numberField * 10)\``,
+        `FROM index | STATS ROUND(AVG(doubleField * 1.5)), COUNT(*), MIN(doubleField * 10) | DROP \`MIN(doubleField * 10)\``,
         []
       );
       testErrorsAndWarnings(
-        `FROM index | STATS COUNT(*), MIN(numberField * 10), MAX(numberField)| DROP \`COUNT(*)\``,
+        `FROM index | STATS COUNT(*), MIN(doubleField * 10), MAX(doubleField)| DROP \`COUNT(*)\``,
         []
       );
     });
@@ -629,7 +635,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | mv_expand ${type}Field`, []);
       }
 
-      testErrorsAndWarnings('from a_index | mv_expand numberField, b', [
+      testErrorsAndWarnings('from a_index | mv_expand doubleField, b', [
         "SyntaxError: token recognition error at: ','",
         "SyntaxError: extraneous input 'b' expecting <EOF>",
       ]);
@@ -669,14 +675,14 @@ describe('validation logic', () => {
         'Unknown column [a]',
       ]);
       testErrorsAndWarnings(
-        'from a_index | eval numberField + 1 | rename `numberField + 1` as a',
+        'from a_index | eval doubleField + 1 | rename `doubleField + 1` as a',
         []
       );
       testErrorsAndWarnings(
-        'from a_index | stats avg(numberField) | rename `avg(numberField)` as avg0',
+        'from a_index | stats avg(doubleField) | rename `avg(doubleField)` as avg0',
         []
       );
-      testErrorsAndWarnings('from a_index |eval numberField + 1 | rename `numberField + 1` as ', [
+      testErrorsAndWarnings('from a_index |eval doubleField + 1 | rename `doubleField + 1` as ', [
         "SyntaxError: missing ID_PATTERN at '<EOF>'",
       ]);
       testErrorsAndWarnings('from a_index | rename s* as strings', [
@@ -709,8 +715,8 @@ describe('validation logic', () => {
       ]);
       // Do not try to validate the dissect pattern string
       testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}"', []);
-      testErrorsAndWarnings('from a_index | dissect numberField "%{firstWord}"', [
-        'DISSECT only supports string type values, found [numberField] of type [number]',
+      testErrorsAndWarnings('from a_index | dissect doubleField "%{firstWord}"', [
+        'DISSECT only supports string type values, found [doubleField] of type [number]',
       ]);
       testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}" option ', [
         "SyntaxError: mismatched input '<EOF>' expecting '='",
@@ -762,8 +768,8 @@ describe('validation logic', () => {
       ]);
       // Do not try to validate the grok pattern string
       testErrorsAndWarnings('from a_index | grok stringField "%{firstWord}"', []);
-      testErrorsAndWarnings('from a_index | grok numberField "%{firstWord}"', [
-        'GROK only supports string type values, found [numberField] of type [number]',
+      testErrorsAndWarnings('from a_index | grok doubleField "%{firstWord}"', [
+        'GROK only supports string type values, found [doubleField] of type [number]',
       ]);
       testErrorsAndWarnings('from a_index | grok stringField "%{firstWord}" | keep firstWord', []);
       // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
@@ -782,10 +788,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where NOT ${nValue} > 0`, []);
       }
       for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
-        testErrorsAndWarnings(`from a_index | where numberField ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | where NOT numberField ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | where (numberField ${op} 0)`, []);
-        testErrorsAndWarnings(`from a_index | where (NOT (numberField ${op} 0))`, []);
+        testErrorsAndWarnings(`from a_index | where doubleField ${op} 0`, []);
+        testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} 0`, []);
+        testErrorsAndWarnings(`from a_index | where (doubleField ${op} 0)`, []);
+        testErrorsAndWarnings(`from a_index | where (NOT (doubleField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
 
         for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
@@ -810,17 +816,17 @@ describe('validation logic', () => {
               .fill('- ')
               .map((_, i) => (i % 2 ? oddOp : evenOp))
               .join('');
-            testErrorsAndWarnings(`from a_index | where ${unaryCombination} numberField > 0`, []);
+            testErrorsAndWarnings(`from a_index | where ${unaryCombination} doubleField > 0`, []);
             testErrorsAndWarnings(
-              `from a_index | where ${unaryCombination} round(numberField) > 0`,
+              `from a_index | where ${unaryCombination} round(doubleField) > 0`,
               []
             );
             testErrorsAndWarnings(
-              `from a_index | where 1 + ${unaryCombination} numberField > 0`,
+              `from a_index | where 1 + ${unaryCombination} doubleField > 0`,
               []
             );
             // still valid
-            testErrorsAndWarnings(`from a_index | where 1 ${unaryCombination} numberField > 0`, []);
+            testErrorsAndWarnings(`from a_index | where 1 ${unaryCombination} doubleField > 0`, []);
           }
         }
         testErrorsAndWarnings(
@@ -829,26 +835,26 @@ describe('validation logic', () => {
         );
       }
       for (const wrongOp of ['*', '/', '%']) {
-        testErrorsAndWarnings(`from a_index | where ${wrongOp}+ numberField`, [
+        testErrorsAndWarnings(`from a_index | where ${wrongOp}+ doubleField`, [
           `SyntaxError: extraneous input '${wrongOp}' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
         ]);
       }
 
       // Skip these tests until the insensitive case equality gets restored back
-      testErrorsAndWarnings.skip(`from a_index | where numberField =~ 0`, [
-        'Argument of [=~] must be [string], found value [numberField] type [number]',
+      testErrorsAndWarnings.skip(`from a_index | where doubleField =~ 0`, [
+        'Argument of [=~] must be [string], found value [doubleField] type [number]',
         'Argument of [=~] must be [string], found value [0] type [number]',
       ]);
-      testErrorsAndWarnings.skip(`from a_index | where NOT numberField =~ 0`, [
-        'Argument of [=~] must be [string], found value [numberField] type [number]',
+      testErrorsAndWarnings.skip(`from a_index | where NOT doubleField =~ 0`, [
+        'Argument of [=~] must be [string], found value [doubleField] type [number]',
         'Argument of [=~] must be [string], found value [0] type [number]',
       ]);
-      testErrorsAndWarnings.skip(`from a_index | where (numberField =~ 0)`, [
-        'Argument of [=~] must be [string], found value [numberField] type [number]',
+      testErrorsAndWarnings.skip(`from a_index | where (doubleField =~ 0)`, [
+        'Argument of [=~] must be [string], found value [doubleField] type [number]',
         'Argument of [=~] must be [string], found value [0] type [number]',
       ]);
-      testErrorsAndWarnings.skip(`from a_index | where (NOT (numberField =~ 0))`, [
-        'Argument of [=~] must be [string], found value [numberField] type [number]',
+      testErrorsAndWarnings.skip(`from a_index | where (NOT (doubleField =~ 0))`, [
+        'Argument of [=~] must be [string], found value [doubleField] type [number]',
         'Argument of [=~] must be [string], found value [0] type [number]',
       ]);
       testErrorsAndWarnings.skip(`from a_index | where 1 =~ 0`, [
@@ -864,17 +870,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where stringField NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | where NOT stringField ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | where NOT stringField NOT ${op} "?a"`, []);
-        testErrorsAndWarnings(`from a_index | where numberField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | where doubleField ${op} "?a"`, [
+          `Argument of [${op}] must be [string], found value [doubleField] type [number]`,
         ]);
-        testErrorsAndWarnings(`from a_index | where numberField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | where doubleField NOT ${op} "?a"`, [
+          `Argument of [not_${op}] must be [string], found value [doubleField] type [number]`,
         ]);
-        testErrorsAndWarnings(`from a_index | where NOT numberField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} "?a"`, [
+          `Argument of [${op}] must be [string], found value [doubleField] type [number]`,
         ]);
-        testErrorsAndWarnings(`from a_index | where NOT numberField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | where NOT doubleField NOT ${op} "?a"`, [
+          `Argument of [not_${op}] must be [string], found value [doubleField] type [number]`,
         ]);
       }
 
@@ -907,9 +913,9 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | eval stringField ', []);
       testErrorsAndWarnings('from a_index | eval b = stringField', []);
-      testErrorsAndWarnings('from a_index | eval numberField + 1', []);
-      testErrorsAndWarnings('from a_index | eval numberField + ', [
-        "SyntaxError: no viable alternative at input 'numberField + '",
+      testErrorsAndWarnings('from a_index | eval doubleField + 1', []);
+      testErrorsAndWarnings('from a_index | eval doubleField + ', [
+        "SyntaxError: no viable alternative at input 'doubleField + '",
       ]);
       testErrorsAndWarnings('from a_index | eval stringField + 1', [
         'Argument of [+] must be [number], found value [stringField] type [string]',
@@ -923,24 +929,24 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=round(', [
         "SyntaxError: no viable alternative at input 'round('",
       ]);
-      testErrorsAndWarnings('from a_index | eval a=round(numberField) ', []);
-      testErrorsAndWarnings('from a_index | eval a=round(numberField), ', [
+      testErrorsAndWarnings('from a_index | eval a=round(doubleField) ', []);
+      testErrorsAndWarnings('from a_index | eval a=round(doubleField), ', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       ]);
-      testErrorsAndWarnings('from a_index | eval a=round(numberField) + round(numberField) ', []);
-      testErrorsAndWarnings('from a_index | eval a=round(numberField) + round(stringField) ', [
+      testErrorsAndWarnings('from a_index | eval a=round(doubleField) + round(doubleField) ', []);
+      testErrorsAndWarnings('from a_index | eval a=round(doubleField) + round(stringField) ', [
         'Argument of [round] must be [number], found value [stringField] type [string]',
       ]);
       testErrorsAndWarnings(
-        'from a_index | eval a=round(numberField) + round(stringField), numberField  ',
+        'from a_index | eval a=round(doubleField) + round(stringField), doubleField  ',
         ['Argument of [round] must be [number], found value [stringField] type [string]']
       );
       testErrorsAndWarnings(
-        'from a_index | eval a=round(numberField) + round(numberField), numberField  ',
+        'from a_index | eval a=round(doubleField) + round(doubleField), doubleField  ',
         []
       );
       testErrorsAndWarnings(
-        'from a_index | eval a=round(numberField) + round(numberField), b = numberField  ',
+        'from a_index | eval a=round(doubleField) + round(doubleField), b = doubleField  ',
         []
       );
 
@@ -968,15 +974,15 @@ describe('validation logic', () => {
               .fill('- ')
               .map((_, i) => (i % 2 ? oddOp : evenOp))
               .join('');
-            testErrorsAndWarnings(`from a_index | eval ${unaryCombination} numberField`, []);
-            testErrorsAndWarnings(`from a_index | eval a=${unaryCombination} numberField`, []);
+            testErrorsAndWarnings(`from a_index | eval ${unaryCombination} doubleField`, []);
+            testErrorsAndWarnings(`from a_index | eval a=${unaryCombination} doubleField`, []);
             testErrorsAndWarnings(
-              `from a_index | eval a=${unaryCombination} round(numberField)`,
+              `from a_index | eval a=${unaryCombination} round(doubleField)`,
               []
             );
-            testErrorsAndWarnings(`from a_index | eval 1 + ${unaryCombination} numberField`, []);
+            testErrorsAndWarnings(`from a_index | eval 1 + ${unaryCombination} doubleField`, []);
             // still valid
-            testErrorsAndWarnings(`from a_index | eval 1 ${unaryCombination} numberField`, []);
+            testErrorsAndWarnings(`from a_index | eval 1 ${unaryCombination} doubleField`, []);
           }
         }
 
@@ -987,7 +993,7 @@ describe('validation logic', () => {
       }
 
       for (const wrongOp of ['*', '/', '%']) {
-        testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ numberField`, [
+        testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ doubleField`, [
           `SyntaxError: extraneous input '${wrongOp}' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
         ]);
       }
@@ -1023,10 +1029,10 @@ describe('validation logic', () => {
         ]
       );
       for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
-        testErrorsAndWarnings(`from a_index | eval numberField ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | eval NOT numberField ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | eval (numberField ${op} 0)`, []);
-        testErrorsAndWarnings(`from a_index | eval (NOT (numberField ${op} 0))`, []);
+        testErrorsAndWarnings(`from a_index | eval doubleField ${op} 0`, []);
+        testErrorsAndWarnings(`from a_index | eval NOT doubleField ${op} 0`, []);
+        testErrorsAndWarnings(`from a_index | eval (doubleField ${op} 0)`, []);
+        testErrorsAndWarnings(`from a_index | eval (NOT (doubleField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 0`, []);
         for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
           testErrorsAndWarnings(
@@ -1040,13 +1046,13 @@ describe('validation logic', () => {
           );
         }
         // Implicit casting of literal values tests
-        testErrorsAndWarnings(`from a_index | eval numberField ${op} stringField`, [
+        testErrorsAndWarnings(`from a_index | eval doubleField ${op} stringField`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval stringField ${op} numberField`, [
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} doubleField`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval numberField ${op} "2022"`, [
+        testErrorsAndWarnings(`from a_index | eval doubleField ${op} "2022"`, [
           `Argument of [${op}] must be [number], found value ["2022"] type [string]`,
         ]);
 
@@ -1104,8 +1110,8 @@ describe('validation logic', () => {
       );
 
       for (const op of ['+', '-', '*', '/', '%']) {
-        testErrorsAndWarnings(`from a_index | eval numberField ${op} 1`, []);
-        testErrorsAndWarnings(`from a_index | eval (numberField ${op} 1)`, []);
+        testErrorsAndWarnings(`from a_index | eval doubleField ${op} 1`, []);
+        testErrorsAndWarnings(`from a_index | eval (doubleField ${op} 1)`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 1`, []);
         testErrorsAndWarnings(
           `from a_index | eval now() ${op} now()`,
@@ -1145,25 +1151,25 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval stringField NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | eval NOT stringField ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | eval NOT stringField NOT ${op} "?a"`, []);
-        testErrorsAndWarnings(`from a_index | eval numberField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | eval doubleField ${op} "?a"`, [
+          `Argument of [${op}] must be [string], found value [doubleField] type [number]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval numberField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | eval doubleField NOT ${op} "?a"`, [
+          `Argument of [not_${op}] must be [string], found value [doubleField] type [number]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval NOT numberField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | eval NOT doubleField ${op} "?a"`, [
+          `Argument of [${op}] must be [string], found value [doubleField] type [number]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval NOT numberField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [numberField] type [number]`,
+        testErrorsAndWarnings(`from a_index | eval NOT doubleField NOT ${op} "?a"`, [
+          `Argument of [not_${op}] must be [string], found value [doubleField] type [number]`,
         ]);
       }
       // test lists
       testErrorsAndWarnings('from a_index | eval 1 in (1, 2, 3)', []);
-      testErrorsAndWarnings('from a_index | eval numberField in (1, 2, 3)', []);
-      testErrorsAndWarnings('from a_index | eval numberField not in (1, 2, 3)', []);
-      testErrorsAndWarnings('from a_index | eval numberField not in (1, 2, 3, numberField)', []);
-      testErrorsAndWarnings('from a_index | eval 1 in (1, 2, 3, round(numberField))', []);
+      testErrorsAndWarnings('from a_index | eval doubleField in (1, 2, 3)', []);
+      testErrorsAndWarnings('from a_index | eval doubleField not in (1, 2, 3)', []);
+      testErrorsAndWarnings('from a_index | eval doubleField not in (1, 2, 3, doubleField)', []);
+      testErrorsAndWarnings('from a_index | eval 1 in (1, 2, 3, round(doubleField))', []);
       testErrorsAndWarnings('from a_index | eval "a" in ("a", "b", "c")', []);
       testErrorsAndWarnings('from a_index | eval stringField in ("a", "b", "c")', []);
       testErrorsAndWarnings('from a_index | eval stringField not in ("a", "b", "c")', []);
@@ -1174,21 +1180,21 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval 1 in ("a", "b", "c")', [
         // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
-      testErrorsAndWarnings('from a_index | eval numberField in ("a", "b", "c")', [
+      testErrorsAndWarnings('from a_index | eval doubleField in ("a", "b", "c")', [
         // 'Argument of [in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
-      testErrorsAndWarnings('from a_index | eval numberField not in ("a", "b", "c")', [
+      testErrorsAndWarnings('from a_index | eval doubleField not in ("a", "b", "c")', [
         // 'Argument of [not_in] must be [number[]], found value [("a", "b", "c")] type [(string, string, string)]',
       ]);
-      testErrorsAndWarnings('from a_index | eval numberField not in (1, 2, 3, stringField)', [
+      testErrorsAndWarnings('from a_index | eval doubleField not in (1, 2, 3, stringField)', [
         // 'Argument of [not_in] must be [number[]], found value [(1, 2, 3, stringField)] type [(number, number, number, string)]',
       ]);
 
-      testErrorsAndWarnings('from a_index | eval avg(numberField)', [
+      testErrorsAndWarnings('from a_index | eval avg(doubleField)', [
         'EVAL does not support function avg',
       ]);
       testErrorsAndWarnings(
-        'from a_index | stats avg(numberField) | eval `avg(numberField)` + 1',
+        'from a_index | stats avg(doubleField) | eval `avg(doubleField)` + 1',
         []
       );
       testErrorsAndWarnings('from a_index | eval not', [
@@ -1282,26 +1288,26 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | sort "field" ', []);
       testErrorsAndWarnings('from a_index | sort wrongField ', ['Unknown column [wrongField]']);
-      testErrorsAndWarnings('from a_index | sort numberField, ', [
+      testErrorsAndWarnings('from a_index | sort doubleField, ', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       ]);
-      testErrorsAndWarnings('from a_index | sort numberField, stringField', []);
+      testErrorsAndWarnings('from a_index | sort doubleField, stringField', []);
       for (const dir of ['desc', 'asc']) {
         testErrorsAndWarnings(`from a_index | sort "field" ${dir} `, []);
-        testErrorsAndWarnings(`from a_index | sort numberField ${dir} `, []);
-        testErrorsAndWarnings(`from a_index | sort numberField ${dir} nulls `, [
+        testErrorsAndWarnings(`from a_index | sort doubleField ${dir} `, []);
+        testErrorsAndWarnings(`from a_index | sort doubleField ${dir} nulls `, [
           "SyntaxError: missing {'first', 'last'} at '<EOF>'",
         ]);
         for (const nullDir of ['first', 'last']) {
-          testErrorsAndWarnings(`from a_index | sort numberField ${dir} nulls ${nullDir}`, []);
-          testErrorsAndWarnings(`from a_index | sort numberField ${dir} ${nullDir}`, [
+          testErrorsAndWarnings(`from a_index | sort doubleField ${dir} nulls ${nullDir}`, []);
+          testErrorsAndWarnings(`from a_index | sort doubleField ${dir} ${nullDir}`, [
             `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
           ]);
         }
       }
       for (const nullDir of ['first', 'last']) {
-        testErrorsAndWarnings(`from a_index | sort numberField nulls ${nullDir}`, []);
-        testErrorsAndWarnings(`from a_index | sort numberField ${nullDir}`, [
+        testErrorsAndWarnings(`from a_index | sort doubleField nulls ${nullDir}`, []);
+        testErrorsAndWarnings(`from a_index | sort doubleField ${nullDir}`, [
           `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
         ]);
       }
@@ -1311,7 +1317,7 @@ describe('validation logic', () => {
       describe('sorting by expressions', () => {
         // SORT accepts complex expressions
         testErrorsAndWarnings(
-          'from a_index | sort abs(numberField) - to_long(stringField) desc nulls first',
+          'from a_index | sort abs(doubleField) - to_long(stringField) desc nulls first',
           []
         );
 
@@ -1321,7 +1327,7 @@ describe('validation logic', () => {
         ]);
 
         // Expression parts are also validated
-        testErrorsAndWarnings('from a_index | sort numberField + stringField', [
+        testErrorsAndWarnings('from a_index | sort doubleField + stringField', [
           'Argument of [+] must be [number], found value [stringField] type [string]',
         ]);
       });
@@ -1402,7 +1408,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | enrich policy on stringField with var0 `, [
         'Unknown column [var0]',
       ]);
-      testErrorsAndWarnings(`from a_index |enrich policy on numberField with var0 = `, [
+      testErrorsAndWarnings(`from a_index |enrich policy on doubleField with var0 = `, [
         "SyntaxError: missing ID_PATTERN at '<EOF>'",
         'Unknown column [var0]',
       ]);
@@ -1414,7 +1420,7 @@ describe('validation logic', () => {
       // testErrorsAndWarnings(`from a_index | enrich policy on stringField with var0 = stringField `, [
       //   `Unknown column [stringField]`,
       // ]);
-      testErrorsAndWarnings(`from a_index |enrich policy on numberField with var0 = , `, [
+      testErrorsAndWarnings(`from a_index |enrich policy on doubleField with var0 = , `, [
         "SyntaxError: missing ID_PATTERN at ','",
         "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN",
         'Unknown column [var0]',
@@ -1432,7 +1438,7 @@ describe('validation logic', () => {
         []
       );
       testErrorsAndWarnings(
-        `from a_index |enrich policy on numberField with var0 = otherField, var1 = `,
+        `from a_index |enrich policy on doubleField with var0 = otherField, var1 = `,
         ["SyntaxError: missing ID_PATTERN at '<EOF>'", 'Unknown column [var1]']
       );
 
@@ -1462,9 +1468,9 @@ describe('validation logic', () => {
         ['Column [stringField] of type string has been overwritten as new type: number']
       );
       testErrorsAndWarnings(
-        'from a_index | eval numberField = "5"',
+        'from a_index | eval doubleField = "5"',
         [],
-        ['Column [numberField] of type number has been overwritten as new type: string']
+        ['Column [doubleField] of type number has been overwritten as new type: string']
       );
     });
 
@@ -1501,7 +1507,7 @@ describe('validation logic', () => {
 
       for (const nesting of NESTED_DEPTHS) {
         // start with a quotable expression
-        const expr = 'round(numberField) + 1';
+        const expr = 'round(doubleField) + 1';
         const startingQuery = `from a_index | eval ${expr}`;
         // now pipe for each nesting level a new eval command that appends a +1 to the previous quoted expression
         const finalQuery = `${startingQuery} | ${Array(nesting)
@@ -1678,16 +1684,16 @@ describe('validation logic', () => {
       // testErrorsAndWarnings('from a_index | eval 23::cartesian_point', ['wrong type!']);
 
       // still validates nested functions when they are casted
-      testErrorsAndWarnings('from a_index | eval to_lower(trim(numberField)::string)', [
-        'Argument of [trim] must be [string], found value [numberField] type [number]',
+      testErrorsAndWarnings('from a_index | eval to_lower(trim(doubleField)::string)', [
+        'Argument of [trim] must be [string], found value [doubleField] type [number]',
       ]);
       testErrorsAndWarnings(
-        'from a_index | eval to_upper(trim(numberField)::string::string::string::string)',
-        ['Argument of [trim] must be [string], found value [numberField] type [number]']
+        'from a_index | eval to_upper(trim(doubleField)::string::string::string::string)',
+        ['Argument of [trim] must be [string], found value [doubleField] type [number]']
       );
       testErrorsAndWarnings(
-        'from a_index | eval to_lower(to_upper(trim(numberField)::string)::string)',
-        ['Argument of [trim] must be [string], found value [numberField] type [number]']
+        'from a_index | eval to_lower(to_upper(trim(doubleField)::string)::string)',
+        ['Argument of [trim] must be [string], found value [doubleField] type [number]']
       );
     });
 
@@ -1745,9 +1751,9 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval date_diff(numberField, stringField, stringField)',
+          'from a_index | eval date_diff(doubleField, stringField, stringField)',
           [
-            'Argument of [date_diff] must be [string], found value [numberField] type [number]',
+            'Argument of [date_diff] must be [string], found value [doubleField] type [number]',
             'Argument of [date_diff] must be [date], found value [stringField] type [string]',
             'Argument of [date_diff] must be [date], found value [stringField] type [string]',
           ]
@@ -1804,6 +1810,26 @@ describe('validation logic', () => {
           'from a_index | sort date_diff(stringField, stringField, stringField)',
           []
         );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_diff("year", stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff("year", stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff("year", stringField, stringField, extraArg)',
+          ['Error: [date_diff] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort date_diff("year", stringField, stringField)',
+          []
+        );
       });
 
       describe('abs', () => {
@@ -1815,21 +1841,21 @@ describe('validation logic', () => {
           'Argument of [abs] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where abs(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where abs(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where abs(stringField) > 0', [
           'Argument of [abs] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = abs(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval abs(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = abs(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval abs(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = abs(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval abs(stringField)', [
           'Argument of [abs] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval abs(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval abs(doubleField, extraArg)', [
           'Error: [abs] function expects exactly one argument, got 2.',
         ]);
 
@@ -1837,7 +1863,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in abs is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort abs(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort abs(doubleField)', []);
         testErrorsAndWarnings('row var = abs(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = abs(true)', [
@@ -1863,6 +1889,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort abs(stringField)', []);
+        testErrorsAndWarnings('row var = abs(doubleField)', []);
+        testErrorsAndWarnings('row abs(doubleField)', []);
+        testErrorsAndWarnings('row var = abs(integerField)', []);
+        testErrorsAndWarnings('row abs(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = abs(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval abs(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = abs(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval abs(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval abs(doubleField, extraArg)', [
+          'Error: [abs] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort abs(doubleField)', []);
       });
 
       describe('acos', () => {
@@ -1874,21 +1914,21 @@ describe('validation logic', () => {
           'Argument of [acos] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where acos(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where acos(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where acos(stringField) > 0', [
           'Argument of [acos] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = acos(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval acos(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = acos(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval acos(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = acos(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval acos(stringField)', [
           'Argument of [acos] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval acos(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval acos(doubleField, extraArg)', [
           'Error: [acos] function expects exactly one argument, got 2.',
         ]);
 
@@ -1896,7 +1936,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in acos is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort acos(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort acos(doubleField)', []);
         testErrorsAndWarnings('row var = acos(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = acos(true)', [
@@ -1922,6 +1962,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort acos(stringField)', []);
+        testErrorsAndWarnings('row var = acos(doubleField)', []);
+        testErrorsAndWarnings('row acos(doubleField)', []);
+        testErrorsAndWarnings('row var = acos(integerField)', []);
+        testErrorsAndWarnings('row acos(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = acos(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval acos(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = acos(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval acos(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval acos(doubleField, extraArg)', [
+          'Error: [acos] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort acos(doubleField)', []);
       });
 
       describe('asin', () => {
@@ -1933,21 +1987,21 @@ describe('validation logic', () => {
           'Argument of [asin] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where asin(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where asin(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where asin(stringField) > 0', [
           'Argument of [asin] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = asin(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval asin(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = asin(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval asin(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = asin(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval asin(stringField)', [
           'Argument of [asin] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval asin(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval asin(doubleField, extraArg)', [
           'Error: [asin] function expects exactly one argument, got 2.',
         ]);
 
@@ -1955,7 +2009,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in asin is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort asin(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort asin(doubleField)', []);
         testErrorsAndWarnings('row var = asin(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = asin(true)', [
@@ -1981,6 +2035,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort asin(stringField)', []);
+        testErrorsAndWarnings('row var = asin(doubleField)', []);
+        testErrorsAndWarnings('row asin(doubleField)', []);
+        testErrorsAndWarnings('row var = asin(integerField)', []);
+        testErrorsAndWarnings('row asin(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = asin(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval asin(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = asin(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval asin(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval asin(doubleField, extraArg)', [
+          'Error: [asin] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort asin(doubleField)', []);
       });
 
       describe('atan', () => {
@@ -1992,21 +2060,21 @@ describe('validation logic', () => {
           'Argument of [atan] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where atan(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where atan(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where atan(stringField) > 0', [
           'Argument of [atan] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = atan(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval atan(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval atan(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = atan(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval atan(stringField)', [
           'Argument of [atan] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval atan(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval atan(doubleField, extraArg)', [
           'Error: [atan] function expects exactly one argument, got 2.',
         ]);
 
@@ -2014,7 +2082,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in atan is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort atan(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort atan(doubleField)', []);
         testErrorsAndWarnings('row var = atan(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = atan(true)', [
@@ -2040,6 +2108,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort atan(stringField)', []);
+        testErrorsAndWarnings('row var = atan(doubleField)', []);
+        testErrorsAndWarnings('row atan(doubleField)', []);
+        testErrorsAndWarnings('row var = atan(integerField)', []);
+        testErrorsAndWarnings('row atan(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval atan(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval atan(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval atan(doubleField, extraArg)', [
+          'Error: [atan] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort atan(doubleField)', []);
       });
 
       describe('atan2', () => {
@@ -2052,15 +2134,15 @@ describe('validation logic', () => {
           'Argument of [atan2] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where atan2(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where atan2(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where atan2(stringField, stringField) > 0', [
           'Argument of [atan2] must be [number], found value [stringField] type [string]',
           'Argument of [atan2] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = atan2(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval atan2(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = atan2(to_integer(stringField), to_integer(stringField))',
@@ -2072,11 +2154,11 @@ describe('validation logic', () => {
           'Argument of [atan2] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval atan2(numberField, numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval atan2(doubleField, doubleField, extraArg)', [
           'Error: [atan2] function expects exactly 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort atan2(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort atan2(doubleField, doubleField)', []);
         testErrorsAndWarnings('row var = atan2(to_integer(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = atan2(true, true)', [
@@ -2108,6 +2190,44 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort atan2(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = atan2(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row atan2(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row var = atan2(doubleField, integerField)', []);
+        testErrorsAndWarnings('row atan2(doubleField, integerField)', []);
+        testErrorsAndWarnings('row var = atan2(doubleField, "a")', []);
+        testErrorsAndWarnings('row atan2(doubleField, "a")', []);
+        testErrorsAndWarnings('row var = atan2(integerField, doubleField)', []);
+        testErrorsAndWarnings('row atan2(integerField, doubleField)', []);
+        testErrorsAndWarnings('row var = atan2(integerField, integerField)', []);
+        testErrorsAndWarnings('row atan2(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = atan2(integerField, "a")', []);
+        testErrorsAndWarnings('row atan2(integerField, "a")', []);
+        testErrorsAndWarnings('row var = atan2("a", doubleField)', []);
+        testErrorsAndWarnings('row atan2("a", doubleField)', []);
+        testErrorsAndWarnings('row var = atan2("a", integerField)', []);
+        testErrorsAndWarnings('row atan2("a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(doubleField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(doubleField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(integerField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(integerField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = atan2(stringField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval atan2(stringField, integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval atan2(doubleField, doubleField, extraArg)', [
+          'Error: [atan2] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort atan2(doubleField, doubleField)', []);
       });
 
       describe('case', () => {
@@ -2133,21 +2253,21 @@ describe('validation logic', () => {
           'Argument of [ceil] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where ceil(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where ceil(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where ceil(stringField) > 0', [
           'Argument of [ceil] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = ceil(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval ceil(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = ceil(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval ceil(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = ceil(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval ceil(stringField)', [
           'Argument of [ceil] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval ceil(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval ceil(doubleField, extraArg)', [
           'Error: [ceil] function expects exactly one argument, got 2.',
         ]);
 
@@ -2155,7 +2275,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in ceil is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort ceil(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort ceil(doubleField)', []);
         testErrorsAndWarnings('row var = ceil(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = ceil(true)', [
@@ -2181,6 +2301,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort ceil(stringField)', []);
+        testErrorsAndWarnings('row var = ceil(doubleField)', []);
+        testErrorsAndWarnings('row ceil(doubleField)', []);
+        testErrorsAndWarnings('row var = ceil(integerField)', []);
+        testErrorsAndWarnings('row ceil(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = ceil(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval ceil(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = ceil(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval ceil(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval ceil(doubleField, extraArg)', [
+          'Error: [ceil] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort ceil(doubleField)', []);
       });
 
       describe('cidr_match', () => {
@@ -2201,9 +2335,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval cidr_match(stringField, numberField)', [
+        testErrorsAndWarnings('from a_index | eval cidr_match(stringField, doubleField)', [
           'Argument of [cidr_match] must be [ip], found value [stringField] type [string]',
-          'Argument of [cidr_match] must be [string], found value [numberField] type [number]',
+          'Argument of [cidr_match] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | sort cidr_match(ipField, stringField)', []);
@@ -2233,6 +2367,16 @@ describe('validation logic', () => {
           'from a_index | eval var = cidr_match(to_ip(ipField), stringField)',
           []
         );
+        testErrorsAndWarnings('row var = cidr_match(to_ip("127.0.0.1"), keywordField)', []);
+        testErrorsAndWarnings('row cidr_match(to_ip("127.0.0.1"), keywordField)', []);
+        testErrorsAndWarnings('row var = cidr_match(to_ip(to_ip("127.0.0.1")), keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cidr_match(ipField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval cidr_match(ipField, keywordField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = cidr_match(to_ip(ipField), keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | sort cidr_match(ipField, keywordField)', []);
       });
 
       describe('coalesce', () => {
@@ -2361,18 +2505,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = coalesce(to_version("1.0.0"), to_version("1.0.0"))', []);
         testErrorsAndWarnings('row coalesce(to_version("1.0.0"), to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = coalesce(to_version("a"), to_version("a"))', []);
-        testErrorsAndWarnings('from a_index | where coalesce(numberField) > 0', []);
-        testErrorsAndWarnings('from a_index | where coalesce(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where coalesce(doubleField) > 0', []);
+        testErrorsAndWarnings('from a_index | where coalesce(doubleField, doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where length(coalesce(stringField)) > 0', []);
         testErrorsAndWarnings(
           'from a_index | where length(coalesce(stringField, stringField)) > 0',
           []
         );
-        testErrorsAndWarnings('from a_index | eval var = coalesce(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = coalesce(to_integer(booleanField))', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = coalesce(to_integer(booleanField), to_integer(booleanField))',
@@ -2506,10 +2650,37 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | sort coalesce(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort coalesce(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval coalesce(nullVar)', []);
         testErrorsAndWarnings('from a_index | sort coalesce(booleanField)', []);
+        testErrorsAndWarnings('row var = coalesce(integerField)', []);
+        testErrorsAndWarnings('row coalesce(integerField)', []);
+        testErrorsAndWarnings('row var = coalesce(integerField, integerField)', []);
+        testErrorsAndWarnings('row coalesce(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = coalesce(keywordField)', []);
+        testErrorsAndWarnings('row coalesce(keywordField)', []);
+        testErrorsAndWarnings('row var = coalesce(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row coalesce(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_version(keywordField), to_version(keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = coalesce(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(to_version(keywordField), to_version(keywordField))',
+          []
+        );
       });
 
       describe('concat', () => {
@@ -2527,9 +2698,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | where length(concat(numberField, numberField)) > 0', [
-          'Argument of [concat] must be [string], found value [numberField] type [number]',
-          'Argument of [concat] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(concat(doubleField, doubleField)) > 0', [
+          'Argument of [concat] must be [string], found value [doubleField] type [number]',
+          'Argument of [concat] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = concat(stringField, stringField)', []);
@@ -2540,9 +2711,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval concat(numberField, numberField)', [
-          'Argument of [concat] must be [string], found value [numberField] type [number]',
-          'Argument of [concat] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval concat(doubleField, doubleField)', [
+          'Argument of [concat] must be [string], found value [doubleField] type [number]',
+          'Argument of [concat] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | sort concat(stringField, stringField)', []);
@@ -2572,6 +2743,19 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval concat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval concat(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = concat(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row concat(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = concat(keywordField, "a")', []);
+        testErrorsAndWarnings('row concat(keywordField, "a")', []);
+        testErrorsAndWarnings('row var = concat("a", keywordField)', []);
+        testErrorsAndWarnings('row concat("a", keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = concat(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval concat(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = concat(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval concat(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = concat(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval concat(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | sort concat(keywordField, keywordField)', []);
       });
 
       describe('cos', () => {
@@ -2583,21 +2767,21 @@ describe('validation logic', () => {
           'Argument of [cos] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where cos(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where cos(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where cos(stringField) > 0', [
           'Argument of [cos] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = cos(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval cos(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cos(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval cos(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = cos(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval cos(stringField)', [
           'Argument of [cos] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval cos(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval cos(doubleField, extraArg)', [
           'Error: [cos] function expects exactly one argument, got 2.',
         ]);
 
@@ -2605,7 +2789,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in cos is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort cos(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort cos(doubleField)', []);
         testErrorsAndWarnings('row var = cos(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = cos(true)', [
@@ -2631,6 +2815,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort cos(stringField)', []);
+        testErrorsAndWarnings('row var = cos(doubleField)', []);
+        testErrorsAndWarnings('row cos(doubleField)', []);
+        testErrorsAndWarnings('row var = cos(integerField)', []);
+        testErrorsAndWarnings('row cos(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cos(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval cos(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cos(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval cos(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval cos(doubleField, extraArg)', [
+          'Error: [cos] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort cos(doubleField)', []);
       });
 
       describe('cosh', () => {
@@ -2642,21 +2840,21 @@ describe('validation logic', () => {
           'Argument of [cosh] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where cosh(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where cosh(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where cosh(stringField) > 0', [
           'Argument of [cosh] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = cosh(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval cosh(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cosh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval cosh(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = cosh(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval cosh(stringField)', [
           'Argument of [cosh] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval cosh(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval cosh(doubleField, extraArg)', [
           'Error: [cosh] function expects exactly one argument, got 2.',
         ]);
 
@@ -2664,7 +2862,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in cosh is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort cosh(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort cosh(doubleField)', []);
         testErrorsAndWarnings('row var = cosh(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = cosh(true)', [
@@ -2690,6 +2888,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort cosh(stringField)', []);
+        testErrorsAndWarnings('row var = cosh(doubleField)', []);
+        testErrorsAndWarnings('row cosh(doubleField)', []);
+        testErrorsAndWarnings('row var = cosh(integerField)', []);
+        testErrorsAndWarnings('row cosh(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cosh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval cosh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cosh(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval cosh(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval cosh(doubleField, extraArg)', [
+          'Error: [cosh] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort cosh(doubleField)', []);
       });
 
       describe('date_extract', () => {
@@ -2773,6 +2985,28 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | sort date_extract(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", "a")', []);
+        testErrorsAndWarnings('row date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", "a")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", stringField, extraArg)',
+          ['Error: [date_extract] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", stringField)',
+          []
+        );
       });
 
       describe('date_format', () => {
@@ -2786,8 +3020,8 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval date_format(stringField, numberField)', [
-          'Argument of [date_format] must be [date], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, doubleField)', [
+          'Argument of [date_format] must be [date], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval date_format(stringField, dateField, extraArg)', [
@@ -2830,6 +3064,20 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | sort date_format(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = date_format(keywordField, "a")', []);
+        testErrorsAndWarnings('row date_format(keywordField, "a")', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_format(keywordField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval date_format(keywordField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_format(keywordField, stringField, extraArg)',
+          ['Error: [date_format] function expects no more than 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort date_format(keywordField, stringField)', []);
       });
 
       describe('date_parse', () => {
@@ -2852,9 +3100,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval date_parse(numberField, numberField)', [
-          'Argument of [date_parse] must be [string], found value [numberField] type [number]',
-          'Argument of [date_parse] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval date_parse(doubleField, doubleField)', [
+          'Argument of [date_parse] must be [string], found value [doubleField] type [number]',
+          'Argument of [date_parse] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings(
@@ -2881,6 +3129,34 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval date_parse(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_parse(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = date_parse(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row date_parse(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = date_parse(keywordField, "a")', []);
+        testErrorsAndWarnings('row date_parse(keywordField, "a")', []);
+        testErrorsAndWarnings('row var = date_parse("a", keywordField)', []);
+        testErrorsAndWarnings('row date_parse("a", keywordField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_parse(keywordField, keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval date_parse(keywordField, keywordField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_parse(keywordField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval date_parse(keywordField, stringField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_parse(stringField, keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval date_parse(stringField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_parse(keywordField, keywordField, extraArg)',
+          ['Error: [date_parse] function expects no more than 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort date_parse(keywordField, keywordField)', []);
       });
 
       describe('date_trunc', () => {
@@ -2992,9 +3268,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval ends_with(numberField, numberField)', [
-          'Argument of [ends_with] must be [string], found value [numberField] type [number]',
-          'Argument of [ends_with] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval ends_with(doubleField, doubleField)', [
+          'Argument of [ends_with] must be [string], found value [doubleField] type [number]',
+          'Argument of [ends_with] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval ends_with(stringField, stringField, extraArg)', [
@@ -3020,6 +3296,20 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval ends_with(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval ends_with(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = ends_with(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row ends_with(keywordField, keywordField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = ends_with(keywordField, keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval ends_with(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval ends_with(keywordField, keywordField, extraArg)',
+          ['Error: [ends_with] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort ends_with(keywordField, keywordField)', []);
       });
 
       describe('floor', () => {
@@ -3031,21 +3321,21 @@ describe('validation logic', () => {
           'Argument of [floor] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where floor(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where floor(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where floor(stringField) > 0', [
           'Argument of [floor] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = floor(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval floor(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = floor(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval floor(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = floor(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval floor(stringField)', [
           'Argument of [floor] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval floor(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval floor(doubleField, extraArg)', [
           'Error: [floor] function expects exactly one argument, got 2.',
         ]);
 
@@ -3053,7 +3343,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in floor is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort floor(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort floor(doubleField)', []);
         testErrorsAndWarnings('row var = floor(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = floor(true)', [
@@ -3079,6 +3369,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort floor(stringField)', []);
+        testErrorsAndWarnings('row var = floor(doubleField)', []);
+        testErrorsAndWarnings('row floor(doubleField)', []);
+        testErrorsAndWarnings('row var = floor(integerField)', []);
+        testErrorsAndWarnings('row floor(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = floor(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval floor(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = floor(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval floor(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval floor(doubleField, extraArg)', [
+          'Error: [floor] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort floor(doubleField)', []);
       });
 
       describe('greatest', () => {
@@ -3123,7 +3427,7 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | where greatest(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where greatest(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings(
           'from a_index | where greatest(cartesianPointField, cartesianPointField) > 0',
@@ -3133,7 +3437,7 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | where greatest(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where greatest(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where greatest(cartesianPointField) > 0', [
           'Argument of [greatest] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
@@ -3182,16 +3486,16 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | eval var = greatest(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval greatest(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = greatest(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval greatest(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = greatest(to_integer(booleanField), to_integer(booleanField))',
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = greatest(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval greatest(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = greatest(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval greatest(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = greatest(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = greatest(ipField, ipField)', []);
         testErrorsAndWarnings('from a_index | eval greatest(ipField, ipField)', []);
@@ -3219,6 +3523,37 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort greatest(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval greatest(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval greatest(nullVar)', []);
+        testErrorsAndWarnings('row var = greatest(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row greatest(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row var = greatest(integerField)', []);
+        testErrorsAndWarnings('row greatest(integerField)', []);
+        testErrorsAndWarnings('row var = greatest(integerField, integerField)', []);
+        testErrorsAndWarnings('row greatest(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = greatest(keywordField)', []);
+        testErrorsAndWarnings('row greatest(keywordField)', []);
+        testErrorsAndWarnings('row var = greatest(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row greatest(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'row var = greatest(to_version(keywordField), to_version(keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = greatest(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval greatest(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = greatest(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval greatest(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = greatest(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval greatest(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = greatest(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval greatest(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = greatest(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval greatest(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greatest(to_version(keywordField), to_version(keywordField))',
+          []
+        );
       });
 
       describe('least', () => {
@@ -3263,7 +3598,7 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | where least(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where least(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings(
           'from a_index | where least(cartesianPointField, cartesianPointField) > 0',
@@ -3273,7 +3608,7 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | where least(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where least(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where least(cartesianPointField) > 0', [
           'Argument of [least] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
@@ -3322,16 +3657,16 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | eval var = least(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval least(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = least(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval least(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = least(to_integer(booleanField), to_integer(booleanField))',
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = least(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval least(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = least(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval least(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = least(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = least(ipField, ipField)', []);
         testErrorsAndWarnings('from a_index | eval least(ipField, ipField)', []);
@@ -3359,6 +3694,35 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort least(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval least(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval least(nullVar)', []);
+        testErrorsAndWarnings('row var = least(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row least(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row var = least(integerField)', []);
+        testErrorsAndWarnings('row least(integerField)', []);
+        testErrorsAndWarnings('row var = least(integerField, integerField)', []);
+        testErrorsAndWarnings('row least(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = least(keywordField)', []);
+        testErrorsAndWarnings('row least(keywordField)', []);
+        testErrorsAndWarnings('row var = least(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row least(keywordField, keywordField)', []);
+        testErrorsAndWarnings(
+          'row var = least(to_version(keywordField), to_version(keywordField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = least(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval least(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = least(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval least(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = least(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval least(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = least(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval least(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = least(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval least(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = least(to_version(keywordField), to_version(keywordField))',
+          []
+        );
       });
 
       describe('left', () => {
@@ -3372,33 +3736,33 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | where length(left(stringField, numberField)) > 0',
+          'from a_index | where length(left(stringField, doubleField)) > 0',
           []
         );
 
-        testErrorsAndWarnings('from a_index | where length(left(numberField, stringField)) > 0', [
-          'Argument of [left] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(left(doubleField, stringField)) > 0', [
+          'Argument of [left] must be [string], found value [doubleField] type [number]',
           'Argument of [left] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = left(stringField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval left(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = left(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval left(stringField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = left(to_string(stringField), to_integer(stringField))',
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval left(numberField, stringField)', [
-          'Argument of [left] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval left(doubleField, stringField)', [
+          'Argument of [left] must be [string], found value [doubleField] type [number]',
           'Argument of [left] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval left(stringField, numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval left(stringField, doubleField, extraArg)', [
           'Error: [left] function expects exactly 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort left(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort left(stringField, doubleField)', []);
         testErrorsAndWarnings('row var = left(to_string(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = left(true, true)', [
@@ -3432,6 +3796,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort left(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = left(keywordField, integerField)', []);
+        testErrorsAndWarnings('row left(keywordField, integerField)', []);
+        testErrorsAndWarnings('row var = left("a", integerField)', []);
+        testErrorsAndWarnings('row left("a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = left(keywordField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval left(keywordField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = left(stringField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval left(stringField, integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval left(keywordField, integerField, extraArg)', [
+          'Error: [left] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort left(keywordField, integerField)', []);
       });
 
       describe('length', () => {
@@ -3445,16 +3823,16 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(stringField) > 0', []);
 
-        testErrorsAndWarnings('from a_index | where length(numberField) > 0', [
-          'Argument of [length] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(doubleField) > 0', [
+          'Argument of [length] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = length(stringField)', []);
         testErrorsAndWarnings('from a_index | eval length(stringField)', []);
         testErrorsAndWarnings('from a_index | eval var = length(to_string(stringField))', []);
 
-        testErrorsAndWarnings('from a_index | eval length(numberField)', [
-          'Argument of [length] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval length(doubleField)', [
+          'Argument of [length] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval length(stringField, extraArg)', [
@@ -3483,6 +3861,16 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval length(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval length(nullVar)', []);
+        testErrorsAndWarnings('row var = length(keywordField)', []);
+        testErrorsAndWarnings('row length(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = length(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval length(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval length(keywordField, extraArg)', [
+          'Error: [length] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort length(keywordField)', []);
       });
 
       describe('log', () => {
@@ -3495,15 +3883,15 @@ describe('validation logic', () => {
           'Argument of [log] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where log(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where log(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where log(stringField, stringField) > 0', [
           'Argument of [log] must be [number], found value [stringField] type [string]',
           'Argument of [log] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = log(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval log(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = log(to_integer(stringField), to_integer(stringField))',
@@ -3515,11 +3903,11 @@ describe('validation logic', () => {
           'Argument of [log] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval log(numberField, numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval log(doubleField, doubleField, extraArg)', [
           'Error: [log] function expects no more than 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort log(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort log(doubleField, doubleField)', []);
         testErrorsAndWarnings('row var = log(5)', []);
         testErrorsAndWarnings('row log(5)', []);
         testErrorsAndWarnings('row var = log(to_integer(true))', []);
@@ -3530,7 +3918,7 @@ describe('validation logic', () => {
           'Argument of [log] must be [number], found value [true] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where log(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where log(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where log(booleanField) > 0', [
           'Argument of [log] must be [number], found value [booleanField] type [boolean]',
@@ -3541,8 +3929,8 @@ describe('validation logic', () => {
           'Argument of [log] must be [number], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = log(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval log(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = log(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval log(booleanField)', [
@@ -3563,7 +3951,7 @@ describe('validation logic', () => {
           'Argument of [log] must be [number], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort log(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort log(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval log(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval log(nullVar, nullVar)', []);
         testErrorsAndWarnings('row var = log("a")', []);
@@ -3578,6 +3966,52 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort log(stringField)', []);
+        testErrorsAndWarnings('row var = log(doubleField)', []);
+        testErrorsAndWarnings('row log(doubleField)', []);
+        testErrorsAndWarnings('row var = log(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row log(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row var = log(doubleField, integerField)', []);
+        testErrorsAndWarnings('row log(doubleField, integerField)', []);
+        testErrorsAndWarnings('row var = log(doubleField, "a")', []);
+        testErrorsAndWarnings('row log(doubleField, "a")', []);
+        testErrorsAndWarnings('row var = log(integerField)', []);
+        testErrorsAndWarnings('row log(integerField)', []);
+        testErrorsAndWarnings('row var = log(integerField, doubleField)', []);
+        testErrorsAndWarnings('row log(integerField, doubleField)', []);
+        testErrorsAndWarnings('row var = log(integerField, integerField)', []);
+        testErrorsAndWarnings('row log(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = log(integerField, "a")', []);
+        testErrorsAndWarnings('row log(integerField, "a")', []);
+        testErrorsAndWarnings('row var = log("a", doubleField)', []);
+        testErrorsAndWarnings('row log("a", doubleField)', []);
+        testErrorsAndWarnings('row var = log("a", integerField)', []);
+        testErrorsAndWarnings('row log("a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval log(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(doubleField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval log(doubleField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval log(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval log(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(integerField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval log(integerField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log(stringField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval log(stringField, integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval log(doubleField, doubleField, extraArg)', [
+          'Error: [log] function expects no more than 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort log(doubleField)', []);
       });
 
       describe('log10', () => {
@@ -3589,21 +4023,21 @@ describe('validation logic', () => {
           'Argument of [log10] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where log10(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where log10(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where log10(stringField) > 0', [
           'Argument of [log10] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = log10(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval log10(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log10(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log10(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = log10(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval log10(stringField)', [
           'Argument of [log10] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval log10(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval log10(doubleField, extraArg)', [
           'Error: [log10] function expects exactly one argument, got 2.',
         ]);
 
@@ -3611,7 +4045,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in log10 is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort log10(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort log10(doubleField)', []);
         testErrorsAndWarnings('row var = log10(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = log10(true)', [
@@ -3637,6 +4071,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort log10(stringField)', []);
+        testErrorsAndWarnings('row var = log10(doubleField)', []);
+        testErrorsAndWarnings('row log10(doubleField)', []);
+        testErrorsAndWarnings('row var = log10(integerField)', []);
+        testErrorsAndWarnings('row log10(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log10(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval log10(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = log10(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval log10(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval log10(doubleField, extraArg)', [
+          'Error: [log10] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort log10(doubleField)', []);
       });
 
       describe('ltrim', () => {
@@ -3650,16 +4098,16 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(ltrim(stringField)) > 0', []);
 
-        testErrorsAndWarnings('from a_index | where length(ltrim(numberField)) > 0', [
-          'Argument of [ltrim] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(ltrim(doubleField)) > 0', [
+          'Argument of [ltrim] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = ltrim(stringField)', []);
         testErrorsAndWarnings('from a_index | eval ltrim(stringField)', []);
         testErrorsAndWarnings('from a_index | eval var = ltrim(to_string(stringField))', []);
 
-        testErrorsAndWarnings('from a_index | eval ltrim(numberField)', [
-          'Argument of [ltrim] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval ltrim(doubleField)', [
+          'Argument of [ltrim] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval ltrim(stringField, extraArg)', [
@@ -3688,6 +4136,16 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval ltrim(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval ltrim(nullVar)', []);
+        testErrorsAndWarnings('row var = ltrim(keywordField)', []);
+        testErrorsAndWarnings('row ltrim(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = ltrim(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval ltrim(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval ltrim(keywordField, extraArg)', [
+          'Error: [ltrim] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort ltrim(keywordField)', []);
       });
 
       describe('mv_avg', () => {
@@ -3699,21 +4157,21 @@ describe('validation logic', () => {
           'Argument of [mv_avg] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where mv_avg(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_avg(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_avg(stringField) > 0', [
           'Argument of [mv_avg] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = mv_avg(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_avg(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_avg(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_avg(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_avg(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_avg(stringField)', [
           'Argument of [mv_avg] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval mv_avg(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval mv_avg(doubleField, extraArg)', [
           'Error: [mv_avg] function expects exactly one argument, got 2.',
         ]);
 
@@ -3721,7 +4179,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in mv_avg is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort mv_avg(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort mv_avg(doubleField)', []);
         testErrorsAndWarnings('row var = mv_avg(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = mv_avg(true)', [
@@ -3747,6 +4205,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort mv_avg(stringField)', []);
+        testErrorsAndWarnings('row var = mv_avg(doubleField)', []);
+        testErrorsAndWarnings('row mv_avg(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_avg(integerField)', []);
+        testErrorsAndWarnings('row mv_avg(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_avg(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_avg(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_avg(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_avg(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval mv_avg(doubleField, extraArg)', [
+          'Error: [mv_avg] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_avg(doubleField)', []);
       });
 
       describe('mv_concat', () => {
@@ -3765,10 +4237,10 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | where length(mv_concat(numberField, numberField)) > 0',
+          'from a_index | where length(mv_concat(doubleField, doubleField)) > 0',
           [
-            'Argument of [mv_concat] must be [string], found value [numberField] type [number]',
-            'Argument of [mv_concat] must be [string], found value [numberField] type [number]',
+            'Argument of [mv_concat] must be [string], found value [doubleField] type [number]',
+            'Argument of [mv_concat] must be [string], found value [doubleField] type [number]',
           ]
         );
 
@@ -3780,9 +4252,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval mv_concat(numberField, numberField)', [
-          'Argument of [mv_concat] must be [string], found value [numberField] type [number]',
-          'Argument of [mv_concat] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval mv_concat(doubleField, doubleField)', [
+          'Argument of [mv_concat] must be [string], found value [doubleField] type [number]',
+          'Argument of [mv_concat] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval mv_concat(stringField, stringField, extraArg)', [
@@ -3816,6 +4288,28 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval mv_concat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_concat(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = mv_concat(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row mv_concat(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = mv_concat(keywordField, "a")', []);
+        testErrorsAndWarnings('row mv_concat(keywordField, "a")', []);
+        testErrorsAndWarnings('row var = mv_concat("a", keywordField)', []);
+        testErrorsAndWarnings('row mv_concat("a", keywordField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_concat(keywordField, keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_concat(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_concat(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_concat(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_concat(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_concat(stringField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_concat(keywordField, keywordField, extraArg)',
+          ['Error: [mv_concat] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort mv_concat(keywordField, keywordField)', []);
       });
 
       describe('mv_count', () => {
@@ -3871,7 +4365,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | where mv_count(cartesianPointField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(cartesianShapeField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(dateField) > 0', []);
-        testErrorsAndWarnings('from a_index | where mv_count(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_count(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(geoPointField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(geoShapeField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(ipField) > 0', []);
@@ -3899,8 +4393,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_count(dateField)', []);
         testErrorsAndWarnings('from a_index | eval mv_count(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_count(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_count(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_count(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_count(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_count(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval mv_count(geoPointField)', []);
@@ -3923,6 +4417,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_count(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_count(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_count(nullVar)', []);
+        testErrorsAndWarnings('row var = mv_count(doubleField)', []);
+        testErrorsAndWarnings('row mv_count(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_count(integerField)', []);
+        testErrorsAndWarnings('row mv_count(integerField)', []);
+        testErrorsAndWarnings('row var = mv_count(keywordField)', []);
+        testErrorsAndWarnings('row mv_count(keywordField)', []);
+        testErrorsAndWarnings('row var = mv_count(to_version(keywordField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(to_version(keywordField))', []);
       });
 
       describe('mv_dedupe', () => {
@@ -3953,7 +4461,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_dedupe(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_version("a"))', []);
 
-        testErrorsAndWarnings('from a_index | where mv_dedupe(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_dedupe(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where length(mv_dedupe(stringField)) > 0', []);
 
@@ -3964,8 +4472,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(dateField)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_dedupe(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(ipField)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(ipField)', []);
@@ -4029,15 +4537,29 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval mv_dedupe(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(doubleField, extraArg)', [
           'Error: [mv_dedupe] function expects exactly one argument, got 2.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort mv_dedupe(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort mv_dedupe(doubleField)', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_dedupe(nullVar)', []);
+        testErrorsAndWarnings('row var = mv_dedupe(doubleField)', []);
+        testErrorsAndWarnings('row mv_dedupe(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_dedupe(integerField)', []);
+        testErrorsAndWarnings('row mv_dedupe(integerField)', []);
+        testErrorsAndWarnings('row var = mv_dedupe(keywordField)', []);
+        testErrorsAndWarnings('row mv_dedupe(keywordField)', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_version(keywordField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(to_version(keywordField))', []);
       });
 
       describe('mv_first', () => {
@@ -4089,7 +4611,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_first(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row mv_first(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = mv_first(to_version("a"))', []);
-        testErrorsAndWarnings('from a_index | where mv_first(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_first(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where length(mv_first(stringField)) > 0', []);
         testErrorsAndWarnings('from a_index | eval var = mv_first(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_first(booleanField)', []);
@@ -4113,8 +4635,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_first(dateField)', []);
         testErrorsAndWarnings('from a_index | eval mv_first(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_first(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_first(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_first(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_first(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_first(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval mv_first(geoPointField)', []);
@@ -4137,6 +4659,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_first(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_first(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_first(nullVar)', []);
+        testErrorsAndWarnings('row var = mv_first(doubleField)', []);
+        testErrorsAndWarnings('row mv_first(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_first(integerField)', []);
+        testErrorsAndWarnings('row mv_first(integerField)', []);
+        testErrorsAndWarnings('row var = mv_first(keywordField)', []);
+        testErrorsAndWarnings('row mv_first(keywordField)', []);
+        testErrorsAndWarnings('row var = mv_first(to_version(keywordField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(to_version(keywordField))', []);
       });
 
       describe('mv_last', () => {
@@ -4188,7 +4724,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_last(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row mv_last(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = mv_last(to_version("a"))', []);
-        testErrorsAndWarnings('from a_index | where mv_last(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_last(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where length(mv_last(stringField)) > 0', []);
         testErrorsAndWarnings('from a_index | eval var = mv_last(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_last(booleanField)', []);
@@ -4212,8 +4748,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_last(dateField)', []);
         testErrorsAndWarnings('from a_index | eval mv_last(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_last(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_last(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_last(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_last(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_last(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval mv_last(geoPointField)', []);
@@ -4236,6 +4772,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_last(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_last(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_last(nullVar)', []);
+        testErrorsAndWarnings('row var = mv_last(doubleField)', []);
+        testErrorsAndWarnings('row mv_last(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_last(integerField)', []);
+        testErrorsAndWarnings('row mv_last(integerField)', []);
+        testErrorsAndWarnings('row var = mv_last(keywordField)', []);
+        testErrorsAndWarnings('row mv_last(keywordField)', []);
+        testErrorsAndWarnings('row var = mv_last(to_version(keywordField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(to_version(keywordField))', []);
       });
 
       describe('mv_max', () => {
@@ -4270,7 +4820,7 @@ describe('validation logic', () => {
           'Argument of [mv_max] must be [boolean], found value [to_cartesianpoint("POINT (30 10)")] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where mv_max(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_max(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_max(cartesianPointField) > 0', [
           'Argument of [mv_max] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
@@ -4293,8 +4843,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_max(dateField)', []);
         testErrorsAndWarnings('from a_index | eval mv_max(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_max(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_max(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_max(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_max(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_max(ipField)', []);
         testErrorsAndWarnings('from a_index | eval mv_max(ipField)', []);
@@ -4311,6 +4861,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_max(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_max(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_max(nullVar)', []);
+        testErrorsAndWarnings('row var = mv_max(doubleField)', []);
+        testErrorsAndWarnings('row mv_max(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_max(integerField)', []);
+        testErrorsAndWarnings('row mv_max(integerField)', []);
+        testErrorsAndWarnings('row var = mv_max(keywordField)', []);
+        testErrorsAndWarnings('row mv_max(keywordField)', []);
+        testErrorsAndWarnings('row var = mv_max(to_version(keywordField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(to_version(keywordField))', []);
       });
 
       describe('mv_median', () => {
@@ -4322,21 +4886,21 @@ describe('validation logic', () => {
           'Argument of [mv_median] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where mv_median(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_median(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_median(stringField) > 0', [
           'Argument of [mv_median] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = mv_median(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_median(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_median(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_median(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_median(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_median(stringField)', [
           'Argument of [mv_median] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval mv_median(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval mv_median(doubleField, extraArg)', [
           'Error: [mv_median] function expects exactly one argument, got 2.',
         ]);
 
@@ -4344,7 +4908,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in mv_median is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort mv_median(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort mv_median(doubleField)', []);
         testErrorsAndWarnings('row var = mv_median(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = mv_median(true)', [
@@ -4370,6 +4934,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort mv_median(stringField)', []);
+        testErrorsAndWarnings('row var = mv_median(doubleField)', []);
+        testErrorsAndWarnings('row mv_median(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_median(integerField)', []);
+        testErrorsAndWarnings('row mv_median(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_median(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_median(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_median(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_median(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval mv_median(doubleField, extraArg)', [
+          'Error: [mv_median] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_median(doubleField)', []);
       });
 
       describe('mv_min', () => {
@@ -4404,7 +4982,7 @@ describe('validation logic', () => {
           'Argument of [mv_min] must be [boolean], found value [to_cartesianpoint("POINT (30 10)")] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where mv_min(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_min(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_min(cartesianPointField) > 0', [
           'Argument of [mv_min] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
@@ -4427,8 +5005,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_min(dateField)', []);
         testErrorsAndWarnings('from a_index | eval mv_min(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_min(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_min(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_min(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_min(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_min(ipField)', []);
         testErrorsAndWarnings('from a_index | eval mv_min(ipField)', []);
@@ -4445,6 +5023,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_min(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_min(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_min(nullVar)', []);
+        testErrorsAndWarnings('row var = mv_min(doubleField)', []);
+        testErrorsAndWarnings('row mv_min(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_min(integerField)', []);
+        testErrorsAndWarnings('row mv_min(integerField)', []);
+        testErrorsAndWarnings('row var = mv_min(keywordField)', []);
+        testErrorsAndWarnings('row mv_min(keywordField)', []);
+        testErrorsAndWarnings('row var = mv_min(to_version(keywordField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(to_version(keywordField))', []);
       });
 
       describe('mv_slice', () => {
@@ -4452,16 +5044,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_slice("a", 5, 5)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(stringField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(stringField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(stringField, numberField, numberField)',
+          'from a_index | eval mv_slice(stringField, doubleField, doubleField)',
           []
         );
         testErrorsAndWarnings(
-          'from a_index | sort mv_slice(stringField, numberField, numberField)',
+          'from a_index | sort mv_slice(stringField, doubleField, doubleField)',
           []
         );
         testErrorsAndWarnings('row var = mv_slice(true, 5, 5)', []);
@@ -4547,12 +5139,12 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | where mv_slice(numberField, numberField, numberField) > 0',
+          'from a_index | where mv_slice(doubleField, doubleField, doubleField) > 0',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | where mv_slice(numberField, booleanField, booleanField) > 0',
+          'from a_index | where mv_slice(doubleField, booleanField, booleanField) > 0',
           [
             'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
             'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
@@ -4560,7 +5152,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | where length(mv_slice(stringField, numberField, numberField)) > 0',
+          'from a_index | where length(mv_slice(stringField, doubleField, doubleField)) > 0',
           []
         );
 
@@ -4573,12 +5165,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(booleanField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(booleanField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(booleanField, numberField, numberField)',
+          'from a_index | eval mv_slice(booleanField, doubleField, doubleField)',
           []
         );
 
@@ -4596,12 +5188,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(cartesianPointField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(cartesianPointField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(cartesianPointField, numberField, numberField)',
+          'from a_index | eval mv_slice(cartesianPointField, doubleField, doubleField)',
           []
         );
 
@@ -4619,12 +5211,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(cartesianShapeField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(cartesianShapeField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(cartesianShapeField, numberField, numberField)',
+          'from a_index | eval mv_slice(cartesianShapeField, doubleField, doubleField)',
           []
         );
 
@@ -4642,12 +5234,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(dateField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(dateField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(dateField, numberField, numberField)',
+          'from a_index | eval mv_slice(dateField, doubleField, doubleField)',
           []
         );
 
@@ -4665,12 +5257,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(numberField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(doubleField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(numberField, numberField, numberField)',
+          'from a_index | eval mv_slice(doubleField, doubleField, doubleField)',
           []
         );
 
@@ -4680,7 +5272,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(numberField, booleanField, booleanField)',
+          'from a_index | eval mv_slice(doubleField, booleanField, booleanField)',
           [
             'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
             'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
@@ -4688,12 +5280,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(geoPointField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(geoPointField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(geoPointField, numberField, numberField)',
+          'from a_index | eval mv_slice(geoPointField, doubleField, doubleField)',
           []
         );
 
@@ -4711,12 +5303,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(geoShapeField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(geoShapeField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(geoShapeField, numberField, numberField)',
+          'from a_index | eval mv_slice(geoShapeField, doubleField, doubleField)',
           []
         );
 
@@ -4734,12 +5326,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(ipField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(ipField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(ipField, numberField, numberField)',
+          'from a_index | eval mv_slice(ipField, doubleField, doubleField)',
           []
         );
 
@@ -4767,12 +5359,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(versionField, numberField, numberField)',
+          'from a_index | eval var = mv_slice(versionField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(versionField, numberField, numberField)',
+          'from a_index | eval mv_slice(versionField, doubleField, doubleField)',
           []
         );
 
@@ -4790,12 +5382,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(booleanField, numberField, numberField, extraArg)',
+          'from a_index | eval mv_slice(booleanField, doubleField, doubleField, extraArg)',
           ['Error: [mv_slice] function expects no more than 3 arguments, got 4.']
         );
 
         testErrorsAndWarnings(
-          'from a_index | sort mv_slice(booleanField, numberField, numberField)',
+          'from a_index | sort mv_slice(booleanField, doubleField, doubleField)',
           []
         );
         testErrorsAndWarnings('from a_index | eval mv_slice(null, null, null)', []);
@@ -4983,6 +5575,260 @@ describe('validation logic', () => {
           'from a_index | sort mv_slice(booleanField, stringField, stringField)',
           []
         );
+        testErrorsAndWarnings('row var = mv_slice(true, integerField, integerField)', []);
+        testErrorsAndWarnings('row mv_slice(true, integerField, integerField)', []);
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_boolean(true), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianpoint("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_slice(to_cartesianpoint("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianshape("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_slice(to_cartesianshape("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_slice("a", integerField, integerField)', []);
+        testErrorsAndWarnings('row mv_slice("a", integerField, integerField)', []);
+        testErrorsAndWarnings('row var = mv_slice(doubleField, integerField, integerField)', []);
+        testErrorsAndWarnings('row mv_slice(doubleField, integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geopoint("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_slice(to_geopoint("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geopoint(to_geopoint("POINT (30 10)")), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geoshape("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_slice(to_geoshape("POINT (30 10)"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geoshape(to_geopoint("POINT (30 10)")), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_slice(integerField, integerField, integerField)', []);
+        testErrorsAndWarnings('row mv_slice(integerField, integerField, integerField)', []);
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_ip("127.0.0.1"), integerField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('row mv_slice(to_ip("127.0.0.1"), integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_ip(to_ip("127.0.0.1")), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_slice(keywordField, integerField, integerField)', []);
+        testErrorsAndWarnings('row mv_slice(keywordField, integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_version("1.0.0"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('row mv_slice(to_version("1.0.0"), integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_version(keywordField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(booleanField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(booleanField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_boolean(booleanField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(cartesianPointField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(cartesianPointField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_cartesianpoint(cartesianPointField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(cartesianShapeField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(cartesianShapeField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_cartesianshape(cartesianPointField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(stringField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(stringField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(doubleField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(doubleField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(geoPointField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(geoPointField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_geopoint(geoPointField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(geoShapeField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(geoShapeField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_geoshape(geoPointField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(integerField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(integerField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(ipField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(ipField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_ip(ipField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(keywordField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(keywordField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(versionField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(versionField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(to_version(keywordField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(booleanField, integerField, integerField, extraArg)',
+          ['Error: [mv_slice] function expects no more than 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort mv_slice(booleanField, integerField, integerField)',
+          []
+        );
       });
 
       describe('mv_sort', () => {
@@ -5007,7 +5853,7 @@ describe('validation logic', () => {
           'Argument of [mv_sort] must be [string], found value [true] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where mv_sort(numberField, "asc") > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_sort(doubleField, "asc") > 0', []);
 
         testErrorsAndWarnings(
           'from a_index | where mv_sort(cartesianPointField, booleanField) > 0',
@@ -5031,8 +5877,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval mv_sort(booleanField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sort(dateField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(dateField, "asc")', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_sort(numberField, "asc")', []);
-        testErrorsAndWarnings('from a_index | eval mv_sort(numberField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(doubleField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(doubleField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sort(ipField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(ipField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sort(versionField, "asc")', []);
@@ -5067,6 +5913,26 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort mv_sort(booleanField, stringField)', []);
+        testErrorsAndWarnings('row var = mv_sort(doubleField, "asc")', []);
+        testErrorsAndWarnings('row mv_sort(doubleField, "asc")', []);
+        testErrorsAndWarnings('row var = mv_sort(integerField, "asc")', []);
+        testErrorsAndWarnings('row mv_sort(integerField, "asc")', []);
+        testErrorsAndWarnings('row var = mv_sort(keywordField, "asc")', []);
+        testErrorsAndWarnings('row mv_sort(keywordField, "asc")', []);
+        testErrorsAndWarnings('row var = mv_sort("a", keywordField)', []);
+        testErrorsAndWarnings('row mv_sort("a", keywordField)', []);
+        testErrorsAndWarnings('row var = mv_sort(to_version("1.0.0"), keywordField)', []);
+        testErrorsAndWarnings('row mv_sort(to_version("1.0.0"), keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(doubleField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(doubleField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(integerField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(integerField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(keywordField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(keywordField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(versionField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(versionField, keywordField)', []);
       });
 
       describe('mv_sum', () => {
@@ -5078,21 +5944,21 @@ describe('validation logic', () => {
           'Argument of [mv_sum] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where mv_sum(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_sum(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_sum(stringField) > 0', [
           'Argument of [mv_sum] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = mv_sum(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_sum(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sum(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sum(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_sum(stringField)', [
           'Argument of [mv_sum] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval mv_sum(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval mv_sum(doubleField, extraArg)', [
           'Error: [mv_sum] function expects exactly one argument, got 2.',
         ]);
 
@@ -5100,7 +5966,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in mv_sum is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort mv_sum(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort mv_sum(doubleField)', []);
         testErrorsAndWarnings('row var = mv_sum(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = mv_sum(true)', [
@@ -5126,6 +5992,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort mv_sum(stringField)', []);
+        testErrorsAndWarnings('row var = mv_sum(doubleField)', []);
+        testErrorsAndWarnings('row mv_sum(doubleField)', []);
+        testErrorsAndWarnings('row var = mv_sum(integerField)', []);
+        testErrorsAndWarnings('row mv_sum(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sum(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sum(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval mv_sum(doubleField, extraArg)', [
+          'Error: [mv_sum] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_sum(doubleField)', []);
       });
 
       describe('mv_zip', () => {
@@ -5151,11 +6031,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | where length(mv_zip(numberField, numberField, numberField)) > 0',
+          'from a_index | where length(mv_zip(doubleField, doubleField, doubleField)) > 0',
           [
-            'Argument of [mv_zip] must be [string], found value [numberField] type [number]',
-            'Argument of [mv_zip] must be [string], found value [numberField] type [number]',
-            'Argument of [mv_zip] must be [string], found value [numberField] type [number]',
+            'Argument of [mv_zip] must be [string], found value [doubleField] type [number]',
+            'Argument of [mv_zip] must be [string], found value [doubleField] type [number]',
+            'Argument of [mv_zip] must be [string], found value [doubleField] type [number]',
           ]
         );
 
@@ -5176,10 +6056,10 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval mv_zip(numberField, numberField, numberField)', [
-          'Argument of [mv_zip] must be [string], found value [numberField] type [number]',
-          'Argument of [mv_zip] must be [string], found value [numberField] type [number]',
-          'Argument of [mv_zip] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval mv_zip(doubleField, doubleField, doubleField)', [
+          'Argument of [mv_zip] must be [string], found value [doubleField] type [number]',
+          'Argument of [mv_zip] must be [string], found value [doubleField] type [number]',
+          'Argument of [mv_zip] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings(
@@ -5253,6 +6133,109 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort mv_zip(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = mv_zip(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row mv_zip(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = mv_zip(keywordField, keywordField, keywordField)', []);
+        testErrorsAndWarnings('row mv_zip(keywordField, keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = mv_zip(keywordField, keywordField, "a")', []);
+        testErrorsAndWarnings('row mv_zip(keywordField, keywordField, "a")', []);
+        testErrorsAndWarnings('row var = mv_zip(keywordField, "a")', []);
+        testErrorsAndWarnings('row mv_zip(keywordField, "a")', []);
+        testErrorsAndWarnings('row var = mv_zip(keywordField, "a", keywordField)', []);
+        testErrorsAndWarnings('row mv_zip(keywordField, "a", keywordField)', []);
+        testErrorsAndWarnings('row var = mv_zip(keywordField, "a", "a")', []);
+        testErrorsAndWarnings('row mv_zip(keywordField, "a", "a")', []);
+        testErrorsAndWarnings('row var = mv_zip("a", keywordField)', []);
+        testErrorsAndWarnings('row mv_zip("a", keywordField)', []);
+        testErrorsAndWarnings('row var = mv_zip("a", keywordField, keywordField)', []);
+        testErrorsAndWarnings('row mv_zip("a", keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = mv_zip("a", keywordField, "a")', []);
+        testErrorsAndWarnings('row mv_zip("a", keywordField, "a")', []);
+        testErrorsAndWarnings('row var = mv_zip("a", "a", keywordField)', []);
+        testErrorsAndWarnings('row mv_zip("a", "a", keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_zip(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_zip(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(keywordField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(keywordField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(keywordField, keywordField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(keywordField, keywordField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = mv_zip(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_zip(keywordField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(keywordField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(keywordField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(keywordField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(keywordField, stringField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = mv_zip(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_zip(stringField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(stringField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(stringField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(stringField, keywordField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(stringField, keywordField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(stringField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(stringField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_zip(keywordField, keywordField, keywordField, extraArg)',
+          ['Error: [mv_zip] function expects no more than 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort mv_zip(keywordField, keywordField)', []);
       });
 
       describe('now', () => {
@@ -5294,15 +6277,15 @@ describe('validation logic', () => {
           'Argument of [pow] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where pow(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where pow(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where pow(stringField, stringField) > 0', [
           'Argument of [pow] must be [number], found value [stringField] type [string]',
           'Argument of [pow] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = pow(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval pow(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = pow(to_integer(stringField), to_integer(stringField))',
@@ -5314,11 +6297,11 @@ describe('validation logic', () => {
           'Argument of [pow] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval pow(numberField, numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval pow(doubleField, doubleField, extraArg)', [
           'Error: [pow] function expects exactly 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort pow(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort pow(doubleField, doubleField)', []);
         testErrorsAndWarnings('row var = pow(to_integer(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = pow(true, true)', [
@@ -5350,6 +6333,44 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort pow(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = pow(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row pow(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row var = pow(doubleField, integerField)', []);
+        testErrorsAndWarnings('row pow(doubleField, integerField)', []);
+        testErrorsAndWarnings('row var = pow(doubleField, "a")', []);
+        testErrorsAndWarnings('row pow(doubleField, "a")', []);
+        testErrorsAndWarnings('row var = pow(integerField, doubleField)', []);
+        testErrorsAndWarnings('row pow(integerField, doubleField)', []);
+        testErrorsAndWarnings('row var = pow(integerField, integerField)', []);
+        testErrorsAndWarnings('row pow(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = pow(integerField, "a")', []);
+        testErrorsAndWarnings('row pow(integerField, "a")', []);
+        testErrorsAndWarnings('row var = pow("a", doubleField)', []);
+        testErrorsAndWarnings('row pow("a", doubleField)', []);
+        testErrorsAndWarnings('row var = pow("a", integerField)', []);
+        testErrorsAndWarnings('row pow("a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(doubleField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(doubleField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(integerField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(integerField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = pow(stringField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval pow(stringField, integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval pow(doubleField, doubleField, extraArg)', [
+          'Error: [pow] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort pow(doubleField, doubleField)', []);
       });
 
       describe('replace', () => {
@@ -5373,11 +6394,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | where length(replace(numberField, numberField, numberField)) > 0',
+          'from a_index | where length(replace(doubleField, doubleField, doubleField)) > 0',
           [
-            'Argument of [replace] must be [string], found value [numberField] type [number]',
-            'Argument of [replace] must be [string], found value [numberField] type [number]',
-            'Argument of [replace] must be [string], found value [numberField] type [number]',
+            'Argument of [replace] must be [string], found value [doubleField] type [number]',
+            'Argument of [replace] must be [string], found value [doubleField] type [number]',
+            'Argument of [replace] must be [string], found value [doubleField] type [number]',
           ]
         );
 
@@ -5397,11 +6418,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval replace(numberField, numberField, numberField)',
+          'from a_index | eval replace(doubleField, doubleField, doubleField)',
           [
-            'Argument of [replace] must be [string], found value [numberField] type [number]',
-            'Argument of [replace] must be [string], found value [numberField] type [number]',
-            'Argument of [replace] must be [string], found value [numberField] type [number]',
+            'Argument of [replace] must be [string], found value [doubleField] type [number]',
+            'Argument of [replace] must be [string], found value [doubleField] type [number]',
+            'Argument of [replace] must be [string], found value [doubleField] type [number]',
           ]
         );
 
@@ -5449,6 +6470,100 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval replace(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval replace(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = replace(keywordField, keywordField, keywordField)', []);
+        testErrorsAndWarnings('row replace(keywordField, keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = replace(keywordField, keywordField, "a")', []);
+        testErrorsAndWarnings('row replace(keywordField, keywordField, "a")', []);
+        testErrorsAndWarnings('row var = replace(keywordField, "a", keywordField)', []);
+        testErrorsAndWarnings('row replace(keywordField, "a", keywordField)', []);
+        testErrorsAndWarnings('row var = replace(keywordField, "a", "a")', []);
+        testErrorsAndWarnings('row replace(keywordField, "a", "a")', []);
+        testErrorsAndWarnings('row var = replace("a", keywordField, keywordField)', []);
+        testErrorsAndWarnings('row replace("a", keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = replace("a", keywordField, "a")', []);
+        testErrorsAndWarnings('row replace("a", keywordField, "a")', []);
+        testErrorsAndWarnings('row var = replace("a", "a", keywordField)', []);
+        testErrorsAndWarnings('row replace("a", "a", keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = replace(keywordField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(keywordField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = replace(keywordField, keywordField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(keywordField, keywordField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = replace(keywordField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(keywordField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = replace(keywordField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(keywordField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = replace(stringField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(stringField, keywordField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = replace(stringField, keywordField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(stringField, keywordField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = replace(stringField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(stringField, stringField, keywordField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval replace(keywordField, keywordField, keywordField, extraArg)',
+          ['Error: [replace] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort replace(keywordField, keywordField, keywordField)',
+          []
+        );
       });
 
       describe('right', () => {
@@ -5462,33 +6577,33 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | where length(right(stringField, numberField)) > 0',
+          'from a_index | where length(right(stringField, doubleField)) > 0',
           []
         );
 
-        testErrorsAndWarnings('from a_index | where length(right(numberField, stringField)) > 0', [
-          'Argument of [right] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(right(doubleField, stringField)) > 0', [
+          'Argument of [right] must be [string], found value [doubleField] type [number]',
           'Argument of [right] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = right(stringField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval right(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = right(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval right(stringField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = right(to_string(stringField), to_integer(stringField))',
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval right(numberField, stringField)', [
-          'Argument of [right] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval right(doubleField, stringField)', [
+          'Argument of [right] must be [string], found value [doubleField] type [number]',
           'Argument of [right] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval right(stringField, numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval right(stringField, doubleField, extraArg)', [
           'Error: [right] function expects exactly 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort right(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort right(stringField, doubleField)', []);
         testErrorsAndWarnings('row var = right(to_string(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = right(true, true)', [
@@ -5525,6 +6640,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort right(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = right(keywordField, integerField)', []);
+        testErrorsAndWarnings('row right(keywordField, integerField)', []);
+        testErrorsAndWarnings('row var = right("a", integerField)', []);
+        testErrorsAndWarnings('row right("a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = right(keywordField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval right(keywordField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = right(stringField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval right(stringField, integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval right(keywordField, integerField, extraArg)', [
+          'Error: [right] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort right(keywordField, integerField)', []);
       });
 
       describe('round', () => {
@@ -5537,15 +6666,15 @@ describe('validation logic', () => {
           'Argument of [round] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where round(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where round(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where round(stringField, stringField) > 0', [
           'Argument of [round] must be [number], found value [stringField] type [string]',
           'Argument of [round] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = round(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval round(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval round(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = round(to_integer(stringField), to_integer(stringField))',
@@ -5557,11 +6686,11 @@ describe('validation logic', () => {
           'Argument of [round] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval round(numberField, numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval round(doubleField, doubleField, extraArg)', [
           'Error: [round] function expects no more than 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort round(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort round(doubleField, doubleField)', []);
         testErrorsAndWarnings('row var = round(5)', []);
         testErrorsAndWarnings('row round(5)', []);
         testErrorsAndWarnings('row var = round(to_integer(true))', []);
@@ -5572,7 +6701,7 @@ describe('validation logic', () => {
           'Argument of [round] must be [number], found value [true] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where round(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where round(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where round(booleanField) > 0', [
           'Argument of [round] must be [number], found value [booleanField] type [boolean]',
@@ -5583,8 +6712,8 @@ describe('validation logic', () => {
           'Argument of [round] must be [number], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = round(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval round(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval round(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = round(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval round(booleanField)', [
@@ -5605,7 +6734,7 @@ describe('validation logic', () => {
           'Argument of [round] must be [number], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort round(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort round(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval round(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval round(nullVar, nullVar)', []);
         testErrorsAndWarnings('row var = round("a")', []);
@@ -5620,6 +6749,32 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort round(stringField)', []);
+        testErrorsAndWarnings('row var = round(doubleField)', []);
+        testErrorsAndWarnings('row round(doubleField)', []);
+        testErrorsAndWarnings('row var = round(doubleField, integerField)', []);
+        testErrorsAndWarnings('row round(doubleField, integerField)', []);
+        testErrorsAndWarnings('row var = round(integerField)', []);
+        testErrorsAndWarnings('row round(integerField)', []);
+        testErrorsAndWarnings('row var = round(integerField, integerField)', []);
+        testErrorsAndWarnings('row round(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = round("a", integerField)', []);
+        testErrorsAndWarnings('row round("a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval round(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval round(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval round(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval round(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = round(stringField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval round(stringField, integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval round(doubleField, integerField, extraArg)', [
+          'Error: [round] function expects no more than 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort round(doubleField)', []);
       });
 
       describe('rtrim', () => {
@@ -5633,16 +6788,16 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(rtrim(stringField)) > 0', []);
 
-        testErrorsAndWarnings('from a_index | where length(rtrim(numberField)) > 0', [
-          'Argument of [rtrim] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(rtrim(doubleField)) > 0', [
+          'Argument of [rtrim] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = rtrim(stringField)', []);
         testErrorsAndWarnings('from a_index | eval rtrim(stringField)', []);
         testErrorsAndWarnings('from a_index | eval var = rtrim(to_string(stringField))', []);
 
-        testErrorsAndWarnings('from a_index | eval rtrim(numberField)', [
-          'Argument of [rtrim] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval rtrim(doubleField)', [
+          'Argument of [rtrim] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval rtrim(stringField, extraArg)', [
@@ -5671,6 +6826,16 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval rtrim(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval rtrim(nullVar)', []);
+        testErrorsAndWarnings('row var = rtrim(keywordField)', []);
+        testErrorsAndWarnings('row rtrim(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = rtrim(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval rtrim(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval rtrim(keywordField, extraArg)', [
+          'Error: [rtrim] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort rtrim(keywordField)', []);
       });
 
       describe('signum', () => {
@@ -5682,21 +6847,21 @@ describe('validation logic', () => {
           'Argument of [signum] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where signum(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where signum(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where signum(stringField) > 0', [
           'Argument of [signum] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = signum(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval signum(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = signum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval signum(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = signum(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval signum(stringField)', [
           'Argument of [signum] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval signum(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval signum(doubleField, extraArg)', [
           'Error: [signum] function expects exactly one argument, got 2.',
         ]);
 
@@ -5704,7 +6869,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in signum is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort signum(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort signum(doubleField)', []);
         testErrorsAndWarnings('row var = signum(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = signum(true)', [
@@ -5730,6 +6895,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort signum(stringField)', []);
+        testErrorsAndWarnings('row var = signum(doubleField)', []);
+        testErrorsAndWarnings('row signum(doubleField)', []);
+        testErrorsAndWarnings('row var = signum(integerField)', []);
+        testErrorsAndWarnings('row signum(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = signum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval signum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = signum(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval signum(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval signum(doubleField, extraArg)', [
+          'Error: [signum] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort signum(doubleField)', []);
       });
 
       describe('sin', () => {
@@ -5741,21 +6920,21 @@ describe('validation logic', () => {
           'Argument of [sin] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where sin(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where sin(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where sin(stringField) > 0', [
           'Argument of [sin] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = sin(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval sin(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sin(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval sin(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = sin(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval sin(stringField)', [
           'Argument of [sin] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval sin(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval sin(doubleField, extraArg)', [
           'Error: [sin] function expects exactly one argument, got 2.',
         ]);
 
@@ -5763,7 +6942,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in sin is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort sin(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort sin(doubleField)', []);
         testErrorsAndWarnings('row var = sin(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = sin(true)', [
@@ -5789,6 +6968,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort sin(stringField)', []);
+        testErrorsAndWarnings('row var = sin(doubleField)', []);
+        testErrorsAndWarnings('row sin(doubleField)', []);
+        testErrorsAndWarnings('row var = sin(integerField)', []);
+        testErrorsAndWarnings('row sin(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sin(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval sin(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sin(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval sin(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval sin(doubleField, extraArg)', [
+          'Error: [sin] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sin(doubleField)', []);
       });
 
       describe('sinh', () => {
@@ -5800,21 +6993,21 @@ describe('validation logic', () => {
           'Argument of [sinh] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where sinh(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where sinh(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where sinh(stringField) > 0', [
           'Argument of [sinh] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = sinh(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval sinh(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sinh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval sinh(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = sinh(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval sinh(stringField)', [
           'Argument of [sinh] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval sinh(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval sinh(doubleField, extraArg)', [
           'Error: [sinh] function expects exactly one argument, got 2.',
         ]);
 
@@ -5822,7 +7015,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in sinh is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort sinh(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort sinh(doubleField)', []);
         testErrorsAndWarnings('row var = sinh(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = sinh(true)', [
@@ -5848,6 +7041,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort sinh(stringField)', []);
+        testErrorsAndWarnings('row var = sinh(doubleField)', []);
+        testErrorsAndWarnings('row sinh(doubleField)', []);
+        testErrorsAndWarnings('row var = sinh(integerField)', []);
+        testErrorsAndWarnings('row sinh(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sinh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval sinh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sinh(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval sinh(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval sinh(doubleField, extraArg)', [
+          'Error: [sinh] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sinh(doubleField)', []);
       });
 
       describe('split', () => {
@@ -5865,9 +7072,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | where length(split(numberField, numberField)) > 0', [
-          'Argument of [split] must be [string], found value [numberField] type [number]',
-          'Argument of [split] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(split(doubleField, doubleField)) > 0', [
+          'Argument of [split] must be [string], found value [doubleField] type [number]',
+          'Argument of [split] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = split(stringField, stringField)', []);
@@ -5878,9 +7085,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval split(numberField, numberField)', [
-          'Argument of [split] must be [string], found value [numberField] type [number]',
-          'Argument of [split] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval split(doubleField, doubleField)', [
+          'Argument of [split] must be [string], found value [doubleField] type [number]',
+          'Argument of [split] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval split(stringField, stringField, extraArg)', [
@@ -5914,6 +7121,24 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval split(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval split(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = split(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row split(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = split(keywordField, "a")', []);
+        testErrorsAndWarnings('row split(keywordField, "a")', []);
+        testErrorsAndWarnings('row var = split("a", keywordField)', []);
+        testErrorsAndWarnings('row split("a", keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = split(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval split(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = split(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval split(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = split(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval split(stringField, keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval split(keywordField, keywordField, extraArg)', [
+          'Error: [split] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort split(keywordField, keywordField)', []);
       });
 
       describe('sqrt', () => {
@@ -5925,21 +7150,21 @@ describe('validation logic', () => {
           'Argument of [sqrt] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where sqrt(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where sqrt(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where sqrt(stringField) > 0', [
           'Argument of [sqrt] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = sqrt(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval sqrt(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sqrt(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval sqrt(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = sqrt(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval sqrt(stringField)', [
           'Argument of [sqrt] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval sqrt(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval sqrt(doubleField, extraArg)', [
           'Error: [sqrt] function expects exactly one argument, got 2.',
         ]);
 
@@ -5947,7 +7172,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in sqrt is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort sqrt(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort sqrt(doubleField)', []);
         testErrorsAndWarnings('row var = sqrt(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = sqrt(true)', [
@@ -5973,6 +7198,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort sqrt(stringField)', []);
+        testErrorsAndWarnings('row var = sqrt(doubleField)', []);
+        testErrorsAndWarnings('row sqrt(doubleField)', []);
+        testErrorsAndWarnings('row var = sqrt(integerField)', []);
+        testErrorsAndWarnings('row sqrt(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sqrt(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval sqrt(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = sqrt(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval sqrt(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval sqrt(doubleField, extraArg)', [
+          'Error: [sqrt] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sqrt(doubleField)', []);
       });
 
       describe('st_contains', () => {
@@ -7551,9 +8790,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval starts_with(numberField, numberField)', [
-          'Argument of [starts_with] must be [string], found value [numberField] type [number]',
-          'Argument of [starts_with] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval starts_with(doubleField, doubleField)', [
+          'Argument of [starts_with] must be [string], found value [doubleField] type [number]',
+          'Argument of [starts_with] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings(
@@ -7580,6 +8819,20 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval starts_with(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval starts_with(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = starts_with(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row starts_with(keywordField, keywordField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = starts_with(keywordField, keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval starts_with(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval starts_with(keywordField, keywordField, extraArg)',
+          ['Error: [starts_with] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort starts_with(keywordField, keywordField)', []);
       });
 
       describe('substring', () => {
@@ -7600,26 +8853,26 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | where length(substring(stringField, numberField, numberField)) > 0',
+          'from a_index | where length(substring(stringField, doubleField, doubleField)) > 0',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | where length(substring(numberField, stringField, stringField)) > 0',
+          'from a_index | where length(substring(doubleField, stringField, stringField)) > 0',
           [
-            'Argument of [substring] must be [string], found value [numberField] type [number]',
+            'Argument of [substring] must be [string], found value [doubleField] type [number]',
             'Argument of [substring] must be [number], found value [stringField] type [string]',
             'Argument of [substring] must be [number], found value [stringField] type [string]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = substring(stringField, numberField, numberField)',
+          'from a_index | eval var = substring(stringField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval substring(stringField, numberField, numberField)',
+          'from a_index | eval substring(stringField, doubleField, doubleField)',
           []
         );
 
@@ -7629,24 +8882,24 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval substring(numberField, stringField, stringField)',
+          'from a_index | eval substring(doubleField, stringField, stringField)',
           [
-            'Argument of [substring] must be [string], found value [numberField] type [number]',
+            'Argument of [substring] must be [string], found value [doubleField] type [number]',
             'Argument of [substring] must be [number], found value [stringField] type [string]',
             'Argument of [substring] must be [number], found value [stringField] type [string]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval substring(stringField, numberField, numberField, extraArg)',
+          'from a_index | eval substring(stringField, doubleField, doubleField, extraArg)',
           ['Error: [substring] function expects no more than 3 arguments, got 4.']
         );
 
         testErrorsAndWarnings(
-          'from a_index | sort substring(stringField, numberField, numberField)',
+          'from a_index | sort substring(stringField, doubleField, doubleField)',
           []
         );
-        testErrorsAndWarnings('from a_index | sort substring(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort substring(stringField, doubleField)', []);
 
         testErrorsAndWarnings(
           'row var = substring(to_string(true), to_integer(true), to_integer(true))',
@@ -7705,6 +8958,40 @@ describe('validation logic', () => {
           'from a_index | sort substring(stringField, stringField, stringField)',
           []
         );
+        testErrorsAndWarnings('row var = substring(keywordField, integerField, integerField)', []);
+        testErrorsAndWarnings('row substring(keywordField, integerField, integerField)', []);
+        testErrorsAndWarnings('row var = substring("a", integerField, integerField)', []);
+        testErrorsAndWarnings('row substring("a", integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = substring(keywordField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval substring(keywordField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = substring(stringField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval substring(stringField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval substring(keywordField, integerField, integerField, extraArg)',
+          ['Error: [substring] function expects no more than 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort substring(keywordField, integerField, integerField)',
+          []
+        );
       });
 
       describe('tan', () => {
@@ -7716,21 +9003,21 @@ describe('validation logic', () => {
           'Argument of [tan] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where tan(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where tan(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where tan(stringField) > 0', [
           'Argument of [tan] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = tan(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval tan(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = tan(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval tan(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = tan(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval tan(stringField)', [
           'Argument of [tan] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval tan(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval tan(doubleField, extraArg)', [
           'Error: [tan] function expects exactly one argument, got 2.',
         ]);
 
@@ -7738,7 +9025,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in tan is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort tan(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort tan(doubleField)', []);
         testErrorsAndWarnings('row var = tan(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = tan(true)', [
@@ -7764,6 +9051,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort tan(stringField)', []);
+        testErrorsAndWarnings('row var = tan(doubleField)', []);
+        testErrorsAndWarnings('row tan(doubleField)', []);
+        testErrorsAndWarnings('row var = tan(integerField)', []);
+        testErrorsAndWarnings('row tan(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = tan(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval tan(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = tan(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval tan(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval tan(doubleField, extraArg)', [
+          'Error: [tan] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort tan(doubleField)', []);
       });
 
       describe('tanh', () => {
@@ -7775,21 +9076,21 @@ describe('validation logic', () => {
           'Argument of [tanh] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where tanh(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where tanh(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where tanh(stringField) > 0', [
           'Argument of [tanh] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = tanh(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval tanh(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = tanh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval tanh(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = tanh(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval tanh(stringField)', [
           'Argument of [tanh] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval tanh(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval tanh(doubleField, extraArg)', [
           'Error: [tanh] function expects exactly one argument, got 2.',
         ]);
 
@@ -7797,7 +9098,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in tanh is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort tanh(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort tanh(doubleField)', []);
         testErrorsAndWarnings('row var = tanh(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = tanh(true)', [
@@ -7823,6 +9124,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort tanh(stringField)', []);
+        testErrorsAndWarnings('row var = tanh(doubleField)', []);
+        testErrorsAndWarnings('row tanh(doubleField)', []);
+        testErrorsAndWarnings('row var = tanh(integerField)', []);
+        testErrorsAndWarnings('row tanh(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = tanh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval tanh(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = tanh(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval tanh(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval tanh(doubleField, extraArg)', [
+          'Error: [tanh] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort tanh(doubleField)', []);
       });
 
       describe('tau', () => {
@@ -7876,9 +9191,9 @@ describe('validation logic', () => {
           'Argument of [to_boolean] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_boolean(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_boolean(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_bool(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_boolean(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_boolean(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_bool(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_boolean(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_boolean(to_string(booleanField))', []);
 
@@ -7889,6 +9204,24 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_boolean(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_boolean(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_boolean(nullVar)', []);
+        testErrorsAndWarnings('row var = to_boolean(doubleField)', []);
+        testErrorsAndWarnings('row to_boolean(doubleField)', []);
+        testErrorsAndWarnings('row var = to_bool(doubleField)', []);
+        testErrorsAndWarnings('row var = to_boolean(integerField)', []);
+        testErrorsAndWarnings('row to_boolean(integerField)', []);
+        testErrorsAndWarnings('row var = to_bool(integerField)', []);
+        testErrorsAndWarnings('row var = to_boolean(keywordField)', []);
+        testErrorsAndWarnings('row to_boolean(keywordField)', []);
+        testErrorsAndWarnings('row var = to_bool(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_boolean(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_boolean(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_bool(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_boolean(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_boolean(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_bool(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_boolean(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_boolean(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_bool(keywordField)', []);
       });
 
       describe('to_cartesianpoint', () => {
@@ -7947,6 +9280,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_cartesianpoint(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_cartesianpoint(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_cartesianpoint(nullVar)', []);
+        testErrorsAndWarnings('row var = to_cartesianpoint(keywordField)', []);
+        testErrorsAndWarnings('row to_cartesianpoint(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_cartesianpoint(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_cartesianpoint(keywordField)', []);
       });
 
       describe('to_cartesianshape', () => {
@@ -8027,6 +9364,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_cartesianshape(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_cartesianshape(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_cartesianshape(nullVar)', []);
+        testErrorsAndWarnings('row var = to_cartesianshape(keywordField)', []);
+        testErrorsAndWarnings('row to_cartesianshape(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_cartesianshape(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_cartesianshape(keywordField)', []);
       });
 
       describe('to_datetime', () => {
@@ -8065,9 +9406,9 @@ describe('validation logic', () => {
           'Argument of [to_datetime] must be [date], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_datetime(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_datetime(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_dt(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_datetime(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_datetime(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dt(doubleField)', []);
         testErrorsAndWarnings(
           'from a_index | eval var = to_datetime(to_integer(booleanField))',
           []
@@ -8085,6 +9426,24 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval to_datetime(stringField, extraArg)', [
           'Error: [to_datetime] function expects exactly one argument, got 2.',
         ]);
+        testErrorsAndWarnings('row var = to_datetime(doubleField)', []);
+        testErrorsAndWarnings('row to_datetime(doubleField)', []);
+        testErrorsAndWarnings('row var = to_dt(doubleField)', []);
+        testErrorsAndWarnings('row var = to_datetime(integerField)', []);
+        testErrorsAndWarnings('row to_datetime(integerField)', []);
+        testErrorsAndWarnings('row var = to_dt(integerField)', []);
+        testErrorsAndWarnings('row var = to_datetime(keywordField)', []);
+        testErrorsAndWarnings('row to_datetime(keywordField)', []);
+        testErrorsAndWarnings('row var = to_dt(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_datetime(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_datetime(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dt(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_datetime(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_datetime(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dt(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_datetime(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_datetime(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dt(keywordField)', []);
       });
 
       describe('to_degrees', () => {
@@ -8096,21 +9455,21 @@ describe('validation logic', () => {
           'Argument of [to_degrees] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_degrees(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_degrees(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where to_degrees(stringField) > 0', [
           'Argument of [to_degrees] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_degrees(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_degrees(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_degrees(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_degrees(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_degrees(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval to_degrees(stringField)', [
           'Argument of [to_degrees] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval to_degrees(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval to_degrees(doubleField, extraArg)', [
           'Error: [to_degrees] function expects exactly one argument, got 2.',
         ]);
 
@@ -8118,7 +9477,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in to_degrees is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort to_degrees(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort to_degrees(doubleField)', []);
         testErrorsAndWarnings('row var = to_degrees(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = to_degrees(true)', [
@@ -8144,6 +9503,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort to_degrees(stringField)', []);
+        testErrorsAndWarnings('row var = to_degrees(doubleField)', []);
+        testErrorsAndWarnings('row to_degrees(doubleField)', []);
+        testErrorsAndWarnings('row var = to_degrees(integerField)', []);
+        testErrorsAndWarnings('row to_degrees(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_degrees(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_degrees(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_degrees(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_degrees(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_degrees(doubleField, extraArg)', [
+          'Error: [to_degrees] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_degrees(doubleField)', []);
       });
 
       describe('to_double', () => {
@@ -8183,7 +9556,7 @@ describe('validation logic', () => {
           'Argument of [to_double] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_double(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_double(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_double(dateField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_double(stringField) > 0', []);
         testErrorsAndWarnings('from a_index | eval var = to_double(booleanField)', []);
@@ -8195,9 +9568,9 @@ describe('validation logic', () => {
           'Argument of [to_double] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_double(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_double(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_dbl(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_double(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_double(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dbl(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_double(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_double(dateField)', []);
         testErrorsAndWarnings('from a_index | eval to_double(dateField)', []);
@@ -8212,6 +9585,24 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_double(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_double(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_double(nullVar)', []);
+        testErrorsAndWarnings('row var = to_double(doubleField)', []);
+        testErrorsAndWarnings('row to_double(doubleField)', []);
+        testErrorsAndWarnings('row var = to_dbl(doubleField)', []);
+        testErrorsAndWarnings('row var = to_double(integerField)', []);
+        testErrorsAndWarnings('row to_double(integerField)', []);
+        testErrorsAndWarnings('row var = to_dbl(integerField)', []);
+        testErrorsAndWarnings('row var = to_double(keywordField)', []);
+        testErrorsAndWarnings('row to_double(keywordField)', []);
+        testErrorsAndWarnings('row var = to_dbl(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_double(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_double(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dbl(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_double(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_double(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dbl(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_double(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_double(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dbl(keywordField)', []);
       });
 
       describe('to_geopoint', () => {
@@ -8257,6 +9648,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_geopoint(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_geopoint(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_geopoint(nullVar)', []);
+        testErrorsAndWarnings('row var = to_geopoint(keywordField)', []);
+        testErrorsAndWarnings('row to_geopoint(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_geopoint(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_geopoint(keywordField)', []);
       });
 
       describe('to_geoshape', () => {
@@ -8314,6 +9709,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_geoshape(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_geoshape(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_geoshape(nullVar)', []);
+        testErrorsAndWarnings('row var = to_geoshape(keywordField)', []);
+        testErrorsAndWarnings('row to_geoshape(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_geoshape(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_geoshape(keywordField)', []);
       });
 
       describe('to_integer', () => {
@@ -8353,7 +9752,7 @@ describe('validation logic', () => {
           'Argument of [to_integer] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_integer(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_integer(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_integer(dateField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_integer(stringField) > 0', []);
         testErrorsAndWarnings('from a_index | eval var = to_integer(booleanField)', []);
@@ -8365,9 +9764,9 @@ describe('validation logic', () => {
           'Argument of [to_integer] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_integer(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_integer(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_int(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_integer(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_integer(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_int(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_integer(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_integer(dateField)', []);
         testErrorsAndWarnings('from a_index | eval to_integer(dateField)', []);
@@ -8382,6 +9781,24 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_integer(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_integer(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_integer(nullVar)', []);
+        testErrorsAndWarnings('row var = to_integer(doubleField)', []);
+        testErrorsAndWarnings('row to_integer(doubleField)', []);
+        testErrorsAndWarnings('row var = to_int(doubleField)', []);
+        testErrorsAndWarnings('row var = to_integer(integerField)', []);
+        testErrorsAndWarnings('row to_integer(integerField)', []);
+        testErrorsAndWarnings('row var = to_int(integerField)', []);
+        testErrorsAndWarnings('row var = to_integer(keywordField)', []);
+        testErrorsAndWarnings('row to_integer(keywordField)', []);
+        testErrorsAndWarnings('row var = to_int(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_integer(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_integer(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_int(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_integer(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_integer(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_int(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_integer(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_integer(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_int(keywordField)', []);
       });
 
       describe('to_ip', () => {
@@ -8421,6 +9838,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_ip(ipField)', []);
         testErrorsAndWarnings('from a_index | eval to_ip(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_ip(nullVar)', []);
+        testErrorsAndWarnings('row var = to_ip(keywordField)', []);
+        testErrorsAndWarnings('row to_ip(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ip(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_ip(keywordField)', []);
       });
 
       describe('to_long', () => {
@@ -8455,7 +9876,7 @@ describe('validation logic', () => {
           'Argument of [to_long] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_long(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_long(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_long(dateField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_long(stringField) > 0', []);
         testErrorsAndWarnings('from a_index | eval var = to_long(booleanField)', []);
@@ -8466,8 +9887,8 @@ describe('validation logic', () => {
           'Argument of [to_long] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_long(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_long(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_long(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_long(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_long(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_long(dateField)', []);
         testErrorsAndWarnings('from a_index | eval to_long(dateField)', []);
@@ -8481,6 +9902,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_long(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_long(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_long(nullVar)', []);
+        testErrorsAndWarnings('row var = to_long(doubleField)', []);
+        testErrorsAndWarnings('row to_long(doubleField)', []);
+        testErrorsAndWarnings('row var = to_long(integerField)', []);
+        testErrorsAndWarnings('row to_long(integerField)', []);
+        testErrorsAndWarnings('row var = to_long(keywordField)', []);
+        testErrorsAndWarnings('row to_long(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_long(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_long(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_long(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_long(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_long(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_long(keywordField)', []);
       });
 
       describe('to_lower', () => {
@@ -8494,16 +9927,16 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(to_lower(stringField)) > 0', []);
 
-        testErrorsAndWarnings('from a_index | where length(to_lower(numberField)) > 0', [
-          'Argument of [to_lower] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(to_lower(doubleField)) > 0', [
+          'Argument of [to_lower] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = to_lower(stringField)', []);
         testErrorsAndWarnings('from a_index | eval to_lower(stringField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_lower(to_string(stringField))', []);
 
-        testErrorsAndWarnings('from a_index | eval to_lower(numberField)', [
-          'Argument of [to_lower] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval to_lower(doubleField)', [
+          'Argument of [to_lower] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval to_lower(stringField, extraArg)', [
@@ -8532,6 +9965,16 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval to_lower(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_lower(nullVar)', []);
+        testErrorsAndWarnings('row var = to_lower(keywordField)', []);
+        testErrorsAndWarnings('row to_lower(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_lower(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_lower(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_lower(keywordField, extraArg)', [
+          'Error: [to_lower] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_lower(keywordField)', []);
       });
 
       describe('to_radians', () => {
@@ -8543,21 +9986,21 @@ describe('validation logic', () => {
           'Argument of [to_radians] must be [number], found value ["a"] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_radians(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_radians(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where to_radians(stringField) > 0', [
           'Argument of [to_radians] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_radians(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_radians(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_radians(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_radians(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_radians(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval to_radians(stringField)', [
           'Argument of [to_radians] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval to_radians(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval to_radians(doubleField, extraArg)', [
           'Error: [to_radians] function expects exactly one argument, got 2.',
         ]);
 
@@ -8565,7 +10008,7 @@ describe('validation logic', () => {
           'Using wildcards (*) in to_radians is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort to_radians(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort to_radians(doubleField)', []);
         testErrorsAndWarnings('row var = to_radians(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = to_radians(true)', [
@@ -8591,6 +10034,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort to_radians(stringField)', []);
+        testErrorsAndWarnings('row var = to_radians(doubleField)', []);
+        testErrorsAndWarnings('row to_radians(doubleField)', []);
+        testErrorsAndWarnings('row var = to_radians(integerField)', []);
+        testErrorsAndWarnings('row to_radians(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_radians(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_radians(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_radians(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_radians(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_radians(doubleField, extraArg)', [
+          'Error: [to_radians] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_radians(doubleField)', []);
       });
 
       describe('to_string', () => {
@@ -8663,7 +10120,7 @@ describe('validation logic', () => {
           []
         );
         testErrorsAndWarnings('from a_index | where length(to_string(dateField)) > 0', []);
-        testErrorsAndWarnings('from a_index | where length(to_string(numberField)) > 0', []);
+        testErrorsAndWarnings('from a_index | where length(to_string(doubleField)) > 0', []);
         testErrorsAndWarnings('from a_index | where length(to_string(geoPointField)) > 0', []);
         testErrorsAndWarnings('from a_index | where length(to_string(geoShapeField)) > 0', []);
         testErrorsAndWarnings('from a_index | where length(to_string(ipField)) > 0', []);
@@ -8695,9 +10152,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval to_string(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_str(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_string(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_string(to_integer(booleanField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_string(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_string(geoPointField)', []);
@@ -8730,6 +10187,26 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_string(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_string(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_string(nullVar)', []);
+        testErrorsAndWarnings('row var = to_string(doubleField)', []);
+        testErrorsAndWarnings('row to_string(doubleField)', []);
+        testErrorsAndWarnings('row var = to_str(doubleField)', []);
+        testErrorsAndWarnings('row var = to_string(integerField)', []);
+        testErrorsAndWarnings('row to_string(integerField)', []);
+        testErrorsAndWarnings('row var = to_str(integerField)', []);
+        testErrorsAndWarnings('row var = to_string(keywordField)', []);
+        testErrorsAndWarnings('row to_string(keywordField)', []);
+        testErrorsAndWarnings('row var = to_str(keywordField)', []);
+        testErrorsAndWarnings('row var = to_string(to_version(keywordField))', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_version(keywordField))', []);
       });
 
       describe('to_unsigned_long', () => {
@@ -8775,7 +10252,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | where to_unsigned_long(dateField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_unsigned_long(stringField) > 0', []);
         testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_unsigned_long(booleanField)', []);
@@ -8798,10 +10275,10 @@ describe('validation logic', () => {
           'from a_index | eval var = to_unsigned_long(to_datetime(dateField))',
           []
         );
-        testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval to_unsigned_long(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_ul(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_ulong(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_unsigned_long(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ul(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ulong(doubleField)', []);
         testErrorsAndWarnings(
           'from a_index | eval var = to_unsigned_long(to_integer(booleanField))',
           []
@@ -8818,6 +10295,30 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_unsigned_long(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_unsigned_long(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_unsigned_long(nullVar)', []);
+        testErrorsAndWarnings('row var = to_unsigned_long(doubleField)', []);
+        testErrorsAndWarnings('row to_unsigned_long(doubleField)', []);
+        testErrorsAndWarnings('row var = to_ul(doubleField)', []);
+        testErrorsAndWarnings('row var = to_ulong(doubleField)', []);
+        testErrorsAndWarnings('row var = to_unsigned_long(integerField)', []);
+        testErrorsAndWarnings('row to_unsigned_long(integerField)', []);
+        testErrorsAndWarnings('row var = to_ul(integerField)', []);
+        testErrorsAndWarnings('row var = to_ulong(integerField)', []);
+        testErrorsAndWarnings('row var = to_unsigned_long(keywordField)', []);
+        testErrorsAndWarnings('row to_unsigned_long(keywordField)', []);
+        testErrorsAndWarnings('row var = to_ul(keywordField)', []);
+        testErrorsAndWarnings('row var = to_ulong(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_unsigned_long(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ul(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ulong(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_unsigned_long(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ul(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ulong(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_unsigned_long(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ul(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ulong(keywordField)', []);
       });
 
       describe('to_upper', () => {
@@ -8831,16 +10332,16 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(to_upper(stringField)) > 0', []);
 
-        testErrorsAndWarnings('from a_index | where length(to_upper(numberField)) > 0', [
-          'Argument of [to_upper] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(to_upper(doubleField)) > 0', [
+          'Argument of [to_upper] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = to_upper(stringField)', []);
         testErrorsAndWarnings('from a_index | eval to_upper(stringField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_upper(to_string(stringField))', []);
 
-        testErrorsAndWarnings('from a_index | eval to_upper(numberField)', [
-          'Argument of [to_upper] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval to_upper(doubleField)', [
+          'Argument of [to_upper] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval to_upper(stringField, extraArg)', [
@@ -8869,6 +10370,16 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval to_upper(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_upper(nullVar)', []);
+        testErrorsAndWarnings('row var = to_upper(keywordField)', []);
+        testErrorsAndWarnings('row to_upper(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_upper(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_upper(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_upper(keywordField, extraArg)', [
+          'Error: [to_upper] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_upper(keywordField)', []);
       });
 
       describe('to_version', () => {
@@ -8901,6 +10412,18 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval to_version(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_version(nullVar)', []);
+        testErrorsAndWarnings('row var = to_version(keywordField)', []);
+        testErrorsAndWarnings('row to_version(keywordField)', []);
+        testErrorsAndWarnings('row var = to_ver(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_version(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_version(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ver(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_version(keywordField, extraArg)', [
+          'Error: [to_version] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_version(keywordField)', []);
       });
 
       describe('trim', () => {
@@ -8914,16 +10437,16 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(trim(stringField)) > 0', []);
 
-        testErrorsAndWarnings('from a_index | where length(trim(numberField)) > 0', [
-          'Argument of [trim] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | where length(trim(doubleField)) > 0', [
+          'Argument of [trim] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = trim(stringField)', []);
         testErrorsAndWarnings('from a_index | eval trim(stringField)', []);
         testErrorsAndWarnings('from a_index | eval var = trim(to_string(stringField))', []);
 
-        testErrorsAndWarnings('from a_index | eval trim(numberField)', [
-          'Argument of [trim] must be [string], found value [numberField] type [number]',
+        testErrorsAndWarnings('from a_index | eval trim(doubleField)', [
+          'Argument of [trim] must be [string], found value [doubleField] type [number]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval trim(stringField, extraArg)', [
@@ -8952,69 +10475,79 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval trim(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval trim(nullVar)', []);
+        testErrorsAndWarnings('row var = trim(keywordField)', []);
+        testErrorsAndWarnings('row trim(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = trim(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval trim(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval trim(keywordField, extraArg)', [
+          'Error: [trim] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort trim(keywordField)', []);
       });
 
       describe('avg', () => {
-        testErrorsAndWarnings('from a_index | stats var = avg(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(avg(numberField))', []);
-        testErrorsAndWarnings('from a_index | stats round(avg(numberField))', []);
+        testErrorsAndWarnings('from a_index | stats var = avg(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(avg(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(avg(doubleField))', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(avg(numberField)) + avg(numberField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(avg(numberField)) + avg(numberField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats avg(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = avg(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), avg(numberField / 2)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = avg(numberField / 2)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats var0 = avg(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), avg(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), var0 = avg(numberField)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats avg(numberField) by round(numberField / 2)',
+          'from a_index | stats var = round(avg(doubleField)) + avg(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = avg(numberField) by var1 = round(numberField / 2)',
+          'from a_index | stats round(avg(doubleField)) + avg(doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats avg(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = avg(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), avg(doubleField / 2)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = avg(doubleField / 2)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = avg(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), avg(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = avg(doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), avg(numberField) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = avg(doubleField) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = avg(numberField) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), avg(doubleField) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), avg(numberField) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = avg(doubleField) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = avg(numberField) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), avg(doubleField) by round(doubleField / 2), doubleField / 2',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = avg(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = avg(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = avg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
-        testErrorsAndWarnings('from a_index | stats avg(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats avg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats avg(stringField)', [
@@ -9025,31 +10558,31 @@ describe('validation logic', () => {
           'Using wildcards (*) in avg is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort avg(numberField)', [
+        testErrorsAndWarnings('from a_index | sort avg(doubleField)', [
           'SORT does not support function avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | where avg(numberField)', [
+        testErrorsAndWarnings('from a_index | where avg(doubleField)', [
           'WHERE does not support function avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | where avg(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where avg(doubleField) > 0', [
           'WHERE does not support function avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = avg(numberField)', [
+        testErrorsAndWarnings('from a_index | eval var = avg(doubleField)', [
           'EVAL does not support function avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = avg(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = avg(doubleField) > 0', [
           'EVAL does not support function avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval avg(numberField)', [
+        testErrorsAndWarnings('from a_index | eval avg(doubleField)', [
           'EVAL does not support function avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval avg(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval avg(doubleField) > 0', [
           'EVAL does not support function avg',
         ]);
 
@@ -9058,69 +10591,146 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats avg(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats avg(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = avg(stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = round(avg(stringField))', []);
+        testErrorsAndWarnings('from a_index | stats round(avg(stringField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(avg(stringField)) + avg(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(avg(stringField)) + avg(stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = avg(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), avg(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = avg(stringField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = avg(stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), avg(stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = avg(stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), avg(stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = avg(stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort avg(stringField)', [
+          'SORT does not support function avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where avg(stringField)', [
+          'WHERE does not support function avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where avg(stringField) > 0', [
+          'WHERE does not support function avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = avg(stringField)', [
+          'EVAL does not support function avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = avg(stringField) > 0', [
+          'EVAL does not support function avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval avg(stringField)', [
+          'EVAL does not support function avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval avg(stringField) > 0', [
+          'EVAL does not support function avg',
+        ]);
       });
 
       describe('sum', () => {
-        testErrorsAndWarnings('from a_index | stats var = sum(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats sum(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(sum(numberField))', []);
-        testErrorsAndWarnings('from a_index | stats round(sum(numberField))', []);
+        testErrorsAndWarnings('from a_index | stats var = sum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats sum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(sum(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(sum(doubleField))', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(sum(numberField)) + sum(numberField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(sum(numberField)) + sum(numberField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats sum(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = sum(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), sum(numberField / 2)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = sum(numberField / 2)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats var0 = sum(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), sum(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), var0 = sum(numberField)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats sum(numberField) by round(numberField / 2)',
+          'from a_index | stats var = round(sum(doubleField)) + sum(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = sum(numberField) by var1 = round(numberField / 2)',
+          'from a_index | stats round(sum(doubleField)) + sum(doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats sum(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = sum(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), sum(doubleField / 2)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = sum(doubleField / 2)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = sum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), sum(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = sum(doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats sum(doubleField) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), sum(numberField) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = sum(doubleField) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = sum(numberField) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), sum(doubleField) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), sum(numberField) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = sum(doubleField) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = sum(numberField) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), sum(doubleField) by round(doubleField / 2), doubleField / 2',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = sum(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = sum(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = sum(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
-        testErrorsAndWarnings('from a_index | stats sum(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats sum(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats sum(stringField)', [
@@ -9131,31 +10741,31 @@ describe('validation logic', () => {
           'Using wildcards (*) in sum is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort sum(numberField)', [
+        testErrorsAndWarnings('from a_index | sort sum(doubleField)', [
           'SORT does not support function sum',
         ]);
 
-        testErrorsAndWarnings('from a_index | where sum(numberField)', [
+        testErrorsAndWarnings('from a_index | where sum(doubleField)', [
           'WHERE does not support function sum',
         ]);
 
-        testErrorsAndWarnings('from a_index | where sum(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where sum(doubleField) > 0', [
           'WHERE does not support function sum',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = sum(numberField)', [
+        testErrorsAndWarnings('from a_index | eval var = sum(doubleField)', [
           'EVAL does not support function sum',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = sum(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = sum(doubleField) > 0', [
           'EVAL does not support function sum',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval sum(numberField)', [
+        testErrorsAndWarnings('from a_index | eval sum(doubleField)', [
           'EVAL does not support function sum',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval sum(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval sum(doubleField) > 0', [
           'EVAL does not support function sum',
         ]);
 
@@ -9164,75 +10774,152 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats sum(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats sum(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = sum(stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = round(sum(stringField))', []);
+        testErrorsAndWarnings('from a_index | stats round(sum(stringField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(sum(stringField)) + sum(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(sum(stringField)) + sum(stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = sum(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), sum(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = sum(stringField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats sum(stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = sum(stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), sum(stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = sum(stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), sum(stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = sum(stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort sum(stringField)', [
+          'SORT does not support function sum',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where sum(stringField)', [
+          'WHERE does not support function sum',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where sum(stringField) > 0', [
+          'WHERE does not support function sum',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = sum(stringField)', [
+          'EVAL does not support function sum',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = sum(stringField) > 0', [
+          'EVAL does not support function sum',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval sum(stringField)', [
+          'EVAL does not support function sum',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval sum(stringField) > 0', [
+          'EVAL does not support function sum',
+        ]);
       });
 
       describe('median', () => {
-        testErrorsAndWarnings('from a_index | stats var = median(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats median(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(median(numberField))', []);
-        testErrorsAndWarnings('from a_index | stats round(median(numberField))', []);
+        testErrorsAndWarnings('from a_index | stats var = median(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats median(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(median(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(median(doubleField))', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(median(numberField)) + median(numberField)',
+          'from a_index | stats var = round(median(doubleField)) + median(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats round(median(numberField)) + median(numberField)',
+          'from a_index | stats round(median(doubleField)) + median(doubleField)',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats median(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = median(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), median(numberField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats median(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = median(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), median(doubleField / 2)', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median(numberField / 2)',
+          'from a_index | stats avg(doubleField), var0 = median(doubleField / 2)',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var0 = median(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), median(numberField)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = median(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), median(doubleField)', []);
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median(numberField)',
+          'from a_index | stats avg(doubleField), var0 = median(doubleField)',
           []
         );
         testErrorsAndWarnings(
-          'from a_index | stats median(numberField) by round(numberField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = median(numberField) by var1 = round(numberField / 2)',
+          'from a_index | stats median(doubleField) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), median(numberField) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = median(doubleField) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median(numberField) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), median(doubleField) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), median(numberField) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = median(doubleField) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median(numberField) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), median(doubleField) by round(doubleField / 2), doubleField / 2',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = median(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = median(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = median(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
-        testErrorsAndWarnings('from a_index | stats median(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats median(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats median(stringField)', [
@@ -9243,31 +10930,31 @@ describe('validation logic', () => {
           'Using wildcards (*) in median is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort median(numberField)', [
+        testErrorsAndWarnings('from a_index | sort median(doubleField)', [
           'SORT does not support function median',
         ]);
 
-        testErrorsAndWarnings('from a_index | where median(numberField)', [
+        testErrorsAndWarnings('from a_index | where median(doubleField)', [
           'WHERE does not support function median',
         ]);
 
-        testErrorsAndWarnings('from a_index | where median(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where median(doubleField) > 0', [
           'WHERE does not support function median',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = median(numberField)', [
+        testErrorsAndWarnings('from a_index | eval var = median(doubleField)', [
           'EVAL does not support function median',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = median(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = median(doubleField) > 0', [
           'EVAL does not support function median',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval median(numberField)', [
+        testErrorsAndWarnings('from a_index | eval median(doubleField)', [
           'EVAL does not support function median',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval median(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval median(doubleField) > 0', [
           'EVAL does not support function median',
         ]);
 
@@ -9276,109 +10963,190 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats median(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats median(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = median(stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = round(median(stringField))', []);
+        testErrorsAndWarnings('from a_index | stats round(median(stringField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(median(stringField)) + median(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(median(stringField)) + median(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = median(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), median(stringField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = median(stringField)',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | stats median(stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = median(stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), median(stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = median(stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), median(stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = median(stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort median(stringField)', [
+          'SORT does not support function median',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where median(stringField)', [
+          'WHERE does not support function median',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where median(stringField) > 0', [
+          'WHERE does not support function median',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = median(stringField)', [
+          'EVAL does not support function median',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = median(stringField) > 0', [
+          'EVAL does not support function median',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval median(stringField)', [
+          'EVAL does not support function median',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval median(stringField) > 0', [
+          'EVAL does not support function median',
+        ]);
       });
 
       describe('median_absolute_deviation', () => {
         testErrorsAndWarnings(
-          'from a_index | stats var = median_absolute_deviation(numberField)',
+          'from a_index | stats var = median_absolute_deviation(doubleField)',
           []
         );
-        testErrorsAndWarnings('from a_index | stats median_absolute_deviation(numberField)', []);
+        testErrorsAndWarnings('from a_index | stats median_absolute_deviation(doubleField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(median_absolute_deviation(numberField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(median_absolute_deviation(numberField))',
+          'from a_index | stats var = round(median_absolute_deviation(doubleField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(median_absolute_deviation(numberField)) + median_absolute_deviation(numberField)',
+          'from a_index | stats round(median_absolute_deviation(doubleField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats round(median_absolute_deviation(numberField)) + median_absolute_deviation(numberField)',
+          'from a_index | stats var = round(median_absolute_deviation(doubleField)) + median_absolute_deviation(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats median_absolute_deviation(numberField / 2)',
+          'from a_index | stats round(median_absolute_deviation(doubleField)) + median_absolute_deviation(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = median_absolute_deviation(numberField / 2)',
+          'from a_index | stats median_absolute_deviation(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), median_absolute_deviation(numberField / 2)',
+          'from a_index | stats var0 = median_absolute_deviation(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median_absolute_deviation(numberField / 2)',
+          'from a_index | stats avg(doubleField), median_absolute_deviation(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = median_absolute_deviation(numberField)',
+          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), median_absolute_deviation(numberField)',
+          'from a_index | stats var0 = median_absolute_deviation(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median_absolute_deviation(numberField)',
+          'from a_index | stats avg(doubleField), median_absolute_deviation(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats median_absolute_deviation(numberField) by round(numberField / 2)',
+          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = median_absolute_deviation(numberField) by var1 = round(numberField / 2)',
+          'from a_index | stats median_absolute_deviation(doubleField) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), median_absolute_deviation(numberField) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = median_absolute_deviation(doubleField) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median_absolute_deviation(numberField) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), median_absolute_deviation(doubleField) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), median_absolute_deviation(numberField) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(doubleField) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = median_absolute_deviation(numberField) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), median_absolute_deviation(doubleField) by round(doubleField / 2), doubleField / 2',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var = median_absolute_deviation(avg(numberField))',
+          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = median_absolute_deviation(avg(doubleField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
           ]
         );
 
-        testErrorsAndWarnings('from a_index | stats median_absolute_deviation(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats median_absolute_deviation(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(stringField)', [
@@ -9389,32 +11157,32 @@ describe('validation logic', () => {
           'Using wildcards (*) in median_absolute_deviation is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort median_absolute_deviation(numberField)', [
+        testErrorsAndWarnings('from a_index | sort median_absolute_deviation(doubleField)', [
           'SORT does not support function median_absolute_deviation',
         ]);
 
-        testErrorsAndWarnings('from a_index | where median_absolute_deviation(numberField)', [
+        testErrorsAndWarnings('from a_index | where median_absolute_deviation(doubleField)', [
           'WHERE does not support function median_absolute_deviation',
         ]);
 
-        testErrorsAndWarnings('from a_index | where median_absolute_deviation(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where median_absolute_deviation(doubleField) > 0', [
           'WHERE does not support function median_absolute_deviation',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = median_absolute_deviation(numberField)', [
+        testErrorsAndWarnings('from a_index | eval var = median_absolute_deviation(doubleField)', [
           'EVAL does not support function median_absolute_deviation',
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = median_absolute_deviation(numberField) > 0',
+          'from a_index | eval var = median_absolute_deviation(doubleField) > 0',
           ['EVAL does not support function median_absolute_deviation']
         );
 
-        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(numberField)', [
+        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(doubleField)', [
           'EVAL does not support function median_absolute_deviation',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(doubleField) > 0', [
           'EVAL does not support function median_absolute_deviation',
         ]);
 
@@ -9423,119 +11191,217 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats median_absolute_deviation(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = median_absolute_deviation(stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(median_absolute_deviation(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(median_absolute_deviation(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(median_absolute_deviation(stringField)) + median_absolute_deviation(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(median_absolute_deviation(stringField)) + median_absolute_deviation(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = median_absolute_deviation(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), median_absolute_deviation(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats median_absolute_deviation(stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = median_absolute_deviation(stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), median_absolute_deviation(stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), median_absolute_deviation(stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort median_absolute_deviation(stringField)', [
+          'SORT does not support function median_absolute_deviation',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where median_absolute_deviation(stringField)', [
+          'WHERE does not support function median_absolute_deviation',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where median_absolute_deviation(stringField) > 0', [
+          'WHERE does not support function median_absolute_deviation',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = median_absolute_deviation(stringField)', [
+          'EVAL does not support function median_absolute_deviation',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = median_absolute_deviation(stringField) > 0',
+          ['EVAL does not support function median_absolute_deviation']
+        );
+
+        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(stringField)', [
+          'EVAL does not support function median_absolute_deviation',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(stringField) > 0', [
+          'EVAL does not support function median_absolute_deviation',
+        ]);
       });
 
       describe('percentile', () => {
-        testErrorsAndWarnings('from a_index | stats var = percentile(numberField, 5)', []);
-        testErrorsAndWarnings('from a_index | stats percentile(numberField, 5)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(percentile(numberField, 5))', []);
-        testErrorsAndWarnings('from a_index | stats round(percentile(numberField, 5))', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(doubleField, 5)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, 5)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(percentile(doubleField, 5))', []);
+        testErrorsAndWarnings('from a_index | stats round(percentile(doubleField, 5))', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(numberField, 5)) + percentile(numberField, 5)',
+          'from a_index | stats var = round(percentile(doubleField, 5)) + percentile(doubleField, 5)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats round(percentile(numberField, 5)) + percentile(numberField, 5)',
+          'from a_index | stats round(percentile(doubleField, 5)) + percentile(doubleField, 5)',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats percentile(numberField, numberField)', [
-          'Argument of [percentile] must be a constant, received [numberField]',
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, doubleField)', [
+          'Argument of [percentile] must be a constant, received [doubleField]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats percentile(numberField / 2, 5)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = percentile(numberField / 2, 5)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, 5)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(doubleField / 2, 5)', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), percentile(numberField / 2, 5)',
+          'from a_index | stats avg(doubleField), percentile(doubleField / 2, 5)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = percentile(numberField / 2, 5)',
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, 5)',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var0 = percentile(numberField, 5)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(doubleField, 5)', []);
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), percentile(numberField, 5)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = percentile(numberField, 5)',
+          'from a_index | stats avg(doubleField), percentile(doubleField, 5)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats percentile(numberField, 5) by round(numberField / 2)',
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, 5)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(numberField, 5) by var1 = round(numberField / 2)',
+          'from a_index | stats percentile(doubleField, 5) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), percentile(numberField, 5) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = percentile(doubleField, 5) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = percentile(numberField, 5) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), percentile(doubleField, 5) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), percentile(numberField, 5) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, 5) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = percentile(numberField, 5) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), percentile(doubleField, 5) by round(doubleField / 2), doubleField / 2',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = percentile(avg(numberField), 5)', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, 5) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(avg(doubleField), 5)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
-        testErrorsAndWarnings('from a_index | stats percentile(avg(numberField), 5)', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats percentile(avg(doubleField), 5)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats percentile(stringField, 5)', [
           'Argument of [percentile] must be [number], found value [stringField] type [string]',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort percentile(numberField, 5)', [
+        testErrorsAndWarnings('from a_index | sort percentile(doubleField, 5)', [
           'SORT does not support function percentile',
         ]);
 
-        testErrorsAndWarnings('from a_index | where percentile(numberField, 5)', [
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, 5)', [
           'WHERE does not support function percentile',
         ]);
 
-        testErrorsAndWarnings('from a_index | where percentile(numberField, 5) > 0', [
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, 5) > 0', [
           'WHERE does not support function percentile',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = percentile(numberField, 5)', [
+        testErrorsAndWarnings('from a_index | eval var = percentile(doubleField, 5)', [
           'EVAL does not support function percentile',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = percentile(numberField, 5) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = percentile(doubleField, 5) > 0', [
           'EVAL does not support function percentile',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval percentile(numberField, 5)', [
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, 5)', [
           'EVAL does not support function percentile',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval percentile(numberField, 5) > 0', [
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, 5) > 0', [
           'EVAL does not support function percentile',
         ]);
 
@@ -9546,69 +11412,187 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats percentile(nullVar, nullVar)', [
           'Argument of [percentile] must be a constant, received [nullVar]',
         ]);
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(stringField, stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats percentile(stringField, stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(stringField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(stringField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(stringField, stringField)) + percentile(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(stringField, stringField)) + percentile(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, stringField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField / 2, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField / 2, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(stringField, stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(stringField, stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(stringField, stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(stringField, stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(stringField, stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(stringField, stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort percentile(stringField, stringField)', [
+          'SORT does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(stringField, stringField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(stringField, stringField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(stringField, stringField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = percentile(stringField, stringField) > 0',
+          ['EVAL does not support function percentile']
+        );
+
+        testErrorsAndWarnings('from a_index | eval percentile(stringField, stringField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(stringField, stringField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
       });
 
       describe('max', () => {
-        testErrorsAndWarnings('from a_index | stats var = max(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats max(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(max(numberField))', []);
-        testErrorsAndWarnings('from a_index | stats round(max(numberField))', []);
+        testErrorsAndWarnings('from a_index | stats var = max(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats max(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(max(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(max(doubleField))', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(max(numberField)) + max(numberField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(max(numberField)) + max(numberField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats max(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = max(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), max(numberField / 2)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = max(numberField / 2)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats var0 = max(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), max(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), var0 = max(numberField)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats max(numberField) by round(numberField / 2)',
+          'from a_index | stats var = round(max(doubleField)) + max(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = max(numberField) by var1 = round(numberField / 2)',
+          'from a_index | stats round(max(doubleField)) + max(doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats max(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = max(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), max(doubleField / 2)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = max(doubleField / 2)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = max(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), max(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = max(doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats max(doubleField) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = max(doubleField) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), max(doubleField) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = max(doubleField) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), max(doubleField) by round(doubleField / 2), doubleField / 2',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = max(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = max(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = max(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
-        testErrorsAndWarnings('from a_index | stats max(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats max(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats max(stringField)', [
@@ -9629,15 +11613,15 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | stats round(max(dateField)) + max(dateField)', []);
 
-        testErrorsAndWarnings('from a_index | sort max(numberField)', [
+        testErrorsAndWarnings('from a_index | sort max(doubleField)', [
           'SORT does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | where max(numberField)', [
+        testErrorsAndWarnings('from a_index | where max(doubleField)', [
           'WHERE does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | where max(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where max(doubleField) > 0', [
           'WHERE does not support function max',
         ]);
 
@@ -9649,19 +11633,19 @@ describe('validation logic', () => {
           'WHERE does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = max(numberField)', [
+        testErrorsAndWarnings('from a_index | eval var = max(doubleField)', [
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = max(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = max(doubleField) > 0', [
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval max(numberField)', [
+        testErrorsAndWarnings('from a_index | eval max(doubleField)', [
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval max(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval max(doubleField) > 0', [
           'EVAL does not support function max',
         ]);
 
@@ -9718,69 +11702,154 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval max(booleanField) > 0', [
           'EVAL does not support function max',
         ]);
+
+        testErrorsAndWarnings('from a_index | stats var = max(stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = round(max(stringField))', []);
+        testErrorsAndWarnings('from a_index | stats round(max(stringField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(max(stringField)) + max(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(max(stringField)) + max(stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = max(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), max(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = max(stringField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats max(stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = max(stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), max(stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = max(stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), max(stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = max(stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = max(avg(stringField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats max(avg(stringField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort max(stringField)', [
+          'SORT does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(stringField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(stringField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(stringField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(stringField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(stringField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(stringField) > 0', [
+          'EVAL does not support function max',
+        ]);
       });
 
       describe('min', () => {
-        testErrorsAndWarnings('from a_index | stats var = min(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats min(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(min(numberField))', []);
-        testErrorsAndWarnings('from a_index | stats round(min(numberField))', []);
+        testErrorsAndWarnings('from a_index | stats var = min(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats min(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = round(min(doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(min(doubleField))', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(min(numberField)) + min(numberField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(min(numberField)) + min(numberField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats min(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = min(numberField / 2)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), min(numberField / 2)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = min(numberField / 2)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats var0 = min(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), min(numberField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(numberField), var0 = min(numberField)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats min(numberField) by round(numberField / 2)',
+          'from a_index | stats var = round(min(doubleField)) + min(doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = min(numberField) by var1 = round(numberField / 2)',
+          'from a_index | stats round(min(doubleField)) + min(doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats min(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = min(doubleField / 2)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), min(doubleField / 2)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = min(doubleField / 2)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = min(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), min(doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = min(doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats min(doubleField) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = min(doubleField) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), min(doubleField) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = min(doubleField) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), min(doubleField) by round(doubleField / 2), doubleField / 2',
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = min(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = min(doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = min(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
-        testErrorsAndWarnings('from a_index | stats min(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats min(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats min(stringField)', [
@@ -9801,15 +11870,15 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | stats round(min(dateField)) + min(dateField)', []);
 
-        testErrorsAndWarnings('from a_index | sort min(numberField)', [
+        testErrorsAndWarnings('from a_index | sort min(doubleField)', [
           'SORT does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | where min(numberField)', [
+        testErrorsAndWarnings('from a_index | where min(doubleField)', [
           'WHERE does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | where min(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where min(doubleField) > 0', [
           'WHERE does not support function min',
         ]);
 
@@ -9821,19 +11890,19 @@ describe('validation logic', () => {
           'WHERE does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = min(numberField)', [
+        testErrorsAndWarnings('from a_index | eval var = min(doubleField)', [
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = min(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = min(doubleField) > 0', [
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval min(numberField)', [
+        testErrorsAndWarnings('from a_index | eval min(doubleField)', [
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval min(numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval min(doubleField) > 0', [
           'EVAL does not support function min',
         ]);
 
@@ -9890,6 +11959,91 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval min(booleanField) > 0', [
           'EVAL does not support function min',
         ]);
+
+        testErrorsAndWarnings('from a_index | stats var = min(stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = round(min(stringField))', []);
+        testErrorsAndWarnings('from a_index | stats round(min(stringField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(min(stringField)) + min(stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(min(stringField)) + min(stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats var0 = min(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), min(stringField)', []);
+        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = min(stringField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats min(stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = min(stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), min(stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = min(stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), min(stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = min(stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = min(avg(stringField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats min(avg(stringField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort min(stringField)', [
+          'SORT does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(stringField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(stringField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(stringField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(stringField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(stringField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(stringField) > 0', [
+          'EVAL does not support function min',
+        ]);
       });
 
       describe('count', () => {
@@ -9941,62 +12095,117 @@ describe('validation logic', () => {
 
       describe('count_distinct', () => {
         testErrorsAndWarnings(
-          'from a_index | stats var = count_distinct(stringField, numberField)',
+          'from a_index | stats var = count_distinct(stringField, doubleField)',
           []
         );
-        testErrorsAndWarnings('from a_index | stats count_distinct(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | stats count_distinct(stringField, doubleField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(count_distinct(stringField, numberField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(count_distinct(stringField, numberField))',
+          'from a_index | stats var = round(count_distinct(stringField, doubleField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(count_distinct(stringField, numberField)) + count_distinct(stringField, numberField)',
+          'from a_index | stats round(count_distinct(stringField, doubleField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats round(count_distinct(stringField, numberField)) + count_distinct(stringField, numberField)',
+          'from a_index | stats var = round(count_distinct(stringField, doubleField)) + count_distinct(stringField, doubleField)',
           []
         );
 
-        testErrorsAndWarnings('from a_index | sort count_distinct(stringField, numberField)', [
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(stringField, doubleField)) + count_distinct(stringField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort count_distinct(stringField, doubleField)', [
           'SORT does not support function count_distinct',
         ]);
 
-        testErrorsAndWarnings('from a_index | where count_distinct(stringField, numberField)', [
+        testErrorsAndWarnings('from a_index | where count_distinct(stringField, doubleField)', [
           'WHERE does not support function count_distinct',
         ]);
 
-        testErrorsAndWarnings('from a_index | where count_distinct(stringField, numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where count_distinct(stringField, doubleField) > 0', [
           'WHERE does not support function count_distinct',
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = count_distinct(stringField, numberField)',
+          'from a_index | eval var = count_distinct(stringField, doubleField)',
           ['EVAL does not support function count_distinct']
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = count_distinct(stringField, numberField) > 0',
+          'from a_index | eval var = count_distinct(stringField, doubleField) > 0',
           ['EVAL does not support function count_distinct']
         );
 
-        testErrorsAndWarnings('from a_index | eval count_distinct(stringField, numberField)', [
+        testErrorsAndWarnings('from a_index | eval count_distinct(stringField, doubleField)', [
           'EVAL does not support function count_distinct',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval count_distinct(stringField, numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval count_distinct(stringField, doubleField) > 0', [
           'EVAL does not support function count_distinct',
         ]);
         testErrorsAndWarnings('from a_index | stats count_distinct(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats count_distinct(nullVar, nullVar)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(stringField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats count_distinct(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(stringField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(stringField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(stringField, stringField)) + count_distinct(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(stringField, stringField)) + count_distinct(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort count_distinct(stringField, stringField)', [
+          'SORT does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where count_distinct(stringField, stringField)', [
+          'WHERE does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where count_distinct(stringField, stringField) > 0', [
+          'WHERE does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = count_distinct(stringField, stringField)',
+          ['EVAL does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = count_distinct(stringField, stringField) > 0',
+          ['EVAL does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings('from a_index | eval count_distinct(stringField, stringField)', [
+          'EVAL does not support function count_distinct',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval count_distinct(stringField, stringField) > 0', [
+          'EVAL does not support function count_distinct',
+        ]);
       });
 
       describe('st_centroid_agg', () => {
@@ -10006,12 +12215,12 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | stats st_centroid_agg(cartesianPointField)', []);
 
-        testErrorsAndWarnings('from a_index | stats var = st_centroid_agg(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats var = st_centroid_agg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
-        testErrorsAndWarnings('from a_index | stats st_centroid_agg(avg(numberField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        testErrorsAndWarnings('from a_index | stats st_centroid_agg(avg(doubleField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats st_centroid_agg(stringField)', [
@@ -10083,6 +12292,14 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats st_centroid_agg(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats st_centroid_agg(nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = st_centroid_agg(avg(stringField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats st_centroid_agg(avg(stringField))', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
       });
 
       describe('values', () => {
@@ -10123,19 +12340,19 @@ describe('validation logic', () => {
       describe('bucket', () => {
         testErrorsAndWarnings('from a_index | stats by bucket(dateField, 1 year)', []);
         testErrorsAndWarnings('from a_index | stats by bin(dateField, 1 year)', []);
-        testErrorsAndWarnings('from a_index | stats by bucket(numberField, 5)', []);
+        testErrorsAndWarnings('from a_index | stats by bucket(doubleField, 5)', []);
 
-        testErrorsAndWarnings('from a_index | stats by bucket(numberField, numberField)', [
-          'Argument of [bucket] must be a constant, received [numberField]',
+        testErrorsAndWarnings('from a_index | stats by bucket(doubleField, doubleField)', [
+          'Argument of [bucket] must be a constant, received [doubleField]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats by bin(numberField, 5)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(doubleField, 5)', []);
         testErrorsAndWarnings('from a_index | stats by bucket(dateField, 5, "a", "a")', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(dateField, numberField, stringField, stringField)',
+          'from a_index | stats by bucket(dateField, doubleField, stringField, stringField)',
           [
-            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
             'Argument of [bucket] must be a constant, received [stringField]',
             'Argument of [bucket] must be a constant, received [stringField]',
           ]
@@ -10145,9 +12362,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats by bucket(dateField, 5, now(), now())', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(dateField, numberField, dateField, dateField)',
+          'from a_index | stats by bucket(dateField, doubleField, dateField, dateField)',
           [
-            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
             'Argument of [bucket] must be a constant, received [dateField]',
             'Argument of [bucket] must be a constant, received [dateField]',
           ]
@@ -10157,9 +12374,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats by bucket(dateField, 5, "a", now())', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(dateField, numberField, stringField, dateField)',
+          'from a_index | stats by bucket(dateField, doubleField, stringField, dateField)',
           [
-            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
             'Argument of [bucket] must be a constant, received [stringField]',
             'Argument of [bucket] must be a constant, received [dateField]',
           ]
@@ -10169,27 +12386,27 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats by bucket(dateField, 5, now(), "a")', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(dateField, numberField, dateField, stringField)',
+          'from a_index | stats by bucket(dateField, doubleField, dateField, stringField)',
           [
-            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
             'Argument of [bucket] must be a constant, received [dateField]',
             'Argument of [bucket] must be a constant, received [stringField]',
           ]
         );
 
         testErrorsAndWarnings('from a_index | stats by bin(dateField, 5, now(), "a")', []);
-        testErrorsAndWarnings('from a_index | stats by bucket(numberField, 5, 5, 5)', []);
+        testErrorsAndWarnings('from a_index | stats by bucket(doubleField, 5, 5, 5)', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(numberField, numberField, numberField, numberField)',
+          'from a_index | stats by bucket(doubleField, doubleField, doubleField, doubleField)',
           [
-            'Argument of [bucket] must be a constant, received [numberField]',
-            'Argument of [bucket] must be a constant, received [numberField]',
-            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
           ]
         );
 
-        testErrorsAndWarnings('from a_index | stats by bin(numberField, 5, 5, 5)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(doubleField, 5, 5, 5)', []);
 
         testErrorsAndWarnings('from a_index | sort bucket(dateField, 1 year)', [
           'SORT does not support function bucket',
@@ -10235,6 +12452,137 @@ describe('validation logic', () => {
           'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), "a")',
           ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
         );
+
+        testErrorsAndWarnings('from a_index | stats by bucket(stringField, stringField)', [
+          'Argument of [bucket] must be a constant, received [doubleField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats by bin(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, stringField, stringField, stringField)',
+          [
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(dateField, stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, stringField, now(), now())',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, stringField, dateField, dateField)',
+          [
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(dateField, stringField, now(), now())',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, stringField, stringField, now())',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, stringField, stringField, dateField)',
+          [
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(dateField, stringField, stringField, now())',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, stringField, now(), stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, stringField, dateField, stringField)',
+          [
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(dateField, stringField, now(), stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(stringField, stringField, stringField, stringField)',
+          [
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(stringField, stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", stringField, "2022", "2022")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), stringField, concat("20", "22"), concat("20", "22"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", stringField, stringField, "2022")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), stringField, stringField, concat("20", "22"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", stringField, "2022", stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), stringField, concat("20", "22"), stringField)',
+          []
+        );
       });
 
       describe('cbrt', () => {
@@ -10246,14 +12594,14 @@ describe('validation logic', () => {
           'Argument of [cbrt] must be [number], found value [true] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where cbrt(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where cbrt(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where cbrt(booleanField) > 0', [
           'Argument of [cbrt] must be [number], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = cbrt(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval cbrt(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cbrt(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval cbrt(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = cbrt(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval cbrt(booleanField)', [
@@ -10264,11 +12612,11 @@ describe('validation logic', () => {
           'Using wildcards (*) in cbrt is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval cbrt(numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval cbrt(doubleField, extraArg)', [
           'Error: [cbrt] function expects exactly one argument, got 2.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort cbrt(numberField)', []);
+        testErrorsAndWarnings('from a_index | sort cbrt(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval cbrt(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval cbrt(nullVar)', []);
         testErrorsAndWarnings('row var = cbrt("a")', []);
@@ -10281,6 +12629,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort cbrt(stringField)', []);
+        testErrorsAndWarnings('row var = cbrt(doubleField)', []);
+        testErrorsAndWarnings('row cbrt(doubleField)', []);
+        testErrorsAndWarnings('row var = cbrt(integerField)', []);
+        testErrorsAndWarnings('row cbrt(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cbrt(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval cbrt(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = cbrt(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval cbrt(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval cbrt(doubleField, extraArg)', [
+          'Error: [cbrt] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort cbrt(doubleField)', []);
       });
 
       describe('from_base64', () => {
@@ -10317,6 +12679,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort from_base64(stringField)', []);
         testErrorsAndWarnings('from a_index | eval from_base64(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval from_base64(nullVar)', []);
+        testErrorsAndWarnings('row var = from_base64(keywordField)', []);
+        testErrorsAndWarnings('row from_base64(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = from_base64(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval from_base64(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval from_base64(keywordField, extraArg)', [
+          'Error: [from_base64] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort from_base64(keywordField)', []);
       });
 
       describe('locate', () => {
@@ -10344,7 +12716,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | where locate(stringField, stringField, numberField) > 0',
+          'from a_index | where locate(stringField, stringField, doubleField) > 0',
           []
         );
 
@@ -10371,12 +12743,12 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = locate(stringField, stringField, numberField)',
+          'from a_index | eval var = locate(stringField, stringField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval locate(stringField, stringField, numberField)',
+          'from a_index | eval locate(stringField, stringField, doubleField)',
           []
         );
 
@@ -10395,7 +12767,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval locate(stringField, stringField, numberField, extraArg)',
+          'from a_index | eval locate(stringField, stringField, doubleField, extraArg)',
           ['Error: [locate] function expects no more than 3 arguments, got 4.']
         );
 
@@ -10419,6 +12791,73 @@ describe('validation logic', () => {
           'from a_index | eval locate(stringField, stringField, stringField, extraArg)',
           ['Error: [locate] function expects no more than 3 arguments, got 4.']
         );
+        testErrorsAndWarnings('row var = locate(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row locate(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row var = locate(keywordField, keywordField, integerField)', []);
+        testErrorsAndWarnings('row locate(keywordField, keywordField, integerField)', []);
+        testErrorsAndWarnings('row var = locate(keywordField, "a")', []);
+        testErrorsAndWarnings('row locate(keywordField, "a")', []);
+        testErrorsAndWarnings('row var = locate(keywordField, "a", integerField)', []);
+        testErrorsAndWarnings('row locate(keywordField, "a", integerField)', []);
+        testErrorsAndWarnings('row var = locate("a", keywordField)', []);
+        testErrorsAndWarnings('row locate("a", keywordField)', []);
+        testErrorsAndWarnings('row var = locate("a", keywordField, integerField)', []);
+        testErrorsAndWarnings('row locate("a", keywordField, integerField)', []);
+        testErrorsAndWarnings('row var = locate("a", "a", integerField)', []);
+        testErrorsAndWarnings('row locate("a", "a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = locate(keywordField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval locate(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = locate(keywordField, keywordField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval locate(keywordField, keywordField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = locate(keywordField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval locate(keywordField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = locate(keywordField, stringField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval locate(keywordField, stringField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = locate(stringField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval locate(stringField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = locate(stringField, keywordField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval locate(stringField, keywordField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = locate(stringField, stringField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval locate(stringField, stringField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval locate(keywordField, keywordField, integerField, extraArg)',
+          ['Error: [locate] function expects no more than 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort locate(keywordField, keywordField)', []);
       });
 
       describe('to_base64', () => {
@@ -10455,6 +12894,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_base64(stringField)', []);
         testErrorsAndWarnings('from a_index | eval to_base64(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_base64(nullVar)', []);
+        testErrorsAndWarnings('row var = to_base64(keywordField)', []);
+        testErrorsAndWarnings('row to_base64(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_base64(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_base64(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | eval to_base64(keywordField, extraArg)', [
+          'Error: [to_base64] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_base64(keywordField)', []);
       });
 
       describe('ip_prefix', () => {
@@ -10473,12 +12922,12 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = ip_prefix(ipField, numberField, numberField)',
+          'from a_index | eval var = ip_prefix(ipField, doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval ip_prefix(ipField, numberField, numberField)',
+          'from a_index | eval ip_prefix(ipField, doubleField, doubleField)',
           []
         );
 
@@ -10497,12 +12946,12 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval ip_prefix(ipField, numberField, numberField, extraArg)',
+          'from a_index | eval ip_prefix(ipField, doubleField, doubleField, extraArg)',
           ['Error: [ip_prefix] function expects exactly 3 arguments, got 4.']
         );
 
         testErrorsAndWarnings(
-          'from a_index | sort ip_prefix(ipField, numberField, numberField)',
+          'from a_index | sort ip_prefix(ipField, doubleField, doubleField)',
           []
         );
         testErrorsAndWarnings('from a_index | eval ip_prefix(null, null, null)', []);
@@ -10533,6 +12982,43 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | sort ip_prefix(ipField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = ip_prefix(to_ip("127.0.0.1"), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('row ip_prefix(to_ip("127.0.0.1"), integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'row var = ip_prefix(to_ip(to_ip("127.0.0.1")), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(ipField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(to_ip(ipField), integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, integerField, integerField, extraArg)',
+          ['Error: [ip_prefix] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort ip_prefix(ipField, integerField, integerField)',
           []
         );
       });
@@ -10623,7 +13109,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_append(to_version("1.0.0"), to_version("1.0.0"))', []);
         testErrorsAndWarnings('row mv_append(to_version("1.0.0"), to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = mv_append(to_version("a"), to_version("a"))', []);
-        testErrorsAndWarnings('from a_index | where mv_append(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_append(doubleField, doubleField) > 0', []);
         testErrorsAndWarnings(
           'from a_index | where length(mv_append(stringField, stringField)) > 0',
           []
@@ -10677,8 +13163,8 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = mv_append(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_append(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_append(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = mv_append(to_integer(booleanField), to_integer(booleanField))',
@@ -10740,6 +13226,35 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_append(booleanField, booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_append(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_append(nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = mv_append(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row mv_append(doubleField, doubleField)', []);
+        testErrorsAndWarnings('row var = mv_append(integerField, integerField)', []);
+        testErrorsAndWarnings('row mv_append(integerField, integerField)', []);
+        testErrorsAndWarnings('row var = mv_append(keywordField, keywordField)', []);
+        testErrorsAndWarnings('row mv_append(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_version(keywordField), to_version(keywordField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_append(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(doubleField, doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(integerField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_append(integerField, integerField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(keywordField, keywordField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_append(keywordField, keywordField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_version(keywordField), to_version(keywordField))',
+          []
+        );
       });
 
       describe('repeat', () => {
@@ -10753,7 +13268,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | where length(repeat(stringField, numberField)) > 0',
+          'from a_index | where length(repeat(stringField, doubleField)) > 0',
           []
         );
 
@@ -10765,8 +13280,8 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | eval var = repeat(stringField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval repeat(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = repeat(stringField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = repeat(to_string(booleanField), to_integer(booleanField))',
@@ -10778,11 +13293,11 @@ describe('validation logic', () => {
           'Argument of [repeat] must be [number], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval repeat(stringField, numberField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, doubleField, extraArg)', [
           'Error: [repeat] function expects exactly 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort repeat(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | sort repeat(stringField, doubleField)', []);
         testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
         testErrorsAndWarnings('row var = repeat("a", "a")', []);
@@ -10795,6 +13310,20 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort repeat(stringField, stringField)', []);
+        testErrorsAndWarnings('row var = repeat(keywordField, integerField)', []);
+        testErrorsAndWarnings('row repeat(keywordField, integerField)', []);
+        testErrorsAndWarnings('row var = repeat("a", integerField)', []);
+        testErrorsAndWarnings('row repeat("a", integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = repeat(keywordField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(keywordField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = repeat(stringField, integerField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval repeat(keywordField, integerField, extraArg)', [
+          'Error: [repeat] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort repeat(keywordField, integerField)', []);
       });
 
       describe('top', () => {
@@ -10815,13 +13344,13 @@ describe('validation logic', () => {
         });
 
         describe('limit must be a literal', () => {
-          testErrorsAndWarnings('from a_index | stats var = top(stringField, numberField, "asc")', [
-            'Argument of [=] must be a constant, received [top(stringField,numberField,"asc")]',
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, doubleField, "asc")', [
+            'Argument of [=] must be a constant, received [top(stringField,doubleField,"asc")]',
           ]);
           testErrorsAndWarnings(
-            'from a_index | stats var = top(stringField, 100 + numberField, "asc")',
+            'from a_index | stats var = top(stringField, 100 + doubleField, "asc")',
             [
-              'Argument of [=] must be a constant, received [top(stringField,100+numberField,"asc")]',
+              'Argument of [=] must be a constant, received [top(stringField,100+doubleField,"asc")]',
             ]
           );
         });
@@ -10837,32 +13366,32 @@ describe('validation logic', () => {
           );
         });
 
-        testErrorsAndWarnings('from a_index | sort top(stringField, numberField, "asc")', [
+        testErrorsAndWarnings('from a_index | sort top(stringField, doubleField, "asc")', [
           'SORT does not support function top',
         ]);
 
-        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc")', [
+        testErrorsAndWarnings('from a_index | where top(stringField, doubleField, "asc")', [
           'WHERE does not support function top',
         ]);
 
-        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc") > 0', [
+        testErrorsAndWarnings('from a_index | where top(stringField, doubleField, "asc") > 0', [
           'WHERE does not support function top',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = top(stringField, numberField, "asc")', [
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, doubleField, "asc")', [
           'EVAL does not support function top',
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = top(stringField, numberField, "asc") > 0',
+          'from a_index | eval var = top(stringField, doubleField, "asc") > 0',
           ['EVAL does not support function top']
         );
 
-        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc")', [
+        testErrorsAndWarnings('from a_index | eval top(stringField, doubleField, "asc")', [
           'EVAL does not support function top',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc") > 0', [
+        testErrorsAndWarnings('from a_index | eval top(stringField, doubleField, "asc") > 0', [
           'EVAL does not support function top',
         ]);
 
@@ -10896,8 +13425,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats var = top(stringField, 5, "asc")', []);
         testErrorsAndWarnings('from a_index | stats top(stringField, 5, "asc")', []);
 
-        testErrorsAndWarnings('from a_index | stats top(stringField, numberField, "asc")', [
-          'Argument of [top] must be a constant, received [numberField]',
+        testErrorsAndWarnings('from a_index | stats top(stringField, doubleField, "asc")', [
+          'Argument of [top] must be a constant, received [doubleField]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats top(null, null, null)', []);
@@ -10905,6 +13434,48 @@ describe('validation logic', () => {
           'Argument of [top] must be a constant, received [nullVar]',
           'Argument of [top] must be a constant, received [nullVar]',
         ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = top(stringField, stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats top(stringField, stringField, stringField)', [
+          'Argument of [top] must be a constant, received [doubleField]',
+          'Argument of [top] must be a constant, received [stringField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort top(stringField, stringField, stringField)', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, stringField, stringField)', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where top(stringField, stringField, stringField) > 0',
+          ['WHERE does not support function top']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top(stringField, stringField, stringField)',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top(stringField, stringField, stringField) > 0',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, stringField, stringField)', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval top(stringField, stringField, stringField) > 0',
+          ['EVAL does not support function top']
+        );
       });
 
       describe('st_distance', () => {
@@ -10990,109 +13561,109 @@ describe('validation logic', () => {
 
       describe('weighted_avg', () => {
         testErrorsAndWarnings(
-          'from a_index | stats var = weighted_avg(numberField, numberField)',
+          'from a_index | stats var = weighted_avg(doubleField, doubleField)',
           []
         );
-        testErrorsAndWarnings('from a_index | stats weighted_avg(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | stats weighted_avg(doubleField, doubleField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(weighted_avg(numberField, numberField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(weighted_avg(numberField, numberField))',
+          'from a_index | stats var = round(weighted_avg(doubleField, doubleField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var = round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)',
+          'from a_index | stats round(weighted_avg(doubleField, doubleField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)',
+          'from a_index | stats var = round(weighted_avg(doubleField, doubleField)) + weighted_avg(doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats weighted_avg(numberField / 2, numberField)',
+          'from a_index | stats round(weighted_avg(doubleField, doubleField)) + weighted_avg(doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = weighted_avg(numberField / 2, numberField)',
+          'from a_index | stats weighted_avg(doubleField / 2, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField)',
+          'from a_index | stats var0 = weighted_avg(doubleField / 2, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField)',
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField / 2, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = weighted_avg(numberField, numberField)',
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField / 2, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField)',
+          'from a_index | stats var0 = weighted_avg(doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField)',
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats weighted_avg(numberField, numberField) by round(numberField / 2)',
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, doubleField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2)',
+          'from a_index | stats weighted_avg(doubleField, doubleField) by round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), ipField',
+          'from a_index | stats var0 = weighted_avg(doubleField, doubleField) by var1 = round(doubleField / 2)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), ipField',
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, doubleField) by round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, doubleField) by var1 = round(doubleField / 2), ipField',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), numberField / 2',
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, doubleField) by round(doubleField / 2), doubleField / 2',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats var = weighted_avg(avg(numberField), avg(numberField))',
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(avg(doubleField), avg(doubleField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats weighted_avg(avg(numberField), avg(numberField))',
+          'from a_index | stats weighted_avg(avg(doubleField), avg(doubleField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
           ]
         );
 
@@ -11101,37 +13672,161 @@ describe('validation logic', () => {
           'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort weighted_avg(numberField, numberField)', [
+        testErrorsAndWarnings('from a_index | sort weighted_avg(doubleField, doubleField)', [
           'SORT does not support function weighted_avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | where weighted_avg(numberField, numberField)', [
+        testErrorsAndWarnings('from a_index | where weighted_avg(doubleField, doubleField)', [
           'WHERE does not support function weighted_avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | where weighted_avg(numberField, numberField) > 0', [
+        testErrorsAndWarnings('from a_index | where weighted_avg(doubleField, doubleField) > 0', [
           'WHERE does not support function weighted_avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = weighted_avg(numberField, numberField)', [
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(doubleField, doubleField)', [
           'EVAL does not support function weighted_avg',
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = weighted_avg(numberField, numberField) > 0',
+          'from a_index | eval var = weighted_avg(doubleField, doubleField) > 0',
           ['EVAL does not support function weighted_avg']
         );
 
-        testErrorsAndWarnings('from a_index | eval weighted_avg(numberField, numberField)', [
+        testErrorsAndWarnings('from a_index | eval weighted_avg(doubleField, doubleField)', [
           'EVAL does not support function weighted_avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval weighted_avg(numberField, numberField) > 0', [
+        testErrorsAndWarnings('from a_index | eval weighted_avg(doubleField, doubleField) > 0', [
           'EVAL does not support function weighted_avg',
         ]);
 
         testErrorsAndWarnings('from a_index | stats weighted_avg(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats weighted_avg(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | stats var = weighted_avg(stringField, stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats weighted_avg(stringField, stringField)', [
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(stringField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(stringField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(stringField, stringField)) + weighted_avg(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(stringField, stringField)) + weighted_avg(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(doubleField / 2, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(doubleField / 2, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField / 2, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField / 2, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(stringField, stringField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(stringField, stringField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(stringField, stringField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(stringField, stringField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(stringField, stringField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(stringField, stringField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort weighted_avg(stringField, stringField)', [
+          'SORT does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(stringField, stringField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(stringField, stringField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(stringField, stringField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(stringField, stringField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(stringField, stringField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(stringField, stringField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
       });
 
       describe('exp', () => {
@@ -11160,6 +13855,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort exp(stringField)', []);
         testErrorsAndWarnings('from a_index | eval exp(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval exp(nullVar)', []);
+        testErrorsAndWarnings('row var = exp(doubleField)', []);
+        testErrorsAndWarnings('row exp(doubleField)', []);
+        testErrorsAndWarnings('row var = exp(integerField)', []);
+        testErrorsAndWarnings('row exp(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = exp(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = exp(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(integerField)', []);
+
+        testErrorsAndWarnings('from a_index | eval exp(doubleField, extraArg)', [
+          'Error: [exp] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort exp(doubleField)', []);
       });
     });
   });

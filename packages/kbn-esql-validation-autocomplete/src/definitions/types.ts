@@ -9,9 +9,18 @@
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
 export const supportedFieldTypes = [
-  'number',
+  'double',
+  // 'unsigned_long',
+  // 'long',
+  'integer',
+  // 'int',
+  // 'counter_integer',
+  // 'counter_long',
+  // 'counter_double',
   'date',
-  'string',
+  // 'text',
+  'keyword',
+  // 'string',
   'boolean',
   'ip',
   'cartesian_point',
@@ -39,10 +48,19 @@ export type FunctionParameterType =
   | 'date[]';
 
 export type FunctionReturnType =
-  | 'number'
+  | 'double'
+  | 'unsigned_long'
+  | 'long'
+  | 'integer'
+  | 'int'
+  | 'counter_integer'
+  | 'counter_long'
+  | 'counter_double'
   | 'date'
   | 'any'
   | 'boolean'
+  | 'text'
+  | 'keyword'
   | 'string'
   | 'cartesian_point'
   | 'cartesian_shape'
