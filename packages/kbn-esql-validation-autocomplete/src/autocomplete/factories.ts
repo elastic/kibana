@@ -132,12 +132,23 @@ export const buildFieldsDefinitionsWithMetadata = (
   return fields.map((field) => {
     const description = field.metadata?.description;
 
-    const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const typeCharacter =
+      {
+        number: 'a',
+        string: 'b',
+        ip: 'c',
+        geo_point: 'd',
+        date: 'e',
+        keyword: 'f',
+      }[field.type] ?? '?';
+
+    console.log(field.type);
+
     return {
       label: field.name,
       text: getSafeInsertText(field.name),
       kind: 'Variable',
-      detail: titleCaseType,
+      detail: typeCharacter,
       documentation: description
         ? {
             value: `

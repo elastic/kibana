@@ -11,6 +11,8 @@ import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 import { untilPluginStartServicesReady } from './kibana_services';
+import './assets/esql.scss';
+import { css } from '@emotion/react';
 
 export const TextBasedLangEditor = (props: TextBasedLanguagesEditorProps) => {
   const { loading, value } = useAsync(() => {
@@ -30,7 +32,16 @@ export const TextBasedLangEditor = (props: TextBasedLanguagesEditorProps) => {
         ...deps,
       }}
     >
-      <TextBasedLanguagesEditor {...props} isDarkMode={deps.darkMode} />
+      <div
+        css={css`
+          .details-label {
+            font-family: 'ESQLGlyphs', Verdana, sans-serif;
+            font-size: 18px !important;
+          }
+        `}
+      >
+        <TextBasedLanguagesEditor {...props} isDarkMode={deps.darkMode} />
+      </div>
     </KibanaContextProvider>
   );
 };

@@ -47,6 +47,16 @@ export const Template: FunctionComponent<Props> = ({
         <meta name="viewport" content="width=device-width" />
         <title>{title}</title>
         <Fonts url={uiPublicUrl} />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              @font-face {
+                font-family: "ESQLGlyphs";
+                src: url(${uiPublicUrl}/fonts/ESQLGlyphs.ttf) format("truetype");
+              }
+            `,
+          }}
+        />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={favIconPng} />
         <link rel="icon" type="image/svg+xml" href={favIcon} />
