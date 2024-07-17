@@ -16,6 +16,8 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      x-codegen-enabled: true
+      operationId: InitRiskEngine
       summary: Initialize the Risk Engine
       description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
       responses:
@@ -24,7 +26,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineInitResponse'
+                type: object
+                required:
+                  - result
+                properties:
+                  result:
+                    $ref: '#/components/schemas/RiskEngineInitResult'
         '400':
           description: Task manager is unavailable
           content:
@@ -61,14 +68,6 @@ components:
           type: array
           items:
             type: string
-
-    RiskEngineInitResponse:
-      type: object
-      required:
-        - result
-      properties:
-        result:
-          $ref: '#/components/schemas/RiskEngineInitResult'
 
     RiskEngineInitErrorResponse:
       type: object

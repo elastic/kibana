@@ -25,13 +25,13 @@ export const RiskEngineInitResult = z.object({
   errors: z.array(z.string()),
 });
 
-export type RiskEngineInitResponse = z.infer<typeof RiskEngineInitResponse>;
-export const RiskEngineInitResponse = z.object({
-  result: RiskEngineInitResult,
-});
-
 export type RiskEngineInitErrorResponse = z.infer<typeof RiskEngineInitErrorResponse>;
 export const RiskEngineInitErrorResponse = z.object({
   message: z.string(),
   full_error: z.string(),
+});
+
+export type InitRiskEngineResponse = z.infer<typeof InitRiskEngineResponse>;
+export const InitRiskEngineResponse = z.object({
+  result: RiskEngineInitResult,
 });

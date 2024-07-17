@@ -9,8 +9,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Readable } from 'node:stream';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { AssetCriticalityBulkUploadResponse } from '../../../../../common/api/entity_analytics';
-import { AssetCriticalityBulkUploadRequest } from '../../../../../common/api/entity_analytics';
+import type { BulkUpsertAssetCriticalityDataResponse } from '../../../../../common/api/entity_analytics';
+import { BulkUpsertAssetCriticalityDataRequestBody } from '../../../../../common/api/entity_analytics';
 import type { ConfigType } from '../../../../config';
 import {
   ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
@@ -42,7 +42,7 @@ export const assetCriticalityPublicBulkUploadRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(AssetCriticalityBulkUploadRequest),
+            body: buildRouteValidationWithZod(BulkUpsertAssetCriticalityDataRequestBody),
           },
         },
       },
@@ -90,7 +90,7 @@ export const assetCriticalityPublicBulkUploadRoute = (
             () => `Asset criticality Bulk upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
           );
 
-          const resBody: AssetCriticalityBulkUploadResponse = { errors, stats };
+          const resBody: BulkUpsertAssetCriticalityDataResponse = { errors, stats };
 
           return response.ok({ body: resBody });
         } catch (e) {
