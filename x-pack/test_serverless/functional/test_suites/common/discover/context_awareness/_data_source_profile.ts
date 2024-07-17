@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('data source profile', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginAsAdmin();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     describe('ES|QL mode', () => {
