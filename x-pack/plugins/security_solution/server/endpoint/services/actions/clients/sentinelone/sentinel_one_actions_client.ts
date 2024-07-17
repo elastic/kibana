@@ -13,14 +13,15 @@ import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   SentinelOneDownloadAgentFileParams,
+  SentinelOneExecuteScriptResponse,
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
-  SentinelOneExecuteScriptResponse,
-  SentinelOneRemoteScriptExecutionStatus,
   SentinelOneGetRemoteScriptStatusApiResponse,
+  SentinelOneRemoteScriptExecutionStatus,
+  SentinelOneGetRemoteScriptResultsApiResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -31,8 +32,8 @@ import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
 import type {
   SentinelOneKillProcessScriptArgs,
-  SentinelOneScriptArgs,
   SentinelOneProcessListScriptArgs,
+  SentinelOneScriptArgs,
 } from './types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
@@ -54,6 +55,7 @@ import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  GetProcessesActionOutputContent,
   KillProcessActionOutputContent,
   KillProcessRequestBody,
   LogsEndpointAction,
@@ -61,6 +63,7 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionParametersWithProcessData,
+  ResponseActionParametersWithProcessName,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
@@ -69,12 +72,10 @@ import type {
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
   SentinelOneKillProcessRequestMeta,
-  UploadedFileInfo,
-  ResponseActionParametersWithProcessName,
-  GetProcessesActionOutputContent,
-  SentinelOneProcessesRequestMeta,
   SentinelOneKillProcessResponseMeta,
+  SentinelOneProcessesRequestMeta,
   SentinelOneProcessesResponseMeta,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   GetProcessesRequestBody,
@@ -561,13 +562,39 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
         case 'running-processes':
           {
-            // FIXME:PT define the `Meta` type
             const agentResponse = await this.fetchEsResponseDocForAgentId<
               GetProcessesActionOutputContent,
-              {}
+              SentinelOneProcessesResponseMeta
             >(actionId, agentId);
+            const s1TaskId = agentResponse.meta?.taskId ?? '';
 
-            // TODO:PT query Sentinelone to see if file is still available
+            fileInfo.created = agentResponse['@timestamp'];
+
+            const { data: s1ScriptResultsApiResponse } =
+              await this.sendAction<SentinelOneGetRemoteScriptResultsApiResponse>(
+                SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
+                {
+                  taskIds: [s1TaskId],
+                }
+              );
+
+            const fileDownloadLink = (s1ScriptResultsApiResponse?.data.download_links ?? []).find(
+              (linkInfo) => {
+                return linkInfo.taskId === s1TaskId;
+              }
+            );
+
+            if (!fileDownloadLink) {
+              this.log.debug(
+                `No download link found in SentinelOne for Task Id [${s1TaskId}]. Setting file status to DELETED`
+              );
+
+              fileInfo.status = 'DELETED';
+            } else {
+              fileInfo.status = 'READY';
+              fileInfo.name = fileDownloadLink.fileName ?? `${actionDetails.id}-${agentId}.zip`;
+              fileInfo.mimeType = 'application/octet-stream';
+            }
           }
           break;
 
