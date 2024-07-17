@@ -14,11 +14,29 @@
 # permission is obtained from Elasticsearch B.V.
 
 .PHONY: api-docs
-api-docs: ## Generate kibana.serverless.yaml
+api-docs: ## Generate kibana.serverless.yaml and kibana.yaml
 	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.serverless.yaml" --prefix-components-with-info-prop title
+	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/cases/docs/openapi/bundled.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/fleet/common/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.yaml" --prefix-components-with-info-prop title
 
+.PHONY: api-docs-stateful
+api-docs-stateful: ## Generate only kibana.yaml
+	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/cases/docs/openapi/bundled.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/fleet/common/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.yaml" --prefix-components-with-info-prop title
+
+.PHONY: api-docs-serverless
+api-docs-serverless: ## Generate only kibana.serverless.yaml
+	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.serverless.yaml" --prefix-components-with-info-prop title
+	
 .PHONY: api-docs-lint
-api-docs-lint: ## Run spectral API docs linter
+api-docs-lint: ## Run spectral API docs linter 
+	@npx @stoplight/spectral-cli lint "kibana.serverless.yaml" --ruleset ".spectral.yaml"
+	@npx @stoplight/spectral-cli lint "kibana.yaml" --ruleset ".spectral.yaml"
+
+.PHONY: api-docs-lint-stateful
+api-docs-lint-stateful: ## Run spectral API docs linter on kibana.yaml
+	@npx @stoplight/spectral-cli lint "kibana.yaml" --ruleset ".spectral.yaml"
+
+.PHONY: api-docs-lint-serverless
+api-docs-lint-serverless: ## Run spectral API docs linter on kibana.serverless.yaml
 	@npx @stoplight/spectral-cli lint "kibana.serverless.yaml" --ruleset ".spectral.yaml"
 
 help:  ## Display help
