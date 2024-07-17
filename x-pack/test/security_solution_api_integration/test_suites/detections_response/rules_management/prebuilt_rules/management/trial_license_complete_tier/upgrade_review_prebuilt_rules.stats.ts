@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    describe(`@ess @serverless the endpoint stats -`, () => {
+    describe(`the endpoint stats -`, () => {
       const getRuleAssetSavedObjects = () => [
         createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'A' }),
         createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'A' }),
