@@ -173,6 +173,7 @@ export class RulesClientFactory {
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }
+
         return {
           apiKeysEnabled: true,
           result: createAPIKeyResult,

@@ -360,11 +360,16 @@ describe('setAlertsToUntracked()', () => {
   });
 
   test('should untrack by query', async () => {
-    getAllAuthorizedRuleTypesFindOperationMock.mockResolvedValue([
-      {
-        id: 'test-rule-type',
-      },
-    ]);
+    getAllAuthorizedRuleTypesFindOperationMock.mockResolvedValue(
+      new Map([
+        [
+          'test-rule-type',
+          {
+            id: 'test-rule-type',
+          },
+        ],
+      ])
+    );
     getAlertIndicesAliasMock.mockResolvedValue(['test-alert-index']);
 
     clusterClient.search.mockResponseOnce({
@@ -525,11 +530,16 @@ describe('setAlertsToUntracked()', () => {
   });
 
   test('should return an empty array if the search returns zero results', async () => {
-    getAllAuthorizedRuleTypesFindOperationMock.mockResolvedValue([
-      {
-        id: 'test-rule-type',
-      },
-    ]);
+    getAllAuthorizedRuleTypesFindOperationMock.mockResolvedValue(
+      new Map([
+        [
+          'test-rule-type',
+          {
+            id: 'test-rule-type',
+          },
+        ],
+      ])
+    );
     getAlertIndicesAliasMock.mockResolvedValue(['test-alert-index']);
 
     clusterClient.search.mockResponseOnce({

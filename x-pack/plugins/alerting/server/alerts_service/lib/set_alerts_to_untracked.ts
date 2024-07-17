@@ -162,18 +162,19 @@ const getAuthorizedAlertsIndices = async ({
   logger,
 }: SetAlertsToUntrackedParamsWithDep) => {
   try {
-    const authorizedRuleTypes =
-      (await getAllAuthorizedRuleTypesFindOperation?.(
-        AlertingAuthorizationEntity.Alert,
-        new Set(featureIds)
-      )) || new Map();
-
-    const indices = getAlertIndicesAlias?.(
-      Array.from(authorizedRuleTypes.keys()).map(({ id }) => id),
-      spaceId
+    const authorizedRuleTypes = await getAllAuthorizedRuleTypesFindOperation?.(
+      AlertingAuthorizationEntity.Alert,
+      new Set(featureIds)
     );
 
-    return indices;
+    if (authorizedRuleTypes) {
+      return getAlertIndicesAlias?.(
+        Array.from(authorizedRuleTypes.keys()).map((id) => id),
+        spaceId
+      );
+    }
+
+    return [];
   } catch (error) {
     const errMessage = `Failed to get authorized rule types to untrack alerts by query: ${error}`;
     logger.error(errMessage);

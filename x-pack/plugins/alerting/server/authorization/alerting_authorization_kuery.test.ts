@@ -11,7 +11,7 @@ import {
   ensureFieldIsSafeForQuery,
   asFiltersBySpaceId,
 } from './alerting_authorization_kuery';
-import { fromKueryExpression } from '@kbn/es-query';
+import { KueryNode, toKqlExpression } from '@kbn/es-query';
 
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {
   test('constructs KQL filter for single rule type with single authorized consumer', async () => {
@@ -27,20 +27,20 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
     ]);
 
     expect(
-      asFiltersByRuleTypeAndConsumer(
-        authorizedRuleTypes,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
           },
-        },
-        'space1'
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(`((path.to.rule_type_id:myAppAlertType and consumer-field:(myApp)))`)
-    );
+    ).toMatchInlineSnapshot(`"(path.to.rule_type_id: myAppAlertType AND consumer-field: myApp)"`);
   });
 
   test('constructs KQL filter for single rule type with multiple authorized consumers', async () => {
@@ -58,21 +58,21 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
     ]);
 
     expect(
-      asFiltersByRuleTypeAndConsumer(
-        authorizedRuleTypes,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
           },
-        },
-        'space1'
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp)))`
-      )
+    ).toMatchInlineSnapshot(
+      `"(path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp))"`
     );
   });
 
@@ -103,21 +103,21 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
     ]);
 
     expect(
-      asFiltersByRuleTypeAndConsumer(
-        authorizedRuleTypes,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
           },
-        },
-        'space1'
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-      )
+    ).toMatchInlineSnapshot(
+      `"((path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)) OR (path.to.rule_type_id: myOtherAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)))"`
     );
   });
 
@@ -148,22 +148,22 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
     ]);
 
     expect(
-      asFiltersByRuleTypeAndConsumer(
-        authorizedRuleTypes,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-            spaceIds: 'path.to.spaceIds',
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.spaceIds',
+            },
           },
-        },
-        'space1'
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1))`
-      )
+    ).toMatchInlineSnapshot(
+      `"((path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature) AND path.to.spaceIds: space1) OR (path.to.rule_type_id: myOtherAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature) AND path.to.spaceIds: space1))"`
     );
   });
 
@@ -194,22 +194,22 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
     ]);
 
     expect(
-      asFiltersByRuleTypeAndConsumer(
-        authorizedRuleTypes,
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-            spaceIds: 'path.to.spaceIds',
+      toKqlExpression(
+        asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.spaceIds',
+            },
           },
-        },
-        undefined
+          undefined
+        ) as KueryNode
       )
-    ).toEqual(
-      fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-      )
+    ).toMatchInlineSnapshot(
+      `"((path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)) OR (path.to.rule_type_id: myOtherAppAlertType AND (consumer-field: alerts OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)))"`
     );
   });
 
@@ -223,19 +223,21 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
       ],
     ]);
 
-    const result = asFiltersByRuleTypeAndConsumer(
-      authorizedRuleTypes,
-      {
-        type: AlertingAuthorizationFilterType.KQL,
-        fieldNames: {
-          ruleTypeId: 'path.to.rule_type_id',
-          consumer: 'consumer-field',
+    const result = toKqlExpression(
+      asFiltersByRuleTypeAndConsumer(
+        authorizedRuleTypes,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule_type_id',
+            consumer: 'consumer-field',
+          },
         },
-      },
-      'space1'
+        'space1'
+      ) as KueryNode
     );
 
-    expect(result).toEqual(fromKueryExpression(`path.to.rule_type_id:myAppAlertType`));
+    expect(result).toMatchInlineSnapshot(`"path.to.rule_type_id: myAppAlertType"`);
   });
 });
 
@@ -399,142 +401,161 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         },
         'space1'
       )
-    ).toEqual({
-      bool: {
-        should: [
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule_type_id': 'myAppAlertType' } }],
-                    minimum_should_match: 1,
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "path.to.rule_type_id": "myAppAlertType",
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "alerts",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myOtherApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myAppWithSubFeature",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                    ],
-                    minimum_should_match: 1,
+                      ],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule_type_id': 'myOtherAppAlertType' } }],
-                    minimum_should_match: 1,
+            Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "path.to.rule_type_id": "myOtherAppAlertType",
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "alerts",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myOtherApp",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "consumer-field": "myAppWithSubFeature",
+                                },
+                              },
+                            ],
+                          },
                         },
-                      },
-                    ],
-                    minimum_should_match: 1,
+                      ],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ match: { 'path.to.rule_type_id': 'mySecondAppAlertType' } }],
-                    minimum_should_match: 1,
-                  },
-                },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'alerts' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myOtherApp' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [{ match: { 'consumer-field': 'myAppWithSubFeature' } }],
-                          minimum_should_match: 1,
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    });
+          ],
+        },
+      }
+    `);
   });
 
   test('constructs KQL filter for single rule type with no authorized consumer', async () => {
@@ -597,18 +618,20 @@ describe('asFiltersBySpaceId', () => {
 
   test('returns KQL filter of spaceId', () => {
     expect(
-      asFiltersBySpaceId(
-        {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-            spaceIds: 'path.to.space.id',
+      toKqlExpression(
+        asFiltersBySpaceId(
+          {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+              spaceIds: 'path.to.space.id',
+            },
           },
-        },
-        'space1'
+          'space1'
+        ) as KueryNode
       )
-    ).toEqual(fromKueryExpression('(path.to.space.id: space1)'));
+    ).toMatchInlineSnapshot(`"path.to.space.id: space1"`);
   });
 
   test('returns undefined if no path to spaceIds is provided', () => {

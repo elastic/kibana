@@ -314,9 +314,9 @@ describe('Alerting Plugin', () => {
             });
 
             expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
-            expect(() =>
+            await expect(() =>
               startContract.getRulesClientWithRequest({} as KibanaRequest)
-            ).toThrowErrorMatchingInlineSnapshot(
+            ).rejects.toThrowErrorMatchingInlineSnapshot(
               `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
             );
           });
@@ -380,7 +380,8 @@ describe('Alerting Plugin', () => {
               },
               getSavedObjectsClient: jest.fn(),
             } as unknown as KibanaRequest;
-            startContract.getRulesClientWithRequest(fakeRequest);
+
+            await startContract.getRulesClientWithRequest(fakeRequest);
           });
         });
 
