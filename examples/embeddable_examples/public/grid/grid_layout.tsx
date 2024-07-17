@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { EuiPortal, transparentize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import { resolveGrid } from './grid_layout_resolver';
-import { getClosestGridRowIndex, pixelCoordinateToGrid } from './grid_layout_utils';
+import {
+  getClosestGridRowIndex,
+  pixelCoordinateToGrid,
+  updateDragPreview,
+} from './grid_layout_utils';
 import { KibanaGridRow } from './grid_row';
 import { GridLayout, GridSettings, InteractionData, PixelCoordinate } from './types';
 
-export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
+const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
   const onWidthChange = useMemo(() => debounce(setWidth, wait), [wait]);
   const { ref } = useResizeObserver<HTMLDivElement>({
@@ -37,6 +44,19 @@ export const KibanaGridLayout = ({
   gridLayout: GridLayout;
   setGridLayout: React.Dispatch<React.SetStateAction<GridLayout>>;
 }) => {
+  /**
+   * mouse position
+   * offset
+   * drag vs resize event type
+   *
+   * requested posistion (x, y, width, height) in pixels
+   *   Set preview panel to this position
+   * Calculate which grid the preview is over (if drag - if resize, use the targeted grid)
+   * requested grid position (row, column, width, height) in grid units + target grid row
+   * when requested grid position changes
+   *   resolve grid + set grid layout to resolved grid
+   */
+
   const [interactionData, setInteractionData] = useState<InteractionData | undefined>();
 
   // track the width of containing element to calculate column width
@@ -49,13 +69,13 @@ export const KibanaGridLayout = ({
 
   // store a ref for each grid row
   const gridRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const dragEnterCount = useRef(0);
 
   // store a pixel shift for the offset between the mouse at the start of a drag, and the panel's top left corner
   const shiftRef = useRef<PixelCoordinate>({ x: 0, y: 0 });
   const updateShift = ({ x, y }: { x: number; y: number }) => (shiftRef.current = { x, y });
 
-  // store the last interaction data to avoid unnecessary re-renders
-  // const lastInteractionData = useRef<InteractionData | undefined>(undefined);
+  const dragPreview = useRef<HTMLDivElement | null>(null);
 
   const updateInteractionData = useCallback(
     (nextInteractionData?: InteractionData) => {
@@ -98,24 +118,36 @@ export const KibanaGridLayout = ({
   const onDragOver = useCallback(
     (mouseCoordinate: PixelCoordinate) => {
       if (!interactionData) return;
-      const panelTopLeft = {
+      const mousePoint: PixelCoordinate = {
         x: mouseCoordinate.x - shiftRef.current.x,
         y: mouseCoordinate.y - shiftRef.current.y,
       };
-
-      const rowIndex = getClosestGridRowIndex({
-        panelTopLeft,
-        gridDivs: gridRefs.current,
-      });
+      const rowIndex =
+        interactionData.type === 'drag'
+          ? getClosestGridRowIndex({
+              panelTopLeft: mousePoint,
+              gridDivs: gridRefs.current,
+            })
+          : interactionData.targetedRow;
       const rowDiv = gridRefs.current[rowIndex];
       if (!rowDiv) return;
 
+      const gridOrigin: PixelCoordinate = {
+        x: rowDiv.getBoundingClientRect().left,
+        y: rowDiv.getBoundingClientRect().top,
+      };
+
+      updateDragPreview({
+        gridOrigin,
+        mousePoint,
+        interactionData,
+        runtimeSettings,
+        dragPreview: dragPreview.current!,
+      });
+
       const { row, column } = pixelCoordinateToGrid({
-        panelTopLeft,
-        gridOrigin: {
-          x: rowDiv.getBoundingClientRect().left,
-          y: rowDiv.getBoundingClientRect().top,
-        },
+        panelTopLeft: mousePoint,
+        gridOrigin,
         isResize: interactionData.type === 'resize',
         panel: interactionData.panelData,
         runtimeSettings,
@@ -137,34 +169,53 @@ export const KibanaGridLayout = ({
   );
 
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
+    const dragOver = (e: MouseEvent) => {
+      if (!interactionData) return;
       e.preventDefault();
       e.stopPropagation();
-      if (!interactionData) return;
       const mouseTargetPixel = { x: e.clientX, y: e.clientY };
       onDragOver(mouseTargetPixel);
     };
 
-    const onMouseUp = () => {
+    const onDrop = (e: MouseEvent) => {
+      if (!interactionData) return;
+      e.preventDefault();
+      e.stopPropagation();
+
       setInteractionData(undefined);
+
+      dragEnterCount.current = 0;
     };
-    window.addEventListener('dragover', onMouseMove);
-    window.addEventListener('dragend', onMouseUp);
-    // const onDragEnd = () => {
-    //   setInteractionData(undefined);
-    // };
-    // window.addEventListener('dragover', onDragOver);
-    // // window.addEventListener('dragend', (event) => {
-    // //   event.preventDefault();
-    // //   event.stopPropagation();
-    // //   console.log('drag ended');
-    // //   onDragEnd();
-    // // });
+
+    const onDragEnter = (e: MouseEvent) => {
+      if (!interactionData) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      dragEnterCount.current++;
+    };
+
+    const onDragLeave = (e: MouseEvent) => {
+      if (!interactionData) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      dragEnterCount.current--;
+      if (dragEnterCount.current === 0) {
+        setInteractionData(undefined);
+        dragEnterCount.current = 0;
+      }
+    };
+
+    window.addEventListener('drop', onDrop);
+    window.addEventListener('dragover', dragOver);
+    window.addEventListener('dragenter', onDragEnter);
+    window.addEventListener('dragleave', onDragLeave);
     return () => {
-      window.removeEventListener('dragover', onMouseMove);
-      window.removeEventListener('dragend', onMouseUp);
-      // window.removeEventListener('dragover', onDragOver);
-      // window.removeEventListener('dragend', onDragEnd);
+      window.removeEventListener('drop', dragOver);
+      window.removeEventListener('dragover', dragOver);
+      window.removeEventListener('dragenter', onDragEnter);
+      window.removeEventListener('dragleave', onDragLeave);
     };
   }, [interactionData, onDragOver]);
 
@@ -184,6 +235,20 @@ export const KibanaGridLayout = ({
           />
         );
       })}
+      <EuiPortal>
+        <div
+          ref={dragPreview}
+          css={css`
+            pointer-events: none;
+            border-radius: ${euiThemeVars.euiBorderRadius};
+            background-color: ${interactionData
+              ? transparentize(euiThemeVars.euiColorSuccess, 0.2)
+              : 'transparent'};
+            transition: background-color 50ms linear;
+            position: absolute;
+          `}
+        />
+      </EuiPortal>
     </div>
   );
 };

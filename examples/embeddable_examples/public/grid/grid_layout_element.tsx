@@ -63,12 +63,15 @@ export const KibanaGridElement = ({
         <div
           css={css`
             position: absolute;
+            top: 0;
+            left: 0;
             opacity: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
           `}
           ref={ghostRef}
-        >
-          <EuiIcon type="grid" />
-        </div>
+        />
         {/* drag handle */}
         <div
           draggable="true"

@@ -36,9 +36,8 @@ export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
       const maxRow = Object.values(gridRow).reduce((acc, panel) => {
         return Math.max(acc, panel.row + panel.height);
       }, 0);
-      if (interactionData?.type === 'resize') return maxRow + 1;
       return maxRow || 1;
-    }, [gridRow, interactionData]);
+    }, [gridRow]);
 
     return (
       <>
@@ -63,7 +62,8 @@ export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
             background-color: ${interactionData?.targetedRow === rowIndex
               ? transparentize(euiThemeVars.euiColorSuccess, 0.05)
               : 'transparent'};
-            ${interactionData && getGridBackgroundCSS(runtimeSettings)}
+            transition: background-color 300ms linear;
+            ${interactionData?.targetedRow === rowIndex && getGridBackgroundCSS(runtimeSettings)}
           `}
         >
           {Object.values(gridRow).map((gridData) => (
