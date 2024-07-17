@@ -6,7 +6,7 @@
  */
 
 import os from 'os';
-import type { ConfigType } from '../../../config';
+import type { ConfigType } from './config';
 
 interface WindowSize {
   height: number;

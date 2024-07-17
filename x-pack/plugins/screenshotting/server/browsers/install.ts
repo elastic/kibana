@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
 import del from 'del';
 import path from 'path';
-import type { Logger } from '@kbn/core/server';
-import { ChromiumArchivePaths, PackageInfo } from './chromium';
 import { download } from './download';
 import { sha256 } from './download/checksum';
 import { extract } from './extract';
