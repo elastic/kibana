@@ -14,7 +14,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('landing page', function () {
     before(async () => {
-      await svlCommonPage.loginWithPrivilegedRole();
+      await svlCommonPage.loginWithRole('viewer');
     });
 
     it('has serverless side nav', async () => {
