@@ -42,7 +42,7 @@ export function useCustomCardsForCategory(
     release: 'preview',
     title: 'OpenTelemetry',
     description:
-      'Collect Logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
+      'Collect logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
     name: 'custom-logs-virtual',
     categories: ['observability'],
     icons: [
@@ -181,7 +181,8 @@ export function useCustomCardsForCategory(
           id: 'auto-detect-logs',
           type: 'virtual',
           title: 'Auto-detect logs and metrics',
-          description: 'This installation scans your host and auto-detects log and metric files',
+          release: 'preview',
+          description: 'This installation scans your host and auto-detects log files and metrics',
           name: 'auto-detect-logs-virtual',
           categories: ['observability'],
           icons: [
