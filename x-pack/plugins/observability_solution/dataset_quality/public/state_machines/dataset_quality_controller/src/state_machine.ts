@@ -900,6 +900,8 @@ export const createDatasetQualityControllerStateMachine = ({
       },
       assertBreakdownFieldIsEcs: async (context) => {
         if (context.flyout.breakdownField) {
+          const allowedFieldSources = ['ecs', 'metadata'];
+
           // This timeout is to avoid a runtime error that randomly happens on breakdown field change
           // TypeError: Cannot read properties of undefined (reading 'timeFieldName')
           await new Promise((res) => setTimeout(res, 300));
@@ -910,7 +912,9 @@ export const createDatasetQualityControllerStateMachine = ({
             fieldNames: [context.flyout.breakdownField],
           });
 
-          return fields[context.flyout.breakdownField]?.source === 'ecs';
+          const breakdownFieldSource = fields[context.flyout.breakdownField]?.source;
+
+          return !!(breakdownFieldSource && allowedFieldSources.includes(breakdownFieldSource));
         }
 
         return null;
