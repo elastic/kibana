@@ -37,6 +37,27 @@ function createMathDefinition(
   };
 }
 
+// https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-functions-operators.html#_less_than
+const baseComparisonTypeTable: MathFunctionSignature[] = [
+  ['datetime', 'datetime', 'boolean'],
+  ['double', 'double', 'boolean'],
+  ['double', 'integer', 'boolean'],
+  ['double', 'long', 'boolean'],
+  ['integer', 'double', 'boolean'],
+  ['integer', 'integer', 'boolean'],
+  ['integer', 'long', 'boolean'],
+  ['ip', 'ip', 'boolean'],
+  ['keyword', 'keyword', 'boolean'],
+  ['keyword', 'text', 'boolean'],
+  ['long', 'double', 'boolean'],
+  ['long', 'integer', 'boolean'],
+  ['long', 'long', 'boolean'],
+  ['text', 'keyword', 'boolean'],
+  ['text', 'text', 'boolean'],
+  ['unsigned_long', 'unsigned_long', 'boolean'],
+  ['version', 'version', 'boolean'],
+];
+
 function createComparisonDefinition(
   {
     name,
@@ -49,6 +70,17 @@ function createComparisonDefinition(
   },
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
+  const commonSignatures = baseComparisonTypeTable.map((functionSignature) => {
+    const [lhs, rhs, result] = functionSignature;
+    return {
+      params: [
+        { name: 'left', type: lhs },
+        { name: 'right', type: rhs },
+      ],
+      returnType: result,
+    };
+  });
+
   return {
     type: 'builtin' as const,
     name,
@@ -57,41 +89,7 @@ function createComparisonDefinition(
     supportedOptions: ['by'],
     validate,
     signatures: [
-      {
-        params: [
-          { name: 'left', type: 'integer' },
-          { name: 'right', type: 'integer' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'string' },
-          { name: 'right', type: 'string' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'date' },
-          { name: 'right', type: 'date' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'ip' },
-          { name: 'right', type: 'ip' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'version' },
-          { name: 'right', type: 'version' },
-        ],
-        returnType: 'boolean',
-      },
+      ...commonSignatures,
       // constant strings okay because of implicit casting for
       // string to version and ip
       //
@@ -259,86 +257,6 @@ export const mathFunctions: FunctionDefinition[] = [
       defaultMessage: 'Module (%)',
     })
   ),
-  // createMathDefinition(
-  //   '-',
-  //   ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
-  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
-  //     defaultMessage: 'Subtract (-)',
-  //   })
-  // ),
-  // createMathDefinition(
-  //   '*',
-  //   ['number'],
-  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.multiplyDoc', {
-  //     defaultMessage: 'Multiply (*)',
-  //   })
-  // ),
-  // createMathDefinition(
-  //   '/',
-  //   ['number'],
-  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.divideDoc', {
-  //     defaultMessage: 'Divide (/)',
-  //   }),
-  //   (fnDef) => {
-  //     const [left, right] = fnDef.args;
-  //     const messages = [];
-  //     if (!Array.isArray(left) && !Array.isArray(right)) {
-  //       if (right.type === 'literal' && right.literalType === 'number') {
-  //         if (right.value === 0) {
-  //           messages.push({
-  //             type: 'warning' as const,
-  //             code: 'divideByZero',
-  //             text: i18n.translate(
-  //               'kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero',
-  //               {
-  //                 defaultMessage: 'Cannot divide by zero: {left}/{right}',
-  //                 values: {
-  //                   left: left.text,
-  //                   right: right.value,
-  //                 },
-  //               }
-  //             ),
-  //             location: fnDef.location,
-  //           });
-  //         }
-  //       }
-  //     }
-  //     return messages;
-  //   }
-  // ),
-  // createMathDefinition(
-  //   '%',
-  //   ['number'],
-  //   i18n.translate('kbn-esql-validation-autocomplete.esql.definition.moduleDoc', {
-  //     defaultMessage: 'Module (%)',
-  //   }),
-  //   (fnDef) => {
-  //     const [left, right] = fnDef.args;
-  //     const messages = [];
-  //     if (!Array.isArray(left) && !Array.isArray(right)) {
-  //       if (right.type === 'literal' && right.literalType === 'number') {
-  //         if (right.value === 0) {
-  //           messages.push({
-  //             type: 'warning' as const,
-  //             code: 'moduleByZero',
-  //             text: i18n.translate(
-  //               'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
-  //               {
-  //                 defaultMessage: 'Module by zero can return null value: {left}%{right}',
-  //                 values: {
-  //                   left: left.text,
-  //                   right: right.value,
-  //                 },
-  //               }
-  //             ),
-  //             location: fnDef.location,
-  //           });
-  //         }
-  //       }
-  //     }
-  //     return messages;
-  //   }
-  // ),
 ];
 
 const comparisonFunctions: FunctionDefinition[] = [

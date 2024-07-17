@@ -86,6 +86,7 @@ import {
   getParamAtPosition,
   getQueryForFields,
   getSourcesFromCommands,
+  getSupportedTypesForFunction,
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
 } from './helper';
@@ -941,6 +942,7 @@ async function getBuiltinFunctionNextArgument(
 ) {
   const suggestions = [];
   const isFnComplete = isFunctionArgComplete(nodeArg, references);
+
   if (isFnComplete.complete) {
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
@@ -971,17 +973,16 @@ async function getBuiltinFunctionNextArgument(
         suggestions.push(listCompleteItem);
       } else {
         const finalType = nestedType || nodeArgType || 'any';
+        const supportedTypes = getSupportedTypesForFunction(fnDef, finalType);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR
             // <COMMAND> expression AND/OR <suggest>
             // technically another boolean value should be suggested, but it is a better experience
             // to actually suggest a wider set of fields/functions
-            [
-              finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
-                ? 'any'
-                : finalType,
-            ],
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
+              ? ['any']
+              : supportedTypes,
             command.name,
             option?.name,
             getFieldsByType,
