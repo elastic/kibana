@@ -1671,7 +1671,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"right\" | \"left\" | \"top\" | \"bottom\")[]"
+                      "(\"right\" | \"top\" | \"bottom\" | \"left\")[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,

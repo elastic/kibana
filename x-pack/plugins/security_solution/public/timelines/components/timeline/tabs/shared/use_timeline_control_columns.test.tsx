@@ -13,10 +13,6 @@ import type { ColumnHeaderOptions } from '../../../../../../common/types/timelin
 import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
 import { TimelineTabs } from '../../../../../../common/types';
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
-
 jest.mock('../../../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({
     isEnterprise: () => true,
