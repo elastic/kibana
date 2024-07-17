@@ -18,12 +18,12 @@ export type UseSearchAlertsQueryParams = SetOptional<
   'query' | 'sort' | 'pageIndex' | 'pageSize'
 >;
 
-export const searchAlertsQueryPrefix = ['alerts', searchAlerts.name];
+export const queryKeyPrefix = ['alerts', searchAlerts.name];
 
 /**
  * Query alerts
  *
- * When testing components that depend on this hook, prefer mocking the `searchAlerts` function instead of the hook itself.
+ * When testing components that depend on this hook, prefer mocking the {@link searchAlerts} function instead of the hook itself.
  * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
 export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
@@ -43,7 +43,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
   } = params;
   return useQuery({
-    queryKey: searchAlertsQueryPrefix.concat(JSON.stringify(params)),
+    queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
     queryFn: ({ signal }) =>
       searchAlerts({
         data,
