@@ -8,7 +8,7 @@
 
 import assert from 'node:assert';
 
-/** We .ciel to rather _slightly_ over-report usage in certain circumstances */
+/** We .ceil to rather _slightly_ over-report usage in certain circumstances */
 const twoDeci = (num: number) => Math.ceil(num * 100) / 100;
 
 export class LoadWindow {
