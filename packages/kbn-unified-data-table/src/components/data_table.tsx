@@ -238,7 +238,7 @@ export interface UnifiedDataTableProps {
    */
   showDensitySelector?: boolean;
   /**
-   * Update row height state
+   * Callback when the density configuration is modified
    */
   onUpdateDensity?: (density: EuiDataGridStyle) => void;
   /**
