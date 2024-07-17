@@ -10,10 +10,12 @@ import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
 import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
-import { RowActions } from '../../assistant/common/components/assistant_settings_management/row_actions';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
+import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
 
 export const useKnowledgeBaseTable = () => {
+  const getActions = useInlineActions<KnowledgeBaseEntryResponse & { isDefault?: undefined }>();
+
   const getColumns = useCallback(
     ({
       onEntryNameClicked,
@@ -67,19 +69,14 @@ export const useKnowledgeBaseTable = () => {
           sortable: ({ createdAt }: KnowledgeBaseEntryResponse) => createdAt,
         },
         {
-          name: i18n.COLUMN_ACTIONS,
-          render: (knowledgeBase: KnowledgeBaseEntryResponse) => (
-            <RowActions<KnowledgeBaseEntryResponse>
-              rowItem={knowledgeBase}
-              onDelete={onDeleteActionClicked}
-              onEdit={onEditActionClicked}
-              isDeletable
-            />
-          ),
+          ...getActions({
+            onDelete: onDeleteActionClicked,
+            onEdit: onEditActionClicked,
+          }),
         },
       ];
     },
-    []
+    [getActions]
   );
   return { getColumns };
 };

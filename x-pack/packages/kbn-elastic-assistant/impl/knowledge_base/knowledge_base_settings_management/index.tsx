@@ -57,7 +57,8 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     useSettingsUpdater(
       DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
       DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
-      false // Knowledge Base settings do not require conversations
+      false, // Knowledge Base settings do not require conversations
+      false // Knowledge Base settings do not require prompts
     );
 
   const handleSave = useCallback(
