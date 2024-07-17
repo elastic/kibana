@@ -6,21 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { AlertConsumers, isValidFeatureId, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers, isValidFeatureId } from '@kbn/rule-data-utils';
 import { useQuery } from '@tanstack/react-query';
-import { HttpSetup } from '@kbn/core-http-browser';
 import type { BrowserFields } from '../types/alerts_fields_types';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
-import { fetchAlertsFields } from '../apis/fetch_alert_fields';
+import { fetchAlertsFields, FetchAlertsFieldsParams } from '../apis/fetch_alert_fields';
 
-export interface UseFetchAlertsFieldsQueryParams {
-  // Dependencies
-  http: HttpSetup;
-  // Params
-  /**
-   * Array of feature ids used for authorization and area-based filtering
-   */
-  featureIds: ValidFeatureId[];
+export interface UseFetchAlertsFieldsQueryParams extends FetchAlertsFieldsParams {
   /**
    * Initial browser fields
    */
@@ -33,10 +25,16 @@ export const queryKeyPrefix = ['alerts', fetchAlertsFields.name];
 
 /**
  * Fetch alerts indexes browser fields for the given feature ids
+ *
+ * When testing components that depend on this hook, prefer mocking the {@link fetchAlertsFields} function instead of the hook itself.
+ * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
 export const useFetchAlertsFieldsQuery = (
   { http, ...params }: UseFetchAlertsFieldsQueryParams,
-  options?: QueryOptionsOverrides<typeof fetchAlertsFields>
+  options?: Pick<
+    QueryOptionsOverrides<typeof fetchAlertsFields>,
+    'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
+  >
 ) => {
   const { featureIds, initialBrowserFields } = params;
 
@@ -44,13 +42,11 @@ export const useFetchAlertsFieldsQuery = (
     (fid) => isValidFeatureId(fid) && fid !== UNSUPPORTED_FEATURE_ID
   );
 
-  return useQuery(
-    queryKeyPrefix.concat(JSON.stringify(params)),
-    () => fetchAlertsFields({ http, featureIds: validFeatureIds }),
-    {
-      enabled: validFeatureIds.length > 0,
-      initialData: { browserFields: initialBrowserFields ?? {}, fields: [] },
-      ...options,
-    }
-  );
+  return useQuery({
+    queryKey: queryKeyPrefix.concat(JSON.stringify(featureIds)),
+    queryFn: () => fetchAlertsFields({ http, featureIds: validFeatureIds }),
+    enabled: validFeatureIds.length > 0,
+    initialData: { browserFields: initialBrowserFields ?? {}, fields: [] },
+    ...options,
+  });
 };
