@@ -21,6 +21,7 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -39,8 +40,8 @@ type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
 
 const getDetailsList = (
   data: CspFinding,
-  ruleFlyoutLink: string,
-  discoverDataviewLink?: string
+  ruleFlyoutLink?: string,
+  discoverDataViewLink?: string
 ) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
@@ -107,11 +108,17 @@ const getDetailsList = (
     description: data.rule?.section ? data.rule?.section : '-',
   },
   {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.sourceTitle', {
+      defaultMessage: 'Source',
+    }),
+    description: getDatasetDisplayName(data.data_stream?.dataset) || '-',
+  },
+  {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
       defaultMessage: 'Index',
     }),
-    description: discoverDataviewLink ? (
-      <EuiLink href={discoverDataviewLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+    description: discoverDataViewLink ? (
+      <EuiLink href={discoverDataViewLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
     ) : (
       LATEST_FINDINGS_INDEX_DEFAULT_NS
     ),
@@ -121,7 +128,11 @@ const getDetailsList = (
 export const getRemediationList = (rule: CspFinding['rule']) => [
   {
     title: '',
-    description: <CspFlyoutMarkdown>{rule?.remediation}</CspFlyoutMarkdown>,
+    description: rule?.remediation ? (
+      <CspFlyoutMarkdown>{rule?.remediation}</CspFlyoutMarkdown>
+    ) : (
+      '-'
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
@@ -171,19 +182,23 @@ export const OverviewTab = ({
   ruleFlyoutLink,
 }: {
   data: CspFinding;
-  ruleFlyoutLink: string;
+  ruleFlyoutLink?: string;
 }) => {
   const { discover } = useKibana().services;
   const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
   // link will navigate to our dataview in discover, filtered by the data source of the finding
-  const discoverDataviewLink = useMemo(
+  const discoverDataViewLink = useMemo(
     () =>
       discover.locator?.getRedirectUrl({
         dataViewId: latestFindingsDataView.data?.id,
         ...(data.data_stream?.dataset && {
           filters: [
             {
+              meta: {
+                type: 'phrase',
+                key: 'data_stream.dataset',
+              },
               query: {
                 match_phrase: {
                   'data_stream.dataset': data.data_stream.dataset,
@@ -207,7 +222,7 @@ export const OverviewTab = ({
             defaultMessage: 'Details',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataviewLink),
+          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink),
         },
         {
           initialIsOpen: true,
@@ -228,7 +243,7 @@ export const OverviewTab = ({
             listItems: getEvidenceList(data),
           },
       ].filter(truthy),
-    [data, discoverDataviewLink, hasEvidence, ruleFlyoutLink]
+    [data, discoverDataViewLink, hasEvidence, ruleFlyoutLink]
   );
 
   return (

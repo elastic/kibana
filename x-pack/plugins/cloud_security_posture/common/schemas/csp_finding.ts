@@ -6,7 +6,7 @@
  */
 
 // TODO: this needs to be defined in a versioned schema
-import type { EcsEvent } from '@elastic/ecs';
+import type { EcsDataStream, EcsEvent } from '@elastic/ecs';
 import { CspBenchmarkRuleMetadata } from '../types/latest';
 
 export interface CspFinding {
@@ -16,10 +16,10 @@ export interface CspFinding {
   cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
-  // TODO: make everything here optional
-  rule?: CspBenchmarkRuleMetadata;
+  rule: CspBenchmarkRuleMetadata;
   host: CspFindingHost;
   event: EcsEvent;
+  data_stream: EcsDataStream;
   agent: CspFindingAgent;
   ecs: {
     version: string;

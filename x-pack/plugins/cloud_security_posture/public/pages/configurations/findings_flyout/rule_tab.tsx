@@ -51,7 +51,7 @@ export const getRuleList = (
       defaultMessage: 'Alerts',
     }),
     description:
-      ruleState === 'unmuted' ? (
+      ruleState === 'unmuted' && rule?.benchmark?.name ? (
         <RulesDetectionRuleCounter benchmarkRule={rule} />
       ) : (
         <FormattedMessage
@@ -87,7 +87,7 @@ export const getRuleList = (
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.cisSectionTitle', {
-      defaultMessage: 'CIS Section',
+      defaultMessage: 'Framework Section',
     }),
     description: rule?.section || '-',
   },
@@ -121,6 +121,12 @@ export const getRuleList = (
   },
 ];
 
-export const RuleTab = ({ data, ruleFlyoutLink }: { data: CspFinding; ruleFlyoutLink: string }) => {
+export const RuleTab = ({
+  data,
+  ruleFlyoutLink,
+}: {
+  data: CspFinding;
+  ruleFlyoutLink?: string;
+}) => {
   return <EuiDescriptionList listItems={getRuleList(data.rule, ruleFlyoutLink)} />;
 };

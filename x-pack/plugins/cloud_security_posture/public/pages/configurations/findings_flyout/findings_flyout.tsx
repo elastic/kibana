@@ -169,7 +169,7 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
 
 const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
   const { euiTheme } = useEuiTheme();
-  const dataSetPrettyName = getDatasetDisplayName(finding.event.dataset);
+  const datasetDisplayName = getDatasetDisplayName(finding.data_stream.dataset);
 
   return (
     <EuiCallOut
@@ -181,7 +181,7 @@ const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
             id="xpack.csp.findings.findingsFlyout.calloutTitle"
             defaultMessage="Some fields not provided by {datasource}"
             values={{
-              datasource: dataSetPrettyName || 'the data source',
+              datasource: datasetDisplayName || 'the data source',
             }}
           />
         </span>
