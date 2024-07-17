@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { memoize } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -17,21 +16,15 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import {
-  OptionsListRequest,
-  OptionsListSuccessResponse,
-  type OptionsListResponse,
-} from '@kbn/controls-plugin/common/options_list/types';
+import { OptionsListSuccessResponse } from '@kbn/controls-plugin/common/options_list/types';
 import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public';
-import dateMath from '@kbn/datemath';
-import { buildEsQuery } from '@kbn/es-query';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
-import { MIN_OPTIONS_LIST_REQUEST_SIZE } from './constants';
+import { OptionsListRequestCache } from './options_list_request_cache';
 import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
-import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 
 export function fetchAndValidate$({
   api,
@@ -51,7 +44,9 @@ export function fetchAndValidate$({
   };
   stateManager: ControlStateManager<OptionsListComponentState>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
-  let abortController: AbortController = new AbortController();
+  let abortController: AbortController | undefined;
+
+  const requestCache = new OptionsListRequestCache();
 
   return combineLatest([
     api.dataViews,
@@ -64,6 +59,13 @@ export function fetchAndValidate$({
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     api.loadMoreSubject.pipe(debounceTime(100)), // debounce load more so "loading" state briefly shows
   ]).pipe(
+    tap(() => {
+      // abort any in progress requests
+      if (abortController) {
+        abortController.abort();
+        abortController = undefined;
+      }
+    }),
     withLatestFrom(
       stateManager.requestSize,
       stateManager.runPastTimeout,
@@ -93,11 +95,6 @@ export function fetchAndValidate$({
           return { suggestions: [] };
         }
 
-        /** Abort any in-progress requests */
-        abortController.abort();
-        const newAbortController = new AbortController();
-        abortController = newAbortController;
-
         /** Fetch the suggestions list + perform validation */
         api.loadingSuggestions$.next(true);
 
@@ -114,11 +111,11 @@ export function fetchAndValidate$({
           ...controlFetchContext,
         };
 
+        const newAbortController = new AbortController();
+        abortController = newAbortController;
         try {
-          return await cachedOptionsListRequest(request, abortController.signal, services);
+          return await requestCache.runRequest(request, newAbortController.signal, services);
         } catch (error) {
-          // Remove rejected results from memoize cache
-          cachedOptionsListRequest.cache.delete(optionsListCacheResolver(request));
           return { error };
         }
       }
@@ -128,79 +125,3 @@ export function fetchAndValidate$({
     })
   );
 }
-
-const optionsListCacheResolver = (request: OptionsListRequest) => {
-  const {
-    size,
-    sort,
-    query,
-    filters,
-    timeRange,
-    searchString,
-    runPastTimeout,
-    selectedOptions,
-    searchTechnique,
-    field: { name: fieldName },
-    dataView: { title: dataViewTitle },
-  } = request;
-  return [
-    // round timeRange to the minute to avoid cache misses
-    ...(timeRange
-      ? JSON.stringify({
-          from: dateMath.parse(timeRange.from)!.startOf('minute').toISOString(),
-          to: dateMath.parse(timeRange.to)!.endOf('minute').toISOString(),
-        })
-      : []),
-    Math.floor(Date.now() / 1000 / 60), // Only cache results for a minute in case data changes in ES index
-    selectedOptions?.join(','),
-    JSON.stringify(filters),
-    JSON.stringify(query),
-    JSON.stringify(sort),
-    searchTechnique,
-    runPastTimeout,
-    dataViewTitle,
-    searchString ?? '',
-    fieldName,
-    size,
-  ].join('|');
-};
-
-const cachedOptionsListRequest = memoize(
-  async (
-    request: OptionsListRequest,
-    abortSignal: AbortSignal,
-    services: {
-      http: CoreStart['http'];
-      uiSettings: CoreStart['uiSettings'];
-      data: DataPublicPluginStart;
-    }
-  ) => {
-    const index = request.dataView.title;
-
-    const timeService = services.data.query.timefilter.timefilter;
-    const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
-    const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
-    const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
-    const config = getEsQueryConfig(services.uiSettings);
-    const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [], config)];
-
-    const requestBody = {
-      ...passThroughProps,
-      filters: esFilters,
-      fieldName: field.name,
-      fieldSpec: field,
-      runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
-    };
-
-    return await services.http.fetch<OptionsListResponse>(
-      `/internal/controls/optionsList/${index}`,
-      {
-        version: '1',
-        body: JSON.stringify(requestBody),
-        signal: abortSignal,
-        method: 'POST',
-      }
-    );
-  },
-  optionsListCacheResolver
-);

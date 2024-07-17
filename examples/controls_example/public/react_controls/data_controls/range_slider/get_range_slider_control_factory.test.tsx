@@ -6,21 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, first, of, skip } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ControlGroupApi } from '../../control_group/types';
-import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { ControlApiRegistration } from '../../types';
-import { RangesliderControlApi, RangesliderControlState } from './types';
-import { StateComparators } from '@kbn/presentation-publishing';
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { ControlFetchContext } from '../../control_group/control_fetch';
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { first, of, skip } from 'rxjs';
+import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
+import { getRangesliderControlFactory } from './get_range_slider_control_factory';
+import { RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -28,14 +24,9 @@ const DEFAULT_MAX = 1000;
 
 describe('RangesliderControlApi', () => {
   const uuid = 'myControl1';
-  const dashboardApi = {
-    timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-  };
-  const controlGroupApi = {
-    controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
-    ignoreParentSettings$: new BehaviorSubject(undefined),
-    parentApi: dashboardApi,
-  } as unknown as ControlGroupApi;
+
+  const controlGroupApi = getMockedControlGroupApi();
+
   const dataStartServiceMock = dataPluginMock.createStartContract();
   let totalResults = DEFAULT_TOTAL_RESULTS;
   let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
@@ -73,6 +64,7 @@ describe('RangesliderControlApi', () => {
             displayName: 'My field name',
             name: 'myFieldName',
             type: 'string',
+            toSpec: jest.fn(),
           },
         ].find((field) => fieldName === field.name);
       },
@@ -97,20 +89,6 @@ describe('RangesliderControlApi', () => {
     max = DEFAULT_MAX;
   });
 
-  function buildApiMock(
-    api: ControlApiRegistration<RangesliderControlApi>,
-    nextComparitors: StateComparators<RangesliderControlState>
-  ) {
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      unsavedChanges: new BehaviorSubject<Partial<RangesliderControlState> | undefined>(undefined),
-      resetUnsavedChanges: () => {},
-      type: factory.type,
-    };
-  }
-
   describe('filters$', () => {
     test('should not set filters$ when value is not provided', (done) => {
       const { api } = factory.buildControl(
@@ -118,7 +96,7 @@ describe('RangesliderControlApi', () => {
           dataViewId: 'myDataView',
           fieldName: 'myFieldName',
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -135,7 +113,7 @@ describe('RangesliderControlApi', () => {
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -178,11 +156,11 @@ describe('RangesliderControlApi', () => {
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className="controlPanel" />);
       await waitFor(async () => {
         await findByTestId('range-slider-control-invalid-append-myControl1');
       });
@@ -196,11 +174,11 @@ describe('RangesliderControlApi', () => {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className="controlPanel" />);
       await waitFor(async () => {
         const minInput = await findByTestId('rangeSlider__lowerBoundFieldNumber');
         expect(minInput).toHaveAttribute('placeholder', String(DEFAULT_MIN));
@@ -217,7 +195,7 @@ describe('RangesliderControlApi', () => {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
@@ -232,7 +210,7 @@ describe('RangesliderControlApi', () => {
           fieldName: 'myFieldName',
           step: 1024,
         },
-        buildApiMock,
+        getMockedBuildApi(uuid, factory, controlGroupApi),
         uuid,
         controlGroupApi
       );
