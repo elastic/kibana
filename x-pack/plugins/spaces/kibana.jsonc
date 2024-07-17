@@ -19,8 +19,7 @@
       "home",
       "management",
       "usageCollection",
-      "cloud",
-      "cloudExperiments"
+      "cloud"
     ],
     "requiredBundles": [
       "esUiShared",

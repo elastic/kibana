@@ -6,16 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import {
-  firstValueFrom,
-  from,
-  of,
-  ReplaySubject,
-  shareReplay,
-  take,
-  combineLatest,
-  map,
-} from 'rxjs';
+import { firstValueFrom, of, ReplaySubject, take, combineLatest, map } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
@@ -67,7 +58,7 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud, cloudExperiments, spaces } = depsStart;
+    const { unifiedSearch, cloud, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
     const activeSpace$ = spaces?.getActiveSpace$() ?? of(undefined);
@@ -95,10 +86,11 @@ export class NavigationPublicPlugin
     const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    if (cloudExperiments && onCloud && !isServerless) {
-      this.isSolutionNavExperiementEnabled$ = from(
-        cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).catch(() => false)
-      ).pipe(shareReplay(1));
+    if (onCloud && !isServerless) {
+      this.isSolutionNavExperiementEnabled$ = core.featureFlags.getBooleanValue$(
+        SOLUTION_NAV_FEATURE_FLAG_NAME,
+        false
+      );
     }
 
     // Initialize the solution navigation if it is enabled

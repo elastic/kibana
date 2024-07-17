@@ -14,7 +14,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Logger } from '@kbn/logging';
 
 import { LaunchDarklyClientProvider } from '@openfeature/launchdarkly-client-provider';
-import { ClientProviderEvents } from '@openfeature/core';
 import type { LDMultiKindContext } from 'launchdarkly-js-client-sdk';
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 import type {
@@ -60,9 +59,11 @@ export class CloudExperimentsPlugin
       this.logger.get('metadata')
     );
 
+    // TODO: Legacy client. Remove when the migration is complete
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;
     }
+
     const ldConfig = config.launch_darkly;
     if (!ldConfig?.client_id && !initializerContext.env.mode.dev) {
       // If the plugin is enabled, and it's in prod mode, launch_darkly must exist
@@ -71,6 +72,8 @@ export class CloudExperimentsPlugin
         'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
       );
     }
+
+    // TODO: Legacy client. Remove when the migration is complete
     if (ldConfig?.client_id) {
       // Disabled to make it easier for manual tests of the new client
       // this.launchDarklyClient = new LaunchDarklyClient(
@@ -94,7 +97,11 @@ export class CloudExperimentsPlugin
       featureFlags: core.featureFlags,
       logger: this.logger,
     });
-    core.featureFlags.setProvider(this.createOpenFeatureProvider());
+
+    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider();
+    if (launchDarklyOpenFeatureProvider) {
+      core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
+    }
 
     // TODO: Legacy client. Remove when the migration is complete
     if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId && this.launchDarklyClient) {
@@ -127,16 +134,6 @@ export class CloudExperimentsPlugin
     this.logger.info(
       `The value is ${core.featureFlags.getStringValue('building-materials', 'fallback')}`
     );
-
-    core.featureFlags.addHandler(ClientProviderEvents.ConfigurationChanged, (event) => {
-      this.logger.info(`[Configuration changed] Flags changed! ${event?.flagsChanged}`);
-      this.logger.info(
-        `[Configuration changed] The value now is ${core.featureFlags.getStringValue(
-          'building-materials',
-          'fallback'
-        )}`
-      );
-    });
 
     this.metadataService.start({
       hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
@@ -188,8 +185,10 @@ export class CloudExperimentsPlugin
 
   private createOpenFeatureProvider() {
     const { launch_darkly: ldConfig } = this.initializerContext.config.get<{
-      launch_darkly: LaunchDarklyClientConfig;
+      launch_darkly?: LaunchDarklyClientConfig;
     }>();
+
+    if (!ldConfig) return;
 
     return new LaunchDarklyClientProvider(ldConfig.client_id, {
       logger: this.logger.get('launch-darkly'),

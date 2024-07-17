@@ -21,7 +21,6 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -61,7 +60,6 @@ export interface ObservabilityOnboardingPluginStartDeps {
   security: SecurityPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &

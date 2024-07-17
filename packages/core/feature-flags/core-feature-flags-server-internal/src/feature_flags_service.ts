@@ -14,8 +14,9 @@ import type {
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
-import { type Client, OpenFeature } from '@openfeature/server-sdk';
+import { type Client, OpenFeature, ServerProviderEvents } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
+import { filter, mergeMap, startWith, Subject } from 'rxjs';
 
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
@@ -44,29 +45,62 @@ export class FeatureFlagsService {
    * Start lifecycle method
    */
   public start(): FeatureFlagsStart {
+    const featureFlagsChanged$ = new Subject<string[]>();
+    this.featureFlagsClient.addHandler(ServerProviderEvents.ConfigurationChanged, (event) => {
+      if (event?.flagsChanged) {
+        featureFlagsChanged$.next(event.flagsChanged);
+      }
+    });
+    const observeFeatureFlag$ = (flagName: string) =>
+      featureFlagsChanged$.pipe(
+        filter((flagNames) => flagNames.includes(flagName)),
+        startWith([]) // only to emit on the first call
+      );
+
     return {
-      addHandler: this.featureFlagsClient.addHandler.bind(this.featureFlagsClient),
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
-      getBooleanValue: async (flagName: string, fallbackValue: boolean) => {
-        // TODO: intercept with config overrides
-        const value = await this.featureFlagsClient.getBooleanValue(flagName, fallbackValue);
-        apm.addLabels({ [`flag_${flagName}`]: value });
-        // TODO: increment usage counter
-        return value;
+      getBooleanValue: async (flagName, fallbackValue) =>
+        this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue),
+      getStringValue: async <Value extends string>(flagName: string, fallbackValue: Value) =>
+        await this.evaluateFlag<Value>(
+          this.featureFlagsClient.getStringValue,
+          flagName,
+          fallbackValue
+        ),
+      getNumberValue: async <Value extends number>(flagName: string, fallbackValue: Value) =>
+        await this.evaluateFlag<Value>(
+          this.featureFlagsClient.getNumberValue,
+          flagName,
+          fallbackValue
+        ),
+      getBooleanValue$: (flagName, fallbackValue) => {
+        return observeFeatureFlag$(flagName).pipe(
+          mergeMap(() =>
+            this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
+          )
+        );
       },
-      getStringValue: async (flagName: string, fallbackValue: string) => {
-        // TODO: intercept with config overrides
-        const value = await this.featureFlagsClient.getStringValue(flagName, fallbackValue);
-        apm.addLabels({ [`flag_${flagName}`]: value });
-        // TODO: increment usage counter
-        return value;
+      getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
+        return observeFeatureFlag$(flagName).pipe(
+          mergeMap(() =>
+            this.evaluateFlag<Value>(
+              this.featureFlagsClient.getStringValue,
+              flagName,
+              fallbackValue
+            )
+          )
+        );
       },
-      getNumberValue: async (flagName: string, fallbackValue: number) => {
-        // TODO: intercept with config overrides
-        const value = await this.featureFlagsClient.getNumberValue(flagName, fallbackValue);
-        apm.addLabels({ [`flag_${flagName}`]: value });
-        // TODO: increment usage counter
-        return value;
+      getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
+        return observeFeatureFlag$(flagName).pipe(
+          mergeMap(() =>
+            this.evaluateFlag<Value>(
+              this.featureFlagsClient.getNumberValue,
+              flagName,
+              fallbackValue
+            )
+          )
+        );
       },
     };
   }
@@ -76,6 +110,25 @@ export class FeatureFlagsService {
    */
   public async stop() {
     await OpenFeature.close();
+  }
+
+  /**
+   * Wrapper to evaluate flags with the common config overrides interceptions + APM and counters reporting
+   * @param evaluationFn The actual evaluation API
+   * @param flagName The name of the flag to evaluate
+   * @param fallbackValue The fallback value
+   * @private
+   */
+  private async evaluateFlag<T extends string | boolean | number>(
+    evaluationFn: (flagName: string, fallbackValue: T) => Promise<T>,
+    flagName: string,
+    fallbackValue: T
+  ): Promise<T> {
+    // TODO: intercept with config overrides
+    const value = await evaluationFn(flagName, fallbackValue);
+    apm.addLabels({ [`flag_${flagName}`]: value });
+    // TODO: increment usage counter
+    return value;
   }
 
   /**

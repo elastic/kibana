@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
 const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';
 
-export const isSolutionNavEnabled = (
-  cloud?: CloudStart,
-  cloudExperiments?: CloudExperimentsPluginStart
-) => {
-  return Boolean(cloud?.isCloudEnabled) && cloudExperiments
-    ? cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
-    : Promise.resolve(false);
+export const isSolutionNavEnabled = (featureFlags: FeatureFlagsStart, cloud?: CloudStart) => {
+  return Boolean(cloud?.isCloudEnabled)
+    ? featureFlags.getBooleanValue(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
+    : false;
 };

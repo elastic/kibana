@@ -14,7 +14,9 @@ import type {
 } from '@kbn/core/server';
 import { get, has } from 'lodash';
 import { filter, map } from 'rxjs';
-import type { LDMultiKindContext } from 'launchdarkly-node-server-sdk';
+import { OpenFeature } from '@openfeature/server-sdk';
+import { LaunchDarklyProvider } from '@launchdarkly/openfeature-node-server';
+import type { LDMultiKindContext } from '@launchdarkly/node-server-sdk';
 import type { LogLevelId, LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -40,7 +42,13 @@ interface CloudExperimentsPluginStartDeps {
 }
 
 export class CloudExperimentsPlugin
-  implements Plugin<void, CloudExperimentsPluginStart, CloudExperimentsPluginSetupDeps>
+  implements
+    Plugin<
+      void,
+      CloudExperimentsPluginStart,
+      CloudExperimentsPluginSetupDeps,
+      CloudExperimentsPluginStartDeps
+    >
 {
   private readonly logger: Logger;
   private readonly launchDarklyClient?: LaunchDarklyClient;
@@ -56,6 +64,7 @@ export class CloudExperimentsPlugin
       this.logger.get('metadata')
     );
 
+    // TODO: Legacy client. Remove when the migration is complete
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;
     }
@@ -67,6 +76,8 @@ export class CloudExperimentsPlugin
         'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
       );
     }
+
+    // TODO: Legacy client. Remove when the migration is complete
     if (ldConfig) {
       // this.launchDarklyClient = new LaunchDarklyClient(
       //   {
@@ -79,6 +90,7 @@ export class CloudExperimentsPlugin
   }
 
   public setup(core: CoreSetup, deps: CloudExperimentsPluginSetupDeps) {
+    // Ideally we should have something like this for the browser as well.
     core.logging.configure(
       this.initializerContext.config.create<CloudExperimentsConfigType>().pipe(
         map(({ launch_darkly: { client_log_level: clientLogLevel = 'none' } = {} }) => {
@@ -87,9 +99,6 @@ export class CloudExperimentsPlugin
         })
       )
     );
-    registerUsageCollector(deps.usageCollection, () => ({
-      launchDarklyClient: this.launchDarklyClient, // TODO: Return the client from the OpenFeature Provider
-    }));
 
     initializeMetadata({
       metadataService: this.metadataService,
@@ -98,6 +107,16 @@ export class CloudExperimentsPlugin
       featureFlags: core.featureFlags,
       logger: this.logger,
     });
+
+    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider();
+    if (launchDarklyOpenFeatureProvider) {
+      core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
+    }
+
+    registerUsageCollector(deps.usageCollection, () => ({
+      launchDarklyClient: launchDarklyOpenFeatureProvider?.getClient(),
+      currentContext: OpenFeature.getContext(),
+    }));
 
     // TODO: Legacy client. Remove when the migration is complete
     if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId) {
@@ -127,6 +146,24 @@ export class CloudExperimentsPlugin
   public stop() {
     this.launchDarklyClient?.stop();
     this.metadataService.stop();
+  }
+
+  private createOpenFeatureProvider() {
+    const { launch_darkly: ldConfig } =
+      this.initializerContext.config.get<CloudExperimentsConfigType>();
+
+    if (!ldConfig) return;
+
+    return new LaunchDarklyProvider(ldConfig.client_id, {
+      logger: this.logger.get('launch-darkly'),
+      application: {
+        id: 'kibana-server',
+        version:
+          this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
+            ? this.initializerContext.env.packageInfo.buildSha
+            : this.initializerContext.env.packageInfo.version,
+      },
+    });
   }
 
   private getVariation = async <Data>(

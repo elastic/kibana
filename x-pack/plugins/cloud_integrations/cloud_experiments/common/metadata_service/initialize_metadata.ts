@@ -11,6 +11,7 @@ import type { CloudSetup as CloudSetupServer } from '@kbn/cloud-plugin/server';
 import type { PluginInitializerContext as PluginInitializerContextBrowser } from '@kbn/core-plugins-browser';
 import type { PluginInitializerContext as PluginInitializerContextServer } from '@kbn/core-plugins-server';
 import type { FeatureFlagsSetup as FeatureFlagsSetupBrowser } from '@kbn/core-feature-flags-browser';
+import type { FeatureFlagsSetup as FeatureFlagsSetupServer } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
 import type { MetadataService } from './metadata_service';
 
@@ -26,7 +27,7 @@ export function initializeMetadata({
 }: {
   metadataService: MetadataService;
   initializerContext: PluginInitializerContextBrowser | PluginInitializerContextServer;
-  featureFlags: FeatureFlagsSetupBrowser;
+  featureFlags: FeatureFlagsSetupBrowser | FeatureFlagsSetupServer;
   cloud: CloudSetupBrowser | CloudSetupServer;
   logger: Logger;
 }) {

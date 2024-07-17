@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
@@ -33,7 +32,6 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 /**
@@ -75,7 +73,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     this.solutionNavExperiment = core
       .getStartServices()
-      .then(([, { cloud, cloudExperiments }]) => isSolutionNavEnabled(cloud, cloudExperiments))
+      .then(([{ featureFlags }, { cloud }]) => isSolutionNavEnabled(featureFlags, cloud))
       .catch((err) => {
         this.initializerContext.logger.get().error(`Failed to retrieve cloud experiment: ${err}`);
 

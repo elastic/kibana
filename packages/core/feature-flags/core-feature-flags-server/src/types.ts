@@ -7,13 +7,8 @@
  */
 
 import type { Provider } from '@openfeature/server-sdk';
-import {
-  ServerProviderEvents,
-  type EvaluationContext as OpenFeatureEvaluationContext,
-  type Eventing,
-} from '@openfeature/core';
-
-export { ServerProviderEvents };
+import { type EvaluationContext as OpenFeatureEvaluationContext } from '@openfeature/core';
+import type { Observable } from 'rxjs';
 
 /**
  * The evaluation context to use when retrieving the flags.
@@ -87,13 +82,6 @@ export interface FeatureFlagsSetup {
  */
 export interface FeatureFlagsStart {
   /**
-   * Registers an {@link Eventing<ClientProviderEvents>['addHandler'] | event handler} to the specified event name.
-   * Useful when the consumer needs to react to flag changes.
-   * @public
-   */
-  addHandler: Eventing<ServerProviderEvents>['addHandler'];
-
-  /**
    * Appends new keys to the evaluation context.
    * @param contextToAppend The additional keys that should be appended/modified in the evaluation context.
    * @public
@@ -110,11 +98,29 @@ export interface FeatureFlagsStart {
    * Evaluates a string flag
    * @public
    */
-  getStringValue(flagName: string, fallbackValue: string): Promise<string>;
+  getStringValue<Value extends string>(flagName: string, fallbackValue: Value): Promise<Value>;
 
   /**
    * Evaluates a number flag
    * @public
    */
-  getNumberValue(flagName: string, fallbackValue: number): Promise<number>;
+  getNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Promise<Value>;
+
+  /**
+   * Returns an observable of a boolean flag
+   * @public
+   */
+  getBooleanValue$(flagName: string, fallbackValue: boolean): Observable<boolean>;
+
+  /**
+   * Returns an observable of a string flag
+   * @public
+   */
+  getStringValue$<Value extends string>(flagName: string, fallbackValue: Value): Observable<Value>;
+
+  /**
+   * Returns an observable of a number flag
+   * @public
+   */
+  getNumberValue$<Value extends number>(flagName: string, fallbackValue: Value): Observable<Value>;
 }
