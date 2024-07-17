@@ -13,7 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('home page', function () {
     before(async () => {
-      await svlCommonPage.loginWithPrivilegedRole();
+      await svlCommonPage.loginWithRole('viewer');
     });
 
     it('has project header', async () => {
