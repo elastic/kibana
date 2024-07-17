@@ -6,21 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { EventLoopUtilizationWithLoad } from '@kbn/core-metrics-server';
 import type { EventLoopUtilization } from 'perf_hooks';
 import { performance } from 'perf_hooks';
 import { LoadWindow } from './load_window';
-
-export interface EventLoopUtilizationWithLoad extends EventLoopUtilization {
-  // Event-loop utilization represented as an average of a number of collections as buckets
-  load: {
-    // The last 3 collections
-    short: number;
-    // The last 6 collections
-    medium: number;
-    // The last 12 collections
-    long: number;
-  };
-}
 
 const LOAD_WINDOW_SIZE_SHORT = 3;
 const LOAD_WINDOW_SIZE_MED = 6;

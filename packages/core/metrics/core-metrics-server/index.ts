@@ -16,4 +16,5 @@ export type {
   OpsServerMetrics,
   ElasticsearchClientProtocol,
   ElasticsearchClientsMetrics,
+  EventLoopUtilizationWithLoad,
 } from './src/metrics';

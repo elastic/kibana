@@ -9,6 +9,24 @@
 import type { EventLoopUtilization } from 'perf_hooks';
 
 /**
+ * Event loop utilization metrics with load averages
+ * @public
+ */
+export interface EventLoopUtilizationWithLoad extends EventLoopUtilization {
+  /** Event-loop utilization represented as an average of a number of collections as buckets */
+  load: {
+    /**
+     * The load for the short window
+     */
+    short: number;
+    /** The load for the medium window */
+    medium: number;
+    /** The load for the long window */
+    long: number;
+  };
+}
+
+/**
  * an IntervalHistogram object that samples and reports the event loop delay over time.
  * The delays will be reported in milliseconds.
  *
@@ -92,7 +110,7 @@ export interface OpsProcessMetrics {
   /** node event loop delay histogram since last collection */
   event_loop_delay_histogram: IntervalHistogram;
   /** node event loop utilization since last collection */
-  event_loop_utilization: EventLoopUtilization;
+  event_loop_utilization: EventLoopUtilizationWithLoad;
   /** uptime of the kibana process */
   uptime_in_millis: number;
 }
