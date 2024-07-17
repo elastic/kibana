@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Export exception list API endpoint
+  version: '2023-10-31'
+paths:
+  /api/exception_lists/_export:
+    post:
+      operationId: ExportExceptionList
+      x-codegen-enabled: true
+      summary: Exports an exception list
+      description: Exports an exception list and its associated items to an .ndjson file
+      tags:
+        - Exceptions API
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Exception list's identifier
+          schema:
+            $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
+        - name: list_id
+          in: query
+          required: true
+          description: Exception list's human identifier
+          schema:
+            $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+        - name: namespace_type
+          in: query
+          required: true
+          schema:
+            $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+        - name: include_expired_exceptions
+          in: query
+          required: true
+          description: Determines whether to include expired exceptions in the exported list
+          schema:
+            type: string
+            enum: ['true', 'false']
+            default: 'true'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/ndjson:
+              schema:
+                type: string
+                format: binary
+                description: A `.ndjson` file containing specified exception list and its items
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        404:
+          description: Exception list not found response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

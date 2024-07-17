@@ -70,6 +70,7 @@ interface RuleSnoozeSettingsResponse {
    * Rule's SO id
    */
   id: string;
+  name: string;
   mute_all: boolean;
   snooze_schedule?: RuleSnooze;
   active_snoozes?: string[];

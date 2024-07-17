@@ -1028,6 +1028,9 @@
       },
       "type": {
         "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
       }
     }
   },
@@ -1608,6 +1611,10 @@
         "type": "text"
       }
     }
+  },
+  "fleet-space-settings": {
+    "dynamic": false,
+    "properties": {}
   },
   "fleet-uninstall-tokens": {
     "dynamic": false,

@@ -61,10 +61,11 @@ export const getRangesliderControlFactory = (
       );
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+      const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-      const step$ = new BehaviorSubject<number | undefined>(initialState.step);
+      const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
       const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
       function setValue(nextValue: RangeValue | undefined) {
         value$.next(nextValue);
@@ -138,8 +139,8 @@ export const getRangesliderControlFactory = (
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
+        controlFetch$,
         data: services.data,
-        dataControlFetch$: controlGroupApi.dataControlFetch$,
         dataViews$: dataControl.api.dataViews,
         fieldName$: dataControl.stateManager.fieldName,
         setIsLoading: (isLoading: boolean) => {
@@ -195,11 +196,11 @@ export const getRangesliderControlFactory = (
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
+        controlFetch$,
         data: services.data,
         dataViews$: dataControl.api.dataViews,
-        filters$: dataControl.api.filters$,
+        rangeFilters$: dataControl.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
-        dataControlFetch$: controlGroupApi.dataControlFetch$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNoResults$.next(isLoading);
         },

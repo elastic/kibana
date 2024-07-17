@@ -227,7 +227,6 @@ export class RenderingService {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      i18n: i18nLib.translate,
       locale,
       themeVersion,
       darkMode,
