@@ -28,6 +28,14 @@ import { ChooseConnectorSelectable } from './components/choose_connector_selecta
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 
 interface StartStepProps {
+  allConnectors: Array<{
+    description: string;
+    iconPath: string;
+    isBeta: boolean;
+    isNative: boolean;
+    isTechPreview: boolean;
+    name: string;
+  }>;
   connectorSelected: string;
   selfManaged: boolean;
   setConnectorSelected: Function;
@@ -41,6 +49,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   selfManaged,
   setConnectorSelected,
   connectorSelected,
+  allConnectors,
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
@@ -72,8 +81,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                   )}
                 >
                   <ChooseConnectorSelectable
+                    selfManaged={selfManaged}
                     setConnectorSelected={setConnectorSelected}
                     connectorSelected={connectorSelected}
+                    allConnectors={allConnectors}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

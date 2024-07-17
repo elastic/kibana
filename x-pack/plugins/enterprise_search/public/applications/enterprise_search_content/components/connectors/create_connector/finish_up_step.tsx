@@ -126,7 +126,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       'xpack.enterpriseSearch.finishUpStep.euiCard.chatWithYourDataLabel',
                       { defaultMessage: 'Chat with your data' }
                     )}
-                    description="Combine your data with the power of LLMs for retrieval augmented generation (RAG)."
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.finishUpStep.euiCard.chatWithYourDataDescriptionl',
+                      {
+                        defaultMessage:
+                          'Combine your data with the power of LLMs for retrieval augmented generation (RAG)',
+                      }
+                    )}
                     footer={
                       hasData ? (
                         <EuiButton
@@ -170,7 +176,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       'xpack.enterpriseSearch.finishUpStep.euiCard.exploreYourDataLabel',
                       { defaultMessage: 'Explore your data' }
                     )}
-                    description="See your connector documents or make a data view to explore it."
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.finishUpStep.euiCard.exploreYourDataDescription',
+                      {
+                        defaultMessage:
+                          'See your connector documents or make a data view to explore it',
+                      }
+                    )}
                     footer={
                       hasData ? (
                         <EuiButton
@@ -214,7 +226,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       'xpack.enterpriseSearch.finishUpStep.euiCard.manageYourConnectorLabel',
                       { defaultMessage: 'Manage your connector' }
                     )}
-                    description="Now you can manage your connector, schedule a sync and much more"
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.finishUpStep.euiCard.manageYourConnectorDescription',
+                      {
+                        defaultMessage:
+                          'Now you can manage your connector, schedule a sync and much more',
+                      }
+                    )}
                     footer={
                       <EuiFlexGroup responsive={false} gutterSize="xs" justifyContent="center">
                         <EuiFlexItem grow={false}>
@@ -293,7 +311,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     { defaultMessage: 'Query with language clients' }
                   )}
                   titleSize="xs"
-                  description="Use your favourite language client to query your data in your app."
+                  description={i18n.translate(
+                    'xpack.enterpriseSearch.finishUpStep.euiCard.queryWithLanguageClientsLDescription',
+                    {
+                      defaultMessage:
+                        'Use your favourite language client to query your data in your app',
+                    }
+                  )}
                   onClick={() => {}}
                   display="subdued"
                 />
@@ -315,7 +339,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     { defaultMessage: 'Dev tools' }
                   )}
                   titleSize="xs"
-                  description="Tools for interacting with your data, such a console, profiler, Grok debugger and more.."
+                  description={i18n.translate(
+                    'xpack.enterpriseSearch.finishUpStep.euiCard.devToolsDescription',
+                    {
+                      defaultMessage:
+                        'Tools for interacting with your data, such a console, profiler, Grok debugger and more',
+                    }
+                  )}
                   onClick={() => {}}
                   display="subdued"
                 />

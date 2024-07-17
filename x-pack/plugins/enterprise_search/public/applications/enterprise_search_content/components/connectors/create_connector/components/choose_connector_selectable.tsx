@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiBadge,
@@ -13,13 +13,21 @@ import {
   EuiInputPopover,
   EuiSelectable,
   EuiSelectableOption,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import dropbox from '../assets/dropbox.svg';
-
 interface ChooseConnectorSelectableProps {
+  allConnectors: Array<{
+    description: string;
+    iconPath: string;
+    isBeta: boolean;
+    isNative: boolean;
+    isTechPreview: boolean;
+    name: string;
+  }>;
   connectorSelected: string;
+  selfManaged: boolean;
   setConnectorSelected: Function;
 }
 interface OptionData {
@@ -29,141 +37,71 @@ interface OptionData {
 export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps> = ({
   setConnectorSelected,
   connectorSelected,
+  selfManaged,
+  allConnectors,
 }) => {
-  const connectorsData = [
-    {
-      checked: 'on',
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Azure Blob Storage',
-      techPreview: false,
-    },
-    {
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Confluence Cloud & Server',
-      techPreview: true,
-    },
-    {
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Confluence Data Center',
-      techPreview: false,
-    },
-    {
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Dropbox',
-      techPreview: true,
-    },
-    {
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Azure Blob Storage',
-      techPreview: false,
-    },
-    {
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Confluence Cloud & Server',
-      techPreview: true,
-    },
-    {
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Confluence Data Center',
-      techPreview: false,
-    },
-    {
-      icon: (
-        <EuiIcon
-          type={dropbox}
-          size="l"
-          title={i18n.translate(
-            'xpack.enterpriseSearch.chooseConnectorSelectable.euiIcon.dropboxLabel',
-            { defaultMessage: 'Dropbox' }
-          )}
-        />
-      ),
-      name: 'Dropbox',
-
-      techPreview: true,
-    },
-  ];
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(true);
-  const [options, setOptions] = useState<Array<EuiSelectableOption<OptionData>>>([
-    ...connectorsData.map(
-      (connector): EuiSelectableOption => ({
-        append: connector.techPreview ? (
-          <EuiBadge iconType="beaker" color="hollow">
-            {i18n.translate(
-              'xpack.enterpriseSearch.chooseConnectorSelectable.thechPreviewBadgeLabel',
-              { defaultMessage: 'Thech preview' }
-            )}
-          </EuiBadge>
-        ) : null,
-        label: `${connector.name}`,
-        prepend: connector.icon,
-      })
+  const [selectableOptions, selectableSetOptions] = useState<
+    Array<EuiSelectableOption<OptionData>>
+  >([
+    ...allConnectors.map(
+      (connector: {
+        description: string;
+        iconPath: string;
+        isBeta: boolean;
+        isNative: boolean;
+        isTechPreview: boolean;
+        name: string;
+      }): EuiSelectableOption => {
+        let append = null;
+        if (connector.isTechPreview) {
+          append = (
+            <EuiBadge iconType="beaker" color="hollow">
+              {i18n.translate(
+                'xpack.enterpriseSearch.chooseConnectorSelectable.thechPreviewBadgeLabel',
+                { defaultMessage: 'Thech preview' }
+              )}
+            </EuiBadge>
+          );
+        } else if (connector.isBeta) {
+          append = (
+            <EuiBadge iconType={'beta'} color="hollow">
+              {i18n.translate('xpack.enterpriseSearch.chooseConnectorSelectable.BetaBadgeLabel', {
+                defaultMessage: 'Beta',
+              })}
+            </EuiBadge>
+          );
+        }
+        if (!selfManaged && !connector.isNative) {
+          append = (
+            <EuiBadge color="warning">
+              {i18n.translate(
+                'xpack.enterpriseSearch.chooseConnectorSelectable.OnlySelfManagedBadgeLabel',
+                {
+                  defaultMessage: 'Only as a self managed',
+                }
+              )}
+            </EuiBadge>
+          );
+        }
+
+        return {
+          append,
+          disabled: !selfManaged && !connector.isNative,
+          label: connector.name,
+          prepend: <EuiIcon size="l" type={connector.iconPath} />,
+          toolTipContent: connector.description,
+        };
+      }
     ),
   ]);
+
+  useEffect(() => {
+    // Setting options when changing the radiobutton to self managed but it doesn't update the values for disable nor badges
+    selectableSetOptions(selectableOptions);
+  }, [selfManaged]);
 
   return (
     <EuiSelectable
@@ -171,21 +109,24 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         'xpack.enterpriseSearch.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
         { defaultMessage: 'Selectable + input popover example' }
       )}
-      options={options}
+      options={selectableOptions}
       onChange={(newOptions, event, changedOption) => {
-        setOptions(newOptions);
+        selectableSetOptions(newOptions);
         setIsOpen(false);
         if (changedOption.checked === 'on') {
           setConnectorSelected(changedOption.label);
-          //   setConnectorSelected(changedOption.label);
           setIsSearching(false);
         } else {
           setConnectorSelected('');
         }
       }}
       listProps={{
-        css: { '.euiSelectableList__list': { maxBlockSize: 200 } },
-        rowHeight: 50,
+        css: {
+          '.euiSelectableListItem': { alignItems: 'center' },
+          '.euiSelectableList__list': { maxBlockSize: 200 },
+        },
+        isVirtualized: true,
+        rowHeight: Number(euiTheme.base * 3),
         showIcons: false,
       }}
       singleSelection

@@ -12,6 +12,8 @@ import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 // import { useValues } from 'kea';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -31,6 +33,7 @@ import { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
 import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n-react';
 
+import { KibanaLogic } from '../../../../shared/kibana';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { connectorsBreadcrumbs } from '../connectors';
 
@@ -43,9 +46,9 @@ import { StartStep } from './start_step';
 
 export const CreateConnector: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-
   const [selfManaged, setSelfManaged] = useState(false);
-
+  const { connectorTypes } = useValues(KibanaLogic);
+  const allConnectors = connectorTypes.sort((a, b) => a.name.localeCompare(b.name)); // alphabetically ordered
   const [startStepStatus, setStartStepStatus] = useState<
     | 'current'
     | 'incomplete'
@@ -108,6 +111,7 @@ export const CreateConnector: React.FC = () => {
           selfManaged={selfManaged}
           setConnectorSelected={setConnectorSelected}
           connectorSelected={connectorSelected}
+          allConnectors={allConnectors}
         />
       ),
       status: startStepStatus,
@@ -171,6 +175,7 @@ export const CreateConnector: React.FC = () => {
           selfManaged={selfManaged}
           setConnectorSelected={setConnectorSelected}
           connectorSelected={connectorSelected}
+          allConnectors={allConnectors}
         />
       ),
       status: startStepStatus,
@@ -288,6 +293,10 @@ export const CreateConnector: React.FC = () => {
       }
     }
   }, [currentStep]);
+
+  useEffect(() => {
+    // console.log(allConnectors);
+  }, []);
 
   return (
     <EnterpriseSearchContentPageTemplate
