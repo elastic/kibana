@@ -57,7 +57,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('setup Page', () => {
