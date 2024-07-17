@@ -8,24 +8,18 @@
 
 import moment from 'moment';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-
-import {
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-  type UsageCollectionSetup,
-  type UsageCountersSavedObjectAttributes,
-} from '@kbn/usage-collection-plugin/server';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
-import { isSavedObjectOlderThan } from '../../common/saved_objects';
-
-export type GetUsageCounter = Pick<UsageCollectionSetup, 'getUsageCounterByDomainId'>;
+import { type UsageCountersSavedObjectAttributes, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '..';
+import { isSavedObjectOlderThan } from '../saved_objects';
+import type { GetUsageCounter } from '../types';
 
 export async function rollUsageCountersIndices({
   logger,
-  usageCollection,
+  usageCounters,
   internalRepository,
 }: {
   logger: Logger;
-  usageCollection: GetUsageCounter;
+  usageCounters: GetUsageCounter;
   internalRepository?: ISavedObjectsRepository;
 }) {
   if (!internalRepository) {
@@ -45,7 +39,7 @@ export async function rollUsageCountersIndices({
     const docsToDelete = rawUiCounterDocs.filter((doc) =>
       isSavedObjectOlderThan({
         numberOfDays:
-          usageCollection.getUsageCounterByDomainId(doc.attributes.domainId)?.retentionPeriodDays ||
+          usageCounters.getUsageCounterByDomainId(doc.attributes.domainId)?.retentionPeriodDays ||
           USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS,
         startDate: now,
         doc,

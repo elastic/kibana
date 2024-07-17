@@ -9,17 +9,18 @@
 import { type Observable, timer, takeUntil } from 'rxjs';
 import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import { ROLL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
-import { type GetUsageCounter, rollUsageCountersIndices } from './rollups';
+import { rollUsageCountersIndices } from './rollups';
+import { GetUsageCounter } from '../types';
 
 export function registerUsageCountersRollups({
   logger,
-  usageCollection,
-  getSavedObjectsClient,
+  usageCounters,
+  internalRepository,
   pluginStop$,
 }: {
   logger: Logger;
-  usageCollection: GetUsageCounter;
-  getSavedObjectsClient: () => ISavedObjectsRepository | undefined;
+  usageCounters: GetUsageCounter;
+  internalRepository: ISavedObjectsRepository;
   pluginStop$: Observable<void>;
 }) {
   timer(ROLL_INDICES_START, ROLL_INDICES_INTERVAL)
@@ -27,8 +28,8 @@ export function registerUsageCountersRollups({
     .subscribe(() =>
       rollUsageCountersIndices({
         logger,
-        usageCollection,
-        internalRepository: getSavedObjectsClient(),
+        usageCounters,
+        internalRepository,
       })
     );
 }

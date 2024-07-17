@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { type Subject, ReplaySubject } from 'rxjs';
 import type {
   PluginInitializerContext,
   Logger,
@@ -21,6 +22,7 @@ import type { UsageCountersServiceSetup, UsageCountersServiceStart } from './usa
 import { CollectorSet } from './collector';
 import { UsageCountersService } from './usage_counters';
 import { registerUsageCountersSavedObjectTypes } from './usage_counters/saved_objects';
+import { registerUsageCountersRollups } from './usage_counters/rollups';
 
 /** Plugin's setup API **/
 export type UsageCollectionSetup = ICollectorSet & UsageCountersServiceSetup;
@@ -32,9 +34,11 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
   private usageCountersService?: UsageCountersService;
+  private pluginStop$: Subject<void>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(core: CoreSetup): UsageCollectionSetup {
@@ -99,6 +103,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     this.savedObjects = savedObjects.createInternalRepository();
     if (config.usageCounters.enabled) {
       const usageCountersStart = this.usageCountersService.start({ savedObjects });
+
+      registerUsageCountersRollups({
+        logger: this.logger,
+        usageCounters: this.usageCountersService,
+        internalRepository: this.savedObjects,
+        pluginStop$: this.pluginStop$,
+      });
       return {
         search: usageCountersStart.search,
       };
@@ -115,6 +126,8 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
 
   public stop() {
     this.logger.debug('Stopping plugin');
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
     this.usageCountersService?.stop();
   }
 }

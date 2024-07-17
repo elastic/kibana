@@ -34,6 +34,7 @@ import type {
   UsageCountersSearchParams,
   UsageCountersSearchResult,
   CreateUsageCounterParams,
+  GetUsageCounter,
 } from './types';
 
 interface UsageCountersLogMeta extends LogMeta {
@@ -51,7 +52,7 @@ export interface UsageCountersServiceStartDeps {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export class UsageCountersService {
+export class UsageCountersService implements GetUsageCounter {
   private readonly stop$ = new Rx.Subject<void>();
   private readonly retryCount: number;
   private readonly bufferDurationMs: number;
@@ -174,7 +175,7 @@ export class UsageCountersService {
     return counterSet;
   };
 
-  private getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
+  getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
     return this.counterSets.get(type);
   };
 

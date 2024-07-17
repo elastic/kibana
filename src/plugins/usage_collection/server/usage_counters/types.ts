@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from '.';
+import type { UsageCounters } from '../../common/types';
+import type { UsageCounter } from '.';
 
 export interface CreateUsageCounterParams {
   /**
@@ -16,18 +17,21 @@ export interface CreateUsageCounterParams {
   retentionPeriodDays?: number;
 }
 
-/**
- * Provides the necessary tools to create and incremement Usage Counters
- */
-export interface UsageCountersServiceSetup {
-  /**
-   * Creates and registers a usage counter to collect daily aggregated plugin counter events
-   */
-  createUsageCounter: (domainId: string, params?: CreateUsageCounterParams) => UsageCounter;
+export interface GetUsageCounter {
   /**
    * Returns a usage counter by domainId
    */
   getUsageCounterByDomainId: (domainId: string) => UsageCounter | undefined;
+}
+
+/**
+ * Provides the necessary tools to create and incremement Usage Counters
+ */
+export interface UsageCountersServiceSetup extends GetUsageCounter {
+  /**
+   * Creates and registers a usage counter to collect daily aggregated plugin counter events
+   */
+  createUsageCounter: (domainId: string, params?: CreateUsageCounterParams) => UsageCounter;
 }
 
 export interface UsageCountersSearchParams {
@@ -68,17 +72,7 @@ export interface UsageCountersSearchResult {
 /**
  * Represents the current state of a Usage Counter at a given point in time
  */
-export interface UsageCounterSnapshot {
-  /** The domainId used to create the Counter API */
-  domainId: string;
-  /** The name of the counter */
-  counterName: string;
-  /** The type of counter (defaults to 'count') */
-  counterType: string;
-  /** The source of this counter: 'server' | 'ui' */
-  source: string;
-  /** Namespace associated to this counter */
-  namespace?: string;
+export interface UsageCounterSnapshot extends UsageCounters.v1.AbstractCounter {
   /** List of daily records captured for this counter */
   records: UsageCounterRecord[];
 }

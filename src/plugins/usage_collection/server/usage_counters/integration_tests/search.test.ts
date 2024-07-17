@@ -6,19 +6,8 @@
  * Side Public License, v 1.
  */
 
-/**
- * Mocking methods that are used to retrieve current time. This allows:
- * 1) introducing OLD counters that can be rolled up
- * getCurrentTime => used by `SOR.incrementCounter` to determine 'updated_at'
- */
-jest.mock('@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils', () => ({
-  ...jest.requireActual('@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils'),
-  getCurrentTime: jest.fn(),
-}));
-
 import moment from 'moment';
-import { getCurrentTime } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
-import type { Logger, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
+import type { Logger, ISavedObjectsRepository, ElasticsearchClient } from '@kbn/core/server';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
@@ -26,19 +15,12 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import {
-  serializeCounterKey,
-  type UsageCountersSavedObjectAttributes,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-} from '../..';
+import { serializeCounterKey, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../..';
 import { UsageCountersService } from '../usage_counters_service';
+import { type CounterAttributes, createCounters, toCounterMetric } from './counter_utils';
 import type { UsageCounterSnapshot } from '../types';
 
-const getCurrentTimeMock = getCurrentTime as jest.MockedFunction<typeof getCurrentTime>;
-
 // domainId, counterName, counterType, source, count, namespace?
-type CounterAttributes = [string, string, string, 'ui' | 'server', number, string?];
-
 const FIRST_DAY_COUNTERS: CounterAttributes[] = [
   ['dashboards', 'aDashboardId', 'viewed', 'server', 10, 'first'],
   ['dashboards', 'aDashboardId', 'edited', 'server', 5, 'first'],
@@ -92,7 +74,7 @@ describe('usage-counters#search', () => {
       USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     ]);
 
-    await createTestCounters(internalRepository);
+    await createTestCounters(internalRepository, start.elasticsearch.client.asInternalUser);
 
     usageCounters = new UsageCountersService({ logger, retryCount: 1, bufferDurationMs: 5000 });
 
@@ -111,13 +93,13 @@ describe('usage-counters#search', () => {
           ({ domainId, namespace }) => domainId === 'dashboards' && namespace === 'default'
         )
       ).toEqual(true);
-      expect(dashboardsNoNamespace.counters.map(counterKey).sort()).toMatchInlineSnapshot(`
-        Array [
-          "dashboards:list:viewed:ui:default",
-          "dashboards:someGlobalServerCounter:count:server:default",
-          "dashboards:someGlobalUiCounter:count:ui:default",
-        ]
-      `);
+
+      expectToMatchKeys(dashboardsNoNamespace.counters, [
+        'dashboards:list:viewed:ui',
+        'dashboards:someGlobalServerCounter:count:server',
+        'dashboards:someGlobalUiCounter:count:ui',
+      ]);
+
       expect(
         dashboardsNoNamespace.counters.find(
           ({ counterName }) => counterName === 'someGlobalUiCounter'
@@ -148,13 +130,11 @@ describe('usage-counters#search', () => {
           ({ domainId, namespace }) => domainId === 'dashboards' && namespace === 'first'
         )
       ).toEqual(true);
-      expect(dashboardsFirstNamespace.counters.map(counterKey).sort()).toMatchInlineSnapshot(`
-        Array [
-          "dashboards:aDashboardId:consoleErrors:ui:first",
-          "dashboards:aDashboardId:edited:server:first",
-          "dashboards:aDashboardId:viewed:server:first",
-        ]
-      `);
+      expectToMatchKeys(dashboardsFirstNamespace.counters, [
+        'first:dashboards:aDashboardId:consoleErrors:ui',
+        'first:dashboards:aDashboardId:edited:server',
+        'first:dashboards:aDashboardId:viewed:server',
+      ]);
       expect(
         dashboardsFirstNamespace.counters.find(({ counterType }) => counterType === 'edited')!
           .records
@@ -201,11 +181,9 @@ describe('usage-counters#search', () => {
             namespace === 'second'
         )
       ).toEqual(true);
-      expect(dashboardsByName.counters.map(counterKey)).toMatchInlineSnapshot(`
-        Array [
-          "dashboards:aDashboardId:viewed:server:second",
-        ]
-      `);
+      expectToMatchKeys(dashboardsByName.counters, [
+        'second:dashboards:aDashboardId:viewed:server',
+      ]);
       expect(dashboardsByName.counters[0].records).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -236,12 +214,11 @@ describe('usage-counters#search', () => {
             records.every(({ updatedAt }) => moment(updatedAt).diff(from) > 0)
         )
       ).toEqual(true);
-      expect(dashboardsFrom.counters.map(counterKey).sort()).toMatchInlineSnapshot(`
-        Array [
-          "dashboards:someGlobalServerCounter:count:server:default",
-          "dashboards:someGlobalUiCounter:count:ui:default",
-        ]
-      `);
+
+      expectToMatchKeys(dashboardsFrom.counters, [
+        'dashboards:someGlobalServerCounter:count:server',
+        'dashboards:someGlobalUiCounter:count:ui',
+      ]);
       expect(dashboardsFrom.counters.find(({ source }) => source === 'ui')!.records)
         .toMatchInlineSnapshot(`
         Array [
@@ -260,86 +237,39 @@ describe('usage-counters#search', () => {
   });
 });
 
-async function createTestCounters(internalRepository: ISavedObjectsRepository) {
+async function createTestCounters(
+  internalRepository: ISavedObjectsRepository,
+  esClient: ElasticsearchClient
+) {
   // insert a bunch of usage counters in multiple namespaces
-  await createCounters(internalRepository, '2024-07-01T10:00:00.000Z', FIRST_DAY_COUNTERS);
-  await createCounters(internalRepository, '2024-07-02T10:00:00.000Z', SECOND_DAY_COUNTERS);
-  await createCounters(internalRepository, '2024-07-03T10:00:00.000Z', THIRD_DAY_COUNTERS);
-}
-
-async function createCounters(
-  internalRepository: ISavedObjectsRepository,
-  isoDate: string,
-  countersAttributes: CounterAttributes[]
-) {
-  // tamper SO `updated_at`
-  getCurrentTimeMock.mockReturnValue(isoDate);
-
-  await Promise.all(
-    countersAttributes
-      .map((attrs) => createCounter(isoDate, ...attrs))
-      .map((counter) => incrementCounter(internalRepository, counter))
+  await createCounters(
+    internalRepository,
+    esClient,
+    '2024-07-01T10:00:00.000Z',
+    FIRST_DAY_COUNTERS.map(toCounterMetric)
+  );
+  await createCounters(
+    internalRepository,
+    esClient,
+    '2024-07-02T10:00:00.000Z',
+    SECOND_DAY_COUNTERS.map(toCounterMetric)
+  );
+  await createCounters(
+    internalRepository,
+    esClient,
+    '2024-07-03T10:00:00.000Z',
+    THIRD_DAY_COUNTERS.map(toCounterMetric)
   );
 }
 
-function createCounter(
-  date: string,
-  domainId: string,
-  counterName: string,
-  counterType: string,
-  source: 'server' | 'ui',
-  count: number,
-  namespace?: string
-): SavedObject<UsageCountersSavedObjectAttributes> {
-  const id = serializeCounterKey({
-    domainId,
-    counterName,
-    counterType,
-    namespace,
-    source,
-    date,
-  });
-  return {
-    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-    id,
-    ...(namespace && { namespaces: [namespace] }),
-    // updated_at: date // illustrative purpose only, overriden by SOR
-    attributes: {
-      domainId,
-      counterName,
-      counterType,
-      source,
-      count,
-    },
-    references: [],
-  };
-}
+function expectToMatchKeys(counters: UsageCounterSnapshot[], keys: string[]) {
+  expect(counters.length).toEqual(keys.length);
 
-async function incrementCounter(
-  internalRepository: ISavedObjectsRepository,
-  counter: SavedObject<UsageCountersSavedObjectAttributes>
-) {
-  const namespace = counter.namespaces?.[0];
-  return await internalRepository.incrementCounter(
-    USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-    counter.id,
-    [{ fieldName: 'count', incrementBy: counter.attributes.count }],
-    {
-      ...(namespace && { namespace }),
-      upsertAttributes: {
-        domainId: counter.attributes.domainId,
-        counterName: counter.attributes.counterName,
-        counterType: counter.attributes.counterType,
-        source: counter.attributes.source,
-      },
-    }
-  );
-}
-
-function counterKey(counter: UsageCounterSnapshot): string {
-  // e.g. 'dashboards:viewed:total:ui'          // namespace-agnostic counters
-  // e.g. 'dashboards:viewed:total:ui:default'  // namespaced counters
-  const { domainId, counterName, counterType, source, namespace } = counter;
-  const namespaceSuffix = namespace ? `:${namespace}` : '';
-  return `${domainId}:${counterName}:${counterType}:${source}${namespaceSuffix}`;
+  // the counter snapshots do not include a single date. We match a date agnostic key
+  expect(
+    counters
+      .map(serializeCounterKey)
+      .map((key) => key.substring(0, key.length - 9)) // remove :YYYYMMDD suffix
+      .sort()
+  ).toEqual(keys);
 }
