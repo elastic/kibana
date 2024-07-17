@@ -141,10 +141,10 @@ const createSLORoute = createSloServerRoute({
 });
 
 const inspectSLORoute = createSloServerRoute({
-  endpoint: 'POST /internal/observability/slos/_inspect 2023-10-31',
+  endpoint: 'POST /internal/observability/slos/_inspect',
   options: {
     tags: ['access:slo_write'],
-    access: 'public',
+    access: 'internal',
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger, dependencies, request }) => {
@@ -528,6 +528,7 @@ const fetchHistoricalSummary = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
     tags: ['access:slo_read'],
+    access: 'internal',
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params, logger }) => {
