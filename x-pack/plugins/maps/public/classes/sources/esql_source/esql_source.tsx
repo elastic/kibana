@@ -187,6 +187,14 @@ export class ESQLSource
       filters.push(extentFilter);
     }
 
+    const timeRange = requestMeta.timeslice
+      ? {
+          from: new Date(requestMeta.timeslice.from).toISOString(),
+          to: new Date(requestMeta.timeslice.to).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : requestMeta.timeFilters;
+
     if (requestMeta.applyGlobalTime) {
       if (!this._descriptor.dateField) {
         throw new Error(
@@ -196,24 +204,18 @@ export class ESQLSource
           })
         );
       }
-      const timeRange = requestMeta.timeslice
-        ? {
-            from: new Date(requestMeta.timeslice.from).toISOString(),
-            to: new Date(requestMeta.timeslice.to).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : requestMeta.timeFilters;
       const timeFilter = getTime(undefined, timeRange, {
         fieldName: this._descriptor.dateField,
       });
-      const namedParams = getEarliestLatestParams(this._descriptor.esql, timeRange);
-      if (namedParams.length) {
-        params.params = namedParams;
-      }
 
       if (timeFilter) {
         filters.push(timeFilter);
       }
+    }
+
+    const namedParams = getEarliestLatestParams(this._descriptor.esql, timeRange);
+    if (namedParams.length) {
+      params.params = namedParams;
     }
 
     params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
