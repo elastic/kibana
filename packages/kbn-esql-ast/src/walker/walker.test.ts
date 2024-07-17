@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLColumn, ESQLLiteral, getAstAndSyntaxErrors } from '../..';
+import { ESQLColumn, ESQLFunction, ESQLLiteral, getAstAndSyntaxErrors } from '../..';
 import { walk, Walker } from './walker';
 
 test('can walk all functions', () => {
@@ -68,6 +68,25 @@ test('can collect all params', () => {
   ]);
 });
 
+test('can find assignment expression', () => {
+  const query = 'METRICS source var0 = bucket(bytes, 1 hour)';
+  const { ast } = getAstAndSyntaxErrors(query);
+  const functions: ESQLFunction[] = [];
+
+  Walker.walk(ast, {
+    visitFunction: (fn) => {
+      if (fn.name === '=') {
+        functions.push(fn);
+      }
+    },
+  });
+
+  expect(functions.length).toBe(1);
+  expect(functions[0].name).toBe('=');
+  expect(functions[0].args.length).toBe(2);
+  expect((functions[0].args[0] as any).name).toBe('var0');
+});
+
 test('can collect all params from grouping functions', () => {
   const query =
     'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?earliest,?latest)';
@@ -88,4 +107,16 @@ test('can collect all params from grouping functions', () => {
       value: 'latest',
     },
   ]);
+});
+
+describe('Walker.hasFunction()', () => {
+  test('can find assignment expression', () => {
+    const query1 = 'METRICS source bucket(bytes, 1 hour)';
+    const query2 = 'METRICS source var0 = bucket(bytes, 1 hour)';
+    const has1 = Walker.hasFunction(getAstAndSyntaxErrors(query1).ast!, '=');
+    const has2 = Walker.hasFunction(getAstAndSyntaxErrors(query2).ast!, '=');
+
+    expect(has1).toBe(false);
+    expect(has2).toBe(true);
+  });
 });

@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { FormattedDate } from '@kbn/i18n-react';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
-import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { PromptContextTemplate } from '../../prompt_context/types';
 import * as i18n from './translations';
+import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 
 export const useQuickPromptTable = () => {
+  const getActions = useInlineActions<PromptResponse>();
   const getColumns = useCallback(
     ({
+      isActionsDisabled,
       basePromptContexts,
       onEditActionClicked,
       onDeleteActionClicked,
     }: {
+      isActionsDisabled: boolean;
       basePromptContexts: PromptContextTemplate[];
       onEditActionClicked: (prompt: PromptResponse) => void;
       onDeleteActionClicked: (prompt: PromptResponse) => void;
@@ -29,7 +33,9 @@ export const useQuickPromptTable = () => {
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_NAME,
         render: (prompt: PromptResponse) =>
           prompt?.name ? (
-            <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.name}</EuiLink>
+            <EuiLink onClick={() => onEditActionClicked(prompt)} disabled={isActionsDisabled}>
+              {prompt?.name}
+            </EuiLink>
           ) : null,
         sortable: ({ name }: PromptResponse) => name,
       },
@@ -47,34 +53,33 @@ export const useQuickPromptTable = () => {
           ) : null;
         },
       },
-      /* TODO: enable when createdAt is added
       {
         align: 'left',
-        field: 'createdAt',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT,
+        field: 'updatedAt',
+        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_DATE_UPDATED,
+        render: (updatedAt: PromptResponse['updatedAt']) =>
+          updatedAt ? (
+            <EuiBadge color="hollow">
+              <FormattedDate
+                value={new Date(updatedAt)}
+                year="numeric"
+                month="2-digit"
+                day="numeric"
+              />
+            </EuiBadge>
+          ) : null,
+        sortable: true,
       },
-      */
       {
         align: 'center',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
         width: '120px',
-        render: (prompt: PromptResponse) => {
-          if (!prompt) {
-            return null;
-          }
-          const isDeletable = !prompt.isDefault;
-          return (
-            <RowActions<PromptResponse>
-              rowItem={prompt}
-              onDelete={isDeletable ? onDeleteActionClicked : undefined}
-              onEdit={onEditActionClicked}
-              isDeletable={isDeletable}
-            />
-          );
-        },
+        ...getActions({
+          onDelete: onDeleteActionClicked,
+          onEdit: onEditActionClicked,
+        }),
       },
     ],
-    []
+    [getActions]
   );
 
   return { getColumns };
