@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export function getUrlPrefix(spaceId: string) {
-  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-}
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const backgroundTaskNodeSchemaV1 = schema.object({
+  id: schema.string(),
+  last_seen: schema.string(),
+});
+
+export type BackgroundTaskNode = TypeOf<typeof backgroundTaskNodeSchemaV1>;

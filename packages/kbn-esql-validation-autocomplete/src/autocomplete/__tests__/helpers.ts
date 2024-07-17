@@ -16,6 +16,7 @@ import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext } from '../types';
+import { TIME_SYSTEM_PARAMS } from '../factories';
 
 export interface Integration {
   name: string;
@@ -219,6 +220,11 @@ export function getLiteralsByType(_type: string | string[]) {
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
   return [];
+}
+
+export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
+  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
+  return requestedType.includes('date') ? TIME_SYSTEM_PARAMS : [];
 }
 
 export function createCustomCallbackMocks(

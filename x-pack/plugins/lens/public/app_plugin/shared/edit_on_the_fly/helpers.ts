@@ -34,12 +34,13 @@ export const getSuggestions = async (
 
     const dataView = dataViewSpec
       ? await deps.dataViews.create(dataViewSpec)
-      : await getESQLAdHocDataview(indexPattern, deps.dataViews);
+      : await getESQLAdHocDataview(query.esql, deps.dataViews);
 
     const columns = await getESQLQueryColumns({
       esqlQuery: 'esql' in query ? query.esql : '',
       search: deps.data.search.search,
       signal: abortController?.signal,
+      timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
     });
     const context = {
       dataViewSpec: dataView?.toSpec(false),

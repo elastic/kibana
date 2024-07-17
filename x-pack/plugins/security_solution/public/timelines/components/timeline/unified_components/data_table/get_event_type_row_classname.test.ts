@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
-import { renderHook } from '@testing-library/react-hooks';
+import { getEventTypeRowClassName } from './get_event_type_row_classname';
 
 const mockOddEqlEvent = {
   _id: 'test-eql-alert',
@@ -29,29 +28,29 @@ const mockEvent = {
   _id: 'basic-event',
 };
 
-describe('useGetEventTypeRowClassName', () => {
+describe('getEventTypeRowClassName', () => {
   it('should return rawEvent', () => {
-    const { result } = renderHook(() => useGetEventTypeRowClassName(mockEvent));
-    expect(result.current).toEqual('rawEvent');
+    const result = getEventTypeRowClassName(mockEvent);
+    expect(result).toEqual('rawEvent');
   });
 
   it('should contain eqlSequence', () => {
-    const { result } = renderHook(() => useGetEventTypeRowClassName(mockBuildingBlockAlert));
-    expect(result.current).toContain('eqlSequence');
+    const result = getEventTypeRowClassName(mockBuildingBlockAlert);
+    expect(result).toContain('eqlSequence');
   });
 
   it('should contain buildingBlockType', () => {
-    const { result } = renderHook(() => useGetEventTypeRowClassName(mockBuildingBlockAlert));
-    expect(result.current).toContain('buildingBlockType');
+    const result = getEventTypeRowClassName(mockBuildingBlockAlert);
+    expect(result).toContain('buildingBlockType');
   });
 
   it('should return eqlNonSequence', () => {
-    const { result } = renderHook(() => useGetEventTypeRowClassName(mockOddEqlEvent));
-    expect(result.current).toEqual('eqlNonSequence');
+    const result = getEventTypeRowClassName(mockOddEqlEvent);
+    expect(result).toEqual('eqlNonSequence');
   });
 
   it('should return nonRawEvent', () => {
-    const { result } = renderHook(() => useGetEventTypeRowClassName(mockAlert));
-    expect(result.current).toEqual('nonRawEvent');
+    const result = getEventTypeRowClassName(mockAlert);
+    expect(result).toEqual('nonRawEvent');
   });
 });
