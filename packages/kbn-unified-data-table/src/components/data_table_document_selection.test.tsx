@@ -197,6 +197,7 @@ describe('document selection', () => {
         rows: dataTableContextMock.rows,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
         setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
         setIsCompareActive: jest.fn(),
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
@@ -211,6 +212,7 @@ describe('document selection', () => {
       component.update();
 
       expect(findTestSubject(component, 'dscGridShowSelectedDocuments').length).toBe(1);
+      expect(findTestSubject(component, 'unifiedDataTableCompareSelectedDocuments').length).toBe(1);
       expect(findTestSubject(component, 'dscGridSelectAllDocs').text()).toBe('Select all 5 rows');
 
       act(() => {
@@ -247,7 +249,10 @@ describe('document selection', () => {
     it('should call setIsCompareActive when the button is clicked', () => {
       const setIsCompareActive = jest.fn();
       const { getButton } = renderCompareBtn({ setIsCompareActive });
-      getButton()?.click();
+      const button = getButton();
+      expect(button).toBeInTheDocument();
+      expect(button?.getAttribute('disabled')).toBeNull();
+      button?.click();
       expect(setIsCompareActive).toHaveBeenCalledWith(true);
     });
 
@@ -255,7 +260,10 @@ describe('document selection', () => {
       const selectedDocIds = Array.from({ length: 500 }, (_, i) => i.toString());
       const setIsCompareActive = jest.fn();
       const { getButton } = renderCompareBtn({ selectedDocIds, setIsCompareActive });
-      getButton()?.click();
+      const button = getButton();
+      expect(button).toBeInTheDocument();
+      expect(button?.getAttribute('disabled')).toBe('');
+      button?.click();
       expect(setIsCompareActive).not.toHaveBeenCalled();
     });
   });

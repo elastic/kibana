@@ -154,18 +154,56 @@ export function DataTableDocumentToolbarBtn({
   rows,
   setIsFilterActive,
   selectedDocsState,
+  enableComparisonMode,
+  setIsCompareActive,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
   rows: DataTableRecord[];
   setIsFilterActive: (value: boolean) => void;
   selectedDocsState: UseSelectedDocsState;
+  enableComparisonMode: boolean | undefined;
+  setIsCompareActive: (value: boolean) => void;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const { selectAllDocs, clearAllSelectedDocs, isDocSelected, selectedDocIds } = selectedDocsState;
 
   const getMenuItems = useCallback(() => {
     return [
+      ...(enableComparisonMode && selectedDocIds.length > 1
+        ? [
+            <DataTableCompareToolbarBtn
+              key="compareSelected"
+              selectedDocIds={selectedDocIds}
+              setIsCompareActive={setIsCompareActive}
+            />,
+          ]
+        : []),
+      <EuiCopy
+        key="copyJsonWrapper"
+        data-test-subj="dscGridCopySelectedDocumentsJSON"
+        textToCopy={
+          rows
+            ? JSON.stringify(rows.filter((row) => isDocSelected(row.id)).map((row) => row.raw))
+            : ''
+        }
+      >
+        {(copy) => (
+          <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
+            {isPlainRecord ? (
+              <FormattedMessage
+                id="unifiedDataTable.copyResultsToClipboardJSON"
+                defaultMessage="Copy results to clipboard (JSON)"
+              />
+            ) : (
+              <FormattedMessage
+                id="unifiedDataTable.copyToClipboardJSON"
+                defaultMessage="Copy documents to clipboard (JSON)"
+              />
+            )}
+          </EuiContextMenuItem>
+        )}
+      </EuiCopy>,
       isFilterActive ? (
         <EuiContextMenuItem
           data-test-subj="dscGridShowAllDocuments"
@@ -211,31 +249,6 @@ export function DataTableDocumentToolbarBtn({
           )}
         </EuiContextMenuItem>
       ),
-      <EuiCopy
-        key="copyJsonWrapper"
-        data-test-subj="dscGridCopySelectedDocumentsJSON"
-        textToCopy={
-          rows
-            ? JSON.stringify(rows.filter((row) => isDocSelected(row.id)).map((row) => row.raw))
-            : ''
-        }
-      >
-        {(copy) => (
-          <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
-            {isPlainRecord ? (
-              <FormattedMessage
-                id="unifiedDataTable.copyResultsToClipboardJSON"
-                defaultMessage="Copy results to clipboard (JSON)"
-              />
-            ) : (
-              <FormattedMessage
-                id="unifiedDataTable.copyToClipboardJSON"
-                defaultMessage="Copy documents to clipboard (JSON)"
-              />
-            )}
-          </EuiContextMenuItem>
-        )}
-      </EuiCopy>,
       ...(!isFilterActive && selectedDocIds.length < rows.length && rows.length > 1
         ? [
             <EuiContextMenuItem
@@ -279,6 +292,8 @@ export function DataTableDocumentToolbarBtn({
     clearAllSelectedDocs,
     selectAllDocs,
     selectedDocIds,
+    enableComparisonMode,
+    setIsCompareActive,
   ]);
 
   const toggleSelectionToolbar = useCallback(
@@ -336,35 +351,33 @@ export const DataTableCompareToolbarBtn = ({
   setIsCompareActive: (value: boolean) => void;
 }) => {
   const isDisabled = selectedDocIds.length > MAX_SELECTED_DOCS_FOR_COMPARE;
-  const button = (
-    <EuiDataGridToolbarControl
-      disabled={isDisabled}
-      iconType="diff"
-      badgeContent={selectedDocIds.length}
+  const label = (
+    <FormattedMessage
+      id="unifiedDataTable.compareSelectedRowsButtonLabel"
+      defaultMessage="Compare selected"
+    />
+  );
+  return (
+    <EuiContextMenuItem
       data-test-subj="unifiedDataTableCompareSelectedDocuments"
+      disabled={isDisabled}
+      icon="diff"
       onClick={() => {
         setIsCompareActive(true);
       }}
     >
-      <FormattedMessage
-        id="unifiedDataTable.compareSelectedRowsButtonLabel"
-        defaultMessage="Compare"
-      />
-    </EuiDataGridToolbarControl>
+      {isDisabled ? (
+        <EuiToolTip
+          content={i18n.translate('unifiedDataTable.compareSelectedRowsButtonDisabledTooltip', {
+            defaultMessage: 'Select not more than {limit} rows to compare',
+            values: { limit: MAX_SELECTED_DOCS_FOR_COMPARE },
+          })}
+        >
+          {label}
+        </EuiToolTip>
+      ) : (
+        label
+      )}
+    </EuiContextMenuItem>
   );
-
-  if (isDisabled) {
-    return (
-      <EuiToolTip
-        content={i18n.translate('unifiedDataTable.compareSelectedRowsButtonDisabledTooltip', {
-          defaultMessage: 'Select not more than {limit} rows to compare',
-          values: { limit: MAX_SELECTED_DOCS_FOR_COMPARE },
-        })}
-      >
-        {button}
-      </EuiToolTip>
-    );
-  }
-
-  return button;
 };

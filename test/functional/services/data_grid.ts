@@ -591,11 +591,22 @@ export class DataGridService extends FtrService {
     });
   }
 
+  public async closeSelectedRowsMenu() {
+    await this.testSubjects.click('unifiedDataTableSelectionBtn');
+    await this.retry.try(async () => {
+      return !(await this.testSubjects.exists('unifiedDataTableSelectionMenu'));
+    });
+  }
+
   public async compareSelectedButtonExists() {
-    return await this.testSubjects.exists('unifiedDataTableCompareSelectedDocuments');
+    await this.openSelectedRowsMenu();
+    const exists = await this.testSubjects.exists('unifiedDataTableCompareSelectedDocuments');
+    await this.closeSelectedRowsMenu();
+    return exists;
   }
 
   public async clickCompareSelectedButton() {
+    await this.openSelectedRowsMenu();
     await this.testSubjects.click('unifiedDataTableCompareSelectedDocuments');
   }
 
