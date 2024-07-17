@@ -153,6 +153,7 @@
     "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/alerts-ui-shared",
+    "@kbn/security-solution-distribution-bar",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
