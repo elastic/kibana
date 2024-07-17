@@ -55,8 +55,6 @@ export const initFindFieldsMetadataRoute = ({
             body: fieldsMetadataV1.findFieldsMetadataResponsePayloadRT.encode(responsePayload),
           });
         } catch (error) {
-          console.log(error);
-
           if (error instanceof PackageNotFoundError) {
             return response.badRequest({
               body: {
