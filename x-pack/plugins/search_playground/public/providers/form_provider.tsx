@@ -65,7 +65,7 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children, storage = 
     const defaultModel = models.find((model) => !model.disabled);
     const currentModel = form.getValues(ChatFormFields.summarizationModel);
 
-    if (defaultModel && (!currentModel || !models.includes(currentModel))) {
+    if (defaultModel && (!currentModel || !models.find((model) => currentModel.id === model.id))) {
       form.setValue(ChatFormFields.summarizationModel, defaultModel);
     }
   }, [form, models]);

@@ -203,6 +203,7 @@ export interface UseChatHelpers {
 }
 
 export interface LLMModel {
+  id: string;
   name: string;
   value?: string;
   showConnectorName?: boolean;
