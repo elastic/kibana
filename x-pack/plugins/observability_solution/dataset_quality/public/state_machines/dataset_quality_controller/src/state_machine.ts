@@ -913,7 +913,7 @@ export const createDatasetQualityControllerStateMachine = ({
           return fields[context.flyout.breakdownField]?.source === 'ecs';
         }
 
-        return true;
+        return null;
       },
     },
   });
