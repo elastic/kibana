@@ -53,15 +53,27 @@ const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
 ];
 
 const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: string }>).concat(
-  ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
+  [
+    'a',
+    'index',
+    'otherIndex',
+    '.secretIndex',
+    'my-index',
+    'my-index$',
+    'my_index{}',
+    'my-index+1',
+    'synthetics-*',
+  ].map((name) => ({
     name,
     hidden: name.startsWith('.'),
   })),
-  ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
-    name,
-    hidden: false,
-    suggestedAs: `\`${name}\``,
-  }))
+  ['my-index[quoted]', 'my:index', 'my,index', 'logstash-{now/d{yyyy.MM.dd|+12:00}}'].map(
+    (name) => ({
+      name,
+      hidden: false,
+      suggestedAs: `"${name}"`,
+    })
+  )
 );
 
 const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
@@ -365,8 +377,9 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
-    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
-
+    const suggestedIndexes = indexes
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, suggestedAs }) => suggestedAs || name);
     // Monaco will filter further down here
     testSuggestions(
       'f',
@@ -394,8 +407,7 @@ describe('autocomplete', () => {
     const dataSources = indexes.concat(integrations);
     const suggestedDataSources = dataSources
       .filter(({ hidden }) => !hidden)
-      .map(({ name }) => name);
-
+      .map(({ name, suggestedAs }) => suggestedAs || name);
     testSuggestions('from ', suggestedDataSources, '', [undefined, dataSources, undefined]);
     testSuggestions('from a,', suggestedDataSources, '', [undefined, dataSources, undefined]);
     testSuggestions('from *,', suggestedDataSources, '', [undefined, dataSources, undefined]);
@@ -696,8 +708,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats a=min()',
       [
-        ...getFieldNamesByType(['number', 'date']),
-        ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
+        ...getFieldNamesByType(['number', 'date', 'boolean']),
+        ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean'], {
           evalMath: true,
         }),
       ],
@@ -719,8 +731,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats a=min(b), b=max()',
       [
-        ...getFieldNamesByType(['number', 'date']),
-        ...getFunctionSignaturesByReturnType('stats', ['number', 'date'], {
+        ...getFieldNamesByType(['number', 'date', 'boolean']),
+        ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean'], {
           evalMath: true,
         }),
       ],

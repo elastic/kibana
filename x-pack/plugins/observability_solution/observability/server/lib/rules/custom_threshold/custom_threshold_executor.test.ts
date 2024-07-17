@@ -1035,18 +1035,51 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(COMPARATORS.GREATER_THAN, [0.75]);
-      expect(getLastReportedAlert(instanceIdA)?.context?.tags).toStrictEqual([
+
+      const reportedAlertInstanceIdA = getLastReportedAlert(instanceIdA);
+      const reportedAlertInstanceIdB = getLastReportedAlert(instanceIdB);
+      expect(reportedAlertInstanceIdA?.context?.tags).toStrictEqual([
         'host-01_tag1',
         'host-01_tag2',
         'ruleTag1',
         'ruleTag2',
       ]);
-      expect(getLastReportedAlert(instanceIdB)?.context?.tags).toStrictEqual([
+      // Payload should include group field (i.e. 'host.name': 'host-01')
+      expect(reportedAlertInstanceIdA?.payload).toStrictEqual({
+        'host.name': 'host-01',
+        'kibana.alert.evaluation.threshold': [0.75],
+        'kibana.alert.evaluation.values': [1],
+        'kibana.alert.group': [
+          {
+            field: 'host.name',
+            value: 'host-01',
+          },
+        ],
+        'kibana.alert.reason':
+          'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-01)',
+        tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
+      });
+      expect(reportedAlertInstanceIdB?.context?.tags).toStrictEqual([
         'host-02_tag1',
         'host-02_tag2',
         'ruleTag1',
         'ruleTag2',
       ]);
+      // Payload should include group field (i.e. 'host.name': 'host-02')
+      expect(reportedAlertInstanceIdB?.payload).toStrictEqual({
+        'host.name': 'host-02',
+        'kibana.alert.evaluation.threshold': [0.75],
+        'kibana.alert.evaluation.values': [3],
+        'kibana.alert.group': [
+          {
+            field: 'host.name',
+            value: 'host-02',
+          },
+        ],
+        'kibana.alert.reason':
+          'Average test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
+        tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
+      });
     });
   });
 
@@ -1258,8 +1291,24 @@ describe('The custom threshold alert type', () => {
       const instanceIdA = 'a';
       const instanceIdB = 'b';
       await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0], 'groupByField');
-      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
-      expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
+      const reportedAlertInstanceIdA = getLastReportedAlert(instanceIdA);
+      const reportedAlertInstanceIdB = getLastReportedAlert(instanceIdB);
+      expect(reportedAlertInstanceIdA).toHaveAlertAction();
+      // Payload should not include group field (i.e. groupByField)
+      expect(reportedAlertInstanceIdA?.payload).toEqual({
+        'kibana.alert.evaluation.threshold': [1, 3],
+        'kibana.alert.evaluation.values': [1, 3],
+        'kibana.alert.group': [
+          {
+            field: 'groupByField',
+            value: 'a',
+          },
+        ],
+        'kibana.alert.reason':
+          'Average test.metric.1 is 1, above or equal the threshold of 1; Average test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName, group: a)',
+        tags: [],
+      });
+      expect(reportedAlertInstanceIdB).toBe(undefined);
     });
     test('sends all criteria to the action context', async () => {
       setEvaluationResults([

@@ -58,7 +58,15 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       return {
         title: `Record #${recordId}`,
         docViewsRegistry: (registry) => {
-          registry.enableById('doc_view_logs_overview');
+          registry.add({
+            id: 'doc_view_example',
+            title: 'Example',
+            order: 0,
+            component: () => (
+              <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
+            ),
+          });
+
           return prevValue.docViewsRegistry(registry);
         },
       };

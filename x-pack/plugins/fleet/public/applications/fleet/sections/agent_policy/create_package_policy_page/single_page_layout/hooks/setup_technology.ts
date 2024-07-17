@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -21,6 +20,7 @@ import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
+import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
   const config = useConfig();
@@ -80,12 +80,16 @@ export function useSetupTechnology({
   updateAgentPolicies,
   setSelectedPolicyTab,
   packageInfo,
+  packagePolicy,
+  isEditPage,
 }: {
   updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicies: (policies: AgentPolicy[]) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
+  packagePolicy: NewPackagePolicy;
+  isEditPage?: boolean;
 }) {
   const { cloud } = useStartServices();
   const {
@@ -94,17 +98,42 @@ export function useSetupTechnology({
     isAgentlessCloudEnabled,
     isAgentlessServerlessEnabled,
   } = useAgentless();
+
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
-  const [newAgentBasedPolicy] = useState<NewAgentPolicy | undefined>({ ...newAgentPolicy });
+  const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
   const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
-      name: `Agentless policy ${uuidv4()}`,
       supports_agentless: true,
     })
   );
+
+  useEffect(() => {
+    if (isEditPage) {
+      return;
+    }
+    if (isAgentlessCloudEnabled && selectedSetupTechnology === SetupTechnology.AGENTLESS) {
+      const nextNewAgentlessPolicy = {
+        ...newAgentlessPolicy,
+        name: getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name),
+      };
+      if (nextNewAgentlessPolicy.name !== newAgentlessPolicy.name) {
+        setNewAgentlessPolicy(nextNewAgentlessPolicy);
+        updateNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
+        updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
+      }
+    }
+  }, [
+    isAgentlessCloudEnabled,
+    isEditPage,
+    newAgentlessPolicy,
+    packagePolicy.name,
+    selectedSetupTechnology,
+    updateAgentPolicies,
+    updateNewAgentPolicy,
+  ]);
 
   useEffect(() => {
     if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
@@ -152,12 +181,12 @@ export function useSetupTechnology({
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy({
-          ...newAgentBasedPolicy,
+          ...newAgentBasedPolicy.current,
           supports_agentless: false,
           is_managed: false,
         } as NewAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
-        updateAgentPolicies([]);
+        updateAgentPolicies([newAgentBasedPolicy.current] as AgentPolicy[]);
       }
       setSelectedSetupTechnology(setupTechnology);
     },
@@ -170,7 +199,6 @@ export function useSetupTechnology({
       newAgentlessPolicy,
       setSelectedPolicyTab,
       updateAgentPolicies,
-      newAgentBasedPolicy,
     ]
   );
 

@@ -434,6 +434,7 @@ export function createIndex(indexName: string) {
     }),
   });
 }
+
 export function updateIndexMappings(indexName: string, newFields: Fields) {
   return sendRequest({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
@@ -443,7 +444,7 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
 }
 
 export function getInferenceEndpoints() {
-  return sendRequest({
+  return sendRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,
     method: 'get',
   });
