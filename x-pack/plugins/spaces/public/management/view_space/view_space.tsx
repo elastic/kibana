@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
 
-import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
+import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
 import {
   ViewSpaceContextProvider,
@@ -45,7 +45,7 @@ const LazySpaceAvatar = lazy(() =>
 const getSelectedTabId = (canUserViewRoles: boolean, selectedTabId?: string) => {
   // Validation of the selectedTabId routing parameter, default to the Content tab
   return selectedTabId &&
-    [TAB_ID_FEATURES, canUserViewRoles ? TAB_ID_ROLES : null]
+    [TAB_ID_FEATURES, TAB_ID_GENERAL, canUserViewRoles ? TAB_ID_ROLES : null]
       .filter(Boolean)
       .includes(selectedTabId)
     ? selectedTabId
