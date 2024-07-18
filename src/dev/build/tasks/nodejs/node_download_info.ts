@@ -32,6 +32,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
       version,
       variant,
       platform.getNodeArch(),
+      'download',
       basename(downloadName)
     );
     const extractDir = config.resolveFromRepo(
@@ -39,6 +40,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
       version,
       variant,
       platform.getNodeArch(),
+      'extract'
     );
 
     return {
