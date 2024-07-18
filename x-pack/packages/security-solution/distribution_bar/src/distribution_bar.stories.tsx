@@ -14,33 +14,35 @@ const mockStatsFindings = [
     key: 'passed',
     count: 90,
     color: euiThemeVars.euiColorVis0,
+    label: 'Passed',
   },
   {
     key: 'failed',
     count: 10,
     color: euiThemeVars.euiColorVis9,
+    label: <>{'Failed'}</>,
   },
 ];
 
 const mockStatsAlerts = [
   {
     key: 'low',
-    count: 30,
+    count: 100,
     color: euiThemeVars.euiColorVis0,
   },
   {
     key: 'medium',
-    count: 30,
+    count: 80,
     color: euiThemeVars.euiColorVis5,
   },
   {
     key: 'high',
-    count: 10,
+    count: 30,
     color: euiThemeVars.euiColorVis7,
   },
   {
     key: 'critical',
-    count: 10,
+    count: 5,
     color: euiThemeVars.euiColorVis9,
   },
 ];
