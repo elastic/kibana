@@ -1,9 +1,6 @@
-[[esql-example-queries]]
-
-The following is an example ES|QL query:
-
-```
-FROM metricbeat*
-| EVAL cpu_pct_normalized = (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores
-| STATS AVG(cpu_pct_normalized) BY host.name
-```
+//12. Segmentation Fault & Potential Buffer Overflow Hunting
+//Helpful when answering questions on extractions with GROK
+FROM logs-*
+| WHERE host.os.type == "linux" and process.name == "kernel" and message like "*segfault*"
+| GROK message "\\[%{NUMBER:timestamp}\\] %{WORD:process}\\[%{NUMBER:pid}\\]: segfault at %{BASE16NUM:segfault_address} ip %{BASE16NUM:instruction_pointer} sp %{BASE16NUM:stack_pointer} error %{NUMBER:error_code} in %{DATA:so_file}\\[%{BASE16NUM:so_base_address}\\+%{BASE16NUM:so_offset}\\]"
+| KEEP timestamp, process, pid, so_file, segfault_address, instruction_pointer, stack_pointer, error_code, so_base_address, so_offset

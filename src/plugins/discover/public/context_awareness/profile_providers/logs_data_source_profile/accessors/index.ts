@@ -7,3 +7,4 @@
  */
 
 export { getRowIndicatorProvider } from './get_row_indicator_provider';
+export { getCellRenderers } from './get_cell_renderers';
