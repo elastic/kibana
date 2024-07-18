@@ -7,6 +7,7 @@
 
 export * from './asset/get_assets_status_route';
 export * from './asset/update_assets_status_route';
+export * from './fleet_wrapper/fleet_wrapper.gen';
 export * from './fleet_wrapper/get_agent_policy_route';
 export * from './fleet_wrapper/get_agent_status_for_agent_policy_route';
 export * from './fleet_wrapper/get_agents_route';

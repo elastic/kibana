@@ -11,7 +11,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getInternalSavedObjectsClient } from '../utils';
-import { GetAgentPolicyRequestParams } from '../../../common/api/fleet_wrapper/fleet_wrapper.gen';
+import { GetAgentPolicyRequestParams } from '../../../common/api';
 
 export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

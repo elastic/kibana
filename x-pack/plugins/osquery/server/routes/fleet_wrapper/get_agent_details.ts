@@ -10,7 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { GetAgentDetailsRequestParams } from '../../../common/api/fleet_wrapper/fleet_wrapper.gen';
+import { GetAgentDetailsRequestParams } from '../../../common/api';
 
 export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -34,8 +34,7 @@ export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryApp
         try {
           agent = await osqueryContext.service
             .getAgentService()
-            ?.asInternalUser // @ts-expect-error update types
-            ?.getAgent(request.params.id);
+            ?.asInternalUser?.getAgent(request.params.id);
         } catch (err) {
           return response.notFound();
         }

@@ -20,56 +20,32 @@ import { Id } from '../model/schema/common_attributes.gen';
 
 export type GetAgentDetailsRequestParams = z.infer<typeof GetAgentDetailsRequestParams>;
 export const GetAgentDetailsRequestParams = z.object({
-  query: z.object({}),
+  id: Id,
 });
 export type GetAgentDetailsRequestParamsInput = z.input<typeof GetAgentDetailsRequestParams>;
 
 export type GetAgentDetailsResponse = z.infer<typeof GetAgentDetailsResponse>;
 export const GetAgentDetailsResponse = z.object({});
 
-export type GetAgentPackagePoliciesRequestParams = z.infer<
-  typeof GetAgentPackagePoliciesRequestParams
->;
-export const GetAgentPackagePoliciesRequestParams = z.object({
-  query: z.object({}),
-});
-export type GetAgentPackagePoliciesRequestParamsInput = z.input<
-  typeof GetAgentPackagePoliciesRequestParams
->;
-
 export type GetAgentPackagePoliciesResponse = z.infer<typeof GetAgentPackagePoliciesResponse>;
 export const GetAgentPackagePoliciesResponse = z.object({});
-export type GetAgentPoliciesRequestQuery = z.infer<typeof GetAgentPoliciesRequestQuery>;
-export const GetAgentPoliciesRequestQuery = z.object({
-  query: z.object({}),
-});
-export type GetAgentPoliciesRequestQueryInput = z.input<typeof GetAgentPoliciesRequestQuery>;
-
-export type GetAgentPoliciesRequestParams = z.infer<typeof GetAgentPoliciesRequestParams>;
-export const GetAgentPoliciesRequestParams = z.object({
-  query: z.object({}),
-});
-export type GetAgentPoliciesRequestParamsInput = z.input<typeof GetAgentPoliciesRequestParams>;
 
 export type GetAgentPoliciesResponse = z.infer<typeof GetAgentPoliciesResponse>;
 export const GetAgentPoliciesResponse = z.object({});
 
 export type GetAgentPolicyRequestParams = z.infer<typeof GetAgentPolicyRequestParams>;
 export const GetAgentPolicyRequestParams = z.object({
-  query: z.object({
-    id: Id.optional(),
-  }),
+  id: Id,
 });
 export type GetAgentPolicyRequestParamsInput = z.input<typeof GetAgentPolicyRequestParams>;
 
 export type GetAgentPolicyResponse = z.infer<typeof GetAgentPolicyResponse>;
 export const GetAgentPolicyResponse = z.object({});
-
-export type GetAgentsRequestParams = z.infer<typeof GetAgentsRequestParams>;
-export const GetAgentsRequestParams = z.object({
+export type GetAgentsRequestQuery = z.infer<typeof GetAgentsRequestQuery>;
+export const GetAgentsRequestQuery = z.object({
   query: z.object({}),
 });
-export type GetAgentsRequestParamsInput = z.input<typeof GetAgentsRequestParams>;
+export type GetAgentsRequestQueryInput = z.input<typeof GetAgentsRequestQuery>;
 
 export type GetAgentsResponse = z.infer<typeof GetAgentsResponse>;
 export const GetAgentsResponse = z.object({});

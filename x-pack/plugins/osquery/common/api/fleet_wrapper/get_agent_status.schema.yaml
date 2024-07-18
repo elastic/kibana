@@ -4,19 +4,6 @@ info:
   version: '1'
 paths: {}
 components:
-  parameters:
-    GetAgentStatusRequestQueryParameter:
-      name: query
-      in: query
-      required: true
-      schema:
-        $ref: '#/components/schemas/GetAgentStatusRequestQueryParams'
-    GetAgentStatusRequestParameter:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/GetAgentStatusRequestParams'
   schemas:
     GetAgentStatusRequestParams:
       type: object

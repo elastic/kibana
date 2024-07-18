@@ -11,15 +11,10 @@ import { satisfies } from 'semver';
 import type { GetAgentPoliciesResponseItem, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getInternalSavedObjectsClient } from '../utils';
-import {
-  GetAgentPoliciesRequestParams,
-  GetAgentPoliciesRequestQuery,
-} from '../../../common/api/fleet_wrapper/fleet_wrapper.gen';
 
 export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -31,12 +26,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {
-          request: {
-            params: buildRouteValidationWithZod(GetAgentPoliciesRequestParams),
-            query: buildRouteValidationWithZod(GetAgentPoliciesRequestQuery),
-          },
-        },
+        validate: {},
       },
       async (context, request, response) => {
         const internalSavedObjectsClient = await getInternalSavedObjectsClient(

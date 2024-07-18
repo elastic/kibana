@@ -10,10 +10,11 @@ paths:
       summary: Get agents
       parameters:
         - name: query
-          in: path
+          in: query
           required: true
           schema:
             type: object
+            additionalProperties: true
       responses:
         '200':
           description: OK
@@ -30,11 +31,11 @@ paths:
       operationId: GetAgentDetails
       summary: Get Agent details
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            type: object
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
       responses:
         '200':
           description: OK
@@ -50,17 +51,6 @@ paths:
       x-codegen-enabled: true
       operationId: GetAgentPolicies
       summary: Get Agent policies
-      parameters:
-        - name: query
-          in: path
-          required: true
-          schema:
-            type: object
-        - name: query
-          in: query
-          required: true
-          schema:
-            type: object
       responses:
         '200':
           description: OK
@@ -77,14 +67,11 @@ paths:
       operationId: GetAgentPolicy
       summary: Get Agent policy
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            type: object
-            properties:
-              id:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
       responses:
         '200':
           description: OK
@@ -100,12 +87,6 @@ paths:
       x-codegen-enabled: true
       operationId: GetAgentPackagePolicies
       summary: Get Agent policy
-      parameters:
-        - name: query
-          in: path
-          required: true
-          schema:
-            type: object
       responses:
         '200':
           description: OK
