@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import { getFips } from 'crypto';
 import { readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
@@ -67,7 +68,21 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      const config = await readConfigFile(log, options.esVersion, path, settingOverrides);
+      const extendedSettingsOverrides = (vars) => {
+        if (getFips() === 1) {
+          vars.esTestCluster.license = 'trial';
+        }
+
+        return vars;
+      };
+
+      const config = await readConfigFile(
+        log,
+        options.esVersion,
+        path,
+        settingOverrides,
+        extendedSettingsOverrides
+      );
 
       const hasTests = await checkForEnabledTestsInFtrConfig({
         config,

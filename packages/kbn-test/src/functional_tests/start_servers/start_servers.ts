@@ -15,6 +15,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
+import { getFips } from 'crypto';
 import { readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
@@ -27,7 +28,21 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    const config = await readConfigFile(log, options.esVersion, options.config);
+    const extendedSettingsOverrides = (vars) => {
+      if (getFips() === 1) {
+        vars.esTestCluster.license = 'trial';
+      }
+
+      return vars;
+    };
+
+    const config = await readConfigFile(
+      log,
+      options.esVersion,
+      options.config,
+      {},
+      extendedSettingsOverrides
+    );
 
     const shutdownEs = await runElasticsearch({
       config,
