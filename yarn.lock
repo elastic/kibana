@@ -3438,6 +3438,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/avc-banner@link:packages/kbn-avc-banner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/axe-config@link:packages/kbn-axe-config":
   version "0.0.0"
   uid ""
