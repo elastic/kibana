@@ -40,14 +40,14 @@ describe('getIntegrationsDetails', () => {
     });
     expect(await getIntegrationsDetails(soClientMock)).toEqual([
       {
-        totalIntegrationPolicies: 3,
-        sharedIntegrationPolicies: 1,
-        sharedIntegrations: {
+        total_integration_policies: 3,
+        shared_integration_policies: 1,
+        shared_integrations: {
           agents: undefined,
           name: 'apache-1',
-          pkgName: 'apache',
-          pkgVersion: '1.0.0',
-          sharedByAgentPolicies: 2,
+          pkg_name: 'apache',
+          pkg_version: '1.0.0',
+          shared_by_agent_policies: 2,
         },
       },
     ]);
@@ -72,25 +72,25 @@ describe('getIntegrationsDetails', () => {
     });
     expect(await getIntegrationsDetails(soClientMock)).toEqual([
       {
-        totalIntegrationPolicies: 3,
-        sharedIntegrationPolicies: 2,
-        sharedIntegrations: {
+        total_integration_policies: 3,
+        shared_integration_policies: 2,
+        shared_integrations: {
           agents: undefined,
           name: 'apache-1',
-          pkgName: 'apache',
-          pkgVersion: '1.0.0',
-          sharedByAgentPolicies: 2,
+          pkg_name: 'apache',
+          pkg_version: '1.0.0',
+          shared_by_agent_policies: 2,
         },
       },
       {
-        totalIntegrationPolicies: 3,
-        sharedIntegrationPolicies: 2,
-        sharedIntegrations: {
+        total_integration_policies: 3,
+        shared_integration_policies: 2,
+        shared_integrations: {
           agents: 10,
           name: 'aws-1',
-          pkgName: 'aws',
-          pkgVersion: '1.0.0',
-          sharedByAgentPolicies: 3,
+          pkg_name: 'aws',
+          pkg_version: '1.0.0',
+          shared_by_agent_policies: 3,
         },
       },
     ]);
