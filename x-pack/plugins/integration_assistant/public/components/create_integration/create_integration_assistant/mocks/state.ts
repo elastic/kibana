@@ -425,10 +425,10 @@ export const mockState: State = {
   result,
 };
 
-// export const mockActions: Actions = {
-//   setStep: jest.fn(),
-//   setConnector: jest.fn(),
-//   setIntegrationSettings: jest.fn(),
-//   setIsGenerating: jest.fn(),
-//   setResult: jest.fn(),
-// };
+export const mockActions: Actions = {
+  setStep: jest.fn(),
+  setConnector: jest.fn(),
+  setIntegrationSettings: jest.fn(),
+  setIsGenerating: jest.fn(),
+  setResult: jest.fn(),
+};
