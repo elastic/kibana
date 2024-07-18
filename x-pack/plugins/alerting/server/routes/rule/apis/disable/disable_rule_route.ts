@@ -6,22 +6,15 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-const paramSchema = schema.object({
-  id: schema.string(),
-});
-
-const bodySchema = schema.nullable(
-  schema.maybe(
-    schema.object({
-      untrack: schema.maybe(schema.boolean({ defaultValue: false })),
-    })
-  )
-);
+import {
+  disableRuleRequestParamsSchemaV1,
+  disableRuleRequestBodySchemaV1,
+  DisableRuleRequestParamsV1,
+  DisableRuleRequestBodyV1,
+} from '../../../../../common/routes/rule/apis/disable';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 
 export const disableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -32,20 +25,24 @@ export const disableRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_disable`,
       options: {
         access: 'public',
-        summary: `Disable a rule`,
+        summary: 'Disable a rule',
       },
       validate: {
-        params: paramSchema,
-        body: bodySchema,
+        params: disableRuleRequestParamsSchemaV1,
+        body: disableRuleRequestBodySchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
-        const { untrack = false } = req.body || {};
+        const { id }: DisableRuleRequestParamsV1 = req.params;
+        const body: DisableRuleRequestBodyV1 = req.body || {};
+        const { untrack = false } = body;
+
+        const disableParams = { id, untrack };
+
         try {
-          await rulesClient.disable({ id, untrack });
+          await rulesClient.disable(disableParams);
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

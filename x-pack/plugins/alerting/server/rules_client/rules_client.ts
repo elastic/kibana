@@ -55,7 +55,7 @@ import {
 import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
-import { disable } from './methods/disable';
+import { disable } from '../application/rule/methods/disable/disable';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
 import { muteAll } from './methods/mute_all';
@@ -75,6 +75,7 @@ import { getBackfill } from '../application/backfill/methods/get';
 import { findBackfill } from '../application/backfill/methods/find';
 import { deleteBackfill } from '../application/backfill/methods/delete';
 import { FindBackfillParams } from '../application/backfill/methods/find/types';
+import { DisableRuleParams } from '../application/rule/methods/disable';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -167,7 +168,7 @@ export class RulesClient {
   public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
 
   public enable = (options: { id: string }) => enable(this.context, options);
-  public disable = (options: { id: string; untrack?: boolean }) => disable(this.context, options);
+  public disable = (params: DisableRuleParams) => disable(this.context, params);
 
   public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
