@@ -21,7 +21,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
 
   return variants.map((variant) => {
     const downloadName = platform.isWindows()
-      ? `win-${arch}/node.exe`
+      ? `win-${platform.getArchitecture()}/node.exe`
       : `node-v${version}-${arch}.tar.gz`;
 
     let variantPath = '';
@@ -30,10 +30,16 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
     const downloadPath = config.resolveFromRepo(
       '.node_binaries',
       version,
+      platform.getNodeArch(),
       variant,
       basename(downloadName)
     );
-    const extractDir = config.resolveFromRepo('.node_binaries', version, variant, arch);
+    const extractDir = config.resolveFromRepo(
+      '.node_binaries',
+      version,
+      platform.getNodeArch(),
+      variant
+    );
 
     return {
       url,
