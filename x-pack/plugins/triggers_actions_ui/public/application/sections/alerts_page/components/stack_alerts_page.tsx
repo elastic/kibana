@@ -46,6 +46,7 @@ import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query'
 import { nonNullable } from '../../../../../common/utils';
 import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
+import { AlertsTableSupportedConsumers } from '../../alerts_table/types';
 const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**
@@ -108,7 +109,7 @@ const PageContent = () => {
       filters.push(
         ...Object.entries(ruleTypeIdsByFeatureId)
           .map(([featureId, ruleTypeIds]) => {
-            const producerData = alertProducersData[featureId as AlertConsumers];
+            const producerData = alertProducersData[featureId as AlertsTableSupportedConsumers];
             if (!producerData) {
               return null;
             }

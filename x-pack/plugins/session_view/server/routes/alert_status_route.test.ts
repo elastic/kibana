@@ -13,7 +13,7 @@ import {
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchAlertByUuid } from './alert_status_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
-import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
+import { getAlertsClientMockInstance } from './alerts_client_mock.test';
 
 const getEmptyResponse = async () => {
   return {
@@ -54,7 +54,6 @@ const getResponse = async () => {
 describe('alert_status_route.ts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    resetAlertingAuthMock();
   });
 
   describe('searchAlertByUuid(client, alertUuid)', () => {
