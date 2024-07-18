@@ -54,7 +54,7 @@ import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { createDocumentStatsHash } from './utils';
 import { TableHeader } from './category_table/table_header';
-import { useOpenInDiscover } from './category_table/use_open_in_discover';
+import { useActions } from './category_table/use_actions';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -160,13 +160,12 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     BAR_TARGET
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions, openInDiscover } = useActions(
     dataView.id!,
     selectedField,
     selectedCategories,
     stateFromUrl,
     timefilter,
-    true,
     undefined,
     undefined
   );
@@ -319,6 +318,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     setUrlState({ field });
   };
 
+  const actions = getActions(true);
+
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -426,8 +427,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
             }}
             displayExamples={data.displayExamples}
             setSelectedCategories={setSelectedCategories}
-            openInDiscover={openInDiscover}
             tableState={tableState}
+            actions={actions}
           />
         </>
       ) : null}

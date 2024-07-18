@@ -42,9 +42,9 @@ import { FieldValidationCallout } from '../category_validation_callout';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
 import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } from '../utils';
-import { useOpenInDiscover } from '../category_table/use_open_in_discover';
 import { DiscoverTabs } from './discover_tabs';
 import { useRandomSamplerStorage } from '../sampling_menu';
+import { useActions } from '../category_table/use_actions';
 
 export interface LogCategorizationEmbeddableProps {
   input: Readonly<EmbeddablePatternAnalysisInput>;
@@ -178,13 +178,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     [dataView.id, filterManager, input]
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions, openInDiscover } = useActions(
     dataView.id!,
     selectedField ?? undefined,
     selectedCategories,
     stateFromUrl,
     timefilter,
-    false,
     onAddFilter,
     undefined
   );
@@ -392,6 +391,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     },
   });
 
+  const actions = getActions(false);
+
   return (
     <>
       <DiscoverTabs
@@ -443,8 +444,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
                   enableRowActions={false}
                   displayExamples={data.displayExamples}
                   setSelectedCategories={setSelectedCategories}
-                  openInDiscover={openInDiscover}
                   tableState={tableState}
+                  actions={actions}
                 />
               ) : null}
             </>

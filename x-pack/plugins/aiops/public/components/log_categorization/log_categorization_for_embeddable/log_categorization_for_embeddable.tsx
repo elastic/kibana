@@ -34,8 +34,8 @@ import { useValidateFieldRequest } from '../use_validate_category_field';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
 import { createAdditionalConfigHash, createDocumentStatsHash } from '../utils';
-import { useOpenInDiscover } from '../category_table/use_open_in_discover';
 import { FieldValidationCallout } from '../category_validation_callout';
+import { useActions } from '../category_table/use_actions';
 
 export interface LogCategorizationEmbeddableProps {
   input: Readonly<EmbeddablePatternAnalysisInput & PatternAnalysisProps>;
@@ -166,13 +166,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     [dataView.id, filterManager]
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions } = useActions(
     dataView.id!,
     dataView.fields.find((field) => field.name === fieldName),
     selectedCategories,
     appState,
     timefilter,
-    false,
     onAddFilter,
     undefined
   );
@@ -400,6 +399,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     [input.lastReloadRequestTime]
   );
 
+  const actions = [...getActions(false), ...getActions(true)];
+
   return (
     <>
       <FieldValidationCallout validationResults={fieldValidationResult} />
@@ -412,9 +413,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           enableRowActions={false}
           displayExamples={data.displayExamples}
           setSelectedCategories={setSelectedCategories}
-          openInDiscover={openInDiscover}
           tableState={tableState}
           selectable={false}
+          actions={actions}
         />
       ) : null}
     </>

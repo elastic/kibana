@@ -16,12 +16,13 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 
 import { i18n } from '@kbn/i18n';
 import type { UseTableState } from '@kbn/ml-in-memory-table';
 
 import { css } from '@emotion/react';
-import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+// import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
@@ -32,7 +33,6 @@ import type { EventRate } from '../use_categorize_request';
 
 import { ExpandedRow } from './expanded_row';
 import { FormattedPatternExamples, FormattedTokens } from '../format_category';
-import type { OpenInDiscover } from './use_open_in_discover';
 
 interface Props {
   categories: Category[];
@@ -44,8 +44,8 @@ interface Props {
     setHighlightedCategory: (category: Category | null) => void;
   };
   setSelectedCategories: (category: Category[]) => void;
-  openInDiscover: OpenInDiscover;
   tableState: UseTableState<Category>;
+  actions: Array<Action<Category>>;
   enableRowActions?: boolean;
   displayExamples?: boolean;
   selectable?: boolean;
@@ -56,8 +56,8 @@ export const CategoryTable: FC<Props> = ({
   eventRate,
   mouseOver,
   setSelectedCategories,
-  openInDiscover,
   tableState,
+  actions,
   enableRowActions = true,
   displayExamples = true,
   selectable = true,
@@ -74,7 +74,7 @@ export const CategoryTable: FC<Props> = ({
     return categories.some((category) => category.sparkline !== undefined);
   }, [categories]);
 
-  const { labels: openInDiscoverLabels, openFunction: openInDiscoverFunction } = openInDiscover;
+  // const { labels: openInDiscoverLabels, openFunction: openInDiscoverFunction } = openInDiscover;
 
   const toggleDetails = useCallback(
     (category: Category) => {
@@ -135,32 +135,33 @@ export const CategoryTable: FC<Props> = ({
       }),
       sortable: false,
       width: '65px',
-      actions: [
-        {
-          name: openInDiscoverLabels.singleSelect.in,
-          description: openInDiscoverLabels.singleSelect.in,
-          icon: 'plusInCircle',
-          type: 'icon',
-          'data-test-subj': 'aiopsLogPatternsActionFilterInButton',
-          onClick: (category) => openInDiscoverFunction(QUERY_MODE.INCLUDE, category),
-        },
-        {
-          name: openInDiscoverLabels.singleSelect.out,
-          description: openInDiscoverLabels.singleSelect.out,
-          icon: 'minusInCircle',
-          type: 'icon',
-          'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
-          onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
-        },
-        {
-          name: openInDiscoverLabels.singleSelect.out + '1', // !!!!!!!!!!!!!!!!!!!!!!
-          description: openInDiscoverLabels.singleSelect.out,
-          icon: 'minusInCircle',
-          type: 'icon',
-          'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
-          onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
-        },
-      ],
+      actions,
+      // actions: [
+      //   {
+      //     name: openInDiscoverLabels.singleSelect.in,
+      //     description: openInDiscoverLabels.singleSelect.in,
+      //     icon: 'plusInCircle',
+      //     type: 'icon',
+      //     'data-test-subj': 'aiopsLogPatternsActionFilterInButton',
+      //     onClick: (category) => openInDiscoverFunction(QUERY_MODE.INCLUDE, category),
+      //   },
+      //   {
+      //     name: openInDiscoverLabels.singleSelect.out,
+      //     description: openInDiscoverLabels.singleSelect.out,
+      //     icon: 'minusInCircle',
+      //     type: 'icon',
+      //     'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
+      //     onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
+      //   },
+      //   {
+      //     name: openInDiscoverLabels.singleSelect.out + '1', // !!!!!!!!!!!!!!!!!!!!!!
+      //     description: openInDiscoverLabels.singleSelect.out,
+      //     icon: 'minusInCircle',
+      //     type: 'icon',
+      //     'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
+      //     onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
+      //   },
+      // ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;
 

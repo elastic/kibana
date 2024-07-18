@@ -52,7 +52,7 @@ import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { CreateCategorizationJobButton } from './create_categorization_job';
 import { TableHeader } from './category_table/table_header';
-import { useOpenInDiscover } from './category_table/use_open_in_discover';
+import { useActions } from './category_table/use_actions';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -152,13 +152,12 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     BAR_TARGET
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions, openInDiscover } = useActions(
     dataView.id!,
     selectedField,
     selectedCategories,
     stateFromUrl,
     timefilter,
-    true,
     undefined,
     undefined
   );
@@ -279,6 +278,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
+  const actions = getActions(true);
   const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
 
   return (
@@ -407,8 +407,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
               enableRowActions={false}
               displayExamples={data.displayExamples}
               setSelectedCategories={setSelectedCategories}
-              openInDiscover={openInDiscover}
               tableState={tableState}
+              actions={actions}
             />
           </>
         ) : null}
