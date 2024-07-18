@@ -773,10 +773,6 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
               },
               {
