@@ -21,7 +21,11 @@ import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
+import {
+  getBaselineAndDeviationRates,
+  getLogRateChange,
+  LOG_RATE_ANALYSIS_TYPE,
+} from '@kbn/aiops-log-rate-analysis';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -31,7 +35,6 @@ import { useViewInDiscoverAction } from './use_view_in_discover_action';
 import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { MiniHistogram } from '../mini_histogram';
-import { getBaselineAndDeviationRates, getLogRateChange } from './get_baseline_and_deviation_rates';
 
 const TRUNCATE_TEXT_LINES = 3;
 const UNIQUE_COLUMN_WIDTH = '40px';
@@ -464,8 +467,8 @@ export const useColumns = (
 
           const logRateChange = getLogRateChange(
             analysisType,
-            baselineBucketRate!,
-            deviationBucketRate!
+            baselineBucketRate,
+            deviationBucketRate
           );
 
           return (

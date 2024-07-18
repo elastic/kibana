@@ -31,6 +31,7 @@ import {
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
 import {
+  getSwappedWindowParameters,
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
@@ -312,12 +313,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         // if it's `dip`, swap baseline and deviation.
         ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
           ? windowParameters
-          : {
-              baselineMin: windowParameters.deviationMin,
-              baselineMax: windowParameters.deviationMax,
-              deviationMin: windowParameters.baselineMin,
-              deviationMax: windowParameters.baselineMax,
-            }),
+          : getSwappedWindowParameters(windowParameters)),
         overrides,
         sampleProbability,
       },
