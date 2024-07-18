@@ -64,7 +64,6 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import classNames from 'classnames';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
