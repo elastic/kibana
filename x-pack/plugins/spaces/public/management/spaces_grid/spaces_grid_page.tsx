@@ -138,7 +138,7 @@ export class SpacesGridPage extends Component<Props, State> {
         ) : undefined}
         <EuiInMemoryTable
           itemId={'id'}
-          data-test-subj={'spacesListTable'}
+          data-test-subj="spacesListTable"
           items={this.state.spaces}
           tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
             defaultMessage: 'Kibana spaces',
@@ -147,7 +147,7 @@ export class SpacesGridPage extends Component<Props, State> {
           rowProps={(item) => ({
             'data-test-subj': `spacesListTableRow-${item.id}`,
           })}
-          columns={this.getColumnConfig({ serverBasePath: this.props.serverBasePath })}
+          columns={this.getColumnConfig()}
           pagination={true}
           sorting={true}
           search={{
@@ -256,7 +256,7 @@ export class SpacesGridPage extends Component<Props, State> {
     }
   };
 
-  public getColumnConfig({ serverBasePath }: { serverBasePath: string }) {
+  public getColumnConfig() {
     const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
@@ -429,7 +429,7 @@ export class SpacesGridPage extends Component<Props, State> {
           color: 'primary',
           href: (rowRecord) =>
             addSpaceIdToPath(
-              serverBasePath,
+              this.props.serverBasePath,
               rowRecord.id,
               `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
             ),
