@@ -18,8 +18,6 @@ import { Moment } from 'moment';
 import React, { useState } from 'react';
 import { AddWidgetMode } from '../../constants/add_widget_mode';
 import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
-import { AddFromLibraryButton } from '../add_from_library_button';
-import { AddWidgetModeSelector } from '../add_widget_mode_selector';
 import { EsqlWidgetControl } from '../esql_widget_control';
 import { NoteWidgetControl } from '../note_widget_control';
 
@@ -107,21 +105,6 @@ export function AddWidgetUI({
           timeRange,
           user,
         })}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <AddWidgetModeSelector
-              mode={mode}
-              onModeSelect={(nextMode) => {
-                setMode(() => nextMode);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddFromLibraryButton onWidgetAdd={onWidgetAdd} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
