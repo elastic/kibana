@@ -100,21 +100,14 @@ interface OptionalRequestParams {
 }
 
 export const getOptionalRequestParams = ({
-  isEnabledRAGAlerts,
   alertsIndexPattern,
   size,
 }: {
-  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
   const optionalSize = size ? { size } : undefined;
-
-  // the settings toggle must be enabled:
-  if (!isEnabledRAGAlerts) {
-    return {}; // don't send any optional params
-  }
 
   return {
     ...optionalAlertsIndexPattern,
@@ -122,10 +115,4 @@ export const getOptionalRequestParams = ({
   };
 };
 
-export const hasParsableResponse = ({
-  isEnabledRAGAlerts,
-  isEnabledKnowledgeBase,
-}: {
-  isEnabledRAGAlerts: boolean;
-  isEnabledKnowledgeBase: boolean;
-}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

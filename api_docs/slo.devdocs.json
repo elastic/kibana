@@ -1358,8 +1358,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               }
             ],
             "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",
