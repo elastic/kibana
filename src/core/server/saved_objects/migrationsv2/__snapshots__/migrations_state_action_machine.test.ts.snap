@@ -44,6 +44,7 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
@@ -181,6 +182,7 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
@@ -322,6 +324,7 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
@@ -467,6 +470,7 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
@@ -643,6 +647,7 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
@@ -791,6 +796,7 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
