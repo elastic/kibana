@@ -226,7 +226,6 @@ describe('setRecoveredAlertsContext', () => {
             getId: () => idWithLocation,
             getState: () => ({}),
             setContext: jest.fn(),
-            getUuid: () => alertUuid,
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -300,7 +299,6 @@ describe('setRecoveredAlertsContext', () => {
             getId: () => idWithLocation,
             getState: () => ({}),
             setContext: jest.fn(),
-            getUuid: () => alertUuid,
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -374,7 +372,6 @@ describe('setRecoveredAlertsContext', () => {
             getUuid: () => alertUuid,
             getState: () => ({}),
             setContext: jest.fn(),
-            getUuid: () => alertUuid,
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
