@@ -13,6 +13,7 @@ import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
 import type { TimelineTypeLiteral } from '../../../common/api/timeline';
+import { TimelineType } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
@@ -86,9 +87,10 @@ export const useCreateTimeline = ({
           show,
           timelineType,
           updated: undefined,
-          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
-            ? timelineDefaults.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineType.template
+              ? timelineDefaults.excludedRowRendererIds
+              : [],
         })
       );
 
