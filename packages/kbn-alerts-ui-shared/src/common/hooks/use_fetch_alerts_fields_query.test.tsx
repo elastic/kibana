@@ -7,32 +7,12 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import type { BrowserFields } from '../types/alerts_fields_types';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
-
-const browserFields: BrowserFields = {
-  kibana: {
-    fields: {
-      'kibana.alert.rule.uuid': {
-        category: 'kibana',
-        name: 'kibana.alert.rule.uuid',
-      },
-      'kibana.alert.rule.name': {
-        category: 'kibana',
-        name: 'kibana.alert.rule.name',
-      },
-      'kibana.alert.reason': {
-        category: 'kibana',
-        name: 'kibana.alert.reason',
-      },
-    },
-  },
-};
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -108,22 +88,6 @@ describe('useFetchAlertsFieldsQuery', () => {
         },
       ],
     });
-  });
-
-  it('should correctly return the initial browserFields', async () => {
-    const { result } = renderHook(
-      () =>
-        useFetchAlertsFieldsQuery({
-          http: mockHttpClient,
-          featureIds: ['apm'],
-          initialBrowserFields: browserFields,
-        }),
-      {
-        wrapper,
-      }
-    );
-
-    expect(result.current.data).toEqual({ browserFields, fields: [] });
   });
 
   it('should not fetch if the only featureId is not valid', async () => {

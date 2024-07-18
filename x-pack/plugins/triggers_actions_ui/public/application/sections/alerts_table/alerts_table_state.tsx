@@ -298,7 +298,7 @@ const AlertsTableStateWithQueryProvider = memo(
       storage,
       id,
       defaultColumns: columnConfigByClient,
-      initialBrowserFields: propBrowserFields,
+      browserFields: propBrowserFields,
     });
 
     const [

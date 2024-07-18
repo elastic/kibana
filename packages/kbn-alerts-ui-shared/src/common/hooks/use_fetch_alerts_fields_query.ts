@@ -8,16 +8,10 @@
 
 import { AlertConsumers, isValidFeatureId } from '@kbn/rule-data-utils';
 import { useQuery } from '@tanstack/react-query';
-import type { BrowserFields } from '../types/alerts_fields_types';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 import { fetchAlertsFields, FetchAlertsFieldsParams } from '../apis/fetch_alert_fields';
 
-export interface UseFetchAlertsFieldsQueryParams extends FetchAlertsFieldsParams {
-  /**
-   * Initial browser fields
-   */
-  initialBrowserFields?: BrowserFields;
-}
+export type UseFetchAlertsFieldsQueryParams = FetchAlertsFieldsParams;
 
 const UNSUPPORTED_FEATURE_ID = AlertConsumers.SIEM;
 
@@ -36,7 +30,7 @@ export const useFetchAlertsFieldsQuery = (
     'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
-  const { featureIds, initialBrowserFields } = params;
+  const { featureIds } = params;
 
   const validFeatureIds = featureIds.filter(
     (fid) => isValidFeatureId(fid) && fid !== UNSUPPORTED_FEATURE_ID
@@ -46,7 +40,7 @@ export const useFetchAlertsFieldsQuery = (
     queryKey: queryKeyPrefix.concat(JSON.stringify(featureIds)),
     queryFn: () => fetchAlertsFields({ http, featureIds: validFeatureIds }),
     enabled: validFeatureIds.length > 0,
-    initialData: { browserFields: initialBrowserFields ?? {}, fields: [] },
+    initialData: { browserFields: {}, fields: [] },
     ...options,
   });
 };
