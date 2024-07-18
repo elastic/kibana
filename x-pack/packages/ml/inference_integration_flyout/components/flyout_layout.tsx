@@ -91,7 +91,7 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
               <EuiLink href={inferenceEndpointUrl} external target={'_blank'}>
                 <FormattedMessage
                   id="xpack.ml.inferenceFlyoutWrapper.elasticsearchModels.inferenceEndpointIdForm.inferenceEnpointDocumentation"
-                  defaultMessage="What's this?"
+                  defaultMessage="Inference API documentation"
                 />
               </EuiLink>
             }
