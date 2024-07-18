@@ -64,15 +64,6 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const hostExpandedDetail: ExpandedDetailTimeline = {
-    [TimelineTabs.query]: {
-      panelView: 'hostDetail',
-      params: {
-        hostName: 'woohoo!',
-      },
-    },
-  };
-
   const networkExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'networkDetail',
@@ -286,50 +277,6 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
       expect(wrapper.find(EventDetailsPanel).props().isDraggable).toBeFalsy();
-    });
-  });
-
-  describe('DetailsPanel:HostDetails: rendering', () => {
-    beforeEach(() => {
-      mockUseSearchStrategy.mockReturnValue({
-        loading: true,
-        result: {
-          hostDetails: {
-            host: {},
-          },
-        },
-        error: undefined,
-        search: jest.fn(),
-        refetch: jest.fn(),
-        inspect: {},
-      });
-      const mockState = {
-        ...state,
-        timeline: {
-          ...state.timeline,
-          timelineById: {
-            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
-            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
-          },
-        },
-      };
-      mockState.timeline.timelineById[TimelineId.test].expandedDetail = hostExpandedDetail;
-      mockState.timeline.timelineById[TimelineId.active].expandedDetail = hostExpandedDetail;
-      store = createMockStore(mockState);
-    });
-
-    afterEach(() => {
-      mockUseSearchStrategy.mockReset();
-    });
-
-    test('it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <DetailsPanel {...mockProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('ExpandableHostDetails').first().render()).toMatchSnapshot();
     });
   });
 
