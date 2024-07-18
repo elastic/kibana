@@ -8,6 +8,8 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
+
+import { EuiFlexGroup } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -34,8 +36,9 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { EuiFlexGroup } from '@elastic/eui';
 import { ControlRenderer } from '../control_renderer';
+import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup } from './serialization_utils';
 import {
@@ -44,8 +47,6 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { initControlsManager } from './init_controls_manager';
-import { controlGroupFetch$, chaining$, controlFetch$ } from './control_fetch';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;

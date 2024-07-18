@@ -8,6 +8,8 @@
 import React, { memo } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
+import type { NetworkExpandableFlyoutProps } from './network_details';
+import { NetworkPanel, NetworkPanelKey } from './network_details';
 import {
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
@@ -123,6 +125,10 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isPreviewMode />
     ),
+  },
+  {
+    key: NetworkPanelKey,
+    component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
   },
 ];
 
