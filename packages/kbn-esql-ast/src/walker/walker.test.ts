@@ -87,6 +87,28 @@ test('can find assignment expression', () => {
   expect((functions[0].args[0] as any).name).toBe('var0');
 });
 
+test('can collect all params from grouping functions', () => {
+  const query =
+    'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?earliest,?latest)';
+  const { ast } = getAstAndSyntaxErrors(query);
+  const params = Walker.params(ast);
+
+  expect(params).toMatchObject([
+    {
+      type: 'literal',
+      literalType: 'param',
+      paramType: 'named',
+      value: 'earliest',
+    },
+    {
+      type: 'literal',
+      literalType: 'param',
+      paramType: 'named',
+      value: 'latest',
+    },
+  ]);
+});
+
 describe('Walker.hasFunction()', () => {
   test('can find assignment expression', () => {
     const query1 = 'METRICS source bucket(bytes, 1 hour)';
