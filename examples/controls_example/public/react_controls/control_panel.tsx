@@ -7,9 +7,12 @@
  */
 
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
@@ -23,6 +26,7 @@ import {
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
@@ -30,6 +34,8 @@ import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
 
 import './control_panel.scss';
+import { DragInfo } from './control_renderer';
+import { ControlWidth } from '@kbn/controls-plugin/common';
 
 /**
  * TODO: Handle dragging
@@ -59,8 +65,33 @@ const DragHandle = ({
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
+  uuid,
+  dragInfo,
 }: ControlPanelProps<ApiType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isOver,
+    isDragging,
+    index,
+    isSorting,
+    over,
+  } = useSortable({
+    id: uuid,
+  });
+
+  useEffect(() => {
+    console.log('OVER', over);
+  }, [over]);
+
+  const style = {
+    transition,
+    transform: isSorting ? undefined : CSS.Translate.toString(transform),
+  };
 
   const viewModeSubject = (() => {
     if (
@@ -102,7 +133,11 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   return (
     <EuiFlexItem
+      ref={setNodeRef}
+      style={style}
       grow={grow}
+      {...attributes}
+      {...listeners}
       data-control-id={api?.uuid}
       data-test-subj={`control-frame`}
       data-render-complete="true"
@@ -111,10 +146,11 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         'controlFrameWrapper--small': width === 'small',
         'controlFrameWrapper--medium': width === 'medium',
         'controlFrameWrapper--large': width === 'large',
-        // TODO: Add the following classes back once drag and drop logic is added
-        // 'controlFrameWrapper-isDragging': isDragging,
-        // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-        // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+        'controlFrameWrapper--insertBefore':
+          isOver && (index ?? -1) < (dragInfo.draggingIndex ?? -1),
+        'controlFrameWrapper--insertAfter':
+          isOver && (index ?? -1) > (dragInfo.draggingIndex ?? -1),
+        'controlFrameWrapper-isDragging': isDragging,
       })}
     >
       <FloatingActions
@@ -134,6 +170,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         >
           <EuiFormControlLayout
             fullWidth
+            className="controlFrame__formControlLayout"
             isLoading={Boolean(dataLoading)}
             prepend={
               <>
@@ -183,6 +220,49 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>
+    </EuiFlexItem>
+  );
+};
+
+/**
+ * A simplified clone version of the control which is dragged. This version only shows
+ * the title, because individual controls can be any size, and dragging a wide item
+ * can be quite cumbersome.
+ */
+export const ControlClone = ({
+  controlStyle,
+  controlApi,
+}: {
+  controlStyle: string;
+  controlApi: DefaultControlApi;
+}) => {
+  console.log('controlApi', controlApi);
+  const width = useStateFromPublishingSubject(controlApi.width);
+  // const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  // const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+
+  // const width = panels[draggingId].width;
+  // const title = panels[draggingId].explicitInput.title;
+  return (
+    <EuiFlexItem
+      className={classNames('controlFrameCloneWrapper', {
+        'controlFrameCloneWrapper--small': width === 'small',
+        'controlFrameCloneWrapper--medium': width === 'medium',
+        'controlFrameCloneWrapper--large': width === 'large',
+        'controlFrameCloneWrapper--twoLine': controlStyle === 'twoLine',
+      })}
+    >
+      {controlStyle === 'twoLine' ? <EuiFormLabel>{'TITLE'}</EuiFormLabel> : undefined}
+      <EuiFlexGroup responsive={false} gutterSize="none" className={'controlFrame__draggable'}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
+        </EuiFlexItem>
+        {controlStyle === 'oneLine' ? (
+          <EuiFlexItem>
+            <label className="controlFrameCloneWrapper__label">{'TITLE'}</label>
+          </EuiFlexItem>
+        ) : undefined}
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 };

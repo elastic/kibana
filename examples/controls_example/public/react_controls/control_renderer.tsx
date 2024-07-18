@@ -14,7 +14,7 @@ import { StateComparators } from '@kbn/presentation-publishing';
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './control_panel';
-import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
+import { ControlApiRegistration, DefaultControlApi, DefaultControlState, DragInfo } from './types';
 
 /**
  * Renders a component from the control registry into a Control Panel
@@ -25,11 +25,13 @@ export const ControlRenderer = <
 >({
   type,
   uuid,
+  dragInfo,
   getParentApi,
   onApiAvailable,
 }: {
   type: string;
   uuid: string;
+  dragInfo: DragInfo;
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
@@ -68,6 +70,7 @@ export const ControlRenderer = <
         return React.forwardRef<typeof api, { className: string }>((props, ref) => {
           // expose the api into the imperative handle
           useImperativeHandle(ref, () => api, []);
+
           return <Component {...props} />;
         });
       })(),
@@ -79,5 +82,5 @@ export const ControlRenderer = <
     [type]
   );
 
-  return <ControlPanel<ApiType> Component={component} />;
+  return <ControlPanel<ApiType> Component={component} uuid={uuid} dragInfo={dragInfo} />;
 };

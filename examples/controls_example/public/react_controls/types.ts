@@ -92,9 +92,18 @@ export type ControlStateManager<State extends object = object> = {
   [key in keyof Required<State>]: BehaviorSubject<State[key]>;
 };
 
+export interface DragInfo {
+  isOver?: boolean;
+  isDragging?: boolean;
+  draggingIndex?: number;
+  index?: number;
+}
+
 export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
   PropsType extends {} = { className: string }
 > {
+  uuid: string;
+  dragInfo: DragInfo;
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }
