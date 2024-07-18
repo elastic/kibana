@@ -213,7 +213,7 @@ describe('document selection', () => {
 
       expect(findTestSubject(component, 'dscGridShowSelectedDocuments').length).toBe(1);
       expect(findTestSubject(component, 'unifiedDataTableCompareSelectedDocuments').length).toBe(1);
-      expect(findTestSubject(component, 'dscGridSelectAllDocs').text()).toBe('Select all 5 rows');
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').text()).toBe('Select all 5');
 
       act(() => {
         findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
@@ -224,43 +224,58 @@ describe('document selection', () => {
   });
 
   describe('DataTableCompareToolbarBtn', () => {
+    const props = {
+      isPlainRecord: false,
+      isFilterActive: false,
+      rows: dataTableContextMock.rows,
+      selectedDocsState: buildSelectedDocsState([]),
+      setIsFilterActive: jest.fn(),
+      enableComparisonMode: true,
+      setIsCompareActive: jest.fn(),
+    };
+
     const renderCompareBtn = ({
       selectedDocIds = ['1', '2'],
       setIsCompareActive = jest.fn(),
     }: Partial<Parameters<typeof DataTableCompareToolbarBtn>[0]> = {}) => {
       render(
         <IntlProvider locale="en">
-          <DataTableCompareToolbarBtn
-            selectedDocIds={selectedDocIds}
+          <DataTableDocumentToolbarBtn
+            {...props}
+            selectedDocsState={buildSelectedDocsState(selectedDocIds)}
             setIsCompareActive={setIsCompareActive}
           />
         </IntlProvider>
       );
       return {
-        getButton: () => screen.queryByRole('button', { name: /Compare/ }),
+        getButton: async () => {
+          const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
+          menuButton.click();
+          return screen.queryByRole('button', { name: /Compare/ });
+        },
       };
     };
 
-    it('should render the compare button', () => {
+    it('should render the compare button', async () => {
       const { getButton } = renderCompareBtn();
-      expect(getButton()).toBeInTheDocument();
+      expect(await getButton()).toBeInTheDocument();
     });
 
-    it('should call setIsCompareActive when the button is clicked', () => {
+    it('should call setIsCompareActive when the button is clicked', async () => {
       const setIsCompareActive = jest.fn();
       const { getButton } = renderCompareBtn({ setIsCompareActive });
-      const button = getButton();
+      const button = await getButton();
       expect(button).toBeInTheDocument();
       expect(button?.getAttribute('disabled')).toBeNull();
       button?.click();
       expect(setIsCompareActive).toHaveBeenCalledWith(true);
     });
 
-    it('should disable the button if limit is reached', () => {
+    it('should disable the button if limit is reached', async () => {
       const selectedDocIds = Array.from({ length: 500 }, (_, i) => i.toString());
       const setIsCompareActive = jest.fn();
       const { getButton } = renderCompareBtn({ selectedDocIds, setIsCompareActive });
-      const button = getButton();
+      const button = await getButton();
       expect(button).toBeInTheDocument();
       expect(button?.getAttribute('disabled')).toBe('');
       button?.click();

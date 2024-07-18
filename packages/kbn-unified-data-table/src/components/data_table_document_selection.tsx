@@ -170,6 +170,7 @@ export function DataTableDocumentToolbarBtn({
 
   const getMenuItems = useCallback(() => {
     return [
+      // Compare selected documents
       ...(enableComparisonMode && selectedDocIds.length > 1
         ? [
             <DataTableCompareToolbarBtn
@@ -179,6 +180,7 @@ export function DataTableDocumentToolbarBtn({
             />,
           ]
         : []),
+      // Copy results to clipboard (JSON)
       <EuiCopy
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
@@ -205,6 +207,7 @@ export function DataTableDocumentToolbarBtn({
         )}
       </EuiCopy>,
       isFilterActive ? (
+        // Show all documents
         <EuiContextMenuItem
           data-test-subj="dscGridShowAllDocuments"
           key="showAllDocuments"
@@ -227,6 +230,7 @@ export function DataTableDocumentToolbarBtn({
           )}
         </EuiContextMenuItem>
       ) : (
+        // Show selected documents only
         <EuiContextMenuItem
           data-test-subj="dscGridShowSelectedDocuments"
           key="showSelectedDocuments"
@@ -249,27 +253,7 @@ export function DataTableDocumentToolbarBtn({
           )}
         </EuiContextMenuItem>
       ),
-      ...(!isFilterActive && selectedDocIds.length < rows.length && rows.length > 1
-        ? [
-            <EuiContextMenuItem
-              data-test-subj="dscGridSelectAllDocs"
-              key="selectRowsOnAllPages"
-              icon="check"
-              onClick={() => {
-                setIsSelectionPopoverOpen(false);
-                selectAllDocs();
-              }}
-            >
-              <FormattedMessage
-                id="unifiedDataTable.selectAllDocs"
-                defaultMessage="Select all {rowsCount} rows"
-                values={{
-                  rowsCount: rows.length,
-                }}
-              />
-            </EuiContextMenuItem>,
-          ]
-        : []),
+      // Clear selection
       <EuiContextMenuItem
         data-test-subj="dscGridClearSelectedDocuments"
         key="clearSelection"
@@ -290,7 +274,6 @@ export function DataTableDocumentToolbarBtn({
     setIsFilterActive,
     isDocSelected,
     clearAllSelectedDocs,
-    selectAllDocs,
     selectedDocIds,
     enableComparisonMode,
     setIsCompareActive,
@@ -301,14 +284,15 @@ export function DataTableDocumentToolbarBtn({
     []
   );
 
-  return (
+  const selectedRowsMenuButton = (
     <EuiPopover
       closePopover={() => setIsSelectionPopoverOpen(false)}
       isOpen={isSelectionPopoverOpen}
       panelPaddingSize="none"
       button={
         <EuiDataGridToolbarControl
-          iconType="documents"
+          iconSide="left"
+          iconType="arrowDown"
           onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocIds.length}
           data-test-subj="unifiedDataTableSelectionBtn"
@@ -338,6 +322,38 @@ export function DataTableDocumentToolbarBtn({
         />
       )}
     </EuiPopover>
+  );
+
+  return (
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="none"
+      wrap={false}
+      className="unifiedDataTableToolbarControlGroup"
+    >
+      <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+        {selectedRowsMenuButton}
+      </EuiFlexItem>
+      {!isFilterActive && selectedDocIds.length < rows.length && rows.length > 1 ? (
+        <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+          <EuiDataGridToolbarControl
+            data-test-subj="dscGridSelectAllDocs"
+            onClick={() => {
+              setIsSelectionPopoverOpen(false);
+              selectAllDocs();
+            }}
+          >
+            <FormattedMessage
+              id="unifiedDataTable.selectAllDocs"
+              defaultMessage="Select all {rowsCount}"
+              values={{
+                rowsCount: rows.length,
+              }}
+            />
+          </EuiDataGridToolbarControl>
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 }
 

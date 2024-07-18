@@ -26,6 +26,10 @@
   &:active {
     transform: translateY(0);
   }
+
+  &[data-test-subj='unifiedDataTableSelectionBtn'] .euiButtonEmpty__content {
+    flex-direction: row-reverse;
+  }
 }
 
 .unifiedDataTableToolbarControlGroup {
@@ -34,6 +38,16 @@
   display: inline-flex;
   align-items: stretch;
   flex-direction: row;
+
+  & .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
+    border-radius: 0;
+    border: none;
+  }
+
+  & .unifiedDataTableToolbarControlButton + .unifiedDataTableToolbarControlButton {
+    border-inline-start: $euiBorderThin;
+    border-radius: 0;
+  }
 }
 
 .unifiedDataTableToolbarControlIconButton .euiButtonIcon {

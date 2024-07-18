@@ -52,7 +52,7 @@ export const internalRenderCustomToolbar = (
     <>
       {leftSide && additionalControls && (
         <EuiFlexItem grow={false}>
-          <div className="unifiedDataTableToolbarControlButton">{additionalControls}</div>
+          <div>{additionalControls}</div>
         </EuiFlexItem>
       )}
       {columnControl && (
@@ -67,7 +67,7 @@ export const internalRenderCustomToolbar = (
       )}
       {!leftSide && additionalControls && (
         <EuiFlexItem grow={false}>
-          <div className="unifiedDataTableToolbarControlButton">{additionalControls}</div>
+          <div>{additionalControls}</div>
         </EuiFlexItem>
       )}
     </>
