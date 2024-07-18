@@ -107,6 +107,10 @@
     "timestamp"
   ],
   "application_usage_totals": [],
+  "background-task-node": [
+    "id",
+    "last_seen"
+  ],
   "canvas-element": [
     "@created",
     "@timestamp",
@@ -480,6 +484,7 @@
     "status",
     "uuid"
   ],
+  "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"

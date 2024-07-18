@@ -7,7 +7,7 @@
  */
 
 /**
- * Inserts `data` into the location specified by pointer in the `document`.
+ * Inserts `data` into the location specified by pointer in the `targetObject`.
  *
  * @param pointer [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901)
  * @param component Component data to insert
@@ -16,7 +16,7 @@
 export function insertRefByPointer(
   pointer: string,
   component: unknown,
-  componentsObject: Record<string, unknown>
+  targetObject: Record<string, unknown>
 ): void {
   if (!pointer.startsWith('/components')) {
     throw new Error(
@@ -24,9 +24,10 @@ export function insertRefByPointer(
     );
   }
 
-  // splitting '/components' by '/' gives ['', 'components'] which should be skipped
-  const segments = pointer.split('/').slice(2);
-  let target = componentsObject;
+  // splitting '/components/some/path' by '/' gives ['', 'components'...]
+  // where the first empty string should be skipped
+  const segments = pointer.split('/').slice(1);
+  let target = targetObject;
 
   while (segments.length > 0) {
     const segment = segments.shift() as string;

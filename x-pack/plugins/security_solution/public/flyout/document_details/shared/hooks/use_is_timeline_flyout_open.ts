@@ -14,7 +14,10 @@ import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
  */
 export const useIsTimelineFlyoutOpen = (): boolean => {
   const query = new URLSearchParams(window.location.search);
-  return (
-    query.has(URL_PARAM_KEY.timelineFlyout) && query.get(URL_PARAM_KEY.timelineFlyout) !== '()'
-  );
+  const queryHasTimelineFlyout = query.has(URL_PARAM_KEY.timelineFlyout);
+  const timelineFlyoutHasValue =
+    query.get(URL_PARAM_KEY.timelineFlyout) !== '()' &&
+    query.get(URL_PARAM_KEY.timelineFlyout) !== '(preview:!())';
+
+  return queryHasTimelineFlyout && timelineFlyoutHasValue;
 };
