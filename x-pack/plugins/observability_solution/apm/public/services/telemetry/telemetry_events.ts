@@ -33,4 +33,19 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-export const apmTelemetryEventBasedTypes = [searchQuerySubmittedEventType];
+const entityExperienceStatusEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_EXPERIENCE_STATUS,
+  schema: {
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'The status of the Entity experience (Enabled or Disabled)',
+      },
+    },
+  },
+};
+
+export const apmTelemetryEventBasedTypes = [
+  searchQuerySubmittedEventType,
+  entityExperienceStatusEventType,
+];

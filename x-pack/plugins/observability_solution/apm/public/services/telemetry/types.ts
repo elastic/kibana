@@ -21,17 +21,23 @@ export interface SearchQuerySubmittedParams {
   action: SearchQueryActions;
 }
 
-export type TelemetryEventParams = SearchQuerySubmittedParams;
+export interface EntityExperienceStatusParams {
+  status: 'enabled' | 'disabled';
+}
+
+export type TelemetryEventParams = SearchQuerySubmittedParams | EntityExperienceStatusParams;
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
+  reportEntityExperienceStatusChange(params: EntityExperienceStatusParams): void;
 }
 
 export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
+  ENTITY_EXPERIENCE_STATUS = 'entity_experience_status',
 }
 
 export interface TelemetryEvent {
-  eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED;
-  schema: RootSchema<SearchQuerySubmittedParams>;
+  eventType: TelemetryEventTypes;
+  schema: RootSchema<TelemetryEventParams>;
 }

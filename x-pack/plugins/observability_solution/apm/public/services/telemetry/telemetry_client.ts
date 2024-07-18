@@ -6,7 +6,12 @@
  */
 
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { TelemetryEventTypes, ITelemetryClient, SearchQuerySubmittedParams } from './types';
+import {
+  ITelemetryClient,
+  SearchQuerySubmittedParams,
+  EntityExperienceStatusParams,
+  TelemetryEventTypes,
+} from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}
@@ -21,5 +26,9 @@ export class TelemetryClient implements ITelemetryClient {
       timerange,
       action,
     });
+  };
+
+  public reportEntityExperienceStatusChange = ({ status }: EntityExperienceStatusParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_EXPERIENCE_STATUS, { status });
   };
 }

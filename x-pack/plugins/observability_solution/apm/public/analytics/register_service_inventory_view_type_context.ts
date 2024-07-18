@@ -7,10 +7,9 @@
 
 import { AnalyticsServiceSetup } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
-import {
-  serviceInventoryStorageKey,
-  ServiceInventoryView,
-} from '../context/entity_manager_context/entity_manager_context';
+import { ServiceInventoryView } from '../context/entity_manager_context/entity_manager_context';
+
+export const serviceInventoryStorageKey = 'apm.service.inventory.view';
 
 export const serviceInventoryViewType$ = new BehaviorSubject({
   serviceInventoryViewType: JSON.parse(
