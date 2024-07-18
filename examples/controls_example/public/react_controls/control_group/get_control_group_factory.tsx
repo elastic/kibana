@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import {
@@ -245,7 +245,7 @@ export const getControlGroupEmbeddableFactory = (services: {
               const oldIndex = active?.data.current?.sortable.index;
               const newIndex = over?.data.current?.sortable.index;
               if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
-                controlsManager.setControlOrder(
+                controlsManager.controlsInOrder$.next(
                   arrayMove([...controlsInOrder], oldIndex, newIndex)
                 );
               }

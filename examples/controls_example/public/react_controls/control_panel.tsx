@@ -79,7 +79,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   } = useSortable({
     id: uuid,
   });
-
   const style = {
     transition,
     transform: isSorting ? undefined : CSS.Translate.toString(transform),
