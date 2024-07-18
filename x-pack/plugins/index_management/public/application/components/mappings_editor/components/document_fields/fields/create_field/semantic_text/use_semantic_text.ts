@@ -110,6 +110,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       throw new Error(
         i18n.translate('xpack.idxMgmt.mappingsEditor.semanticText.inferenceError', {
           defaultMessage: 'No inference model found for inference ID {inferenceId}',
+          values: { inferenceId },
         })
       );
     }

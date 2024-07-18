@@ -152,7 +152,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       selectTimelineById(state, timelineId)
     );
 
-    const tableRows = useMemo(
+    const { tableRows, tableStylesOverride } = useMemo(
       () => transformTimelineItemToUnifiedRows({ events, dataView }),
       [events, dataView]
     );
@@ -372,9 +372,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           <UnifiedTimelineGlobalStyles />
           <DataGridMemoized
             ariaLabelledBy="timelineDocumentsAriaLabel"
-            className={'udtTimeline'}
+            className="udtTimeline"
             columns={columnIds}
             expandedDoc={expandedDoc}
+            gridStyleOverride={tableStylesOverride}
             dataView={dataView}
             showColumnTokens={true}
             loadingState={dataLoadingState}
