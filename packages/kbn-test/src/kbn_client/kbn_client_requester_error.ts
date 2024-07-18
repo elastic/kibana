@@ -12,10 +12,7 @@ export class KbnClientRequesterError extends Error {
   constructor(message: string, error: unknown) {
     super(message);
     this.name = 'KbnClientRequesterError';
-
-    if (error instanceof AxiosError) {
-      this.axiosError = clean(error);
-    }
+    if (error instanceof AxiosError) this.axiosError = clean(error);
   }
 }
 function clean(error: Error): AxiosError {
