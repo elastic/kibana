@@ -11,13 +11,13 @@ import datemath from '@kbn/datemath';
 import moment from 'moment';
 import * as rt from 'io-ts';
 import type { TimeRange as KibanaTimeRange } from '@kbn/es-query';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { TimeRange } from '../../../../common/time/time_range';
 import { useUrlState } from '../../../hooks/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../hooks/use_kibana_timefilter_time';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const autoRefreshRT = rt.type({
   interval: rt.number,

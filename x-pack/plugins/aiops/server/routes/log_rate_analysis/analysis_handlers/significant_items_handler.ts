@@ -6,6 +6,7 @@
  */
 
 import { queue } from 'async';
+import { chunk } from 'lodash';
 
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
@@ -17,10 +18,15 @@ import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-log-rate-analysis/api/schema';
+import type { QueueFieldCandidate } from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
+import {
+  isKeywordFieldCandidates,
+  isTextFieldCandidates,
+  QUEUE_CHUNKING_SIZE,
+} from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import { fetchSignificantCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_categories';
 import { fetchSignificantTermPValues } from '@kbn/aiops-log-rate-analysis/queries/fetch_significant_term_p_values';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import {
   LOADED_FIELD_CANDIDATES,
@@ -28,20 +34,6 @@ import {
   PROGRESS_STEP_P_VALUES,
 } from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
-
-interface FieldCandidate {
-  fieldCandidate: string;
-}
-const isFieldCandidate = (d: unknown): d is FieldCandidate =>
-  isPopulatedObject(d, ['fieldCandidate']);
-
-interface TextFieldCandidate {
-  textFieldCandidate: string;
-}
-const isTextFieldCandidate = (d: unknown): d is FieldCandidate =>
-  isPopulatedObject(d, ['textFieldCandidate']);
-
-type Candidate = FieldCandidate | TextFieldCandidate;
 
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
@@ -82,8 +74,6 @@ export const significantItemsHandlerFactory =
       ) ?? [])
     );
 
-    const fieldsToSample = new Set<string>();
-
     let remainingFieldCandidates: string[];
     let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
 
@@ -104,9 +94,12 @@ export const significantItemsHandlerFactory =
     const loadingStep =
       (1 / (fieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
 
-    const pValuesQueue = queue(async function (payload: Candidate) {
-      if (isFieldCandidate(payload)) {
-        const { fieldCandidate } = payload;
+    const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
+      let queueItemLoadingStep = 0;
+
+      if (isKeywordFieldCandidates(payload)) {
+        const { keywordFieldCandidates: fieldNames } = payload;
+        queueItemLoadingStep = loadingStep * fieldNames.length;
         let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
         try {
@@ -117,34 +110,30 @@ export const significantItemsHandlerFactory =
             emitError: responseStream.pushError,
             arguments: {
               ...requestBody,
-              fieldNames: [fieldCandidate],
+              fieldNames,
               sampleProbability: stateHandler.sampleProbability(),
             },
           });
         } catch (e) {
           if (!isRequestAbortedError(e)) {
             logger.error(
-              `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
+              `Failed to fetch p-values for ${fieldNames.join()}, got: \n${e.toString()}`
             );
-            responseStream.pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+            responseStream.pushError(`Failed to fetch p-values for ${fieldNames.join()}.`);
           }
           return;
         }
 
-        remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
+        remainingFieldCandidates = remainingFieldCandidates.filter((d) => !fieldNames.includes(d));
 
         if (pValues.length > 0) {
-          pValues.forEach((d) => {
-            fieldsToSample.add(d.fieldName);
-          });
           significantTerms.push(...pValues);
-
           responseStream.push(addSignificantItems(pValues));
-
           fieldValuePairsCount += pValues.length;
         }
-      } else if (isTextFieldCandidate(payload)) {
-        const { textFieldCandidate } = payload;
+      } else if (isTextFieldCandidates(payload)) {
+        const { textFieldCandidates: fieldNames } = payload;
+        queueItemLoadingStep = loadingStep * fieldNames.length;
 
         const significantCategoriesForField = await fetchSignificantCategories({
           esClient,
@@ -153,7 +142,7 @@ export const significantItemsHandlerFactory =
           abortSignal,
           arguments: {
             ...requestBody,
-            fieldNames: [textFieldCandidate],
+            fieldNames,
             sampleProbability: stateHandler.sampleProbability(),
           },
         });
@@ -165,7 +154,7 @@ export const significantItemsHandlerFactory =
         }
       }
 
-      stateHandler.loaded(loadingStep, false);
+      stateHandler.loaded(queueItemLoadingStep, false);
 
       responseStream.push(
         updateLoadingState({
@@ -186,10 +175,14 @@ export const significantItemsHandlerFactory =
       );
     }, MAX_CONCURRENT_QUERIES);
 
+    // This chunks keyword and text field candidates, then passes them on
+    // to the async queue for processing. Each chunk will be part of a single
+    // query using multiple aggs for each candidate. For many candidates,
+    // on top of that the async queue will process multiple queries concurrently.
     pValuesQueue.push(
       [
-        ...textFieldCandidates.map((d) => ({ textFieldCandidate: d })),
-        ...fieldCandidates.map((d) => ({ fieldCandidate: d })),
+        ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
+        ...chunk(fieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ keywordFieldCandidates: d })),
       ],
       (err) => {
         if (err) {
