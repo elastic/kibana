@@ -40,7 +40,7 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
-      path: '/internal/api/entities/definition/{id}/_reset',
+      path: '/internal/entities/definition/{id}/_reset',
       validate: {
         params: schema.object({
           id: schema.string(),

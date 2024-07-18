@@ -90,7 +90,7 @@ export const metadataSchema = z
   })
   .transform((metadata) => ({
     ...metadata,
-    desitination: metadata.destination ?? metadata.source,
+    destination: metadata.destination ?? metadata.source,
     limit: metadata.limit ?? 1000,
   }))
   .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })));
