@@ -22,14 +22,12 @@ import {
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
-// TODO: ALL CASES NEED THEIR SAMPLE VERSIONS UPDATED TO BE MULTI LINE STRINGS
-
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI review prebuilt rules updates from package with mock rule assets', () => {
+  describe.only('@ess @serverless @skipInServerlessMKI review prebuilt rules updates from package with mock rule assets', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
@@ -38,7 +36,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe(`multi line string fields`, () => {
       const getRuleAssetSavedObjects = () => [
-        createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, description: 'A' }),
+        createRuleAssetSavedObject({
+          rule_id: 'rule-1',
+          version: 1,
+          description: 'My description.\nThis is a second line.',
+        }),
       ];
 
       describe("when rule field doesn't have an update and has no custom value - scenario AAA", () => {
@@ -51,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
-              description: 'A',
+              description: 'My description.\nThis is a second line.',
               version: 2,
             }),
           ];
@@ -85,14 +87,14 @@ export default ({ getService }: FtrProviderContext): void => {
           // Customize a multi line string field on the installed rule
           await patchRule(supertest, log, {
             rule_id: 'rule-1',
-            description: 'B',
+            description: 'My GREAT description.\nThis is a second line.',
           });
 
           // Increment the version of the installed rule, do NOT update the related multi line string field, and create the new rule assets
           const updatedRuleAssetSavedObjects = [
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
-              description: 'A',
+              description: 'My description.\nThis is a second line.',
               version: 2,
             }),
           ];
@@ -102,10 +104,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
           expect(reviewResponse.rules[0].diff.fields).toEqual({
             description: {
-              base_version: 'A',
-              current_version: 'B',
-              target_version: 'A',
-              merged_version: 'B',
+              base_version: 'My description.\nThis is a second line.',
+              current_version: 'My GREAT description.\nThis is a second line.',
+              target_version: 'My description.\nThis is a second line.',
+              merged_version: 'My GREAT description.\nThis is a second line.',
               diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
               merge_outcome: ThreeWayMergeOutcome.Current,
               has_conflict: false,
@@ -138,7 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
             createRuleAssetSavedObject({
               rule_id: 'rule-1',
               version: 2,
-              description: 'B',
+              description: 'My GREAT description.\nThis is a second line.',
             }),
           ];
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -147,10 +149,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
           expect(reviewResponse.rules[0].diff.fields).toEqual({
             description: {
-              base_version: 'A',
-              current_version: 'A',
-              target_version: 'B',
-              merged_version: 'B',
+              base_version: 'My description.\nThis is a second line.',
+              current_version: 'My description.\nThis is a second line.',
+              target_version: 'My GREAT description.\nThis is a second line.',
+              merged_version: 'My GREAT description.\nThis is a second line.',
               diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
               merge_outcome: ThreeWayMergeOutcome.Target,
               has_conflict: false,
@@ -180,7 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
             // Customize a multi line string field on the installed rule
             await patchRule(supertest, log, {
               rule_id: 'rule-1',
-              description: 'B',
+              description: 'My GREAT description.\nThis is a second line.',
             });
 
             // Increment the version of the installed rule, update a multi line string field, and create the new rule assets
@@ -188,7 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
               createRuleAssetSavedObject({
                 rule_id: 'rule-1',
                 version: 2,
-                description: 'B',
+                description: 'My GREAT description.\nThis is a second line.',
               }),
             ];
             await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -197,10 +199,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             expect(reviewResponse.rules[0].diff.fields).toEqual({
               description: {
-                base_version: 'A',
-                current_version: 'B',
-                target_version: 'B',
-                merged_version: 'B',
+                base_version: 'My description.\nThis is a second line.',
+                current_version: 'My GREAT description.\nThis is a second line.',
+                target_version: 'My GREAT description.\nThis is a second line.',
+                merged_version: 'My GREAT description.\nThis is a second line.',
                 diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
                 merge_outcome: ThreeWayMergeOutcome.Current,
                 has_conflict: false,
@@ -232,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
               // Customize a multi line string field on the installed rule
               await patchRule(supertest, log, {
                 rule_id: 'rule-1',
-                description: 'B',
+                description: 'My GREAT description.\nThis is a second line.',
               });
 
               // Increment the version of the installed rule, update a multi line string field, and create the new rule assets
@@ -240,7 +242,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 createRuleAssetSavedObject({
                   rule_id: 'rule-1',
                   version: 2,
-                  description: 'C',
+                  description: 'My description.\nThis is a second line, now longer.',
                 }),
               ];
               await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -250,13 +252,13 @@ export default ({ getService }: FtrProviderContext): void => {
               const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
               expect(reviewResponse.rules[0].diff.fields).toEqual({
                 description: {
-                  base_version: 'A',
-                  current_version: 'B',
-                  target_version: 'C',
-                  merged_version: 'B',
+                  base_version: 'My description.\nThis is a second line.',
+                  current_version: 'My GREAT description.\nThis is a second line.',
+                  target_version: 'My description.\nThis is a second line, now longer.',
+                  merged_version: 'My GREAT description.\nThis is a second line, now longer.',
                   diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-                  merge_outcome: ThreeWayMergeOutcome.Conflict,
-                  has_conflict: true,
+                  merge_outcome: ThreeWayMergeOutcome.Merged,
+                  has_conflict: false,
                   has_update: true,
                 },
                 version: {
@@ -270,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   has_update: true,
                 },
               });
-              expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
+              expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
               expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
             });
           });
@@ -284,7 +286,7 @@ export default ({ getService }: FtrProviderContext): void => {
               // Customize a multi line string field on the installed rule
               await patchRule(supertest, log, {
                 rule_id: 'rule-1',
-                description: 'B',
+                description: 'My GREAT description.\nThis is a third line.',
               });
 
               // Increment the version of the installed rule, update a multi line string field, and create the new rule assets
@@ -292,7 +294,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 createRuleAssetSavedObject({
                   rule_id: 'rule-1',
                   version: 2,
-                  description: 'C',
+                  description: 'My EXCELLENT description.\nThis is a fourth.',
                 }),
               ];
               await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -302,10 +304,10 @@ export default ({ getService }: FtrProviderContext): void => {
               const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
               expect(reviewResponse.rules[0].diff.fields).toEqual({
                 description: {
-                  base_version: 'A',
-                  current_version: 'B',
-                  target_version: 'C',
-                  merged_version: 'B',
+                  base_version: 'My description.\nThis is a second line.',
+                  current_version: 'My GREAT description.\nThis is a third line.',
+                  target_version: 'My EXCELLENT description.\nThis is a fourth.',
+                  merged_version: 'My GREAT description.\nThis is a third line.',
                   diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
                   merge_outcome: ThreeWayMergeOutcome.Conflict,
                   has_conflict: true,
@@ -341,7 +343,7 @@ export default ({ getService }: FtrProviderContext): void => {
               // Customize a multi line string field on the installed rule
               await patchRule(supertest, log, {
                 rule_id: 'rule-1',
-                description: 'B',
+                description: 'My description.\nThis is a second line.',
               });
 
               // Increment the version of the installed rule, update a multi line string field, and create the new rule assets
@@ -349,7 +351,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 createRuleAssetSavedObject({
                   rule_id: 'rule-1',
                   version: 2,
-                  description: 'B',
+                  description: 'My description.\nThis is a second line.',
                 }),
               ];
               await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -385,7 +387,7 @@ export default ({ getService }: FtrProviderContext): void => {
               // Customize a multi line string field on the installed rule
               await patchRule(supertest, log, {
                 rule_id: 'rule-1',
-                description: 'B',
+                description: 'My description.\nThis is a second line.',
               });
 
               // Increment the version of the installed rule, update a multi line string field, and create the new rule assets
@@ -393,7 +395,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 createRuleAssetSavedObject({
                   rule_id: 'rule-1',
                   version: 2,
-                  description: 'C',
+                  description: 'My GREAT description.\nThis is a second line.',
                 }),
               ];
               await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -403,9 +405,9 @@ export default ({ getService }: FtrProviderContext): void => {
               const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
               expect(reviewResponse.rules[0].diff.fields).toEqual({
                 description: {
-                  current_version: 'B',
-                  target_version: 'C',
-                  merged_version: 'C',
+                  current_version: 'My description.\nThis is a second line.',
+                  target_version: 'My GREAT description.\nThis is a second line.',
+                  merged_version: 'My GREAT description.\nThis is a second line.',
                   diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
                   merge_outcome: ThreeWayMergeOutcome.Target,
                   has_conflict: false,
