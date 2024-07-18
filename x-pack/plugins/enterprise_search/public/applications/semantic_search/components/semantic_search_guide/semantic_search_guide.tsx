@@ -158,7 +158,7 @@ export const SemanticSearchGuide: React.FC = () => {
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.semanticSearch.guide.description"
-              defaultMessage="Elasticsearch can simplify Semantic Search with Inference Endpoints and semantic_text mapping."
+              defaultMessage="Semantic search in Elasticsearch is now simpler and more intuitive when you use inference endpoints and the `semantic_text` field type."
             />{' '}
             <EuiLink
               href={docLinks.knnSearch}
@@ -187,7 +187,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.setupInferenceEndpoint.title"
-                defaultMessage="Setup an Inference Endpoint"
+                defaultMessage="Set up an inference endpoint"
               />
             </h2>
           </EuiTitle>
@@ -195,7 +195,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.setupInferenceEndpoint.description"
-                defaultMessage="Start by creating an index with one or more {semanticText} fields."
+                defaultMessage="Start by setting up an inference endpoint to manage the machine learning model for your task. Endpoints have a unique ID and a specific task type, in this example we use `text_embeddings` via the Amazon Bedrock service."
                 values={{ semanticText: <EuiCode>semantic_text</EuiCode> }}
               />
             </p>
@@ -255,7 +255,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.ingest.description"
-                defaultMessage="Add data to Elasticsearch."
+                defaultMessage="Add data to Elasticsearch using the field name you assigned the semantic_text type to."
               />
             </p>
           </EuiText>
@@ -271,7 +271,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.query.title"
-                defaultMessage="Execute your semantic search query"
+                defaultMessage="Perform semantic search"
               />
             </h2>
           </EuiTitle>
@@ -279,7 +279,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.query.description"
-                defaultMessage="Now you're ready to explore your data with searches and aggregations."
+                defaultMessage="Search your data by targeting the semantic_text field with a semantic query."
               />
             </p>
           </EuiText>
