@@ -9,7 +9,7 @@
 import { useMemo, useRef, useCallback } from 'react';
 import type { IconType } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { type Subscription, AsyncSubject, from, defer, map, forkJoin, Observable } from 'rxjs';
+import { type Subscription, AsyncSubject, from, defer, map, forkJoin, lastValueFrom } from 'rxjs';
 import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
@@ -381,8 +381,11 @@ export const useGetDashboardPanels = ({
     ]
   );
 
-  return useMemo<[Observable<GroupedAddPanelActions[]>, typeof computeAvailablePanels]>(
-    () => [panelsComputeResultCache.current.asObservable(), computeAvailablePanels],
+  return useCallback(
+    (...args: Parameters<typeof computeAvailablePanels>) => {
+      computeAvailablePanels(...args);
+      return lastValueFrom(panelsComputeResultCache.current.asObservable());
+    },
     [computeAvailablePanels]
   );
 };

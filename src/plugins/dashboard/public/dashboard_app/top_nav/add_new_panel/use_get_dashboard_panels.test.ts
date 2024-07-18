@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { finalize, Observable } from 'rxjs';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { buildMockDashboard } from '../../../mocks';
@@ -175,33 +174,7 @@ describe('Get dashboard panels hook', () => {
 
     it('return value of hook has a specific shape', () => {
       const { result } = renderHook(() => useGetDashboardPanels(defaultProps));
-      expect(result.current).toHaveProperty('[0]', expect.any(Observable));
-      expect(result.current).toHaveProperty('[1]', expect.any(Function));
-    });
-
-    it('returned observable only a emits value when the accompanying fetch method is invoked', (done) => {
-      const { result } = renderHook(() => useGetDashboardPanels(defaultProps));
-
-      const [dashboardPanels$, getDashboardPanels] = result.current;
-
-      const mockCloseHandler = jest.fn();
-
-      const mockOnValueSubscriber = jest.fn();
-
-      dashboardPanels$
-        .pipe(
-          finalize(() => {
-            expect(mockOnValueSubscriber).toHaveBeenCalled();
-            done();
-          })
-        )
-        .subscribe(mockOnValueSubscriber);
-
-      expect(mockOnValueSubscriber).not.toHaveBeenCalled();
-
-      act(() => {
-        getDashboardPanels(mockCloseHandler);
-      });
+      expect(result.current).toBeInstanceOf(Function);
     });
   });
 });

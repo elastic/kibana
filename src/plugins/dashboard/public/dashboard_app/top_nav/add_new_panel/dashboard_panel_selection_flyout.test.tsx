@@ -7,29 +7,29 @@
  */
 
 import React, { type ComponentProps } from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Subject } from 'rxjs';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DashboardPanelSelectionListFlyout } from './dashboard_panel_selection_flyout';
 import type { GroupedAddPanelActions } from './add_panel_action_menu_items';
 
-let panels$: Subject<GroupedAddPanelActions[]>;
-
 const defaultProps: Omit<
   ComponentProps<typeof DashboardPanelSelectionListFlyout>,
-  'dashboardPanels$'
+  'fetchDashboardPanel'
 > = {
   close: jest.fn(),
   paddingSize: 's',
 };
 
 const renderComponent = ({
-  dashboardPanels$,
-}: Pick<ComponentProps<typeof DashboardPanelSelectionListFlyout>, 'dashboardPanels$'>) =>
+  fetchDashboardPanel,
+}: Pick<ComponentProps<typeof DashboardPanelSelectionListFlyout>, 'fetchDashboardPanel'>) =>
   render(
     <IntlProvider locale="en">
-      <DashboardPanelSelectionListFlyout {...defaultProps} dashboardPanels$={dashboardPanels$} />
+      <DashboardPanelSelectionListFlyout
+        {...defaultProps}
+        fetchDashboardPanel={fetchDashboardPanel}
+      />
     </IntlProvider>
   );
 
@@ -54,75 +54,54 @@ const panelConfiguration: GroupedAddPanelActions[] = [
 ];
 
 describe('DashboardPanelSelectionListFlyout', () => {
-  beforeEach(() => {
-    panels$ = new Subject<GroupedAddPanelActions[]>();
-  });
+  it('renders a loading indicator when fetchDashboardPanel has not yielded any value', async () => {
+    const promiseDelay = 5000;
 
-  it('renders a loading indicator when the panels observable has not yielded any value', async () => {
-    renderComponent({ dashboardPanels$: panels$.asObservable() });
-
-    expect(
-      await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
-    ).toBeInTheDocument();
-  });
-
-  it('renders a error indicator when the panels observable yields an error', async () => {
-    renderComponent({ dashboardPanels$: panels$.asObservable() });
+    renderComponent({
+      fetchDashboardPanel: jest.fn(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => resolve(panelConfiguration), promiseDelay);
+          })
+      ),
+    });
 
     expect(
       await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
     ).toBeInTheDocument();
+  });
 
-    act(() => {
-      panels$.error(new Error('simulated error'));
+  it('renders an error indicator when fetchDashboardPanel errors', async () => {
+    renderComponent({
+      fetchDashboardPanel: jest.fn().mockRejectedValue(new Error('simulated error')),
     });
 
     expect(await screen.findByTestId('dashboardPanelSelectionErrorIndicator')).toBeInTheDocument();
   });
 
-  it('renders the list of available panels when the panels observable yields its value', async () => {
-    renderComponent({ dashboardPanels$: panels$.asObservable() });
-
-    expect(
-      await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
-    ).toBeInTheDocument();
-
-    act(() => {
-      panels$.next(panelConfiguration);
-    });
-
-    expect(screen.queryByTestId('dashboardPanelSelectionLoadingIndicator')).not.toBeInTheDocument();
+  it('renders the list of available panels when fetchDashboardPanel resolves a value', async () => {
+    renderComponent({ fetchDashboardPanel: jest.fn().mockResolvedValue(panelConfiguration) });
 
     expect(await screen.findByTestId(panelConfiguration[0]['data-test-subj']!)).toBeInTheDocument();
   });
 
   it('renders a not found message when a user searches for an item that is not in the selection list', async () => {
-    renderComponent({ dashboardPanels$: panels$.asObservable() });
-
-    expect(
-      await screen.findByTestId('dashboardPanelSelectionLoadingIndicator')
-    ).toBeInTheDocument();
-
-    act(() => {
-      panels$.next(panelConfiguration);
-    });
+    renderComponent({ fetchDashboardPanel: jest.fn().mockResolvedValue(panelConfiguration) });
 
     expect(await screen.findByTestId(panelConfiguration[0]['data-test-subj']!)).toBeInTheDocument();
 
-    userEvent.type(
-      screen.getByTestId('dashboardPanelSelectionFlyout__searchInput'),
-      'non existent panel'
-    );
+    act(() => {
+      userEvent.type(
+        screen.getByTestId('dashboardPanelSelectionFlyout__searchInput'),
+        'non existent panel'
+      );
+    });
 
     expect(await screen.findByTestId('dashboardPanelSelectionNoPanelMessage')).toBeInTheDocument();
   });
 
   it('invokes the close method when the flyout close btn is clicked', async () => {
-    renderComponent({ dashboardPanels$: panels$.asObservable() });
-
-    act(() => {
-      panels$.next(panelConfiguration);
-    });
+    renderComponent({ fetchDashboardPanel: jest.fn().mockResolvedValue(panelConfiguration) });
 
     fireEvent.click(await screen.findByTestId('dashboardPanelSelectionCloseBtn'));
 

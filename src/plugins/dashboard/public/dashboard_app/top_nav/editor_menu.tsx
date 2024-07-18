@@ -24,7 +24,6 @@ interface EditorMenuProps
 }
 
 export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
-  // const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
   const dashboardAPI = useDashboardAPI();
 
   const {
@@ -33,7 +32,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
     settings: { i18n: i18nStart, theme },
   } = pluginServices.getServices();
 
-  const [panels$, fetchDashboardPanels] = useGetDashboardPanels({
+  const fetchDashboardPanels = useGetDashboardPanels({
     dashboardAPI,
     createNewVisType,
     api,
@@ -56,15 +55,12 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         React.createElement(function () {
           const closeFlyout = () => dashboardAPI.clearOverlays();
 
-          // kick off dashboard panel fetch
-          fetchDashboardPanels(closeFlyout);
-
           return (
             <DashboardPanelSelectionListFlyout
               close={closeFlyout}
               {...{
                 paddingSize: flyoutPanelPaddingSize,
-                dashboardPanels$: panels$,
+                fetchDashboardPanel: fetchDashboardPanels.bind(null, closeFlyout),
               }}
             />
           );
@@ -86,7 +82,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         })
       );
     },
-    [analytics, theme, i18nStart, dashboardAPI, overlays, fetchDashboardPanels, panels$]
+    [analytics, theme, i18nStart, dashboardAPI, overlays, fetchDashboardPanels]
   );
 
   return (

@@ -9,7 +9,6 @@
 import React, { useEffect, useState } from 'react';
 import { i18n as i18nFn } from '@kbn/i18n';
 import { type EuiFlyoutProps, EuiLoadingChart } from '@elastic/eui';
-import { type Observable } from 'rxjs';
 import orderBy from 'lodash/orderBy';
 import {
   EuiEmptyPrompt,
@@ -41,13 +40,12 @@ export interface DashboardPanelSelectionListFlyoutProps {
   close: () => void;
   /** Padding for flyout  */
   paddingSize: Exclude<EuiFlyoutProps['paddingSize'], 'none' | undefined>;
-  /** Handler for creating new visualization of a specified type */
-  dashboardPanels$: Observable<GroupedAddPanelActions[]>;
+  fetchDashboardPanel: () => Promise<GroupedAddPanelActions[]>;
 }
 
 export const DashboardPanelSelectionListFlyout: React.FC<
   DashboardPanelSelectionListFlyoutProps
-> = ({ paddingSize, close, dashboardPanels$ }) => {
+> = ({ paddingSize, close, fetchDashboardPanel }) => {
   const { euiTheme } = useEuiTheme();
   const [{ data: panels, loading, error }, setPanelState] = useState<{
     loading: boolean;
@@ -61,27 +59,26 @@ export const DashboardPanelSelectionListFlyout: React.FC<
   );
 
   useEffect(() => {
-    if (loading) {
-      const subscription = dashboardPanels$.subscribe({
-        next(value) {
-          setPanelState({
-            data: value,
-            error: null,
+    const requestDashboardPanels = () => {
+      fetchDashboardPanel()
+        .then((_panels) =>
+          setPanelState((prevState) => ({
+            ...prevState,
             loading: false,
-          });
-        },
-        error(err) {
-          setPanelState({
-            data: null,
+            data: _panels,
+          }))
+        )
+        .catch((err) =>
+          setPanelState((prevState) => ({
+            ...prevState,
+            loading: false,
             error: err,
-            loading: false,
-          });
-        },
-      });
+          }))
+        );
+    };
 
-      return () => subscription.unsubscribe();
-    }
-  }, [dashboardPanels$, loading]);
+    requestDashboardPanels();
+  }, [fetchDashboardPanel]);
 
   useEffect(() => {
     const _panels = (panels ?? []).slice(0);
