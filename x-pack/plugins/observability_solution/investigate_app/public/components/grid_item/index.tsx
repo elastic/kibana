@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { useTheme } from '../../hooks/use_theme';
 import { InvestigateTextButton } from '../investigate_text_button';
 import { InvestigateWidgetGridItemOverride } from '../investigate_widget_grid';
-import { MiniMapWidget } from '../minimap/mini_map_widget';
 
 export const GRID_ITEM_HEADER_HEIGHT = 40;
 
@@ -116,107 +115,105 @@ export function GridItem({
   `;
 
   return (
-    <MiniMapWidget id={id} title={title}>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        className={faded ? classNames(containerClassName, fadedClassName) : containerClassName}
-        alignItems="stretch"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="m"
-            alignItems="center"
-            className={headerClassName}
-          >
-            <EuiFlexItem className={titleContainerClassName}>
-              <EuiText size="s" className={titleItemClassName}>
-                {title}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {overrides.length ? (
-                <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexStart">
-                  {overrides.map((override) => (
-                    <EuiFlexItem key={override.id} grow={false}>
-                      <EuiBadge
-                        color="primary"
-                        className={changeBadgeClassName}
-                        iconType="cross"
-                        iconSide="right"
-                        iconOnClick={() => {
-                          onOverrideRemove(override);
-                        }}
-                        iconOnClickAriaLabel={i18n.translate(
-                          'xpack.investigateApp.gridItem.removeOverrideButtonAriaLabel',
-                          {
-                            defaultMessage: 'Remove filter',
-                          }
-                        )}
-                      >
-                        <EuiText size="xs">{override.label}</EuiText>
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              ) : null}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="gridItemControls">
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="xs"
-                alignItems="center"
-                justifyContent="flexEnd"
-              >
-                <EuiFlexItem grow={false}>
-                  <InvestigateTextButton
-                    iconType="copy"
-                    onClick={() => {
-                      onCopy();
-                    }}
-                    disabled={loading}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <InvestigateTextButton
-                    iconType="trash"
-                    onClick={() => {
-                      onDelete();
-                    }}
-                    disabled={loading}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <InvestigateTextButton
-                    iconType="pencil"
-                    onClick={() => {
-                      onEditClick();
-                    }}
-                    disabled={loading}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <InvestigateTextButton
-                    iconType={locked ? 'lock' : 'lockOpen'}
-                    className={locked ? lockedControlClassName : ''}
-                    color={locked ? 'primary' : 'text'}
-                    onClick={() => {
-                      onLockToggle();
-                    }}
-                    disabled={loading}
-                  />
-                </EuiFlexItem>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={faded ? classNames(containerClassName, fadedClassName) : containerClassName}
+      alignItems="stretch"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="m"
+          alignItems="center"
+          className={headerClassName}
+        >
+          <EuiFlexItem className={titleContainerClassName}>
+            <EuiText size="s" className={titleItemClassName}>
+              {title}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {overrides.length ? (
+              <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexStart">
+                {overrides.map((override) => (
+                  <EuiFlexItem key={override.id} grow={false}>
+                    <EuiBadge
+                      color="primary"
+                      className={changeBadgeClassName}
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => {
+                        onOverrideRemove(override);
+                      }}
+                      iconOnClickAriaLabel={i18n.translate(
+                        'xpack.investigateApp.gridItem.removeOverrideButtonAriaLabel',
+                        {
+                          defaultMessage: 'Remove filter',
+                        }
+                      )}
+                    >
+                      <EuiText size="xs">{override.label}</EuiText>
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow className={panelContainerClassName}>
-          <EuiPanel hasBorder hasShadow={false} className={panelClassName}>
-            <div className={panelContentClassName}>{children}</div>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </MiniMapWidget>
+            ) : null}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className="gridItemControls">
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="xs"
+              alignItems="center"
+              justifyContent="flexEnd"
+            >
+              <EuiFlexItem grow={false}>
+                <InvestigateTextButton
+                  iconType="copy"
+                  onClick={() => {
+                    onCopy();
+                  }}
+                  disabled={loading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InvestigateTextButton
+                  iconType="trash"
+                  onClick={() => {
+                    onDelete();
+                  }}
+                  disabled={loading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InvestigateTextButton
+                  iconType="pencil"
+                  onClick={() => {
+                    onEditClick();
+                  }}
+                  disabled={loading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InvestigateTextButton
+                  iconType={locked ? 'lock' : 'lockOpen'}
+                  className={locked ? lockedControlClassName : ''}
+                  color={locked ? 'primary' : 'text'}
+                  onClick={() => {
+                    onLockToggle();
+                  }}
+                  disabled={loading}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow className={panelContainerClassName}>
+        <EuiPanel hasBorder hasShadow={false} className={panelClassName}>
+          <div className={panelContentClassName}>{children}</div>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
