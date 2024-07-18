@@ -7,7 +7,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
-import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
@@ -59,10 +58,6 @@ describe('global header', () => {
     },
   };
   const store = createMockStore(state);
-
-  beforeEach(() => {
-    useVariationMock.mockReset();
-  });
 
   it('has add data link', () => {
     (useLocation as jest.Mock).mockReturnValue([
