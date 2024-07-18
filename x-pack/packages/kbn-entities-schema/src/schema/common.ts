@@ -88,6 +88,11 @@ export const metadataSchema = z
     destination: z.optional(z.string()),
     limit: z.optional(z.number().default(1000)),
   })
+  .transform((metadata) => ({
+    ...metadata,
+    destination: metadata.destination ?? metadata.source,
+    limit: metadata.limit ?? 1000,
+  }))
   .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })));
 
 export const identityFieldsSchema = z

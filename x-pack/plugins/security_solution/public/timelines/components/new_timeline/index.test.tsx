@@ -94,7 +94,7 @@ describe('NewTimelineButton', () => {
         show: true,
         timelineType: TimelineType.template,
         updated: undefined,
-        excludedRowRendererIds: [...Object.values(RowRendererId)],
+        excludedRowRendererIds: [],
       });
     });
   });
