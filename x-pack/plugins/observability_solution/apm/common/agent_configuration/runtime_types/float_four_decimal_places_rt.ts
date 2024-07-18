@@ -8,19 +8,19 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
-export const floatRt = new t.Type<string, string, unknown>(
-  'floatRt',
+export const floatFourDecimalPlacesRt = new t.Type<string, string, unknown>(
+  'floatFourDecimalPlacesRt',
   t.string.is,
   (input, context) => {
     return either.chain(t.string.validate(input, context), (inputAsString) => {
       const inputAsFloat = parseFloat(inputAsString);
-      const maxThreeDecimals = parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;
+      const maxFourDecimals = parseFloat(inputAsFloat.toFixed(4)) === inputAsFloat;
 
-      const isValid = inputAsFloat >= 0 && inputAsFloat <= 1 && maxThreeDecimals;
+      const isValid = inputAsFloat >= 0 && inputAsFloat <= 1 && maxFourDecimals;
 
       return isValid
         ? t.success(inputAsString)
-        : t.failure(input, context, 'Must be a number between 0.000 and 1');
+        : t.failure(input, context, 'Must be a number between 0.0000 and 1');
     });
   },
   t.identity
