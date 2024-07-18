@@ -113,5 +113,6 @@
     "@kbn/integration-assistant-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/slo-schema",
+    "@kbn/server-http-tools",
   ]
 }

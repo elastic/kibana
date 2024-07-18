@@ -51,7 +51,7 @@ export interface PluginSetup {
   alerting: PluginSetupContract;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
-  features: FeaturesSetup;
+  features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
