@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { setTimeout as sleep } from 'node:timers/promises';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -180,7 +179,7 @@ export function AddCisIntegrationFormPageProvider({
     const button = await testSubjects.find(buttonId);
     await button.click();
     // Wait a bit to allow the new tab to load the URL
-    sleep(3000);
+    await new Promise((r) => setTimeout(r, 3000));
     await browser.switchTab(1);
     const currentUrl = await browser.getCurrentUrl();
     await browser.closeCurrentWindow();
