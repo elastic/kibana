@@ -22,17 +22,22 @@ const matchEntityToCandidateEntity = (match: MatchEntity): CandidateEntity => {
     return {
       id: match._id,
       type: match.type,
-      name: match.doc.user.name,
-      email: match.doc.user.email,
+      name: match._source.user.name,
+      email: match._source.user.email,
     };
   }
 
   return {
     id: match._id,
     type: match.type,
-    name: match.doc.host.name,
+    name: match._source.host.name,
   };
 };
+
+interface CandidateEntityElement {
+  entity: CandidateEntity;
+  document: MatchEntity;
+}
 
 export const getCandidateEntities = async ({
   entitiesIndexPattern,
@@ -48,7 +53,7 @@ export const getCandidateEntities = async ({
   size?: number;
   namespace: string;
   logger: Logger;
-}): Promise<CandidateEntity[]> => {
+}): Promise<CandidateEntityElement[]> => {
   if (entitiesIndexPattern == null || size == null || searchEntity == null) {
     return [];
   }
@@ -60,5 +65,5 @@ export const getCandidateEntities = async ({
     size,
   });
 
-  return matches.map(matchEntityToCandidateEntity);
+  return matches.map((match) => ({ entity: matchEntityToCandidateEntity(match), document: match }));
 };

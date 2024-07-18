@@ -23,7 +23,7 @@ ${JSON.stringify(searchEntity)}
 Given the following list:
 
 """
-${candidateEntities.map(JSON.stringify).join('\n\n')}
+${candidateEntities.map((e) => JSON.stringify(e)).join('\n\n')}
 """
 
 Does a new record '${JSON.stringify(

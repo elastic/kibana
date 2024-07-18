@@ -11,8 +11,11 @@ import { LLMChain } from 'langchain/chains';
 import { OutputFixingParser } from 'langchain/output_parsers';
 import { DynamicTool } from '@langchain/core/tools';
 
+import type { SearchEntity } from '@kbn/elastic-assistant-common';
+import _ from 'lodash';
 import { APP_UI_ID } from '../../../../common';
 import { getCandidateEntities } from './get_candidate_entities';
+import type { EntityResolutionOutput } from './get_entity_resolution_output_parser';
 import { getEntityResolutionOutputParser } from './get_entity_resolution_output_parser';
 import { sizeIsOutOfRange } from '../open_and_acknowledged_alerts/helpers';
 import { getEntityResolutionPrompt } from './get_entity_resolution_prompt';
@@ -20,6 +23,10 @@ import { getEntityResolutionPrompt } from './get_entity_resolution_prompt';
 export interface EntityResolutionToolParams extends AssistantToolParams {
   entitiesIndexPattern: string;
   size: number;
+}
+
+export interface EntityResolutionToolResponse extends EntityResolutionOutput {
+  entity: SearchEntity;
 }
 
 export const ENTITY_RESOLUTION_TOOL_DESCRIPTION =
@@ -86,24 +93,36 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
         const llmStart = new Date().getTime();
 
         const { result } = await answerFormattingChain.call({
-          query: getEntityResolutionPrompt({ searchEntity, candidateEntities }),
+          query: getEntityResolutionPrompt({
+            searchEntity,
+            candidateEntities: candidateEntities.map((e) => e.entity),
+          }),
           timeout: langChainTimeout,
         });
 
-        const { foundMatch, matches } = result;
+        const candidateEntitiesById = _.keyBy(candidateEntities, 'entity.id');
 
         logger.info(`Entity Resolution LLM took ${new Date().getTime() - llmStart}ms`);
-        logger.info(`Entity Resolution LLM raw output: ${JSON.stringify(result, null, 2)}`);
+        logger.info(`Entity Resolution LLM raw output: ${JSON.stringify(result)}`);
 
-        return JSON.stringify(
-          {
-            entity: searchEntity,
-            foundMatch,
-            matches,
-          },
-          null,
-          2
-        );
+        const { foundSuggestion, suggestions } = result as EntityResolutionOutput;
+
+        const toolResponse: EntityResolutionToolResponse = {
+          entity: searchEntity,
+          foundSuggestion,
+          suggestions: suggestions.map((suggestion) => {
+            const suggestionDocument = candidateEntitiesById[suggestion.id].document;
+            return {
+              ...suggestion,
+              index: suggestionDocument._index,
+              document: suggestionDocument._source,
+            };
+          }),
+        };
+
+        logger.info(`Entity Resolution tool response: ${JSON.stringify(toolResponse)}`);
+
+        return JSON.stringify(toolResponse, null, 2);
       },
       tags: ['entity-analytics', 'entity-resolution'],
     });

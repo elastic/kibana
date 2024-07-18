@@ -25,19 +25,13 @@ export const SearchEntity = z.object({
   email: z.string().optional(),
 });
 
-export type EntityResolutionMatch = z.infer<typeof EntityResolutionMatch>;
-export const EntityResolutionMatch = z.object({
+export type EntityResolutionSuggestion = z.infer<typeof EntityResolutionSuggestion>;
+export const EntityResolutionSuggestion = z.object({
   index: z.string().optional(),
   id: z.string().optional(),
-  entity: SearchEntity.optional(),
+  reason: z.string().optional(),
+  confidence: z.unknown(),
   document: z.object({}).optional(),
-});
-
-export type EntitySearchResponse = z.infer<typeof EntitySearchResponse>;
-export const EntitySearchResponse = z.object({
-  entity: SearchEntity.optional(),
-  foundMatch: z.boolean().optional(),
-  matches: z.array(EntityResolutionMatch).optional(),
 });
 
 export type EntityResolutionPostRequestBody = z.infer<typeof EntityResolutionPostRequestBody>;
@@ -63,4 +57,8 @@ export const EntityResolutionPostRequestBody = z.object({
 export type EntityResolutionPostRequestBodyInput = z.input<typeof EntityResolutionPostRequestBody>;
 
 export type EntityResolutionPostResponse = z.infer<typeof EntityResolutionPostResponse>;
-export const EntityResolutionPostResponse = EntitySearchResponse;
+export const EntityResolutionPostResponse = z.object({
+  entity: SearchEntity.optional(),
+  foundSuggestion: z.boolean().optional(),
+  suggestions: z.array(EntityResolutionSuggestion).optional(),
+});

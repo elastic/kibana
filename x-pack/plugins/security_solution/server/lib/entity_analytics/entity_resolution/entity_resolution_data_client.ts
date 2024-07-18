@@ -21,17 +21,20 @@ const searchHitsToMatches = (hits: Array<SearchHit<EntityLatestDocument>>): Matc
   return hits
     .filter((hit) => !!hit._source)
     .map((hit) => {
-      if ('user' in hit._source) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if ('user' in hit._source!) {
         return {
           _id: hit._id!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          _index: hit._index,
           type: EntityTypeEnum.User,
-          doc: hit._source as UserLatestDocument,
+          _source: hit._source as UserLatestDocument,
         };
       } else {
         return {
           _id: hit._id!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          _index: hit._index,
           type: EntityTypeEnum.Host,
-          doc: hit._source as HostLatestDocument,
+          _source: hit._source as HostLatestDocument,
         };
       }
     });
@@ -87,52 +90,23 @@ type EntityLatestDocument = HostLatestDocument | UserLatestDocument;
 
 interface UserMatchEntity {
   _id: string;
+  _index: string;
   type: EntityTypeEnum.User;
-  doc: UserLatestDocument;
+  _source: UserLatestDocument;
 }
 interface HostMatchEntity {
   _id: string;
+  _index: string;
   type: EntityTypeEnum.Host;
-  doc: HostLatestDocument;
+  _source: HostLatestDocument;
 }
 
 export type MatchEntity = UserMatchEntity | HostMatchEntity;
 
-const testDoc: UserMatchEntity = {
-  _id: 'test',
-  type: EntityTypeEnum.User,
-  doc: {
-    event: {
-      ingested: '2024-07-17T13:21:12.801970Z',
-    },
-    user: {
-      name: 'p2g83v4n0w',
-      risk: {
-        calculated_score_norm: [],
-        calculated_level: [],
-      },
-    },
-    criticality_level: [],
-    entity: {
-      lastSeenTimestamp: '2024-07-17T13:19:46.793Z',
-      schemaVersion: 'v1',
-      definitionVersion: '1.0.0',
-      displayName: 'p2g83v4n0w',
-      identityFields: ['user.name', 'id_value'],
-      id: 'Vpz5MNJgenODpwQ7AYTMRA==',
-      type: 'node',
-      firstSeenTimestamp: '2024-07-17T13:19:00.000Z',
-      definitionId: 'secsol-ea-entity-store',
-    },
-  },
-};
-
 interface EntityResolutionClientOpts {
   logger: Logger;
-  //   kibanaVersion: string;
   esClient: ElasticsearchClient;
   namespace: string;
-  //   soClient: SavedObjectsClientContract;
   auditLogger?: AuditLogger | undefined;
 }
 
@@ -151,17 +125,14 @@ export class EntityResolutionDataClient {
     k?: number;
   }): Promise<{ total: number; matches: MatchEntity[] }> {
     const { esClient, logger } = this.options;
-
     const identityField = searchEntity.type === 'user' ? 'user.name' : 'host.name';
-
     const embeddingField = `test_${searchEntity.type}_name_embeddings.predicted_value`;
-
-    // return [testDoc];
-
     const searchQuery = {
       index: entitiesIndexPattern,
       body: {
-        // _source: false,
+        _source: {
+          excludes: ['test_user_name_embeddings'],
+        },
         knn: [
           {
             field: embeddingField,

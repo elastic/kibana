@@ -7,8 +7,8 @@ paths:
     post:
       operationId: EntityResolutionPost
       x-codegen-enabled: true
-      description: Find matching entities
-      summary: Generate matching entities for the given entity via the Elastic Assistant
+      description: Find matching entity suggestions
+      summary: Generate matching entity suggestions for the given entity via the Elastic Assistant
       tags:
         - entity_analytics
       requestBody:
@@ -50,7 +50,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntitySearchResponse'
+                type: object
+                properties:
+                  entity:
+                    $ref: '#/components/schemas/SearchEntity'
+                  foundSuggestion:
+                    type: boolean
+                  suggestions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EntityResolutionSuggestion'
         '400':
           description: Bad request
           content:
@@ -81,26 +90,20 @@ components:
           type: string
         email:
           type: string
-    EntitySearchResponse:
-      type: object
-      properties:
-        entity:
-          $ref: '#/components/schemas/SearchEntity'
-        foundMatch:
-          type: boolean
-        matches:
-          type: array
-          items:
-            $ref: '#/components/schemas/EntityResolutionMatch'
-    EntityResolutionMatch:
+    EntityResolutionSuggestion:
       type: object
       properties:
         index:
           type: string
         id:
           type: string
-        entity:
-          $ref: '#/components/schemas/SearchEntity'
+        reason:
+          type: string
+        confidence:
+          enum:
+            - high
+            - medium
+            - low
         document:
           type: object
 
