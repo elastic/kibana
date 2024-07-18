@@ -13,5 +13,9 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-base-server-internal",
+    "@kbn/core-feature-flags-server",
+    "@kbn/logging",
+  ]
 }

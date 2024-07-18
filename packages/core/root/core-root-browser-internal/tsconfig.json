@@ -67,6 +67,7 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-user-profile-browser-internal",
     "@kbn/core-injected-metadata-common-internal",
+    "@kbn/core-feature-flags-browser-internal",
   ],
   "exclude": [
     "target/**/*",
