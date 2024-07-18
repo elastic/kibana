@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export function getUrlPrefix(spaceId: string) {
-  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+export enum FieldStatsComponentType {
+  EsqlDataVisualizer = 'esql_data_visualizer',
+  IndexDataVisualizer = 'index_data_visualizer',
+  DashboardEmbeddable = 'dashboard_embeddable',
+  DiscoverEmbeddable = 'discover_embeddable',
 }

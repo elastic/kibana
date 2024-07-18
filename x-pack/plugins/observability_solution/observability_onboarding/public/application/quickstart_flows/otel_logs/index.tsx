@@ -438,6 +438,7 @@ data:
           - resourcedetection/gcp
           - resource/k8s
           - resource/cloud
+          - attributes/k8s_logs_dataset
           receivers:
           - filelog
         metrics:
@@ -454,7 +455,6 @@ data:
           - resource/cloud
           - attributes/dataset
           - resource/process
-          - attributes/k8s_logs_dataset
           receivers:
           - kubeletstats
           - hostmetrics

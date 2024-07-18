@@ -6,21 +6,13 @@
  */
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { useConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
+import { ConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { noop } from 'lodash/fp';
 
 import * as i18n from './translations';
 
 const WelcomeComponent: React.FC = () => {
-  const { prompt: connectorPrompt } = useConnectorSetup({
-    isFlyoutMode: true, // prevents the "Click to skip" button from showing
-    onConversationUpdate: async () => {},
-    onSetupComplete: noop, // this callback cannot be used to select a connector, so it's not used
-    updateConversationsOnSaveConnector: false, // no conversation to update
-  });
-
   const title = useMemo(
     () => (
       <EuiFlexGroup
@@ -70,7 +62,12 @@ const WelcomeComponent: React.FC = () => {
         <EuiEmptyPrompt body={body} title={title} />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>{connectorPrompt}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ConnectorSetup
+          onConversationUpdate={async () => {}}
+          updateConversationsOnSaveConnector={false} // no conversation to update
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
