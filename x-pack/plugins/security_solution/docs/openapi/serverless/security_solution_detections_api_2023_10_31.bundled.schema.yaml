@@ -547,7 +547,7 @@ paths:
       description: |
         Assign users to detection alerts, and unassign them from alerts.
         > info
-        > You cannot add and remove the same assignee.
+        > You cannot add and remove the same assignee in the same request.
       operationId: SetAlertAssignees
       requestBody:
         content:
@@ -695,7 +695,7 @@ paths:
       description: |
         And tags to detection alerts, and remove them from alerts.
         > info
-        > You cannot add and remove the same alert tag.
+        > You cannot add and remove the same alert tag in the same request.
       operationId: ManageAlertTags
       requestBody:
         content:

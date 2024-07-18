@@ -390,7 +390,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkCrudRulesResponse'
           description: Indicates a successful call.
-      summary: Delete multiple detection rules
         '400':
           content:
             application/json:
@@ -411,6 +410,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
+      summary: Delete multiple detection rules
       tags:
         - Bulk API
     post:
@@ -949,7 +949,7 @@ paths:
       description: |
         Assign users to detection alerts, and unassign them from alerts.
         > info
-        > You cannot add and remove the same assignee.
+        > You cannot add and remove the same assignee in the same request.
       operationId: SetAlertAssignees
       requestBody:
         content:
@@ -1041,6 +1041,7 @@ paths:
         old and new indices being present.
 
         As such, the old, orphaned index can (and likely should) be deleted.
+
 
         While you can delete these indices manually,
 
@@ -1344,7 +1345,7 @@ paths:
       description: |
         And tags to detection alerts, and remove them from alerts.
         > info
-        > You cannot add and remove the same alert tag.
+        > You cannot add and remove the same alert tag in the same request.
       operationId: ManageAlertTags
       requestBody:
         content:
