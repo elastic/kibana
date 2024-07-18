@@ -169,10 +169,14 @@ export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q
 export interface RouteValidatorFullConfigResponse {
   [statusCode: number]: {
     /**
+     * A description of the response. This is required input for complete OAS documentation.
+     */
+    description?: string;
+    /**
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body: LazyValidator;
+    body?: LazyValidator;
   };
   unsafe?: {
     body?: boolean;
