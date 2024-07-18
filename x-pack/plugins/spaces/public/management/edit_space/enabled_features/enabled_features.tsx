@@ -21,7 +21,7 @@ import { SectionPanel } from '../section_panel';
 interface Props {
   space: Partial<Space>;
   features: KibanaFeatureConfig[];
-  onChange?: (space: Partial<Space>) => void;
+  onChange: (space: Partial<Space>) => void;
 }
 
 export const EnabledFeatures: FunctionComponent<Props> = (props) => {
@@ -75,20 +75,7 @@ export const EnabledFeatures: FunctionComponent<Props> = (props) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <FeatureTable
-            features={props.features}
-            space={props.space}
-            onChange={props.onChange}
-            headerText={
-              <EuiText size="xs">
-                <b>
-                  {i18n.translate('xpack.spaces.management.featureVisibilityTitle', {
-                    defaultMessage: 'Feature visibility',
-                  })}
-                </b>
-              </EuiText>
-            }
-          />
+          <FeatureTable features={props.features} space={props.space} onChange={props.onChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SectionPanel>

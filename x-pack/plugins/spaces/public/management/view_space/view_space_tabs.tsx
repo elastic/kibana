@@ -16,7 +16,7 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { ViewSpaceContent } from './view_space_content_tab';
 import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
-import { ViewSpaceGeneral } from './view_space_general_tab';
+import { ViewSpaceSettings } from './view_space_general_tab';
 import { ViewSpaceAssignedRoles } from './view_space_roles';
 import type { Space } from '../../../common';
 import { getEnabledFeatures } from '../lib/feature_utils';
@@ -107,7 +107,7 @@ export const getTabs = ({
     name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.general.heading', {
       defaultMessage: 'General settings',
     }),
-    content: <ViewSpaceGeneral space={space} isReadOnly={true} />,
+    content: <ViewSpaceSettings space={space} isReadOnly={true} />,
   });
 
   return tabsDefinition;

@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import type { FC } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -28,20 +37,47 @@ interface Props {
 export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, isSolutionNavEnabled }) => {
   const { capabilities, getUrlForApp } = useViewSpaceServices();
 
+  const [spaceNavigation, setSpaceNavigation] = useState<Partial<Space>>(space); // space details as seen in the Solution View UI, possibly with unsaved changes
+  const [spaceFeatures, setSpaceFeatures] = useState<Partial<Space>>(space); // space details as seen in the Feature Visibility UI, possibly with unsaved changes
+  const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
+
   if (!features) {
     return null;
   }
 
   const canManageRoles = capabilities.management?.security?.roles === true;
 
+  const onChangeSpaceNavigation = (updatedSpace: Partial<Space>) => {
+    setIsDirty(true);
+    setSpaceNavigation(updatedSpace);
+    console.log('updatedSpace-solutionView', updatedSpace);
+  };
+
+  const onChangeSpaceFeatures = (updatedSpace: Partial<Space>) => {
+    setIsDirty(true);
+    setSpaceFeatures({ ...updatedSpace, id: space.id });
+    console.log('updatedSpace-featuresTable', updatedSpace);
+  };
+
+  const onUpdateSpace = () => {
+    window.alert('not yet implemented');
+  };
+
+  const onCancel = () => {
+    setSpaceNavigation(space);
+    setSpaceFeatures(space);
+    setIsDirty(false);
+  };
+
   return (
     <>
       {isSolutionNavEnabled && (
         <>
-          <SolutionView space={space} onChange={() => {}} />
+          <SolutionView space={spaceNavigation} onChange={onChangeSpaceNavigation} />
           <EuiSpacer />
         </>
       )}
+
       <SectionPanel
         title={i18n.translate('xpack.spaces.management.manageSpacePage.featuresTitle', {
           defaultMessage: 'Features',
@@ -84,10 +120,31 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, isSolutio
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <FeatureTable features={features} space={space} />
+            <FeatureTable
+              features={features}
+              space={spaceFeatures}
+              onChange={onChangeSpaceFeatures}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SectionPanel>
+
+      {isDirty && (
+        <>
+          <EuiSpacer />
+          <p>
+            <EuiText>
+              Changes will impact all users in the Space. The page will be reloaded.
+            </EuiText>
+          </p>
+          <p>
+            <EuiButton color="primary" fill onClick={onUpdateSpace}>
+              Update Space
+            </EuiButton>
+            <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+          </p>
+        </>
+      )}
     </>
   );
 };
