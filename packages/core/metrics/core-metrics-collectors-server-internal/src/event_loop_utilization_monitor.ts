@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { EventLoopUtilizationWithLoad } from '@kbn/core-metrics-server';
 import type { EventLoopUtilization } from 'perf_hooks';
 import { performance } from 'perf_hooks';
-import { LoadWindow } from './load_window';
-
-const LOAD_WINDOW_SIZE_SHORT = 3;
-const LOAD_WINDOW_SIZE_MED = 6;
-const LOAD_WINDOW_SIZE_LONG = 12;
 
 export class EventLoopUtilizationMonitor {
   private elu: EventLoopUtilization;
-  private loadWindow = new LoadWindow(LOAD_WINDOW_SIZE_LONG);
 
   /**
    * Creating a new instance of EventLoopUtilizationMonitor will capture the
@@ -31,19 +24,13 @@ export class EventLoopUtilizationMonitor {
   /**
    * Get ELU between now and last time the ELU was reset.
    */
-  public collect(): EventLoopUtilizationWithLoad {
+  public collect(): EventLoopUtilization {
     const { active, idle, utilization } = performance.eventLoopUtilization(this.elu);
-    this.loadWindow.addObservation(utilization);
 
     return {
       active,
       idle,
       utilization,
-      load: {
-        short: this.loadWindow.getAverage(LOAD_WINDOW_SIZE_SHORT),
-        medium: this.loadWindow.getAverage(LOAD_WINDOW_SIZE_MED),
-        long: this.loadWindow.getAverage(LOAD_WINDOW_SIZE_LONG),
-      },
     };
   }
 
