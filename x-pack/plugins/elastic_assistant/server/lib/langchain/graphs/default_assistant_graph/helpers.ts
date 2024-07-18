@@ -94,17 +94,23 @@ export const streamGraph = async ({
       llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
     );
 
-    for await (const { event, data } of stream) {
-      if (event === 'on_chat_model_stream') {
-        const msg = data.chunk as AIMessageChunk;
+    for await (const { event, data, tags } of stream) {
+      if ((tags || []).includes(AGENT_NODE_TAG)) {
+        if (event === 'on_chat_model_stream') {
+          const msg = data.chunk as AIMessageChunk;
 
-        if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
-          push({ payload: msg.content, type: 'content' });
+          if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+            push({ payload: msg.content, type: 'content' });
+          }
         }
-      }
 
-      if (event === 'on_chat_model_end' && !data.output.lc_kwargs?.tool_calls?.length && !didEnd) {
-        handleStreamEnd(data.output.content);
+        if (
+          event === 'on_chat_model_end' &&
+          !data.output.lc_kwargs?.tool_calls?.length &&
+          !didEnd
+        ) {
+          handleStreamEnd(data.output.content);
+        }
       }
     }
     return responseWithHeaders;
@@ -133,6 +139,7 @@ export const streamGraph = async ({
       const event = value;
       // only process events that are part of the agent run
       if ((event.tags || []).includes(AGENT_NODE_TAG)) {
+        console.log('stephhh openai event', JSON.stringify(event, null, 2));
         if (event.name === 'ActionsClientChatOpenAI') {
           if (event.event === 'on_llm_stream') {
             const chunk = event.data?.chunk;

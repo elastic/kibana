@@ -6,6 +6,7 @@
  */
 
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { AGENT_NODE_TAG } from './run_agent';
 import { AgentState } from '../types';
 
 export const RESPOND_NODE = 'respond';
@@ -24,7 +25,8 @@ export const respond = async ({ llm, state }: { llm: BaseChatModel; state: Agent
   // console.error('userMessage', userMessage);
   const responseMessage = await llm
     // .bindTools([])
-    .withConfig({ runName: 'Summarizer' })
+    // use AGENT_NODE_TAG to identify as agent node for stream parsing
+    .withConfig({ runName: 'Summarizer', tags: [AGENT_NODE_TAG] })
     .invoke([userMessage]);
 
   return {
