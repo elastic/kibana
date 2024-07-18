@@ -51,7 +51,7 @@ interface LinkFieldCellProps {
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
   const { scopeId, eventId, indexName } = useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({

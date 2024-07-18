@@ -80,7 +80,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
 
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({

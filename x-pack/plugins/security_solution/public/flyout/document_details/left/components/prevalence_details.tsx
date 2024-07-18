@@ -350,7 +350,7 @@ export const PrevalenceDetails: React.FC = () => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   // these two are used by the usePrevalence hook to fetch the data
   const [start, setStart] = useState(DEFAULT_FROM);
