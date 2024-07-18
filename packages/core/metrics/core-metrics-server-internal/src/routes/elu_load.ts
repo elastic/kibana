@@ -48,6 +48,9 @@ export function registerEluLoadRoute(router: IRouter, tick$: Observable<unknown>
     .get({
       access: 'public', // Public but needs to remain undocumented
       path: '/api/_elu_load',
+      options: {
+        authRequired: false,
+      },
     })
     .addVersion(
       {
