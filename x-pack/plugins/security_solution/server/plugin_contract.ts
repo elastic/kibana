@@ -23,7 +23,7 @@ import type {
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FleetStartContract as FleetPluginStart } from '@kbn/fleet-plugin/server';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
