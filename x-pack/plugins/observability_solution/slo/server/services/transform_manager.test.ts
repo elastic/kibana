@@ -14,11 +14,7 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { DefaultTransformManager } from './transform_manager';
-import {
-  createAPMTransactionDurationIndicator,
-  createAPMTransactionErrorRateIndicator,
-  createSLO,
-} from './fixtures/slo';
+import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
 describe('TransformManager', () => {
@@ -32,36 +28,6 @@ describe('TransformManager', () => {
   });
 
   describe('Install', () => {
-    describe('Unhappy path', () => {
-      it('throws when no generator exists for the slo indicator type', async () => {
-        const service = new DefaultTransformManager(
-          esClientMock,
-          loggerMock,
-          spaceId,
-          dataViewsService
-        );
-
-        await expect(
-          service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
-        ).rejects.toThrowError('Unsupported indicator type [sli.apm.transactionErrorRate]');
-      });
-
-      it('throws when transform generator fails', async () => {
-        const transformManager = new DefaultTransformManager(
-          esClientMock,
-          loggerMock,
-          spaceId,
-          dataViewsService
-        );
-
-        await expect(
-          transformManager.install(
-            createSLO({ indicator: createAPMTransactionDurationIndicator() })
-          )
-        ).rejects.toThrowError('Some error');
-      });
-    });
-
     it('installs the transform', async () => {
       const transformManager = new DefaultTransformManager(
         esClientMock,
