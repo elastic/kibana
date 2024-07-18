@@ -14,7 +14,7 @@ import { StateComparators } from '@kbn/presentation-publishing';
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './control_panel';
-import { ControlApiRegistration, DefaultControlApi, DefaultControlState, DragInfo } from './types';
+import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
 
 /**
  * Renders a component from the control registry into a Control Panel
