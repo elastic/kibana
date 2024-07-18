@@ -476,7 +476,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * disable these fields and leave users in a bad state that they cannot change.
    * The exception is threshold rules, which use an existing threshold field for the same
    * purpose and so are treated as if the field is always selected.  */
-  const areSuppressionFieldsSelected = !isThresholdRule && groupByFields.length > 0;
+  const areSuppressionFieldsSelected = isThresholdRule || groupByFields.length > 0;
 
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
@@ -527,12 +527,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [esqlSuppressionFields, mlSuppressionFields, ruleType, termsAggregationFields]);
 
-  const isGroupByChildrenDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
+  const isGroupByChildrenDisabled =
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
   const isPerRuleExecutionDisabled = areSuppressionFieldsDisabled || isThresholdRule;
-  const isPerTimePeriodDisabled = areSuppressionFieldsDisabled || isThresholdSuppressionDisabled;
+  const isPerTimePeriodDisabled =
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
   const isDurationDisabled =
-    (areSuppressionFieldsDisabled || isThresholdSuppressionDisabled) &&
-    !areSuppressionFieldsSelected;
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
   const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
 
   const GroupByChildren = useCallback(
