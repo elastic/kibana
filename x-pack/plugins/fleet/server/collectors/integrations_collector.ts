@@ -11,16 +11,16 @@ import { SO_SEARCH_LIMIT } from '../constants';
 import { packagePolicyService } from '../services';
 
 export interface IntegrationsDetails {
-  totalIntegrationPolicies: number;
-  sharedIntegrationPolicies: number;
-  sharedIntegrations: SharedIntegration;
+  total_integration_policies: number;
+  shared_integration_policies: number;
+  shared_integrations: SharedIntegration;
 }
 
 interface SharedIntegration {
   name: string;
-  sharedByAgentPolicies: number;
-  pkgName?: string;
-  pkgVersion?: string;
+  shared_by_agent_policies: number;
+  pkg_name?: string;
+  pkg_version?: string;
   agents?: number;
 }
 
@@ -33,23 +33,20 @@ export const getIntegrationsDetails = async (
   const allPackagePolicies = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
   });
-  const totalIntegrationPolicies = allPackagePolicies.items.length;
-
   const sharedPackagePolicies = allPackagePolicies.items.filter((packagePolicy) => {
     if (packagePolicy?.policy_ids?.length > 1) return packagePolicy;
   });
-  const sharedIntegrationPolicies = sharedPackagePolicies.length;
 
   const integrationsDetails: IntegrationsDetails[] = (sharedPackagePolicies || []).map(
     (packagePolicy) => {
       return {
-        totalIntegrationPolicies,
-        sharedIntegrationPolicies,
-        sharedIntegrations: {
+        total_integration_policies: allPackagePolicies.items.length,
+        shared_integration_policies: sharedPackagePolicies.length,
+        shared_integrations: {
           name: packagePolicy.name,
-          pkgName: packagePolicy.package?.name,
-          pkgVersion: packagePolicy.package?.version,
-          sharedByAgentPolicies: packagePolicy?.policy_ids.length,
+          pkg_name: packagePolicy.package?.name,
+          pkg_version: packagePolicy.package?.version,
+          shared_by_agent_policies: packagePolicy?.policy_ids.length,
           agents: packagePolicy?.agents,
         },
       };
