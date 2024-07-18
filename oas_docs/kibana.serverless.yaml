@@ -1,26 +1,50 @@
 openapi: 3.0.3
 info:
   title: Kibana Serverless APIs
-  description: |
+  description: >
+    **Technical preview**  
+
+    This functionality is in technical preview and may be changed or removed in
+    a future release.
+
+    Elastic will work to fix any issues, but features in technical preview are
+    not subject to the support SLA of official GA features.
+
+
     The Kibana REST APIs for Elastic serverless enable you to manage resources
+
     such as connectors, data views, and saved objects. The API calls are
+
     stateless. Each request that you make happens in isolation from other calls
+
     and must include all of the necessary information for Kibana to fulfill the
+
     request. API requests return JSON output, which is a format that is
+
     machine-readable and works well for automation.
+
 
     To interact with Kibana APIs, use the following operations:
 
+
     - GET: Fetches the information.
+
     - POST: Adds new information.
+
     - PUT: Updates the existing information.
+
     - DELETE: Removes the information.
 
+
     You can prepend any Kibana API endpoint with `kbn:` and run the request in
+
     **Dev Tools → Console**. For example:
 
+
     ```
+
     GET kbn:/api/data_views
+
     ```
   version: 1.0.2
   license:
@@ -76,6 +100,7 @@ paths:
     post:
       summary: Create an APM agent key
       description: Create a new agent key for APM.
+      operationId: createAgentKey
       tags:
         - APM agent keys
       requestBody:
@@ -117,6 +142,7 @@ paths:
     get:
       summary: Search for annotations
       description: Search for annotations related to a specific service.
+      operationId: getAnnotation
       tags:
         - APM annotations
       parameters:
@@ -171,6 +197,7 @@ paths:
     post:
       summary: Create a service annotation
       description: Create a new annotation for a specific service.
+      operationId: createAnnotation
       tags:
         - APM annotations
       parameters:
@@ -1246,13 +1273,13 @@ paths:
       summary: Update data view fields metadata in the default space
       operationId: updateFieldsMetadataDefault
       description: >
-        Update fields presentation metadata such as count, customLabel and
-        format. This functionality is in technical preview and may be changed or
-        removed in a future release. Elastic will work to fix any issues, but
-        features in technical preview are not subject to the support SLA of
-        official GA features. You can update multiple fields in one request.
-        Updates are merged with persisted metadata. To remove existing metadata,
-        specify null as the value.
+        Update fields presentation metadata such as count, customLabel,
+        customDescription, and format. This functionality is in technical
+        preview and may be changed or removed in a future release. Elastic will
+        work to fix any issues, but features in technical preview are not
+        subject to the support SLA of official GA features. You can update
+        multiple fields in one request. Updates are merged with persisted
+        metadata. To remove existing metadata, specify null as the value.
       tags:
         - data views
       parameters:
@@ -3324,7 +3351,7 @@ components:
           description: >
             The generative artificial intelligence model for Amazon Bedrock to
             use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-3-sonnet-20240229-v1:0
+          default: anthropic.claude-3-5-sonnet-20240620-v1:0
     Connectors_secrets_properties_bedrock:
       title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.
@@ -3356,7 +3383,7 @@ components:
           description: >-
             The generative artificial intelligence model for Google Gemini to
             use.
-          default: gemini-1.5-pro-preview-0409
+          default: gemini-1.5-pro-001
         gcpRegion:
           type: string
           description: The GCP region where the Vertex AI endpoint enabled.
@@ -3594,7 +3621,7 @@ components:
             The host name of the service provider. If the `service` is
             `elastic_cloud` (for Elastic Cloud notifications) or one of
             Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined. 
+            ignored. If `service` is `other`, this property must be defined.
           type: string
         oauthTokenUrl:
           type: string
@@ -3604,7 +3631,7 @@ components:
             The port to connect to on the service provider. If the `service` is
             `elastic_cloud` (for Elastic Cloud notifications) or one of
             Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined. 
+            ignored. If `service` is `other`, this property must be defined.
           type: integer
         secure:
           description: >
@@ -5272,7 +5299,7 @@ components:
       type: boolean
       description: >
         Indicates whether it is a preconfigured connector. If true, the `config`
-        and `is_missing_secrets` properties are omitted from the response. 
+        and `is_missing_secrets` properties are omitted from the response.
       example: false
     Connectors_is_system_action:
       type: boolean
@@ -5780,6 +5807,17 @@ components:
     Data_views_fieldattrs:
       type: object
       description: A map of field attributes by field name.
+      properties:
+        count:
+          type: integer
+          description: Popularity count for the field.
+        customDescription:
+          type: string
+          description: Custom description for the field.
+          maxLength: 300
+        customLabel:
+          type: string
+          description: Custom label for the field.
     Data_views_fieldformats:
       type: object
       description: A map of field formats by field name.
@@ -5835,7 +5873,9 @@ components:
             allowNoIndex:
               $ref: '#/components/schemas/Data_views_allownoindex'
             fieldAttrs:
-              $ref: '#/components/schemas/Data_views_fieldattrs'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_fieldattrs'
             fieldFormats:
               $ref: '#/components/schemas/Data_views_fieldformats'
             fields:
@@ -5877,7 +5917,9 @@ components:
             allowNoIndex:
               $ref: '#/components/schemas/Data_views_allownoindex'
             fieldAttrs:
-              $ref: '#/components/schemas/Data_views_fieldattrs'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_fieldattrs'
             fieldFormats:
               $ref: '#/components/schemas/Data_views_fieldformats'
             fields:
@@ -8594,11 +8636,15 @@ components:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
         force: true
     Data_views_update_field_metadata_request:
-      summary: Set popularity count for field foo.
+      summary: Update multiple metadata fields.
       value:
         fields:
-          foo:
+          field1:
             count: 123
+            customLabel: Field 1 label
+          field2:
+            customLabel: Field 2 label
+            customDescription: Field 2 description
     Data_views_create_runtime_field_request:
       summary: Create a runtime field.
       value:
