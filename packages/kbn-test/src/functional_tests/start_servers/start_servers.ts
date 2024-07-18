@@ -28,6 +28,10 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
+    log.success(
+      `The current Node environment has FIPS enabled: ${getFips() === 1 ? 'true' : 'false'}`
+    );
+
     const extendedSettingsOverrides = (vars) => {
       if (getFips() === 1) {
         vars.esTestCluster.license = 'trial';

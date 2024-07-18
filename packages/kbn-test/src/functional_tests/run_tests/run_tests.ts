@@ -61,6 +61,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     updateSnapshots: options.updateSnapshots,
   };
 
+  log.success(
+    `The current Node environment has FIPS enabled: ${getFips() === 1 ? 'true' : 'false'}`
+  );
+
   for (const [i, path] of options.configs.entries()) {
     await log.indent(0, async () => {
       if (options.configs.length > 1) {
