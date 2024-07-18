@@ -67,6 +67,8 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... METADATA <fields>', () => {
+      const metadataFieldsSandIndex = metadataFields.filter((field) => field !== '_index');
+
       test('on <kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
         const { assertSuggestions } = await setup();
         const expected = ['METADATA $0', ',', '|'].sort();
@@ -81,9 +83,17 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a, b METADATA /', metadataFields);
       });
 
+      test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a, b [metadata _index  /]', [',', '|']);
+        await assertSuggestions('from a, b metadata _index /', [',', '|']);
+        await assertSuggestions('from a, b metadata _index, _source /', [',', '|']);
+        await assertSuggestions(`from a, b metadata ${METADATA_FIELDS.join(', ')} /`, ['|']);
+      });
+
       test('filters out already used metadata fields', async () => {
         const { assertSuggestions } = await setup();
-        const metadataFieldsSandIndex = metadataFields.filter((field) => field !== '_index');
 
         await assertSuggestions('from a, b [metadata _index, /]', metadataFieldsSandIndex);
         await assertSuggestions('from a, b metadata _index, /', metadataFieldsSandIndex);

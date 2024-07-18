@@ -19,6 +19,8 @@ import type {
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneExecuteScriptResponse,
+  SentinelOneRemoteScriptExecutionStatus,
+  SentinelOneGetRemoteScriptStatusApiResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -71,6 +73,7 @@ import type {
   ResponseActionParametersWithProcessName,
   GetProcessesActionOutputContent,
   SentinelOneProcessesRequestMeta,
+  SentinelOneKillProcessResponseMeta,
 } from '../../../../../../common/endpoint/types';
 import type {
   GetProcessesRequestBody,
@@ -795,6 +798,23 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               }
             }
             break;
+
+          case 'kill-process':
+            {
+              const responseDocsForKillProcess = await this.checkPendingKillProcessActions(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    ResponseActionParametersWithProcessName,
+                    KillProcessActionOutputContent,
+                    SentinelOneKillProcessRequestMeta
+                  >
+                >
+              );
+              if (responseDocsForKillProcess.length) {
+                addToQueue(...responseDocsForKillProcess);
+              }
+            }
+            break;
         }
       }
     }
@@ -1311,6 +1331,177 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     this.log.debug(
       () =>
         `${completedResponses.length} get-file action responses generated:\n${stringify(
+          completedResponses
+        )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  /**
+   * Calculates the state of a SentinelOne Task using the response from their task status API. It
+   * returns a normalized object with basic info derived from the task status value
+   * @param taskStatusRecord
+   * @private
+   */
+  private calculateTaskState(taskStatusRecord: SentinelOneRemoteScriptExecutionStatus): {
+    isPending: boolean;
+    isError: boolean;
+    message: string;
+  } {
+    const taskStatusValue = taskStatusRecord.status;
+    let message =
+      taskStatusRecord.detailedStatus ?? taskStatusRecord.statusDescription ?? taskStatusValue;
+    let isPending: boolean;
+    let isError: boolean;
+
+    switch (taskStatusValue) {
+      // PENDING STATUSES ------------------------------------------
+      case 'created':
+      case 'pending':
+      case 'pending_user_action':
+      case 'scheduled':
+      case 'in_progress':
+      case 'partially_completed':
+        isPending = true;
+        isError = true;
+        break;
+
+      // COMPLETE STATUSES ------------------------------------------
+      case 'canceled':
+        isPending = false;
+        isError = true;
+        message = `SentinelOne Parent Task Id [${taskStatusRecord.parentTaskId}] was canceled${
+          taskStatusRecord.detailedStatus ? ` - ${taskStatusRecord.detailedStatus}` : ''
+        }`;
+        break;
+
+      case 'completed':
+        isPending = false;
+        isError = false;
+        break;
+
+      case 'expired':
+        isPending = false;
+        isError = true;
+        break;
+
+      case 'failed':
+        isPending = false;
+        isError = true;
+        break;
+
+      default:
+        isPending = false;
+        isError = true;
+        message = `Unable to determine task state - unknown SentinelOne task status value [${taskStatusRecord}] for task parent id [${taskStatusRecord.parentTaskId}]`;
+    }
+
+    return {
+      isPending,
+      isError,
+      message,
+    };
+  }
+
+  private async checkPendingKillProcessActions(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        ResponseActionParametersWithProcessName,
+        KillProcessActionOutputContent,
+        SentinelOneKillProcessRequestMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+
+    for (const pendingAction of actionRequests) {
+      const actionRequest = pendingAction.action;
+      const s1ParentTaskId = actionRequest.meta?.parentTaskId;
+
+      if (!s1ParentTaskId) {
+        completedResponses.push(
+          this.buildActionResponseEsDoc<
+            KillProcessActionOutputContent,
+            SentinelOneKillProcessResponseMeta
+          >({
+            actionId: actionRequest.EndpointActions.action_id,
+            agentId: Array.isArray(actionRequest.agent.id)
+              ? actionRequest.agent.id[0]
+              : actionRequest.agent.id,
+            data: {
+              command: 'kill-process',
+              comment: '',
+            },
+            error: {
+              message: `Action request missing SentinelOne 'parentTaskId' value - unable check on its status`,
+            },
+          })
+        );
+
+        warnings.push(
+          `Response Action [${actionRequest.EndpointActions.action_id}] is missing [meta.parentTaskId]! (should not have happened)`
+        );
+      } else {
+        const s1TaskStatusApiResponse =
+          await this.sendAction<SentinelOneGetRemoteScriptStatusApiResponse>(
+            SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
+            { parentTaskId: s1ParentTaskId }
+          );
+
+        if (s1TaskStatusApiResponse.data?.data.length) {
+          const killProcessStatus = s1TaskStatusApiResponse.data.data[0];
+          const taskState = this.calculateTaskState(killProcessStatus);
+
+          if (!taskState.isPending) {
+            this.log.debug(`Action is completed - generating response doc for it`);
+
+            const error: LogsEndpointActionResponse['error'] = taskState.isError
+              ? {
+                  message: `Action failed to execute in SentinelOne. message: ${taskState.message}`,
+                }
+              : undefined;
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc<
+                KillProcessActionOutputContent,
+                SentinelOneKillProcessResponseMeta
+              >({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: 'kill-process',
+                  comment: taskState.message,
+                  output: {
+                    type: 'json',
+                    content: {
+                      code: killProcessStatus.statusCode ?? killProcessStatus.status,
+                      command: actionRequest.EndpointActions.data.command,
+                      process_name: actionRequest.EndpointActions.data.parameters?.process_name,
+                    },
+                  },
+                },
+                error,
+                meta: {
+                  taskId: killProcessStatus.id,
+                },
+              })
+            );
+          }
+        }
+      }
+    }
+
+    this.log.debug(
+      () =>
+        `${completedResponses.length} kill-process action responses generated:\n${stringify(
           completedResponses
         )}`
     );
