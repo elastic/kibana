@@ -3,7 +3,7 @@ info:
   title: Find Conversations API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/conversations/_find:
+  /api/security_ai_assistant/current_user/conversations/_find:
     get:
       operationId: FindConversations
       x-codegen-enabled: true
@@ -91,6 +91,7 @@ paths:
                   message:
                     type: string
 
+  # TODO: No corresponding route/handler, can this be removed?
   /internal/elastic_assistant/conversations/current_user/_find:
     get:
       operationId: FindCurrentUserConversations

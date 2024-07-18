@@ -3,7 +3,7 @@ info:
   title: Bulk Actions API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/conversations/_bulk_action:
+  /internal/elastic_assistant/current_user/conversations/_bulk_action:
     post:
       operationId: PerformBulkAction
       x-codegen-enabled: true
@@ -180,4 +180,3 @@ components:
           minItems: 1
           items:
             type: string
-    

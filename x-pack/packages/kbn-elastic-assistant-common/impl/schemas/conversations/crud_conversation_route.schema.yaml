@@ -3,7 +3,7 @@ info:
   title: Create Conversation API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/conversations:
+  /api/security_ai_assistant/current_user/conversations:
     post:
       operationId: CreateConversation
       x-codegen-enabled: true
@@ -38,7 +38,7 @@ paths:
                   message:
                     type: string
 
-  /internal/elastic_assistant/conversations/{id}:
+  /api/security_ai_assistant/current_user/conversations/{id}:
     get:
       operationId: ReadConversation
       x-codegen-enabled: true
@@ -148,7 +148,7 @@ paths:
                   message:
                     type: string
 
-  /internal/elastic_assistant/conversations/{id}/messages:
+  /internal/elastic_assistant/current_user/conversations/{id}/messages:
     post:
       operationId: AppendConversationMessage
       x-codegen-enabled: true
