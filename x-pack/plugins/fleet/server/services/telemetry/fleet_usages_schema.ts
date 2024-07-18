@@ -453,14 +453,13 @@ export const fleetIntegrationsSchema: RootSchema<any> = {
   shared_integration_policies: {
     type: 'long',
     _meta: {
-      description: 'Count of total number of integration policies in this kibana',
+      description: 'Count of total integration policies in this kibana',
     },
   },
   total_integration_policies: {
     type: 'long',
     _meta: {
-      description:
-        'Count of total number of integration policies shared across agent policies in this kibana',
+      description: 'Count of integration policies shared across agent policies in this kibana',
     },
   },
   shared_integrations: {
