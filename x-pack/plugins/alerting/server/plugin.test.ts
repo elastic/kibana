@@ -209,7 +209,8 @@ describe('Alerting Plugin', () => {
               ...sampleRuleType,
               minimumLicenseRequired: 'basic',
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+
+            setup.registerType(ruleType);
             expect(ruleType.ruleTaskTimeout).toBe('5m');
           });
 
@@ -219,7 +220,7 @@ describe('Alerting Plugin', () => {
               minimumLicenseRequired: 'basic',
               ruleTaskTimeout: '20h',
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+            setup.registerType(ruleType);
             expect(ruleType.ruleTaskTimeout).toBe('20h');
           });
 
@@ -228,7 +229,7 @@ describe('Alerting Plugin', () => {
               ...sampleRuleType,
               minimumLicenseRequired: 'basic',
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+            setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
           });
 
@@ -238,7 +239,7 @@ describe('Alerting Plugin', () => {
               minimumLicenseRequired: 'basic',
               cancelAlertsOnRuleTimeout: false,
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+            setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
           });
         });
@@ -444,7 +445,8 @@ describe('Alerting Plugin', () => {
             },
             getSavedObjectsClient: jest.fn(),
           } as unknown as KibanaRequest;
-          startContract.getAlertingAuthorizationWithRequest(fakeRequest);
+
+          await startContract.getAlertingAuthorizationWithRequest(fakeRequest);
         });
       });
     });

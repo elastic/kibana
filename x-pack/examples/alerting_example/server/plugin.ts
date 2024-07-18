@@ -9,7 +9,7 @@ import { Plugin, CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 // import directly to support examples functional tests (@kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js)
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -22,7 +22,7 @@ import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
 
 // this plugin's dependencies
 export interface AlertingExampleDeps {
-  alerting: AlertingSetup;
+  alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
 }
 
