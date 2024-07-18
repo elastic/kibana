@@ -5,10 +5,26 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from './log_rate_analysis_type';
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
 
+/**
+ * Calculates the baseline and deviation rates for log rate analysis based on the specified analysis type.
+ *
+ * This function computes the rates by dividing the document count (docCount) and background count (bgCount)
+ * by the number of buckets allocated for baseline and deviation periods, respectively. The calculation
+ * method varies depending on whether the analysis type is a "spike" or a "dip". For a "spike", the baseline
+ * rate is derived from the background count and the deviation rate from the document count. For a "dip",
+ * the roles are reversed.
+ *
+ * @param analysisType The type of analysis to perform, can be either "spike" or "dip".
+ * @param baselineBuckets The number of buckets into which the baseline period is divided.
+ * @param deviationBuckets The number of buckets into which the deviation period is divided.
+ * @param docCount The total document count observed in the deviation period.
+ * @param bgCount The total background count observed in the baseline period.
+ * @returns An object containing the calculated baseline and deviation bucket rates.
+ */
 export function getBaselineAndDeviationRates(
-  analysisType: typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE],
+  analysisType: LogRateAnalysisType,
   baselineBuckets: number,
   deviationBuckets: number,
   docCount: number,
