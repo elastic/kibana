@@ -8,7 +8,7 @@
 import type { MouseEvent } from 'react';
 import React, { useState, type FC } from 'react';
 
-import type { EuiBasicTableProps } from '@elastic/eui';
+import { useEuiTheme, type EuiBasicTableProps } from '@elastic/eui';
 import { formatDate, EuiPanel, EuiBasicTable, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -30,6 +30,7 @@ interface Sorting {
 }
 
 export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
+  const { euiTheme } = useEuiTheme();
   const { showNodeInfo } = useEnabledFeatures();
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -79,8 +80,12 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
       ) : (
         ''
       ),
-      render: (message: TransformMessage) => <JobIcon message={message} />,
-      width: '6%',
+      render: (message: TransformMessage) => (
+        <div css={{ marginLeft: `-${euiTheme.base * 1.75}px` }}>
+          <JobIcon message={message} />
+        </div>
+      ),
+      width: euiTheme.size.xl,
     },
     {
       field: 'timestamp',
