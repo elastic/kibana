@@ -12,7 +12,8 @@ import { useKibana } from '../utils/kibana_react';
 
 interface SLOInspectResponse {
   slo: SLODefinitionResponse;
-  pipeline: Record<string, any>;
+  rollUpPipeline: Record<string, any>;
+  summaryPipeline: Record<string, any>;
   rollUpTransform: TransformPutTransformRequest;
   summaryTransform: TransformPutTransformRequest;
   temporaryDoc: Record<string, any>;

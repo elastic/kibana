@@ -27,7 +27,7 @@ import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import { useNodeDetailsRedirect } from '../../../../link_to';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
