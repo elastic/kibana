@@ -20,6 +20,7 @@ import { UnifiedDataTableContext } from '../table_context';
 import { getDocId } from '@kbn/discover-utils';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { servicesMock } from '../../__mocks__/services';
 
 describe('document selection', () => {
   describe('getDocId', () => {
@@ -199,6 +200,7 @@ describe('document selection', () => {
         setIsFilterActive: jest.fn(),
         enableComparisonMode: true,
         setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
       const button = findTestSubject(component, 'unifiedDataTableSelectionBtn');
@@ -232,6 +234,7 @@ describe('document selection', () => {
       setIsFilterActive: jest.fn(),
       enableComparisonMode: true,
       setIsCompareActive: jest.fn(),
+      fieldFormats: servicesMock.fieldFormats,
     };
 
     const renderCompareBtn = ({

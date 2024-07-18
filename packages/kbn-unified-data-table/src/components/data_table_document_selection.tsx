@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   EuiCheckbox,
   EuiContextMenuItem,
@@ -112,10 +114,10 @@ export const SelectAllButton = () => {
   const title =
     isIndeterminateForCurrentPage || areDocsSelectedForCurrentPage
       ? i18n.translate('unifiedDataTable.deselectAllRowsOnPageColumnHeader', {
-          defaultMessage: 'Deselect all rows on the page',
+          defaultMessage: 'Deselect all visible rows',
         })
       : i18n.translate('unifiedDataTable.selectAllRowsOnPageColumnHeader', {
-          defaultMessage: 'Select all rows on the page',
+          defaultMessage: 'Select all visible rows',
         });
 
   return (
@@ -156,6 +158,7 @@ export function DataTableDocumentToolbarBtn({
   selectedDocsState,
   enableComparisonMode,
   setIsCompareActive,
+  fieldFormats,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
@@ -164,6 +167,7 @@ export function DataTableDocumentToolbarBtn({
   selectedDocsState: UseSelectedDocsState;
   enableComparisonMode: boolean | undefined;
   setIsCompareActive: (value: boolean) => void;
+  fieldFormats: FieldFormatsStart;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const { selectAllDocs, clearAllSelectedDocs, isDocSelected, selectedDocIds } = selectedDocsState;
@@ -297,7 +301,9 @@ export function DataTableDocumentToolbarBtn({
           data-selected-documents={selectedDocIds.length}
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
-          badgeContent={selectedDocIds.length}
+          badgeContent={fieldFormats
+            .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+            .convert(selectedDocIds.length)}
           css={css`
             .euiButtonEmpty__content {
               flex-direction: row-reverse;
@@ -352,7 +358,9 @@ export function DataTableDocumentToolbarBtn({
               id="unifiedDataTable.selectAllDocs"
               defaultMessage="Select all {rowsCount}"
               values={{
-                rowsCount: rows.length,
+                rowsCount: fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(rows.length),
               }}
             />
           </EuiDataGridToolbarControl>

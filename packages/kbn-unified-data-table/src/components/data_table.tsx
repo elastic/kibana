@@ -888,6 +888,7 @@ export const UnifiedDataTable = ({
             selectedDocsState={selectedDocsState}
             enableComparisonMode={enableComparisonMode}
             setIsCompareActive={setIsCompareActive}
+            fieldFormats={fieldFormats}
           />
         )}
         {externalAdditionalControls}
@@ -902,6 +903,7 @@ export const UnifiedDataTable = ({
     setIsFilterActive,
     enableComparisonMode,
     rows,
+    fieldFormats,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
