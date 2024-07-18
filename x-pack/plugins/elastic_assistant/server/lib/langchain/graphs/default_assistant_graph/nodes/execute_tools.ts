@@ -50,6 +50,7 @@ export const executeTools = async ({ config, logger, state, tools }: ExecuteTool
   }
 
   return {
+    ...state,
     steps: [{ action: agentAction, observation: JSON.stringify(out, null, 2) }],
   };
 };

@@ -38,7 +38,6 @@ export interface AgentExecutorParams<T extends boolean> {
   alertsIndexPattern?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
   bedrockChatEnabled: boolean;
-  isEnabledKnowledgeBase: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
