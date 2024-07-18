@@ -30,7 +30,7 @@ export function isCustomValidation(
  * @internal
  */
 export function unwrapVersionedResponseBodyValidation(
-  validation: VersionedRouteResponseValidation[number]['body']
+  validation: VersionedResponseBodyValidation
 ): RouteValidationSpec<unknown> {
   if (isCustomValidation(validation)) {
     return validation.custom;
@@ -44,6 +44,7 @@ function prepareValidation(validation: VersionedRouteValidation<unknown, unknown
     const result: VersionedRouteResponseValidation = {};
 
     for (const [key, { body }] of Object.entries(responseValidations)) {
+      if (!body) continue;
       result[key as unknown as number] = { body: isCustomValidation(body) ? body : once(body) };
     }
 
