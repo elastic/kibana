@@ -43,6 +43,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HOST_OVERVIEW_LINK,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   navigateToCorrelationsDetails,
@@ -76,6 +78,20 @@ import {
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
+import {
+  HOST_PANEL_HEADER,
+  HOST_PREVIEW_PANEL_FOOTER,
+  OPEN_HOST_FLYOUT_LINK,
+} from '../../../../screens/hosts/flyout_host_panel';
+import {
+  USER_PANEL_HEADER,
+  USER_PREVIEW_PANEL_FOOTER,
+  OPEN_USER_FLYOUT_LINK,
+} from '../../../../screens/users/flyout_user_panel';
+import {
+  PREVIEW_SECTION,
+  PREVIEW_BANNER,
+} from '../../../../screens/expandable_flyout/alert_details_preview_panel';
 
 describe(
   'Alert details expandable flyout right panel overview tab',
@@ -216,6 +232,15 @@ describe(
           'contain.text',
           'host.name'
         );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL).should(
+          'contain.text',
+          'user.name'
+        );
+      });
+
+      // github.com/elastic/security-team/issues/9933
+      // Skip when feature flag 'entityAlertPreviewEnabled' is enabled
+      it('should open entities details when clicking host name and user name', () => {
         const hostNameCell =
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
         cy.get(hostNameCell).and('have.text', 'siem-kibana');
@@ -225,16 +250,57 @@ describe(
 
         collapseDocumentDetailsExpandableFlyoutLeftSection();
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL).should(
-          'contain.text',
-          'user.name'
-        );
         const userNameCell =
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
         cy.get(userNameCell).should('have.text', 'test');
 
         cy.get(userNameCell).click();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('exist');
+      });
+
+      // github.com/elastic/security-team/issues/9933
+      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
+      it.skip('should open host preview when host name is clicked', () => {
+        toggleOverviewTabAboutSection();
+
+        cy.log('should open host preview when clicked on host name');
+
+        const hostNameCell =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
+        cy.get(hostNameCell).click();
+
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview host details');
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.log('should open host flyout when click on footer link');
+
+        cy.get(OPEN_HOST_FLYOUT_LINK).click();
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
+      });
+
+      // github.com/elastic/security-team/issues/9933
+      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
+      it.skip('should open user preview when user name is clicked', () => {
+        toggleOverviewTabAboutSection();
+
+        const userNameCell =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
+        cy.get(userNameCell).and('have.text', 'test');
+
+        cy.get(userNameCell).click();
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview user details');
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.get(OPEN_USER_FLYOUT_LINK).click();
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('not.exist');
       });
     });
 
@@ -260,6 +326,50 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON)
           .should('have.text', 'Entities')
           .and('have.class', 'euiButtonGroupButton-isSelected');
+      });
+
+      // github.com/elastic/security-team/issues/9933
+      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
+      it.skip('open host preview when host name is clicked', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.log('should open host preview when clicked on host name');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HOST_OVERVIEW_LINK).click();
+
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview host details');
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.log('should open host flyout when click on footer link');
+
+        cy.get(OPEN_HOST_FLYOUT_LINK).click();
+        cy.get(HOST_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
+      });
+
+      // github.com/elastic/security-team/issues/9933
+      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
+      it.skip('open user preview when user name is clicked', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK).click();
+
+        cy.get(PREVIEW_SECTION).should('exist');
+        cy.get(PREVIEW_BANNER).should('have.text', 'Preview user details');
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('exist');
+
+        cy.get(OPEN_USER_FLYOUT_LINK).click();
+        cy.get(USER_PANEL_HEADER).should('exist');
+        cy.get(PREVIEW_SECTION).should('not.exist');
+        cy.get(USER_PREVIEW_PANEL_FOOTER).should('not.exist');
       });
 
       it('should display threat intelligence section', () => {
