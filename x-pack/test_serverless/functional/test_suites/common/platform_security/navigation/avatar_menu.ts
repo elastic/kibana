@@ -13,7 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('Avatar menu', function () {
     before(async () => {
-      await svlCommonPage.loginWithPrivilegedRole();
+      await svlCommonPage.loginAsViewer();
     });
 
     it('is displayed', async () => {
