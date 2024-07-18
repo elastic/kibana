@@ -94,7 +94,8 @@ export const CreateConnector: React.FC = () => {
   >('incomplete');
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [connectorSelected, setConnectorSelected] = useState('');
+
+  const [connectorSelected, setConnectorSelected] = useState<any>('');
 
   interface CustomEuiStepInterface extends EuiStepInterface {
     content: JSX.Element;
@@ -294,9 +295,8 @@ export const CreateConnector: React.FC = () => {
     }
   }, [currentStep]);
 
-  useEffect(() => {
-    // console.log(allConnectors);
-  }, []);
+  // useEffect(() => {
+  // }, []);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -383,7 +383,7 @@ export const CreateConnector: React.FC = () => {
                   <EuiSuperSelect
                     readOnly
                     valueOfSelected="item1"
-                    options={[{ inputDisplay: connectorSelected, value: 'item1' }]}
+                    options={[{ inputDisplay: connectorSelected.name, value: 'item1' }]}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -394,7 +394,7 @@ export const CreateConnector: React.FC = () => {
                       href="http://www.elastic.co"
                       target="_blank"
                     >
-                      {connectorSelected}{' '}
+                      {connectorSelected.name}{' '}
                       {i18n.translate(
                         'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
                         { defaultMessage: 'connector docs' }

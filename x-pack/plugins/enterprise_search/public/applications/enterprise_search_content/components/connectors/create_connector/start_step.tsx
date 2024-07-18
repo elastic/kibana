@@ -28,15 +28,8 @@ import { ChooseConnectorSelectable } from './components/choose_connector_selecta
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 
 interface StartStepProps {
-  allConnectors: Array<{
-    description: string;
-    iconPath: string;
-    isBeta: boolean;
-    isNative: boolean;
-    isTechPreview: boolean;
-    name: string;
-  }>;
-  connectorSelected: string;
+  allConnectors: unknown;
+  connectorSelected: any;
   selfManaged: boolean;
   setConnectorSelected: Function;
   setSelfManaged: Function;
@@ -60,6 +53,21 @@ export const StartStep: React.FC<StartStepProps> = ({
   useEffect(() => {
     setSelfManaged(radioIdSelected === selfManagedRadioButtonId ? true : false);
   }, [radioIdSelected]);
+  useEffect(() => {
+    setRadioIdSelected(selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId);
+  }, [selfManaged]);
+
+  const [connectorName, setConnectorName] = useState('');
+  useEffect(() => {
+    if (connectorSelected && connectorSelected.name !== '') {
+      const name =
+        connectorSelected.name
+          .toLocaleLowerCase()
+          .replace(/[^\w-]/g, '-')
+          .replace(/ /g, '-') + '-aa3f';
+      setConnectorName(name);
+    }
+  }, [connectorSelected]);
 
   return (
     <>
@@ -85,6 +93,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     setConnectorSelected={setConnectorSelected}
                     connectorSelected={connectorSelected}
                     allConnectors={allConnectors}
+                    setSelfManaged={setSelfManaged}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -100,6 +109,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     data-test-subj="enterpriseSearchStartStepFieldText"
                     fullWidth
                     name="first"
+                    value={connectorName}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -151,6 +161,14 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Elastic managed' }
                   )}
                   checked={!selfManaged}
+                  // Make it dymanic
+                  disabled={
+                    connectorSelected.name === 'GraphQL' ||
+                    connectorSelected.name === 'Customized connector' ||
+                    connectorSelected.name === 'Jira Server' ||
+                    connectorSelected.name === 'Redis' ||
+                    connectorSelected.name === 'OpenText Documentum'
+                  }
                   onChange={() => setRadioIdSelected(elasticManagedRadioButtonId)}
                   name="setUp"
                 />

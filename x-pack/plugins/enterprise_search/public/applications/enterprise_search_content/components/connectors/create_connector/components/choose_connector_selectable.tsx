@@ -26,9 +26,10 @@ interface ChooseConnectorSelectableProps {
     isTechPreview: boolean;
     name: string;
   }>;
-  connectorSelected: string;
+  connectorSelected: any;
   selfManaged: boolean;
   setConnectorSelected: Function;
+  setSelfManaged: Function;
 }
 interface OptionData {
   secondaryContent?: string;
@@ -38,6 +39,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   setConnectorSelected,
   connectorSelected,
   selfManaged,
+  setSelfManaged,
   allConnectors,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -45,62 +47,70 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   const [isSearching, setIsSearching] = useState(true);
   const [selectableOptions, selectableSetOptions] = useState<
     Array<EuiSelectableOption<OptionData>>
-  >([
-    ...allConnectors.map(
-      (connector: {
+  >([]);
+  const initialOptions = allConnectors.map(
+    (
+      connector: {
         description: string;
         iconPath: string;
         isBeta: boolean;
         isNative: boolean;
         isTechPreview: boolean;
         name: string;
-      }): EuiSelectableOption => {
-        let append = null;
-        if (connector.isTechPreview) {
-          append = (
-            <EuiBadge iconType="beaker" color="hollow">
-              {i18n.translate(
-                'xpack.enterpriseSearch.chooseConnectorSelectable.thechPreviewBadgeLabel',
-                { defaultMessage: 'Thech preview' }
-              )}
-            </EuiBadge>
-          );
-        } else if (connector.isBeta) {
-          append = (
-            <EuiBadge iconType={'beta'} color="hollow">
-              {i18n.translate('xpack.enterpriseSearch.chooseConnectorSelectable.BetaBadgeLabel', {
-                defaultMessage: 'Beta',
-              })}
-            </EuiBadge>
-          );
-        }
-        if (!selfManaged && !connector.isNative) {
-          append = (
-            <EuiBadge color="warning">
-              {i18n.translate(
-                'xpack.enterpriseSearch.chooseConnectorSelectable.OnlySelfManagedBadgeLabel',
-                {
-                  defaultMessage: 'Only as a self managed',
-                }
-              )}
-            </EuiBadge>
-          );
-        }
-
-        return {
-          append,
-          disabled: !selfManaged && !connector.isNative,
-          label: connector.name,
-          prepend: <EuiIcon size="l" type={connector.iconPath} />,
-          toolTipContent: connector.description,
-        };
+      },
+      key
+    ): EuiSelectableOption => {
+      const append: JSX.Element[] = [];
+      if (connector.isTechPreview) {
+        append.push(
+          <EuiBadge iconType="beaker" color="hollow">
+            {i18n.translate(
+              'xpack.enterpriseSearch.chooseConnectorSelectable.thechPreviewBadgeLabel',
+              { defaultMessage: 'Thech preview' }
+            )}
+          </EuiBadge>
+        );
       }
-    ),
-  ]);
+      if (connector.isBeta) {
+        append.push(
+          <EuiBadge iconType={'beta'} color="hollow">
+            {i18n.translate('xpack.enterpriseSearch.chooseConnectorSelectable.BetaBadgeLabel', {
+              defaultMessage: 'Beta',
+            })}
+          </EuiBadge>
+        );
+      }
+      if (!selfManaged && !connector.isNative) {
+        append.push(
+          <EuiBadge iconType={'warning'} color="warning">
+            {i18n.translate(
+              'xpack.enterpriseSearch.chooseConnectorSelectable.OnlySelfManagedBadgeLabel',
+              {
+                defaultMessage: 'Self managed',
+              }
+            )}
+          </EuiBadge>
+        );
+      }
+
+      return {
+        append,
+        key: key.toString(),
+        label: connector.name,
+        prepend: <EuiIcon size="l" type={connector.iconPath} />,
+      };
+    }
+  );
+
+  useEffect(() => {
+    selectableSetOptions(initialOptions);
+  }, []);
+
+  // Rest of the code...
 
   useEffect(() => {
     // Setting options when changing the radiobutton to self managed but it doesn't update the values for disable nor badges
-    selectableSetOptions(selectableOptions);
+    selectableSetOptions(initialOptions);
   }, [selfManaged]);
 
   return (
@@ -114,8 +124,13 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         selectableSetOptions(newOptions);
         setIsOpen(false);
         if (changedOption.checked === 'on') {
-          setConnectorSelected(changedOption.label);
+          const keySelected = Number(changedOption.key);
+          setConnectorSelected(allConnectors[keySelected]);
           setIsSearching(false);
+
+          if (!allConnectors[keySelected].isNative && !selfManaged) {
+            setSelfManaged(true);
+          }
         } else {
           setConnectorSelected('');
         }
@@ -135,7 +150,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         fullWidth: true,
         isClearable: true,
         onChange: (value) => {
-          setConnectorSelected(value);
+          setConnectorSelected({ name: value });
           setIsSearching(true);
         },
         onClick: () => setIsOpen(true),
@@ -145,7 +160,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           if (event.key !== 'Escape') return setIsOpen(true);
         },
         placeholder: 'Choose a data source',
-        value: connectorSelected,
+        value: connectorSelected.name,
       }}
       isPreFiltered={isSearching ? false : { highlightSearch: false }} // Shows the full list when not actively typing to search
     >

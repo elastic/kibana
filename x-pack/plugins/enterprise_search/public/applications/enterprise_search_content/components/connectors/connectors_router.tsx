@@ -13,7 +13,7 @@ import {
   CONNECTORS_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
   NEW_CONNECTOR_PATH,
-  NEW_CONNECTOR_PATH_ALTERNATIVE,
+  NEW_CONNECTOR_FLOW_PATH,
   CONNECTOR_DETAIL_PATH,
 } from '../../routes';
 import { ConnectorDetailRouter } from '../connector_detail/connector_detail_router';
@@ -32,7 +32,7 @@ export const ConnectorsRouter: React.FC = () => {
       <Route path={NEW_CONNECTOR_PATH}>
         <NewSearchIndexPage type="connector" />
       </Route>
-      <Route path={NEW_CONNECTOR_PATH_ALTERNATIVE}>
+      <Route path={NEW_CONNECTOR_FLOW_PATH}>
         <CreateConnector />
       </Route>
       <Route path={CONNECTORS_PATH} exact>
