@@ -133,17 +133,22 @@
               }
             },
             {
-              "zone_count": 1,
+              "autoscaling_max": {
+                "resource": "memory",
+                "value": 8192
+              },
+              "autoscaling_min": {
+                "resource": "memory",
+                "value": 0
+              },
+              "autoscaling_tier_override": true,
+              "id": "ml",
               "instance_configuration_id": "gcp.ml.1",
               "node_roles": [
                 "ml",
                 "remote_cluster_client"
               ],
-              "id": "ml",
-              "size": {
-                "value": 1024,
-                "resource": "memory"
-              }
+              "zone_count": 1
             }
           ],
           "elasticsearch": {
