@@ -6,3 +6,4 @@
  */
 
 export { taskModelVersions } from './task_model_versions';
+export { backgroundTaskNodeModelVersions } from './background_task_node_model_versions';

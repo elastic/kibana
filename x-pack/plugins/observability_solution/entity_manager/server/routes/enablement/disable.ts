@@ -24,7 +24,7 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.delete<unknown, { deleteData?: boolean }, unknown>(
     {
-      path: '/internal/api/entities/managed/enablement',
+      path: '/internal/entities/managed/enablement',
       validate: {
         query: schema.object({
           deleteData: schema.maybe(schema.boolean({ defaultValue: false })),
