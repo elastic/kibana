@@ -23,15 +23,6 @@ export type ExpandedEventType =
     }
   | EmptyObject;
 
-export type ExpandedHostType =
-  | {
-      panelView?: 'hostDetail';
-      params?: {
-        hostName: string;
-      };
-    }
-  | EmptyObject;
-
 export type ExpandedNetworkType =
   | {
       panelView?: 'networkDetail';
@@ -42,7 +33,7 @@ export type ExpandedNetworkType =
     }
   | EmptyObject;
 
-export type ExpandedDetailType = ExpandedEventType | ExpandedHostType | ExpandedNetworkType;
+export type ExpandedDetailType = ExpandedEventType | ExpandedNetworkType;
 
 export enum TimelineTabs {
   query = 'query',
