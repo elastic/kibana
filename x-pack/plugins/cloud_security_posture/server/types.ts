@@ -37,8 +37,8 @@ import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
-import { CspStatusCode, IndexDetails } from '../common/types_old';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { CspStatusCode, IndexDetails } from '../common/types_old';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
