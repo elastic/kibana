@@ -539,6 +539,57 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
     });
   }
 
+  if (explanation.by_field_first_occurrence !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.byFieldFirstOccurrenceTooltip',
+            {
+              defaultMessage:
+                'If the rare category was seen for the first time.',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.byFieldFirstOccurrence"
+              defaultMessage="First occurrence:"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: explanation.by_field_first_occurrence ? yes : no,
+    });
+  }
+  if (explanation.by_field_relative_rarity !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.byFieldRelativeRarityTooltip',
+            {
+              defaultMessage:
+                'Relation between actual frequency of the category and the typical frequency of categories in the bucket.',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.byFieldRelativeRarity"
+              defaultMessage="Concentration ratio:"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: explanation.by_field_relative_rarity,
+    });
+  }
+
   return (
     <div>
       <EuiText size="xs">

@@ -228,6 +228,10 @@ export interface AnomalyRecordDoc {
      * Indicates a reduction of anomaly score if the bucket contains fewer samples than historically expected.
      */
     incomplete_bucket_penalty?: boolean;
+
+    by_field_first_occurrence?: boolean;
+
+    by_field_relative_rarity?: number;
     /**
      * Indicates whether the prior distribution of the observed time series is multi-modal or has a single mode.
      */
