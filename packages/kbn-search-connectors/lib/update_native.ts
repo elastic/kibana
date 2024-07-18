@@ -8,7 +8,7 @@
 
 import { Result } from '@elastic/elasticsearch/lib/api/types';
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export const putUpdateNative = async (
   client: ElasticsearchClient,

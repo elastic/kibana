@@ -43,7 +43,7 @@ import {
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
-import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import {

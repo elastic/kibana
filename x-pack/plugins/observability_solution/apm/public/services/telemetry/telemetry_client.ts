@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { TelemetryEventTypes, ITelemetryClient, SearchQuerySubmittedParams } from './types';
 
 export class TelemetryClient implements ITelemetryClient {

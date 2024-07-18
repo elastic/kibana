@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Result } from '@elastic/elasticsearch/lib/api/types';
-
-export const deleteConnectorSecret = async (client: ElasticsearchClient, id: string) => {
-  return await client.transport.request<Result>({
-    method: 'DELETE',
-    path: `/_connector/_secret/${id}`,
-  });
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-server-route-repository-utils'],
 };

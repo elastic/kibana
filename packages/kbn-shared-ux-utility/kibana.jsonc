@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/shared-ux-utility",
   "owner": "@elastic/appex-sharedux"
 }

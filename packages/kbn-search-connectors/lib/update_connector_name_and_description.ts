@@ -7,7 +7,7 @@
  */
 
 import { Result } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { Connector } from '../types/connectors';
 

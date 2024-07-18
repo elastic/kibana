@@ -8,7 +8,7 @@
 
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 import { Error } from '../types';
 
 interface Props {

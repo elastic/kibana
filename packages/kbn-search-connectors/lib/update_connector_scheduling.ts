@@ -7,7 +7,7 @@
  */
 
 import { Result } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { i18n } from '@kbn/i18n';
 import { isNotFoundException } from '../utils/identify_exceptions';
 

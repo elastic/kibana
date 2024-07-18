@@ -7,7 +7,7 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { DEFAULT_DOCS_PER_PAGE, Paginate } from '../types';
 import { escapeLuceneChars } from '../utils/escape_lucene_charts';
 import { fetchWithPagination } from '../utils/fetch_with_pagination';

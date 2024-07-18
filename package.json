@@ -779,6 +779,7 @@
     "@kbn/securitysolution-utils": "link:packages/kbn-securitysolution-utils",
     "@kbn/server-http-tools": "link:packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:packages/kbn-server-route-repository",
+    "@kbn/server-route-repository-utils": "link:packages/kbn-server-route-repository-utils",
     "@kbn/serverless": "link:x-pack/plugins/serverless",
     "@kbn/serverless-common-settings": "link:packages/serverless/settings/common",
     "@kbn/serverless-observability": "link:x-pack/plugins/serverless_observability",
