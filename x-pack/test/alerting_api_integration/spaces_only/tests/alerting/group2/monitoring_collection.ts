@@ -38,7 +38,8 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
     ? dedicatedTaskRunner.getSupertest()
     : supertest;
 
-  describe('monitoring_collection', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/187275
+  describe.skip('monitoring_collection', () => {
     let endDate: string;
     const objectRemover = new ObjectRemover(supertest);
 

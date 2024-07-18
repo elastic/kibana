@@ -13,7 +13,7 @@
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import {
   getAssistantFeature,

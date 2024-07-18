@@ -41,16 +41,22 @@ jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
 
 describe('HostDetailsPanel', () => {
   it('render risk inputs panel', () => {
-    const { getByTestId } = render(<HostDetailsPanel name="elastic" isRiskScoreExist={true} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <HostDetailsPanel name="elastic" isRiskScoreExist={true} scopeId={'scopeId'} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
     expect(getByTestId(RISK_INPUTS_TAB_TEST_ID)).toBeInTheDocument();
   });
 
   it("doesn't render risk inputs panel when no alerts ids are provided", () => {
-    const { queryByTestId } = render(<HostDetailsPanel name="elastic" isRiskScoreExist={false} />, {
-      wrapper: TestProviders,
-    });
+    const { queryByTestId } = render(
+      <HostDetailsPanel name="elastic" isRiskScoreExist={false} scopeId={'scopeId'} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
     expect(queryByTestId(RISK_INPUTS_TAB_TEST_ID)).not.toBeInTheDocument();
   });
 });

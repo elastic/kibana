@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Prompt } from '../../assistant/types';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
-export const mockUserPrompt: Prompt = {
+export const mockUserPrompt: PromptResponse = {
   id: 'mock-user-prompt-1',
   content: `Explain the meaning from the context above, then summarize a list of suggested Elasticsearch KQL and EQL queries.
 Finally, suggest an investigation guide, and format it as markdown.`,
   name: 'Mock user prompt',
-  promptType: 'user',
+  promptType: 'quick',
 };

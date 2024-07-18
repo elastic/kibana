@@ -44,7 +44,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       describe('Osquery Tab', () => {

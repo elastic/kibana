@@ -30,16 +30,14 @@ import {
 } from '../../lib/entities/create_and_install_transform';
 import { startTransform } from '../../lib/entities/start_transform';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   logger,
-  spaces,
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}/_reset`,
+      path: '/internal/entities/definition/{id}/_reset',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -50,7 +48,6 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
       try {
         const soClient = (await context.core).savedObjects.client;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
 
         const definition = await readEntityDefinition(soClient, req.params.id, logger);
 
@@ -62,8 +59,8 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
         await deleteIndices(esClient, definition, logger);
 
         // Recreate everything
-        await createAndInstallHistoryIngestPipeline(esClient, definition, logger, spaceId);
-        await createAndInstallLatestIngestPipeline(esClient, definition, logger, spaceId);
+        await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
+        await createAndInstallLatestIngestPipeline(esClient, definition, logger);
         await createAndInstallHistoryTransform(esClient, definition, logger);
         await createAndInstallLatestTransform(esClient, definition, logger);
         await startTransform(esClient, definition, logger);

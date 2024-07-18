@@ -57,6 +57,7 @@ import {
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
 export { ObjectType, Type };
+export type { SchemaValidationOptions } from './src/types';
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';

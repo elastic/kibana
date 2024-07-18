@@ -132,6 +132,7 @@ import {
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -241,6 +242,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
       await requireUniqueName(soClient, enrichedPackagePolicy);
+    }
+    if (enrichedPackagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: enrichedPackagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -845,6 +852,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       !options?.skipUniqueNameVerification
     ) {
       await requireUniqueName(soClient, enrichedPackagePolicy, id);
+    }
+
+    if (packagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: packagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     // eslint-disable-next-line prefer-const
@@ -1678,7 +1692,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         .info(
           `Package policy upgrade dry run ${hasErrors ? 'resulted in errors' : 'ran successfully'}`
         );
-      appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      appContextService.getLogger().debug(() => JSON.stringify(upgradeTelemetry));
     }
   }
 
@@ -2716,9 +2730,10 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             appContextService
               .getLogger()
               .debug(
-                `Rejecting package policy update due to dataset change, old val '${
-                  oldStream?.vars[DATASET_VAR_NAME]?.value
-                }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
+                () =>
+                  `Rejecting package policy update due to dataset change, old val '${
+                    oldStream.vars![DATASET_VAR_NAME].value
+                  }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
@@ -2745,7 +2760,10 @@ async function validateIsNotHostedPolicy(
     throw new AgentPolicyNotFoundError('Agent policy not found');
   }
 
-  if (agentPolicy.is_managed && !force) {
+  const isManagedPolicyWithoutServerlessSupport =
+    agentPolicy.is_managed && !agentPolicy.supports_agentless && !force;
+
+  if (isManagedPolicyWithoutServerlessSupport) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
     );
@@ -2778,7 +2796,7 @@ export function sendUpdatePackagePolicyTelemetryEvent(
           upgradeTelemetry
         );
         appContextService.getLogger().info(`Package policy upgraded successfully`);
-        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+        appContextService.getLogger().debug(() => JSON.stringify(upgradeTelemetry));
       }
     }
   });

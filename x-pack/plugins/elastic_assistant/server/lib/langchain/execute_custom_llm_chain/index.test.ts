@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 
@@ -84,7 +85,7 @@ const mockRequest: KibanaRequest<unknown, unknown, any, any> = { body: {} } as K
   any // eslint-disable-line @typescript-eslint/no-explicit-any
 >;
 
-const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
+const actionsClient = actionsClientMock.create();
 const mockLogger = loggerMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -95,8 +96,7 @@ const esStoreMock = new ElasticsearchStore(
   mockTelemetry
 );
 const defaultProps: AgentExecutorParams<true> = {
-  actions: mockActions,
-  isEnabledKnowledgeBase: true,
+  actionsClient,
   connectorId: mockConnectorId,
   esClient: esClientMock,
   esStore: esStoreMock,
@@ -151,11 +151,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor(defaultProps);
 
         expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: false,
           temperature: 0.2,
           llmType: 'openai',
@@ -189,11 +188,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor({ ...defaultProps, isStream: true });
 
         expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: true,
           temperature: 0.2,
           llmType: 'openai',
@@ -213,11 +211,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor(bedrockProps);
 
         expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: false,
           temperature: 0,
           llmType: 'bedrock',
@@ -253,11 +250,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor({ ...bedrockProps, isStream: true });
 
         expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: true,
           temperature: 0,
           llmType: 'bedrock',

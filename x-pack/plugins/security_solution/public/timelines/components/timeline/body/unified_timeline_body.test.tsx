@@ -46,8 +46,6 @@ const defaultProps: UnifiedTimelineBodyProps = {
     activePage: 0,
     querySize: 0,
   },
-  eventIdToNoteIds: {} as Record<string, string[]>,
-  pinnedEventIds: {} as Record<string, boolean>,
 };
 
 const renderTestComponents = (props?: UnifiedTimelineBodyProps) => {
@@ -102,7 +100,7 @@ describe('UnifiedTimelineBody', () => {
 
     expect(MockUnifiedTimelineComponent).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        columns: defaultUdtHeaders,
+        columns: [],
       }),
       {}
     );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
@@ -14,19 +14,17 @@ import { ActionIconItem } from './action_icon_item';
 
 interface AddEventNoteActionProps {
   ariaLabel?: string;
-  showNotes: boolean;
   timelineType: TimelineType;
-  toggleShowNotes: () => void;
+  toggleShowNotes?: () => void | ((eventId: string) => void);
   eventId?: string;
-  /**
+  /*
    * Number of notes associated with the event
    */
-  notesCount?: number;
+  notesCount: number;
 }
 
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   ariaLabel,
-  showNotes,
   timelineType,
   toggleShowNotes,
   eventId,
@@ -34,12 +32,10 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
 }) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
-  const tooltip =
-    notesCount && notesCount > 0
-      ? i18n.NOTE_COUNT_TOOLTIP(notesCount)
-      : timelineType === TimelineType.template
-      ? i18n.NOTES_DISABLE_TOOLTIP
-      : i18n.NOTES_TOOLTIP;
+  const NOTES_TOOLTIP = useMemo(
+    () => (notesCount > 0 ? i18n.NOTES_COUNT_TOOLTIP({ notesCount }) : i18n.NOTES_ADD_TOOLTIP),
+    [notesCount]
+  );
 
   return (
     <ActionIconItem>
@@ -47,10 +43,11 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
         ariaLabel={ariaLabel}
         data-test-subj="add-note"
         isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
-        showNotes={showNotes}
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
-        toolTip={tooltip}
+        toolTip={
+          timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP
+        }
         eventId={eventId}
         notesCount={notesCount}
       />

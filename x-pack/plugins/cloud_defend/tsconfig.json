@@ -37,7 +37,8 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/core-security-common"
   ],
   "exclude": ["target/**/*"]
 }
