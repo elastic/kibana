@@ -450,13 +450,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
 };
 
 export const fleetIntegrationsSchema: RootSchema<any> = {
-  total_policies_count: {
+  shared_integration_policies: {
     type: 'long',
     _meta: {
       description: 'Count of total number of integration policies in this kibana',
     },
   },
-  total_shared_count: {
+  total_integration_policies: {
     type: 'long',
     _meta: {
       description:
@@ -481,7 +481,7 @@ export const fleetIntegrationsSchema: RootSchema<any> = {
           description: 'Version of the integration package installed on the integration policy',
         },
       },
-      shared_by_policies_count: {
+      shared_by_agent_policies: {
         type: 'long',
         _meta: {
           description: 'Count of agent policies sharing the integration policy',

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 import { packagePolicyService } from '../services';
 
 export interface IntegrationsDetails {
-  totalPoliciesCount: number;
-  totalSharedCount: number;
+  totalIntegrationPolicies: number;
+  sharedIntegrationPolicies: number;
   sharedIntegrations: SharedIntegration;
 }
 
 interface SharedIntegration {
   name: string;
-  sharedByPoliciesCount: number;
+  sharedByAgentPolicies: number;
   pkgName?: string;
   pkgVersion?: string;
   agents?: number;
 }
 
 export const getIntegrationsDetails = async (
-  soClient?: SavedObjectsClient
+  soClient?: SavedObjectsClientContract
 ): Promise<IntegrationsDetails[]> => {
   if (!soClient) {
     return [];
@@ -33,24 +33,24 @@ export const getIntegrationsDetails = async (
   const allPackagePolicies = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
   });
-  const totalPoliciesCount = allPackagePolicies.items.length;
+  const totalIntegrationPolicies = allPackagePolicies.items.length;
 
   const sharedPackagePolicies = allPackagePolicies.items.filter((packagePolicy) => {
-    if (packagePolicy.policy_ids.length > 1) return packagePolicy;
+    if (packagePolicy?.policy_ids?.length > 1) return packagePolicy;
   });
-  const totalSharedCount = sharedPackagePolicies.length;
+  const sharedIntegrationPolicies = sharedPackagePolicies.length;
 
   const integrationsDetails: IntegrationsDetails[] = (sharedPackagePolicies || []).map(
     (packagePolicy) => {
       return {
-        totalPoliciesCount,
-        totalSharedCount,
+        totalIntegrationPolicies,
+        sharedIntegrationPolicies,
         sharedIntegrations: {
           name: packagePolicy.name,
           pkgName: packagePolicy.package?.name,
           pkgVersion: packagePolicy.package?.version,
-          sharedByPoliciesCount: packagePolicy.policy_ids.length,
-          agents: packagePolicy.agents,
+          sharedByAgentPolicies: packagePolicy?.policy_ids.length,
+          agents: packagePolicy?.agents,
         },
       };
     }
