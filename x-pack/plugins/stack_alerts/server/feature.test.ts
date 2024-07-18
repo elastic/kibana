@@ -27,26 +27,31 @@ describe('Stack Alerts Feature Privileges', () => {
     const featuresSetup = featuresPluginMock.createSetup();
     plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
-    const typesInFeaturePrivilege = BUILT_IN_ALERTS_FEATURE.alerting ?? [];
-    const typesInFeaturePrivilegeAll =
-      BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all ?? [];
-    const typesInFeaturePrivilegeRead =
-      BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read ?? [];
-    // transform alerting rule is initialized during the transform plugin setup
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilege.length - 1
-    );
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilegeAll.length - 1
-    );
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilegeRead.length - 1
+    const ruleTypeIdsAlerting = new Set(
+      BUILT_IN_ALERTS_FEATURE.alerting?.map((feature) => feature.ruleTypeId) ?? []
     );
 
+    const ruleTypeIdsAll = new Set(
+      BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all?.map(
+        (feature) => feature.ruleTypeId
+      ) ?? []
+    );
+
+    const ruleTypeIdsRead = new Set(
+      BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read?.map(
+        (feature) => feature.ruleTypeId
+      ) ?? []
+    );
+
+    // transform alerting rule is initialized during the transform plugin setup
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(ruleTypeIdsAlerting.size - 1);
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(ruleTypeIdsAll.size - 1);
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(ruleTypeIdsRead.size - 1);
+
     alertingSetup.registerType.mock.calls.forEach((call) => {
-      expect(typesInFeaturePrivilege.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
-      expect(typesInFeaturePrivilegeAll.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
-      expect(typesInFeaturePrivilegeRead.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
+      expect(ruleTypeIdsAlerting.has(call[0].id)).toBe(true);
+      expect(ruleTypeIdsAll.has(call[0].id)).toBe(true);
+      expect(ruleTypeIdsRead.has(call[0].id)).toBe(true);
     });
   });
 });
