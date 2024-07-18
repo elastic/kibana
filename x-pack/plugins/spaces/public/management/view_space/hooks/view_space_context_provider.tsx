@@ -14,9 +14,10 @@ import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
 import type { SpacesManager } from '../../../spaces_manager';
 
 export interface ViewSpaceServices {
-  serverBasePath: string;
+  capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  serverBasePath: string;
   spacesManager: SpacesManager;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
 }

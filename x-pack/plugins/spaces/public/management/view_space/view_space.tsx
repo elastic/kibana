@@ -204,6 +204,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
   return (
     <ViewSpaceContextProvider
+      capabilities={capabilities}
       getRolesAPIClient={getRolesAPIClient}
       spacesManager={spacesManager}
       serverBasePath={props.serverBasePath}

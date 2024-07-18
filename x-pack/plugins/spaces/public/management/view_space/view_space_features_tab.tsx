@@ -12,8 +12,8 @@ import React from 'react';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
 import { FeatureTable } from '../edit_space/enabled_features/feature_table';
 import { SectionPanel } from '../edit_space/section_panel';
@@ -26,13 +26,13 @@ interface Props {
 }
 
 export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, isSolutionNavEnabled }) => {
-  const { services } = useKibana();
+  const { capabilities, getUrlForApp } = useViewSpaceServices();
 
   if (!features) {
     return null;
   }
 
-  const canManageRoles = services.application?.capabilities.management?.security?.roles === true;
+  const canManageRoles = capabilities.management?.security?.roles === true;
 
   return (
     <>
@@ -66,11 +66,7 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, isSolutio
                   defaultMessage="Hidden features are removed from the user interface, but not disabled. To secure access to features, {manageRolesLink}."
                   values={{
                     manageRolesLink: canManageRoles ? (
-                      <EuiLink
-                        href={services.application?.getUrlForApp('management', {
-                          path: '/security/roles',
-                        })}
-                      >
+                      <EuiLink href={getUrlForApp('management', { path: '/security/roles' })}>
                         <FormattedMessage
                           id="xpack.spaces.management.viewSpaceFeatures.manageRolesLinkText"
                           defaultMessage="manage security roles"
