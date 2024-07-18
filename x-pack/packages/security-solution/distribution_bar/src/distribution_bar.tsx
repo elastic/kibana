@@ -119,6 +119,7 @@ const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) =
   return <div css={emptyBarStyle} data-test-subj={`${dataTestSubj}__emptyBar`} />;
 };
 
+// TODO: fix tooltip direction if not enough space;
 /**
  * Security Solution DistributionBar component.
  * Shows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result.
