@@ -8,11 +8,13 @@ import React, { useState } from 'react';
 
 import {
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiPopover,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -81,11 +83,13 @@ const connectorClientPopoverPanels = [
 ];
 
 export interface ConnectorDescriptionPopoverProps {
+  isDisabled: boolean;
   isNative: boolean;
 }
 
 export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
+  isDisabled,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;
@@ -105,6 +109,19 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
       }}
     >
       <EuiPanel hasBorder={false} hasShadow={false}>
+        {isDisabled && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCallOut
+                title="This connector is not available as an Elastic managed"
+                size="s"
+                iconType="warning"
+                color="warning"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        <EuiSpacer size="m" />
         <EuiFlexGroup>
           {panels.map((panel) => {
             return (

@@ -124,17 +124,15 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
       `}
     >
       {connectorSelected.iconPath && (
-        <EuiToken
-          iconType={connectorSelected.iconPath}
+        <EuiIcon
+          type={connectorSelected.iconPath}
           size="l"
           css={css`
             position: absolute;
-            top: 2px;
-            left: 1px;
+            top: 8px;
+            left: 10px;
             z-index: 2;
           `}
-          color={'#f9fbfd'}
-          shape="rectangle"
         />
       )}
 
@@ -143,6 +141,14 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           'xpack.enterpriseSearch.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
           { defaultMessage: 'Selectable + input popover example' }
         )}
+        css={css`
+          .euiFormControlLayoutIcons--left {
+            display: ${connectorSelected.iconPath ? 'none' : ''};
+          }
+          .euiFieldSearch {
+            padding-left: 45px;
+          }
+        `}
         options={selectableOptions}
         onChange={(newOptions, event, changedOption) => {
           selectableSetOptions(newOptions);
@@ -156,7 +162,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
               setSelfManaged(true);
             }
           } else {
-            setConnectorSelected('');
+            setConnectorSelected({ name: '' });
           }
         }}
         listProps={{
@@ -178,8 +184,10 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           fullWidth: true,
           isClearable: true,
           onChange: (value) => {
-            setConnectorSelected({ name: value });
-            setIsSearching(true);
+            if (value !== connectorSelected.name) {
+              setConnectorSelected({ name: value });
+              setIsSearching(true);
+            }
           },
           onClick: () => setIsOpen(true),
           onFocus: () => setIsOpen(true),

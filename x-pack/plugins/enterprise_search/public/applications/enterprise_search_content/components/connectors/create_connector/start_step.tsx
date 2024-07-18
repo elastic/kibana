@@ -168,7 +168,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover isNative />
+                <ConnectorDescriptionPopover
+                  isDisabled={connectorSelected.isNative === false}
+                  isNative
+                />
               </EuiFlexItem>
               &nbsp; &nbsp;
               <EuiFlexItem grow={false}>
