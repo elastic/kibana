@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ESQL_NUMBER_TYPES } from './constants';
+
 export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
@@ -107,19 +109,46 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
+export type ESQLNumericLiteralType = typeof ESQL_NUMBER_TYPES[number];
+
 export type ESQLLiteral =
-  | ESQLNumberLiteral
+  | ESQLDoubleLiteral
+  | ESQLUnsignedLongLiteral
+  | ESQLLongLiteral
+  | ESQLIntegerLiteral
+  | ESQLCounterIntegerLiteral
+  | ESQLCounterLongLiteral
+  | ESQLCounterDouble
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
+  | ESQLKeywordLiteral
+  | ESQLTextLiteral
   | ESQLParamLiteral<string>;
 
+// Exporting here to prevent TypeScript error TS4058
+// Return type of exported function has or is using name 'ESQLNumericLiteral' from external module
 // @internal
-export interface ESQLNumberLiteral extends ESQLAstBaseItem {
+export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'number';
+  literalType: T;
   value: number;
 }
+// @todo: verify if we need 'int' type
+// @internal
+export type ESQLDoubleLiteral = ESQLNumericLiteral<'double'>;
+// @internal
+export type ESQLUnsignedLongLiteral = ESQLNumericLiteral<'unsigned_long'>;
+// @internal
+export type ESQLLongLiteral = ESQLNumericLiteral<'long'>;
+// @internal
+export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'> | ESQLNumericLiteral<'int'>;
+// @internal
+export type ESQLCounterIntegerLiteral = ESQLNumericLiteral<'counter_integer'>;
+// @internal
+export type ESQLCounterLongLiteral = ESQLNumericLiteral<'counter_long'>;
+// @internal
+export type ESQLCounterDouble = ESQLNumericLiteral<'counter_double'>;
 
 // @internal
 export interface ESQLBooleanLiteral extends ESQLAstBaseItem {
@@ -139,6 +168,20 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'string';
+  value: string;
+}
+
+// @internal
+export interface ESQLKeywordLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'keyword';
+  value: string;
+}
+
+// @internal
+export interface ESQLTextLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'text';
   value: string;
 }
 

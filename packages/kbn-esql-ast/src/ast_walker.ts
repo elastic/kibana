@@ -284,7 +284,7 @@ function visitOperatorExpression(
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
     const fn = createFunction('*', ctx);
-    fn.args.push(createFakeMultiplyLiteral(ctx));
+    fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
     if (arg) {
       fn.args.push(arg);
     }
@@ -324,10 +324,10 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     return createTimeUnit(ctx);
   }
   if (ctx instanceof DecimalLiteralContext) {
-    return createNumericLiteral(ctx.decimalValue());
+    return createNumericLiteral(ctx.decimalValue(), 'double');
   }
   if (ctx instanceof IntegerLiteralContext) {
-    return createNumericLiteral(ctx.integerValue());
+    return createNumericLiteral(ctx.integerValue(), 'integer');
   }
   if (ctx instanceof BooleanLiteralContext) {
     return getBooleanValue(ctx);
@@ -341,9 +341,12 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     ctx instanceof StringArrayLiteralContext
   ) {
     const values: ESQLLiteral[] = [];
+
+    // @todo: double check here
     for (const numericValue of ctx.getTypedRuleContexts(NumericValueContext)) {
+      const isDecimal = numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!));
+      values.push(createNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(BooleanValueContext)) {
       values.push(getBooleanValue(booleanValue)!);

@@ -19,7 +19,7 @@ import type {
   QualifiedIntegerLiteralContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
+import { DOUBLE_TICKS_REGEX, ESQL_NUMBER_TYPES, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
   ESQLAstBaseItem,
   ESQLCommand,
@@ -35,10 +35,14 @@ import type {
   ESQLCommandMode,
   ESQLInlineCast,
   ESQLUnknownItem,
+  ESQLNumericLiteralType,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
+}
+export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
+  return typeof type === 'string' && ESQL_NUMBER_TYPES.includes(type as ESQLNumericLiteralType);
 }
 
 export function createAstBaseItem<Name = string>(
@@ -86,11 +90,14 @@ export function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLL
   };
 }
 
-export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueContext): ESQLLiteral {
+export function createNumericLiteral(
+  ctx: DecimalValueContext | IntegerValueContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   const text = ctx.getText();
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text,
     name: text,
     value: Number(text),
@@ -99,10 +106,13 @@ export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueCont
   };
 }
 
-export function createFakeMultiplyLiteral(ctx: ArithmeticUnaryContext): ESQLLiteral {
+export function createFakeMultiplyLiteral(
+  ctx: ArithmeticUnaryContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text: ctx.getText(),
     name: ctx.getText(),
     value: ctx.PLUS() ? 1 : -1,
@@ -157,11 +167,12 @@ export function createLiteral(
     location: getPosition(node.symbol),
     incomplete: isMissingText(text),
   };
-  if (type === 'number') {
+  if (isNumericType(type)) {
     return {
       ...partialLiteral,
       literalType: type,
       value: Number(text),
+      paramType: 'number',
     };
   } else if (type === 'param') {
     throw new Error('Should never happen');
