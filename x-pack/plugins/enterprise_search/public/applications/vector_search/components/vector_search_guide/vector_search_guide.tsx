@@ -31,49 +31,36 @@ import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_c
 import { DevToolsConsoleCodeBlock } from '../dev_tools_console_code_block/dev_tools_console_code_block';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
 
-const CREATE_INDEX_SNIPPET = `PUT /image-index
+const CREATE_INDEX_SNIPPET = `PUT /my-index
 {
   "mappings": {
     "properties": {
-      "image-vector": {
+      "vector": {
         "type": "dense_vector",
-        "dims": 3,
-        "index": true,
-        "similarity": "l2_norm"
+        "dims": 3
       },
-      "title-vector": {
-        "type": "dense_vector",
-        "dims": 5,
-        "index": true,
-        "similarity": "l2_norm"
-      },
-      "title": {
+      "text": {
         "type": "text"
-      },
-      "file-type": {
-        "type": "keyword"
       }
     }
   }
 }`;
 
-const INGEST_SNIPPET = `POST /image-index/_bulk?refresh=true
-{ "index": { "_id": "1" } }
-{ "image-vector": [1, 5, -20], "title-vector": [12, 50, -10, 0, 1], "title": "moose family", "file-type": "jpg" }
-{ "index": { "_id": "2" } }
-{ "image-vector": [42, 8, -15], "title-vector": [25, 1, 4, -12, 2], "title": "alpine lake", "file-type": "png" }
-{ "index": { "_id": "3" } }
-{ "image-vector": [15, 11, 23], "title-vector": [1, 5, 25, 50, 20], "title": "full moon", "file-type": "jpg" }`;
+const INGEST_SNIPPET = `POST /my-index/_doc
+{ 
+  "vector": [1, 5, -20], 
+  "text": "hello world" 
+}`;
 
-const QUERY_SNIPPET = `POST /image-index/_search
+const QUERY_SNIPPET = `POST /my-index/_search
 {
-  "knn": {
-    "field": "image-vector",
-    "query_vector": [-5, 9, -12],
-    "k": 10,
-    "num_candidates": 100
-  },
-  "fields": [ "title", "file-type" ]
+  "size" : 3,
+  "query" : {
+    "knn": {
+      "field": "vector",
+      "query_vector": [1, 5, -20]
+    }
+  }
 }`;
 
 export const VectorSearchGuide: React.FC = () => {
@@ -149,7 +136,7 @@ export const VectorSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.ingest.description"
-                defaultMessage="Add data to your index to make it searchable."
+                defaultMessage="Add data to Elasticsearch."
               />
             </p>
           </EuiText>
