@@ -93,7 +93,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
   );
 
   // if the flyout is open from a timeline and that timeline is saved, we automatically check the checkbox to associate the note to it
-  const isTimelineFlyout = useIsTimelineFlyoutOpen();
+  const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
 
   const [checked, setChecked] = useState<boolean>(true);
   const onCheckboxChange = useCallback(
@@ -132,6 +132,11 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
   const buttonDisabled = useMemo(
     () => editorValue.trim().length === 0 || isMarkdownInvalid,
     [editorValue, isMarkdownInvalid]
+  );
+
+  const initialCheckboxChecked = useMemo(
+    () => isTimelineFlyout && activeTimeline.savedObjectId != null,
+    [activeTimeline?.savedObjectId, isTimelineFlyout]
   );
 
   const checkBoxDisabled = useMemo(
