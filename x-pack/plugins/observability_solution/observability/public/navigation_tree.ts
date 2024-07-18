@@ -48,6 +48,12 @@ const navTree: NavigationTreeDefinition = {
           },
         },
         {
+          link: 'inventory',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/observability/inventory'));
+          },
+        },
+        {
           link: 'observability-overview:alerts',
         },
         {

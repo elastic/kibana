@@ -5330,6 +5330,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inventory-plugin@link:x-pack/plugins/observability_solution/inventory":
+  version "0.0.0"
+  uid ""
+
 "@kbn/investigate-app-plugin@link:x-pack/plugins/observability_solution/investigate_app":
   version "0.0.0"
   uid ""

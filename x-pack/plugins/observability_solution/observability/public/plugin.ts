@@ -71,6 +71,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
+import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -358,6 +359,16 @@ export class Plugin
                   ]
                 : [];
 
+              const inventoryLink = [
+                {
+                  label: i18n.translate('xpack.observability.inventoryLinkTitle', {
+                    defaultMessage: 'Inventory',
+                  }),
+                  app: INVENTORY_APP_ID,
+                  path: '',
+                },
+              ];
+
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
@@ -421,6 +432,7 @@ export class Plugin
                   sortKey: 100,
                   entries: [
                     ...overviewLink,
+                    ...inventoryLink,
                     ...alertsLink,
                     ...sloLink,
                     ...casesLink,

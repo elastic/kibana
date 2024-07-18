@@ -566,6 +566,7 @@
     "@kbn/interactive-setup-plugin": "link:src/plugins/interactive_setup",
     "@kbn/interactive-setup-test-endpoints-plugin": "link:test/interactive_setup_api_integration/plugins/test_endpoints",
     "@kbn/interpreter": "link:packages/kbn-interpreter",
+    "@kbn/inventory-plugin": "link:x-pack/plugins/observability_solution/inventory",
     "@kbn/investigate-app-plugin": "link:x-pack/plugins/observability_solution/investigate_app",
     "@kbn/investigate-plugin": "link:x-pack/plugins/observability_solution/investigate",
     "@kbn/investigation-shared": "link:packages/kbn-investigation-shared",
