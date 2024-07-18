@@ -99,6 +99,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     roles,
     capabilities,
     currentSelectedTabId: selectedTabId,
+    isSolutionNavEnabled,
   });
 
   useEffect(() => {
