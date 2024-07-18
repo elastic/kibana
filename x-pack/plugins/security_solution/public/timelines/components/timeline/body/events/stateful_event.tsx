@@ -38,7 +38,6 @@ import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ControlColumnProps,
@@ -126,23 +125,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
   );
-  const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
-
-  const hostName = useMemo(() => {
-    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
-  }, [hostNameArr]);
-  const hostIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
-  const sourceIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' });
-  const destinationIpList = useGetMappedNonEcsValue({
-    data: event?.data,
-    fieldName: 'destination.ip',
-  });
-  const hostIPAddresses = useMemo(() => {
-    const hostIps = hostIpList ?? [];
-    const sourceIps = sourceIpList ?? [];
-    const destinationIps = destinationIpList ?? [];
-    return new Set([...hostIps, ...sourceIps, ...destinationIps]);
-  }, [destinationIpList, sourceIpList, hostIpList]);
 
   const activeTab = tabType ?? TimelineTabs.query;
   const activeExpandedDetail = expandedDetail[activeTab];
@@ -151,11 +133,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   const isDetailPanelExpanded: boolean =
     (activeExpandedDetail?.panelView === 'eventDetail' &&
       activeExpandedDetail?.params?.eventId === eventId) ||
-    (activeExpandedDetail?.panelView === 'hostDetail' &&
-      activeExpandedDetail?.params?.hostName === hostName) ||
-    (activeExpandedDetail?.panelView === 'networkDetail' &&
-      activeExpandedDetail?.params?.ip &&
-      hostIPAddresses?.has(activeExpandedDetail?.params?.ip)) ||
     false;
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
