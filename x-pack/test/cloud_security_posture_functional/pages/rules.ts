@@ -42,25 +42,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
-      // const { body: agentPolicyResponse } = await supertest
-      //   .post(`/api/fleet/agent_policies`)
-      //   .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      //   .set('kbn-xsrf', 'xxxx')
-      //   .send({
-      //     name: 'Test policy',
-      //     namespace: 'default',
-      //   });
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+        });
 
-      // agentPolicyId = agentPolicyResponse.item.id;
+      agentPolicyId = agentPolicyResponse.item.id;
 
-      // await createPackagePolicy(
-      //   supertest,
-      //   agentPolicyId,
-      //   'kspm',
-      //   'cloudbeat/cis_k8s',
-      //   'vanilla',
-      //   'kspm'
-      // );
+      await createPackagePolicy(
+        supertest,
+        agentPolicyId,
+        'kspm',
+        'cloudbeat/cis_k8s',
+        'vanilla',
+        'kspm'
+      );
       await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
