@@ -24,7 +24,11 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import { createPluginInitializerModule, createPluginSetupModule } from './plugin_module';
+import {
+  createPluginInitializerModule,
+  createPluginSetupModule,
+  createPluginStartModule,
+} from './plugin_module';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -160,6 +164,8 @@ export class PluginWrapper<
     if (this.instance && this.isPrebootPluginInstance(this.instance)) {
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
+
+    startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
 
     if (!this.instance) {
       return;
