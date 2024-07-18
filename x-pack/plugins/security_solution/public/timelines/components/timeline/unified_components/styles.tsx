@@ -76,6 +76,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
     padding: 0;
     position: relative;
+
+    &[data-gridcell-column-id='select'] {
+      ${({ theme }) => `padding-top: ${theme.eui.euiSizeS};`};
+      ${({ theme }) => `padding-left: ${theme.eui.euiSizeXS};`};
+    }
   }
 
   .udtTimeline .euiDataGridRowCell--controlColumn {

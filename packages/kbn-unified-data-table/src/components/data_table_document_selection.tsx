@@ -298,6 +298,11 @@ export function DataTableDocumentToolbarBtn({
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
           badgeContent={selectedDocIds.length}
+          css={css`
+            .euiButtonEmpty__content {
+              flex-direction: row-reverse;
+            }
+          `}
         >
           {isPlainRecord ? (
             <FormattedMessage
