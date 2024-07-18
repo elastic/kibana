@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { z } from 'zod';
 
-export * from './src/schema/entity_definition';
-export * from './src/schema/entity';
-export * from './src/schema/common';
-export * from './src/rest_spec/delete';
-export * from './src/rest_spec/reset';
-export * from './src/rest_spec/get';
+export const resetEntityDefinitionParamsSchema = z.object({
+  id: z.string(),
+});

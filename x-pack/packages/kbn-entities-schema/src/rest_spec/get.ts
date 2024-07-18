@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './src/schema/entity_definition';
-export * from './src/schema/entity';
-export * from './src/schema/common';
-export * from './src/rest_spec/delete';
-export * from './src/rest_spec/reset';
-export * from './src/rest_spec/get';
+import { z } from 'zod';
+
+export const getEntityDefinitionQuerySchema = z.object({
+  page: z.optional(z.number()),
+  perPage: z.optional(z.number()),
+});
