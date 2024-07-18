@@ -16,6 +16,7 @@ type UseTabsProps = Pick<GetTabsProps, 'roles' | 'capabilities'> & {
   space: Space | null;
   features: KibanaFeature[] | null;
   currentSelectedTabId: string;
+  isSolutionNavEnabled: boolean;
 };
 
 export const useTabs = ({

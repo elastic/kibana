@@ -36,13 +36,15 @@ export interface GetTabsProps {
   capabilities: Capabilities & {
     roles?: { view: boolean; save: boolean };
   };
+  isSolutionNavEnabled: boolean;
 }
 
 export const getTabs = ({
   space,
   features,
   capabilities,
-  ...rest
+  roles,
+  isSolutionNavEnabled,
 }: GetTabsProps): ViewSpaceTab[] => {
   const enabledFeatureCount = getEnabledFeatures(features, space).length;
   const totalFeatureCount = features.length;
@@ -68,7 +70,13 @@ export const getTabs = ({
           {enabledFeatureCount} / {totalFeatureCount}
         </EuiNotificationBadge>
       ),
-      content: <ViewSpaceEnabledFeatures features={features} space={space} />,
+      content: (
+        <ViewSpaceEnabledFeatures
+          features={features}
+          space={space}
+          isSolutionNavEnabled={isSolutionNavEnabled}
+        />
+      ),
     },
   ];
 
@@ -80,13 +88,13 @@ export const getTabs = ({
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {rest.roles.length}
+          {roles.length}
         </EuiNotificationBadge>
       ),
       content: (
         <ViewSpaceAssignedRoles
           space={space}
-          roles={rest.roles}
+          roles={roles}
           features={features}
           isReadOnly={!canUserModifyRoles}
         />
