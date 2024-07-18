@@ -165,6 +165,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       trace_data: graphResponse.traceData,
       replacements,
       status: 'ok',
+      ...(graphResponse.conversationId ? { conversationId: graphResponse.conversationId } : {}),
     },
     headers: {
       'content-type': 'application/json',
