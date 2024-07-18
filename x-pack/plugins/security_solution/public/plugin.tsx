@@ -327,7 +327,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
-      cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
+      cloudSecurityPosture: subPlugins.cloudSecurityPosture.start({
+        dataViews: plugins.dataViews,
+        spaces: plugins.spaces,
+      }),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
