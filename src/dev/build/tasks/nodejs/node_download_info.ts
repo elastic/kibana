@@ -21,7 +21,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
 
   return variants.map((variant) => {
     const downloadName = platform.isWindows()
-      ? 'win-x64/node.exe'
+      ? `win-${arch}/node.exe`
       : `node-v${version}-${arch}.tar.gz`;
 
     let variantPath = '';
