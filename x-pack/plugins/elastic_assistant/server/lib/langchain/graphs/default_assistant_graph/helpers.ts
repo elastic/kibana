@@ -103,7 +103,7 @@ export const streamGraph = async ({
         }
       }
 
-      if (event === 'on_chat_model_end' && !data.output.lc_kwargs?.tool_calls?.length) {
+      if (event === 'on_chat_model_end' && !data.output.lc_kwargs?.tool_calls?.length && !didEnd) {
         handleStreamEnd(data.output.content);
       }
     }
