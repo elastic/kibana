@@ -190,6 +190,15 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  async bulkUpdateAgentTags(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_update_agent_tags`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
   // Enrollment Settings
   async getEnrollmentSettings(spaceId?: string): Promise<GetEnrollmentSettingsResponse> {
     const { body: res } = await this.supertest
