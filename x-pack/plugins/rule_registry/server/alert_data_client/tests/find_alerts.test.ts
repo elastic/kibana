@@ -16,62 +16,59 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
-const alertingAuthMock = alertingAuthorizationMock.create();
-const esClientMock = elasticsearchClientMock.createElasticsearchClient();
-const auditLogger = auditLoggerMock.create();
+describe('find()', () => {
+  const alertingAuthMock = alertingAuthorizationMock.create();
+  const esClientMock = elasticsearchClientMock.createElasticsearchClient();
+  const auditLogger = auditLoggerMock.create();
 
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
-  logger: loggingSystemMock.create().get(),
-  authorization: alertingAuthMock,
-  esClient: esClientMock,
-  auditLogger,
-  ruleDataService: ruleDataServiceMock.create(),
-  getRuleType: jest.fn(),
-  getRuleList: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-};
+  const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+    logger: loggingSystemMock.create().get(),
+    authorization: alertingAuthMock,
+    esClient: esClientMock,
+    auditLogger,
+    ruleDataService: ruleDataServiceMock.create(),
+    getRuleType: jest.fn(),
+    getRuleList: jest.fn(),
+    getAlertIndicesAlias: jest.fn(),
+  };
 
-const DEFAULT_SPACE = 'test_default_space_id';
+  const DEFAULT_SPACE = 'test_default_space_id';
+  const authorizedRuleTypes = new Map([
+    [
+      'apm.error_rate',
+      {
+        producer: 'apm',
+        id: 'apm.error_rate',
+        alerts: {
+          context: 'observability.apm',
+        },
+        authorizedConsumers: {},
+      },
+    ],
+  ]);
 
-beforeEach(() => {
-  jest.resetAllMocks();
-  alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
-  // @ts-expect-error
-  alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
-    Promise.resolve({ filter: [] })
-  );
-  // @ts-expect-error
-  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
-    const authorizedRuleTypes = new Set();
-    authorizedRuleTypes.add({ producer: 'apm' });
-    return Promise.resolve({ authorizedRuleTypes });
-  });
+  beforeEach(() => {
+    jest.resetAllMocks();
+    alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
+    alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
+      filter: undefined,
+      ensureRuleTypeIsAuthorized: jest.fn(),
+    });
+    alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
+      hasAllRequested: true,
+      authorizedRuleTypes,
+    });
 
-  alertingAuthMock.ensureAuthorized.mockImplementation(
-    // @ts-expect-error
-    async ({
-      ruleTypeId,
-      consumer,
-      operation,
-      entity,
-    }: {
-      ruleTypeId: string;
-      consumer: string;
-      operation: string;
-      entity: typeof AlertingAuthorizationEntity.Alert;
-    }) => {
+    alertingAuthMock.ensureAuthorized.mockImplementation(async ({ ruleTypeId, consumer }) => {
       if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
         return Promise.resolve();
       }
       return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
-    }
-  );
-});
+    });
+  });
 
-describe('find()', () => {
   test('calls ES client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     esClientMock.search.mockResponseOnce({
@@ -163,7 +160,6 @@ describe('find()', () => {
             "query": Object {
               "bool": Object {
                 "filter": Array [
-                  Object {},
                   Object {
                     "term": Object {
                       "kibana.space_ids": "test_default_space_id",
@@ -297,7 +293,6 @@ describe('find()', () => {
             "query": Object {
               "bool": Object {
                 "filter": Array [
-                  Object {},
                   Object {
                     "term": Object {
                       "kibana.space_ids": "test_default_space_id",
@@ -424,7 +419,7 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
+      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"{\\"match\\":{\\"kibana.alert.workflow_status\\":\\"open\\"}}\\" and operation find 
       Error: Error: Unauthorized for fake.rule and apm"
     `);
 
@@ -454,7 +449,7 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
+      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"{\\"match\\":{\\"kibana.alert.workflow_status\\":\\"open\\"}}\\" and operation find 
       Error: Error: something went wrong"
     `);
   });

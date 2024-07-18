@@ -18,6 +18,7 @@ import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { RuleRegistrySearchRequest } from '../../common/search_strategy';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';
 import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 
 jest.mock('../lib/get_is_kibana_request');
 
@@ -75,9 +76,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   beforeEach(() => {
     getAuthorizedRuleTypesMock.mockResolvedValue([]);
     getAlertIndicesAliasMock.mockReturnValue(['test']);
-    const authorizationMock = {
-      getAuthorizedRuleTypes: getAuthorizedRuleTypesMock,
-    } as never;
+    const authorizationMock = alertingAuthorizationMock.create();
     alerting.getAlertingAuthorizationWithRequest.mockResolvedValue(authorizationMock);
     alerting.getAlertIndicesAlias = getAlertIndicesAliasMock;
 

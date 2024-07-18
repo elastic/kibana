@@ -367,7 +367,9 @@ export class AlertsClient {
 
       return result;
     } catch (error) {
-      const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
+      const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${JSON.stringify(
+        query
+      )}" and operation ${operation} \nError: ${error}`;
       this.logger.error(errorMessage);
       throw Boom.notFound(errorMessage);
     }
