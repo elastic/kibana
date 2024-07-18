@@ -139,7 +139,6 @@ export const streamGraph = async ({
       const event = value;
       // only process events that are part of the agent run
       if ((event.tags || []).includes(AGENT_NODE_TAG)) {
-        console.log('stephhh openai event', JSON.stringify(event, null, 2));
         if (event.name === 'ActionsClientChatOpenAI') {
           if (event.event === 'on_llm_stream') {
             const chunk = event.data?.chunk;
