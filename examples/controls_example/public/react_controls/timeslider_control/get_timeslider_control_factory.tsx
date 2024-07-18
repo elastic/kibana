@@ -49,7 +49,7 @@ export const getTimesliderControlFactory = (
       i18n.translate('controlsExamples.timesliderControl.displayName', {
         defaultMessage: 'Time slider',
       }),
-    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi, services);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);

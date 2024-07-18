@@ -36,6 +36,7 @@ describe('chaining$', () => {
   const onFireMock = jest.fn();
   const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>('HIERARCHICAL');
   const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>([]);
+  const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const alphaControlApi = {
     filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
   };
@@ -48,21 +49,6 @@ describe('chaining$', () => {
   };
   const deltaControlApi = {
     filters$: new BehaviorSubject<Filter[] | undefined>([FILTER_DELTA]),
-  };
-  const getControlApi = (uuid: string) => {
-    if (uuid === 'alpha') {
-      return alphaControlApi;
-    }
-    if (uuid === 'bravo') {
-      return bravoControlApi;
-    }
-    if (uuid === 'charlie') {
-      return charlieControlApi;
-    }
-    if (uuid === 'delta') {
-      return deltaControlApi;
-    }
-    return undefined;
   };
 
   beforeEach(() => {
@@ -82,15 +68,51 @@ describe('chaining$', () => {
       { id: 'charlie', type: 'whatever' },
       { id: 'delta', type: 'whatever' },
     ]);
+    children$.next({
+      alpha: alphaControlApi,
+      bravo: bravoControlApi,
+      charlie: charlieControlApi,
+      delta: deltaControlApi,
+    });
   });
 
   describe('hierarchical chaining', () => {
+    test('should not fire until all chained controls are initialized', async () => {
+      const childrenValueWithNoControlsInitialized = {};
+      children$.next(childrenValueWithNoControlsInitialized);
+      const subscription = chaining$(
+        'charlie',
+        chainingSystem$,
+        controlsInOrder$,
+        children$
+      ).subscribe(onFireMock);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onFireMock.mock.calls).toHaveLength(0);
+
+      const childrenValueWithAlphaInitialized = {
+        alpha: alphaControlApi,
+      };
+      children$.next(childrenValueWithAlphaInitialized);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onFireMock.mock.calls).toHaveLength(0);
+
+      const childrenValueWithAllControlsInitialized = {
+        alpha: alphaControlApi,
+        bravo: bravoControlApi,
+      };
+      children$.next(childrenValueWithAllControlsInitialized);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onFireMock.mock.calls).toHaveLength(1);
+
+      subscription.unsubscribe();
+    });
+
     test('should contain values from controls to the left', async () => {
       const subscription = chaining$(
         'charlie',
         chainingSystem$,
         controlsInOrder$,
-        getControlApi
+        children$
       ).subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(onFireMock.mock.calls).toHaveLength(1);
@@ -107,7 +129,7 @@ describe('chaining$', () => {
     });
 
     test('should fire on chaining system change', async () => {
-      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, children$)
         .pipe(skip(1))
         .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -126,7 +148,7 @@ describe('chaining$', () => {
     });
 
     test('should fire when controls are moved', async () => {
-      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, children$)
         .pipe(skip(1))
         .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -155,7 +177,7 @@ describe('chaining$', () => {
     });
 
     test('should fire when controls are removed', async () => {
-      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, children$)
         .pipe(skip(1))
         .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -179,7 +201,7 @@ describe('chaining$', () => {
     });
 
     test('should fire when chained filter changes', async () => {
-      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, children$)
         .pipe(skip(1))
         .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -208,7 +230,7 @@ describe('chaining$', () => {
     });
 
     test('should not fire when unchained filter changes', async () => {
-      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, children$)
         .pipe(skip(1))
         .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -228,7 +250,7 @@ describe('chaining$', () => {
     });
 
     test('should fire when chained timeslice changes', async () => {
-      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, getControlApi)
+      const subscription = chaining$('charlie', chainingSystem$, controlsInOrder$, children$)
         .pipe(skip(1))
         .subscribe(onFireMock);
       await new Promise((resolve) => setTimeout(resolve, 0));

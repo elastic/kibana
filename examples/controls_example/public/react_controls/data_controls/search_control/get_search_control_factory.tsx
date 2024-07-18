@@ -82,7 +82,7 @@ export const getSearchControlFactory = ({
         </EuiFormRow>
       );
     },
-    buildControl: (initialState, buildApi, uuid, parentApi) => {
+    buildControl: async (initialState, buildApi, uuid, parentApi) => {
       const searchString = new BehaviorSubject<string | undefined>(initialState.searchString);
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
@@ -184,6 +184,10 @@ export const getSearchControlFactory = ({
         .subscribe(() => {
           searchString.next(undefined);
         });
+
+      /* if (initialState.searchString?.length) {
+        await dataControl.untilFiltersInitialized();
+      }*/
 
       return {
         api,

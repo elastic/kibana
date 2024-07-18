@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -112,7 +112,7 @@ export const getControlGroupEmbeddableFactory = (services: {
               controlUuid,
               chainingSystem$,
               controlsManager.controlsInOrder$,
-              controlsManager.getControlApi
+              controlsManager.api.children$
             ),
             controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
           ),
@@ -212,6 +212,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
+          const [isInitialized, setIsInitialized] = useState(false);
           const controlsInOrder = useStateFromPublishingSubject(controlsManager.controlsInOrder$);
 
           useEffect(() => {
@@ -222,8 +223,24 @@ export const getControlGroupEmbeddableFactory = (services: {
             };
           }, []);
 
+          useEffect(() => {
+            let ignore = false;
+            controlsManager.api.untilInitialized().then(() => {
+              if (!ignore) {
+                setIsInitialized(true);
+              }
+            });
+
+            return () => {
+              ignore = true;
+            };
+          }, []);
+
           return (
             <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
+              {!isInitialized && (
+                <EuiLoadingChart />
+              )}
               {controlsInOrder.map(({ id, type }) => (
                 <ControlRenderer
                   key={id}
@@ -233,6 +250,7 @@ export const getControlGroupEmbeddableFactory = (services: {
                   onApiAvailable={(controlApi) => {
                     controlsManager.setControlApi(id, controlApi);
                   }}
+                  isControlGroupInitialized={isInitialized}
                 />
               ))}
             </EuiFlexGroup>

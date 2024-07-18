@@ -60,7 +60,7 @@ export const getRangesliderControlFactory = (
         </>
       );
     },
-    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
@@ -207,6 +207,10 @@ export const getRangesliderControlFactory = (
       }).subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
+
+      if (initialState.value !== undefined) {
+        await dataControl.untilFiltersInitialized();
+      }
 
       return {
         api,
