@@ -4038,7 +4038,6 @@ components:
         params:
           $ref: '#/components/schemas/RuleActionParams'
       required:
-        - group
         - id
         - params
     NormalizedRuleError:
@@ -4836,7 +4835,6 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
       required:
         - action_type_id
-        - group
         - id
         - params
     RuleActionAlertsFilter:
