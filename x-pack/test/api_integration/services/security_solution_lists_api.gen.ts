@@ -98,7 +98,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     },
     findListItems(props: FindListItemsProps) {
       return supertest
-        .get('/api/lists/_find')
+        .get('/api/lists/items/_find')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
