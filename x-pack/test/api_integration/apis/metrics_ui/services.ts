@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateServicesData, generateServicesLogsOnlyData } from './helpers';
 import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
