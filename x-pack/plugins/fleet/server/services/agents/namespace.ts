@@ -18,3 +18,12 @@ export function isAgentInNamespace(agent: Agent, namespace?: string) {
         agent.namespaces?.includes(DEFAULT_NAMESPACE_STRING)))
   );
 }
+
+export function agentsKueryNamespaceFilter(namespace?: string) {
+  if (!namespace) {
+    return;
+  }
+  return namespace === DEFAULT_NAMESPACE_STRING
+    ? `namespaces:(${DEFAULT_NAMESPACE_STRING}) or not namespaces:*`
+    : `namespaces:(${namespace})`;
+}
