@@ -68,6 +68,15 @@ export class SyntheticsRuleHelper {
     return res.body as EncryptedSyntheticsSavedMonitor;
   }
 
+  async deleteMonitor(monitorId: string) {
+    const res = await this.supertest
+      .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?id=' + monitorId)
+      .set('kbn-xsrf', 'true')
+      .send();
+
+    expect(res.status).to.eql(200);
+  }
+
   async updateTestMonitor(monitorId: string, updates: Record<string, any>) {
     const result = await this.supertest
       .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`)

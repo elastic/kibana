@@ -289,8 +289,6 @@ export class StatusRuleExecutor {
             status: baseSummary.status,
             location: baseSummary.locationName,
             checkedAt,
-            downCheck: checks?.down ?? 1,
-            total: checks?.total ?? 1,
             downThreshold,
             unitLabel: getTimeUnitLabel(unit, size),
             size,
@@ -429,7 +427,6 @@ export class StatusRuleExecutor {
         {
           defaultMessage: `Monitor "{name}" is {status}{locationDetails}. Alert when down => {threshold} times.`,
           values: {
-            locNames,
             name: baseSummary.monitorName,
             status: baseSummary.status,
             threshold: downThreshold,

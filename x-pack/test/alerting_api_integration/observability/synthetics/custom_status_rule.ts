@@ -29,18 +29,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('NumberOfChecks', () => {
       let ruleId = '';
+      const params = {
+        condition: {
+          window: {
+            numberOfChecks: 5,
+          },
+          alertOnNoData: true,
+          groupByLocation: true,
+          downThreshold: 5,
+        },
+      };
 
       it('creates a custom rule', async () => {
-        const params = {
-          condition: {
-            window: {
-              numberOfChecks: 5,
-            },
-            alertOnNoData: true,
-            groupByLocation: true,
-            downThreshold: 5,
-          },
-        };
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'Status based on number of checks',
@@ -89,6 +89,36 @@ export default function ({ getService }: FtrProviderContext) {
 
         const alert = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'recovered');
+      });
+
+      it('should trigger down for ungrouped', async () => {
+        params.condition.groupByLocation = false;
+        const rule = await ruleHelper.createCustomStatusRule({
+          params,
+          name: 'Status based on number of checks',
+        });
+        ruleId = rule.id;
+        expect(rule.params).to.eql(params);
+
+        monitor = await ruleHelper.addMonitor('Monitor for grouped ' + moment().format('LT'));
+        expect(monitor).to.have.property('id');
+
+        docs = await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 5,
+        });
+
+        const response = await ruleHelper.waitForStatusAlert({
+          ruleId,
+        });
+
+        const alert: any = response.hits.hits?.[0]._source;
+        expect(alert).to.have.property('kibana.alert.status', 'active');
+        expect(alert['kibana.alert.reason']).to.eql(
+          `Monitor "${monitor.name}" is down from Dev Service. Alert when down 5 times.`
+        );
+
+        await ruleHelper.deleteMonitor(monitor.id);
       });
     });
 

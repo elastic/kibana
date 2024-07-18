@@ -160,7 +160,7 @@ export const registerSyntheticsStatusCheckRule = (
           const downConfigsById = getConfigsByIds();
           for (const [configId, configs] of downConfigsById) {
             const totalDownChecks = configs.reduce((acc, { checks }) => acc + checks.down, 0);
-            if (totalDownChecks > downThreshold) {
+            if (totalDownChecks >= downThreshold) {
               const alertId = configId;
               const monitorSummary = statusRule.getUngroupedDownSummary({
                 statusConfigs: configs,

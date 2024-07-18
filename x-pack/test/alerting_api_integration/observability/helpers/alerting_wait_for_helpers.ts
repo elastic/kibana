@@ -129,7 +129,7 @@ export async function waitForAlertInIndex<T>({
         },
       });
       if (response.hits.hits.length === 0) {
-        throw new Error('No hits found');
+        throw new Error(`No hits found for the ruleId: ${ruleId}`);
       }
       return response;
     },
