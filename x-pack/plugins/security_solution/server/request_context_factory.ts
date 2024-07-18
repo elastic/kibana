@@ -86,6 +86,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
 
+    const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+
     return {
       core: coreContext,
 
@@ -123,7 +125,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
 
         return createDetectionRulesClient({
-          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          rulesClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
         });
@@ -131,7 +133,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
-          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          rulesClient,
           eventLogClient: startPlugins.eventLog.getClient(request),
           currentSpaceId: getSpaceId(),
         })
