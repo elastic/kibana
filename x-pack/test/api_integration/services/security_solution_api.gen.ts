@@ -455,6 +455,9 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Find and/or aggregate detection alerts that match the given query.
+     */
     searchAlerts(props: SearchAlertsProps) {
       return supertest
         .post('/api/detection_engine/signals/search')
