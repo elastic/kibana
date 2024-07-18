@@ -86,11 +86,11 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     username="$CLOUD_DEPLOYMENT_USERNAME" \
     password="$CLOUD_DEPLOYMENT_PASSWORD"
 
-  echo "Enabling Stack Monitoring..."
-  jq '
-    .settings.observability.metrics.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'" |
-    .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
-    ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
+  # echo "Enabling Stack Monitoring..."
+  # jq '
+  #   .settings.observability.metrics.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'" |
+  #   .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
+  #   ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
 
   # After a deployment is created, a new Kibana plan is automatically added to update settings
   # and restart Kibana.  Polling for a plan state isn't especially reliable because it flips
@@ -98,14 +98,14 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
   # We want to enable monitoring after the automatic plan has run, if not we get an error:
   # * deployments.resource_plan_state_error: Kibana resource [main-kibana] has a plan still pending, cancel that or wait for it to complete (settings.observability.plan)
   # This adds a sleep and retry to see if we can make this step more reliable
-  sleep 120
-  retry 5 60 ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$ECCTL_LOGS"
+  # sleep 120
+  # retry 5 60 ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$ECCTL_LOGS"
 
-  echo "Enabling verbose logging..."
-  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-    .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all"
-    ' > /tmp/verbose_logging.json
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$ECCTL_LOGS"
+  # echo "Enabling verbose logging..."
+  # ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
+  #   .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all"
+  #   ' > /tmp/verbose_logging.json
+  # ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$ECCTL_LOGS"
 else
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
