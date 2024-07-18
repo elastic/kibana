@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(testData.suiteSuffix, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/188493
+      describe.skip(testData.suiteSuffix, function () {
         before(async () => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
             testData.jobConfig,
@@ -58,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ml.testResources.deleteDashboardByTitle(testData.dashboardTitle);
         });
 
-        it('can open job selection flyout', async () => {
+        it('should open job selection flyout', async () => {
           await PageObjects.dashboard.clickNewDashboard();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
           await ml.dashboardEmbeddables.openAnomalyJobSelectionFlyout(
@@ -66,12 +67,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        it('can select jobs', async () => {
+        it('should select jobs', async () => {
           await ml.alerting.selectJobs([testData.jobConfig.job_id]);
           await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);
         });
 
-        it('can configure single metric viewer panel', async () => {
+        it('should configure single metric viewer panel', async () => {
           await ml.singleMetricViewer.assertDetectorInputExist();
           await ml.singleMetricViewer.assertDetectorInputValue(
             testData.expected.detectorInputValue
@@ -83,13 +84,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        it('create new single metric viewer panel', async () => {
+        it('should create new single metric viewer panel', async () => {
           await ml.dashboardEmbeddables.clickSingleMetricViewerInitializerConfirmButtonEnabled();
           await PageObjects.timePicker.pauseAutoRefresh();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);
           await ml.singleMetricViewer.assertChartExist();
-          await ml.singleMetricViewer.assertAnomalyMarkerExist();
           await PageObjects.dashboard.saveDashboard(testData.dashboardTitle);
+        });
+
+        it('should have anomaly click action menu', async () => {
+          await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);
+          await ml.singleMetricViewer.assertAnomalyMarkerExist();
+          await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
+          await ml.singleMetricViewer.assertAnomalyActionDiscoverButtonExists();
+          await ml.singleMetricViewer.assertAnomalyActionJobRulesButtonExists();
+          await ml.singleMetricViewer.ensureAnomalyActionJobRulesButtonClicked();
+          await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
+          await ml.singleMetricViewer.ensureAnomalyActionDiscoverButtonClicked();
         });
       });
     }

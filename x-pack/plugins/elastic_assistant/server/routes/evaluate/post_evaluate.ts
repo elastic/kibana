@@ -153,8 +153,6 @@ export const postEvaluateRoute = (
               actionTypeId: '.gen-ai',
               replacements: {},
               size: DEFAULT_SIZE,
-              isEnabledKnowledgeBase: true,
-              isEnabledRAGAlerts: true,
               conversationId: '',
             },
           };
@@ -164,7 +162,7 @@ export const postEvaluateRoute = (
           const enableKnowledgeBaseByDefault =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           const kbDataClient = enableKnowledgeBaseByDefault
-            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined
             : undefined;
           const kbIndex =
             enableKnowledgeBaseByDefault && kbDataClient != null
@@ -194,7 +192,6 @@ export const postEvaluateRoute = (
                 agentEvaluator: async (langChainMessages, exampleId) => {
                   const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                     actionsClient,
-                    isEnabledKnowledgeBase: true,
                     assistantTools,
                     connectorId,
                     esClient,

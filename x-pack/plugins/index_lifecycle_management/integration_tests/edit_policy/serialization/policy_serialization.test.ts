@@ -199,6 +199,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.hot.setForcemergeSegmentsCount('123');
       await actions.hot.setBestCompression(true);
       await actions.hot.setShrinkCount('2');
+      await actions.hot.toggleAllowWriteAfterShrink();
       await actions.hot.toggleReadonly();
       await actions.hot.setIndexPriority('123');
 
@@ -226,6 +227,7 @@ describe('<EditPolicy /> serialization', () => {
                   },
                   shrink: {
                     number_of_shards: 2,
+                    allow_write_after_shrink: true,
                   },
                   set_priority: {
                     priority: 123,
@@ -336,6 +338,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.setSelectedNodeAttribute('test:123');
       await actions.warm.setReplicas('123');
       await actions.warm.setShrinkCount('123');
+      await actions.warm.toggleAllowWriteAfterShrink();
       await actions.warm.toggleForceMerge();
       await actions.warm.setForcemergeSegmentsCount('123');
       await actions.warm.setBestCompression(true);
@@ -366,6 +369,7 @@ describe('<EditPolicy /> serialization', () => {
                   },
                   shrink: {
                     number_of_shards: 123,
+                    allow_write_after_shrink: true,
                   },
                   forcemerge: {
                     max_num_segments: 123,
@@ -690,6 +694,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
       await actions.warm.setShrinkSize('100');
+      await actions.warm.toggleAllowWriteAfterShrink();
 
       await actions.savePolicy();
 
@@ -707,6 +712,7 @@ describe('<EditPolicy /> serialization', () => {
                     max_primary_shard_size: '50gb',
                   },
                   shrink: {
+                    allow_write_after_shrink: false,
                     max_primary_shard_size: '50gb',
                   },
                 },
@@ -718,6 +724,7 @@ describe('<EditPolicy /> serialization', () => {
                     priority: 50,
                   },
                   shrink: {
+                    allow_write_after_shrink: true,
                     max_primary_shard_size: '100gb',
                   },
                 },
