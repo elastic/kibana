@@ -126,11 +126,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
   );
-  const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
 
-  const hostName = useMemo(() => {
-    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
-  }, [hostNameArr]);
   const hostIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
   const sourceIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' });
   const destinationIpList = useGetMappedNonEcsValue({
@@ -151,8 +147,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   const isDetailPanelExpanded: boolean =
     (activeExpandedDetail?.panelView === 'eventDetail' &&
       activeExpandedDetail?.params?.eventId === eventId) ||
-    (activeExpandedDetail?.panelView === 'hostDetail' &&
-      activeExpandedDetail?.params?.hostName === hostName) ||
     (activeExpandedDetail?.panelView === 'networkDetail' &&
       activeExpandedDetail?.params?.ip &&
       hostIPAddresses?.has(activeExpandedDetail?.params?.ip)) ||
