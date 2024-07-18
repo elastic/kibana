@@ -102,11 +102,9 @@ function useChatWithoutContext({
 
   const handleError = useCallback(
     (error: Error) => {
-      if (error instanceof AbortError) {
-        setChatState(ChatState.Aborted);
-      } else {
-        setChatState(ChatState.Error);
-      }
+      const isAbortedError = error instanceof AbortError;
+
+      setChatState(isAbortedError ? ChatState.Aborted : ChatState.Error);
 
       if (isTokenLimitReachedError(error)) {
         setMessages((msgs) => [
@@ -127,11 +125,13 @@ function useChatWithoutContext({
         return;
       }
 
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
-          defaultMessage: 'Failed to load response from the AI Assistant',
-        }),
-      });
+      if (!isAbortedError) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
+            defaultMessage: 'Failed to load response from the AI Assistant',
+          }),
+        });
+      }
     },
     [notifications.toasts]
   );

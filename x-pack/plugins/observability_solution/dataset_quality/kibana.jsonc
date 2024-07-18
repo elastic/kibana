@@ -24,8 +24,10 @@
       "dataViews",
       "lens"
     ],
-    "optionalPlugins": [],
-    "requiredBundles": ["unifiedHistogram", "discover"],
+    "optionalPlugins": [
+      "observabilityAIAssistant",
+    ],
+    "requiredBundles": ["unifiedHistogram", "discover", "triggersActionsUi", "stackConnectors", "actions"],
     "extraPublicDirs": [
       "common"
     ]

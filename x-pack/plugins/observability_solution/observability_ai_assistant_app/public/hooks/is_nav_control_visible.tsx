@@ -27,6 +27,12 @@ function getVisibility(
     return categoryId !== DEFAULT_APP_CATEGORIES.security.id;
   }
 
+  if (categoryId === DEFAULT_APP_CATEGORIES.management.id) {
+    const location = window.location;
+
+    return location.pathname.endsWith('/management/data/data_quality/');
+  }
+
   return categoryId === DEFAULT_APP_CATEGORIES.observability.id;
 }
 
