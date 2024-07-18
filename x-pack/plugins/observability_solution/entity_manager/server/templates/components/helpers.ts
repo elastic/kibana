@@ -8,13 +8,13 @@
 export const getCustomLatestTemplateComponents = (definitionId: string) => [
   `${definitionId}@custom`,
   `${definitionId}@platform`,
-  `${definitionId}-history@custom`,
-  `${definitionId}-history@platform`,
+  `${definitionId}-latest@custom`,
+  `${definitionId}-latest@platform`,
 ];
 
 export const getCustomHistoryTemplateComponents = (definitionId: string) => [
   `${definitionId}@custom`,
   `${definitionId}@platform`,
-  `${definitionId}-latest@custom`,
-  `${definitionId}-latest@platform`,
+  `${definitionId}-history@custom`,
+  `${definitionId}-history@platform`,
 ];

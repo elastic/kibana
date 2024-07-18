@@ -126,7 +126,7 @@ export class EntityResolutionDataClient {
   }): Promise<{ total: number; matches: MatchEntity[] }> {
     const { esClient, logger } = this.options;
     const identityField = searchEntity.type === 'user' ? 'user.name' : 'host.name';
-    const embeddingField = `test_${searchEntity.type}_name_embeddings.predicted_value`;
+    const embeddingField = `test_${searchEntity.type}_name_embeddings.inference.chunks.embeddings`;
     const searchQuery = {
       index: entitiesIndexPattern,
       body: {

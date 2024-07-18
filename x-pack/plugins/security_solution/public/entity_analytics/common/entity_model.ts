@@ -21,23 +21,17 @@ export const useEntityModel = () => {
   const initialize = useCallback(() => {
     if (!http) return Promise.resolve();
 
-    return http
-      .fetch('/internal/entities/definition', {
-        version: '1',
-        method: 'POST',
-        headers: {
-          'elastic-api-version': 1,
-        },
-        body: JSON.stringify(entityDefinition),
-      })
-      .then((response) => {
-        console.log(response);
-      });
+    return http.fetch('/internal/entities/definition', {
+      version: '1',
+      method: 'POST',
+      headers: {
+        'elastic-api-version': 1,
+      },
+      body: JSON.stringify(entityDefinition),
+    });
   }, [http]);
 
   const get = useCallback(() => {
-    console.log('Getting entity model');
-
     if (!http) return Promise.resolve([]);
 
     return http.fetch('/internal/entities/definition', {
@@ -50,8 +44,6 @@ export const useEntityModel = () => {
   }, [http]);
 
   const deleteAPI = useCallback(() => {
-    console.log('Deleting entity model');
-
     if (!http) return Promise.resolve([]);
 
     return http.fetch(`/internal/entities/definition/${ENTITY_DEFINITION_ID}`, {
@@ -79,7 +71,13 @@ const entityDefinition = {
     { field: 'id_value', optional: true },
   ],
   displayNameTemplate: '{{user.name}}{{id_value}}',
-  metadata: ['user.risk.calculated_level', 'user.risk.calculated_score_norm', 'criticality_level'],
+  metadata: [
+    'user.risk.calculated_level',
+    'user.risk.calculated_score_norm',
+    'criticality_level',
+    { source: '_index', destination: 'sourceIndex' },
+    { source: 'user.name', destination: 'test_user_name_embeddings' },
+  ],
   history: {
     timestampField: '@timestamp',
     interval: '1m',
