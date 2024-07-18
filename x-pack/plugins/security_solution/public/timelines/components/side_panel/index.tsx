@@ -20,9 +20,7 @@ import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
-import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
-import { UserDetailsPanel } from './user_details';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -122,34 +120,6 @@ export const DetailsPanel = React.memo(
           tabType={activeTab}
           scopeId={scopeId}
           isReadOnly={isReadOnly}
-        />
-      );
-    }
-
-    if (currentTabDetail?.panelView === 'hostDetail' && currentTabDetail?.params?.hostName) {
-      flyoutUniqueKey = currentTabDetail.params.hostName;
-      visiblePanel = (
-        <HostDetailsPanel
-          contextID={contextID}
-          expandedHost={currentTabDetail?.params}
-          handleOnHostClosed={closePanel}
-          isDraggable={isDraggable}
-          isFlyoutView={isFlyoutView}
-          scopeId={scopeId}
-        />
-      );
-    }
-
-    if (currentTabDetail?.panelView === 'userDetail' && currentTabDetail?.params?.userName) {
-      flyoutUniqueKey = currentTabDetail.params.userName;
-      visiblePanel = (
-        <UserDetailsPanel
-          contextID={contextID}
-          userName={currentTabDetail.params.userName}
-          handleOnClose={closePanel}
-          isDraggable={isDraggable}
-          isFlyoutView={isFlyoutView}
-          scopeId={scopeId}
         />
       );
     }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
@@ -20,7 +20,7 @@ import type { ContentManagementServerSetup } from '@kbn/content-management-plugi
 
 export interface SetupDeps {
   data: DataPluginSetup;
-  features: FeaturesPluginSetupContract;
+  features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
