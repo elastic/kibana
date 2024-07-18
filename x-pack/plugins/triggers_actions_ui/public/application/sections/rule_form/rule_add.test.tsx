@@ -228,14 +228,12 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('addRuleFlyoutTitle')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('addRuleFlyoutTitle')).toBeInTheDocument();
 
-    expect(screen.getByTestId('saveRuleButton')).toBeInTheDocument();
-    expect(screen.getByTestId('showRequestButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('showRequestButton')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('cancelSaveRuleButton'));
+    userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
     expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED, {
       fields: ['test'],
       test: 'some value',
@@ -260,12 +258,10 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('my-rule-type-SelectOption')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('my-rule-type-SelectOption')).toBeInTheDocument();
 
-    expect(screen.getByText('Test')).toBeInTheDocument();
-    expect(screen.getByText('test')).toBeInTheDocument();
+    expect(await screen.findByText('Test')).toBeInTheDocument();
+    expect(await screen.findByText('test')).toBeInTheDocument();
   });
 
   it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
@@ -288,20 +284,18 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('ruleNameInput')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('ruleNameInput')).toBeInTheDocument();
 
-    userEvent.type(screen.getByTestId('ruleNameInput'), 'my{space}rule{space}type');
+    userEvent.type(await screen.findByTestId('ruleNameInput'), 'my{space}rule{space}type');
 
-    expect(screen.getByTestId('ruleNameInput')).toHaveValue('my rule type');
-    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
-    expect(screen.getByTestId('intervalInputUnit')).toHaveValue('m');
+    expect(await screen.findByTestId('ruleNameInput')).toHaveValue('my rule type');
+    expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('');
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
 
-    userEvent.click(screen.getByTestId('cancelSaveRuleButton'));
+    userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
 
     expect(onClose).not.toHaveBeenCalled();
-    expect(screen.getByTestId('confirmRuleCloseModal')).toBeInTheDocument();
+    expect(await screen.findByTestId('confirmRuleCloseModal')).toBeInTheDocument();
   });
 
   it('renders rule add flyout with initial values', async () => {
@@ -329,15 +323,17 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('ruleNameInput')).toHaveValue('Simple status rule');
-    });
+    expect(await screen.findByTestId('ruleNameInput')).toHaveValue('Simple status rule');
 
-    expect(within(screen.getByTestId('tagsComboBox')).getByText('uptime')).toBeInTheDocument();
-    expect(within(screen.getByTestId('tagsComboBox')).getByText('logs')).toBeInTheDocument();
+    expect(
+      await within(await screen.findByTestId('tagsComboBox')).findByText('uptime')
+    ).toBeInTheDocument();
+    expect(
+      await within(await screen.findByTestId('tagsComboBox')).findByText('logs')
+    ).toBeInTheDocument();
 
-    expect(screen.getByTestId('intervalInput')).toHaveValue(1);
-    expect(screen.getByTestId('intervalInputUnit')).toHaveValue('h');
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(1);
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('h');
   });
 
   it('renders rule add flyout with DEFAULT_RULE_INTERVAL if no initialValues specified and no minimumScheduleInterval', async () => {
@@ -352,10 +348,9 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('intervalInput')).toHaveValue(1);
-    });
-    expect(screen.getByTestId('intervalInputUnit')).toHaveValue('m');
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(1);
+
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
   });
 
   it('renders rule add flyout with minimumScheduleInterval if minimumScheduleInterval is greater than DEFAULT_RULE_INTERVAL', async () => {
@@ -372,10 +367,9 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('intervalInput')).toHaveValue(5);
-    });
-    expect(screen.getByTestId('intervalInputUnit')).toHaveValue('m');
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(5);
+
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
   });
 
   it('emit an onClose event when the rule is saved', async () => {
@@ -407,11 +401,9 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('saveRuleButton')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('saveRuleButton'));
+    userEvent.click(await screen.findByTestId('saveRuleButton'));
 
     await waitFor(() => {
       return expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
@@ -484,12 +476,10 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('saveRuleButton')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('saveRuleButton'));
+    await waitFor(async () => {
+      userEvent.click(await screen.findByTestId('saveRuleButton'));
       return expect(createRule).toHaveBeenLastCalledWith(
         expect.objectContaining({
           rule: expect.objectContaining({
@@ -520,11 +510,9 @@ describe('rule_add', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      return expect(screen.getByTestId('intervalInputUnit')).toHaveValue('h');
-    });
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('h');
 
-    expect(screen.getByTestId('intervalInput')).toHaveValue(3);
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(3);
   });
 
   it('should load connectors and connector types when there is a pre-selected rule type', async () => {
@@ -587,7 +575,7 @@ describe('rule_add', () => {
     });
 
     expect(
-      screen.getByText('You must configure an encryption key to use Alerting.', {
+      await screen.findByText('You must configure an encryption key to use Alerting.', {
         collapseWhitespace: false,
       })
     ).toBeInTheDocument();
