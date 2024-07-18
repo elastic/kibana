@@ -8,7 +8,6 @@
 
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import type { monaco } from '@kbn/monaco';
 import { evalFunctionDefinitions } from '../../definitions/functions';
 import { builtinFunctions } from '../../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
@@ -242,9 +241,7 @@ export function createCustomCallbackMocks(
   };
 }
 
-export function createCompletionContext(
-  triggerCharacter?: string
-): monaco.languages.CompletionContext {
+export function createCompletionContext(triggerCharacter?: string) {
   if (triggerCharacter) {
     return { triggerCharacter, triggerKind: 1 }; // any number is fine here
   }
