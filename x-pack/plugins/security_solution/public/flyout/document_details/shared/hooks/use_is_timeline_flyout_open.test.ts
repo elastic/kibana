@@ -30,6 +30,13 @@ describe('useInvestigationGuide', () => {
     expect(hookResult.result.current).toEqual(false);
   });
 
+  it('should return false when timeline flyout is in url but params are empty preview', () => {
+    window.location.search =
+      'http://app/security/alerts&flyout=(right:(id:document-details-right))&timelineFlyout=(preview:!())';
+    const hookResult = renderHook(() => useIsTimelineFlyoutOpen());
+    expect(hookResult.result.current).toEqual(false);
+  });
+
   it('should return true when timeline flyout is open', () => {
     window.location.search =
       'http://app/security/alerts&flyout=(right:(id:document-details-right))&timelineFlyout=(right:(id:document-details-right,params:(id:id,indexName:index,scopeId:scope)))';
