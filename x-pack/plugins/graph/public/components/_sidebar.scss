@@ -63,6 +63,9 @@
   line-height: $euiLineHeight;
   margin: $euiSizeXS 0;
   cursor: pointer;
+  width: 100%;
+  display: block;
+  text-align: left;
 
   > * {
     vertical-align: middle;
