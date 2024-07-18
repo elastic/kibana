@@ -27,76 +27,6 @@ import { NEW_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
-const steps: EuiContainedStepProps[] = [
-  {
-    title: i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step1.title', {
-      defaultMessage: 'Create an index',
-    }),
-    children: (
-      <EuiLinkTo
-        to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
-        shouldNotCreateHref
-      >
-        <EuiButton
-          data-telemetry-id="entSearch-aiSearch-semanticSearch-elserPanel-createIndexButton"
-          iconType="plusInCircle"
-        >
-          {i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step1.buttonLabel', {
-            defaultMessage: 'Create an index',
-          })}
-        </EuiButton>
-      </EuiLinkTo>
-    ),
-    status: 'incomplete',
-  },
-  {
-    title: i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step2.title', {
-      defaultMessage: "Navigate to index's Pipelines tab",
-    }),
-    children: (
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.aiSearch.elserPanel.step2.description"
-            defaultMessage="After creating an index, select it and click the tab called {pipelinesName}."
-            values={{
-              pipelinesName: (
-                <strong>
-                  &quot;
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.aiSearch.elserPanel.step2.description.pipelinesName',
-                    {
-                      defaultMessage: 'Pipelines',
-                    }
-                  )}
-                  &quot;
-                </strong>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
-    ),
-    status: 'incomplete',
-  },
-  {
-    title: i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step3.title', {
-      defaultMessage: 'Follow the on-screen instructions to deploy ELSER',
-    }),
-    children: (
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.aiSearch.elserPanel.step3.description"
-            defaultMessage="Locate the panel that allows you to one click deploy ELSER and create an inference pipeline using that model."
-          />
-        </p>
-      </EuiText>
-    ),
-    status: 'incomplete',
-  },
-];
-
 export const ElserPanel: React.FC = () => (
   <>
     <EuiSpacer />
@@ -106,10 +36,15 @@ export const ElserPanel: React.FC = () => (
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.aiSearch.elser.description"
-              defaultMessage="Effortlessly deploy the {elser} for instant text semantic search capabilities in just a few clicks. This model expands your document and query text using the 'text_expansion' field, delivering seamless search out of the box."
+              defaultMessage="Effortlessly use the {elser} for instant text semantic search capabilities in just a few commands. We use 'semantic_text' field to simplify setting up semantic search."
               values={{
                 elser: (
-                  <EuiLink target="_blank" href={docLinks.elser} external={false}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchElserPanelElasticLearnedSparseEncoderV2Link"
+                    target="_blank"
+                    href={docLinks.elser}
+                    external={false}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.aiSearch.elser.description.elserLinkText',
                       {
@@ -124,7 +59,20 @@ export const ElserPanel: React.FC = () => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSteps steps={steps} titleSize="xs" />
+        <EuiLinkTo
+          to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
+          shouldNotCreateHref
+        >
+          <EuiButton
+            data-test-subj="enterpriseSearchElserPanelSetupSemanticSearchButton"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-elserPanel-setupSemanticSearch"
+            iconType="plusInCircle"
+          >
+            {i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.buttonLabel', {
+              defaultMessage: 'Setup Semantic Search',
+            })}
+          </EuiButton>
+        </EuiLinkTo>
       </EuiFlexItem>
     </EuiFlexGroup>
   </>

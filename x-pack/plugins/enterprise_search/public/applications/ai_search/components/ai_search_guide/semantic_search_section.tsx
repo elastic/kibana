@@ -58,7 +58,7 @@ export const SemanticSearchSection: React.FC = () => {
               initialIsOpen
               icon={elserIllustration}
               title={i18n.translate('xpack.enterpriseSearch.aiSearch.elserAccordion.title', {
-                defaultMessage: 'Elastic Learned Sparse Encoder',
+                defaultMessage: 'Semantic Search with ELSER',
               })}
               description={i18n.translate(
                 'xpack.enterpriseSearch.aiSearch.elserAccordion.description',
@@ -90,29 +90,6 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <VectorSearchPanel />
-            </AISearchGuideAccordion>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AISearchGuideAccordion
-              id="nlpEnrichmentAccordion"
-              data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentAccordion"
-              icon={nlpEnrichmentIllustration}
-              title={i18n.translate(
-                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.title',
-                {
-                  defaultMessage: 'NLP Enrichment',
-                }
-              )}
-              description={i18n.translate(
-                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.description',
-                {
-                  defaultMessage: 'Insightful data enrichment with trained ML models',
-                }
-              )}
-              currentExpandedId={currentExpandedId}
-              onToggle={setCurrentExpandedId}
-            >
-              <NlpEnrichmentPanel />
             </AISearchGuideAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>

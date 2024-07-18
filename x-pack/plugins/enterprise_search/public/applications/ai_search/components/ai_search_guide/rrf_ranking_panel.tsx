@@ -47,7 +47,7 @@ const steps: EuiContainedStepProps[] = [
   },
   {
     title: i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.title', {
-      defaultMessage: 'Try it today in Console',
+      defaultMessage: 'Example in Action',
     }),
     children: (
       <EuiLinkTo
@@ -57,7 +57,7 @@ const steps: EuiContainedStepProps[] = [
       >
         <EuiButton>
           {i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.buttonLabel', {
-            defaultMessage: 'Open Console',
+            defaultMessage: 'View Notebook',
           })}
         </EuiButton>
       </EuiLinkTo>

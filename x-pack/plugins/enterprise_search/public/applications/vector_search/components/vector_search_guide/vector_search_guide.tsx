@@ -176,7 +176,7 @@ export const VectorSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
-                defaultMessage="Don’t have a model deployed?"
+                defaultMessage="Semantic Search"
               />
             </h2>
           </EuiTitle>
@@ -184,7 +184,7 @@ export const VectorSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.description"
-                defaultMessage="Elastic can help you generate embeddings."
+                defaultMessage="Elastic can help you generate embeddings with Inference Endpoints."
               />
             </p>
           </EuiText>
@@ -201,7 +201,7 @@ export const VectorSearchGuide: React.FC = () => {
               title={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.title"
-                  defaultMessage="Elastic Learned Sparse Encoder (ELSER)"
+                  defaultMessage="ELSER"
                 />
               }
               description={
@@ -220,13 +220,13 @@ export const VectorSearchGuide: React.FC = () => {
               title={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.title"
-                  defaultMessage="Run your models in Elastic"
+                  defaultMessage="E5 Multi-Lingual"
                 />
               }
               description={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.description"
-                  defaultMessage="Learn how to upload compatible third-party models"
+                  defaultMessage="Use E5 to enable semantic search for multiple languages"
                 />
               }
             />

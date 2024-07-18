@@ -81,11 +81,11 @@ export const AISearchGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiHorizontalRule />
           <EuiFlexItem grow>
-            <MeasurePerformanceSection />
+            <SetAISearchChromeSearchDocsSection />
           </EuiFlexItem>
           <EuiHorizontalRule />
           <EuiFlexItem grow>
-            <SetAISearchChromeSearchDocsSection />
+            <MeasurePerformanceSection />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
