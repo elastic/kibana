@@ -15,6 +15,7 @@
 export enum ML_DETECTOR_RULE_ACTION {
   SKIP_MODEL_UPDATE = 'skip_model_update',
   SKIP_RESULT = 'skip_result',
+  FORCE_TIME_SHIFT = 'force_time_shift',
 }
 
 /**
