@@ -16,6 +16,8 @@ import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
 
+const initialVersion = '1.0.0';
+
 export async function buildPackage(integration: Integration): Promise<Buffer> {
   const templateDir = joinPath(__dirname, '../templates');
   const agentTemplates = joinPath(templateDir, 'agent');
@@ -26,7 +28,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   });
 
   const tmpDir = joinPath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
-  const packageDirectoryName = `${integration.name}-0.1.0`;
+  const packageDirectoryName = `${integration.name}-${initialVersion}`;
   const packageDir = createDirectories(tmpDir, integration, packageDirectoryName);
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
 
@@ -86,7 +88,7 @@ function createBuildFile(packageDir: string): void {
 
 function createChangelog(packageDir: string): void {
   const changelogTemplate = nunjucks.render('changelog.yml.njk', {
-    initial_version: '0.1.0',
+    initial_version: initialVersion,
   });
 
   createSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
@@ -132,7 +134,7 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
     format_version: '3.1.4',
     package_title: integration.title,
     package_name: integration.name,
-    package_version: '0.1.0',
+    package_version: initialVersion,
     package_description: integration.description,
     package_logo: integration.logo,
     package_owner: '@elastic/custom-integrations',
