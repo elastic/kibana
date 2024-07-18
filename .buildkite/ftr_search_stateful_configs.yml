@@ -10,4 +10,3 @@ disabled:
 
 defaultQueue: 'n2-4-spot'
 enabled:
-  - x-pack/test/random/path/config.ts
