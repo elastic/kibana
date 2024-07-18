@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { LogDocumentOverview } from '@kbn/discover-utils';
 import { LogLevelBadge } from '@kbn/discover-utils';
@@ -22,16 +21,5 @@ interface LogLevelProps {
 export function LogLevel({ level }: LogLevelProps) {
   if (!level) return null;
 
-  return (
-    <LogLevelBadge
-      logLevel={level}
-      fallback={
-        <EuiBadge color="hollow" data-test-subj={dataTestSubj} css={badgeCss}>
-          {level}
-        </EuiBadge>
-      }
-      css={badgeCss}
-      data-test-subj={dataTestSubj}
-    />
-  );
+  return <LogLevelBadge logLevel={level} data-test-subj={dataTestSubj} css={badgeCss} />;
 }

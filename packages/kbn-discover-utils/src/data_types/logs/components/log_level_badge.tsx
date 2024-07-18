@@ -23,19 +23,31 @@ export const LogLevelBadge = ({
   ...badgeProps
 }: Omit<EuiBadgeProps, 'children' | 'color'> & {
   logLevel: {};
-  fallback: ReactElement;
+  fallback?: ReactElement;
 }) => {
   const { euiTheme } = useEuiTheme();
   const coalescedValue = getLogLevelCoalescedValue(logLevel);
   const color = coalescedValue ? getLogLevelColor(coalescedValue, euiTheme) : undefined;
+  const castedBadgeProps = badgeProps as EuiBadgeProps;
 
   if (!color || !coalescedValue) {
-    return fallback;
+    return fallback ? (
+      fallback
+    ) : (
+      <EuiBadge
+        {...castedBadgeProps}
+        color="hollow"
+        data-test-subj={`${dataTestSubj}-unknown`}
+        css={badgeCss}
+      >
+        {logLevel}
+      </EuiBadge>
+    );
   }
 
   return (
     <EuiBadge
-      {...(badgeProps as EuiBadgeProps)}
+      {...castedBadgeProps}
       color={color}
       data-test-subj={`${dataTestSubj}-${coalescedValue}`}
       css={badgeCss}

@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { LogFlyoutDoc, LogLevelBadge } from '@kbn/discover-utils/src';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import * as constants from '../../../../common/data_types/logs/constants';
 import { ChipPopover } from './popover_chip';
 
@@ -23,27 +22,16 @@ export function LogLevel({ level }: LogLevelProps) {
     <ChipPopover
       property={constants.LOG_LEVEL_FIELD}
       text={level}
-      renderChip={({ handleChipClick, handleChipClickAriaLabel, chipCss }) => {
-        const sharedProps: EuiBadgeProps = {
-          iconType: 'arrowDown',
-          iconSide: 'right',
-          onClick: handleChipClick,
-          onClickAriaLabel: handleChipClickAriaLabel,
-          css: [chipCss, { width: '80px', paddingInline: '4px' }],
-        };
-
-        return (
-          <LogLevelBadge
-            {...sharedProps}
-            logLevel={level}
-            fallback={
-              <EuiBadge {...sharedProps} color="hollow">
-                {level}
-              </EuiBadge>
-            }
-          />
-        );
-      }}
+      renderChip={({ handleChipClick, handleChipClickAriaLabel, chipCss }) => (
+        <LogLevelBadge
+          logLevel={level}
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={handleChipClick}
+          onClickAriaLabel={handleChipClickAriaLabel}
+          css={[chipCss, { width: '80px', paddingInline: '4px' }]}
+        />
+      )}
     />
   );
 }
