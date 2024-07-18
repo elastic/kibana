@@ -24,11 +24,6 @@ export function createMockOpsProcessMetrics(): OpsProcessMetrics {
       active: 1,
       idle: 1,
       utilization: 1,
-      load: {
-        long: 1,
-        medium: 1,
-        short: 1,
-      },
     },
     pid: 1,
     uptime_in_millis: 1,

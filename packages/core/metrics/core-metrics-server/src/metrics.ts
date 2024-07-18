@@ -9,27 +9,6 @@
 import type { EventLoopUtilization } from 'perf_hooks';
 
 /**
- * Event loop utilization metrics with load averages
- * @public
- */
-export interface EventLoopUtilizationWithLoad extends EventLoopUtilization {
-  /**
-   * Event-loop utilization averaged over a set of sample buckets
-   * @remark 3 load windows borrows from the `uptime` CLI tool on macOS and Linux, but is not necessarily 1m, 5m, 15m. The
-   *         actual time range covered is determined by our collection interval (configured via `ops.interval`, default 5s)
-   *         and the number of samples held in each window. So by default short: 15s, medium: 30s and long 60s.
-   */
-  load: {
-    /** The load for the short window */
-    short: number;
-    /** The load for the medium window */
-    medium: number;
-    /** The load for the long window */
-    long: number;
-  };
-}
-
-/**
  * an IntervalHistogram object that samples and reports the event loop delay over time.
  * The delays will be reported in milliseconds.
  *
@@ -113,7 +92,7 @@ export interface OpsProcessMetrics {
   /** node event loop delay histogram since last collection */
   event_loop_delay_histogram: IntervalHistogram;
   /** node event loop utilization since last collection */
-  event_loop_utilization: EventLoopUtilizationWithLoad;
+  event_loop_utilization: EventLoopUtilization;
   /** uptime of the kibana process */
   uptime_in_millis: number;
 }
