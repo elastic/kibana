@@ -59,11 +59,12 @@ export const StartStep: React.FC<StartStepProps> = ({
 
   const [connectorName, setConnectorName] = useState('');
   useEffect(() => {
+    console.log('connectorSelected', connectorSelected);
     if (connectorSelected && connectorSelected.name !== '') {
       const name =
         connectorSelected.name
           .toLocaleLowerCase()
-          .replace(/[^\w-]/g, '-')
+          .replace(/[^\w-]/g, '')
           .replace(/ /g, '-') + '-aa3f';
       setConnectorName(name);
     }
@@ -161,14 +162,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Elastic managed' }
                   )}
                   checked={!selfManaged}
-                  // Make it dymanic
-                  disabled={
-                    connectorSelected.name === 'GraphQL' ||
-                    connectorSelected.name === 'Customized connector' ||
-                    connectorSelected.name === 'Jira Server' ||
-                    connectorSelected.name === 'Redis' ||
-                    connectorSelected.name === 'OpenText Documentum'
-                  }
+                  disabled={connectorSelected.isNative === false}
                   onChange={() => setRadioIdSelected(elasticManagedRadioButtonId)}
                   name="setUp"
                 />

@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -374,24 +375,12 @@ export const CreateConnector: React.FC = () => {
             {currentStep > 0 && (
               <>
                 <EuiSpacer size="xl" />
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.euiFormRow.connectorLabel',
-                    { defaultMessage: 'Connector' }
-                  )}
-                >
-                  <EuiSuperSelect
-                    readOnly
-                    valueOfSelected="item1"
-                    options={[{ inputDisplay: connectorSelected.name, value: 'item1' }]}
-                  />
-                </EuiFormRow>
-                <EuiSpacer size="s" />
                 <EuiText size="s">
                   <p>
                     <EuiLink
+                      external
                       data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
-                      href="http://www.elastic.co"
+                      href={connectorSelected.docsUrl}
                       target="_blank"
                     >
                       {connectorSelected.name}{' '}
@@ -403,8 +392,49 @@ export const CreateConnector: React.FC = () => {
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.euiFormRow.connectorLabel',
+                    { defaultMessage: 'Connector' }
+                  )}
+                >
+                  <EuiSuperSelect
+                    readOnly
+                    valueOfSelected="item1"
+                    options={[
+                      {
+                        inputDisplay: (
+                          <>
+                            <EuiIcon
+                              size="l"
+                              type={connectorSelected.iconPath}
+                              css={css`
+                                margin-right: ${euiTheme.size.m};
+                              `}
+                            />
+                            {connectorSelected.name}
+                          </>
+                        ),
+                        value: 'item1',
+                      },
+                    ]}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
                 <EuiBadge color="hollow">
-                  {selfManaged ? 'Self managed' : 'Elastic managed'}
+                  {selfManaged
+                    ? i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
+                        {
+                          defaultMessage: 'Self managed',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.badgeType.ElasticManaged',
+                        {
+                          defaultMessage: 'Elastic managed',
+                        }
+                      )}
                 </EuiBadge>
               </>
             )}

@@ -7,12 +7,16 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { css } from '@emotion/react';
+
 import {
   EuiBadge,
+  EuiFlexItem,
   EuiIcon,
   EuiInputPopover,
   EuiSelectable,
   EuiSelectableOption,
+  EuiToken,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -114,69 +118,94 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   }, [selfManaged]);
 
   return (
-    <EuiSelectable
-      aria-label={i18n.translate(
-        'xpack.enterpriseSearch.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
-        { defaultMessage: 'Selectable + input popover example' }
-      )}
-      options={selectableOptions}
-      onChange={(newOptions, event, changedOption) => {
-        selectableSetOptions(newOptions);
-        setIsOpen(false);
-        if (changedOption.checked === 'on') {
-          const keySelected = Number(changedOption.key);
-          setConnectorSelected(allConnectors[keySelected]);
-          setIsSearching(false);
-
-          if (!allConnectors[keySelected].isNative && !selfManaged) {
-            setSelfManaged(true);
-          }
-        } else {
-          setConnectorSelected('');
-        }
-      }}
-      listProps={{
-        css: {
-          '.euiSelectableListItem': { alignItems: 'center' },
-          '.euiSelectableList__list': { maxBlockSize: 200 },
-        },
-        isVirtualized: true,
-        rowHeight: Number(euiTheme.base * 3),
-        showIcons: false,
-      }}
-      singleSelection
-      searchable
-      searchProps={{
-        fullWidth: true,
-        isClearable: true,
-        onChange: (value) => {
-          setConnectorSelected({ name: value });
-          setIsSearching(true);
-        },
-        onClick: () => setIsOpen(true),
-        onFocus: () => setIsOpen(true),
-        onKeyDown: (event) => {
-          if (event.key === 'Tab') return setIsOpen(false);
-          if (event.key !== 'Escape') return setIsOpen(true);
-        },
-        placeholder: 'Choose a data source',
-        value: connectorSelected.name,
-      }}
-      isPreFiltered={isSearching ? false : { highlightSearch: false }} // Shows the full list when not actively typing to search
+    <EuiFlexItem
+      css={css`
+        position: relative;
+      `}
     >
-      {(list, search) => (
-        <EuiInputPopover
-          fullWidth
-          closePopover={() => setIsOpen(false)}
-          disableFocusTrap
-          closeOnScroll
-          isOpen={isOpen}
-          input={search!}
-          panelPaddingSize="none"
-        >
-          {list}
-        </EuiInputPopover>
+      {connectorSelected.iconPath && (
+        <EuiToken
+          iconType={connectorSelected.iconPath}
+          size="l"
+          css={css`
+            position: absolute;
+            top: 2px;
+            left: 1px;
+            z-index: 2;
+          `}
+          color={'#f9fbfd'}
+          shape="rectangle"
+        />
       )}
-    </EuiSelectable>
+
+      <EuiSelectable
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
+          { defaultMessage: 'Selectable + input popover example' }
+        )}
+        options={selectableOptions}
+        onChange={(newOptions, event, changedOption) => {
+          selectableSetOptions(newOptions);
+          setIsOpen(false);
+          if (changedOption.checked === 'on') {
+            const keySelected = Number(changedOption.key);
+            setConnectorSelected(allConnectors[keySelected]);
+            setIsSearching(false);
+
+            if (!allConnectors[keySelected].isNative && !selfManaged) {
+              setSelfManaged(true);
+            }
+          } else {
+            setConnectorSelected('');
+          }
+        }}
+        listProps={{
+          css: {
+            '.euiSelectableListItem': { alignItems: 'center' },
+            '.euiSelectableList__list': { maxBlockSize: 240 },
+          },
+          isVirtualized: true,
+          rowHeight: Number(euiTheme.base * 3),
+          showIcons: false,
+        }}
+        singleSelection
+        searchable
+        searchProps={{
+          // TODO it doesn't apply this css class
+          css: {
+            '.euiFormControlLayoutIcons--absolute': { display: 'none' },
+          },
+          fullWidth: true,
+          isClearable: true,
+          onChange: (value) => {
+            setConnectorSelected({ name: value });
+            setIsSearching(true);
+          },
+          onClick: () => setIsOpen(true),
+          onFocus: () => setIsOpen(true),
+          onKeyDown: (event) => {
+            if (event.key === 'Tab') return setIsOpen(false);
+            if (event.key !== 'Escape') return setIsOpen(true);
+          },
+          placeholder: 'Choose a data source',
+          value: connectorSelected.name,
+        }}
+        isPreFiltered={isSearching ? false : { highlightSearch: false }} // Shows the full list when not actively typing to search
+      >
+        {(list, search) => (
+          <EuiInputPopover
+            fullWidth
+            closePopover={() => setIsOpen(false)}
+            disableFocusTrap
+            closeOnScroll
+            isOpen={isOpen}
+            input={search!}
+            panelPaddingSize="none"
+          >
+            {list}
+          </EuiInputPopover>
+        )}
+      </EuiSelectable>
+    </EuiFlexItem>
   );
 };
