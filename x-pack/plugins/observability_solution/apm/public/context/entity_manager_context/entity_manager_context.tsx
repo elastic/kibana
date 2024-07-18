@@ -9,6 +9,7 @@ import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ENTITY_FETCH_STATUS, useEntityManager } from '../../hooks/use_entity_manager';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
+import { serviceInventoryViewType$ } from '../../analytics/register_service_inventory_view_type_context';
 
 export interface EntityManagerEnablementContextValue {
   isEntityManagerEnabled: boolean;
@@ -60,7 +61,11 @@ export function EntityManagerEnablementContextProvider({
         isEnablementPending: status === ENTITY_FETCH_STATUS.LOADING,
         refetch,
         serviceInventoryViewLocalStorageSetting,
-        setServiceInventoryViewLocalStorageSetting,
+        setServiceInventoryViewLocalStorageSetting: (nextView) => {
+          setServiceInventoryViewLocalStorageSetting(nextView);
+          // Updates the telemetry context variable every time the user switches views
+          serviceInventoryViewType$.next({ serviceInventoryViewType: nextView });
+        },
         isEntityCentricExperienceViewEnabled,
       }}
     >
