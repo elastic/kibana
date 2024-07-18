@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 /** DistributionBar component props */
 export interface DistributionBarProps {
   /** distribution data points */
-  stats: Array<{ key: string; count: number; color: string; label: React.ReactElement }>;
+  stats: Array<{ key: string; count: number; color: string; label?: React.ReactNode }>;
   /** data-test-subj used for querying the component in tests */
   ['data-test-subj']?: string;
 }
@@ -20,48 +20,28 @@ export interface EmptyBarProps {
   ['data-test-subj']?: string;
 }
 
-const styles = {
-  base: css`
-    position: relative;
-    border-radius: 2px;
-    height: 5px;
-  `,
-};
-
-const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) => {
+const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
-  const emptyBarStyle = [
-    styles.base,
-    css`
-      background-color: ${euiTheme.colors.lightShade};
-      flex: 1;
+  return {
+    bar: css`
+      gap: ${euiTheme.size.xxs};
+      min-height: 7px;
     `,
-  ];
-
-  return <div css={emptyBarStyle} data-test-subj={`${dataTestSubj}__emptyBar`} />;
-};
-
-// TODO: handle stats with count 0
-/**
- * Security Solution DistributionBar component.
- * Shows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result.
- */
-export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
-  props
-) {
-  const { euiTheme } = useEuiTheme();
-  const { stats, 'data-test-subj': dataTestSubj } = props;
-  const parts = stats.map((stat) => {
-    const partStyle = [
-      styles.base,
-      css`
-        background-color: ${stat.color};
-        flex: ${stat.count};
+    part: {
+      base: css`
+        position: relative;
+        border-radius: 2px;
+        height: 5px;
+      `,
+      empty: css`
+        background-color: ${euiTheme.colors.lightShade};
+        flex: 1;
+      `,
+      tick: css`
         &::after {
           content: '';
           opacity: 0;
-          visibility: hidden;
           position: absolute;
           top: -10px;
           right: 0;
@@ -69,33 +49,12 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
           height: 6px;
           background-color: ${euiTheme.colors.lightShade};
         }
-        &:last-child::after {
-          opacity: 1;
-          visibility: visible;
-        }
-        &:last-child .label {
-          opacity: 1;
-          visibility: visible;
-        }
-        &:hover ~ div:last-child .label {
-          opacity: 0;
-          visibility: hidden;
-        }
-        &:hover ~ div:last-child::after {
-          opacity: 0;
-          visibility: hidden;
-        }
+      `,
+      hover: css`
         &:hover {
           height: 7px;
           border-radius: 3px;
           cursor: pointer;
-
-          .label {
-            opacity: 1;
-            visibility: visible;
-            top: calc(-${euiTheme.base + 2}px - 13px);
-            transition: all 0.3s ease;
-          }
 
           .euiBadge {
             cursor: unset;
@@ -103,7 +62,6 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
 
           &::after {
             opacity: 1;
-            visibility: visible;
             transition: all 0.3s ease;
             top: -9px;
           }
@@ -111,46 +69,88 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
           transition: all 0.3s ease;
         }
       `,
+      lastTooltip: css`
+        &:last-child > div {
+          opacity: 1;
+        }
+        &:last-child::after {
+          opacity: 1;
+        }
+        &:hover ~ div:last-child > div {
+          opacity: 0;
+        }
+        &:hover ~ div:last-child::after {
+          opacity: 0;
+        }
+      `,
+    },
+    tooltip: css`
+      opacity: 0;
+      position: absolute;
+      width: 100%;
+      height: calc(${euiTheme.base + 2}px + 14px + 7px); // for clickable area
+      text-align: right;
+      top: calc(-${euiTheme.base + 2}px - 14px); // 2px border of the badge? 14px height of the line
+      right: 0;
+
+      &:hover {
+        opacity: 1;
+        top: calc(-${euiTheme.base + 2}px - 13px);
+        transition: all 0.3s ease;
+      }
+    `,
+    tooltipBadgeLeft: css`
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+    `,
+    tooltipBadgeRight: css`
+      border-left: none;
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+    `,
+  };
+};
+
+const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) => {
+  const styles = useStyles();
+
+  const emptyBarStyle = [styles.part.base, styles.part.empty];
+
+  return <div css={emptyBarStyle} data-test-subj={`${dataTestSubj}__emptyBar`} />;
+};
+
+/**
+ * Security Solution DistributionBar component.
+ * Shows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result.
+ */
+export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
+  props
+) {
+  const styles = useStyles();
+  const { stats, 'data-test-subj': dataTestSubj } = props;
+  const parts = stats.map((stat) => {
+    const partStyle = [
+      styles.part.base,
+      styles.part.tick,
+      styles.part.hover,
+      styles.part.lastTooltip,
+      css`
+        background-color: ${stat.color};
+        flex: ${stat.count};
+      `,
     ];
 
     return (
       <div key={stat.key} css={partStyle}>
-        <div
-          className={'label'}
-          css={css`
-            opacity: 0;
-            visibility: hidden;
-            position: absolute;
-            width: 100%;
-            height: calc(${euiTheme.base + 2}px + 14px); // for clickable area
-            text-align: right;
-            top: calc(
-              -${euiTheme.base + 2}px - 14px
-            ); // 2px border of the badge? 14px height of the line
-            right: 0;
-          `}
-        >
+        <div css={styles.tooltip}>
           <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'} wrap={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={'hollow'}
-                css={css`
-                  border-bottom-right-radius: 0;
-                  border-top-right-radius: 0;
-                `}
-              >
+              <EuiBadge color={'hollow'} css={styles.tooltipBadgeLeft}>
                 {stat.count}
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={'hollow'}
-                css={css`
-                  border-left: none;
-                  border-bottom-left-radius: 0;
-                  border-top-left-radius: 0;
-                `}
-              >
+              <EuiBadge color={'hollow'} css={styles.tooltipBadgeRight}>
                 <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
                   <EuiFlexItem grow={false}>
                     <EuiIcon type={'dot'} size={'s'} color={stat.color} />
@@ -166,14 +166,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
   });
 
   return (
-    <EuiFlexGroup
-      alignItems={'center'}
-      css={css`
-        gap: ${euiTheme.size.xxs};
-        min-height: 7px;
-      `}
-      data-test-subj={dataTestSubj}
-    >
+    <EuiFlexGroup alignItems={'center'} css={styles.bar} data-test-subj={dataTestSubj}>
       {parts.length ? parts : <EmptyBar data-test-subj={dataTestSubj} />}
     </EuiFlexGroup>
   );

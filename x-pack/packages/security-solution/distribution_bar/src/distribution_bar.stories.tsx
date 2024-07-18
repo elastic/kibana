@@ -52,6 +52,7 @@ export default {
   description: 'Distribution Bar',
 };
 
+// todo: fix key warning
 export const DistributionBar = () => {
   return [
     <EuiTitle size={'xs'}>
