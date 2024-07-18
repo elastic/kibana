@@ -24,6 +24,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { delay } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -224,23 +225,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [searchValue, loadSuggestions, searchableTypes, initialLoad]
   );
 
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
-        event.preventDefault();
-        reportEvent.shortcutUsed();
-        if (chromeStyle === 'project' && !isVisible) {
-          visibilityButtonRef.current?.click();
-        } else if (searchRef) {
-          searchRef.focus();
-        } else if (buttonRef) {
-          (buttonRef.children[0] as HTMLButtonElement).click();
-        }
-      }
-    },
-    [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
-  );
-
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
@@ -293,11 +277,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      if (event.shiftKey && isLoading === false) {
-        window.open(url);
-      } else if ((event.ctrlKey || event.metaKey) && isLoading === false) {
-        window.open(url, '_blank');
-      } else if (isLoading === false) {
+      if (isLoading === false) {
+        if (event.shiftKey) {
+          window.open(url);
+        } else if (event.ctrlKey || event.metaKey) {
+          window.open(url, '_blank');
+        }
+      } else {
         navigateToUrl(url);
       }
 
@@ -308,6 +294,25 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }
     },
     [reportEvent, navigateToUrl, searchRef, searchValue, isLoading]
+  );
+
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
+        event.preventDefault();
+        reportEvent.shortcutUsed();
+        if (chromeStyle === 'project' && !isVisible) {
+          visibilityButtonRef.current?.click();
+        } else if (searchRef) {
+          searchRef.focus();
+        } else if (buttonRef) {
+          (buttonRef.children[0] as HTMLButtonElement).click();
+        }
+      } else if (event.key === 'Enter' && isLoading === true) {
+        delay(onChange, 1000);
+      }
+    },
+    [chromeStyle, isVisible, buttonRef, searchRef, reportEvent, isLoading, onChange]
   );
 
   const clearField = () => setSearchValue('');
