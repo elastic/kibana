@@ -6,7 +6,6 @@
  */
 
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe(
   'App Features for Security Essentials PLI',
@@ -16,8 +15,5 @@ describe(
       ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'essentials' }] },
     },
   },
-  () => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
-    checkOsqueryResponseActionsPermissions(false);
-  }
+  () => checkOsqueryResponseActionsPermissions(false)
 );

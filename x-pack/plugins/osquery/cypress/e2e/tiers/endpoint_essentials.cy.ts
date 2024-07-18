@@ -6,7 +6,6 @@
  */
 
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe(
   'App Features for Endpoint Essentials PLI',
@@ -21,8 +20,5 @@ describe(
       },
     },
   },
-  () => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
-    checkOsqueryResponseActionsPermissions(false);
-  }
+  () => checkOsqueryResponseActionsPermissions(false)
 );
