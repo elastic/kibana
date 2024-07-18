@@ -696,10 +696,6 @@ export class HttpServer {
     const { authRequired, tags, body = {}, timeout } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
-    // if (route.path === '/internal/security/roles/{spaceId}') {
-    //   console.log(route);
-    // }
-
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
@@ -712,10 +708,6 @@ export class HttpServer {
       }]`
     );
 
-    if (route.authz) {
-      console.log('route authz', route.authz);
-    }
-
     this.server!.route({
       handler: route.handler,
       method: route.method,
@@ -724,7 +716,7 @@ export class HttpServer {
         // ext: {
         //   onPostAuth: {
         //     method(request, h) {
-        //       // check authz here ?
+        //       // After moving authz to core, check it here ?
 
         //       return h.continue;
         //     },
