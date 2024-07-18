@@ -62,7 +62,7 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(
   download_artifact beats_manifest.json /tmp --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   export BEATS_MANIFEST_URL=$(jq -r .manifest_url /tmp/beats_manifest.json)
 
-  if [[ "$DRY_RUN" =~ ^(1|true)$ ]]; then
+  if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
       docker run --rm \
         --name release-manager \
         -e VAULT_ADDR \
