@@ -39,6 +39,7 @@ export const normalizeRuleSource = ({
 export const normalizeRuleParams = (params: BaseRuleParams) => {
   return {
     ...params,
+    // Fields to normalize
     ruleSource: normalizeRuleSource({
       immutable: params.immutable,
       ruleSource: params.ruleSource,
