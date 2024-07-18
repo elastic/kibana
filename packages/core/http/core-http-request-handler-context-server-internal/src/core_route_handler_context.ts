@@ -35,7 +35,6 @@ import {
   type InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-server-internal';
 import type { InternalCoreDiServiceStart } from '@kbn/core-di-common-internal';
-import { CoreInjectionRouteHandlerContext } from '@kbn/core-di-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
@@ -63,7 +62,6 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   #deprecations?: CoreDeprecationsRouteHandlerContext;
   #security?: CoreSecurityRouteHandlerContext;
   #userProfile?: CoreUserProfileRouteHandlerContext;
-  #injection?: CoreInjectionRouteHandlerContext;
 
   constructor(
     private readonly coreStart: CoreRouteHandlerContextParams,
@@ -80,18 +78,6 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
       );
     }
     return this.#elasticsearch;
-  }
-
-  public get injection() {
-    if (!this.#injection) {
-      this.#injection = new CoreInjectionRouteHandlerContext(
-        this.coreStart.injection,
-        this.request,
-        this.response,
-        this.callerId
-      );
-    }
-    return this.#injection;
   }
 
   public get savedObjects() {

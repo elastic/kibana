@@ -13,7 +13,6 @@ import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-s
 import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-server';
-import type { InjectionRequestHandlerContext } from '@kbn/core-di-server';
 
 /**
  * The `core` context provided to route handler.
@@ -36,7 +35,6 @@ export interface CoreRequestHandlerContext {
   deprecations: DeprecationsRequestHandlerContext;
   security: SecurityRequestHandlerContext;
   userProfile: UserProfileRequestHandlerContext;
-  injection: InjectionRequestHandlerContext;
 }
 
 /**
