@@ -30,15 +30,15 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
     const downloadPath = config.resolveFromRepo(
       '.node_binaries',
       version,
-      platform.getNodeArch(),
       variant,
+      platform.getNodeArch(),
       basename(downloadName)
     );
     const extractDir = config.resolveFromRepo(
       '.node_binaries',
       version,
+      variant,
       platform.getNodeArch(),
-      variant
     );
 
     return {
