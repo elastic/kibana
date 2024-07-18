@@ -132,7 +132,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
 
     // values
     ...buildRuleGroup(
-      ['quoted_string', 'integer_literal', 'decimal_literal'],
+      ['quoted_string', 'integer_literal', 'decimal_literal', 'named_or_positional_param'],
       euiThemeVars.euiColorSuccessText
     ),
   ],
