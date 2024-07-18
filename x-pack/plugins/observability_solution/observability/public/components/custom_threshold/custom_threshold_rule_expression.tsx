@@ -578,14 +578,14 @@ export default function Expressions(props: Props) {
                       'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
                       {
                         defaultMessage:
-                          'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                          'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                       }
                     )
                   : i18n.translate(
                       'xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText',
                       {
                         defaultMessage:
-                          'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                          'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
                       }
                     )
               }
