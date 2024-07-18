@@ -45,7 +45,20 @@ const entityExperienceStatusEventType: TelemetryEvent = {
   },
 };
 
+const entityInventoryPageStateEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_INVENTORY_PAGE_STATE,
+  schema: {
+    state: {
+      type: 'keyword',
+      _meta: {
+        description: 'The current entity inventory page state (empty_state or available)',
+      },
+    },
+  },
+};
+
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   entityExperienceStatusEventType,
+  entityInventoryPageStateEventType,
 ];

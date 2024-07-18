@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
@@ -27,14 +27,21 @@ import {
   AssociateServiceLogs,
   CollectServiceLogs,
 } from '../../../../shared/add_data_buttons/buttons';
+import { useKibana } from '../../../../../context/kibana_context/use_kibana';
+import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
 
 export function NoEntitiesEmptyState() {
   const { core } = useApmPluginContext();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { basePath } = core.http;
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.uiNewExperienceCallout',
     false
   );
+
+  useEffect(() => {
+    services.telemetry.reportEntityInventoryPageState({ state: 'empty_state' });
+  }, [services.telemetry]);
 
   return (
     <EuiFlexGroup direction="column">

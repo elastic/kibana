@@ -11,6 +11,7 @@ import {
   SearchQuerySubmittedParams,
   EntityExperienceStatusParams,
   TelemetryEventTypes,
+  EntityInventoryPageStateParams,
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -30,5 +31,9 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportEntityExperienceStatusChange = ({ status }: EntityExperienceStatusParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.ENTITY_EXPERIENCE_STATUS, { status });
+  };
+
+  public reportEntityInventoryPageState = ({ state }: EntityInventoryPageStateParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_PAGE_STATE, { state });
   };
 }
