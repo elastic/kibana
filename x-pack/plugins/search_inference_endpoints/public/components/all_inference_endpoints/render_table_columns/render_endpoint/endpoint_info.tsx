@@ -73,6 +73,8 @@ function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
       return mistralAttributes(endpoint);
     case ServiceProviderKeys.googleaistudio:
       return googleAIStudioAttributes(endpoint);
+    case ServiceProviderKeys.amazonbedrock:
+      return amazonBedrockAttributes(endpoint);
     default:
       return null;
   }
@@ -149,6 +151,22 @@ function mistralAttributes(endpoint: InferenceAPIConfigResponse) {
   return [
     maxInputTokens && `max_input_tokens: ${maxInputTokens}`,
     rateLimit && `rate_limit: ${rateLimit}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+function amazonBedrockAttributes(endpoint: InferenceAPIConfigResponse) {
+  const serviceSettings = endpoint.service_settings;
+
+  const region = 'region' in serviceSettings ? serviceSettings.region : undefined;
+  const provider = 'provider' in serviceSettings ? serviceSettings.provider.toLocaleLowerCase() : undefined;
+  const model = 'model' in serviceSettings ? serviceSettings.model : undefined;
+
+  return [
+    region && `region: ${region}`,
+    provider && `provider: ${provider}`,
+    model && `model: ${model}`,
   ]
     .filter(Boolean)
     .join(', ');

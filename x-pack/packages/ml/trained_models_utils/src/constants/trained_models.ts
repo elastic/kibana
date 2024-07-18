@@ -259,6 +259,16 @@ export type InferenceServiceSettings =
         api_key: string;
         url: string;
       };
+    }
+  | {
+      service: 'amazonbedrock';
+      service_settings: {
+        access_key: string;
+        secret_key: string;
+        region: string;
+        provider: string;
+        model: string;
+      };
     };
 
 export type InferenceAPIConfigResponse = {

@@ -254,4 +254,25 @@ describe('RenderEndpoint component tests', () => {
       expect(screen.queryByText('Rate limit:')).not.toBeInTheDocument();
     });
   });
+
+  describe('with amazonbedrock service', () => {
+    const mockEndpoint = {
+      model_id: 'amazon-bedrock-1',
+      service: 'amazonbedrok',
+      service_settings: {
+        region: 'us-west-1',
+        provider: 'AMAZONTITAN',
+        model: 'model-bedrock-xyz',
+      },
+    } as any;
+
+    it('renders the component with endpoint details', () => {
+      render(<EndpointInfo endpoint={mockEndpoint} />);
+
+      expect(screen.getByText('us-west-1')).toBeInTheDocument();
+      expect(screen.getByText('amazontitan')).toBeInTheDocument();
+      expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
+    });
+  });
+ 
 });
