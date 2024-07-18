@@ -17,7 +17,8 @@ import {
 } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
