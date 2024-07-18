@@ -106,28 +106,12 @@ export class SyntheticsServices {
       async (monitor: Record<string, any>) => {
         await this.requester.request({
           description: 'delete monitor',
-          path: `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.config_id}`,
+          path: `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${monitor.config_id}`,
           method: 'DELETE',
         });
       },
       { concurrency: 10 }
     );
-  }
-
-  async enableDefaultAlertingViaApi() {
-    try {
-      await axios.post(
-        this.kibanaUrl + SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
-        { isDisabled: false },
-        {
-          auth: { username: 'elastic', password: 'changeme' },
-          headers: { 'kbn-xsrf': 'true' },
-        }
-      );
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
-    }
   }
 
   async addTestSummaryDocument({
@@ -158,14 +142,22 @@ export class SyntheticsServices {
 
     let index = 'synthetics-http-default';
 
-    const commonData = { timestamp, monitorId, name, testRunId, locationName, configId };
+    const commonData = {
+      timestamp,
+      name,
+      testRunId,
+      location: {
+        id: 'us_central',
+        label: locationName ?? 'North America - US Central',
+      },
+      configId,
+      monitorId: monitorId ?? configId,
+    };
 
     switch (docType) {
       case 'stepEnd':
         index = 'synthetics-browser-default';
-
         const stepDoc = stepIndex === 1 ? step1(commonData) : step2(commonData);
-
         document = { ...stepDoc, ...document };
         break;
       case 'journeyEnd':
@@ -231,10 +223,41 @@ export class SyntheticsServices {
   }
 
   async getRules() {
-    const response = await axios.post(this.kibanaUrl + '/internal/alerting/rules/_find', {
+    const response = await axios.get(this.kibanaUrl + '/internal/alerting/rules/_find', {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });
-    return response.data;
+    return response.data.data;
+  }
+
+  async setupTestConnector() {
+    const indexConnector = {
+      name: 'test index',
+      config: { index: 'test-index' },
+      secrets: {},
+      connector_type_id: '.index',
+    };
+    const connector = await this.requester.request({
+      path: `/api/actions/connector`,
+      method: 'POST',
+      body: indexConnector,
+    });
+    return connector.data as any;
+  }
+
+  async setupSettings(connectorId?: string) {
+    const settings = {
+      certExpirationThreshold: 30,
+      certAgeThreshold: 730,
+      defaultConnectors: [connectorId],
+      defaultEmail: { to: [], cc: [], bcc: [] },
+      defaultRulesEnabled: true,
+    };
+    const connector = await this.requester.request({
+      path: `/api/synthetics/settings`,
+      method: 'PUT',
+      body: settings,
+    });
+    return connector.data;
   }
 }

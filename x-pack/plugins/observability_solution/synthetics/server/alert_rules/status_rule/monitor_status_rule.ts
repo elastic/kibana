@@ -136,7 +136,7 @@ export const registerSyntheticsStatusCheckRule = (
           }
         }
       } else {
-        const groupByLocation = Boolean(params.condition?.groupByLocation);
+        const groupByLocation = Boolean(params.condition?.groupByLocation ?? true);
         if (groupByLocation) {
           Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
             const { checks } = statusConfig;

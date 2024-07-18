@@ -100,6 +100,7 @@ export const getMonitorSummary = (
     downThreshold,
     timestamp: monitorInfo['@timestamp'],
     monitorTags: monitorInfo.tags,
+    locationNames: monitorInfo.observer?.geo?.name!,
   };
 };
 

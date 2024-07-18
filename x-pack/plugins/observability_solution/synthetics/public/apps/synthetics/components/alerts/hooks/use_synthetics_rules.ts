@@ -74,7 +74,6 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
     }
     return triggersActionsUi.getEditRuleFlyout({
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
-      hideInterval: true,
       initialRule:
         alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules.tlsRule : defaultRules.statusRule,
     });
@@ -89,7 +88,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
       ruleTypeId: alertFlyoutVisible,
       onClose: () => dispatch(setAlertFlyoutVisible(null)),
     });
-  }, [defaultRules, isNewRule, triggersActionsUi, dispatch, alertFlyoutVisible]);
+  }, [isNewRule, triggersActionsUi, dispatch, alertFlyoutVisible]);
 
   return useMemo(
     () => ({ loading, EditAlertFlyout, NewRuleFlyout }),

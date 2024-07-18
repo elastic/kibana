@@ -95,7 +95,7 @@ export function OverviewStatus() {
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={false}>
           <EuiStat
-            data-test-subj="xpack.uptime.synthetics.overview.status.up"
+            data-test-subj="syntheticsOverviewUp"
             description={upDescription}
             reverse
             title={title(statusConfig?.up)}
@@ -105,7 +105,7 @@ export function OverviewStatus() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
-            data-test-subj="xpack.uptime.synthetics.overview.status.down"
+            data-test-subj="syntheticsOverviewDown"
             description={downDescription}
             reverse
             title={title(statusConfig?.down)}

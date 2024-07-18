@@ -23,7 +23,7 @@ import {
 import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ClientPluginsStart } from '../../../../plugin';
 import { STATUS_RULE_NAME, TLS_RULE_NAME, ToggleFlyoutTranslations } from './hooks/translations';
-import { useSyntheticsAlert } from './hooks/use_synthetics_alert';
+import { useSyntheticsAlert } from './hooks/use_synthetics_rules';
 import {
   selectAlertFlyoutVisibility,
   selectMonitorListState,
@@ -78,7 +78,7 @@ export const ToggleAlertFlyoutButton = () => {
         },
         {
           'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
-          'data-test-subj': 'xpack.synthetics.toggleAlertFlyout',
+          'data-test-subj': 'editDefaultStatusRule',
           name: <RuleNameWithLoading ruleName={EDIT_STATUS_RULE} isLoading={loading} />,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNew: false }));
@@ -104,7 +104,7 @@ export const ToggleAlertFlyoutButton = () => {
         },
         {
           'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
-          'data-test-subj': 'xpack.synthetics.toggleAlertFlyout.tls',
+          'data-test-subj': 'editDefaultTlsRule',
           name: <RuleNameWithLoading ruleName={EDIT_TLS_RULE_NAME} isLoading={loading} />,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNew: false }));

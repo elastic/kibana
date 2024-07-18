@@ -8,11 +8,7 @@
 import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import {
-  makeDownSummary,
-  makeUpSummary,
-  PrivateLocationTestService,
-} from '@kbn/observability-synthetics-test-data';
+import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import moment from 'moment';
@@ -23,6 +19,7 @@ import expect from '@kbn/expect';
 import { createRule } from '../helpers/alerting_api_helper';
 import { waitForAlertInIndex } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { PrivateLocationTestService } from './private_location_test_service';
 
 export class SyntheticsRuleHelper {
   supertest: SuperTestAgent;
