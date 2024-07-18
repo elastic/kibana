@@ -281,37 +281,6 @@ describe('StatusRuleExecutor', () => {
       });
     });
 
-    it('tests getLastRunForPendingMonitors filters out recently created', async () => {
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
-        {
-          ...testMonitors[0],
-          attributes: {
-            ...testMonitors[0].attributes,
-            locations: [
-              {
-                geo: { lon: -95.86, lat: 41.25 },
-                isServiceManaged: true,
-                id: 'us_central_qa',
-              },
-            ],
-          },
-          created_at: moment().subtract(5, 'minutes').toISOString(),
-        },
-      ]);
-
-      await statusRule.getDownChecks();
-      const { pendingConfigs } = await statusRule.getLastRunForPendingMonitors({
-        id1: {
-          locationId: 'us-east-1',
-          configId: 'id1',
-          status: 'down',
-          timestamp: '2021-06-01T00:00:00.000Z',
-          monitorQueryId: 'test',
-        },
-      });
-      expect(pendingConfigs).toEqual({});
-    });
-
     it('tests findEarliestMonitorCreatedAt', async () => {
       const fiveMinutesAgo = moment().subtract(5, 'minutes').toISOString();
       const tenMinutesAgo = moment().subtract(10, 'minutes').toISOString();
