@@ -8,6 +8,6 @@
 import { z } from 'zod';
 
 export const getEntityDefinitionQuerySchema = z.object({
-  page: z.optional(z.number()),
-  perPage: z.optional(z.number()),
+  page: z.optional(z.coerce.number()),
+  perPage: z.optional(z.coerce.number()),
 });
