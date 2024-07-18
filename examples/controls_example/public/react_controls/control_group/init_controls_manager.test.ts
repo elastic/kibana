@@ -67,7 +67,7 @@ describe('PresentationContainer api', () => {
   });
 
   describe('untilInitialized', () => {
-    test('should not resolve all controls are initialized', async () => {
+    test('should not resolve until all controls are initialized', async () => {
       const controlsManager = initControlsManager({
         alpha: { type: 'whatever', order: 0 },
         bravo: { type: 'whatever', order: 1 },

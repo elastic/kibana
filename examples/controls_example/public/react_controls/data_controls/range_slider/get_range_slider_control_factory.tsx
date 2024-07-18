@@ -12,6 +12,7 @@ import deepEqual from 'react-fast-compare';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
@@ -71,7 +72,30 @@ export const getRangesliderControlFactory = (
         value$.next(nextValue);
       }
 
-      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
+      function buildFilter(dataView: DataView, fieldName: string, selectedRange: undefined | RangeValue) {
+        const dataViewField =
+          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+        const gte = parseFloat(selectedRange?.[0] ?? '');
+        const lte = parseFloat(selectedRange?.[1] ?? '');
+
+        if (!selectedRange || !dataViewField || isNaN(gte) || isNaN(lte)) {
+          return undefined;
+        }
+
+        const params = {
+          gte,
+          lte,
+        } as RangeFilterParams;
+
+        const filter = buildRangeFilter(dataViewField, params, dataView);
+        filter.meta.key = fieldName;
+        filter.meta.type = 'range';
+        filter.meta.params = params;
+        return filter;
+      }
+
+      const hasInitialSelections = initialState.value !== undefined;
+      const dataControl = await initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
         initialState,
@@ -80,6 +104,8 @@ export const getRangesliderControlFactory = (
           value: value$,
         },
         controlGroupApi,
+        hasInitialSelections,
+        (dataView: DataView, fieldName: string) => buildFilter(dataView, fieldName, value$.value),
         services
       );
 
@@ -172,26 +198,12 @@ export const getRangesliderControlFactory = (
         dataControl.api.dataViews,
         dataControl.stateManager.fieldName,
         value$,
-      ]).subscribe(([dataViews, fieldName, value]) => {
+      ]).subscribe(([dataViews, fieldName, selectedRange]) => {
         const dataView = dataViews?.[0];
-        const dataViewField =
-          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        const gte = parseFloat(value?.[0] ?? '');
-        const lte = parseFloat(value?.[1] ?? '');
-
-        let rangeFilter: Filter | undefined;
-        if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
-          const params = {
-            gte,
-            lte,
-          } as RangeFilterParams;
-
-          rangeFilter = buildRangeFilter(dataViewField, params, dataView);
-          rangeFilter.meta.key = fieldName;
-          rangeFilter.meta.type = 'range';
-          rangeFilter.meta.params = params;
-        }
-        api.setOutputFilter(rangeFilter);
+        const filter = dataView
+          ? buildFilter(dataView, fieldName, selectedRange)
+          : undefined;
+        api.setOutputFilter(filter);
       });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
@@ -207,10 +219,6 @@ export const getRangesliderControlFactory = (
       }).subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
-
-      if (initialState.value !== undefined) {
-        await dataControl.untilFiltersInitialized();
-      }
 
       return {
         api,
