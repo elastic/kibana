@@ -21,7 +21,6 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
   EuiBadge,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -30,8 +29,7 @@ import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 import { useVirtualSearchResults } from './use_virtual_search_results';
-import type { SupportedLogo } from '../../hooks/types';
-import { useIconForLogo } from '../../hooks/use_icon_for_logo';
+import { LogoIcon, SupportedLogo } from '../shared/logo_icon';
 
 interface UseCaseOption {
   id: Category;
@@ -293,12 +291,4 @@ function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
     behavior: 'smooth',
     top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
   });
-}
-
-function LogoIcon({ logo }: { logo: SupportedLogo }) {
-  const iconType = useIconForLogo(logo);
-  if (iconType) {
-    return <EuiIcon type={iconType} />;
-  }
-  return null;
 }

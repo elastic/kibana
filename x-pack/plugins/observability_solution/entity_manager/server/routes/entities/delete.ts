@@ -20,7 +20,7 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.delete<{ id: string }, { deleteData?: boolean }, unknown>(
     {
-      path: '/internal/api/entities/definition/{id}',
+      path: '/internal/entities/definition/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),

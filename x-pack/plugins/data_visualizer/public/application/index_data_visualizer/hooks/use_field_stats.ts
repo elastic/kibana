@@ -195,11 +195,13 @@ export function useFieldStatsSearchStrategy(
       .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>;
 
     const onError = (error: any) => {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
+      // eslint-disable-next-line no-console
+      console.error(
+        i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
           defaultMessage: 'Error fetching field statistics',
         }),
-      });
+        error
+      );
       setFetchState({
         isRunning: false,
         error,
