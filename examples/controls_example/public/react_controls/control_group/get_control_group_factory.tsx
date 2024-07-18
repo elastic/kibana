@@ -25,7 +25,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -64,6 +64,7 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
+import classNames from 'classnames';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -264,41 +265,47 @@ export const getControlGroupEmbeddableFactory = (services: {
           }, []);
 
           return (
-            <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
-              <DndContext
-                onDragStart={({ active }) => setDraggingId(`${active.id}`)}
-                onDragEnd={onDragEnd}
-                onDragCancel={() => setDraggingId(null)}
-                sensors={sensors}
-                measuring={{
-                  droppable: {
-                    strategy: MeasuringStrategy.BeforeDragging,
-                  },
-                }}
-              >
-                <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-                  {controlsInOrder.map(({ id, type }) => (
-                    <ControlRenderer
-                      key={id}
-                      uuid={id}
-                      type={type}
-                      getParentApi={() => api}
-                      onApiAvailable={(controlApi) => {
-                        controlsManager.setControlApi(id, controlApi);
-                      }}
-                    />
-                  ))}
-                </SortableContext>
-                <DragOverlay>
-                  {draggingId ? (
-                    <ControlClone
-                      controlStyle={controlStyle}
-                      controlApi={controlsManager.getControlApi(draggingId)}
-                    />
-                  ) : null}
-                </DragOverlay>
-              </DndContext>
-            </EuiFlexGroup>
+            <EuiPanel
+              borderRadius="m"
+              paddingSize="none"
+              color={draggingId ? 'success' : 'transparent'}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
+                <DndContext
+                  onDragStart={({ active }) => setDraggingId(`${active.id}`)}
+                  onDragEnd={onDragEnd}
+                  onDragCancel={() => setDraggingId(null)}
+                  sensors={sensors}
+                  measuring={{
+                    droppable: {
+                      strategy: MeasuringStrategy.BeforeDragging,
+                    },
+                  }}
+                >
+                  <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
+                    {controlsInOrder.map(({ id, type }) => (
+                      <ControlRenderer
+                        key={id}
+                        uuid={id}
+                        type={type}
+                        getParentApi={() => api}
+                        onApiAvailable={(controlApi) => {
+                          controlsManager.setControlApi(id, controlApi);
+                        }}
+                      />
+                    ))}
+                  </SortableContext>
+                  <DragOverlay>
+                    {draggingId ? (
+                      <ControlClone
+                        controlStyle={controlStyle}
+                        controlApi={controlsManager.getControlApi(draggingId)}
+                      />
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </EuiFlexGroup>
+            </EuiPanel>
           );
         },
       };
