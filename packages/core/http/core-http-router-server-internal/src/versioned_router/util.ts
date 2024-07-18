@@ -43,9 +43,15 @@ function prepareValidation(validation: VersionedRouteValidation<unknown, unknown
     const { unsafe, ...responseValidations } = validation.response;
     const result: VersionedRouteResponseValidation = {};
 
-    for (const [key, { body }] of Object.entries(responseValidations)) {
-      if (!body) continue;
-      result[key as unknown as number] = { body: isCustomValidation(body) ? body : once(body) };
+    for (const [key, value] of Object.entries(responseValidations)) {
+      result[key as unknown as number] = {
+        ...value,
+      };
+      if (value.body) {
+        result[key as unknown as number].body = isCustomValidation(value.body)
+          ? value.body
+          : once(value.body);
+      }
     }
 
     return {
