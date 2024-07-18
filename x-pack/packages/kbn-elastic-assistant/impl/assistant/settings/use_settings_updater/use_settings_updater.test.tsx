@@ -17,7 +17,8 @@ const mockConversations = {
   [alertConvo.title]: alertConvo,
   [welcomeConvo.title]: welcomeConvo,
 };
-const conversationsLoaded = true;
+const conversationsLoaded = false;
+const promptsLoaded = false;
 
 const mockHttp = {
   fetch: jest.fn(),
@@ -112,6 +113,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
@@ -168,6 +170,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
@@ -215,6 +218,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
@@ -242,6 +246,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
@@ -270,6 +275,7 @@ describe('useSettingsUpdater', () => {
             total: 10,
           },
           conversationsLoaded,
+          promptsLoaded,
           anonymizationFields
         )
       );
