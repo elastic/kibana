@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import classNames from 'classnames';
 
-import { EuiFlexGroup } from '@elastic/eui';
 import {
-  closestCenter,
   DndContext,
+  DragEndEvent,
   DragOverlay,
   KeyboardSensor,
   MeasuringStrategy,
@@ -22,10 +20,12 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import {
+  arrayMove,
   rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
+import { EuiFlexGroup } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -50,9 +50,9 @@ import {
   PublishesFilters,
   PublishesTimeslice,
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
+import { ControlClone } from '../control_panel';
 import { ControlRenderer } from '../control_renderer';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
@@ -64,8 +64,6 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { ControlClone } from '../control_panel';
-import { DefaultControlApi } from '../types';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -228,22 +226,13 @@ export const getControlGroupEmbeddableFactory = (services: {
         dataViews.next(newDataViews)
       );
 
-      controlsManager.api.children$.subscribe((children) => {
-        console.log('children changed outside of component', children);
-      });
-
       return {
         api,
         Component: () => {
-          const [controlsInOrder, controlStyle, children] = useBatchedPublishingSubjects(
+          const [controlsInOrder, controlStyle] = useBatchedPublishingSubjects(
             controlsManager.controlsInOrder$,
-            labelPosition$,
-            controlsManager.api.children$
+            labelPosition$
           );
-
-          useEffect(() => {
-            console.log('children changed in component', children);
-          }, [children]);
 
           /** Handle drag and drop */
           const sensors = useSensors(
@@ -251,10 +240,19 @@ export const getControlGroupEmbeddableFactory = (services: {
             useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
           );
           const [draggingId, setDraggingId] = useState<string | null>(null);
-          const draggingIndex = useMemo(
-            () =>
-              draggingId ? controlsInOrder.map((control) => control.id).indexOf(draggingId) : -1,
-            [controlsInOrder, draggingId]
+          const onDragEnd = useCallback(
+            ({ over, active }: DragEndEvent) => {
+              const oldIndex = active?.data.current?.sortable.index;
+              const newIndex = over?.data.current?.sortable.index;
+              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+                controlsManager.setControlOrder(
+                  arrayMove([...controlsInOrder], oldIndex, newIndex)
+                );
+              }
+              (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
+              setDraggingId(null);
+            },
+            [controlsInOrder]
           );
 
           useEffect(() => {
@@ -269,17 +267,14 @@ export const getControlGroupEmbeddableFactory = (services: {
             <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
               <DndContext
                 onDragStart={({ active }) => setDraggingId(`${active.id}`)}
-                onDragEnd={() => {
-                  setDraggingId(null);
-                }}
+                onDragEnd={onDragEnd}
                 onDragCancel={() => setDraggingId(null)}
                 sensors={sensors}
                 measuring={{
                   droppable: {
-                    strategy: MeasuringStrategy.Always,
+                    strategy: MeasuringStrategy.BeforeDragging,
                   },
                 }}
-                collisionDetection={closestCenter}
               >
                 <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
                   {controlsInOrder.map(({ id, type }) => (
@@ -288,7 +283,6 @@ export const getControlGroupEmbeddableFactory = (services: {
                       uuid={id}
                       type={type}
                       getParentApi={() => api}
-                      dragInfo={{ draggingIndex }}
                       onApiAvailable={(controlApi) => {
                         controlsManager.setControlApi(id, controlApi);
                       }}

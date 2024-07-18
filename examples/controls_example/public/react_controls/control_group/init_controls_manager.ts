@@ -88,11 +88,24 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
     controlsInOrder$: controlsInOrder$ as PublishingSubject<Array<{ id: string; type: string }>>,
     getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
-      console.log('SET CONTROL API', children$.getValue(), controlApi);
       children$.next({
         ...children$.getValue(),
         [uuid]: controlApi,
       });
+    },
+    setControlOrder: (
+      newOrder: Array<{
+        id: string;
+        type: string;
+      }>
+    ) => {
+      controlsInOrder$.next(
+        newOrder.map(({ id, type }, index) => ({
+          id,
+          type,
+          order: index,
+        }))
+      );
     },
     serializeControls: () => {
       const references: Reference[] = [];

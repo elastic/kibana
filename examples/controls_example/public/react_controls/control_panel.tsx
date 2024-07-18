@@ -7,7 +7,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -34,16 +34,12 @@ import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
 
 import './control_panel.scss';
-import { DragInfo } from './control_renderer';
-import { ControlWidth } from '@kbn/controls-plugin/common';
 
-/**
- * TODO: Handle dragging
- */
 const DragHandle = ({
   isEditable,
   controlTitle,
   hideEmptyDragHandle,
+  ...rest // drag info is contained here
 }: {
   isEditable: boolean;
   controlTitle?: string;
@@ -51,6 +47,7 @@ const DragHandle = ({
 }) =>
   isEditable ? (
     <button
+      {...rest}
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle: controlTitle ?? '' },
@@ -66,7 +63,6 @@ const DragHandle = ({
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
   uuid,
-  dragInfo,
 }: ControlPanelProps<ApiType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const {
@@ -79,14 +75,10 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     isDragging,
     index,
     isSorting,
-    over,
+    activeIndex,
   } = useSortable({
     id: uuid,
   });
-
-  useEffect(() => {
-    console.log('OVER', over);
-  }, [over]);
 
   const style = {
     transition,
@@ -136,8 +128,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       ref={setNodeRef}
       style={style}
       grow={grow}
-      {...attributes}
-      {...listeners}
       data-control-id={api?.uuid}
       data-test-subj={`control-frame`}
       data-render-complete="true"
@@ -146,10 +136,8 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         'controlFrameWrapper--small': width === 'small',
         'controlFrameWrapper--medium': width === 'medium',
         'controlFrameWrapper--large': width === 'large',
-        'controlFrameWrapper--insertBefore':
-          isOver && (index ?? -1) < (dragInfo.draggingIndex ?? -1),
-        'controlFrameWrapper--insertAfter':
-          isOver && (index ?? -1) > (dragInfo.draggingIndex ?? -1),
+        'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (activeIndex ?? -1),
+        'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (activeIndex ?? -1),
         'controlFrameWrapper-isDragging': isDragging,
       })}
     >
@@ -178,6 +166,8 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
                   hideEmptyDragHandle={usingTwoLineLayout || Boolean(api?.CustomPrependComponent)}
+                  {...attributes}
+                  {...listeners}
                 />
 
                 {api?.CustomPrependComponent ? (
@@ -236,13 +226,12 @@ export const ControlClone = ({
   controlStyle: string;
   controlApi: DefaultControlApi;
 }) => {
-  console.log('controlApi', controlApi);
   const width = useStateFromPublishingSubject(controlApi.width);
-  // const panels = controlGroupSelector((state) => state.explicitInput.panels);
-  // const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const [panelTitle, defaultPanelTitle] = useBatchedOptionalPublishingSubjects(
+    controlApi.panelTitle,
+    controlApi.defaultPanelTitle
+  );
 
-  // const width = panels[draggingId].width;
-  // const title = panels[draggingId].explicitInput.title;
   return (
     <EuiFlexItem
       className={classNames('controlFrameCloneWrapper', {
@@ -252,14 +241,18 @@ export const ControlClone = ({
         'controlFrameCloneWrapper--twoLine': controlStyle === 'twoLine',
       })}
     >
-      {controlStyle === 'twoLine' ? <EuiFormLabel>{'TITLE'}</EuiFormLabel> : undefined}
+      {controlStyle === 'twoLine' ? (
+        <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>
+      ) : undefined}
       <EuiFlexGroup responsive={false} gutterSize="none" className={'controlFrame__draggable'}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
         </EuiFlexItem>
         {controlStyle === 'oneLine' ? (
           <EuiFlexItem>
-            <label className="controlFrameCloneWrapper__label">{'TITLE'}</label>
+            <label className="controlFrameCloneWrapper__label">
+              {panelTitle ?? defaultPanelTitle}
+            </label>
           </EuiFlexItem>
         ) : undefined}
       </EuiFlexGroup>

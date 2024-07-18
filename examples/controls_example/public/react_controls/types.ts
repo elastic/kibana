@@ -104,6 +104,5 @@ export interface ControlPanelProps<
   PropsType extends {} = { className: string }
 > {
   uuid: string;
-  dragInfo: DragInfo;
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }

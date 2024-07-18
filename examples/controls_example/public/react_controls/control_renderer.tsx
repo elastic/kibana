@@ -25,13 +25,11 @@ export const ControlRenderer = <
 >({
   type,
   uuid,
-  dragInfo,
   getParentApi,
   onApiAvailable,
 }: {
   type: string;
   uuid: string;
-  dragInfo: DragInfo;
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
@@ -82,5 +80,5 @@ export const ControlRenderer = <
     [type]
   );
 
-  return <ControlPanel<ApiType> Component={component} uuid={uuid} dragInfo={dragInfo} />;
+  return <ControlPanel<ApiType> Component={component} uuid={uuid} />;
 };
