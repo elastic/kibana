@@ -103,7 +103,6 @@ const esStoreMock = new ElasticsearchStore(
 const defaultProps: AgentExecutorParams<true> = {
   actionsClient,
   bedrockChatEnabled: false,
-  isEnabledKnowledgeBase: true,
   connectorId: mockConnectorId,
   esClient: esClientMock,
   esStore: esStoreMock,

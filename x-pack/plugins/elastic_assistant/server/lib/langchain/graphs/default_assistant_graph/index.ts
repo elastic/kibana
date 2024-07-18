@@ -31,7 +31,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  isEnabledKnowledgeBase,
   assistantTools = [],
   bedrockChatEnabled,
   connectorId,
@@ -92,6 +91,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
+
+  // Check if KB is available
+  const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
@@ -190,6 +192,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       trace_data: graphResponse.traceData,
       replacements,
       status: 'ok',
+      ...(graphResponse.conversationId ? { conversationId: graphResponse.conversationId } : {}),
     },
     headers: {
       'content-type': 'application/json',

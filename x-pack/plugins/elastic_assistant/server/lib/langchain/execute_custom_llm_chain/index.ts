@@ -36,7 +36,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  isEnabledKnowledgeBase,
   assistantTools = [],
   bedrockChatEnabled,
   connectorId,
@@ -53,6 +52,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   size,
   traceOptions,
   dataClients,
+  conversationId,
 }) => {
   const isOpenAI = llmType === 'openai';
   const llmClass = getLlmClass(llmType, bedrockChatEnabled);
@@ -107,7 +107,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
-    isEnabledKnowledgeBase,
+    isEnabledKnowledgeBase: true,
     llm,
     logger,
     modelExists,
@@ -291,6 +291,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       trace_data: traceData,
       replacements,
       status: 'ok',
+      conversationId,
     },
     headers: {
       'content-type': 'application/json',
