@@ -6,14 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { EuiFlyoutHeader } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getNetworkDetailsUrl } from '../../common/components/link_to';
-import {
-  SecuritySolutionLinkAnchor,
-  useGetSecuritySolutionLinkProps,
-} from '../../common/components/links';
+import { SecuritySolutionLinkAnchor } from '../../common/components/links';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { FlyoutHeader } from '../shared/components/flyout_header';
 import { FlyoutTitle } from '../shared/components/flyout_title';
@@ -35,11 +32,10 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {
-    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
-    const { href } = getSecuritySolutionLinkProps({
-      deepLinkId: SecurityPageName.network,
-      path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget),
-    });
+    const href = useMemo(
+      () => getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget),
+      [flowTarget, ip]
+    );
 
     return (
       <FlyoutHeader {...flyoutHeaderProps}>
