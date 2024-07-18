@@ -23,19 +23,17 @@ const isTimelineEventDetailsItems = (
  * Retrieve a host's platform type from either ECS data or Event Details list of items
  * @param data
  */
-export const getHostPlatform = (data: EcsHostData | TimelineEventsDetailsItem[]): Platform | '' => {
-  let platform: Platform | '' = '';
+export const getHostPlatform = (data: EcsHostData | TimelineEventsDetailsItem[]): Platform => {
+  let platform = '';
 
   if (isTimelineEventDetailsItems(data)) {
-    platform = (
-      getAlertDetailsFieldValue({ category: 'host', field: 'host.os.platform' }, data) ||
+    platform = (getAlertDetailsFieldValue({ category: 'host', field: 'host.os.platform' }, data) ||
       getAlertDetailsFieldValue({ category: 'host', field: 'host.os.type' }, data) ||
-      getAlertDetailsFieldValue({ category: 'host', field: 'host.os.name' }, data)
-    ).toLowerCase() as Platform;
+      getAlertDetailsFieldValue({ category: 'host', field: 'host.os.name' }, data)) as Platform;
   } else {
     platform =
       ((data.host?.os?.platform || data.host?.os?.type || data.host?.os?.name) as Platform) || '';
   }
 
-  return platform;
+  return platform.toLowerCase() as Platform;
 };
