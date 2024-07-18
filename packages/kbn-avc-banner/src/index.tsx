@@ -17,7 +17,7 @@ import avcBannerBackground from './avc_banner_background.svg';
 export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const bannerTitle = i18n.translate('xpack.securitySolution.common.avcResultsBanner.title', {
+  const bannerTitle = i18n.translate('avcBanner.title', {
     defaultMessage: '100% protection with zero false positives.',
   });
 
@@ -39,7 +39,7 @@ export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDi
       data-test-subj="avcResultsBanner"
     >
       <FormattedMessage
-        id="xpack.securitySolution.common.avcResultsBanner.body"
+        id="avcBanner.body"
         defaultMessage="Elastic Security shines in Malware Protection Test by AV-Comparatives"
       />
       <EuiSpacer size="s" />
@@ -50,10 +50,7 @@ export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDi
         target="_blank"
         data-test-subj="avcReadTheBlog"
       >
-        <FormattedMessage
-          id="xpack.securitySolution.common.avcResults.readTheBlog.link"
-          defaultMessage="Read the blog"
-        />
+        <FormattedMessage id="avcBanner.readTheBlog.link" defaultMessage="Read the blog" />
       </EuiButton>
     </EuiCallOut>
   );
