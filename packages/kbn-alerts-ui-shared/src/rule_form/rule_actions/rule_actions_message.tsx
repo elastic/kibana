@@ -22,7 +22,7 @@ interface RuleActionsMessageProps {
   connector: ActionConnector;
   actionTypes: ActionType[];
   producerId: string;
-  warning: string | null;
+  warning?: string | null;
   onParamsChange: (key: string, value: RuleActionParam) => void;
 }
 
@@ -87,7 +87,7 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
 
   return (
     <EuiErrorBoundary>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" data-test-subj="ruleActionsMessage">
         <EuiFlexItem>
           <Suspense fallback={null}>
             <ParamsFieldsComponent

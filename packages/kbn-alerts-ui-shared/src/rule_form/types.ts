@@ -49,7 +49,7 @@ export interface RuleFormPlugins {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   application: ApplicationStart;
-  notification: NotificationsStart;
+  notifications: NotificationsStart;
   charts: ChartsPluginSetup;
   settings: SettingsStart;
   data: DataPublicPluginStart;

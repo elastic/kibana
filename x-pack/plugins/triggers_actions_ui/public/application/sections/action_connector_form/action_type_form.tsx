@@ -46,6 +46,7 @@ import {
 import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import { RuleActionsNotifyWhen } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_notify_when';
+import { RuleActionsAlertsFilter } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter';
 import { RuleActionsAlertsFilterTimeframe } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_alerts_filter_timeframe';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
@@ -66,7 +67,6 @@ import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
 
@@ -155,6 +155,9 @@ export const ActionTypeForm = ({
     application: { capabilities },
     settings,
     http,
+    notifications,
+    unifiedSearch,
+    dataViews,
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -501,17 +504,23 @@ export const ActionTypeForm = ({
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
             <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
-              <ActionAlertsFilterQuery
-                state={actionItem.alertsFilter?.query}
+              <RuleActionsAlertsFilter
+                action={actionItem}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
                 featureIds={[producerId as ValidFeatureId]}
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
+                plugins={{
+                  http,
+                  unifiedSearch,
+                  dataViews,
+                  notifications,
+                }}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
             <RuleActionsAlertsFilterTimeframe
-              state={actionItem.alertsFilter?.timeframe}
+              action={actionItem}
               settings={settings}
               onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />

@@ -133,6 +133,7 @@ export const RuleActions = () => {
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiButton
+        data-test-subj="ruleActionsAddActionButton"
         iconType="push"
         iconSide="left"
         onClick={onModalOpen}

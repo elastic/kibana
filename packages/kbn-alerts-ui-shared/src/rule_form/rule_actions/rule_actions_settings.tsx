@@ -16,7 +16,6 @@ import {
   RuleActionFrequency,
 } from '@kbn/alerting-types';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
-import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import { useRuleFormState } from '../hooks';
 import { RuleAction, RuleTypeWithDescription } from '../../common';
 import {
@@ -28,6 +27,8 @@ import {
   parseDuration,
 } from '../utils';
 import { DEFAULT_VALID_CONSUMERS } from '../constants';
+
+import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
 import { RuleActionsAlertsFilterTimeframe } from './rule_actions_alerts_filter_timeframe';
 
@@ -179,7 +180,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     }) || producerId === AlertConsumers.SIEM;
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" data-test-subj="ruleActionsSettings">
       <EuiFlexItem>
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -202,10 +203,12 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
                     {ACTION_GROUP_RUN_WHEN}
                   </EuiFormLabel>
                 }
+                data-test-subj="ruleActionsSettingsSelectActionGroup"
                 fullWidth
                 id={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
                 options={actionGroups.map(({ id: value, name }) => ({
                   value,
+                  ['data-test-subj']: `addNewActionConnectorActionGroup-${value}`,
                   inputDisplay: actionGroupDisplay({
                     ruleType: selectedRuleType,
                     actionGroupId: value,
@@ -235,7 +238,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
                 isInvalid={!!actionError.filterQuery?.length}
               >
                 <RuleActionsAlertsFilter
-                  state={action.alertsFilter?.query}
+                  action={action}
                   onChange={onAlertsFilterChange}
                   featureIds={[
                     producerId === 'alerts' ? 'stackAlerts' : (producerId as ValidFeatureId),
@@ -247,8 +250,8 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <RuleActionsAlertsFilterTimeframe
+                action={action}
                 settings={settings}
-                state={action.alertsFilter?.timeframe}
                 onChange={onTimeframeChange}
               />
             </EuiFlexItem>

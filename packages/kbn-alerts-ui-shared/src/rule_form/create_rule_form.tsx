@@ -54,8 +54,8 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     returnUrl,
   } = props;
 
-  const { http, docLinks, notification, ruleTypeRegistry, i18n, theme } = plugins;
-  const { toasts } = notification;
+  const { http, docLinks, notifications, ruleTypeRegistry, i18n, theme } = plugins;
+  const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
@@ -81,7 +81,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } =
     useLoadDependencies({
       http,
-      toasts: notification.toasts,
+      toasts: notifications.toasts,
       ruleTypeRegistry,
       ruleTypeId,
       consumer,

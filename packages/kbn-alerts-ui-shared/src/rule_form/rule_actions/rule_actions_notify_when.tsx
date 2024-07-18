@@ -146,7 +146,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   },
 ];
 
-interface RuleActionsNotifyWhenProps {
+export interface RuleActionsNotifyWhenProps {
   frequency: RuleAction['frequency'];
   throttle: number | null;
   throttleUnit: string;

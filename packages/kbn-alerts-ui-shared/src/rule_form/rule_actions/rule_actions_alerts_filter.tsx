@@ -6,61 +6,64 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import { AlertsFilter } from '@kbn/alerting-types';
-import AlertsSearchBar from '../../alerts_search_bar';
+import { AlertsSearchBar } from '../../alerts_search_bar';
 import { useRuleFormState } from '../hooks';
+import { RuleAction } from '../../common';
+import { RuleFormPlugins } from '../types';
 
-interface RuleActionsAlertsFilterProps {
-  state?: AlertsFilter['query'];
+const DEFAULT_QUERY = { kql: '', filters: [] };
+
+export interface RuleActionsAlertsFilterProps {
+  action: RuleAction;
   onChange: (update?: AlertsFilter['query']) => void;
   appName: string;
   featureIds: ValidFeatureId[];
   ruleTypeId?: string;
+  plugins?: {
+    http: RuleFormPlugins['http'];
+    notifications: RuleFormPlugins['notifications'];
+    unifiedSearch: RuleFormPlugins['unifiedSearch'];
+    dataViews: RuleFormPlugins['dataViews'];
+  };
 }
 
 export const RuleActionsAlertsFilter = ({
-  state,
+  action,
   onChange,
   appName,
   featureIds,
   ruleTypeId,
+  plugins: propsPlugins,
 }: RuleActionsAlertsFilterProps) => {
+  const { plugins } = useRuleFormState();
   const {
-    plugins: {
-      http,
-      notification: { toasts },
-      unifiedSearch,
-      dataViews,
-    },
-  } = useRuleFormState();
+    http,
+    notifications: { toasts },
+    unifiedSearch,
+    dataViews,
+  } = plugins || propsPlugins || {};
 
-  const [query, setQuery] = useState(state ?? { kql: '', filters: [] });
+  const query = action.alertsFilter?.query;
 
-  const queryEnabled = useMemo(() => Boolean(state), [state]);
+  const toggleQuery = useCallback(() => {
+    onChange(query ? undefined : DEFAULT_QUERY);
+  }, [query, onChange]);
 
-  useEffect(() => {
-    const nextState = queryEnabled ? query : undefined;
-    if (!deepEqual(state, nextState)) onChange(nextState);
-  }, [queryEnabled, query, state, onChange]);
-
-  const toggleQuery = useCallback(
-    () => onChange(state ? undefined : query),
-    [state, query, onChange]
-  );
   const updateQuery = useCallback(
     (update: Partial<AlertsFilter['query']>) => {
-      setQuery({
-        ...query,
+      const newQuery = {
+        ...(query || DEFAULT_QUERY),
         ...update,
-      });
+      };
+      onChange(newQuery);
     },
-    [query, setQuery]
+    [query, onChange]
   );
 
   const onQueryChange = useCallback(
@@ -82,11 +85,11 @@ export const RuleActionsAlertsFilter = ({
             defaultMessage: 'If alert matches a query',
           }
         )}
-        checked={queryEnabled}
+        checked={!!query}
         onChange={toggleQuery}
         data-test-subj="alertsFilterQueryToggle"
       />
-      {queryEnabled && (
+      {query && (
         <>
           <EuiSpacer size="s" />
           <AlertsSearchBar

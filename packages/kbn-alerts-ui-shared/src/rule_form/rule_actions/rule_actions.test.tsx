@@ -10,6 +10,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { RuleActions } from './rule_actions';
+import {
+  getActionType,
+  getAction,
+  getSystemAction,
+  getConnector,
+} from '../../common/test_utils/actions_test_utils';
+import { RuleActionsConnectorsModalProps } from './rule_actions_connectors_modal';
+import userEvent from '@testing-library/user-event';
 
 const http = httpServiceMock.createStartContract();
 
@@ -19,15 +27,27 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./rule_actions_system_actions_item', () => ({
-  RuleActionsSystemActionsItem: <div>RuleActionsSystemActionsItem</div>,
+  RuleActionsSystemActionsItem: () => <div>RuleActionsSystemActionsItem</div>,
 }));
 
 jest.mock('./rule_actions_item', () => ({
-  RuleActionsItem: <div>RuleActionsItem</div>,
+  RuleActionsItem: () => <div>RuleActionsItem</div>,
 }));
 
 jest.mock('./rule_actions_connectors_modal', () => ({
-  RuleActionsConnectorsModal: <div>RuleActionsConnectorsModal</div>,
+  RuleActionsConnectorsModal: ({
+    onSelectConnector,
+    connectors,
+  }: RuleActionsConnectorsModalProps) => (
+    <div>
+      RuleActionsConnectorsModal
+      <button onClick={() => onSelectConnector(connectors[0])}>select connector</button>
+    </div>
+  ),
+}));
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
 jest.mock('../../common/hooks', () => ({
@@ -40,16 +60,26 @@ const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 const { useLoadConnectors, useLoadConnectorTypes, useLoadRuleTypeAadTemplateField } =
   jest.requireMock('../../common/hooks');
 
+const mockConnectors = [getConnector('1')];
+const mockConnectorTypes = [
+  getActionType('1'),
+  getActionType('2'),
+  getActionType('3', { isSystemActionType: true }),
+];
+
+const mockActions = [getAction('1'), getAction('2')];
+const mockSystemActions = [getSystemAction('3')];
+
 const mockOnChange = jest.fn();
 
-describe('Rule actions', () => {
+describe('ruleActions', () => {
   beforeEach(() => {
     useLoadConnectors.mockReturnValue({
-      data: [],
+      data: mockConnectors,
       isInitialLoading: false,
     });
     useLoadConnectorTypes.mockReturnValue({
-      data: [],
+      data: mockConnectorTypes,
       isInitialLoading: false,
     });
     useLoadRuleTypeAadTemplateField.mockReturnValue({
@@ -61,7 +91,7 @@ describe('Rule actions', () => {
         http,
       },
       formData: {
-        actions: [],
+        actions: [...mockActions, ...mockSystemActions],
         consumer: 'stackAlerts',
       },
       selectedRuleType: {
@@ -77,9 +107,69 @@ describe('Rule actions', () => {
     jest.clearAllMocks();
   });
 
-  test('Renders correctly', () => {
+  test('renders correctly', () => {
     render(<RuleActions />);
 
     expect(screen.getByTestId('ruleActions')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionsAddActionButton')).toBeInTheDocument();
+    expect(screen.queryByText('RuleActionsConnectorsModal')).not.toBeInTheDocument();
+  });
+
+  test('renders actions correctly', () => {
+    render(<RuleActions />);
+
+    expect(screen.getAllByText('RuleActionsItem').length).toEqual(2);
+    expect(screen.getAllByText('RuleActionsSystemActionsItem').length).toEqual(1);
+  });
+
+  test('should show no actions if none are selected', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        http,
+      },
+      formData: {
+        actions: [],
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: {
+        id: 'selectedRuleTypeId',
+        defaultActionGroupId: 'test',
+        producer: 'stackAlerts',
+      },
+    });
+
+    render(<RuleActions />);
+    expect(screen.queryAllByText('RuleActionsItem').length).toEqual(0);
+    expect(screen.queryAllByText('RuleActionsSystemActionsItem').length).toEqual(0);
+  });
+
+  test('should be able to open the connector modal', () => {
+    render(<RuleActions />);
+
+    userEvent.click(screen.getByTestId('ruleActionsAddActionButton'));
+    expect(screen.getByText('RuleActionsConnectorsModal')).toBeInTheDocument();
+  });
+
+  test('should call onSelectConnector with the correct parameters', () => {
+    render(<RuleActions />);
+
+    userEvent.click(screen.getByTestId('ruleActionsAddActionButton'));
+    expect(screen.getByText('RuleActionsConnectorsModal')).toBeInTheDocument();
+
+    userEvent.click(screen.getByText('select connector'));
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: {
+        actionTypeId: 'actionType-1',
+        frequency: { notifyWhen: 'onActionGroupChange', summary: false, throttle: null },
+        group: 'test',
+        id: 'connector-1',
+        params: {},
+        uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      },
+      type: 'addAction',
+    });
+
+    expect(screen.queryByText('RuleActionsConnectorsModal')).not.toBeInTheDocument();
   });
 });

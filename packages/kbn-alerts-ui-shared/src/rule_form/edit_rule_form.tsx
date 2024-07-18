@@ -32,8 +32,8 @@ export interface EditRuleFormProps {
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
   const { id, plugins, returnUrl } = props;
-  const { http, notification, docLinks, ruleTypeRegistry, i18n, theme } = plugins;
-  const { toasts } = notification;
+  const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme } = plugins;
+  const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
     http,
@@ -59,7 +59,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError, fetchedFormData } =
     useLoadDependencies({
       http,
-      toasts: notification.toasts,
+      toasts: notifications.toasts,
       ruleTypeRegistry,
       id,
     });
