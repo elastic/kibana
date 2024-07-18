@@ -47,6 +47,7 @@ export const runAgent = async ({
     config
   );
   return {
+    ...state,
     agentOutcome,
   };
 };
