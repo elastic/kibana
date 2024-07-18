@@ -73,14 +73,10 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     margin-top: 3px;
   }
 
-  .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
+  .udtTimeline
+    .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn:not([data-gridcell-column-id='select']) {
     padding: 0;
     position: relative;
-
-    &[data-gridcell-column-id='select'] {
-      ${({ theme }) => `padding-top: ${theme.eui.euiSizeS};`};
-      ${({ theme }) => `padding-left: ${theme.eui.euiSizeXS};`};
-    }
   }
 
   .udtTimeline .euiDataGridRowCell--controlColumn {
