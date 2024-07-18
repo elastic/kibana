@@ -15,7 +15,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.get<unknown, { page?: number; perPage?: number }, unknown>(
     {
-      path: '/internal/api/entities/definition',
+      path: '/internal/entities/definition',
       validate: {
         query: schema.object({
           page: schema.maybe(schema.number()),
