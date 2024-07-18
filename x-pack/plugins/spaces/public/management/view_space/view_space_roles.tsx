@@ -308,7 +308,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           )}
         >
           <EuiButtonGroup
-            name="spacePrivilege"
             legend="select the privilege for the features enabled in this space"
             options={[
               {

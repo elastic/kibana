@@ -12,7 +12,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Space } from '../../../../common';
 import { getTabs, type GetTabsProps, type ViewSpaceTab } from '../view_space_tabs';
 
-type UseTabsProps = Omit<GetTabsProps, 'space' | 'features'> & {
+type UseTabsProps = Pick<GetTabsProps, 'roles' | 'capabilities'> & {
   space: Space | null;
   features: KibanaFeature[] | null;
   currentSelectedTabId: string;
