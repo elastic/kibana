@@ -54,6 +54,7 @@ export const registerUsageCountersSavedObjectTypes = (
         counterName: { type: 'keyword' },
         counterType: { type: 'keyword' },
         source: { type: 'keyword' },
+        count: { type: 'integer' },
       },
     },
   });

@@ -54,7 +54,8 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { forceStopAndCloseJob } from '../../../../support/machine_learning';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
-describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
+// https://github.com/elastic/kibana/issues/187622
+describe('Machine Learning rules', { tags: ['@ess', '@serverless, @skipInServerlessMKI'] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');

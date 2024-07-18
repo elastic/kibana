@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { createEsParams, UptimeEsClient } from '../lib';
+import { createEsParams, SyntheticsEsClient } from '../lib';
 import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
 export interface GetJourneyDetails {
@@ -16,10 +16,10 @@ export interface GetJourneyDetails {
 type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
 
 export const getJourneyDetails = async ({
-  uptimeEsClient,
+  syntheticsEsClient,
   checkGroup,
 }: GetJourneyDetails & {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
   const params = createEsParams({
     body: {
@@ -43,7 +43,7 @@ export const getJourneyDetails = async ({
     },
   });
 
-  const { body: thisJourney } = await uptimeEsClient.search<DocumentSource, typeof params>(
+  const { body: thisJourney } = await syntheticsEsClient.search<DocumentSource, typeof params>(
     params,
     'getJourneyDetailsCurrentJourney'
   );
@@ -143,11 +143,11 @@ export const getJourneyDetails = async ({
     });
 
     const [previousJourneyPromise, nextJourneyPromise] = await Promise.all([
-      uptimeEsClient.search<JourneyStep, typeof previousParams>(
+      syntheticsEsClient.search<JourneyStep, typeof previousParams>(
         previousParams,
         'getJourneyDetailsPreviousJourney'
       ),
-      uptimeEsClient.search<JourneyStep, typeof nextParams>(
+      syntheticsEsClient.search<JourneyStep, typeof nextParams>(
         nextParams,
         'getJourneyDetailsNextJourney'
       ),

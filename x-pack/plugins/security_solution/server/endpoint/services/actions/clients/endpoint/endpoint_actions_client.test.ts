@@ -263,7 +263,8 @@ describe('EndpointActionsClient', () => {
     });
   });
 
-  it('should create an action with error', async () => {
+  it('should create an action with error and not trow when in automated mode', async () => {
+    classConstructorOptions.isAutomated = true;
     await endpointActionsClient.isolate(getCommonResponseActionOptions(), {
       error: 'something is wrong',
     });
@@ -283,7 +284,8 @@ describe('EndpointActionsClient', () => {
     );
   });
 
-  it('should create an action with error when agents are invalid', async () => {
+  it('should create an action with error when agents are invalid (automated mode)', async () => {
+    classConstructorOptions.isAutomated = true;
     // @ts-expect-error mocking this for testing purposes
     endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
       isValid: false,

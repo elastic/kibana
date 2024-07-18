@@ -81,6 +81,12 @@ export const allowedExperimentalValues = Object.freeze({
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: true,
 
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: false,
+
+  /** Enable the `processes` response actions for SentinelOne */
+  responseActionsSentinelOneProcessesEnabled: false,
+
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
@@ -103,11 +109,6 @@ export const allowedExperimentalValues = Object.freeze({
   alertTypeEnabled: false,
 
   /**
-   * Disables expandable flyout
-   */
-  expandableFlyoutDisabled: false,
-
-  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
@@ -123,13 +124,12 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
 
@@ -208,9 +208,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   timelineEsqlTabDisabled: false,
   /*
-   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
    */
-  unifiedComponentsInTimelineEnabled: false,
+  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
@@ -238,11 +238,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
    */
   unifiedManifestEnabled: true,
-
-  /**
-   *  Enables Security AI Assistant's Flyout mode
-   */
-  aiAssistantFlyoutMode: true,
 
   /**
    * Enables the new modal for the value list items
