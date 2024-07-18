@@ -8,14 +8,16 @@
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import { Header } from './header';
 import backgroundImageUrl from './background.svg';
 import { KubernetesHeaderSection } from './kubernetes_header';
 
-export function HeaderSection() {
-  const path = useLocation().pathname;
-  if (path === '/kubernetes') {
+interface Props {
+  pathname: string;
+}
+
+export function HeaderSection({ pathname }: Props) {
+  if (pathname.startsWith('/kubernetes')) {
     return <KubernetesHeaderSection />;
   }
   return (

@@ -37,7 +37,7 @@ export function ObservabilityOnboardingFlow() {
           padding-top: 0px !important;
         `}
       >
-        <HeaderSection />
+        <HeaderSection pathname={pathname} />
         <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
           <Routes>
             <Route path="/auto-detect">
