@@ -442,6 +442,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
         );
+
+        // verify popular fields were persisted
+        await browser.refresh();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
+        );
       });
 
       it('should show selected and available fields in ES|QL mode', async function () {

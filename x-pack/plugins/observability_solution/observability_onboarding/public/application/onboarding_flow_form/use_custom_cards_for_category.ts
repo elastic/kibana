@@ -117,6 +117,7 @@ export function useCustomCardsForCategory(
           id: 'kubernetes-quick-start',
           type: 'virtual',
           title: 'Kubernetes',
+          release: 'preview',
           description: 'Collect logs and metrics from Kubernetes using minimal configuration',
           name: 'kubernetes-quick-start',
           categories: ['observability'],
