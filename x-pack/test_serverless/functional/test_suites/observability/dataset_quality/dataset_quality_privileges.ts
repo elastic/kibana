@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags(['failsOnMKI']);
 
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+      await PageObjects.svlCommonPage.loginAsViewer();
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
       await PageObjects.datasetQuality.navigateTo();
