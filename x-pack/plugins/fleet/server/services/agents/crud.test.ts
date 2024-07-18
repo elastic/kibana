@@ -436,6 +436,17 @@ describe('Agents CRUD test', () => {
         );
       });
 
+      it('should not add unenrolled filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'status:unenrolled',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['status:unenrolled'])!)
+        );
+      });
+
       it('should add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
           showInactive: false,

@@ -38,6 +38,9 @@ const INACTIVE_AGENT_CONDITION = `status:inactive`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
+const includeUnenrolled = (kuery?: string) =>
+  kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
+
 export function _joinFilters(
   filters: Array<string | undefined | KueryNode>
 ): KueryNode | undefined {
@@ -158,7 +161,7 @@ export async function getAgentTags(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
-  if (!kuery?.toLowerCase().includes('status:*')) {
+  if (!includeUnenrolled(kuery)) {
     filters.push(ENROLLED_AGENT_CONDITION);
   }
 
@@ -241,7 +244,7 @@ export async function getAgentsByKuery(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
-  if (!kuery?.toLowerCase().includes('status:*')) {
+  if (!includeUnenrolled(kuery)) {
     filters.push(ENROLLED_AGENT_CONDITION);
   }
 
