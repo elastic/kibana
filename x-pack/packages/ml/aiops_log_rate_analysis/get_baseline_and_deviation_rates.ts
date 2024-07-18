@@ -29,17 +29,19 @@ export function getBaselineAndDeviationRates(
   deviationBuckets: number,
   docCount: number,
   bgCount: number
-) {
-  let baselineBucketRate;
-  let deviationBucketRate;
-  if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
-    baselineBucketRate = Math.round(bgCount / baselineBuckets);
-    deviationBucketRate = Math.round(docCount / deviationBuckets);
+): { baselineBucketRate: number; deviationBucketRate: number } {
+  if (baselineBuckets === 0 || deviationBuckets === 0) {
+    return { baselineBucketRate: 0, deviationBucketRate: 0 };
+  } else if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
+    return {
+      baselineBucketRate: Math.round(bgCount / baselineBuckets),
+      deviationBucketRate: Math.round(docCount / deviationBuckets),
+    };
   } else {
     // For dip, the "doc count" refers to the amount of documents in the baseline time range so we set baselineBucketRate
-    baselineBucketRate = Math.round(docCount / baselineBuckets);
-    deviationBucketRate = Math.round(bgCount / deviationBuckets);
+    return {
+      baselineBucketRate: Math.round(docCount / baselineBuckets),
+      deviationBucketRate: Math.round(bgCount / deviationBuckets),
+    };
   }
-
-  return { baselineBucketRate, deviationBucketRate };
 }
