@@ -39,7 +39,7 @@ export const stackFeatureIds: AlertConsumers[] = [AlertConsumers.STACK_ALERTS, A
 
 export const [_, ...observabilityApps] = observabilityFeatureIds;
 
-export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
+export const alertProducersData: Record<Exclude<AlertConsumers, 'alerts'>, AlertProducerData> = {
   [AlertConsumers.OBSERVABILITY]: {
     displayName: OBSERVABILITY_DISPLAY_NAME,
     icon: 'logoObservability',

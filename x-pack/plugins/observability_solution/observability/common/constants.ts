@@ -20,6 +20,7 @@ export const observabilityAlertFeatureIds: ValidFeatureId[] = [
   AlertConsumers.UPTIME,
   AlertConsumers.SLO,
   AlertConsumers.OBSERVABILITY,
+  AlertConsumers.ALERTS,
 ];
 
 export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[] = [
