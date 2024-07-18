@@ -21,8 +21,11 @@ import {
 } from '../queue_field_candidates';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
-import { getHistogramIntervalMs } from '../get_histogram_interval_ms';
 import { getLogRateAnalysisParametersFromAlert } from '../get_log_rate_analysis_parameters_from_alert';
+import { getSwappedWindowParameters } from '../get_swapped_window_parameters';
+import { getLogRateChange } from '../get_log_rate_change';
+import { getBaselineAndDeviationRates } from '../get_baseline_and_deviation_rates';
+import { getLogRateAnalysisTypeForCounts } from '../get_log_rate_analysis_type_for_counts';
 
 import { fetchIndexInfo } from './fetch_index_info';
 import { fetchSignificantCategories } from './fetch_significant_categories';
@@ -113,8 +116,6 @@ export const fetchLogRateAnalysisForAlert = async ({
     searchQuery.bool.filter.push(rangeQuery);
   }
 
-  const intervalMs = getHistogramIntervalMs(earliestMs, latestMs);
-
   // FIELD CANDIDATES
 
   const includeFieldCandidates =
@@ -139,31 +140,23 @@ export const fetchLogRateAnalysisForAlert = async ({
     },
   });
 
-  const baselineNumBuckets =
-    (windowParameters.baselineMax - windowParameters.baselineMin) / intervalMs;
-  const baselinePerBucket = indexInfo.baselineTotalDocCount / baselineNumBuckets;
-
-  const deviationNumBuckets =
-    (windowParameters.deviationMax - windowParameters.deviationMin) / intervalMs;
-  const deviationPerBucket = indexInfo.deviationTotalDocCount / deviationNumBuckets;
+  const logRateAnalysisType = getLogRateAnalysisTypeForCounts({
+    baselineCount: indexInfo.baselineTotalDocCount,
+    deviationCount: indexInfo.deviationTotalDocCount,
+    windowParameters,
+  });
 
   const analysisWindowParameters =
-    deviationPerBucket > baselinePerBucket
+    logRateAnalysisType === 'spike'
       ? windowParameters
-      : {
-          baselineMin: windowParameters.deviationMin,
-          baselineMax: windowParameters.deviationMax,
-          deviationMin: windowParameters.baselineMin,
-          deviationMax: windowParameters.baselineMax,
-        };
-
-  const logRateType = deviationPerBucket > baselinePerBucket ? 'spike' : 'dip';
+      : getSwappedWindowParameters(windowParameters);
 
   const params: AiopsLogRateAnalysisSchema = {
     ...indexInfoParams,
     ...analysisWindowParameters,
   };
 
+  keywordFieldCandidates.push(...indexInfo.keywordFieldCandidates);
   textFieldCandidates.push(...indexInfo.textFieldCandidates);
   const sampleProbability = getSampleProbability(
     indexInfo.deviationTotalDocCount + indexInfo.baselineTotalDocCount
@@ -243,24 +236,34 @@ export const fetchLogRateAnalysisForAlert = async ({
     .filter(({ bg_count: bgCount, doc_count: docCount }) => {
       return docCount > bgCount;
     })
-    .map(({ fieldName, fieldValue, type, doc_count: docCount, bg_count: bgCount }) => ({
-      field: fieldName,
-      value: fieldValue,
-      type: (type === 'keyword'
-        ? 'metadata'
-        : 'log message pattern') as SimpleSignificantItem['type'],
-      documentCount: docCount,
-      baselineCount: bgCount,
-      logRateChangeSort: bgCount > 0 ? docCount / bgCount : docCount,
-      logRateChange:
-        bgCount > 0
-          ? logRateType === 'spike'
-            ? `${Math.round((docCount / bgCount) * 100) / 100}x increase`
-            : `${Math.round((bgCount / docCount) * 100) / 100}x decrease`
-          : logRateType === 'spike'
-          ? `${docCount} docs up from 0 in baseline`
-          : `0 docs down from ${docCount} in baseline`,
-    }))
+    .map(({ fieldName, fieldValue, type, doc_count: docCount, bg_count: bgCount }) => {
+      const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
+        logRateAnalysisType,
+        // Normalize the amount of baseline buckets based on treating the
+        // devation duration as 1 bucket.
+        (windowParameters.baselineMax - windowParameters.baselineMin) /
+          (windowParameters.deviationMax - windowParameters.deviationMin),
+        1,
+        docCount,
+        bgCount
+      );
+
+      return {
+        field: fieldName,
+        value: fieldValue,
+        type: (type === 'keyword'
+          ? 'metadata'
+          : 'log message pattern') as SimpleSignificantItem['type'],
+        documentCount: docCount,
+        baselineCount: bgCount,
+        logRateChangeSort: bgCount > 0 ? docCount / bgCount : docCount,
+        logRateChange: getLogRateChange(
+          logRateAnalysisType,
+          baselineBucketRate,
+          deviationBucketRate
+        ).message,
+      };
+    })
     .sort((a, b) => b.logRateChangeSort - a.logRateChangeSort);
 
   return { significantItems };
