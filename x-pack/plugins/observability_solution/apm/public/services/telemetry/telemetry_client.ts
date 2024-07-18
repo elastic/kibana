@@ -12,6 +12,7 @@ import {
   EntityExperienceStatusParams,
   TelemetryEventTypes,
   EntityInventoryPageStateParams,
+  EntityInventoryAddDataParams,
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -29,11 +30,15 @@ export class TelemetryClient implements ITelemetryClient {
     });
   };
 
-  public reportEntityExperienceStatusChange = ({ status }: EntityExperienceStatusParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_EXPERIENCE_STATUS, { status });
+  public reportEntityExperienceStatusChange = (params: EntityExperienceStatusParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_EXPERIENCE_STATUS, params);
   };
 
-  public reportEntityInventoryPageState = ({ state }: EntityInventoryPageStateParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_PAGE_STATE, { state });
+  public reportEntityInventoryPageState = (params: EntityInventoryPageStateParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_PAGE_STATE, params);
+  };
+
+  public reportEntityInventoryAddData = (params: EntityInventoryAddDataParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA, params);
   };
 }

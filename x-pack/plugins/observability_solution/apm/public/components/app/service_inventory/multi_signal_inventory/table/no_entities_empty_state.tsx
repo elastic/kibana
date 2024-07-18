@@ -29,6 +29,7 @@ import {
 } from '../../../../shared/add_data_buttons/buttons';
 import { useKibana } from '../../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
+import { EntityInventoryAddDataParams } from '../../../../../services/telemetry';
 
 export function NoEntitiesEmptyState() {
   const { core } = useApmPluginContext();
@@ -42,6 +43,13 @@ export function NoEntitiesEmptyState() {
   useEffect(() => {
     services.telemetry.reportEntityInventoryPageState({ state: 'empty_state' });
   }, [services.telemetry]);
+
+  function reportButtonClick(journey: EntityInventoryAddDataParams['journey']) {
+    services.telemetry.reportEntityInventoryAddData({
+      type: 'empty_state',
+      journey,
+    });
+  }
 
   return (
     <EuiFlexGroup direction="column">
@@ -83,9 +91,23 @@ export function NoEntitiesEmptyState() {
           actions={
             <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
               <EuiFlexGroup direction="row" gutterSize="xs">
-                <AddApmAgent basePath={basePath} />
-                <AssociateServiceLogs />
-                <CollectServiceLogs basePath={basePath} />
+                <AddApmAgent
+                  basePath={basePath}
+                  onClick={() => {
+                    reportButtonClick('add_apm_agent');
+                  }}
+                />
+                <AssociateServiceLogs
+                  onClick={() => {
+                    reportButtonClick('associate_existing_service_logs');
+                  }}
+                />
+                <CollectServiceLogs
+                  basePath={basePath}
+                  onClick={() => {
+                    reportButtonClick('collect_new_service_logs');
+                  }}
+                />
               </EuiFlexGroup>
 
               {!userHasDismissedCallout && (

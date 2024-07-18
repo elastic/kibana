@@ -57,8 +57,30 @@ const entityInventoryPageStateEventType: TelemetryEvent = {
   },
 };
 
+const entityInventoryAddDataEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA,
+  schema: {
+    type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Where the action was initiated (empty_state or add_data_button or add_apm_cta)',
+      },
+    },
+    journey: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          'Which action was performed (add_apm_agent or associate_existing_service_logs orcollect_new_service_logs)',
+      },
+    },
+  },
+};
+
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   entityExperienceStatusEventType,
   entityInventoryPageStateEventType,
+  entityInventoryAddDataEventType,
 ];
