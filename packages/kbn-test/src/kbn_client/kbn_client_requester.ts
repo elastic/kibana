@@ -119,6 +119,15 @@ export class KbnClientRequester {
     const redacted = redactUrl(url);
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
+    const fromError = errMsg({
+      redacted,
+      attempt,
+      maxAttempts,
+      requestedRetries: options.retries !== undefined,
+      failedToGetResponseF: (error: Error) => isAxiosRequestError(error),
+      ...options,
+    });
+
     while (true) {
       attempt += 1;
       try {
@@ -130,30 +139,47 @@ export class KbnClientRequester {
           await delay(1000 * attempt);
           continue;
         }
-        throw new KbnClientRequesterError(`${errMsg(error)} -- and ran out of retries`, error);
-
-        function errMsg(_: any): string {
-          const requestedRetries: boolean = options.retries !== undefined;
-          const failedToGetResponse: boolean = isAxiosRequestError(_);
-          const result = isConcliftOnGetError(_)
-            ? `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`
-            : requestedRetries || failedToGetResponse
-            ? `[${
-                options.description || `${options.method} - ${redacted}`
-              }] request failed (attempt=${attempt}/${maxAttempts}): ${_?.code}`
-            : '';
-          if (result === '') throw _;
-          return result;
-        }
+        throw new KbnClientRequesterError(`${fromError(error)} -- and ran out of retries`, error);
       }
     }
   }
 }
-function redactUrl(_: string): string {
+
+export function errMsg({
+  redacted,
+  attempt,
+  maxAttempts,
+  requestedRetries,
+  failedToGetResponseF,
+  path,
+  method,
+  description,
+}: ReqOptions & {
+  redacted: string;
+  attempt: number;
+  maxAttempts: number;
+  requestedRetries: boolean;
+  failedToGetResponseF: (x: Error) => boolean;
+}) {
+  return (_: any) => {
+    const result = isConcliftOnGetError(_) // Should be a type imho
+      ? `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`
+      : requestedRetries || failedToGetResponseF(_)
+      ? `[${
+          description || `${method} - ${redacted}`
+        }] request failed (attempt=${attempt}/${maxAttempts}): ${_?.code}`
+      : '';
+    if (result === '') throw _;
+    return result;
+  };
+}
+
+export function redactUrl(_: string): string {
   const url = new URL(_);
   return url.password ? `${url.protocol}//${url.host}${url.pathname}` : _;
 }
-function buildRequest(
+
+export function buildRequest(
   url: any,
   httpsAgent: Https.Agent | null,
   { method, body, query, headers, responseType }: any
