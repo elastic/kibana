@@ -27,11 +27,6 @@ const statsResponseSchema = schema.object({
       active: schema.number(),
       idle: schema.number(),
       utilization: schema.number(),
-      load: schema.object({
-        short: schema.number(),
-        medium: schema.number(),
-        long: schema.number(),
-      }),
     }),
     memory: schema.object({
       heap: schema.object({
