@@ -241,7 +241,7 @@ export const BulkActionEditPayloadSchedule = z.object({
   type: z.literal('set_schedule'),
   value: z.object({
     /**
-     * Interval in which the rule is executed
+     * Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
      */
     interval: z.string().regex(/^[1-9]\d*[smh]$/),
     /**

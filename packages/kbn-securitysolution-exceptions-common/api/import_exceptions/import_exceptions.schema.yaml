@@ -5,6 +5,7 @@ info:
 paths:
   /api/exception_lists/_import:
     post:
+      x-labels: [serverless, ess]
       operationId: ImportExceptionList
       x-codegen-enabled: true
       summary: Imports an exception list
