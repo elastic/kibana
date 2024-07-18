@@ -136,9 +136,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         'controlFrameWrapper--small': width === 'small',
         'controlFrameWrapper--medium': width === 'medium',
         'controlFrameWrapper--large': width === 'large',
+        'controlFrameWrapper-isDragging': isDragging,
         'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (activeIndex ?? -1),
         'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (activeIndex ?? -1),
-        'controlFrameWrapper-isDragging': isDragging,
       })}
     >
       <FloatingActions
@@ -158,8 +158,8 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         >
           <EuiFormControlLayout
             fullWidth
-            className="controlFrame__formControlLayout"
             isLoading={Boolean(dataLoading)}
+            className="controlFrame__formControlLayout"
             prepend={
               <>
                 <DragHandle
