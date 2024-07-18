@@ -77,6 +77,8 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
+  let finalMessage = '';
+  let conversationId: string | undefined;
   const stream = assistantGraph.streamEvents(inputs, {
     callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
     runName: DEFAULT_ASSISTANT_GRAPH_ID,
@@ -84,7 +86,6 @@ export const streamGraph = async ({
     tags: traceOptions?.tags ?? [],
     version: 'v1',
   });
-  let finalMessage = '';
 
   let currentOutput = '';
   let finalOutputIndex = -1;
@@ -168,6 +169,9 @@ export const streamGraph = async ({
         return handleStreamEnd(finalMessage);
       }
       logger.error(`Error streaming from LangChain: ${error.message}`);
+      if (conversationId) {
+        push({ payload: `Conversation id: ${conversationId}`, type: 'content' });
+      }
       push({ payload: error.message, type: 'content' });
       handleStreamEnd(error.message, true);
     }
@@ -189,6 +193,7 @@ interface InvokeGraphParams {
 interface InvokeGraphResponse {
   output: string;
   traceData: TraceData;
+  conversationId?: string;
 }
 
 /**
@@ -217,18 +222,17 @@ export const invokeGraph = async ({
       };
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
-
     const r = await assistantGraph.invoke(inputs, {
       callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
     });
     const output = r.agentOutcome.returnValues.output;
-
+    const conversationId = r.conversation?.id;
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }
 
-    return { output, traceData };
+    return { output, traceData, conversationId };
   });
 };
