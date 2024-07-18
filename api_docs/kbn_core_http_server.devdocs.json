@@ -4744,10 +4744,6 @@
               },
               {
                 "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/ping.ts"
-              },
-              {
-                "plugin": "entityManager",
                 "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/get.ts"
               },
               {

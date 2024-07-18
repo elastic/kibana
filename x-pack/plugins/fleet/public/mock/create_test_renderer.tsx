@@ -112,9 +112,17 @@ export const createFleetTestRendererMock = (): TestRenderer => {
       );
     }),
     HookWrapper,
-    renderHook: (callback) => {
+    renderHook: (
+      callback,
+      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+    ) => {
+      const wrapper: WrapperComponent<any> = ({ children }) => (
+        <testRendererMocks.HookWrapper>
+          <ExtraWrapper>{children}</ExtraWrapper>
+        </testRendererMocks.HookWrapper>
+      );
       return renderHook(callback, {
-        wrapper: testRendererMocks.HookWrapper,
+        wrapper,
       });
     },
     render: (ui, options) => {
@@ -135,6 +143,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
 export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
   const startServices = createStartServices(basePath);
   const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
