@@ -19,3 +19,6 @@ export { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 
 // Evaluate
 export { postEvaluateRoute } from './evaluate/post_evaluate';
+
+// Entity Resolution
+export { postEntityResolutionRoute } from './entity_resolution/post_entity_resolution';

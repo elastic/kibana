@@ -22,15 +22,15 @@ const matchEntityToCandidateEntity = (match: MatchEntity): CandidateEntity => {
     return {
       id: match._id,
       type: match.type,
-      name: match.doc.entity.identityFields.user.name,
-      email: match.doc.entity.identityFields.user.email,
+      name: match.doc.user.name,
+      email: match.doc.user.email,
     };
   }
 
   return {
     id: match._id,
     type: match.type,
-    name: match.doc.entity.identityFields.host.name,
+    name: match.doc.host.name,
   };
 };
 

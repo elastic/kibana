@@ -79,16 +79,31 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
         const answerFormattingChain = new LLMChain({
           llm,
           prompt,
-          outputKey: 'matches',
+          outputKey: 'result',
           outputParser: outputFixingParser,
         });
 
-        const { matches } = await answerFormattingChain.call({
+        const llmStart = new Date().getTime();
+
+        const { result } = await answerFormattingChain.call({
           query: getEntityResolutionPrompt({ searchEntity, candidateEntities }),
           timeout: langChainTimeout,
         });
 
-        return JSON.stringify({ matches }, null, 2);
+        const { foundMatch, matches } = result;
+
+        logger.info(`Entity Resolution LLM took ${new Date().getTime() - llmStart}ms`);
+        logger.info(`Entity Resolution LLM raw output: ${JSON.stringify(result, null, 2)}`);
+
+        return JSON.stringify(
+          {
+            entity: searchEntity,
+            foundMatch,
+            matches,
+          },
+          null,
+          2
+        );
       },
       tags: ['entity-analytics', 'entity-resolution'],
     });

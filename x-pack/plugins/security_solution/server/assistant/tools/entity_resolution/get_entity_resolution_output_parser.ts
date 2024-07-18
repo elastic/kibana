@@ -10,17 +10,20 @@ import { z } from 'zod';
 
 export const getEntityResolutionOutputParser = () =>
   StructuredOutputParser.fromZodSchema(
-    z
-      .array(
-        z.object({
-          id: z.string().describe('The id of the entity'),
-          confidence: z
-            .enum(['high', 'medium', 'low'])
-            .describe('The confidence level of the match, where high is a strong match'),
-          reason: z.string().describe('The reason for the match'),
-        })
-      )
-      .describe(
-        `The output of the entity resolution tool. The output is an array of objects, where each object represents a match. Each match object has the following fields: id, confidence, and reason. The id field is the id of the entity, the confidence field is the confidence level of the match, and the reason field is the reason for the match.`
-      )
+    z.object({
+      foundMatch: z.boolean().describe('Whether a match was found, true if a match was found'),
+      matches: z
+        .array(
+          z.object({
+            id: z.string().describe('The id of the entity'),
+            confidence: z
+              .enum(['high', 'medium', 'low'])
+              .describe('The confidence level of the match, where high is a strong match'),
+            reason: z.string().describe('The reason for the match'),
+          })
+        )
+        .describe(
+          `An array of objects where each object represents a match. Each match object has the following fields: id, confidence, and reason. The id field is the id of the entity, the confidence field is the confidence level of the match, and the reason field is the reason for the match. Only populated if foundMatch is true.`
+        ),
+    })
   );

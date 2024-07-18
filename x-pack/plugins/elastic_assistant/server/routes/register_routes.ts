@@ -33,7 +33,7 @@ import { postActionsConnectorExecuteRoute } from './post_actions_connector_execu
 import { bulkActionKnowledgeBaseEntriesRoute } from './knowledge_base/entries/bulk_actions_route';
 import { createKnowledgeBaseEntryRoute } from './knowledge_base/entries/create_route';
 import { findKnowledgeBaseEntriesRoute } from './knowledge_base/entries/find_route';
-
+import { postEntityResolutionRoute } from './entity_resolution/post_entity_resolution';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
@@ -89,4 +89,7 @@ export const registerRoutes = (
   getAttackDiscoveryRoute(router);
   postAttackDiscoveryRoute(router);
   cancelAttackDiscoveryRoute(router);
+
+  // Entity Resolution
+  postEntityResolutionRoute(router);
 };

@@ -14,13 +14,19 @@ export const getEntityResolutionPrompt = ({
 }: {
   searchEntity: SearchEntity;
   candidateEntities: CandidateEntity[];
-}) => `Given the following ${searchEntity.type} entity from elasticsearch:
+}) => `Your role is to facilitate entity resolution	by providing the best matches for the given record.		 
+
+${searchEntity.type} entity from elasticsearch:
 
 ${JSON.stringify(searchEntity)}
 
-Which of the following entities do you think are the same as the given entity? 
+Given the following list:
 
 """
-${candidateEntities.join('\n\n')}
+${candidateEntities.map(JSON.stringify).join('\n\n')}
 """
+
+Does a new record '${JSON.stringify(
+  searchEntity
+)}' match an entity in the list? If no entities match do not provide any input.
 `;

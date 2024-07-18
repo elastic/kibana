@@ -7,7 +7,11 @@
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ApiConfig, EntityResolutionPostRequestBody } from '@kbn/elastic-assistant-common';
+import {
+  ApiConfig,
+  EntityResolutionPostRequestBody,
+  type SearchEntity,
+} from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -16,8 +20,8 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
 import { AssistantToolParams } from '../../types';
-
 export const getAssistantToolParams = ({
+  searchEntity,
   actionsClient,
   entitiesIndexPattern,
   apiConfig,
@@ -30,6 +34,7 @@ export const getAssistantToolParams = ({
   request,
   size,
 }: {
+  searchEntity: SearchEntity;
   actionsClient: PublicMethodsOf<ActionsClient>;
   entitiesIndexPattern: string;
   apiConfig: ApiConfig;
@@ -64,6 +69,7 @@ export const getAssistantToolParams = ({
   });
 
   return formatAssistantToolParams({
+    searchEntity,
     entitiesIndexPattern,
     esClient,
     langChainTimeout,
@@ -82,6 +88,7 @@ const formatAssistantToolParams = ({
   logger,
   request,
   size,
+  searchEntity,
 }: {
   entitiesIndexPattern: string;
   esClient: ElasticsearchClient;
@@ -90,7 +97,9 @@ const formatAssistantToolParams = ({
   logger: Logger;
   request: KibanaRequest<unknown, unknown, EntityResolutionPostRequestBody>;
   size: number;
+  searchEntity: SearchEntity;
 }): AssistantToolParams => ({
+  searchEntity,
   entitiesIndexPattern,
   isEnabledKnowledgeBase: false, // not required
   chain: undefined, // not required

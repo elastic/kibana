@@ -86,12 +86,12 @@ components:
       properties:
         entity:
           $ref: '#/components/schemas/SearchEntity'
+        foundMatch:
+          type: boolean
         matches:
           type: array
           items:
             $ref: '#/components/schemas/EntityResolutionMatch'
-        score:
-          type: number
     EntityResolutionMatch:
       type: object
       properties:

@@ -36,8 +36,8 @@ export const EntityResolutionMatch = z.object({
 export type EntitySearchResponse = z.infer<typeof EntitySearchResponse>;
 export const EntitySearchResponse = z.object({
   entity: SearchEntity.optional(),
+  foundMatch: z.boolean().optional(),
   matches: z.array(EntityResolutionMatch).optional(),
-  score: z.number().optional(),
 });
 
 export type EntityResolutionPostRequestBody = z.infer<typeof EntityResolutionPostRequestBody>;
@@ -58,7 +58,7 @@ export const EntityResolutionPostRequestBody = z.object({
    */
   langSmithApiKey: z.string().optional(),
   model: z.string().optional(),
-  size: z.number(),
+  size: z.number().min(1).max(100),
 });
 export type EntityResolutionPostRequestBodyInput = z.input<typeof EntityResolutionPostRequestBody>;
 

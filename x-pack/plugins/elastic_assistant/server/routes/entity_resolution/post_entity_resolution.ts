@@ -15,7 +15,7 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import moment from 'moment/moment';
-import { ATTACK_DISCOVERY } from '../../../common/constants';
+import { ENTITY_RESOLUTION } from '../../../common/constants';
 import { getAssistantTool, getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { buildResponse } from '../../lib/build_response';
@@ -31,7 +31,7 @@ export const postEntityResolutionRoute = (
   router.versioned
     .post({
       access: 'internal',
-      path: ATTACK_DISCOVERY,
+      path: ENTITY_RESOLUTION,
       options: {
         tags: ['access:elasticAssistant'],
         timeout: {
@@ -83,7 +83,20 @@ export const postEntityResolutionRoute = (
 
           // get parameters from the request body
           const entitiesIndexPattern = decodeURIComponent(request.body.entitiesIndexPattern);
-          const { apiConfig, langSmithApiKey, langSmithProject, size } = request.body;
+          const {
+            apiConfig,
+            langSmithApiKey,
+            langSmithProject,
+            size,
+            entity: searchEntity,
+          } = request.body;
+
+          if (!searchEntity) {
+            return resp.error({
+              body: `Entity to resolve not found`,
+              statusCode: 400,
+            });
+          }
 
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -98,6 +111,7 @@ export const postEntityResolutionRoute = (
           }
 
           const assistantToolParams = getAssistantToolParams({
+            searchEntity,
             actionsClient,
             entitiesIndexPattern,
             apiConfig,
@@ -116,6 +130,14 @@ export const postEntityResolutionRoute = (
 
           const result = await toolInstance?.invoke('');
 
+          if (!result) {
+            return resp.error({
+              body: `Entity resolution tool failed to generate`,
+              statusCode: 500,
+            });
+          }
+
+          const castResult = JSON.parse(result) as EntityResolutionPostResponse;
           const endTime = moment(); // end timing the generation
 
           logger.info(
@@ -123,7 +145,7 @@ export const postEntityResolutionRoute = (
           );
 
           return response.ok({
-            body: result as EntityResolutionPostResponse,
+            body: castResult,
           });
         } catch (err) {
           logger.error(err);

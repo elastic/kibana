@@ -21,8 +21,7 @@ const searchHitsToMatches = (hits: Array<SearchHit<EntityLatestDocument>>): Matc
   return hits
     .filter((hit) => !!hit._source)
     .map((hit) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      if ('user' in hit._source!.entity) {
+      if ('user' in hit._source) {
         return {
           _id: hit._id!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
           type: EntityTypeEnum.User,
@@ -51,51 +50,37 @@ interface EntityLatestCommon {
     ingested: string;
   };
   criticality_level: string[];
-}
-
-interface CommonIdentityFields {
-  lastSeenTimestamp: string;
-  displayName: string;
-  id: string;
-  type: string;
-  firstSeenTimestamp: string;
-  definitionId: string;
-}
-
-interface UserIdentityFields extends CommonIdentityFields {
-  identityFields: {
-    user: {
-      name: string;
-      email?: string;
-    };
-    id_value: string | null;
-  };
-}
-
-interface HostIdentityFields extends CommonIdentityFields {
-  identityFields: {
-    host: {
-      name: string;
-    };
-    id_value: string | null;
+  entity: {
+    lastSeenTimestamp: string;
+    schemaVersion: string;
+    definitionVersion: string;
+    displayName: string;
+    identityFields: string[];
+    id: string;
+    type: string;
+    firstSeenTimestamp: string;
+    definitionId: string;
   };
 }
 
 interface EntityRisk {
-  risk: {
-    calculated_score_norm: number;
-    calculated_level: string;
-  };
+  calculated_score_norm: number[];
+  calculated_level: string[];
 }
 
 interface HostLatestDocument extends EntityLatestCommon {
-  host: EntityRisk;
-  entity: HostIdentityFields;
+  host: {
+    risk: EntityRisk;
+    name: string;
+  };
 }
 
 interface UserLatestDocument extends EntityLatestCommon {
-  user: EntityRisk;
-  entity: UserIdentityFields;
+  user: {
+    risk: EntityRisk;
+    name: string;
+    email?: string;
+  };
 }
 
 type EntityLatestDocument = HostLatestDocument | UserLatestDocument;
@@ -118,27 +103,25 @@ const testDoc: UserMatchEntity = {
   type: EntityTypeEnum.User,
   doc: {
     event: {
-      ingested: '2024-07-15T08:34:20.090157Z',
+      ingested: '2024-07-17T13:21:12.801970Z',
     },
     user: {
+      name: 'p2g83v4n0w',
       risk: {
-        calculated_score_norm: 16.16342544555664,
-        calculated_level: 'Unknown',
+        calculated_score_norm: [],
+        calculated_level: [],
       },
     },
     criticality_level: [],
     entity: {
-      lastSeenTimestamp: '2024-07-15T08:32:53.460Z',
-      displayName: 'Earnest.Maggio-Brekke',
-      identityFields: {
-        user: {
-          name: 'Earnest.Maggio-Brekke',
-        },
-        id_value: null,
-      },
-      id: '/PHyUC5eOSf9NluBdayegg==',
+      lastSeenTimestamp: '2024-07-17T13:19:46.793Z',
+      schemaVersion: 'v1',
+      definitionVersion: '1.0.0',
+      displayName: 'p2g83v4n0w',
+      identityFields: ['user.name', 'id_value'],
+      id: 'Vpz5MNJgenODpwQ7AYTMRA==',
       type: 'node',
-      firstSeenTimestamp: '2024-07-15T08:32:00.000Z',
+      firstSeenTimestamp: '2024-07-17T13:19:00.000Z',
       definitionId: 'secsol-ea-entity-store',
     },
   },
@@ -169,9 +152,7 @@ export class EntityResolutionDataClient {
   }): Promise<{ total: number; matches: MatchEntity[] }> {
     const { esClient, logger } = this.options;
 
-    const identityField = `entity.identityFields.${
-      searchEntity.type === 'user' ? 'user.name' : 'host.name'
-    }`;
+    const identityField = searchEntity.type === 'user' ? 'user.name' : 'host.name';
 
     const embeddingField = `test_${searchEntity.type}_name_embeddings.predicted_value`;
 
