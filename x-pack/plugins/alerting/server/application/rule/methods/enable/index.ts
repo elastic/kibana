@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type { BulkEnableRulesParams, BulkEnableRulesError, BulkEnableRulesResult } from './types';
+export type { EnableRuleParams } from './types';
 
 export { enable } from './enable';

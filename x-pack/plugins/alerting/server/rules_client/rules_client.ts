@@ -75,7 +75,7 @@ import { getBackfill } from '../application/backfill/methods/get';
 import { findBackfill } from '../application/backfill/methods/find';
 import { deleteBackfill } from '../application/backfill/methods/delete';
 import { FindBackfillParams } from '../application/backfill/methods/find/types';
-import { EnableRuleParams } from '../application/rule/methods/enable/types';
+import { EnableRuleParams } from '../application/rule/methods/enable';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
