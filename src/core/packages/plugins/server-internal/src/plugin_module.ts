@@ -8,7 +8,7 @@
  */
 
 import { type interfaces, ContainerModule } from 'inversify';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import {
   ConfigService,
   LoggerService,
@@ -19,12 +19,15 @@ import {
 } from '@kbn/core-plugins-server';
 import {
   type IRouteHandler,
+  RequestToken,
+  ResponseToken,
   Route,
   type RouteRegistrar,
   RouterService,
 } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { Global } from '@kbn/core-di-common';
+import { DiService, Global } from '@kbn/core-di-common';
+import { InternalDiService } from '@kbn/core-di-common-internal';
 
 export function createCoreModule() {
   return new ContainerModule(() => {});
@@ -54,13 +57,23 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
           RequestHandlerContext
         >;
 
-        register(route, async ({ core }) => {
-          const { injection } = await core;
+        register(route, async (_context, request, response) => {
+          const injection = container.get(InternalDiService);
+          const scope = injection.fork();
+
+          scope.bind(RequestToken).toConstantValue(request);
+          scope.bind(ResponseToken).toConstantValue(response);
+          scope.bind(Global).toConstantValue(RequestToken);
+          scope.bind(Global).toConstantValue(ResponseToken);
 
           try {
-            return await injection.container.get<IRouteHandler>(route).handle();
+            return await container
+              .get(DiService)
+              .getContainer(scope)!
+              .get<IRouteHandler>(route)
+              .handle();
           } finally {
-            injection.dispose();
+            injection.dispose(scope);
           }
         });
 
@@ -68,5 +81,11 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
       });
 
     bind(Global).toConstantValue(RouterService);
+  });
+}
+
+export function createPluginStartModule(context: CoreStart): interfaces.ContainerModule {
+  return new ContainerModule((bind) => {
+    bind(DiService).toConstantValue(context.injection);
   });
 }
