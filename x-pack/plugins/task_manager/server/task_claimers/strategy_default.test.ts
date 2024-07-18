@@ -29,6 +29,7 @@ import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TaskPartitioner } from '../lib/task_partitioner';
+import { KibanaDiscoveryService } from '../kibana_discovery_service';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -42,7 +43,7 @@ jest.mock('../constants', () => ({
 }));
 
 const taskManagerLogger = mockLogger();
-const taskPartitioner = new TaskPartitioner('test');
+const taskPartitioner = new TaskPartitioner('test', {} as KibanaDiscoveryService);
 
 beforeEach(() => jest.clearAllMocks());
 

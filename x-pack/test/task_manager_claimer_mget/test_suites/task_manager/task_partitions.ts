@@ -47,8 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const testHistoryIndex = '.kibana_task_manager_test_result';
-  const testNode1 = 'test-node-1';
-  const testNode2 = 'test-node-2';
+  const testNode1 = 'y-test-node';
+  const testNode2 = 'z-test-node';
 
   function scheduleTask(
     task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
@@ -196,7 +196,9 @@ export default function ({ getService }: FtrProviderContext) {
             return;
           }
 
-          if (counter > 20) {
+          // we don't want the test to time out, so we check
+          // 20 times and then return
+          if (scheduledTask.id === '2' && counter > 20) {
             return;
           }
           counter++;

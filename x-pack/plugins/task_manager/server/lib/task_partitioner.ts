@@ -45,6 +45,6 @@ export class TaskPartitioner {
 
   private async getAllPodNames(): Promise<string[]> {
     const nodes = await this.kibanaDiscoveryService.getActiveKibanaNodes();
-    return nodes.map((node) => node.id);
+    return nodes.map((node) => node.attributes.id);
   }
 }

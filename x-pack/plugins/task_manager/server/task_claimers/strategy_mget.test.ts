@@ -35,6 +35,10 @@ import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TaskPartitioner } from '../lib/task_partitioner';
 import type { MustNotCondition } from '../queries/query_clauses';
+import {
+  createDiscoveryServiceMock,
+  createFindSO,
+} from '../kibana_discovery_service/mock_kibana_discovery_service';
 
 jest.mock('../lib/assign_pod_partitions', () => ({
   assignPodPartitions: jest.fn().mockReturnValue([1, 3]),
@@ -52,7 +56,6 @@ jest.mock('../constants', () => ({
 }));
 
 const taskManagerLogger = mockLogger();
-const taskPartitioner = new TaskPartitioner('test');
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -86,6 +89,15 @@ taskDefinitions.registerTaskDefinitions({
 const mockApmTrans = {
   end: jest.fn(),
 };
+
+const discoveryServiceMock = createDiscoveryServiceMock('test');
+const lastSeen = '2024-08-10T10:00:00.000Z';
+discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
+  createFindSO('test', lastSeen),
+  createFindSO('test-pod-2', lastSeen),
+  createFindSO('test-pod-3', lastSeen),
+]);
+const taskPartitioner = new TaskPartitioner('test', discoveryServiceMock);
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
 describe('TaskClaiming', () => {
@@ -301,38 +313,6 @@ describe('TaskClaiming', () => {
             "filter": Array [
               Object {
                 "bool": Object {
-                  "must_not": Array [
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "must": Object {
-                          "range": Object {
-                            "task.retryAt": Object {
-                              "gt": "now",
-                            },
-                          },
-                        },
-                        "should": Array [
-                          Object {
-                            "term": Object {
-                              "task.status": "running",
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "task.status": "claiming",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-            "must": Array [
-              Object {
-                "bool": Object {
                   "should": Array [
                     Object {
                       "terms": Object {
@@ -351,6 +331,98 @@ describe('TaskClaiming', () => {
                             },
                           },
                         ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            "must": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "task.enabled": true,
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "terms": Object {
+                        "task.taskType": Array [
+                          "report",
+                          "dernstraight",
+                          "yawn",
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "idle",
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.runAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "bool": Object {
+                              "should": Array [
+                                Object {
+                                  "term": Object {
+                                    "task.status": "running",
+                                  },
+                                },
+                                Object {
+                                  "term": Object {
+                                    "task.status": "claiming",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.retryAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "task.status": "unrecognized",
                       },
                     },
                   ],
