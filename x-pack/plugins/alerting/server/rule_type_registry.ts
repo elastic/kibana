@@ -298,17 +298,22 @@ export class RuleTypeRegistry {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create<
-            Params,
-            ExtractedParams,
-            State,
-            InstanceState,
-            InstanceContext,
-            ActionGroupIds,
-            RecoveryActionGroupId | RecoveredActionGroupId,
-            AlertData
-          >(normalizedRuleType, context, this.inMemoryMetrics),
+        createTaskRunner: (context: RunContext) => ({
+          run: async () => {
+            console.log(`Running benchmark task - ${context.taskInstance.id}`);
+          },
+        }),
+        // createTaskRunner: (context: RunContext) =>
+        //   this.taskRunnerFactory.create<
+        //     Params,
+        //     ExtractedParams,
+        //     State,
+        //     InstanceState,
+        //     InstanceContext,
+        //     ActionGroupIds,
+        //     RecoveryActionGroupId | RecoveredActionGroupId,
+        //     AlertData
+        //   >(normalizedRuleType, context, this.inMemoryMetrics),
         paramsSchema: schema.object({
           alertId: schema.string(),
           spaceId: schema.string(),
