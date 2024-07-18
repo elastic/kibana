@@ -51,7 +51,7 @@ export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
   ENTITY_EXPERIENCE_STATUS = 'entity_experience_status',
   ENTITY_INVENTORY_PAGE_STATE = 'entity_inventory_page_state',
-  ENTITY_INVENTORY_ADD_DATA = 'entity_inventory_data',
+  ENTITY_INVENTORY_ADD_DATA = 'entity_inventory_add_data',
 }
 
 export interface TelemetryEvent {
