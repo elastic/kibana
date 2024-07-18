@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { normalizeRuleSource } from './normalize_rule_source';
+import { normalizeRuleSource } from './normalize_rule_params';
 import type { BaseRuleParams } from '../../../../rule_schema';
 
 describe('normalizeRuleSource', () => {
