@@ -48,7 +48,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/server-route-repository-utils"
   ],
   "exclude": ["target/**/*"]
 }
