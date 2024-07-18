@@ -8,7 +8,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
@@ -19,11 +18,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useIconForLogo } from '../../hooks/use_icon_for_logo';
 import { BackButton } from '../shared/back_button';
+import { LogoIcon } from '../shared/logo_icon';
 
 export function KubernetesHeaderSection() {
-  const kubernetesLogo = useIconForLogo('kubernetes');
+  // const kubernetesLogo = useIconForLogo('kubernetes');
   const theme = useEuiTheme();
   const shadow = useEuiShadow('s');
   return (
@@ -45,17 +44,15 @@ export function KubernetesHeaderSection() {
               ${shadow}
             `}
           >
-            {!!kubernetesLogo && (
-              <EuiIcon
-                size="xxl"
-                type={kubernetesLogo}
-                css={css`
-                  margin: 12px;
-                  width: 56px;
-                  height: 56px;
-                `}
-              />
-            )}
+            <LogoIcon
+              logo="kubernetes"
+              size="xxl"
+              css={css`
+                margin: 12px;
+                width: 56px;
+                height: 56px;
+              `}
+            />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
