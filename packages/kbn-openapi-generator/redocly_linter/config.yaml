@@ -5,16 +5,15 @@ plugins:
 
 rules:
   spec: error
-  spec-strict-refs: warn
+  spec-strict-refs: error
   no-path-trailing-slash: error
   no-identical-paths: error
-  no-ambiguous-paths: warn
+  no-ambiguous-paths: error
   no-unresolved-refs: error
   no-enum-type-mismatch: error
   component-name-unique: error
   path-declaration-must-exist: error
   path-not-include-query: error
-
   operation-2xx-response: error
   operation-operationId: error
   operation-operationId-unique: error
