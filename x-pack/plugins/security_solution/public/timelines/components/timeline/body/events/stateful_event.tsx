@@ -11,7 +11,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -43,7 +42,6 @@ import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ControlColumnProps,
-  ExpandedDetailType,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../../common/types';
@@ -112,7 +110,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
@@ -129,11 +126,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
   );
-  const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
 
-  const hostName = useMemo(() => {
-    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
-  }, [hostNameArr]);
   const hostIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
   const sourceIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' });
   const destinationIpList = useGetMappedNonEcsValue({
@@ -154,8 +147,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   const isDetailPanelExpanded: boolean =
     (activeExpandedDetail?.panelView === 'eventDetail' &&
       activeExpandedDetail?.params?.eventId === eventId) ||
-    (activeExpandedDetail?.panelView === 'hostDetail' &&
-      activeExpandedDetail?.params?.hostName === hostName) ||
     (activeExpandedDetail?.panelView === 'networkDetail' &&
       activeExpandedDetail?.params?.ip &&
       hostIPAddresses?.has(activeExpandedDetail?.params?.ip)) ||
@@ -206,51 +197,21 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    const updatedExpandedDetail: ExpandedDetailType = {
-      panelView: 'eventDetail',
-      params: {
-        eventId,
-        indexName,
-        refetch,
-      },
-    };
-
-    if (!expandableFlyoutDisabled) {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: timelineId,
         },
-      });
-      telemetry.reportDetailsFlyoutOpened({
-        location: timelineId,
-        panel: 'right',
-      });
-    } else {
-      // opens the panel when clicking on the table row action
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          ...updatedExpandedDetail,
-          tabType,
-          id: timelineId,
-        })
-      );
-    }
-  }, [
-    eventId,
-    indexName,
-    refetch,
-    expandableFlyoutDisabled,
-    openFlyout,
-    timelineId,
-    telemetry,
-    dispatch,
-    tabType,
-  ]);
+      },
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: timelineId,
+      panel: 'right',
+    });
+  }, [eventId, indexName, openFlyout, timelineId, telemetry]);
 
   const setEventsLoading = useCallback<SetEventsLoading>(
     ({ eventIds, isLoading }) => {

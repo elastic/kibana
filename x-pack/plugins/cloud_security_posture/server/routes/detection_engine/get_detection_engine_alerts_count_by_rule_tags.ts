@@ -57,6 +57,9 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: GET_DETECTION_RULE_ALERTS_STATUS_PATH,
+      options: {
+        tags: ['access:cloud-security-posture-read'],
+      },
     })
     .addVersion(
       {
