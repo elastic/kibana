@@ -102,6 +102,12 @@ export function NotificationAction({
   const connectorType = connectorTypes.find(({ id }) => id === action.actionTypeId);
   const registeredAction = actionTypeRegistry.get(action.actionTypeId);
 
+  /*
+  since there is no "connector" for system actions,
+  we need to determine the title based off the action
+  properties in order to render helpful text on the
+  rule details page.
+  */
   const connectorTypeName = isRuleAction
     ? connectorType?.name ?? ''
     : registeredAction.actionTypeTitle ?? '';
