@@ -100,6 +100,7 @@ const getExpectedcreateTimelineParam = (
   notes: null,
   timeline: {
     ...timelineDefaults,
+    excludedRowRendererIds: [],
     dataProviders,
     id: TimelineId.active,
     indexNames: [],
@@ -379,7 +380,7 @@ describe('alert actions', () => {
             },
             eventIdToNoteIds: {},
             eventType: 'all',
-            excludedRowRendererIds: defaultTimelineProps.timeline.excludedRowRendererIds,
+            excludedRowRendererIds: [],
             expandedDetail: {},
             filters: [
               {
@@ -549,10 +550,13 @@ describe('alert actions', () => {
           getExceptionFilter: mockGetExceptionFilter,
         });
 
+        const expectedTimelineProps = structuredClone(defaultTimelineProps);
+        expectedTimelineProps.timeline.excludedRowRendererIds = [];
+
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
       });
     });
 
@@ -576,10 +580,13 @@ describe('alert actions', () => {
           getExceptionFilter: mockGetExceptionFilter,
         });
 
+        const expectedTimelineProps = structuredClone(defaultTimelineProps);
+        expectedTimelineProps.timeline.excludedRowRendererIds = [];
+
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
       });
     });
 
@@ -614,6 +621,7 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             resolveTimelineConfig: undefined,
             dataProviders: [
               {
@@ -642,6 +650,9 @@ describe('alert actions', () => {
           },
         };
 
+        const expectedTimelineProps = structuredClone(defaultTimelineProps);
+        expectedTimelineProps.timeline.excludedRowRendererIds = [];
+
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
@@ -653,7 +664,7 @@ describe('alert actions', () => {
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
       });
     });
 
@@ -737,6 +748,7 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             dataProviders: [
               {
                 and: [],
@@ -890,6 +902,7 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             columns: mockGetOneTimelineResult.columns,
             defaultColumns: defaultUdtHeaders,
             dataProviders: [],
@@ -1043,6 +1056,7 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            excludedRowRendererIds: [],
             filters: [
               {
                 meta: {
