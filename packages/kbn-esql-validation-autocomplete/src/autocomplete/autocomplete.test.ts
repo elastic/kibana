@@ -10,7 +10,7 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
-import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { getSafeInsertText, getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { FunctionParameter } from '../definitions/types';
@@ -1008,5 +1008,60 @@ describe('autocomplete', () => {
 
     // DISSECT field
     testSuggestions('FROM index1 | DISSECT b', getFieldNamesByType('string'), undefined, 23);
+
+    // DISSECT field pattern
+    // TODO - should this work? It's failing because Monaco adds an extra quote and does not trigger suggestions.
+    // testSuggestions('FROM index1 | DISSECT field ""', getFieldNamesByType('string'), undefined, 23);
+
+    // DROP (first field)
+    testSuggestions('FROM index1 | DROP f', getFieldNamesByType('any'), undefined, 20);
+
+    // DROP (subsequent field)
+    testSuggestions('FROM index1 | DROP field1, f', getFieldNamesByType('any'), undefined, 28);
+
+    // ENRICH policy
+    testSuggestions(
+      'FROM index1 | ENRICH p',
+      policies.map(({ name }) => getSafeInsertText(name)),
+      undefined,
+      22
+    );
+
+    // ENRICH policy ON
+    testSuggestions('FROM index1 | ENRICH policy O', ['ON $0', 'WITH $0', '|'], undefined, 29);
+
+    // ENRICH policy ON field
+    // TODO — failing because we aren't correctly escaping the value
+    testSuggestions('FROM index1 | ENRICH policy ON f', getFieldNamesByType('any'), undefined, 32);
+
+    // ENRICH policy WITH policyfield
+    testSuggestions(
+      'FROM index1 | ENRICH policy WITH v',
+      ['var0 =', ...getPolicyFields('policy')],
+      undefined,
+      34
+    );
+
+    // GROK field
+    testSuggestions('FROM index1 | GROK f', getFieldNamesByType('string'), undefined, 20);
+
+    // GROK field "pattern"
+    // TODO - should this work? It's failing because Monaco adds an extra quote and does not trigger suggestions.
+    // testSuggestions('FROM index1 | GROK field ""', getFieldNamesByType('string'), undefined, 20);
+
+    // KEEP (first field)
+    // KEEP (subsequent fields)
+    // LIMIT number
+    // MV_EXPAND field
+    // RENAME field
+    // RENAME field AS
+    // RENAME field AS var0
+    // SORT field
+    // SORT field order
+    // STATS argument
+    // STATS argument BY
+    // STATS argument BY expression
+    // WHERE argument
+    // WHERE argument comparison
   });
 });
