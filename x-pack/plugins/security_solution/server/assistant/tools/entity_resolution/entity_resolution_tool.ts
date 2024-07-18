@@ -116,6 +116,7 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
               ...suggestion,
               index: suggestionDocument._index,
               document: suggestionDocument._source,
+              entity: candidateEntitiesById[suggestion.id].entity,
             };
           }),
         };
