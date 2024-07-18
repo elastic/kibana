@@ -167,7 +167,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     it(
       'Creates and enables a new EQL rule with a sequence',
       {
-        tags: ['@skipServerlessInMKI'],
+        tags: ['@skipInServerlessMKI'],
       },
       function () {
         login();
