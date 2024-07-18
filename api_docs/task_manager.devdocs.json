@@ -126,7 +126,15 @@
                 "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, plugins: { usageCollection?: ",
+              "<",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerStartContract",
+                "text": "TaskManagerStartContract"
+              },
+              ", unknown>, plugins: { usageCollection?: ",
               {
                 "pluginId": "usageCollection",
                 "scope": "server",
@@ -162,7 +170,15 @@
                     "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>"
+                  "<",
+                  {
+                    "pluginId": "taskManager",
+                    "scope": "server",
+                    "docId": "kibTaskManagerPluginApi",
+                    "section": "def-server.TaskManagerStartContract",
+                    "text": "TaskManagerStartContract"
+                  },
+                  ", unknown>"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -257,6 +273,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskManagerPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

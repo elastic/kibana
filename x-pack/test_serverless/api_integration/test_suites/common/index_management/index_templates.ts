@@ -30,13 +30,13 @@ export default function ({ getService }: FtrProviderContext) {
   // see details: https://github.com/elastic/kibana/issues/187368
   describe.skip('Index templates', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
       await svlTemplatesApi.cleanUpTemplates(roleAuthc);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('get', () => {
