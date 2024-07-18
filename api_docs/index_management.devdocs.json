@@ -625,8 +625,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               }
             ],
             "path": "x-pack/plugins/index_management/server/types.ts",

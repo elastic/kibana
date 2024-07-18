@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(testData.suiteSuffix, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/188493
+      describe.skip(testData.suiteSuffix, function () {
         before(async () => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
             testData.jobConfig,
