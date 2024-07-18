@@ -135,13 +135,15 @@ export class KbnClientRequester {
         function errMsg(_: any): string {
           const requestedRetries: boolean = options.retries !== undefined;
           const failedToGetResponse: boolean = isAxiosRequestError(_);
-          return isConcliftOnGetError(_)
+          const result = isConcliftOnGetError(_)
             ? `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`
             : requestedRetries || failedToGetResponse
             ? `[${
                 options.description || `${options.method} - ${redacted}`
               }] request failed (attempt=${attempt}/${maxAttempts}): ${_?.code}`
             : '';
+          if (result === '') throw _;
+          return result;
         }
       }
     }
