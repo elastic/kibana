@@ -7,7 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiBadge, mathWithUnits, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { getLogLevelCoalescedValue, getLogLevelColor } from '../utils';
@@ -19,13 +19,11 @@ const badgeCss: CSSObject = {
 export const LogLevelBadge = ({
   logLevel,
   fallback,
-  className,
   'data-test-subj': dataTestSubj = 'logLevelBadge',
-}: {
+  ...badgeProps
+}: Omit<EuiBadgeProps, 'children' | 'color'> & {
   logLevel: {};
   fallback: ReactElement;
-  className?: string;
-  ['data-test-subj']?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const coalescedValue = getLogLevelCoalescedValue(logLevel);
@@ -37,8 +35,8 @@ export const LogLevelBadge = ({
 
   return (
     <EuiBadge
+      {...(badgeProps as EuiBadgeProps)}
       color={color}
-      className={className}
       data-test-subj={`${dataTestSubj}-${coalescedValue}`}
       css={badgeCss}
     >
