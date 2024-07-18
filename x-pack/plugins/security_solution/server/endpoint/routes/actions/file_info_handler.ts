@@ -82,6 +82,7 @@ export const registerActionFileInfoRoute = (
           request: EndpointActionFileInfoSchema,
         },
       },
+      // FIXME:PT this code shows a bug for any action that supports a download, but role does not have File Operations (ex. execute)
       withEndpointAuthz(
         { all: ['canWriteFileOperations'] },
         endpointContext.logFactory.get('actionFileInfo'),
