@@ -29,7 +29,6 @@
           "dedicated_masters_threshold": 6
         },
         "plan": {
-          "autoscaling_enabled": false,
           "cluster_topology": [
             {
               "zone_count": 1,
@@ -213,7 +212,9 @@
       }
     ]
   },
-  "settings": {},
+  "settings": {
+    "autoscaling_enabled": false
+  },
   "name": null,
   "metadata": {
     "system_owned": false
