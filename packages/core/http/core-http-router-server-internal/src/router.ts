@@ -151,15 +151,29 @@ export type InternalRegistrar<M extends Method, C extends RequestHandlerContextB
   internalOpts?: InternalRegistrarOptions
 ) => ReturnType<RouteRegistrar<M, C>>;
 
+type Privilege = string;
+
+interface PrivilegeSet {
+  anyRequired?: Privilege[];
+  allRequired?: Privilege[];
+  offering?: string;
+}
+
+type Privileges = Array<Privilege | PrivilegeSet>;
+
+export interface AuthzEnabled {
+  requiredPrivileges: Privileges;
+  passThrough?: boolean;
+}
+
+export type AuthzDisabled = false;
+
+export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+
 /** @internal */
 export interface InternalRouterRoute extends RouterRoute {
   readonly isVersioned: boolean;
-  readonly authz?:
-    | false
-    | {
-        requiredPrivileges: Array<string | { tier: string; privileges: string[] }>;
-        passThrough?: boolean;
-      };
+  readonly authz?: RouteAuthz;
 }
 
 /** @internal */
@@ -197,10 +211,6 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       ) => {
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
-
-        if (route.authz) {
-          console.log(route.authz, route.path);
-        }
 
         this.routes.push({
           handler: async (req, responseToolkit) =>

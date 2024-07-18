@@ -32,6 +32,25 @@ export type SafeRouteMethod = 'get' | 'options';
  */
 export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
+type Privilege = string;
+
+interface PrivilegeSet {
+  anyRequired?: Privilege[];
+  allRequired?: Privilege[];
+  offering?: string;
+}
+
+type Privileges = Array<Privilege | PrivilegeSet>;
+
+export interface AuthzEnabled {
+  requiredPrivileges: Privileges;
+  passThrough?: boolean;
+}
+
+export type AuthzDisabled = false;
+
+export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+
 /**
  * The set of supported parseable Content-Types
  * @public
@@ -210,12 +229,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * The required capabilities to access this route.
    */
-  authz?:
-    | false
-    | {
-        requiredPrivileges: Array<string | { tier: string; privileges: string[] }>;
-        passThrough?: boolean;
-      };
+  authz?: RouteAuthz;
 }
 
 /**
@@ -296,15 +310,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    */
   validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
 
-  authz?:
-    | false
-    | {
-        /**
-         * The required capabilities to access this route.
-         */
-        requiredPrivileges: Array<string | { tier: string; privileges: string[] }>;
-        passThrough?: boolean;
-      };
+  authz?: RouteAuthz;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

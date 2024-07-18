@@ -27,8 +27,7 @@ export function defineGetAllRolesBySpaceRoutes({
         requiredPrivileges: [
           ApiActionPermission.ManageSpaces,
           {
-            tier: 'serverless',
-            privileges: [ApiActionPermission.TaskManager],
+            anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
           },
         ],
         passThrough: true,
