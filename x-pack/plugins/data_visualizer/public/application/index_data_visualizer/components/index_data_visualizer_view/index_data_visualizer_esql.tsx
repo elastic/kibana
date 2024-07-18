@@ -116,7 +116,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         if (!indexPattern) return;
         const dv = await getOrCreateDataViewByIndexPattern(
           data.dataViews,
-          indexPattern,
+          query.esql,
           currentDataView
         );
 
@@ -266,7 +266,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           onTextLangQuerySubmit={onTextLangQuerySubmit}
           expandCodeEditor={expandCodeEditor}
           isCodeEditorExpanded={true}
-          detectTimestamp={true}
+          detectedTimestamp={currentDataView?.timeFieldName}
           hideMinimizeButton={true}
           hideRunQueryText={false}
           isLoading={queryHistoryStatus ?? false}
