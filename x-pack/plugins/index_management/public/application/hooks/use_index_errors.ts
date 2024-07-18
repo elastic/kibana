@@ -49,7 +49,6 @@ export const useIndexErrors = (
                 defaultMessage: 'Model not found for inference endpoint {inferenceId}',
                 values: {
                   inferenceId: field.source.inference_id as string,
-                  fieldName: field.path.join('.'),
                 },
               }),
             };
