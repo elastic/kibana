@@ -8,7 +8,7 @@
 import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { RuleParamsV1, ruleResponseSchema } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import {
   AlertingRequestHandlerContext,
@@ -47,7 +47,7 @@ const buildGetRuleRoute = ({
         },
         response: {
           200: {
-            body: () => ruleResponseSchema,
+            body: () => ruleResponseSchemaV1,
           },
         },
       },

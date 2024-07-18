@@ -17,7 +17,7 @@ import {
   updateBodySchemaV1,
   updateParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update';
-import { RuleParamsV1, ruleResponseSchema } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { Rule } from '../../../../application/rule/types';
 import { transformUpdateBodyV1 } from './transforms';
@@ -42,7 +42,7 @@ export const updateRuleRoute = (
         },
         response: {
           200: {
-            body: () => ruleResponseSchema,
+            body: () => ruleResponseSchemaV1,
           },
         },
       },

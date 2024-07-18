@@ -14,7 +14,7 @@ import type {
   FindRulesRequestQueryV1,
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
-import { RuleParamsV1, ruleResponseSchema } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
@@ -51,7 +51,7 @@ const buildFindRulesRoute = ({
         },
         response: {
           200: {
-            body: () => ruleResponseSchema,
+            body: () => ruleResponseSchemaV1,
           },
         },
       },
