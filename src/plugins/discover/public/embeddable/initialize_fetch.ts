@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, combineLatest, lastValueFrom, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import { KibanaExecutionContext } from '@kbn/core/types';
 import {
@@ -91,21 +91,23 @@ export function initializeFetch({
   discoverServices: DiscoverServices;
 }) {
   const requestAdapter = new RequestAdapter();
-  let abortController = new AbortController();
+  let abortController: AbortController | undefined;
 
   const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews])
     .pipe(
+      tap(() => {
+        // abort any in-progress requests
+        if (abortController) {
+          abortController.abort();
+          abortController = undefined;
+        }
+      }),
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         api.blockingError.next(undefined);
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
-
-        // Abort any in-progress requests
-        const currentAbortController = new AbortController();
-        abortController.abort();
-        abortController = currentAbortController;
 
         const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
         updateSearchSource(
@@ -126,6 +128,7 @@ export function initializeFetch({
 
         try {
           api.dataLoading.next(true);
+
           // Log request to inspector
           requestAdapter.reset();
           await discoverServices.profilesManager.resolveDataSourceProfile({
@@ -137,6 +140,10 @@ export function initializeFetch({
             dataView,
             query: searchSourceQuery,
           });
+
+          // Get new abort controller
+          const currentAbortController = new AbortController();
+          abortController = currentAbortController;
 
           const esqlMode = isEsqlMode(savedSearch);
           if (
