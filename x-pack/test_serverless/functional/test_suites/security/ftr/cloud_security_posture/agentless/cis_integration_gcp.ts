@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     before(async () => {
-      await pageObjects.svlCommonPage.loginAsViewer();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
     });
