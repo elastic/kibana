@@ -26,11 +26,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 import './add_empty_prompt.scss';
 
-interface AddEmptyPromptProps {
-  setIsInferenceFlyoutVisible: (value: boolean) => void;
-}
-
-export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFlyoutVisible }) => {
+export const AddEmptyPrompt: React.FC = () => {
   const {
     services: { ml },
   } = useKibana();
@@ -92,7 +88,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
                   <EuiLink
                     href={docLinks.createInferenceEndpoint}
                     target="_blank"
-                    data-test-subj="learn-more-about-inference-endpoints"
+                    data-test-subj="learn-more-about-elser"
                   >
                     {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
                   </EuiLink>
@@ -107,7 +103,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
                   <EuiLink
                     href={docLinks.createInferenceEndpoint}
                     target="_blank"
-                    data-test-subj="learn-more-about-inference-endpoints"
+                    data-test-subj="learn-more-about-e5"
                   >
                     {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
                   </EuiLink>

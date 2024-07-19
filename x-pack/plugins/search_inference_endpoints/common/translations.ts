@@ -21,14 +21,8 @@ export const CANCEL = i18n.translate('xpack.searchInferenceEndpoints.cancel', {
 export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
   {
-    defaultMessage: 'Manage your inference endpoints.',
-  }
-);
-
-export const ADD_ENDPOINT_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.newInferenceEndpointButtonLabel',
-  {
-    defaultMessage: 'Add endpoint',
+    defaultMessage:
+      'Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Set up tasks such as text embedding, completions, and reranking using simple, unique endpoints.',
   }
 );
 

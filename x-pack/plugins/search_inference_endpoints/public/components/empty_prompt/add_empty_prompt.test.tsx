@@ -35,4 +35,14 @@ describe('When empty prompt is loaded', () => {
     const learnMoreLink = screen.getByTestId('view-your-models');
     expect(learnMoreLink).toBeInTheDocument();
   });
+
+  it('should have a learn-more-about-elser link', () => {
+    const learnMoreLink = screen.getByTestId('learn-more-about-elser');
+    expect(learnMoreLink).toBeInTheDocument();
+  });
+
+  it('should have a learn-more-about-e5 link', () => {
+    const learnMoreLink = screen.getByTestId('learn-more-about-e5');
+    expect(learnMoreLink).toBeInTheDocument();
+  });
 });

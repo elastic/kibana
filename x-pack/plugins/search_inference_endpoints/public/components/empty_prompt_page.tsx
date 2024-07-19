@@ -9,10 +9,4 @@ import React from 'react';
 
 import { AddEmptyPrompt } from './empty_prompt/add_empty_prompt';
 
-interface EmptyPromptPageProps {
-  setIsInferenceFlyoutVisible: (value: boolean) => void;
-}
-
-export const EmptyPromptPage: React.FC<EmptyPromptPageProps> = ({
-  setIsInferenceFlyoutVisible,
-}) => <AddEmptyPrompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />;
+export const EmptyPromptPage: React.FC = () => <AddEmptyPrompt />;
