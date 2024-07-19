@@ -431,6 +431,16 @@ describe('enable()', () => {
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 
+  test('throws an error if API params do not match the schema', async () => {
+    await expect(
+      // @ts-ignore: this is what we are testing
+      async () => await rulesClient.enable({ id: 1 })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating enable rule parameters - [id]: expected value of type [string] but got [number]"`
+    );
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+  });
+
   test('falls back when failing to getDecryptedAsInternalUser', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
