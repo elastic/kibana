@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       //   'vanilla',
       //   'kspm'
       // );
-      await rule.waitForPluginInitialized();
+      // await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });
