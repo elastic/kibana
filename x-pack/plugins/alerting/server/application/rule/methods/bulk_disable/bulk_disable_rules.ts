@@ -143,7 +143,7 @@ const bulkDisableRulesWithOCC = async (
     () =>
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
-          filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
+          filter: filter ?? additionalFilter,
           type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
