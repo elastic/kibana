@@ -9,14 +9,14 @@
 import type { EuiDataGridStyle } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
-import { useDensity } from './use_density';
+import { useDataGridStyle } from './use_data_grid_style';
 
 const localStorageMock = {
   get: jest.fn(),
   set: jest.fn(),
 };
 
-describe('useDensity', () => {
+describe('useDataGridStyle', () => {
   beforeEach(() => {
     localStorageMock.get.mockClear();
     localStorageMock.set.mockClear();
@@ -25,54 +25,54 @@ describe('useDensity', () => {
   it('should read from local storage', () => {
     localStorageMock.get.mockReturnValue({ foo: 'bar' });
     const { result } = renderHook(() =>
-      useDensity({
+      useDataGridStyle({
         storage: localStorageMock as unknown as Storage,
         consumer: 'discover',
       })
     );
     const {
-      current: { density },
+      current: { dataGridStyle },
     } = result;
-    expect(density).toMatchInlineSnapshot(`
+    expect(dataGridStyle).toMatchInlineSnapshot(`
       Object {
         "foo": "bar",
       }
     `);
   });
 
-  it('should update local storage when onChangeDensity is called', () => {
+  it('should update local storage when onChangeDataGridStyle is called', () => {
     const { result } = renderHook(() =>
-      useDensity({
+      useDataGridStyle({
         storage: localStorageMock as unknown as Storage,
         consumer: 'discover',
       })
     );
     const {
-      current: { onChangeDensity },
+      current: { onChangeDataGridStyle },
     } = result;
 
     const newValue: EuiDataGridStyle = { border: 'all', footer: 'shade' };
-    onChangeDensity(newValue);
+    onChangeDataGridStyle(newValue);
 
     expect(localStorageMock.set).toBeCalledWith('discover:dataGridStyle', newValue);
   });
 
-  it('should call provided onUpdateDensity with the updated value', () => {
-    const onUpdateDensity = jest.fn();
+  it('should call provided onUpdateDataGridStyle with the updated value', () => {
+    const onUpdateDataGridStyle = jest.fn();
     const { result } = renderHook(() =>
-      useDensity({
+      useDataGridStyle({
         storage: localStorageMock as unknown as Storage,
         consumer: 'discover',
-        onUpdateDensity,
+        onUpdateDataGridStyle,
       })
     );
     const {
-      current: { onChangeDensity },
+      current: { onChangeDataGridStyle },
     } = result;
 
     const newValue: EuiDataGridStyle = { border: 'all', footer: 'shade' };
-    onChangeDensity(newValue);
+    onChangeDataGridStyle(newValue);
 
-    expect(onUpdateDensity).toBeCalledWith(newValue);
+    expect(onUpdateDataGridStyle).toBeCalledWith(newValue);
   });
 });

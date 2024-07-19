@@ -90,7 +90,7 @@ import {
   getColorIndicatorControlColumn,
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
-import { useDensity } from '../hooks/use_density';
+import { useDataGridStyle } from '../hooks/use_data_grid_style';
 
 export type SortOrder = [string, string];
 
@@ -238,9 +238,9 @@ export interface UnifiedDataTableProps {
    */
   showDensitySelector?: boolean;
   /**
-   * Callback when the density configuration is modified
+   * Callback when the data grid style configuration is modified
    */
-  onUpdateDensity?: (density: EuiDataGridStyle) => void;
+  onUpdateDataGridStyle?: (dataGridStyle: EuiDataGridStyle) => void;
   /**
    * Is text base lang mode enabled
    */
@@ -477,7 +477,7 @@ export const UnifiedDataTable = ({
   renderCellPopover,
   getRowIndicator,
   showDensitySelector = false,
-  onUpdateDensity,
+  onUpdateDataGridStyle,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -621,7 +621,11 @@ export const UnifiedDataTable = ({
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
 
-  const { density, onChangeDensity } = useDensity({ storage, consumer, onUpdateDensity });
+  const { dataGridStyle, onChangeDataGridStyle } = useDataGridStyle({
+    storage,
+    consumer,
+    onUpdateDataGridStyle,
+  });
 
   /**
    * Cell rendering
@@ -638,7 +642,7 @@ export const UnifiedDataTable = ({
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
-        isCompressed: density.fontSize === 's',
+        isCompressed: dataGridStyle.fontSize === 's',
       }),
     [
       dataView,
@@ -649,7 +653,7 @@ export const UnifiedDataTable = ({
       fieldFormats,
       externalCustomRenderers,
       isPlainRecord,
-      density,
+      dataGridStyle,
     ]
   );
 
@@ -1071,8 +1075,8 @@ export const UnifiedDataTable = ({
   }
 
   const gridStyle: EuiDataGridStyle = {
-    ...density,
-    onChange: onChangeDensity,
+    ...dataGridStyle,
+    onChange: onChangeDataGridStyle,
     ...gridStyleOverride,
   };
 
