@@ -175,6 +175,7 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
-    "@kbn/securitysolution-exceptions-common"
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/alerting-types"
   ]
 }
