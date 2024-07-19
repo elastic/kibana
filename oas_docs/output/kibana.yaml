@@ -87,6 +87,8 @@ tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
     x-displayName: slo
+  - name: system
+    x-displayName: system
 paths:
   /api/apm/agent_keys:
     post:
@@ -4083,7 +4085,8 @@ paths:
                   Kibana's operational status. A minimal response is sent for
                   unauthorized users.
       summary: Get Kibana's current status
-      tags: []
+      tags:
+        - system
       security:
         - Kibana_HTTP_APIs_basicAuth: []
 components:
@@ -12382,3 +12385,6 @@ x-tagGroups:
   - name: SLOs
     tags:
       - slo
+  - name: Kibana HTTP APIs
+    tags:
+      - system

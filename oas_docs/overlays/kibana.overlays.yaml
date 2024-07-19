@@ -14,30 +14,3 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-  - target: '$.paths["/api/status"][*].tags'
-    description: Add tag to the operations in the status endpoint
-    update:
-      - status
-  - target: '$.tags'
-    description: Add status tag to the document level tags
-    update:
-      - name: status
-        description: TBD
-        x-displayName: status
-  # - target: '$.components.securitySchemes'
-  #   description: Remove all security schemes so we can add our own.
-  #   remove: true
-  # - target: '$.components'
-  #   description: Add security schemes
-  #   update:
-  #     securitySchemes:
-  #       basicAuth:
-  #         type: http
-  #         scheme: basic
-  #       apiKeyAuth:
-  #         type: apiKey
-  #         in: header
-  #         name: Authorization
-  #         description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-  # - target: '$.paths["/api/actions/connector"][*].security'
-  #   remove: true
