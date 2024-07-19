@@ -6,12 +6,14 @@
  */
 
 import expect from 'expect';
-
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
+  ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
 
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -25,12 +27,20 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { createRule } from '../../../../../../../common/utils/security_solution';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import {
   getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
+  dataGeneratorFactory,
+  scheduleRuleRun,
+  stopAllManualRuns,
+  waitForBackfillExecuted,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -67,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toEqual(1);
+      expect(alerts.hits.hits).toHaveLength(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {
         return expect(fullAlert).toBeTruthy();
@@ -333,7 +343,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toEqual(1);
+      expect(alerts.hits.hits).toHaveLength(1);
     });
 
     describe('Timestamp override and fallback', async () => {
@@ -458,6 +468,226 @@ export default ({ getService }: FtrProviderContext) => {
         const fullAlert = previewAlerts[0]?._source;
 
         expect(fullAlert?.['host.asset.criticality']).toEqual('high_impact');
+      });
+    });
+
+    // skipped on MKI since feature flags are not supported there
+    describe('@skipInServerlessMKI manual rule run', () => {
+      beforeEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+      });
+
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      const createEvent = ({
+        id,
+        timestamp,
+        name = 'agent-1',
+      }: {
+        id: string;
+        timestamp: string;
+        name?: string;
+      }) => ({
+        id,
+        '@timestamp': timestamp,
+        agent: {
+          name,
+        },
+        host: {
+          name: 'host-1',
+        },
+      });
+
+      it('alerts when run on a time range that the rule has not previously seen, and deduplicates if run there more than once', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+        const secondTimestamp = moment(new Date()).subtract(1, 'm');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: firstTimestamp.subtract(1, 'm').toISOString() }),
+          createEvent({ id, timestamp: secondTimestamp.toISOString() }),
+          createEvent({ id, timestamp: secondTimestamp.subtract(5, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(2);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+      });
+
+      it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(1, 'm');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: firstTimestamp.subtract(1, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
+      });
+
+      it('should run rule in the past and generate duplicate alert', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(20, 'm');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).subtract(1, 'm').toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).subtract(40, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-180m',
+          interval: '30m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(45, 'm'),
+          endDate: moment(firstTimestamp).add(1, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(2);
+      });
+
+      it('supression with time window should work for manual rule runs and update alert', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: firstTimestamp.toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).subtract(1, 'm').toISOString() }),
+        ]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          from: 'now-35m',
+          interval: '30m',
+          alert_suppression: {
+            duration: {
+              value: 5,
+              unit: 'h',
+            },
+          },
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(0);
+
+        // generate alert in the past
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
+
+        await indexListOfDocuments([
+          createEvent({ id, timestamp: moment(firstTimestamp).add(41, 'm').toISOString() }),
+          createEvent({ id, timestamp: moment(firstTimestamp).add(42, 'm').toISOString() }),
+        ]);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).add(39, 'm'),
+          endDate: moment(firstTimestamp).add(120, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
+
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
+        expect(updatedAlerts.hits.hits[0]._source).toEqual({
+          ...updatedAlerts.hits.hits[0]._source,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
       });
     });
   });
