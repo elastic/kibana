@@ -37,10 +37,6 @@ export const generateChatTitle = async ({
 }: GenerateChatTitleParams) => {
   logger.debug(() => `Node state:\n ${JSON.stringify(state, null, 2)}`);
 
-  if (state.messages.length !== 0) {
-    logger.debug('No need to generate chat title, messages already exist');
-    return { chatTitle: '' };
-  }
   const outputParser = new StringOutputParser();
   const graph = GENERATE_CHAT_TITLE_PROMPT(responseLanguage).pipe(model).pipe(outputParser);
 
@@ -50,6 +46,7 @@ export const generateChatTitle = async ({
   logger.debug(`chatTitle: ${chatTitle}`);
 
   return {
+    ...state,
     chatTitle,
   };
 };
