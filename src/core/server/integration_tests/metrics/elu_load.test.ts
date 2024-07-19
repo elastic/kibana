@@ -31,14 +31,13 @@ describe('GET /api/_elu_load', () => {
       coreId: Symbol('core'),
       env: Env.createDefault(REPO_ROOT, getEnvOptions()),
       logger: loggingSystemMock.create(),
-      configService: configServiceMock.create({ atPath: { interval: moment.duration('2s') } }),
+      configService: configServiceMock.create({ atPath: { interval: moment.duration('1s') } }),
     });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
-    const setupDeps = {
+    const httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
-    };
-    const httpSetup = await server.setup(setupDeps);
+    });
     listener = httpSetup.server.listener;
     await service.setup({
       http: httpSetup,
@@ -61,5 +60,14 @@ describe('GET /api/_elu_load', () => {
         long: expect.any(Number),
       },
     });
+
+    expect(body.load.short).toBeGreaterThanOrEqual(0);
+    expect(body.load.short).toBeLessThanOrEqual(1);
+
+    expect(body.load.medium).toBeGreaterThanOrEqual(0);
+    expect(body.load.medium).toBeLessThanOrEqual(1);
+
+    expect(body.load.long).toBeGreaterThanOrEqual(0);
+    expect(body.load.long).toBeLessThanOrEqual(1);
   });
 });
