@@ -23,12 +23,16 @@ jest.mock('../store/notes.slice', () => ({
   fetchNotesByDocumentIds: jest.fn(),
 }));
 
+const mockedUseDispatch = useDispatch as jest.MockedFunction<typeof useDispatch>;
+const mockedUseIsExperimentalFeatureEnabled =
+  useIsExperimentalFeatureEnabled as jest.MockedFunction<typeof useIsExperimentalFeatureEnabled>;
+
 describe('useFetchNotes', () => {
   let mockDispatch: jest.Mock;
 
   beforeEach(() => {
     mockDispatch = jest.fn();
-    useDispatch.mockReturnValue(mockDispatch);
+    mockedUseDispatch.mockReturnValue(mockDispatch);
   });
 
   afterEach(() => {
@@ -42,7 +46,7 @@ describe('useFetchNotes', () => {
   });
 
   it('should not dispatch action when securitySolutionNotesEnabled is false', () => {
-    useIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { result } = renderHook(() => useFetchNotes());
 
     result.current.onLoad([{ _id: '1' }]);
@@ -50,7 +54,7 @@ describe('useFetchNotes', () => {
   });
 
   it('should not dispatch action when events array is empty', () => {
-    useIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const { result } = renderHook(() => useFetchNotes());
 
     result.current.onLoad([]);
@@ -58,7 +62,7 @@ describe('useFetchNotes', () => {
   });
 
   it('should dispatch fetchNotesByDocumentIds with correct ids when conditions are met', () => {
-    useIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const { result } = renderHook(() => useFetchNotes());
 
     const events = [{ _id: '1' }, { _id: '2' }, { _id: '3' }];
@@ -70,7 +74,7 @@ describe('useFetchNotes', () => {
   });
 
   it('should memoize onLoad function', () => {
-    useIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const { result, rerender } = renderHook(() => useFetchNotes());
 
     const firstOnLoad = result.current.onLoad;
@@ -81,12 +85,12 @@ describe('useFetchNotes', () => {
   });
 
   it('should update onLoad when securitySolutionNotesEnabled changes', () => {
-    useIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const { result, rerender } = renderHook(() => useFetchNotes());
 
     const firstOnLoad = result.current.onLoad;
 
-    useIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     rerender();
     const secondOnLoad = result.current.onLoad;
 
