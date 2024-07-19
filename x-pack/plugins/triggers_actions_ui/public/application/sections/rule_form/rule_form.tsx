@@ -769,7 +769,7 @@ export const RuleForm = ({
               </SectionLoading>
             }
           >
-            <EuiThemeProvider isDarkMode={colorMode === COLOR_MODES_STANDARD.dark}>
+            <EuiThemeProvider darkMode={colorMode === COLOR_MODES_STANDARD.dark}>
               <RuleParamsExpressionComponent
                 id={rule.id}
                 ruleParams={rule.params}
