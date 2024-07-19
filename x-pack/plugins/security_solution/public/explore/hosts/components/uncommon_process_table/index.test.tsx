@@ -14,7 +14,7 @@ import { hostsModel } from '../../store';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
-import { getArgs, UncommonProcessTable, getUncommonColumnsCurated } from '.';
+import { UncommonProcessTable, getUncommonColumnsCurated } from '.';
 import { mockData } from './mock';
 import { HostsType } from '../../store/model';
 import * as i18n from './translations';
@@ -149,26 +149,6 @@ describe('Uncommon Process Table Component', () => {
       expect(wrapper.find('tr.euiTableRow').at(4).find('td.euiTableRowCell').at(3).text()).toBe(
         'hello-worldhello-world-2 '
       );
-    });
-  });
-
-  describe('#getArgs', () => {
-    test('it works with string array', () => {
-      const args = ['1', '2', '3'];
-      expect(getArgs(args)).toEqual('1 2 3');
-    });
-
-    test('it returns null if empty array', () => {
-      const args: string[] = [];
-      expect(getArgs(args)).toEqual(null);
-    });
-
-    test('it returns null if given null', () => {
-      expect(getArgs(null)).toEqual(null);
-    });
-
-    test('it returns null if given undefined', () => {
-      expect(getArgs(undefined)).toEqual(null);
     });
   });
 
