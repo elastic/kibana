@@ -103,7 +103,7 @@ describe('useFetchBrowserFieldCapabilities', () => {
   it('should not fetch if the only featureId is not valid', async () => {
     const { result } = renderHook(() =>
       useFetchBrowserFieldCapabilities({
-        featureIds: ['alerts'] as unknown as AlertConsumers[],
+        featureIds: ['foo'] as unknown as AlertConsumers[],
       })
     );
 
@@ -114,7 +114,7 @@ describe('useFetchBrowserFieldCapabilities', () => {
   it('should not fetch if all featureId are not valid', async () => {
     const { result } = renderHook(() =>
       useFetchBrowserFieldCapabilities({
-        featureIds: ['alerts', 'tomato'] as unknown as AlertConsumers[],
+        featureIds: ['foo', 'bar'] as unknown as AlertConsumers[],
       })
     );
 
@@ -125,7 +125,7 @@ describe('useFetchBrowserFieldCapabilities', () => {
   it('should filter out the non valid feature id', async () => {
     const { waitForNextUpdate } = renderHook(() =>
       useFetchBrowserFieldCapabilities({
-        featureIds: ['alerts', 'apm', 'logs'] as unknown as AlertConsumers[],
+        featureIds: ['foo', 'apm', 'logs'] as unknown as AlertConsumers[],
       })
     );
 
