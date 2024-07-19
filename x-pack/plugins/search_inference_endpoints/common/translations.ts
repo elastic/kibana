@@ -71,8 +71,7 @@ export const VIEW_YOUR_MODELS_LINK = i18n.translate(
 export const ELSER_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.elserDescription',
   {
-    defaultMessage:
-      'ELSER is a sparse vector NLP model trained by Elastic for semantic search. Recommended for English language.',
+    defaultMessage: "ELSER is Elastic's sparse vector NLP model for English semantic search.",
   }
 );
 
@@ -84,7 +83,7 @@ export const E5_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.e5Description',
   {
     defaultMessage:
-      'E5 is a dense vector NLP model that enables you to perform multi-lingual semantic search.',
+      'E5 is a third party NLP model that enables you to perform multi-lingual semantic search by using dense vector representations.',
   }
 );
 

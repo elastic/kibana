@@ -8,7 +8,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  EuiButton,
   EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
@@ -87,31 +86,31 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
           <EuiFlexGroup>
             <EuiFlexItem>
               <EndpointPrompt
-                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
                 title={i18n.ELSER_TITLE}
                 description={i18n.ELSER_DESCRIPTION}
                 footer={
-                  <EuiButton
-                    iconType="plusInCircle"
-                    onClick={() => setIsInferenceFlyoutVisible(true)}
+                  <EuiLink
+                    href={docLinks.createInferenceEndpoint}
+                    target="_blank"
+                    data-test-subj="learn-more-about-inference-endpoints"
                   >
-                    {i18n.ADD_ENDPOINT_LABEL}
-                  </EuiButton>
+                    {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+                  </EuiLink>
                 }
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EndpointPrompt
-                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
                 title={i18n.E5_TITLE}
                 description={i18n.E5_DESCRIPTION}
                 footer={
-                  <EuiButton
-                    iconType="plusInCircle"
-                    onClick={() => setIsInferenceFlyoutVisible(true)}
+                  <EuiLink
+                    href={docLinks.createInferenceEndpoint}
+                    target="_blank"
+                    data-test-subj="learn-more-about-inference-endpoints"
                   >
-                    {i18n.ADD_ENDPOINT_LABEL}
-                  </EuiButton>
+                    {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+                  </EuiLink>
                 }
               />
             </EuiFlexItem>
