@@ -40,7 +40,7 @@ const SETUP_INFERENCE_ENDPOINT_ELSER = `PUT _inference/sparse_embedding/my-infer
 }
 `;
 
-const SETUP_INFERENCE_ENDPOINT_E5 = `PUT _inference/sparse_embedding/my-inference-endpoint
+const SETUP_INFERENCE_ENDPOINT_E5 = `PUT _inference/text_embedding/my-inference-endpoint
 {
   "service": "elasticsearch",
   "service_settings": {
