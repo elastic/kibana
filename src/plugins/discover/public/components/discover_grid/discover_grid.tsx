@@ -62,6 +62,19 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
             };
           },
         },
+        {
+          id: 'test',
+          headerAriaLabel: 'Additional row control header 3',
+          getRowControlParams: () => {
+            return {
+              label: 'Test 3',
+              iconType: 'heart',
+              onClick: () => {
+                alert('Test 3 clicked');
+              },
+            };
+          },
+        },
       ]}
       {...props}
     />

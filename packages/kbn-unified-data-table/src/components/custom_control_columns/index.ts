@@ -11,4 +11,4 @@ export {
   type ColorIndicatorControlColumnParams,
 } from './color_indicator';
 
-export { getAdditionalRowControlColumn } from './additional_row_control';
+export { getAdditionalRowControlColumns } from './additional_row_control';

@@ -88,7 +88,7 @@ import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import {
   getColorIndicatorControlColumn,
   type ColorIndicatorControlColumnParams,
-  getAdditionalRowControlColumn,
+  getAdditionalRowControlColumns,
 } from './custom_control_columns';
 
 export type SortOrder = [string, string];
@@ -865,8 +865,8 @@ export const UnifiedDataTable = ({
       leadingColumns.unshift(colorIndicatorControlColumn);
     }
 
-    if (additionalRowLeadingControls) {
-      leadingColumns.push(...additionalRowLeadingControls.map(getAdditionalRowControlColumn));
+    if (additionalRowLeadingControls?.length) {
+      leadingColumns.push(...getAdditionalRowControlColumns(additionalRowLeadingControls));
     }
 
     return leadingColumns;
