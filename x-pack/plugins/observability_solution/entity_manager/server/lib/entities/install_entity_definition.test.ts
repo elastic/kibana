@@ -125,12 +125,18 @@ const assertHasUninstalledDefinition = (
   expect(soClient.delete).toBeCalledTimes(1);
 
   expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(2);
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith({
-    name: `entities_v1_history_${definition.id}_index_template`,
-  });
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith({
-    name: `entities_v1_latest_${definition.id}_index_template`,
-  });
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: `entities_v1_history_${definition.id}_index_template`,
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: `entities_v1_latest_${definition.id}_index_template`,
+    },
+    { ignore: [404] }
+  );
 };
 
 describe('install_entity_definition', () => {

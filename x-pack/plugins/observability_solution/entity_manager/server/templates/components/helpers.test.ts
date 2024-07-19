@@ -13,9 +13,9 @@ describe('helpers', () => {
     const result = getCustomLatestTemplateComponents(definitionId);
     expect(result).toEqual([
       'test@platform',
-      'test-history@platform',
+      'test-latest@platform',
       'test@custom',
-      'test-history@custom',
+      'test-latest@custom',
     ]);
   });
 
@@ -24,9 +24,9 @@ describe('helpers', () => {
     const result = getCustomHistoryTemplateComponents(definitionId);
     expect(result).toEqual([
       'test@platform',
-      'test-latest@platform',
+      'test-history@platform',
       'test@custom',
-      'test-latest@custom',
+      'test-history@custom',
     ]);
   });
 });

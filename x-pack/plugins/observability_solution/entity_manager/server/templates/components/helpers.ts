@@ -7,14 +7,14 @@
 
 export const getCustomLatestTemplateComponents = (definitionId: string) => [
   `${definitionId}@platform`, // @platform goes before so it can be overwritten by custom
-  `${definitionId}-history@platform`,
+  `${definitionId}-latest@platform`,
   `${definitionId}@custom`,
-  `${definitionId}-history@custom`,
+  `${definitionId}-latest@custom`,
 ];
 
 export const getCustomHistoryTemplateComponents = (definitionId: string) => [
   `${definitionId}@platform`, // @platform goes before so it can be overwritten by custom
-  `${definitionId}-latest@platform`,
+  `${definitionId}-history@platform`,
   `${definitionId}@custom`,
-  `${definitionId}-latest@custom`,
+  `${definitionId}-history@custom`,
 ];

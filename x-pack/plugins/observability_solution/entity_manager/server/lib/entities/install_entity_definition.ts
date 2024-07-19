@@ -109,21 +109,6 @@ export async function installEntityDefinition({
       await deleteEntityDefinition(soClient, definition, logger);
     }
 
-    if (installState.indexTemplates.history) {
-      await deleteTemplate({
-        esClient,
-        logger,
-        name: getEntityHistoryIndexTemplateV1(definition.id),
-      });
-    }
-    if (installState.indexTemplates.latest) {
-      await deleteTemplate({
-        esClient,
-        logger,
-        name: getEntityLatestIndexTemplateV1(definition.id),
-      });
-    }
-
     if (installState.ingestPipelines.history) {
       await deleteHistoryIngestPipeline(esClient, definition, logger);
     }
@@ -137,6 +122,21 @@ export async function installEntityDefinition({
 
     if (installState.transforms.latest) {
       await stopAndDeleteLatestTransform(esClient, definition, logger);
+    }
+
+    if (installState.indexTemplates.history) {
+      await deleteTemplate({
+        esClient,
+        logger,
+        name: getEntityHistoryIndexTemplateV1(definition.id),
+      });
+    }
+    if (installState.indexTemplates.latest) {
+      await deleteTemplate({
+        esClient,
+        logger,
+        name: getEntityLatestIndexTemplateV1(definition.id),
+      });
     }
 
     throw e;
