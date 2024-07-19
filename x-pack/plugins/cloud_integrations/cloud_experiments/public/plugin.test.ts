@@ -49,7 +49,6 @@ describe('Cloud Experiments public plugin', () => {
 
   describe('setup', () => {
     let plugin: CloudExperimentsPlugin;
-    let metadataServiceSetupSpy: jest.SpyInstance;
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext({
@@ -57,8 +56,6 @@ describe('Cloud Experiments public plugin', () => {
         metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
-      // eslint-disable-next-line dot-notation
-      metadataServiceSetupSpy = jest.spyOn(plugin['metadataService'], 'setup');
     });
 
     afterEach(() => {
