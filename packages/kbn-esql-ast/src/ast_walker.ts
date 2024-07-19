@@ -337,6 +337,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     return getBooleanValue(ctx);
   }
   if (ctx instanceof StringLiteralContext) {
+    // String literal covers multiple ES|QL types: text and keyword types
     return createLiteral('string', ctx.string_().QUOTED_STRING());
   }
   if (
@@ -356,6 +357,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
+      // String literal covers multiple ES|QL types: text and keyword types
       const literal = createLiteral('string', string.QUOTED_STRING());
       if (literal) {
         values.push(literal);

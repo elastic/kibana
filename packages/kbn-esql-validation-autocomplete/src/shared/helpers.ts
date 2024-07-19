@@ -230,6 +230,10 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return true;
   }
 
+  if (item.literalType === 'string' && (argType === 'text' || argType === 'keyword')) {
+    return true;
+  }
+
   if (item.literalType !== 'string') {
     if (argType === item.literalType) {
       return true;
@@ -442,12 +446,7 @@ export function checkFunctionArgMatchesDefinition(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some(
-      (ct) =>
-        ['any', 'null'].includes(ct) ||
-        (isNumericDecimalType(argType) && ct === 'decimal') ||
-        argType === ct
-    );
+    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
   }
   if (arg.type === 'inlineCast') {
     return argType === arg.castType;
