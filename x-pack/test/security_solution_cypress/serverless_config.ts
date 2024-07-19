@@ -36,7 +36,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'bulkCustomHighlightedFieldsEnabled',
-          'alertSuppressionForMachineLearningRuleEnabled',
           'manualRuleRunEnabled',
         ])}`,
       ],
