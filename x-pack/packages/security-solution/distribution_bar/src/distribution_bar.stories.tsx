@@ -52,25 +52,30 @@ export default {
   description: 'Distribution Bar',
 };
 
-// todo: fix key warning
 export const DistributionBar = () => {
   return [
-    <EuiTitle size={'xs'}>
-      <h4>{'Findings'}</h4>
-    </EuiTitle>,
-    <EuiSpacer size={'s'} />,
-    <DistributionBarComponent stats={mockStatsFindings} />,
-    <EuiSpacer size={'m'} />,
-    <EuiTitle size={'xs'}>
-      <h4>{'Alerts'}</h4>
-    </EuiTitle>,
-    <EuiSpacer size={'s'} />,
-    <DistributionBarComponent stats={mockStatsAlerts} />,
-    <EuiSpacer size={'m'} />,
-    <EuiTitle size={'xs'}>
-      <h4>{'Empty state'}</h4>
-    </EuiTitle>,
-    <EuiSpacer size={'s'} />,
-    <DistributionBarComponent stats={[]} />,
+    <React.Fragment key={'findings'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Findings'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={mockStatsFindings} />
+      <EuiSpacer size={'m'} />
+    </React.Fragment>,
+    <React.Fragment key={'alerts'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Alerts'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={mockStatsAlerts} />
+      <EuiSpacer size={'m'} />
+    </React.Fragment>,
+    <React.Fragment key={'empty'}>
+      <EuiTitle size={'xs'}>
+        <h4>{'Empty state'}</h4>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <DistributionBarComponent stats={[]} />
+    </React.Fragment>,
   ];
 };
