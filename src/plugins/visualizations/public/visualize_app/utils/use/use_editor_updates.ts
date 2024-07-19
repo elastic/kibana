@@ -16,6 +16,7 @@ import {
   VisualizeEditorVisInstance,
 } from '../../types';
 import { convertFromSerializedVis } from '../../../utils/saved_visualize_utils';
+import { VisualizeSerializedState } from '@kbn/visualizations-plugin/public/react_embeddable/types';
 
 export const useEditorUpdates = (
   services: VisualizeServices,
@@ -59,58 +60,51 @@ export const useEditorUpdates = (
       };
 
       // update persisted state from initial state
-      if (initialState.uiState) {
+      if (initialState?.uiState) {
         vis.uiState.setSilent(initialState.uiState);
       }
 
-      // update the appState when the stateful instance changes
-      const updateOnChange = () => {
-        appState.transitions.set('uiState', vis.uiState.getChanges());
-      };
+      // const unsubscribeStateUpdates = appState.subscribe((state: VisualizeSerializedState) => {
+      //   setCurrentAppState(state);
+      //   if (savedVis && savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
+      //     // this filters out the case when manipulating the browser history back/forward
+      //     // and initializing different visualizations
+      //     return;
+      //   }
 
-      vis.uiState.on('change', updateOnChange);
+      //   if (!isEqual(state.uiState, vis.uiState.getChanges())) {
+      //     vis.uiState.set(state.uiState);
+      //   }
 
-      const unsubscribeStateUpdates = appState.subscribe((state) => {
-        setCurrentAppState(state);
-        if (savedVis && savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
-          // this filters out the case when manipulating the browser history back/forward
-          // and initializing different visualizations
-          return;
-        }
+      //   // if the browser history was changed manually we need to reflect changes in the editor
+      //   if (
+      //     savedVis &&
+      //     !isEqual(
+      //       {
+      //         ...convertFromSerializedVis(vis.serialize()).visState,
+      //         title: vis.title,
+      //       },
+      //       state.vis
+      //     )
+      //   ) {
+      //     const { aggs, ...visState } = state.vis;
+      //     vis.setState({
+      //       ...visState,
+      //       data: {
+      //         aggs,
+      //       },
+      //     });
+      //     eventEmitter.emit('updateEditor');
+      //   }
 
-        if (!isEqual(state.uiState, vis.uiState.getChanges())) {
-          vis.uiState.set(state.uiState);
-        }
+      //   handleLinkedSearch(state.linked);
 
-        // if the browser history was changed manually we need to reflect changes in the editor
-        if (
-          savedVis &&
-          !isEqual(
-            {
-              ...convertFromSerializedVis(vis.serialize()).visState,
-              title: vis.title,
-            },
-            state.vis
-          )
-        ) {
-          const { aggs, ...visState } = state.vis;
-          vis.setState({
-            ...visState,
-            data: {
-              aggs,
-            },
-          });
-          eventEmitter.emit('updateEditor');
-        }
-
-        handleLinkedSearch(state.linked);
-
-        if (vis.data.searchSource) {
-          vis.data.searchSource.setField('query', state.query);
-          vis.data.searchSource.setField('filter', state.filters);
-        }
-        setHasUnsavedChanges(true);
-      });
+      //   if (vis.data.searchSource) {
+      //     vis.data.searchSource.setField('query', state.query);
+      //     vis.data.searchSource.setField('filter', state.filters);
+      //   }
+      //   setHasUnsavedChanges(true);
+      // });
 
       const updateOnEmbeddableRendered = () => setIsEmbeddableRendered(true);
       eventEmitter.on('embeddableRendered', updateOnEmbeddableRendered);
@@ -119,11 +113,10 @@ export const useEditorUpdates = (
         setIsEmbeddableRendered(false);
         eventEmitter.off('embeddableRendered', updateOnEmbeddableRendered);
         subscriptions.unsubscribe();
-        vis.uiState.off('change', updateOnChange);
-        unsubscribeStateUpdates();
+        // unsubscribeStateUpdates();
       };
     }
-  }, [appState, eventEmitter, visInstance, services, setHasUnsavedChanges]);
+  }, [appState, eventEmitter, visInstance, services, setHasUnsavedChanges, isEmbeddableRendered]);
 
   return { isEmbeddableRendered, currentAppState };
 };

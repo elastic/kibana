@@ -162,9 +162,7 @@ export const getTopNavConfig = (
     }
 
     // vis.title was not bound and it's needed to reflect title into visState
-    stateContainer.transitions.setVis({
-      title: serializedVis.title,
-    });
+    stateContainer.transitions.updateTitle(serializedVis.title);
 
     setHasUnsavedChanges(false);
     const visSavedObjectAttributes = {

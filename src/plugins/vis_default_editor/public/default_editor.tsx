@@ -40,6 +40,7 @@ export type DefaultEditorProps = Omit<EditorRenderProps, 'linked'> & {
   initialState: VisualizeSerializedState;
   eventEmitter: EventEmitter;
   embeddableApiHandler: EmbeddableApiHandler;
+  updateUrlState?: (state: VisualizeRuntimeState) => void;
   dataView?: string;
   savedSearchService: SavedSearchPublicPluginStart;
   references: Reference[];
@@ -56,6 +57,7 @@ function DefaultEditor({
   embeddableApiHandler,
   eventEmitter,
   savedSearchService,
+  updateUrlState,
   references = [],
   onRedirectToLegacy,
 }: DefaultEditorProps) {
@@ -150,10 +152,12 @@ function DefaultEditor({
                     serializeState: [, setSerializeState],
                     snapshotState: [, setSnapshotState],
                     getVis: [, setGetVis],
+                    updateVis: [, setEmbeddableApiHandlerUpdateVis],
                   } = embeddableApiHandler;
                   setSerializeState(() => api.serializeState as SerializeStateFn);
                   setSnapshotState(() => api.snapshotRuntimeState);
                   setGetVis(() => api.getVis);
+                  setEmbeddableApiHandlerUpdateVis(() => api.updateVis);
                   setOnUpdateVis(() => api.updateVis);
                   setTitles(api.getTitles());
 
@@ -172,7 +176,6 @@ function DefaultEditor({
                       .get(embeddableVis.data.savedSearchId)
                       .then((result) => setSavedSearch(result));
 
-                  api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
                   api.subscribeToHasInspector((hasInspector) => {
                     if (!hasInspector) return;
                     setOpenInspector(() => api.openInspector);
@@ -180,6 +183,13 @@ function DefaultEditor({
                   api.subscribeToNavigateToLens((navigateToLens) => {
                     if (!navigateToLens) return;
                     setNavigateToLens(() => navigateToLens);
+                  });
+                  api.subscribeToSerializedStateChanges(() => {
+                    updateUrlState?.(api.snapshotRuntimeState());
+                  });
+                  api.subscribeToVisInstance((newVis) => {
+                    setVis(newVis);
+                    setGetVis(() => () => newVis);
                   });
                 }}
               />

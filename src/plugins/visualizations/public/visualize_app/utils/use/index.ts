@@ -15,3 +15,4 @@ export { useLinkedSearchUpdates } from './use_linked_search_updates';
 export { useVisByValue } from './legacy/use_vis_byvalue';
 export { useDataViewUpdates } from './use_data_view_updates';
 export { useEmbeddableApiHandler } from './use_embeddable_api_handler';
+export { useVisualizeAppState as useLegacyVisualizeAppState } from './legacy/use_visualize_app_state';

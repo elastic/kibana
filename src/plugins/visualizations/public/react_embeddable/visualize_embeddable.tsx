@@ -157,8 +157,13 @@ export const getVisualizeEmbeddableFactory: (
               ...visUpdates.data,
             },
           } as SerializedVis);
+          if (visUpdates.title) {
+            titlesApi.setPanelTitle(visUpdates.title);
+          }
           await updateExpressionParams();
         },
+        subscribeToSerializedStateChanges: (listener) => serializedVis$.subscribe(listener),
+        subscribeToVisInstance: (listener) => vis$.subscribe(listener),
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
         subscribeToVisData: (listener) => visData$.subscribe(listener),
         subscribeToHasInspector: (listener) =>

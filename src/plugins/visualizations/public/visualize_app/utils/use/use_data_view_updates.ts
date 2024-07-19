@@ -44,6 +44,7 @@ export const useDataViewUpdates = (
 
     if (appState && visInstance) {
       const syncDataView = async ({ dataView }: VisualizeAppState) => {
+        console.log('SYNC DATA VIEW', dataView);
         if (
           dataView &&
           visInstance.vis.data.indexPattern &&
@@ -57,7 +58,6 @@ export const useDataViewUpdates = (
         }
       };
 
-      syncDataView(appState.getState());
       stateUpdatesSubscription = appState.state$.subscribe(syncDataView);
     }
     return () => {

@@ -8,9 +8,11 @@
 import { Reference } from '@kbn/content-management-utils';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { decode } from '@kbn/rison';
 import { parse } from 'query-string';
 import { useMemo } from 'react';
-import type { VisualizeSerializedState } from '../../../react_embeddable/types';
+import { STATE_STORAGE_KEY } from '../../../../common/constants';
+import { VisualizeRuntimeState, VisualizeSerializedState } from '../../../react_embeddable/types';
 import { getTypes } from '../../../services';
 import { VisualizeServices } from '../../types';
 
@@ -23,8 +25,14 @@ export const useInitialVisState: (opts: {
   useMemo(() => {
     const { history } = services;
 
+    const searchParams = history.location.search ? parse(history.location.search) : {};
+    const appState =
+      typeof searchParams[STATE_STORAGE_KEY] === 'string'
+        ? decode(searchParams[STATE_STORAGE_KEY])
+        : {};
+    const initialStateFromURL = appState as unknown as VisualizeRuntimeState;
+
     if (history.location.pathname === '/create') {
-      const searchParams = parse(history.location.search);
       const visType = getTypes()
         .all()
         .find(({ name }) => name === searchParams.type);
@@ -71,8 +79,8 @@ export const useInitialVisState: (opts: {
 
       return [
         {
-          title: '',
-          description: '',
+          title: initialStateFromURL?.title ?? '',
+          description: initialStateFromURL?.description ?? '',
           savedVis: {
             title: '',
             description: '',
@@ -86,6 +94,7 @@ export const useInitialVisState: (opts: {
               },
             },
             params: {},
+            ...(appState ? appState.serializedVis : {}),
           },
         } as VisualizeSerializedState,
         references,

@@ -65,6 +65,8 @@ export type VisualizeApi = HasEditCapabilities &
   HasVisualizeConfig &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
+    subscribeToSerializedStateChanges: (listener: () => void) => void;
+    subscribeToVisInstance: (listener: (vis: Vis<VisParams>) => void) => void;
     subscribeToInitialRender: (listener: () => void) => void;
     subscribeToVisData: (listener: (data: unknown) => void) => void;
     subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;

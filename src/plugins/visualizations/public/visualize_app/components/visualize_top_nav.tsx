@@ -36,7 +36,6 @@ const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
   isChromeVisible?: boolean;
-  isEmbeddableRendered: boolean;
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
@@ -57,7 +56,6 @@ interface VisualizeTopNavProps {
 const TopNav = ({
   currentAppState,
   isChromeVisible,
-  isEmbeddableRendered,
   hasUnsavedChanges,
   setHasUnsavedChanges,
   hasUnappliedChanges,
@@ -115,36 +113,33 @@ const TopNav = ({
   );
 
   const config = useMemo(() => {
-    if (isEmbeddableRendered) {
-      return getTopNavConfig(
-        {
-          hasUnsavedChanges,
-          setHasUnsavedChanges,
-          hasUnappliedChanges,
-          openInspector,
-          originatingApp,
-          setOriginatingApp,
-          originatingPath,
-          visInstance,
-          stateContainer,
-          stateTransfer: services.stateTransferService,
-          savedSearchService: services.savedSearch,
-          embeddableId,
-          displayEditInLensItem,
-          hideLensBadge,
-          setNavigateToLens,
-          navigateToLensFn,
-          serializeState: serializeStateFn,
-          snapshotState: snapshotStateFn,
-          showBadge: !hideTryInLensBadge && displayEditInLensItem,
-          eventEmitter,
-          hasInspector: !!openInspectorFn,
-        },
-        services
-      );
-    }
+    return getTopNavConfig(
+      {
+        hasUnsavedChanges,
+        setHasUnsavedChanges,
+        hasUnappliedChanges,
+        openInspector,
+        originatingApp,
+        setOriginatingApp,
+        originatingPath,
+        visInstance,
+        stateContainer,
+        stateTransfer: services.stateTransferService,
+        savedSearchService: services.savedSearch,
+        embeddableId,
+        displayEditInLensItem,
+        hideLensBadge,
+        setNavigateToLens,
+        navigateToLensFn,
+        serializeState: serializeStateFn,
+        snapshotState: snapshotStateFn,
+        showBadge: !hideTryInLensBadge && displayEditInLensItem,
+        eventEmitter,
+        hasInspector: !!openInspectorFn,
+      },
+      services
+    );
   }, [
-    isEmbeddableRendered,
     hasUnsavedChanges,
     setHasUnsavedChanges,
     hasUnappliedChanges,
@@ -174,6 +169,8 @@ const TopNav = ({
   };
   const showFilterBar = vis.type.options.showFilterBar;
   const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryInput;
+
+  const currentIndexPattern = useMemo(() => vis.data.indexPattern, [vis.data.indexPattern]);
 
   useEffect(() => {
     return () => {
@@ -295,7 +292,7 @@ const TopNav = ({
   const onChangeDataView = useCallback(
     async (selectedDataViewId: string) => {
       if (selectedDataViewId) {
-        stateContainer.transitions.updateDataView(selectedDataViewId);
+        await stateContainer.transitions.updateDataView(selectedDataViewId);
       }
     },
     [stateContainer.transitions]
@@ -318,7 +315,6 @@ const TopNav = ({
       setMenuMountPoint={setHeaderActionMenu}
       onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
-      onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
       indexPatterns={indexPatterns}
       screenTitle={vis.title}
       showAutoRefreshOnly={!showDatePicker()}
@@ -341,9 +337,9 @@ const TopNav = ({
         services.visualizeCapabilities.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
       }
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker && vis.data.indexPattern
+        shouldShowDataViewPicker && currentIndexPattern
           ? {
-              currentDataViewId: vis.data.indexPattern.id,
+              currentDataViewId: currentIndexPattern.id,
               trigger: {
                 label: isMissingCurrentDataView
                   ? i18n.translate('visualizations.fallbackDataView.label', {
@@ -358,7 +354,7 @@ const TopNav = ({
                             }),
                       },
                     })
-                  : vis.data.indexPattern.getName(),
+                  : currentIndexPattern?.getName(),
               },
               isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,

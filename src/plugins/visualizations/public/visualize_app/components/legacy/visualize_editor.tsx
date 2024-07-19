@@ -15,7 +15,7 @@ import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public'
 import {
   useChromeVisibility,
   useSavedVisInstance,
-  useVisualizeAppState,
+  useLegacyVisualizeAppState,
   useLegacyEditorUpdates,
   useLinkedSearchUpdates,
   useDataViewUpdates,
@@ -83,7 +83,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     id: visualizationIdFromUrl || 'new',
   });
 
-  const { appState, hasUnappliedChanges } = useVisualizeAppState(
+  const { appState, hasUnappliedChanges } = useLegacyVisualizeAppState(
     services,
     eventEmitter,
     savedVisInstance

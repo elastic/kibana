@@ -36,6 +36,7 @@ import {
   NavigateToLensFn,
   OpenInspectorFn,
   SerializeStateFn,
+  UpdateTitleFn,
 } from '../utils/use/use_embeddable_api_handler';
 import { VisualizeRuntimeState } from '../../react_embeddable/types';
 
@@ -47,7 +48,6 @@ interface VisualizeEditorCommonProps {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
-  isEmbeddableRendered: boolean;
   onAppLeave: AppMountParameters['onAppLeave'];
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
@@ -58,6 +58,7 @@ interface VisualizeEditorCommonProps {
   navigateToLensFn?: NavigateToLensFn;
   serializeStateFn?: SerializeStateFn;
   snapshotStateFn?: () => VisualizeRuntimeState;
+  updateTitle?: UpdateTitleFn;
 }
 
 export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
@@ -67,7 +68,6 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
   hasUnsavedChanges,
   setHasUnsavedChanges,
   hasUnappliedChanges,
-  isEmbeddableRendered,
   onAppLeave,
   originatingApp,
   originatingPath,
@@ -78,6 +78,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
   navigateToLensFn,
   serializeStateFn,
   snapshotStateFn,
+  updateTitle,
   visInstance,
   children,
 }) => {
@@ -162,7 +163,6 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
           hasUnsavedChanges={hasUnsavedChanges}
           setHasUnsavedChanges={setHasUnsavedChanges}
           isChromeVisible={isChromeVisible}
-          isEmbeddableRendered={isEmbeddableRendered}
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
           originatingPath={originatingPath}
@@ -176,6 +176,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
           navigateToLensFn={navigateToLensFn}
           serializeStateFn={serializeStateFn}
           snapshotStateFn={snapshotStateFn}
+          updateTitle={updateTitle}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&
