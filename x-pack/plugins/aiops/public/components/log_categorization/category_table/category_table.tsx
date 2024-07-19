@@ -74,8 +74,6 @@ export const CategoryTable: FC<Props> = ({
     return categories.some((category) => category.sparkline !== undefined);
   }, [categories]);
 
-  // const { labels: openInDiscoverLabels, openFunction: openInDiscoverFunction } = openInDiscover;
-
   const toggleDetails = useCallback(
     (category: Category) => {
       const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -136,32 +134,6 @@ export const CategoryTable: FC<Props> = ({
       sortable: false,
       width: '65px',
       actions,
-      // actions: [
-      //   {
-      //     name: openInDiscoverLabels.singleSelect.in,
-      //     description: openInDiscoverLabels.singleSelect.in,
-      //     icon: 'plusInCircle',
-      //     type: 'icon',
-      //     'data-test-subj': 'aiopsLogPatternsActionFilterInButton',
-      //     onClick: (category) => openInDiscoverFunction(QUERY_MODE.INCLUDE, category),
-      //   },
-      //   {
-      //     name: openInDiscoverLabels.singleSelect.out,
-      //     description: openInDiscoverLabels.singleSelect.out,
-      //     icon: 'minusInCircle',
-      //     type: 'icon',
-      //     'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
-      //     onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
-      //   },
-      //   {
-      //     name: openInDiscoverLabels.singleSelect.out + '1', // !!!!!!!!!!!!!!!!!!!!!!
-      //     description: openInDiscoverLabels.singleSelect.out,
-      //     icon: 'minusInCircle',
-      //     type: 'icon',
-      //     'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
-      //     onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
-      //   },
-      // ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;
 

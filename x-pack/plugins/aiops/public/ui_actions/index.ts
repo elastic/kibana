@@ -27,13 +27,9 @@ export function registerAiopsUiActions(
   const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(coreStart, pluginStart);
   const addChangePointChartAction = createAddChangePointChartAction(coreStart, pluginStart);
   const addPatternAnalysisAction = createAddPatternAnalysisEmbeddableAction(coreStart, pluginStart);
-  
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addPatternAnalysisAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addChangePointChartAction);
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openChangePointInMlAppAction);
+
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addPatternAnalysisAction);
   uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addChangePointChartAction);
-  
-    
 
   uiActions.registerTrigger(categorizeFieldTrigger);
 
@@ -41,4 +37,6 @@ export function registerAiopsUiActions(
     CATEGORIZE_FIELD_TRIGGER,
     createCategorizeFieldAction(coreStart, pluginStart)
   );
+
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openChangePointInMlAppAction);
 }

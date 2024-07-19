@@ -13,7 +13,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { AiopsPluginStartDeps } from '../types';
-import type { ChangePointChartActionContext } from './change_point_action_context';
+import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -26,7 +26,7 @@ const parentApiIsCompatible = async (
 export function createAddPatternAnalysisEmbeddableAction(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
-): UiActionsActionDefinition<ChangePointChartActionContext> {
+): UiActionsActionDefinition<PatternAnalysisActionContext> {
   return {
     id: 'create-pattern-analysis-embeddable',
     grouping: [

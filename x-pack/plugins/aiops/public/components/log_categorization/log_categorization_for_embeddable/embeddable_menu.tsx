@@ -162,7 +162,12 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
       >
         <EuiSuperSelect
           fullWidth
-          aria-label="Select a minimum time range"
+          aria-label={i18n.translate(
+            'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRangeOptionsRowAriaLabel',
+            {
+              defaultMessage: 'Select a minimum time range',
+            }
+          )}
           options={minimumTimeRangeOptions}
           valueOfSelected={minimumTimeRangeOption}
           onChange={setMinimumTimeRangeOption}
