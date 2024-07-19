@@ -31,7 +31,6 @@ describe(
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
       },
-      kbnServerArgs: [`--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`],
     },
   },
   () => {
