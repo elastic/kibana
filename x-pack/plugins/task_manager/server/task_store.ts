@@ -41,8 +41,7 @@ import {
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
-
-const MAX_PARTITIONS = 256;
+import { MAX_PARTITIONS } from './lib/task_partitioner';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
