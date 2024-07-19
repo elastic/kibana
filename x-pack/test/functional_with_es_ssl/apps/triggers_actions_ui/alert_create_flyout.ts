@@ -371,7 +371,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
-    it('should successfully load an APM error count rule flyout', async () => {
+    // Related issue that this test is trying to prevent:
+    // https://github.com/elastic/kibana/issues/186969
+    it('should successfully show the APM error count rule flyout', async () => {
       const ruleName = generateUniqueKey();
       await defineAPMErrorCountRule(ruleName);
 
