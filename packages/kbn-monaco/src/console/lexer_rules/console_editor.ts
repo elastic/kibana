@@ -26,7 +26,12 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
     root: [
       ...consoleSharedLexerRules.tokenizer.root,
       // method
-      matchTokensWithEOL('method', /([a-zA-Z]+)/, 'root', 'method_sep'),
+      matchTokensWithEOL(
+        'method',
+        /([Gg][Ee][Tt])|([Pp][Oo][Ss][Tt])|([Pp][Uu][Tt])|([Pp][Aa][Tt][Cc][Hh])|([Dd][Ee][Ll][Ee][Tt][Ee])|([Hh][Ee][Aa][Dd])/,
+        'root',
+        'method_sep'
+      ),
       // whitespace
       matchToken('whitespace', '\\s+'),
       // text
