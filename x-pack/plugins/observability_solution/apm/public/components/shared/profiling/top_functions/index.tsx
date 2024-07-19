@@ -69,6 +69,7 @@ export function ProfilingTopNFunctions({
         isLoading={isPending(status)}
         rangeFrom={new Date(start).valueOf()}
         rangeTo={new Date(end).valueOf()}
+        showFullScreenSelector
       />
     </>
   );
