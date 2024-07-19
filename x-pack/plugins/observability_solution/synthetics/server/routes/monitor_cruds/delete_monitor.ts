@@ -45,11 +45,9 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
           }),
         })
       ),
-      query: schema.maybe(
-        schema.object({
-          id: schema.string(),
-        })
-      ),
+      query: schema.object({
+        id: schema.maybe(schema.string()),
+      }),
     },
   },
   handler: async (routeContext): Promise<any> => {
