@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { showEmptyPrompt, showNoAlertsPrompt, showWelcomePrompt } from './helpers';
+import { ProductLine, ProductTier } from '../../common/components/landing_page/onboarding/configs';
+import {
+  getProductTier,
+  showEmptyPrompt,
+  showNoAlertsPrompt,
+  showUpgradeProductTier,
+  showWelcomePrompt,
+} from './helpers';
 
 describe('helpers', () => {
   describe('showNoAlertsPrompt', () => {
@@ -143,6 +150,55 @@ describe('helpers', () => {
       });
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('showUpgradeProductTier', () => {
+    it('returns false when productTier is undefined', () => {
+      const result = showUpgradeProductTier(undefined);
+
+      expect(result).toBe(false);
+    });
+
+    it('returns true when productTier is NOT equal to complete', () => {
+      const result = showUpgradeProductTier(ProductTier.essentials);
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when productTier is equal to ProductTier.complete', () => {
+      const result = showUpgradeProductTier(ProductTier.complete);
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('getProductTier', () => {
+    it('returns undefined when productTypes is undefined', () => {
+      const result = getProductTier(undefined);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when productTypes does NOT contain a security product_line', () => {
+      const productTypes = [
+        { product_line: ProductLine.cloud, product_tier: ProductTier.essentials },
+      ];
+
+      const result = getProductTier(productTypes);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns the expected product tier when productTypes contains a security product_line', () => {
+      const productTypes = [
+        { product_line: ProductLine.cloud, product_tier: ProductTier.complete },
+        { product_line: ProductLine.security, product_tier: ProductTier.essentials }, // <-- security product_line
+      ];
+
+      const result = getProductTier(productTypes);
+
+      expect(result).toBe(ProductTier.essentials);
     });
   });
 });

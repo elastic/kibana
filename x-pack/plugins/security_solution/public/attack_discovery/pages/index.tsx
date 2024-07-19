@@ -18,6 +18,7 @@ import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'react-use';
 
+import { useProductTypes } from '../../common/components/landing_page/onboarding/hooks/use_product_types';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
@@ -26,9 +27,11 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Header } from './header';
 import {
   CONNECTOR_ID_LOCAL_STORAGE_KEY,
+  getProductTier,
   getInitialIsOpen,
   showLoading,
   showSummary,
+  showUpgradeProductTier,
 } from './helpers';
 import { AttackDiscoveryPanel } from '../attack_discovery_panel';
 import { EmptyStates } from './empty_states';
@@ -144,14 +147,18 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   }, [aiConnectors]);
 
   const animatedLogo = useMemo(() => <EuiLoadingLogo logo="logoSecurity" size="xl" />, []);
+
+  const productTypes = useProductTypes();
+  const productTier = useMemo(() => getProductTier(productTypes), [productTypes]);
+
   const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
   const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
 
-  if (!isAssistantEnabled) {
+  if (!isAssistantEnabled || showUpgradeProductTier(productTier)) {
     return (
       <>
         <EuiSpacer size="xxl" />
-        <Upgrade />
+        <Upgrade productTier={productTier} />
       </>
     );
   }

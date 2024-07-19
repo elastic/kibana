@@ -28,9 +28,23 @@ export const PLEASE_UPGRADE = i18n.translate(
   }
 );
 
+export const PLEASE_UPGRADE_YOUR_PRODUCT_TIER = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.upgrade.pleaseUpgradeYourProductTierLabel',
+  {
+    defaultMessage: 'Please upgrade your product tier to use this feature.',
+  }
+);
+
 export const UPGRADE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.upgrade.upgradeButton',
   {
     defaultMessage: 'Upgrade',
+  }
+);
+
+export const YOUR_PRODUCT_TIER_DOES_NOT_SUPPORT = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.upgrade.yourProductTierDoesNotSupportLabel',
+  {
+    defaultMessage: 'Your product tier does not support Attack discovery.',
   }
 );

@@ -9,9 +9,14 @@ import { AssistantAvatar, UpgradeButtons, useAssistantContext } from '@kbn/elast
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import type { ProductTier } from '../../../common/components/landing_page/onboarding/configs';
 import * as i18n from './translations';
 
-const UpgradeComponent: React.FC = () => {
+interface Props {
+  productTier: ProductTier | undefined;
+}
+
+const UpgradeComponent: React.FC<Props> = ({ productTier }) => {
   const { http } = useAssistantContext();
 
   const title = useMemo(
@@ -39,29 +44,32 @@ const UpgradeComponent: React.FC = () => {
       <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" data-test-subj="attackDiscoveryIsAvailable">
-            {i18n.ATTACK_DISCOVERY_IS_AVAILABLE}
+            {productTier == null
+              ? i18n.ATTACK_DISCOVERY_IS_AVAILABLE
+              : i18n.YOUR_PRODUCT_TIER_DOES_NOT_SUPPORT}
           </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" data-test-subj="pleaseUpgrade">
-            {i18n.PLEASE_UPGRADE}
+            {productTier == null ? i18n.PLEASE_UPGRADE : i18n.PLEASE_UPGRADE_YOUR_PRODUCT_TIER}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    []
+    [productTier]
   );
 
   const actions = useMemo(
-    () => (
-      <EuiFlexGroup justifyContent="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <UpgradeButtons basePath={http.basePath.get()} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [http.basePath]
+    () =>
+      productTier == null ? (
+        <EuiFlexGroup justifyContent="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <UpgradeButtons basePath={http.basePath.get()} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null,
+    [http.basePath, productTier]
   );
 
   return <EuiEmptyPrompt actions={actions} body={body} data-test-subj="upgrade" title={title} />;
