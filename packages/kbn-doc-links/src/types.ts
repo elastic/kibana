@@ -668,6 +668,9 @@ export interface DocLinks {
     readonly context: string;
     readonly hiddenFields: string;
   };
+  readonly inference: {
+    readonly createInferenceEndpoint: string;
+  };
 }
 
 export type BuildFlavor = 'serverless' | 'traditional';

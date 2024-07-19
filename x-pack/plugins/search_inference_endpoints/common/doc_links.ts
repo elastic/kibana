@@ -10,12 +10,14 @@ import { DocLinks } from '@kbn/doc-links';
 class InferenceEndpointsDocLinks {
   public nlpImportModel: string = '';
   public supportedNlpModels: string = '';
+  public createInferenceEndpoint: string = '';
 
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
     this.nlpImportModel = newDocLinks.ml.nlpImportModel;
     this.supportedNlpModels = newDocLinks.ml.supportedNlpModels;
+    this.createInferenceEndpoint = newDocLinks.inference.createInferenceEndpoint;
   }
 }
 

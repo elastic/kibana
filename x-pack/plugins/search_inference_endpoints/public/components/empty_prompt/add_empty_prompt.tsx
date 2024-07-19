@@ -14,7 +14,9 @@ import {
   EuiFlexItem,
   EuiImage,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
+import { docLinks } from '../../../common/doc_links';
 
 import * as i18n from '../../../common/translations';
 
@@ -42,18 +44,14 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
           <EuiFlexItem data-test-subj="createFirstInferenceEndpointDescription">
             {i18n.CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButton
-                color="primary"
-                fill
-                iconType="plusInCircle"
-                data-test-subj="addEndpointButtonForEmptyPrompt"
-                onClick={() => setIsInferenceFlyoutVisible(true)}
-              >
-                {i18n.ADD_ENDPOINT_LABEL}
-              </EuiButton>
-            </div>
+          <EuiFlexItem>
+            <EuiLink
+              href={docLinks.createInferenceEndpoint}
+              target="_blank"
+              data-test-subj="learn-more-about-inference-endpoints"
+            >
+              {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

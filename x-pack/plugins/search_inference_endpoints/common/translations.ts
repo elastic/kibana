@@ -36,14 +36,14 @@ export const CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.createFirstInferenceEndpointDescription',
   {
     defaultMessage:
-      'Connect to your third-party model provider to create an inference endpoint for semantic search.',
+      "Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Set up tasks such as text embedding, completions, and reranking using simple, unique endpoints. Use Elastic's built-in models, connect to third-party services via API, or integrate models uploaded with Python.",
   }
 );
 
 export const START_WITH_PREPARED_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.startWithPreparedEndpointsLabel',
   {
-    defaultMessage: 'Get started quickly with our prepared endpoints:',
+    defaultMessage: 'Get started quickly with our prepared built-in ML models:',
   }
 );
 
@@ -51,6 +51,13 @@ export const ELSER_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.elserTitle',
   {
     defaultMessage: 'ELSER',
+  }
+);
+
+export const LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEmptyPrompt.learnMoreAboutInferenceEndpoints',
+  {
+    defaultMessage: 'Learn more about inference endpoints.',
   }
 );
 

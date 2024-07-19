@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { AddEmptyPrompt } from './add_empty_prompt';
 
 import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
@@ -21,13 +21,13 @@ describe('When empty prompt is loaded', () => {
   it('should display the description for creation of the first inference endpoint', () => {
     expect(
       screen.getByText(
-        /Connect to your third-party model provider to create an inference endpoint for semantic search./
+        /Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch/
       )
     ).toBeInTheDocument();
   });
 
-  it('calls setIsInferenceFlyoutVisible when the addInferenceEndpoint button is clicked', async () => {
-    fireEvent.click(screen.getByTestId('addEndpointButtonForEmptyPrompt'));
-    expect(setIsInferenceFlyoutVisibleMock).toHaveBeenCalled();
+  it('should have a learn more link', () => {
+    const learnMoreLink = screen.getByTestId('learn-more-about-inference-endpoints');
+    expect(learnMoreLink).toBeInTheDocument();
   });
 });
