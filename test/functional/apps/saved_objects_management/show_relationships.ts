@@ -37,6 +37,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
 
+      expect(invalidRelations.length).to.be(2);
+
       expect(invalidRelations).to.eql([
         {
           error: 'Saved object [dashboard/missing-dashboard-ref] not found',
