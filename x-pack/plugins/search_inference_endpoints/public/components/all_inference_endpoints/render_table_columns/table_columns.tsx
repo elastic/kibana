@@ -24,6 +24,7 @@ export const useTableColumns = () => {
     {
       field: 'deployment',
       name: '',
+      'data-test-subj': 'deploymentCell',
       render: (deployment: DeploymentStatusEnum) => {
         if (deployment != null) {
           return <DeploymentStatus status={deployment} />;
@@ -37,6 +38,7 @@ export const useTableColumns = () => {
     {
       field: 'endpoint',
       name: i18n.ENDPOINT,
+      'data-test-subj': 'endpointCell',
       render: (endpoint: InferenceAPIConfigResponse) => {
         if (endpoint != null) {
           return <EndpointInfo endpoint={endpoint} />;
@@ -49,6 +51,7 @@ export const useTableColumns = () => {
     {
       field: 'provider',
       name: i18n.SERVICE_PROVIDER,
+      'data-test-subj': 'providerCell',
       render: (provider: ServiceProviderKeys) => {
         if (provider != null) {
           return <ServiceProvider providerKey={provider} />;
@@ -62,6 +65,7 @@ export const useTableColumns = () => {
     {
       field: 'type',
       name: i18n.TASK_TYPE,
+      'data-test-subj': 'typeCell',
       render: (type: TaskTypes) => {
         if (type != null) {
           return <TaskType type={type} />;

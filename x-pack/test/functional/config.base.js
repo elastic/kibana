@@ -182,6 +182,9 @@ export default async function ({ readConfigFile }) {
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
+      inferenceManagement: {
+        pathname: '/app/enterprise_search/relevance/inference_endpoints',
+      },
     },
 
     suiteTags: {

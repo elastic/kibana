@@ -45,6 +45,7 @@ export const useDeleteAction = ({ onActionSuccess }: UseActionProps) => {
         key="delete"
         icon={<EuiIcon type="trash" size="m" color={'danger'} />}
         onClick={() => openModal(selectedEndpoint)}
+        data-test-subj="inference-endpoints-action-delete-endpoint"
       >
         {i18n.DELETE_ACTION_LABEL}
       </EuiContextMenuItem>

@@ -36,7 +36,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
       color="plain"
       hasShadow
       icon={<EuiImage size="fullWidth" src={inferenceEndpoint} alt="" />}
-      title={<h2>{i18n.INFERENCE_ENDPOINT_LABEL}</h2>}
+      title={<h2 data-test-subj="allInferenceEndpointsPage">{i18n.INFERENCE_ENDPOINT_LABEL}</h2>}
       body={
         <EuiFlexGroup direction="column">
           <EuiFlexItem data-test-subj="createFirstInferenceEndpointDescription">
@@ -73,6 +73,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
                   <EuiButton
                     iconType="plusInCircle"
                     onClick={() => setIsInferenceFlyoutVisible(true)}
+                    data-test-subj="createFirstElserInferenceEndpointDescription"
                   >
                     {i18n.ADD_ENDPOINT_LABEL}
                   </EuiButton>
@@ -88,6 +89,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
                   <EuiButton
                     iconType="plusInCircle"
                     onClick={() => setIsInferenceFlyoutVisible(true)}
+                    data-test-subj="createFirstE5InferenceEndpointDescription"
                   >
                     {i18n.ADD_ENDPOINT_LABEL}
                   </EuiButton>
