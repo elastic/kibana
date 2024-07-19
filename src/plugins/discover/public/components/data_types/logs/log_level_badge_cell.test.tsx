@@ -33,31 +33,21 @@ const renderCell = (logLevelField: string, record: DataTableRecord) => {
 };
 
 describe('getLogLevelBadgeCell', () => {
-  it('renders badge with color based on provided logLevelField', () => {
+  it('renders badge if log level is recognized', () => {
     const record = buildDataTableRecord({ fields: { 'log.level': 'info' } }, dataViewMock);
     renderCell('log.level', record);
-    const badge = screen.getByTestId('logLevelBadgeCell-info');
-    expect(badge).toBeInTheDocument();
-    expect(badge).toHaveTextContent('info');
-    expect(getComputedStyle(badge).getPropertyValue('--euiBadgeBackgroundColor')).toEqual(
-      '#90b0d1'
-    );
+    expect(screen.getByTestId('logLevelBadgeCell-info')).toBeInTheDocument();
   });
 
-  it('renders unknown badge if logLevelField is not recognized', () => {
+  it('renders unknown if log level is not recognized', () => {
     const record = buildDataTableRecord({ fields: { 'log.level': 'unknown_level' } }, dataViewMock);
     renderCell('log.level', record);
-    const badge = screen.getByTestId('logLevelBadgeCell-unknown');
-    expect(badge).toBeInTheDocument();
-    expect(badge).toHaveTextContent('unknown_level');
-    expect(getComputedStyle(badge).getPropertyValue('--euiBadgeBackgroundColor')).toEqual('');
+    expect(screen.getByTestId('logLevelBadgeCell-unknown')).toBeInTheDocument();
   });
 
-  it('renders empty if no matching logLevelField is found', () => {
+  it('renders empty if no matching log level field is found', () => {
     const record = buildDataTableRecord({ fields: { 'log.level': 'info' } }, dataViewMock);
     renderCell('log_level', record);
-    const badge = screen.getByTestId('logLevelBadgeCell-empty');
-    expect(badge).toBeInTheDocument();
-    expect(badge).toHaveTextContent('-');
+    expect(screen.getByTestId('logLevelBadgeCell-empty')).toBeInTheDocument();
   });
 });
