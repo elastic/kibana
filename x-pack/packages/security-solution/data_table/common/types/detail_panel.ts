@@ -23,17 +23,7 @@ export type ExpandedEventType =
     }
   | EmptyObject;
 
-export type ExpandedNetworkType =
-  | {
-      panelView?: 'networkDetail';
-      params?: {
-        ip: string;
-        flowTarget: FlowTargetSourceDest;
-      };
-    }
-  | EmptyObject;
-
-export type ExpandedDetailType = ExpandedEventType | ExpandedNetworkType;
+export type ExpandedDetailType = ExpandedEventType;
 
 export enum TimelineTabs {
   query = 'query',
