@@ -40,9 +40,9 @@ export class FipsService {
         const errorMessage = `Your current license level is ${license.getLicenseType()} and does not support running in FIPS mode.`;
 
         if (license.isLicenseAvailable() && !this.isInitialLicenseLoaded) {
-          console.log('The current license features:');
-          console.log(license.getFeatures());
-          console.log(`Fips config is set to: ${config?.experimental.fipsMode.enabled}`);
+          this.logger.info('The current license features:');
+          this.logger.info(JSON.stringify(license.getFeatures()));
+          this.logger.info(`Fips config is set to: ${config?.experimental.fipsMode.enabled}`);
 
           if (config?.experimental.fipsMode.enabled && !license.getFeatures().allowFips) {
             this.logger.error(errorMessage);
