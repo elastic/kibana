@@ -25,7 +25,7 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
 }: SetupRouteOptions<T>) {
   router.get<unknown, unknown, unknown>(
     {
-      path: '/internal/api/entities/managed/enablement',
+      path: '/internal/entities/managed/enablement',
       validate: false,
     },
     async (context, req, res) => {

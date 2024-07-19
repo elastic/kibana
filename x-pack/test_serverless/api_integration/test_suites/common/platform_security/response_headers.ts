@@ -17,6 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
 
   describe('security/response_headers', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/188714
+    this.tags(['failsOnMKI']);
+
     const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
     const defaultPermissionsPolicy =

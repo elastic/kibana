@@ -105,7 +105,7 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
 
 /**
  * A router, very similar to {@link IRouter} that will return an {@link VersionedRoute}
- * instead.
+ * instead
  *
  * @example
  * const versionedRoute = versionedRouter
