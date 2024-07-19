@@ -253,6 +253,14 @@ export const getNavigationTreeDefinition = ({
                     defaultMessage: 'Enterprise Search',
                   }),
                 },
+                {
+                  children: [{ link: 'maps' }, { link: 'canvas' }, { link: 'graph' }],
+                  id: 'otherTools',
+                  renderAs: 'accordion',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.otherTools', {
+                    defaultMessage: 'Other tools',
+                  }),
+                },
               ],
               defaultIsCollapsed: false,
               icon,

@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
@@ -70,8 +71,12 @@ export function ApmMainTemplate({
   const { http, docLinks, observabilityShared, application } = services;
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
-  const { config } = useApmPluginContext();
-  const { isEntityManagerEnabled } = useEntityManagerEnablementContext();
+  const { config, core } = useApmPluginContext();
+  const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
+    entityCentricExperience,
+    false
+  );
+  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -139,7 +144,7 @@ export function ApmMainTemplate({
             <FeatureFeedbackButton
               data-test-subj="infraApmFeedbackLink"
               formUrl={
-                isEntityManagerEnabled && sanitizedPath.includes('service')
+                isEntityCentricExperienceViewEnabled && sanitizedPath.includes('service')
                   ? APM_NEW_EXPERIENCE_FEEDBACK_LINK
                   : APM_FEEDBACK_LINK
               }
@@ -165,7 +170,11 @@ export function ApmMainTemplate({
         pageTitle: pageHeaderTitle,
         children: (
           <EuiFlexGroup direction="column">
-            {showEnablementCallout && selectedNavButton === 'allServices' && <EntityEnablement />}
+            {isEntityCentricExperienceSettingEnabled &&
+            showEnablementCallout &&
+            selectedNavButton === 'allServices' ? (
+              <EntityEnablement />
+            ) : null}
             {showServiceGroupsNav && selectedNavButton && (
               <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
             )}

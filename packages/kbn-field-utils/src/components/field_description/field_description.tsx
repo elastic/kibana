@@ -8,27 +8,81 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButtonEmpty, EuiTextBlockTruncate, useEuiTheme } from '@elastic/eui';
+import { Markdown } from '@kbn/shared-ux-markdown';
+import {
+  EuiText,
+  EuiButtonEmpty,
+  EuiTextBlockTruncate,
+  EuiSkeletonText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 
 const MAX_VISIBLE_LENGTH = 110;
 
-export interface FieldDescriptionProps {
+const removeKeywordSuffix = (name: string) => {
+  return name.endsWith('.keyword') ? name.slice(0, -8) : name;
+};
+
+export interface FieldDescriptionContentProps {
   field: {
     name: string;
     customDescription?: string;
+    type: string;
   };
   color?: 'subdued';
   truncate?: boolean;
+  Wrapper?: React.FC<{ children: React.ReactNode }>;
+}
+
+export interface FieldDescriptionProps extends FieldDescriptionContentProps {
+  fieldsMetadataService?: FieldsMetadataPublicStart;
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
-  field,
-  color,
-  truncate = true,
+  fieldsMetadataService,
+  ...props
 }) => {
+  if (fieldsMetadataService && !props.field.customDescription) {
+    return <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />;
+  }
+
+  return <FieldDescriptionContent {...props} />;
+};
+
+const EcsFieldDescriptionFallback: React.FC<
+  FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
+> = ({ fieldsMetadataService, ...props }) => {
+  const fieldName = removeKeywordSuffix(props.field.name);
+  const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
+    attributes: ['description', 'type'],
+    fieldNames: [fieldName],
+  });
+
+  const escFieldDescription = fieldsMetadata?.[fieldName]?.description;
+  const escFieldType = fieldsMetadata?.[fieldName]?.type;
+
+  return (
+    <EuiSkeletonText isLoading={loading} size="s">
+      <FieldDescriptionContent
+        {...props}
+        ecsFieldDescription={
+          escFieldType && esFieldTypeToKibanaFieldType(escFieldType) === props.field.type
+            ? escFieldDescription
+            : undefined
+        }
+      />
+    </EuiSkeletonText>
+  );
+};
+
+export const FieldDescriptionContent: React.FC<
+  FieldDescriptionContentProps & { ecsFieldDescription?: string }
+> = ({ field, color, truncate = true, ecsFieldDescription, Wrapper }) => {
   const { euiTheme } = useEuiTheme();
-  const customDescription = (field?.customDescription || '').trim();
+  const customDescription = (field?.customDescription || ecsFieldDescription || '').trim();
   const isTooLong = Boolean(truncate && customDescription.length > MAX_VISIBLE_LENGTH);
   const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
 
@@ -36,7 +90,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
     return null;
   }
 
-  return (
+  const result = (
     <div data-test-subj={`fieldDescription-${field.name}`}>
       {isTruncated ? (
         <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
@@ -61,13 +115,15 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
               }
             `}
           >
-            <EuiTextBlockTruncate lines={2}>{customDescription}</EuiTextBlockTruncate>
+            <EuiTextBlockTruncate lines={2}>
+              <Markdown readOnly>{customDescription}</Markdown>
+            </EuiTextBlockTruncate>
           </button>
         </EuiText>
       ) : (
         <>
           <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
-            {customDescription}
+            <Markdown readOnly>{customDescription}</Markdown>
           </EuiText>
           {isTooLong && (
             <EuiButtonEmpty
@@ -85,4 +141,6 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
       )}
     </div>
   );
+
+  return Wrapper ? <Wrapper>{result}</Wrapper> : result;
 };
