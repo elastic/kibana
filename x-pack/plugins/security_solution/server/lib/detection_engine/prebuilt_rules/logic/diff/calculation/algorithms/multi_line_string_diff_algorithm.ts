@@ -17,6 +17,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
+  ThreeWayDiffConflictResolutionResult,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 /**
@@ -50,7 +51,7 @@ export const multiLineStringDiffAlgorithm = (
     diff_outcome: diffOutcome,
     merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
-    has_conflict: mergeOutcome === ThreeWayMergeOutcome.Conflict,
+    conflict: determineConflictType(mergeOutcome),
   };
 };
 
@@ -111,4 +112,14 @@ const mergeVersions = ({
     default:
       return assertUnreachable(diffOutcome);
   }
+};
+
+const determineConflictType = (mergeOutcome: ThreeWayMergeOutcome) => {
+  if (mergeOutcome === ThreeWayMergeOutcome.Conflict) {
+    return ThreeWayDiffConflictResolutionResult.NON_SOLVABLE_CONFLICT;
+  }
+  if (mergeOutcome === ThreeWayMergeOutcome.Merged) {
+    return ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT;
+  }
+  return ThreeWayDiffConflictResolutionResult.NO_CONFLICT;
 };
