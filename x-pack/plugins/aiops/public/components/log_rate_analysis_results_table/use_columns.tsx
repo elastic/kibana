@@ -165,10 +165,11 @@ export const useColumns = (
   const loading = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
   const {
-    analysisType,
-    windowParameters,
     documentStats: { documentCountStats },
   } = useAppSelector((s) => s.logRateAnalysis);
+  const { currentAnalysisType, currentAnalysisWindowParameters } = useAppSelector(
+    (s) => s.logRateAnalysisResults
+  );
 
   const isGroupsTable = tableType === LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS;
   const interval = documentCountStats?.interval ?? 0;
@@ -184,14 +185,15 @@ export const useColumns = (
   }, [uiSettings, data, fieldFormats, charts]);
 
   const buckets = useMemo(() => {
-    if (windowParameters === undefined) return;
+    if (currentAnalysisWindowParameters === undefined) return;
 
-    const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
+    const { baselineMin, baselineMax, deviationMin, deviationMax } =
+      currentAnalysisWindowParameters;
     const baselineBuckets = (baselineMax - baselineMin) / interval;
     const deviationBuckets = (deviationMax - deviationMin) / interval;
 
     return { baselineBuckets, deviationBuckets };
-  }, [windowParameters, interval]);
+  }, [currentAnalysisWindowParameters, interval]);
 
   const columnsMap: Record<ColumnNames, EuiBasicTableColumn<SignificantItem>> = useMemo(
     () => ({
@@ -368,14 +370,15 @@ export const useColumns = (
         render: (_, { bg_count: bgCount, doc_count: docCount }) => {
           if (
             interval === 0 ||
-            windowParameters === undefined ||
+            currentAnalysisType === undefined ||
+            currentAnalysisWindowParameters === undefined ||
             buckets === undefined ||
             isGroupsTable
           )
             return NOT_AVAILABLE;
 
           const { baselineBucketRate } = getBaselineAndDeviationRates(
-            analysisType,
+            currentAnalysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
@@ -410,14 +413,15 @@ export const useColumns = (
         render: (_, { doc_count: docCount, bg_count: bgCount }) => {
           if (
             interval === 0 ||
-            windowParameters === undefined ||
+            currentAnalysisType === undefined ||
+            currentAnalysisWindowParameters === undefined ||
             buckets === undefined ||
             isGroupsTable
           )
             return NOT_AVAILABLE;
 
           const { deviationBucketRate } = getBaselineAndDeviationRates(
-            analysisType,
+            currentAnalysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
@@ -451,14 +455,15 @@ export const useColumns = (
         render: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
           if (
             interval === 0 ||
-            windowParameters === undefined ||
+            currentAnalysisType === undefined ||
+            currentAnalysisWindowParameters === undefined ||
             buckets === undefined ||
             isGroupsTable
           )
             return NOT_AVAILABLE;
 
           const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
-            analysisType,
+            currentAnalysisType,
             buckets.baselineBuckets,
             buckets.deviationBuckets,
             docCount,
@@ -466,7 +471,7 @@ export const useColumns = (
           );
 
           const logRateChange = getLogRateChange(
-            analysisType,
+            currentAnalysisType,
             baselineBucketRate,
             deviationBucketRate
           );
@@ -476,7 +481,7 @@ export const useColumns = (
               <EuiIcon
                 size="s"
                 color="subdued"
-                type={analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}
+                type={currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}
                 className="eui-alignTop"
               />
               &nbsp;
