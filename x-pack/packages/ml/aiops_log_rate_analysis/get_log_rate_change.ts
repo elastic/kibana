@@ -44,7 +44,7 @@ export function getLogRateChange(
         message: i18n.translate(
           'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocIncreaseLabel',
           {
-            defaultMessage: '{deviationBucketRate} up from 0 in baseline',
+            defaultMessage: 'up to {deviationBucketRate} from 0 in baseline',
             values: { deviationBucketRate },
           }
         ),
