@@ -242,7 +242,7 @@ export const SemanticSearchGuide: React.FC = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiFlexGrid columns={1} direction="column">
+          <EuiFlexGrid columns={2} direction="column">
             {modelSelection.map((model) => (
               <SelectModelPanel
                 model={model}
