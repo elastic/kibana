@@ -21,4 +21,4 @@ export {
   readRolesDescriptorsFromResource,
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';
-export { SERVERLESS_ROLES_ROOT_PATH } from './src/paths';
+export { SERVERLESS_ROLES_ROOT_PATH, STATEFUL_ROLES_ROOT_PATH } from './src/paths';

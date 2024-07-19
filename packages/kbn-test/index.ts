@@ -63,3 +63,5 @@ export * from './src/kbn_client';
 export * from './src/find_test_plugin_paths';
 
 export { getDockerFileMountPath } from '@kbn/es';
+
+export { readFtrConfigs } from './src/read_ftr_configs';
