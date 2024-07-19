@@ -29,11 +29,20 @@ import { ConnectorDescriptionPopover } from './components/connector_description_
 
 interface StartStepProps {
   allConnectors: unknown;
-  connectorSelected: any;
+  connectorSelected: {
+    description: string;
+    iconPath: string;
+    isBeta: boolean;
+    isNative: boolean;
+    isTechPreview: boolean;
+    name: string;
+  };
   selfManaged: boolean;
   setConnectorSelected: Function;
   setSelfManaged: Function;
   title: string;
+  connectorName: string;
+  setConnectorName: Function;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -43,6 +52,8 @@ export const StartStep: React.FC<StartStepProps> = ({
   setConnectorSelected,
   connectorSelected,
   allConnectors,
+  connectorName,
+  setConnectorName,
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
@@ -57,9 +68,8 @@ export const StartStep: React.FC<StartStepProps> = ({
     setRadioIdSelected(selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId);
   }, [selfManaged]);
 
-  const [connectorName, setConnectorName] = useState('');
   useEffect(() => {
-    console.log('connectorSelected', connectorSelected);
+    // console.log('connectorSelected', connectorSelected);
     if (connectorSelected && connectorSelected.name !== '') {
       const name =
         connectorSelected.name
@@ -111,6 +121,11 @@ export const StartStep: React.FC<StartStepProps> = ({
                     fullWidth
                     name="first"
                     value={connectorName}
+                    onChange={(e) => {
+                      if (e.target.value !== connectorName) {
+                        setConnectorName(e.target.value);
+                      }
+                    }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -187,7 +202,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover isNative={false} />
+                <ConnectorDescriptionPopover isDisabled={false} isNative={false} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

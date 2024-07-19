@@ -113,7 +113,12 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
-                title="This connector is not available as an Elastic managed"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.connectorDescriptionBadge.notAvailableTitle',
+                  {
+                    defaultMessage: 'This connector is not available as an Elastic managed',
+                  }
+                )}
                 size="s"
                 iconType="warning"
                 color="warning"

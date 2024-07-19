@@ -97,6 +97,12 @@ export const CreateConnector: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
 
   const [connectorSelected, setConnectorSelected] = useState<any>('');
+  const [connectorName, setConnectorName] = useState('');
+
+  const [startStepComplete, setStartStepComplete] = useState(false);
+  const [deploymentStepComplete, setDeploymentStepComplete] = useState(false);
+  const [configurationStepComplete, setConfigurationStepComplete] = useState(false);
+  const [finishUpStepComplete, setFinishUpStepComplete] = useState(false);
 
   interface CustomEuiStepInterface extends EuiStepInterface {
     content: JSX.Element;
@@ -114,6 +120,8 @@ export const CreateConnector: React.FC = () => {
           setConnectorSelected={setConnectorSelected}
           connectorSelected={connectorSelected}
           allConnectors={allConnectors}
+          connectorName={connectorName}
+          setConnectorName={setConnectorName}
         />
       ),
       status: startStepStatus,
@@ -178,6 +186,8 @@ export const CreateConnector: React.FC = () => {
           setConnectorSelected={setConnectorSelected}
           connectorSelected={connectorSelected}
           allConnectors={allConnectors}
+          connectorName={connectorName}
+          setConnectorName={setConnectorName}
         />
       ),
       status: startStepStatus,
@@ -372,9 +382,9 @@ export const CreateConnector: React.FC = () => {
                 }
               `}
             />
-            {currentStep > 0 && (
+            <EuiSpacer size="xl" />
+            {connectorSelected.docsUrl && connectorSelected.docsUrl !== '' && (
               <>
-                <EuiSpacer size="xl" />
                 <EuiText size="s">
                   <p>
                     <EuiLink
@@ -383,15 +393,61 @@ export const CreateConnector: React.FC = () => {
                       href={connectorSelected.docsUrl}
                       target="_blank"
                     >
-                      {connectorSelected.name}{' '}
+                      {/* {connectorSelected.name}{' '} */}
                       {i18n.translate(
                         'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
-                        { defaultMessage: 'connector docs' }
+                        { defaultMessage: 'Connector docs' }
                       )}
                     </EuiLink>
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
+              </>
+            )}
+            {connectorSelected.externalAuthDocsUrl && connectorSelected.externalAuthDocsUrl !== '' && (
+              <>
+                <EuiText size="s">
+                  <p>
+                    <EuiLink
+                      external
+                      data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
+                      href={connectorSelected.externalAuthDocsUrl}
+                      target="_blank"
+                    >
+                      {/* {connectorSelected.name}{' '} */}
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
+                        { defaultMessage: 'External author docs' }
+                      )}
+                    </EuiLink>
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            )}
+            {connectorSelected.externalDocsUrl && connectorSelected.externalDocsUrl !== '' && (
+              <>
+                <EuiText size="s">
+                  <p>
+                    <EuiLink
+                      external
+                      data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
+                      href={connectorSelected.externalDocsUrl}
+                      target="_blank"
+                    >
+                      {/* {connectorSelected.name}{' '} */}
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
+                        { defaultMessage: 'External docs' }
+                      )}
+                    </EuiLink>
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            )}
+            {currentStep > 0 && (
+              <>
                 <EuiFormRow
                   label={i18n.translate(
                     'xpack.enterpriseSearch.createConnector.euiFormRow.connectorLabel',

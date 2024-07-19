@@ -16,7 +16,6 @@ import {
   EuiInputPopover,
   EuiSelectable,
   EuiSelectableOption,
-  EuiToken,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -154,6 +153,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           selectableSetOptions(newOptions);
           setIsOpen(false);
           if (changedOption.checked === 'on') {
+            // console.log(allConnectors);
             const keySelected = Number(changedOption.key);
             setConnectorSelected(allConnectors[keySelected]);
             setIsSearching(false);
