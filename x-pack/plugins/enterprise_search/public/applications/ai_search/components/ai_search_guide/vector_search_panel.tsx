@@ -15,9 +15,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { VECTOR_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
 export const VectorSearchPanel: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const { application } = useValues(KibanaLogic);
 
   return (
@@ -55,11 +57,9 @@ export const VectorSearchPanel: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiLink
             data-test-subj="enterpriseSearchVectorSearchPanelLink"
-            onClick={() =>
-              application.navigateToApp(
-                VECTOR_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1')
-              )
-            }
+            onClick={() => {
+              application.navigateToUrl(http.basePath.prepend(`${VECTOR_SEARCH_PLUGIN.URL}`));
+            }}
           >
             <EuiButton
               data-test-subj="enterpriseSearchVectorSearchPanelCreateAnIndexButton"

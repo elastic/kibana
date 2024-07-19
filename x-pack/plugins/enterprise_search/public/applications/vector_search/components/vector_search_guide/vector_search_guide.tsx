@@ -27,6 +27,7 @@ import { SEMANTIC_SEARCH_PLUGIN } from '../../../../../common/constants';
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { docLinks } from '../../../shared/doc_links';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { DevToolsConsoleCodeBlock } from '../dev_tools_console_code_block/dev_tools_console_code_block';
@@ -65,6 +66,7 @@ const QUERY_SNIPPET = `POST /my-index/_search
 }`;
 
 export const VectorSearchGuide: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const { application } = useValues(KibanaLogic);
 
   return (
@@ -194,12 +196,11 @@ export const VectorSearchGuide: React.FC = () => {
         <EuiFlexItem grow={6}>
           <EuiFlexGroup gutterSize="l" direction="column">
             <EuiCard
-              onClick={() =>
-                application.navigateToApp(
-                  SEMANTIC_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1') +
-                    '?model_example=elser'
-                )
-              }
+              onClick={() => {
+                application.navigateToUrl(
+                  http.basePath.prepend(`${SEMANTIC_SEARCH_PLUGIN.URL}?model_example=elser`)
+                );
+              }}
               layout="horizontal"
               titleSize="s"
               icon={<EuiIcon type={elserIllustration} size="xxl" />}
@@ -216,14 +217,13 @@ export const VectorSearchGuide: React.FC = () => {
                 />
               }
             />
+
             <EuiCard
-              onClick={() =>
-                application.navigateToApp(
-                  SEMANTIC_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1') +
-                    '?model_example=e5'
-                )
-              }
-              target="_blank"
+              onClick={() => {
+                application.navigateToUrl(
+                  http.basePath.prepend(`${SEMANTIC_SEARCH_PLUGIN.URL}?model_example=e5`)
+                );
+              }}
               layout="horizontal"
               titleSize="s"
               icon={<EuiIcon type={nlpIllustration} size="xxl" />}

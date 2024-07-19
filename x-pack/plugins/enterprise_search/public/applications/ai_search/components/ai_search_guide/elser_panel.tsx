@@ -15,9 +15,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SEMANTIC_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
 export const ElserPanel: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const { application } = useValues(KibanaLogic);
 
   return (
@@ -54,12 +56,11 @@ export const ElserPanel: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiLink
             data-test-subj="enterpriseSearchElserPanelLink"
-            onClick={() =>
-              application.navigateToApp(
-                SEMANTIC_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1') +
-                  '?model_example=elser'
-              )
-            }
+            onClick={() => {
+              application.navigateToUrl(
+                http.basePath.prepend(`${SEMANTIC_SEARCH_PLUGIN.URL}?model_example=elser`)
+              );
+            }}
           >
             <EuiButton
               data-test-subj="enterpriseSearchElserPanelSetupSemanticSearchButton"
