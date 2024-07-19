@@ -20,6 +20,7 @@ import { SimpleAlertTable } from './simple_alert_table';
 import { getEnrichedFieldInfo } from '../helpers';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { SESSION_LOADING, SESSION_EMPTY, SESSION_ERROR, SESSION_COUNT } from './translations';
+import { getFieldFormat } from '../get_field_format';
 
 interface Props {
   browserFields: BrowserFields;
@@ -62,10 +63,7 @@ export const RelatedAlertsBySession = React.memo<Props>(
       contextId: scopeId,
       eventId,
       fieldFromBrowserField,
-      fieldFormat:
-        typeof fieldFromBrowserField?.format === 'string'
-          ? fieldFromBrowserField.format
-          : fieldFromBrowserField?.format?.id,
+      fieldFormat: getFieldFormat(fieldFromBrowserField),
       fieldType: fieldFromBrowserField?.type,
     });
 

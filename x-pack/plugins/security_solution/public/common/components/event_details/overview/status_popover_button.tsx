@@ -19,6 +19,7 @@ import type { EnrichedFieldInfoWithValues } from '../types';
 import type { inputsModel } from '../../../store';
 import { inputsSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { getFieldFormat } from '../get_field_format';
 
 interface StatusPopoverButtonProps {
   eventId: string;
@@ -69,11 +70,7 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
           fieldName={enrichedFieldInfo.data.field}
           linkValue={enrichedFieldInfo.linkValue}
           fieldType={enrichedFieldInfo.data.type}
-          fieldFormat={
-            typeof enrichedFieldInfo.data.format === 'string'
-              ? enrichedFieldInfo.data.format
-              : enrichedFieldInfo?.data?.format?.id
-          }
+          fieldFormat={getFieldFormat(enrichedFieldInfo.data)}
           isDraggable={false}
           truncate={false}
           isButton={statusPopoverVisible}
