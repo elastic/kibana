@@ -1,23 +1,23 @@
 openapi: 3.0.3
 info:
-  title: Kibana Serverless APIs
+  title: Kibana APIs
   description: |
-    The Kibana REST APIs for Elastic serverless enable you to manage resources
-    such as connectors, data views, and saved objects. The API calls are
-    stateless. Each request that you make happens in isolation from other calls
-    and must include all of the necessary information for Kibana to fulfill the
-    request. API requests return JSON output, which is a format that is
-    machine-readable and works well for automation.
+    The Kibana REST APIs enable you to manage resources such as connectors, data views, and saved objects.
+    The API calls are stateless.
+    Each request that you make happens in isolation from other calls and must include all of the necessary information for Kibana to fulfill the
+    request.
+    API requests return JSON output, which is a format that is machine-readable and works well for automation.
     
     To interact with Kibana APIs, use the following operations:
     
     - GET: Fetches the information.
+    - PATCH: Applies partial modifications to the existing information.
     - POST: Adds new information.
     - PUT: Updates the existing information.
     - DELETE: Removes the information.
     
-    You can prepend any Kibana API endpoint with `kbn:` and run the request in
-    **Dev Tools → Console**. For example:
+    You can prepend any Kibana API endpoint with `kbn:` and run the request in **Dev Tools → Console**.
+    For example:
 
     ```
     GET kbn:/api/data_views
