@@ -274,7 +274,7 @@ describe('telemetry tasks', () => {
       expect(body.Endpoint).not.toBeFalsy();
     });
 
-    it('should execute get license info', async () => {
+    it('should enrich with license info', async () => {
       await mockAndScheduleEndpointDiagnosticsTask();
 
       // wait until the events are sent to the telemetry server
