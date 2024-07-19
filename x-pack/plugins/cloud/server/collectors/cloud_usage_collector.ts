@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ICollectorSet } from '@kbn/usage-collection-plugin/server';
+import type { ICollectorSet } from '@kbn/usage-collection-plugin/server';
 
 export interface CloudUsageCollectorConfig {
   isCloudEnabled: boolean;

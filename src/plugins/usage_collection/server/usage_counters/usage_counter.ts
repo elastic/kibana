@@ -24,7 +24,7 @@ export interface IUsageCounter {
   /**
    * Defines custom retention period for the counters under this domain.
    * This is the number of days worth of counters that must be kept in the system indices.
-   * Defaults to 5
+   * See USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS for default value
    */
   retentionPeriodDays?: number;
   /**

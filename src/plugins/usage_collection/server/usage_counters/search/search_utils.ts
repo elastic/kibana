@@ -11,7 +11,7 @@ import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { UsageCountersSearchParams } from '../types';
 
 export function usageCountersSearchParamsToKueryFilter(
-  params: UsageCountersSearchParams
+  params: Omit<UsageCountersSearchParams, 'namespace'>
 ): KueryNode {
   const { domainId, counterName, counterType, from, source } = params;
 
