@@ -65,6 +65,8 @@ const baseResponseSchema = schema.object({
   os: schema.object({
     platform: schema.string(),
     platform_release: schema.string(),
+    distro: schema.maybe(schema.string()),
+    distro_release: schema.maybe(schema.string()),
     memory: schema.object({
       free_bytes: schema.number(),
       used_bytes: schema.number(),
@@ -76,6 +78,30 @@ const baseResponseSchema = schema.object({
       '5m': schema.number(),
       '15m': schema.number(),
     }),
+    cpuacct: schema.maybe(
+      schema.object({
+        control_group: schema.string(),
+        usage_nanos: schema.number(),
+      })
+    ),
+    cpu: schema.maybe(
+      schema.object({
+        control_group: schema.string(),
+        cfs_period_micros: schema.number(),
+        cfs_quota_micros: schema.number(),
+        stat: schema.object({
+          number_of_elapsed_periods: schema.number(),
+          number_of_times_throttled: schema.number(),
+          time_throttled_nanos: schema.number(),
+        }),
+      })
+    ),
+    cgroup_memory: schema.maybe(
+      schema.object({
+        current_in_bytes: schema.number(),
+        swap_current_in_bytes: schema.number(),
+      })
+    ),
   }),
   elasticsearch_client: schema.object({
     total_active_sockets: schema.number(),
