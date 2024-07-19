@@ -180,7 +180,7 @@ export const VECTOR_SEARCH_PLUGIN = {
 export const SEMANTIC_SEARCH_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.SemanticSearch.description', {
     defaultMessage:
-      ' Easily add semantic search to Elasticsearch with inference endpoints and the semantic_text field type, to boost search relevance.',
+      'Easily add semantic search to Elasticsearch with inference endpoints and the semantic_text field type, to boost search relevance.',
   }),
   ID: 'enterpriseSearchSemanticSearch',
   LOGO: 'logoEnterpriseSearch',
