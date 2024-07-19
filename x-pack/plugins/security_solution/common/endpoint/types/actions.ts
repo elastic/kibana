@@ -56,6 +56,7 @@ export interface KillProcessActionOutputContent {
   command?: string;
   pid?: number;
   entity_id?: string;
+  process_name?: string;
 }
 
 export interface ResponseActionGetFileOutputContent {
@@ -135,7 +136,7 @@ export interface LogsEndpointAction<
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields & ActionRequestFields;
+  EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionRequestFields;
   error?: EcsError;
   user: {
     id: string;
