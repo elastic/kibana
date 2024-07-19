@@ -12,7 +12,7 @@ import { SelectedVersions } from './constants';
 
 export default {
   component: VersionsPicker,
-  title: 'ThreeWayDiff/VersionsPicker',
+  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/VersionsPicker',
   argTypes: {
     hasBaseVersion: {
       control: 'boolean',
@@ -24,7 +24,7 @@ export default {
 
 const Template: Story<{ hasBaseVersion: boolean }> = (args) => {
   const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
-    SelectedVersions.BaseTarget
+    SelectedVersions.CurrentFinal
   );
 
   return (
