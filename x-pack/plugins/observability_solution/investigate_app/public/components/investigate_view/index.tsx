@@ -20,7 +20,6 @@ import { useTheme } from '../../hooks/use_theme';
 import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
 import { AddWidgetUI } from '../add_widget_ui';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
-import { InvestigateTextButton } from '../investigate_text_button';
 import { AddWidgetMode } from '../../constants/add_widget_mode';
 
 const containerClassName = css`
@@ -195,6 +194,63 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     <EuiFlexGroup direction="row" className={containerClassName}>
       <EuiFlexItem grow className={scrollContainerClassName}>
         <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem className={gridContainerClassName} grow={false}>
+              <InvestigateWidgetGrid
+                items={gridItems}
+                onItemsChange={async (nextGridItems) => {
+                  return setItemPositions(
+                    nextGridItems.map((gridItem) => ({
+                      columns: gridItem.columns,
+                      rows: gridItem.rows,
+                      id: gridItem.id,
+                    }))
+                  );
+                }}
+                onItemTitleChange={async (item, title) => {
+                  return setItemTitle(item.id, title);
+                }}
+                onItemCopy={async (copiedItem) => {
+                  return copyItem(copiedItem.id);
+                }}
+                onItemDelete={async (deletedItem) => {
+                  return deleteItem(deletedItem.id);
+                }}
+                onItemLockToggle={async (toggledItem) => {
+                  return toggledItem.locked ? unlockItem(toggledItem.id) : lockItem(toggledItem.id);
+                }}
+                fadeLockedItems={searchBarFocused}
+                onItemOverrideRemove={async (updatedItem, override) => {
+                  // TODO: remove filters
+                  const itemToUpdate = revision.items.find((item) => item.id === updatedItem.id);
+                  if (itemToUpdate) {
+                    return setItemParameters(updatedItem.id, {
+                      ...revision.parameters,
+                      ...omit(itemToUpdate.parameters, override.id),
+                    });
+                  }
+                }}
+                onItemEditClick={(itemToEdit) => {
+                  setEditingItem(revision.items.find((item) => item.id === itemToEdit.id));
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AddWidgetUI
+                workflowBlocks={blocks}
+                user={user}
+                revision={revision}
+                start={range.start}
+                end={range.end}
+                filters={revision.parameters.filters}
+                query={revision.parameters.query}
+                timeRange={revision.parameters.timeRange}
+                onWidgetAdd={(widget) => {
+                  return createWidgetRef.current(widget);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiFlexItem grow={false} key={AddWidgetMode.Esql}>
             <EuiButton data-test-subj="investigateAppInvestigateViewWithUserAddAnObservationChartButton">
               {i18n.translate(
@@ -207,63 +263,10 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} className={sideBarClassName}>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem className={gridContainerClassName} grow={false}>
-            <InvestigateWidgetGrid
-              items={gridItems}
-              onItemsChange={async (nextGridItems) => {
-                return setItemPositions(
-                  nextGridItems.map((gridItem) => ({
-                    columns: gridItem.columns,
-                    rows: gridItem.rows,
-                    id: gridItem.id,
-                  }))
-                );
-              }}
-              onItemTitleChange={async (item, title) => {
-                return setItemTitle(item.id, title);
-              }}
-              onItemCopy={async (copiedItem) => {
-                return copyItem(copiedItem.id);
-              }}
-              onItemDelete={async (deletedItem) => {
-                return deleteItem(deletedItem.id);
-              }}
-              onItemLockToggle={async (toggledItem) => {
-                return toggledItem.locked ? unlockItem(toggledItem.id) : lockItem(toggledItem.id);
-              }}
-              fadeLockedItems={searchBarFocused}
-              onItemOverrideRemove={async (updatedItem, override) => {
-                // TODO: remove filters
-                const itemToUpdate = revision.items.find((item) => item.id === updatedItem.id);
-                if (itemToUpdate) {
-                  return setItemParameters(updatedItem.id, {
-                    ...revision.parameters,
-                    ...omit(itemToUpdate.parameters, override.id),
-                  });
-                }
-              }}
-              onItemEditClick={(itemToEdit) => {
-                setEditingItem(revision.items.find((item) => item.id === itemToEdit.id));
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddWidgetUI
-              workflowBlocks={blocks}
-              user={user}
-              revision={revision}
-              start={range.start}
-              end={range.end}
-              filters={revision.parameters.filters}
-              query={revision.parameters.query}
-              timeRange={revision.parameters.timeRange}
-              onWidgetAdd={(widget) => {
-                return createWidgetRef.current(widget);
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {i18n.translate(
+          'xpack.investigateApp.investigateViewWithUser.placeholderForRightSidebarFlexItemLabel',
+          { defaultMessage: 'placeholder for right sidebar' }
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
