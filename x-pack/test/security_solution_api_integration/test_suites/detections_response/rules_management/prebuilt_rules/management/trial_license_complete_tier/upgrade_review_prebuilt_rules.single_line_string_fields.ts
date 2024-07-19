@@ -68,7 +68,6 @@ export default ({ getService }: FtrProviderContext): void => {
               merge_outcome: ThreeWayMergeOutcome.Target,
               conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
-              
               has_base_version: true,
             },
           });
