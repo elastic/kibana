@@ -27,22 +27,22 @@ const mockStatsFindings = [
 const mockStatsAlerts = [
   {
     key: 'low',
-    count: 100,
+    count: 1000,
     color: euiThemeVars.euiColorVis0,
   },
   {
     key: 'medium',
-    count: 80,
+    count: 800,
     color: euiThemeVars.euiColorVis5,
   },
   {
     key: 'high',
-    count: 30,
+    count: 300,
     color: euiThemeVars.euiColorVis7,
   },
   {
     key: 'critical',
-    count: 5,
+    count: 50,
     color: euiThemeVars.euiColorVis9,
   },
 ];

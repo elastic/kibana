@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiBadge, useEuiTheme, EuiIcon, EuiFlexItem } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 
 /** DistributionBar component props */
@@ -120,7 +121,6 @@ const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) =
 };
 
 // TODO: fix tooltip direction if not enough space;
-// TODO: human readable counts
 /**
  * Security Solution DistributionBar component.
  * Shows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result.
@@ -141,6 +141,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
         flex: ${stat.count};
       `,
     ];
+    const prettyNumber = numeral(stat.count).format('0,0a');
 
     return (
       <div key={stat.key} css={partStyle}>
@@ -148,7 +149,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
           <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'} wrap={false}>
             <EuiFlexItem grow={false}>
               <EuiBadge color={'hollow'} css={styles.tooltipBadgeLeft}>
-                {stat.count}
+                {prettyNumber}
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
