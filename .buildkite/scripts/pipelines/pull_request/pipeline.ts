@@ -37,9 +37,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
         stdio: 'inherit',
       });
       process.exit(0);
+      return;
     }
 
-    const pipeline = [];
+    const pipeline: string[] = [];
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
