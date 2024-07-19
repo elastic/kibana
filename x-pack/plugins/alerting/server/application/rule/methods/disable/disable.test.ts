@@ -225,7 +225,7 @@ describe('disable()', () => {
     });
   });
 
-  test('disables an rule', async () => {
+  test('disables a rule', async () => {
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -581,6 +581,16 @@ describe('disable()', () => {
 
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to disable task"`
+    );
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
+  });
+
+  test('throws if API params do not match the schema', async () => {
+    await expect(
+      // @ts-ignore: this is what we are testing
+      rulesClient.disable({ id: 1 })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating disable rule parameters - [id]: expected value of type [string] but got [number]"`
     );
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
