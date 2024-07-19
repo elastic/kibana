@@ -369,6 +369,7 @@ export class LensPlugin {
             eventAnnotationService,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
+        extractFilterReferences: data.query.filterManager.extract.bind(data.query.filterManager),
         visualizationMap,
         datasourceMap,
         dataViews: plugins.dataViews,

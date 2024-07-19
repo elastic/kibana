@@ -216,6 +216,7 @@ export interface LensEmbeddableDeps {
   data: DataPublicPluginStart;
   documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
+  extractFilterReferences: FilterManager['extract'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   dataViews: DataViewsContract;
@@ -788,10 +789,19 @@ export class Embeddable
           ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
           : undefined,
       });
+
+      const filters = this.getFilters();
+
+      const { state: persistableFilters, references: filterReferences } =
+        this.deps.extractFilterReferences(filters);
+
+      references.push(...filterReferences);
+
       const attrs = {
         ...viz,
         state: {
           ...viz.state,
+          filters: [...persistableFilters],
           visualization: visualizationState,
           datasourceStates,
         },

@@ -48,6 +48,7 @@ export interface LensEmbeddableStartServices {
   usageCollection?: UsageCollectionSetup;
   documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
+  extractFilterReferences: FilterManager['extract'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   spaces?: SpacesPluginStart;
@@ -101,6 +102,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         expressionRenderer,
         documentToExpression,
         injectFilterReferences,
+        extractFilterReferences,
         visualizationMap,
         datasourceMap,
         uiActions,
@@ -130,6 +132,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
           documentToExpression,
           injectFilterReferences,
+          extractFilterReferences,
           visualizationMap,
           datasourceMap,
           capabilities: {
