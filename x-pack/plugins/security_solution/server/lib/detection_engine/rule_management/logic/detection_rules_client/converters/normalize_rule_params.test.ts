@@ -26,11 +26,11 @@ describe('normalizeRuleSource', () => {
     });
     expect(result).toEqual({
       type: 'external',
-      is_customized: false,
+      isCustomized: false,
     });
   });
 
-  it('should return snake_case version of rule_source when ruleSource is present', () => {
+  it('should return existing value when ruleSource is present', () => {
     const externalRuleSource: BaseRuleParams['ruleSource'] = {
       type: 'external',
       isCustomized: true,
@@ -38,7 +38,7 @@ describe('normalizeRuleSource', () => {
     const externalResult = normalizeRuleSource({ immutable: true, ruleSource: externalRuleSource });
     expect(externalResult).toEqual({
       type: externalRuleSource.type,
-      is_customized: externalRuleSource.isCustomized,
+      isCustomized: externalRuleSource.isCustomized,
     });
 
     const internalRuleSource: BaseRuleParams['ruleSource'] = {
