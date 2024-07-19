@@ -115,6 +115,7 @@ class DocLinks {
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
   public indexApi: string;
+  public inferenceApiCreate: string;
   public ingestionApis: string;
   public ingestPipelines: string;
   public kibanaSecurity: string;
@@ -294,6 +295,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
     this.indexApi = '';
+    this.inferenceApiCreate = '';
     this.ingestionApis = '';
     this.ingestPipelines = '';
     this.kibanaSecurity = '';
@@ -475,6 +477,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.indexApi = docLinks.links.enterpriseSearch.indexApi;
+    this.inferenceApiCreate = docLinks.links.enterpriseSearch.inferenceApiCreate;
     this.ingestionApis = docLinks.links.enterpriseSearch.ingestionApis;
     this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;

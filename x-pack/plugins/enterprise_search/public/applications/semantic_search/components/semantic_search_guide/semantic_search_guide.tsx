@@ -105,7 +105,7 @@ const QUERY_SNIPPET = `POST /my-index/_search
 const modelSelection: InferenceModel[] = [
   {
     id: 'elser',
-    modelName: 'ELSER v2',
+    modelName: 'ELSER',
     code: SETUP_INFERENCE_ENDPOINT_ELSER,
     link: docLinks.elser,
     description: "Elastic's proprietary, best-in-class sparse vector model for semantic search.",
@@ -115,7 +115,7 @@ const modelSelection: InferenceModel[] = [
     modelName: 'E5 Multilingual',
     code: SETUP_INFERENCE_ENDPOINT_E5,
     link: docLinks.e5Model,
-    description: 'Dense vector model optimized for multi-lingual semantic search.',
+    description: 'Try an optimized third party multilingual model.',
   },
   {
     code: SETUP_INFERENCE_ENDPOINT_OPENAI,
@@ -129,7 +129,7 @@ const modelSelection: InferenceModel[] = [
     modelName: 'Amazon Bedrock',
     code: SETUP_INFERENCE_ENDPOINT_BEDROCK,
     link: 'https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html',
-    description: "Use Amazon Bedrock's own embedding models.",
+    description: "Use Amazon Bedrock's embedding models.",
   },
 ];
 
@@ -242,6 +242,18 @@ export const SemanticSearchGuide: React.FC = () => {
                 id="xpack.enterpriseSearch.semanticSearch.guide.setupInferenceEndpoint.description"
                 defaultMessage="Start by setting up an inference endpoint to manage the machine learning model for your task. This may take a while to complete depending on the model you choose and your ML node configuration."
               />
+            </p>
+            <p>
+              <EuiLink
+                href={docLinks.inferenceApiCreate}
+                target="_blank"
+                data-test-subj="inference-create-documentation-link"
+              >
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.semanticSearch.guide.inferenceCreateDocumentationLink"
+                  defaultMessage="Learn more about Inference Endpoints."
+                />
+              </EuiLink>
             </p>
           </EuiText>
           <EuiSpacer size="m" />
