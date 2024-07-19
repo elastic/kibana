@@ -116,7 +116,7 @@ export function populateAlertActions({
         actions.push(recoveredAction);
         break;
       case SLACK_WEBAPI_ACTION_ID:
-        const allowedChannels = aId.config?.allowedChannels ?? [];
+        const allowedChannels = aId.config?.allowedChannels || [];
         action.params = getSlackAPIActionParams(translations, allowedChannels);
         recoveredAction.params = getSlackAPIActionParams(translations, allowedChannels, true);
         actions.push(recoveredAction);
