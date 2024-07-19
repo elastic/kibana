@@ -105,7 +105,7 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
   merge_outcome: ThreeWayMergeOutcome;
 
   /**
-   * Bolean which determines if a base version was found and return for the three-way-diff for the field
+   * Boolean which determines if a base version was found and returned for the three-way-diff of the field
    * - true: the base version of the field was found and is either defined or undefined
    * - false: the base version of the field was not found
    */
