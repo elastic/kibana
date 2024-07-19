@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SetAISearchChromeSearchDocsSection } from '../../../ai_search/components/ai_search_guide/ai_search_docs_section';
@@ -169,6 +170,10 @@ const SelectModelPanel: React.FC<SelectModelPanelProps> = ({
               data-test-subj="enterpriseSearchSelectModelPanelReadMoreLink"
               href={model.link}
               target="_blank"
+              aria-label={i18n.translate('xpack.enterpriseSearch.semanticSearch.modelAriaLabel', {
+                defaultMessage: 'Read more about {modelName}',
+                values: { modelName: model.modelName },
+              })}
             >
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.model.link"
