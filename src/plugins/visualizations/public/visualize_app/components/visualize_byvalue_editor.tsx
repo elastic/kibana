@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { EventEmitter } from 'events';
-import React, { useEffect, useState, useMemo } from 'react';
-import './visualize_editor.scss';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { EventEmitter } from 'events';
+import React, { useEffect, useMemo, useState } from 'react';
+import './visualize_editor.scss';
 
 import { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { DefaultEditor } from '@kbn/vis-default-editor-plugin/public';
 import { VisualizeConstants } from '../../../common/constants';
+import { PersistedState } from '../../persisted_state';
+import type { VisualizeSavedVisInputState } from '../../react_embeddable/types';
 import { VisualizeAppProps } from '../app';
 import { VisualizeServices } from '../types';
 import {
   useChromeVisibility,
   useDataViewUpdates,
-  useEditorUpdates,
   useEmbeddableApiHandler,
   useLinkedSearchUpdates,
   useVisualizeAppState,
 } from '../utils';
-import { VisualizeEditorCommon } from './visualize_editor_common';
 import { useVisEditorBreadcrumbs } from '../utils/use/use_vis_editor_breadcrumbs';
-import type { VisualizeSavedVisInputState } from '../../react_embeddable/types';
-import { PersistedState } from '../../persisted_state';
+import { VisualizeEditorCommon } from './visualize_editor_common';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -43,7 +43,18 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     timefilter: { timefilter },
     filterManager,
     queryString,
+    state$: queryState$,
   } = services.data.query;
+  const queryState = useObservable(queryState$);
+  const {
+    filters,
+    query,
+    time: timeRange,
+  } = queryState?.state ?? {
+    filters: filterManager.getFilters(),
+    query: queryString.getQuery(),
+    time: timefilter.getTime(),
+  };
   const { savedSearch } = services;
 
   const embeddableApiHandler = useEmbeddableApiHandler();
@@ -53,6 +64,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     serializeState: [serializeStateFn],
     snapshotState: [snapshotStateFn],
     getVis: [getVis],
+    updateVis: [updateVis],
   } = embeddableApiHandler;
 
   useEffect(() => {
@@ -97,19 +109,15 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       },
     };
   }, [getVis, serializeStateFn]);
+  const editorName = byValueVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
+  const visTitle = useMemo(() => byValueVisInstance?.vis.title, [byValueVisInstance?.vis.title]);
 
-  const { appState, hasUnappliedChanges } = useVisualizeAppState(
+  const { stateContainer, currentAppState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
-    byValueVisInstance
+    updateVis
   );
-  const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
-    services,
-    eventEmitter,
-    setHasUnsavedChanges,
-    appState,
-    byValueVisInstance
-  );
+
   const uiState = useMemo(
     () => new PersistedState(currentAppState?.uiState ?? {}),
     [currentAppState]
@@ -120,7 +128,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   useVisEditorBreadcrumbs({
     services,
     originatingApp,
-    visTitle: byValueVisInstance?.vis.title,
+    visTitle,
   });
 
   useEffect(() => {
@@ -133,12 +141,11 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   return (
     <VisualizeEditorCommon
       visInstance={byValueVisInstance}
-      appState={appState}
+      appState={stateContainer}
       currentAppState={currentAppState}
       isChromeVisible={isChromeVisible}
       hasUnsavedChanges={hasUnsavedChanges}
       hasUnappliedChanges={hasUnappliedChanges}
-      isEmbeddableRendered={isEmbeddableRendered}
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
@@ -156,11 +163,12 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
           <DefaultEditor
             initialState={initialState}
             references={[]}
+            updateUrlState={stateContainer.updateUrlState}
             embeddableApiHandler={embeddableApiHandler}
             eventEmitter={eventEmitter}
-            timeRange={timefilter.getTime()}
-            filters={filterManager.getFilters()}
-            query={queryString.getQuery() as Query}
+            timeRange={timeRange!}
+            filters={filters!}
+            query={query as Query}
             dataView={currentAppState?.dataView}
             uiState={uiState}
             savedSearchService={savedSearch}

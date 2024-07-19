@@ -7,7 +7,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
 import { EventEmitter } from 'events';
 import {
   VisualizeServices,
@@ -15,8 +14,6 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../../types';
-import { convertFromSerializedVis } from '../../../utils/saved_visualize_utils';
-import { VisualizeSerializedState } from '@kbn/visualizations-plugin/public/react_embeddable/types';
 
 export const useEditorUpdates = (
   services: VisualizeServices,
