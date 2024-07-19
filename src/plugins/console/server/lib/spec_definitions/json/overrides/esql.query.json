@@ -11,10 +11,10 @@
         "cbor",
         "csv",
         "json",
+        "smile",
         "text",
         "tsv",
-        "yaml",
-        "smile"
+        "yaml"
       ],
       "delimiter": "",
       "drop_null_columns": [
