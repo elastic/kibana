@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import {
   EuiPageTemplate,
@@ -22,27 +22,12 @@ import * as i18n from '../../../common/translations';
 import inferenceEndpoint from '../../assets/images/inference_endpoint.svg';
 
 import { EndpointPrompt } from './endpoint_prompt';
-import { useKibana } from '../../hooks/use_kibana';
+import { useTrainedModelPageUrl } from '../../hooks/use_trained_model_page_url';
 
 import './add_empty_prompt.scss';
 
 export const AddEmptyPrompt: React.FC = () => {
-  const {
-    services: { ml },
-  } = useKibana();
-
-  const [trainedModelPageUrl, setTrainedModelPageUrl] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    const fetchMlTrainedModelPageUrl = async () => {
-      const url = await ml?.locator?.getUrl({
-        page: 'trained_models',
-      });
-      setTrainedModelPageUrl(url);
-    };
-
-    fetchMlTrainedModelPageUrl();
-  }, [ml]);
+  const trainedModelPageUrl = useTrainedModelPageUrl();
 
   return (
     <EuiPageTemplate.EmptyPrompt
@@ -61,9 +46,9 @@ export const AddEmptyPrompt: React.FC = () => {
             <EuiLink
               href={docLinks.createInferenceEndpoint}
               target="_blank"
-              data-test-subj="learn-more-about-inference-endpoints"
+              data-test-subj="learn-how-to-create-inference-endpoints"
             >
-              {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+              {i18n.LEARN_HOW_TO_CREATE_INFERENCE_ENDPOINTS_LINK}
             </EuiLink>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -86,11 +71,11 @@ export const AddEmptyPrompt: React.FC = () => {
                 description={i18n.ELSER_DESCRIPTION}
                 footer={
                   <EuiLink
-                    href={docLinks.createInferenceEndpoint}
+                    href={docLinks.semanticSearchElser}
                     target="_blank"
-                    data-test-subj="learn-more-about-elser"
+                    data-test-subj="semantic-search-with-elser"
                   >
-                    {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+                    {i18n.SEMANTIC_SEARCH_WITH_ELSER_LINK}
                   </EuiLink>
                 }
               />
@@ -101,11 +86,11 @@ export const AddEmptyPrompt: React.FC = () => {
                 description={i18n.E5_DESCRIPTION}
                 footer={
                   <EuiLink
-                    href={docLinks.createInferenceEndpoint}
+                    href={docLinks.semanticSearchE5}
                     target="_blank"
-                    data-test-subj="learn-more-about-e5"
+                    data-test-subj="semantic-search-with-e5"
                   >
-                    {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+                    {i18n.SEMANTIC_SEARCH_WITH_E5_LINK}
                   </EuiLink>
                 }
               />

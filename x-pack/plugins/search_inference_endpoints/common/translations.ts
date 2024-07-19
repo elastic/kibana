@@ -48,10 +48,24 @@ export const ELSER_TITLE = i18n.translate(
   }
 );
 
-export const LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.learnMoreAboutInferenceEndpoints',
+export const LEARN_HOW_TO_CREATE_INFERENCE_ENDPOINTS_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEmptyPrompt.learnHowToCreateInferenceEndpoints',
   {
-    defaultMessage: 'Learn more about inference endpoints',
+    defaultMessage: 'Learn how to create inference endpoints',
+  }
+);
+
+export const SEMANTIC_SEARCH_WITH_ELSER_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEmptyPrompt.semanticSearchWithElser',
+  {
+    defaultMessage: 'Semantic search with ELSER',
+  }
+);
+
+export const SEMANTIC_SEARCH_WITH_E5_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEmptyPrompt.semanticSearchWithE5',
+  {
+    defaultMessage: 'Semantic search with E5 Multilingual',
   }
 );
 
@@ -70,7 +84,7 @@ export const ELSER_DESCRIPTION = i18n.translate(
 );
 
 export const E5_TITLE = i18n.translate('xpack.searchInferenceEndpoints.addEmptyPrompt.e5Title', {
-  defaultMessage: 'Multilingual E5',
+  defaultMessage: 'E5 Multilingual',
 });
 
 export const E5_DESCRIPTION = i18n.translate(

@@ -984,8 +984,5 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       context: `${KIBANA_DOCS}playground-context.html`,
       hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
-    inference: {
-      createInferenceEndpoint: `${ELASTICSEARCH_DOCS}semantic-search-inference.html#infer-text-embedding-task`,
-    },
   });
 };

@@ -5,54 +5,39 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { EuiPageTemplate, EuiLink, EuiText } from '@elastic/eui';
+import React from 'react';
 import * as i18n from '../../common/translations';
-import { useKibana } from '../hooks/use_kibana';
 import { docLinks } from '../../common/doc_links';
+import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
 export const InferenceEndpointsHeader: React.FC = () => {
-  const {
-    services: { ml },
-  } = useKibana();
-
-  const [trainedModelPageUrl, setTrainedModelPageUrl] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    const fetchMlTrainedModelPageUrl = async () => {
-      const url = await ml?.locator?.getUrl({
-        page: 'trained_models',
-      });
-      setTrainedModelPageUrl(url);
-    };
-
-    fetchMlTrainedModelPageUrl();
-  }, [ml]);
+  const trainedModelPageUrl = useTrainedModelPageUrl();
 
   return (
     <EuiPageTemplate.Header
-      css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
       data-test-subj="allInferenceEndpointsPage"
       pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
-      description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
-      bottomBorder={true}
-      rightSideItems={[
-        <EuiFlexGroup>
-          <EuiFlexItem>
+      description={
+        <EuiText>
+          <p>
+            {i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
+            <br />
             <EuiLink
               href={docLinks.createInferenceEndpoint}
               target="_blank"
-              data-test-subj="learn-more-about-inference-endpoints"
+              data-test-subj="learn-how-to-create-inference-endpoints"
             >
-              {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+              {i18n.LEARN_HOW_TO_CREATE_INFERENCE_ENDPOINTS_LINK}
             </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiLink href={trainedModelPageUrl} target="_blank" data-test-subj="view-your-models">
-              {i18n.VIEW_YOUR_MODELS_LINK}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>,
+          </p>
+        </EuiText>
+      }
+      bottomBorder={true}
+      rightSideItems={[
+        <EuiLink href={trainedModelPageUrl} target="_blank" data-test-subj="view-your-models">
+          {i18n.VIEW_YOUR_MODELS_LINK}
+        </EuiLink>,
       ]}
     />
   );
