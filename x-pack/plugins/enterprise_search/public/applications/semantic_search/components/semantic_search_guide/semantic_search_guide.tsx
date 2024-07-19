@@ -241,7 +241,6 @@ export const SemanticSearchGuide: React.FC = () => {
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.setupInferenceEndpoint.description"
                 defaultMessage="Start by setting up an inference endpoint to manage the machine learning model for your task. This may take a while to complete depending on the model you choose and your ML node configuration."
-                values={{ semanticText: <EuiCode>semantic_text</EuiCode> }}
               />
             </p>
           </EuiText>
