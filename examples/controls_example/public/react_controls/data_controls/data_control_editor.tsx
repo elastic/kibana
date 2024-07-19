@@ -438,7 +438,11 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               disabled={!controlEditorValid}
               onClick={() => {
                 onSave(
-                  { ...dataControlState, ...customOptionsState } as State,
+                  {
+                    ...dataControlState,
+                    ...customOptionsState,
+                    controlType: selectedControlType,
+                  } as State,
                   selectedControlType!
                 );
               }}

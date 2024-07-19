@@ -64,12 +64,13 @@ const controlGroupApi = {
   grow: new BehaviorSubject(DEFAULT_CONTROL_GROW),
   width: new BehaviorSubject(DEFAULT_CONTROL_WIDTH),
 } as unknown as ControlGroupApi;
+const onSave = jest.fn();
 
 describe('Data control editor', () => {
-  const mountComponent = async ({
+  const mountComponent = async <State extends DataControlEditorState = DataControlEditorState>({
     initialState,
   }: {
-    initialState?: Partial<DataControlEditorState>;
+    initialState?: Partial<State>;
   }) => {
     mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
@@ -77,7 +78,7 @@ describe('Data control editor', () => {
       <I18nProvider>
         <DataControlEditor
           onCancel={() => {}}
-          onSave={() => {}}
+          onSave={onSave}
           parentApi={controlGroupApi}
           initialState={{
             dataViewId: dashboardApi.lastUsedDataViewId$.getValue(),
@@ -236,6 +237,38 @@ describe('Data control editor', () => {
       expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('false');
       expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
       expect(getPressedAttribute(controlEditor, 'create__search')).toBe('false');
+    });
+
+    test('removes unrelated state', async () => {
+      const controlEditor = await mountComponent<
+        DataControlEditorState & { someOtherState: string; moreRandomState: number }
+      >({
+        initialState: {
+          controlType: 'rangeSlider',
+          controlId: 'testId',
+          dataViewId: 'logstash-*',
+          fieldName: 'bytes',
+          someOtherState: 'test',
+          moreRandomState: 2,
+        },
+      });
+
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('create__optionsList'));
+      });
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('control-editor-save'));
+      });
+
+      expect(onSave).toBeCalledWith(
+        {
+          controlId: 'testId',
+          controlType: 'optionsList',
+          dataViewId: 'logstash-*',
+          fieldName: 'bytes',
+        },
+        'optionsList'
+      );
     });
   });
 });
