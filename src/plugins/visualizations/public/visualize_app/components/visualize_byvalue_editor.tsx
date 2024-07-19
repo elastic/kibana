@@ -22,7 +22,6 @@ import { VisualizeAppProps } from '../app';
 import { VisualizeServices } from '../types';
 import {
   useChromeVisibility,
-  useDataViewUpdates,
   useEmbeddableApiHandler,
   useLinkedSearchUpdates,
   useVisualizeAppState,
@@ -123,8 +122,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     [currentAppState]
   );
 
-  useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
-  useDataViewUpdates(services, eventEmitter, appState, byValueVisInstance);
+  useLinkedSearchUpdates(services, eventEmitter, stateContainer, byValueVisInstance);
   useVisEditorBreadcrumbs({
     services,
     originatingApp,
