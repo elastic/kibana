@@ -7,8 +7,6 @@
  */
 
 export {
-  getColorIndicatorControlColumn,
-  type ColorIndicatorControlColumnParams,
-} from './color_indicator';
-
-export { getAdditionalRowControlColumn } from './additional_row_control';
+  AdditionalRowControlButton,
+  getAdditionalRowControlColumn,
+} from './additional_row_control_column';

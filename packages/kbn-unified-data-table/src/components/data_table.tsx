@@ -53,14 +53,13 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
-  CustomControlColumnConfiguration,
+  RowControlColumn,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
-  getAllControlColumns,
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
@@ -89,6 +88,7 @@ import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import {
   getColorIndicatorControlColumn,
   type ColorIndicatorControlColumnParams,
+  getAdditionalRowControlColumn,
 } from './custom_control_columns';
 
 export type SortOrder = [string, string];
@@ -294,9 +294,9 @@ export interface UnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
-   * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
+   * Optional value to extend the list of default row actions
    */
-  externalControlColumns?: EuiDataGridControlColumn[];
+  additionalRowLeadingControls?: RowControlColumn[];
   /**
    * Number total hits from ES
    */
@@ -332,10 +332,6 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
-   * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
-   */
-  trailingControlColumns?: EuiDataGridControlColumn[];
-  /**
    * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
    **/
   visibleCellActions?: number;
@@ -351,10 +347,6 @@ export interface UnifiedDataTableProps {
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
-  /**
-   * An optional settings to control which columns to render as trailing and leading control columns
-   */
-  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
   /**
    * Name of the UnifiedDataTable consumer component or application
    */
@@ -411,6 +403,7 @@ export const UnifiedDataTable = ({
   headerRowHeightState,
   onUpdateHeaderRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+  additionalRowLeadingControls,
   dataView,
   loadingState,
   onFilter,
@@ -441,7 +434,6 @@ export const UnifiedDataTable = ({
   services,
   renderCustomGridBody,
   renderCustomToolbar,
-  trailingControlColumns,
   totalHits,
   onFetchMoreRecords,
   renderDocumentView,
@@ -450,7 +442,6 @@ export const UnifiedDataTable = ({
   configRowHeight,
   showMultiFields = true,
   maxDocFieldsDisplayed = 50,
-  externalControlColumns,
   externalAdditionalControls,
   rowsPerPageOptions,
   visibleCellActions,
@@ -462,7 +453,6 @@ export const UnifiedDataTable = ({
   rowLineHeightOverride,
   cellActionsMetadata,
   customGridColumnsConfiguration,
-  customControlColumnsConfiguration,
   enableComparisonMode,
   cellContext,
   renderCellPopover,
@@ -857,13 +847,16 @@ export const UnifiedDataTable = ({
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
+  // for swapping the default controls https://github.com/elastic/kibana/pull/165866/commits/604d7223261c084539919a7174b8d07fbdecf937
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
-    const leadingColumns = externalControlColumns
-      ? [...internalControlColumns, ...externalControlColumns]
-      : internalControlColumns;
+    // const leadingColumns = externalControlColumns
+    //   ? [...internalControlColumns, ...externalControlColumns]
+    //   : internalControlColumns;
+
+    const leadingColumns: EuiDataGridControlColumn[] = internalControlColumns;
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
@@ -872,17 +865,21 @@ export const UnifiedDataTable = ({
       leadingColumns.unshift(colorIndicatorControlColumn);
     }
 
+    if (additionalRowLeadingControls) {
+      leadingColumns.push(...additionalRowLeadingControls.map(getAdditionalRowControlColumn));
+    }
+
     return leadingColumns;
-  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns, getRowIndicator]);
+  }, [canSetExpandedDoc, controlColumnIds, getRowIndicator, additionalRowLeadingControls]);
 
-  const controlColumnsConfig = customControlColumnsConfiguration?.({
-    controlColumns: getAllControlColumns(),
-  });
-
-  const customLeadingControlColumn =
-    controlColumnsConfig?.leadingControlColumns ?? leadingControlColumns;
-  const customTrailingControlColumn =
-    controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
+  // const controlColumnsConfig = customControlColumnsConfiguration?.({
+  //   controlColumns: getAllControlColumns(),
+  // });
+  //
+  // const customLeadingControlColumn =
+  //   controlColumnsConfig?.leadingControlColumns ?? leadingControlColumns;
+  // const customTrailingControlColumn =
+  //   controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
 
   const additionalControls = useMemo(() => {
     if (!externalAdditionalControls && !usedSelectedDocs.length) {
@@ -1095,7 +1092,7 @@ export const UnifiedDataTable = ({
               columns={euiGridColumns}
               columnVisibility={columnsVisibility}
               data-test-subj="docTable"
-              leadingControlColumns={customLeadingControlColumn}
+              leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
               pagination={paginationObj}
               renderCellValue={renderCellValue}
@@ -1109,7 +1106,6 @@ export const UnifiedDataTable = ({
               gridStyle={gridStyleOverride ?? GRID_STYLE}
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
-              trailingControlColumns={customTrailingControlColumn}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
             />

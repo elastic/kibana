@@ -55,7 +55,8 @@
 
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^='additionalRowControl_'] {
     padding-left: 0;
     padding-right: 0;
   }

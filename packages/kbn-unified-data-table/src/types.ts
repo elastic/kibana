@@ -7,7 +7,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridColumn, IconType } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -70,6 +70,7 @@ export type CustomGridColumnsConfiguration = Record<
   (props: CustomGridColumnProps) => EuiDataGridColumn
 >;
 
+// TODO: remove types
 export interface ControlColumns {
   select: EuiDataGridControlColumn;
   openDetails: EuiDataGridControlColumn;
@@ -83,3 +84,20 @@ export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {
   leadingControlColumns: EuiDataGridControlColumn[];
   trailingControlColumns?: EuiDataGridControlColumn[];
 };
+
+export interface RowControlProps {
+  rowIndex: number;
+  record: DataTableRecord;
+}
+
+export interface RowControlParams {
+  label: string;
+  iconType: IconType;
+  onClick: (props: RowControlProps) => void;
+}
+
+export interface RowControlColumn {
+  id: string;
+  headerAriaLabel: string;
+  getRowControlParams: (props: RowControlProps) => RowControlParams;
+}

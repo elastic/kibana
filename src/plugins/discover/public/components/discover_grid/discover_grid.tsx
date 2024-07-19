@@ -24,6 +24,7 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
   const getRowIndicator = useMemo(() => {
     return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
   }, [getRowIndicatorProvider, props.dataView]);
+  const [pinnedItems, setPinnedItems] = React.useState<Record<string, boolean>>({});
 
   return (
     <UnifiedDataTable
@@ -31,6 +32,37 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
+      additionalRowLeadingControls={[
+        {
+          id: 'test1',
+          headerAriaLabel: 'Additional row control header 1',
+          getRowControlParams: (params) => {
+            return {
+              label: 'Test 1',
+              iconType: pinnedItems[params.record.id] ? 'pinFilled' : 'pin',
+              onClick: ({ record }) => {
+                setPinnedItems((prev) => ({
+                  ...prev,
+                  [record.id]: !prev[record.id],
+                }));
+              },
+            };
+          },
+        },
+        {
+          id: 'test2',
+          headerAriaLabel: 'Additional row control header 2',
+          getRowControlParams: () => {
+            return {
+              label: 'Test 2',
+              iconType: 'visBarVerticalStacked',
+              onClick: () => {
+                alert('Test 2 clicked');
+              },
+            };
+          },
+        },
+      ]}
       {...props}
     />
   );
