@@ -30,7 +30,7 @@ export const RankAggregationSection: React.FC = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.title"
-                  defaultMessage="Use Hybrid Search"
+                  defaultMessage="Hybrid search"
                 />
               </h2>
             </EuiTitle>
