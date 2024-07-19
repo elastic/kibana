@@ -13,10 +13,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/core-http-router-server-internal",
-    "@kbn/core-http-server",
-    "@kbn/config-schema",
-    "@kbn/zod"
-  ]
+  "kbn_references": []
 }
