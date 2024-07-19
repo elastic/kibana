@@ -489,6 +489,12 @@ Refer to {observability-guide}/apm-dependencies.html[Dependencies].
 
 Refer to {observability-guide}/apm-service-maps.html[Service Map].
 
+[float]
+[[service-maps-supported]]
+=== Supported APM agents
+
+Refer to {observability-guide}/apm-service-maps.html#service-maps-supported[Supported APM agents].
+
 [role="exclude",id="service-overview"]
 == Service overview
 
