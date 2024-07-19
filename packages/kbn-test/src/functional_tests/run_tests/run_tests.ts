@@ -13,7 +13,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
-import { getFips } from 'crypto';
 import { readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
@@ -62,7 +61,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   };
 
   log.success(
-    `The current Node environment has FIPS enabled: ${getFips() === 1 ? 'true' : 'false'}`
+    `The current Node environment should have FIPS overrides: ${
+      process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true' ? 'true' : 'false'
+    }`
   );
 
   for (const [i, path] of options.configs.entries()) {
@@ -72,8 +73,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      const extendedSettingsOverrides = (vars) => {
-        if (getFips() === 1) {
+      const extendedSettingsOverrides = (vars: any) => {
+        if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
           vars.esTestCluster.license = 'trial';
         }
 

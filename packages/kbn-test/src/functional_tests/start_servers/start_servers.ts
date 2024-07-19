@@ -15,7 +15,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { getFips } from 'crypto';
 import { readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
@@ -29,11 +28,13 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
   await withProcRunner(log, async (procs) => {
     log.success(
-      `The current Node environment has FIPS enabled: ${getFips() === 1 ? 'true' : 'false'}`
+      `The current Node environment should have FIPS overrides: ${
+        process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true' ? 'true' : 'false'
+      }`
     );
 
-    const extendedSettingsOverrides = (vars) => {
-      if (getFips() === 1) {
+    const extendedSettingsOverrides = (vars: any) => {
+      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
         vars.esTestCluster.license = 'trial';
       }
 
