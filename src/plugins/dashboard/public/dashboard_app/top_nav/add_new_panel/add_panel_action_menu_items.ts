@@ -55,7 +55,7 @@ const onAddPanelActionClick =
 export const getAddPanelActionMenuItemsGroup = (
   api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
-  closePopover: () => void
+  onPanelSelected: () => void
 ) => {
   const grouped: Record<string, GroupedAddPanelActions> = {};
 
@@ -72,7 +72,7 @@ export const getAddPanelActionMenuItemsGroup = (
       name: actionName,
       icon:
         (typeof item.getIconType === 'function' ? item.getIconType(context) : undefined) ?? 'empty',
-      onClick: onAddPanelActionClick(item, context, closePopover),
+      onClick: onAddPanelActionClick(item, context, onPanelSelected),
       'data-test-subj': `create-action-${actionName}`,
       description: item?.getDisplayNameTooltip?.(context),
       order: item.order ?? 0,

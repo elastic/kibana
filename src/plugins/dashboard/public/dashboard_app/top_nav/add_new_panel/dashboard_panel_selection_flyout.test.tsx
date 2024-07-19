@@ -15,20 +15,20 @@ import type { GroupedAddPanelActions } from './add_panel_action_menu_items';
 
 const defaultProps: Omit<
   ComponentProps<typeof DashboardPanelSelectionListFlyout>,
-  'fetchDashboardPanel'
+  'fetchDashboardPanels'
 > = {
   close: jest.fn(),
   paddingSize: 's',
 };
 
 const renderComponent = ({
-  fetchDashboardPanel,
-}: Pick<ComponentProps<typeof DashboardPanelSelectionListFlyout>, 'fetchDashboardPanel'>) =>
+  fetchDashboardPanels,
+}: Pick<ComponentProps<typeof DashboardPanelSelectionListFlyout>, 'fetchDashboardPanels'>) =>
   render(
     <IntlProvider locale="en">
       <DashboardPanelSelectionListFlyout
         {...defaultProps}
-        fetchDashboardPanel={fetchDashboardPanel}
+        fetchDashboardPanels={fetchDashboardPanels}
       />
     </IntlProvider>
   );
@@ -58,7 +58,7 @@ describe('DashboardPanelSelectionListFlyout', () => {
     const promiseDelay = 5000;
 
     renderComponent({
-      fetchDashboardPanel: jest.fn(
+      fetchDashboardPanels: jest.fn(
         () =>
           new Promise((resolve) => {
             setTimeout(() => resolve(panelConfiguration), promiseDelay);
@@ -73,20 +73,20 @@ describe('DashboardPanelSelectionListFlyout', () => {
 
   it('renders an error indicator when fetchDashboardPanel errors', async () => {
     renderComponent({
-      fetchDashboardPanel: jest.fn().mockRejectedValue(new Error('simulated error')),
+      fetchDashboardPanels: jest.fn().mockRejectedValue(new Error('simulated error')),
     });
 
     expect(await screen.findByTestId('dashboardPanelSelectionErrorIndicator')).toBeInTheDocument();
   });
 
   it('renders the list of available panels when fetchDashboardPanel resolves a value', async () => {
-    renderComponent({ fetchDashboardPanel: jest.fn().mockResolvedValue(panelConfiguration) });
+    renderComponent({ fetchDashboardPanels: jest.fn().mockResolvedValue(panelConfiguration) });
 
     expect(await screen.findByTestId(panelConfiguration[0]['data-test-subj']!)).toBeInTheDocument();
   });
 
   it('renders a not found message when a user searches for an item that is not in the selection list', async () => {
-    renderComponent({ fetchDashboardPanel: jest.fn().mockResolvedValue(panelConfiguration) });
+    renderComponent({ fetchDashboardPanels: jest.fn().mockResolvedValue(panelConfiguration) });
 
     expect(await screen.findByTestId(panelConfiguration[0]['data-test-subj']!)).toBeInTheDocument();
 
@@ -101,7 +101,7 @@ describe('DashboardPanelSelectionListFlyout', () => {
   });
 
   it('invokes the close method when the flyout close btn is clicked', async () => {
-    renderComponent({ fetchDashboardPanel: jest.fn().mockResolvedValue(panelConfiguration) });
+    renderComponent({ fetchDashboardPanels: jest.fn().mockResolvedValue(panelConfiguration) });
 
     fireEvent.click(await screen.findByTestId('dashboardPanelSelectionCloseBtn'));
 

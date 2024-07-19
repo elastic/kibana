@@ -40,12 +40,13 @@ export interface DashboardPanelSelectionListFlyoutProps {
   close: () => void;
   /** Padding for flyout  */
   paddingSize: Exclude<EuiFlyoutProps['paddingSize'], 'none' | undefined>;
-  fetchDashboardPanel: () => Promise<GroupedAddPanelActions[]>;
+  /** Fetches the panels available for a dashboard  */
+  fetchDashboardPanels: () => Promise<GroupedAddPanelActions[]>;
 }
 
 export const DashboardPanelSelectionListFlyout: React.FC<
   DashboardPanelSelectionListFlyoutProps
-> = ({ paddingSize, close, fetchDashboardPanel }) => {
+> = ({ close, paddingSize, fetchDashboardPanels }) => {
   const { euiTheme } = useEuiTheme();
   const [{ data: panels, loading, error }, setPanelState] = useState<{
     loading: boolean;
@@ -60,7 +61,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
 
   useEffect(() => {
     const requestDashboardPanels = () => {
-      fetchDashboardPanel()
+      fetchDashboardPanels()
         .then((_panels) =>
           setPanelState((prevState) => ({
             ...prevState,
@@ -78,7 +79,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
     };
 
     requestDashboardPanels();
-  }, [fetchDashboardPanel]);
+  }, [fetchDashboardPanels]);
 
   useEffect(() => {
     const _panels = (panels ?? []).slice(0);
@@ -178,7 +179,11 @@ export const DashboardPanelSelectionListFlyout: React.FC<
                 icon={<EuiLoadingChart size="l" mono />}
               />
             ) : (
-              <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="m"
+                data-test-subj="dashboardPanelSelectionList"
+              >
                 {panelsSearchResult?.some(({ isDisabled }) => !isDisabled) ? (
                   panelsSearchResult.map(
                     ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) =>

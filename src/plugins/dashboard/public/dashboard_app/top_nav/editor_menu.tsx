@@ -33,9 +33,8 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
   } = pluginServices.getServices();
 
   const fetchDashboardPanels = useGetDashboardPanels({
-    dashboardAPI,
-    createNewVisType,
     api,
+    createNewVisType,
   });
 
   useEffect(() => {
@@ -53,14 +52,12 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
 
       const mount = toMountPoint(
         React.createElement(function () {
-          const closeFlyout = () => dashboardAPI.clearOverlays();
-
           return (
             <DashboardPanelSelectionListFlyout
-              close={closeFlyout}
+              close={dashboardAPI.clearOverlays}
               {...{
                 paddingSize: flyoutPanelPaddingSize,
-                fetchDashboardPanel: fetchDashboardPanels.bind(null, closeFlyout),
+                fetchDashboardPanels: fetchDashboardPanels.bind(null, dashboardAPI.clearOverlays),
               }}
             />
           );

@@ -9,13 +9,12 @@
 import { useMemo, useRef, useCallback } from 'react';
 import type { IconType } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { type Subscription, AsyncSubject, from, defer, map, forkJoin, lastValueFrom } from 'rxjs';
+import { type Subscription, AsyncSubject, from, defer, map, lastValueFrom } from 'rxjs';
 import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardAPI } from '../../dashboard_app';
 import {
   getAddPanelActionMenuItemsGroup,
   type PanelSelectionMenuItem,
@@ -24,7 +23,6 @@ import {
 
 interface UseGetDashboardPanelsArgs {
   api: PresentationContainer;
-  dashboardAPI: ReturnType<typeof useDashboardAPI>;
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
 }
 
@@ -36,32 +34,6 @@ export interface FactoryGroup {
   order: number;
 }
 
-interface UnwrappedEmbeddableFactory {
-  factory: EmbeddableFactory;
-  isEditable: boolean;
-}
-
-export const getEmbeddableFactoryMenuItemProvider =
-  (api: PresentationContainer, closePopover: () => void) =>
-  (factory: EmbeddableFactory): PanelSelectionMenuItem => {
-    const icon = factory?.getIconType ? factory.getIconType() : 'empty';
-
-    return {
-      id: factory.type,
-      name: factory.getDisplayName(),
-      icon,
-      description: factory.getDescription?.(),
-      onClick: async () => {
-        closePopover();
-        api.addNewPanel({ panelType: factory.type }, true);
-      },
-      'data-test-subj': `createNew-${factory.type}`,
-      order: factory.order ?? 0,
-    };
-  };
-
-export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
-
 const sortGroupPanelsByOrder = <T extends { order: number }>(panelGroups: T[]): T[] => {
   return panelGroups.sort(
     // larger number sorted to the top
@@ -69,60 +41,12 @@ const sortGroupPanelsByOrder = <T extends { order: number }>(panelGroups: T[]): 
   );
 };
 
-export const mergeGroupedItemsProvider =
-  (getEmbeddableFactoryMenuItem: GetEmbeddableFactoryMenuItem) =>
-  (
-    factoryGroupMap: Record<string, FactoryGroup>,
-    groupedAddPanelAction: Record<string, GroupedAddPanelActions>
-  ) => {
-    const panelGroups: GroupedAddPanelActions[] = [];
-
-    new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
-      (groupId) => {
-        const dataTestSubj = `dashboardEditorMenu-${groupId}Group`;
-
-        const factoryGroup = factoryGroupMap[groupId];
-        const addPanelGroup = groupedAddPanelAction[groupId];
-
-        if (factoryGroup && addPanelGroup) {
-          panelGroups.push({
-            id: factoryGroup.id,
-            title: factoryGroup.appName,
-            'data-test-subj': dataTestSubj,
-            order: factoryGroup.order,
-            items: [
-              ...factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
-              ...(addPanelGroup?.items ?? []),
-            ],
-          });
-        } else if (factoryGroup) {
-          panelGroups.push({
-            id: factoryGroup.id,
-            title: factoryGroup.appName,
-            'data-test-subj': dataTestSubj,
-            order: factoryGroup.order,
-            items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
-          });
-        } else if (addPanelGroup) {
-          panelGroups.push(addPanelGroup);
-        }
-      }
-    );
-
-    return panelGroups;
-  };
-
-export const useGetDashboardPanels = ({
-  dashboardAPI,
-  api: embeddableAPI,
-  createNewVisType,
-}: UseGetDashboardPanelsArgs) => {
+export const useGetDashboardPanels = ({ api, createNewVisType }: UseGetDashboardPanelsArgs) => {
   const panelsComputeResultCache = useRef(new AsyncSubject<GroupedAddPanelActions[]>());
   const panelsComputeSubscription = useRef<Subscription | null>(null);
 
   const {
     uiActions,
-    embeddable,
     visualizations: { getAliases: getVisTypeAliases, getByGroup: getVisTypesByGroup },
   } = pluginServices.getServices();
 
@@ -204,174 +128,79 @@ export const useGetDashboardPanels = ({
     [augmentedCreateNewVisType]
   );
 
-  const groupUnwrappedEmbeddableFactoriesMap$ = useMemo(
-    () =>
-      defer(() => {
-        return from(
-          Promise.allSettled(
-            Array.from(embeddable.getEmbeddableFactories()).map<
-              Promise<UnwrappedEmbeddableFactory>
-            >(async (factory) => ({
-              factory,
-              isEditable: await factory.isEditable(),
-            }))
-          )
-        ).pipe(
-          map((result) =>
-            result.reduce((acc, cur) => {
-              if (
-                cur.status === 'fulfilled' &&
-                cur.value &&
-                cur.value.isEditable &&
-                !cur.value.factory.isContainerType &&
-                cur.value.factory.canCreateNew() &&
-                cur.value.factory.type !== 'visualization'
-              ) {
-                acc.push(cur.value);
-              }
-
-              return acc;
-            }, [] as UnwrappedEmbeddableFactory[])
-          ),
-          map((factories) => {
-            const _factoryGroupMap: Record<string, FactoryGroup> = {};
-
-            factories.forEach(({ factory }) => {
-              const { grouping } = factory;
-
-              if (grouping) {
-                grouping.forEach((group) => {
-                  if (_factoryGroupMap[group.id]) {
-                    _factoryGroupMap[group.id].factories.push(factory);
-                  } else {
-                    _factoryGroupMap[group.id] = {
-                      id: group.id,
-                      appName: group.getDisplayName
-                        ? group.getDisplayName({ embeddable: dashboardAPI })
-                        : group.id,
-                      icon: group.getIconType?.({ embeddable: dashboardAPI }),
-                      factories: [factory],
-                      order: group.order ?? 0,
-                    };
-                  }
-                });
-              } else {
-                const fallbackGroup = COMMON_EMBEDDABLE_GROUPING.other;
-
-                if (!_factoryGroupMap[fallbackGroup.id]) {
-                  _factoryGroupMap[fallbackGroup.id] = {
-                    id: fallbackGroup.id,
-                    appName: fallbackGroup.getDisplayName
-                      ? fallbackGroup.getDisplayName({ embeddable: dashboardAPI })
-                      : fallbackGroup.id,
-                    icon: fallbackGroup.getIconType?.({ embeddable: dashboardAPI }) || 'empty',
-                    factories: [],
-                    order: fallbackGroup.order ?? 0,
-                  };
-                }
-
-                _factoryGroupMap[fallbackGroup.id].factories.push(factory);
-              }
-            });
-
-            return _factoryGroupMap;
-          })
-        );
-      }),
-    [dashboardAPI, embeddable]
-  );
-
   const addPanelAction$ = useMemo(
     () =>
       defer(() => {
         return from(
           uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
-            embeddable: embeddableAPI,
+            embeddable: api,
           }) ?? []
         );
       }),
-    [embeddableAPI, uiActions]
+    [api, uiActions]
   );
 
   const computeAvailablePanels = useCallback(
-    (closeFlyout: () => void) => {
+    (onPanelSelected: () => void) => {
       if (!panelsComputeSubscription.current) {
-        panelsComputeSubscription.current = forkJoin([
-          groupUnwrappedEmbeddableFactoriesMap$,
-          addPanelAction$,
-        ])
+        panelsComputeSubscription.current = addPanelAction$
           .pipe(
-            map(([factoryGroupMap, addPanelActions]) => {
-              const groupedAddPanelAction = getAddPanelActionMenuItemsGroup(
-                embeddableAPI,
-                addPanelActions,
-                closeFlyout
-              );
-
-              const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(
-                embeddableAPI,
-                closeFlyout
-              );
-
-              return mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
-                factoryGroupMap,
-                groupedAddPanelAction
-              );
-            }),
-            map((mergedPanelGroups) => {
-              return sortGroupPanelsByOrder<GroupedAddPanelActions>(mergedPanelGroups).map(
-                (panelGroup) => {
-                  switch (panelGroup.id) {
-                    case 'visualizations': {
-                      return {
-                        ...panelGroup,
-                        items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
-                          (panelGroup.items ?? []).concat(
-                            // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
-                            visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, closeFlyout)),
-                            promotedVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
-                          )
-                        ),
-                      };
-                    }
-                    case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
-                      return {
-                        ...panelGroup,
-                        items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
-                          (panelGroup.items ?? []).concat(
-                            legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
-                          )
-                        ),
-                      };
-                    }
-                    case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
-                      return {
-                        ...panelGroup,
-                        items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
-                          (panelGroup.items ?? []).concat(
-                            toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
-                          )
-                        ),
-                      };
-                    }
-                    default: {
-                      return {
-                        ...panelGroup,
-                        items: sortGroupPanelsByOrder(panelGroup.items),
-                      };
-                    }
+            map((addPanelActions) =>
+              getAddPanelActionMenuItemsGroup(api, addPanelActions, onPanelSelected)
+            ),
+            map((groupedAddPanelAction) => {
+              return sortGroupPanelsByOrder<GroupedAddPanelActions>(
+                Object.values(groupedAddPanelAction)
+              ).map((panelGroup) => {
+                switch (panelGroup.id) {
+                  case 'visualizations': {
+                    return {
+                      ...panelGroup,
+                      items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
+                        (panelGroup.items ?? []).concat(
+                          // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
+                          visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, onPanelSelected)),
+                          promotedVisTypes.map(getVisTypeMenuItem.bind(null, onPanelSelected))
+                        )
+                      ),
+                    };
+                  }
+                  case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
+                    return {
+                      ...panelGroup,
+                      items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
+                        (panelGroup.items ?? []).concat(
+                          legacyVisTypes.map(getVisTypeMenuItem.bind(null, onPanelSelected))
+                        )
+                      ),
+                    };
+                  }
+                  case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
+                    return {
+                      ...panelGroup,
+                      items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
+                        (panelGroup.items ?? []).concat(
+                          toolVisTypes.map(getVisTypeMenuItem.bind(null, onPanelSelected))
+                        )
+                      ),
+                    };
+                  }
+                  default: {
+                    return {
+                      ...panelGroup,
+                      items: sortGroupPanelsByOrder(panelGroup.items),
+                    };
                   }
                 }
-              );
+              });
             })
           )
           .subscribe(panelsComputeResultCache.current);
       }
     },
     [
-      embeddableAPI,
+      api,
       addPanelAction$,
-      groupUnwrappedEmbeddableFactoriesMap$,
       getVisTypeMenuItem,
       getVisTypeAliasMenuItem,
       toolVisTypes,
