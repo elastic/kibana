@@ -81,7 +81,7 @@ describe('getLogRateChange', () => {
     const analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE;
     const baselineBucketRate = 0;
     const deviationBucketRate = 10;
-    const expectedMessage = '10 up from 0 in baseline';
+    const expectedMessage = 'up to 10 from 0 in baseline';
     const { message, factor } = getLogRateChange(
       analysisType,
       baselineBucketRate,
