@@ -104,6 +104,12 @@ export const entityDefinitionRuntimePrivileges = {
 
 const entityDefinitionDeletionPrivileges = {
   cluster: ['manage_transform', 'manage_ingest_pipelines'],
+  index: [
+    {
+      names: [ENTITY_INDICES_PATTERN],
+      privileges: ['delete_index'],
+    },
+  ],
   application: [
     {
       application: 'kibana-.kibana',
