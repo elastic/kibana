@@ -25,10 +25,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SetAISearchChromeSearchDocsSection } from '../../../ai_search/components/ai_search_guide/ai_search_docs_section';
 import { docLinks } from '../../../shared/doc_links';
-import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSemanticSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { DevToolsConsoleCodeBlock } from '../../../vector_search/components/dev_tools_console_code_block/dev_tools_console_code_block';
-import { EnterpriseSearchVectorSearchPageTemplate } from '../../../vector_search/components/layout/page_template';
 import './semantic_search_guide.scss';
+import { EnterpriseSearchSemanticSearchPageTemplate } from '../layout/page_template';
 
 const SETUP_INFERENCE_ENDPOINT_ELSER = `PUT _inference/sparse_embedding/my-inference-endpoint
 {
@@ -195,7 +195,7 @@ export const SemanticSearchGuide: React.FC = () => {
   const [selectedModel, setSelectedModel] = React.useState<InferenceModel>(chosenUrlModel);
 
   return (
-    <EnterpriseSearchVectorSearchPageTemplate
+    <EnterpriseSearchSemanticSearchPageTemplate
       restrictWidth
       pageHeader={{
         description: (
@@ -249,6 +249,7 @@ export const SemanticSearchGuide: React.FC = () => {
           <EuiFlexGrid columns={2} direction="column">
             {modelSelection.map((model) => (
               <SelectModelPanel
+                key={model.id}
                 model={model}
                 setSelectedModel={setSelectedModel}
                 isSelectedModel={selectedModel === model}
@@ -338,6 +339,6 @@ export const SemanticSearchGuide: React.FC = () => {
       </EuiFlexGroup>
       <EuiHorizontalRule />
       <SetAISearchChromeSearchDocsSection />
-    </EnterpriseSearchVectorSearchPageTemplate>
+    </EnterpriseSearchSemanticSearchPageTemplate>
   );
 };
