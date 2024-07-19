@@ -12,6 +12,7 @@ export const MONITOR_NOT_FOUND_ROUTE = '/monitor-not-found/:monitorId';
 export const MONITOR_HISTORY_ROUTE = '/monitor/:monitorId/history';
 
 export const MONITOR_ERRORS_ROUTE = '/monitor/:monitorId/errors';
+export const MONITOR_ALERTS_ROUTE = '/monitor/:monitorId/alerts';
 
 export const MONITOR_ADD_ROUTE = '/add-monitor';
 
