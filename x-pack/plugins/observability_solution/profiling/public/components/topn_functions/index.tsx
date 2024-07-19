@@ -51,7 +51,7 @@ export const TopNFunctionsGrid = ({
   topNFunctions,
   comparisonTopNFunctions,
   totalSeconds,
-  showFullScreenSelector = false,
+  showFullScreenSelector = true,
   isDifferentialView,
   baselineScaleFactor,
   comparisonScaleFactor,
@@ -318,7 +318,7 @@ export const TopNFunctionsGrid = ({
           showColumnSelector: false,
           showKeyboardShortcuts: !isDifferentialView,
           showDisplaySelector: !isDifferentialView,
-          showFullScreenSelector: showFullScreenSelector ?? !isDifferentialView,
+          showFullScreenSelector: showFullScreenSelector && !isDifferentialView,
           showSortSelector: false,
         }}
         virtualizationOptions={{
