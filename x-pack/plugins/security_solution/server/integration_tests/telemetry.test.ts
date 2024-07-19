@@ -148,7 +148,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('detection-rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/187719
+  describe.skip('detection-rules', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 
@@ -679,7 +680,8 @@ describe('telemetry tasks', () => {
       expect(body.file).toStrictEqual(alertsDetectionsRequest.file);
     });
 
-    it('should manage runtime errors searching endpoint metrics', async () => {
+    // Flaky: https://github.com/elastic/kibana/issues/188234
+    it.skip('should manage runtime errors searching endpoint metrics', async () => {
       const errorMessage = 'Something went wront';
 
       async function* mockedGenerator(

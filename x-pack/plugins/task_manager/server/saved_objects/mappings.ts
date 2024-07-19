@@ -64,3 +64,15 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     },
   },
 };
+
+export const backgroundTaskNodeMapping: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    id: {
+      type: 'keyword',
+    },
+    last_seen: {
+      type: 'date',
+    },
+  },
+};

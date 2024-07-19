@@ -49,7 +49,7 @@ export async function executeCreateAction({
   const getFallbackDataView = async () => {
     const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
     if (!indexName) return null;
-    const dataView = await getESQLAdHocDataview(indexName, deps.dataViews);
+    const dataView = await getESQLAdHocDataview(`from ${indexName}`, deps.dataViews);
     return dataView;
   };
 
@@ -75,6 +75,7 @@ export async function executeCreateAction({
     esqlQuery: `from ${defaultIndex}`,
     search: deps.data.search.search,
     signal: abortController.signal,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
   });
 
   const context = {

@@ -23,39 +23,7 @@ export type ExpandedEventType =
     }
   | EmptyObject;
 
-export type ExpandedHostType =
-  | {
-      panelView?: 'hostDetail';
-      params?: {
-        hostName: string;
-      };
-    }
-  | EmptyObject;
-
-export type ExpandedNetworkType =
-  | {
-      panelView?: 'networkDetail';
-      params?: {
-        ip: string;
-        flowTarget: FlowTargetSourceDest;
-      };
-    }
-  | EmptyObject;
-
-export type ExpandedUserType =
-  | {
-      panelView?: 'userDetail';
-      params?: {
-        userName: string;
-      };
-    }
-  | EmptyObject;
-
-export type ExpandedDetailType =
-  | ExpandedEventType
-  | ExpandedHostType
-  | ExpandedNetworkType
-  | ExpandedUserType;
+export type ExpandedDetailType = ExpandedEventType;
 
 export enum TimelineTabs {
   query = 'query',
