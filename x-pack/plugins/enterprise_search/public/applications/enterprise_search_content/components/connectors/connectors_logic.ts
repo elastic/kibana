@@ -20,6 +20,10 @@ import {
   FetchConnectorsApiLogic,
   FetchConnectorsApiLogicActions,
 } from '../../api/connector/fetch_connectors.api';
+import {
+  DeleteConnectorCrawlerApiLogic,
+  DeleteConnectorCrawlerApiLogicActions,
+} from '../../api/connector/delete_connector_crawler_api_logic';
 import { DeleteIndexApiActions, DeleteIndexApiLogic } from '../../api/index/delete_index_api_logic';
 
 export type ConnectorViewItem = Connector & { docsCount?: number; indexExists: boolean };
@@ -30,6 +34,8 @@ export interface ConnectorsActions {
   deleteConnector: DeleteConnectorApiLogicActions['makeRequest'];
   deleteError: DeleteConnectorApiLogicActions['apiError'];
   deleteIndex: DeleteIndexApiActions['makeRequest'];
+  deleteConnectorCrawler: DeleteConnectorCrawlerApiLogicActions['makeRequest'];
+  deleteConnectorCrawlerError: DeleteConnectorCrawlerApiLogicActions['apiError'];
   deleteIndexError: DeleteIndexApiActions['apiError'];
   deleteIndexSuccess: DeleteIndexApiActions['apiSuccess'];
   deleteSuccess: DeleteConnectorApiLogicActions['apiSuccess'];
@@ -113,6 +119,8 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
         'apiSuccess as deleteIndexSuccess',
         'makeRequest as deleteIndex',
       ],
+      DeleteConnectorCrawlerApiLogic,
+      ['apiError as deleteConnectorCrawlerError', 'makeRequest as deleteConnectorCrawler'],
       FetchConnectorsApiLogic,
       ['makeRequest', 'apiSuccess', 'apiError'],
     ],

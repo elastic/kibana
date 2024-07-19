@@ -14,6 +14,7 @@ import {
   CONNECTORS_INDEX,
   cancelSync,
   deleteConnectorById,
+  deleteCrawlerConnectorById,
   deleteConnectorSecret,
   fetchConnectorById,
   fetchConnectors,
@@ -26,6 +27,7 @@ import {
   updateConnectorStatus,
   updateFiltering,
   updateFilteringDraft,
+  fetchConnectorCrawlerById,
 } from '@kbn/search-connectors';
 
 import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
@@ -645,7 +647,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         const secretId = connector?.api_key_secret_id;
 
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
-
         if (indexNameToDelete) {
           await deleteIndexPipelines(client, indexNameToDelete);
           await deleteAccessControlIndex(client, indexNameToDelete);
@@ -833,6 +834,53 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         },
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/crawler/{connectorCrawlerId}',
+      validate: {
+        params: schema.object({
+          connectorCrawlerId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorCrawlerId } = request.params;
+      const connectorResult = await fetchConnectorCrawlerById(
+        client.asCurrentUser,
+        connectorCrawlerId
+      );
+
+      return response.ok({
+        body: {
+          connector: connectorResult,
+        },
+      });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/connectors/crawler/{connectorCrawlerId}',
+      validate: {
+        params: schema.object({
+          connectorCrawlerId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorCrawlerId } = request.params;
+
+      const deleteResponse = await deleteCrawlerConnectorById(
+        client.asCurrentUser,
+        connectorCrawlerId
+      );
+
+      return response.ok({ body: deleteResponse });
     })
   );
 }

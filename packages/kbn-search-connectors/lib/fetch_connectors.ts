@@ -8,12 +8,13 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { ConnectorAPIListConnectorsResponse } from '..';
+import { ConnectorAPIListConnectorsResponse, CONNECTORS_INDEX } from '..';
 
-import { Connector } from '../types/connectors';
+import { Connector, ConnectorDocument } from '../types/connectors';
 
 import { isNotFoundException } from '../utils/identify_exceptions';
 import { CRAWLER_SERVICE_TYPE } from '..';
+import { isIndexNotFoundException } from '@kbn/core-saved-objects-migration-server-internal';
 
 export const fetchConnectorById = async (
   client: ElasticsearchClient,
@@ -30,6 +31,26 @@ export const fetchConnectorById = async (
       return undefined;
     }
     throw err;
+  }
+};
+
+export const fetchConnectorCrawlerById = async (
+  client: ElasticsearchClient,
+  connectorCrawlerId: string
+): Promise<Connector | undefined> => {
+  try {
+    const connectorResult = await client.get<Connector>({
+      id: connectorCrawlerId,
+      index: CONNECTORS_INDEX,
+    });
+    return connectorResult._source
+      ? { ...connectorResult._source, id: connectorResult._id }
+      : undefined;
+  } catch (error) {
+    if (isIndexNotFoundException(error)) {
+      return undefined;
+    }
+    throw error;
   }
 };
 

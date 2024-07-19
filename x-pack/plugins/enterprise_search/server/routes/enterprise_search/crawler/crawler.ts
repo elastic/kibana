@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
-import { deleteConnectorById, fetchConnectorByIndexName } from '@kbn/search-connectors';
+import { deleteCrawlerConnectorById, fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
@@ -119,7 +119,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
           request.body.index_name
         );
         if (createdConnector) {
-          await deleteConnectorById(client.asCurrentUser, createdConnector.id);
+          await deleteCrawlerConnectorById(client.asCurrentUser, createdConnector.id);
           if (createdConnector.index_name) {
             await deleteIndex(client, createdConnector.index_name);
           }

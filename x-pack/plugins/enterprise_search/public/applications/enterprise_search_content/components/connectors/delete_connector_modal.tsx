@@ -36,7 +36,8 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
   const [connectorUiOptions, setConnectorUiOptions] = useLocalStorage<
     Record<string, { deploymentMethod: 'docker' | 'source' | null }>
   >('search:connector-ui-options', {});
-  const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic);
+  const { closeDeleteModal, deleteConnector, deleteIndex, deleteConnectorCrawler } =
+    useActions(ConnectorsLogic);
 
   const {
     deleteModalConnectorId: connectorId,
@@ -74,9 +75,12 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       }}
       onConfirm={() => {
         if (isCrawler) {
+          console.log('deleteIndex');
           if (deleteModalIndexName) {
             deleteIndex({ indexName: deleteModalIndexName });
           }
+          console.log('deleteCrawler');
+          deleteConnectorCrawler({ connectorCrawlerId: connectorId });
         } else {
           deleteConnector({
             connectorId,

@@ -8,6 +8,7 @@
 
 import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { CONNECTORS_INDEX } from '..';
 import { cancelSyncs } from './cancel_syncs';
 
 export const deleteConnectorById = async (client: ElasticsearchClient, id: string) => {
@@ -21,4 +22,15 @@ export const deleteConnectorById = async (client: ElasticsearchClient, id: strin
     method: 'DELETE',
     path: `/_connector/${id}`,
   });
+};
+
+// Crawler-related data stays in .elastic-connectors-v1 hidden index, so we need direct call to delete it
+export const deleteCrawlerConnectorById = async (client: ElasticsearchClient, id: string) => {
+  // timeout function to mitigate race condition with external connector running job and recreating index
+  const timeout = async () => {
+    const promise = new Promise((resolve) => setTimeout(resolve, 500));
+    return promise;
+  };
+  await Promise.all([cancelSyncs(client, id), timeout]);
+  return await client.delete({ id, index: CONNECTORS_INDEX, refresh: 'wait_for' });
 };
