@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
 import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
+const emptyStep = `
+steps:
+  - label: ':pipeline: No steps to run'
+    command: echo 'Changes are skippable - no steps to run'
+`.trim();
 
 if (!prConfig) {
   console.error(`'kibana-pull-request' pipeline not found in .buildkite/pull_requests.json`);
@@ -28,19 +32,15 @@ const getPipeline = (filename: string, removeSteps = true) => {
 };
 
 (async () => {
+  const pipeline: string[] = [];
+
   try {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable || true) {
-      // Since we skip everything, including post-build, we need to at least make sure the commit status gets set
-      execSync('BUILD_SUCCESSFUL=true .buildkite/scripts/lifecycle/commit_status_complete.sh', {
-        stdio: 'inherit',
-      });
-      process.exit(0);
+      console.log(emptyStep);
       return;
     }
-
-    const pipeline: string[] = [];
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
