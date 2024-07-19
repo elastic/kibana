@@ -101,7 +101,7 @@ interface EditorFooterProps {
   };
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
-  detectTimestamp: boolean;
+  detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
   runQuery: () => void;
   updateQuery: (qs: string) => void;
@@ -126,7 +126,7 @@ export const EditorFooter = memo(function EditorFooter({
   styles,
   errors,
   warnings,
-  detectTimestamp,
+  detectedTimestamp,
   onErrorClick,
   runQuery,
   updateQuery,
@@ -195,7 +195,7 @@ export const EditorFooter = memo(function EditorFooter({
                 </EuiText>
               </EuiFlexItem>
               {/* If there is no space and no @timestamp detected hide the information */}
-              {(detectTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
+              {(detectedTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
                 <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                     <EuiFlexItem grow={false}>
@@ -207,11 +207,12 @@ export const EditorFooter = memo(function EditorFooter({
                         <p>
                           {isSpaceReduced
                             ? '@timestamp'
-                            : detectTimestamp
+                            : detectedTimestamp
                             ? i18n.translate(
                                 'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
                                 {
-                                  defaultMessage: '@timestamp found',
+                                  defaultMessage: '{detectedTimestamp} found',
+                                  values: { detectedTimestamp },
                                 }
                               )
                             : i18n.translate(
