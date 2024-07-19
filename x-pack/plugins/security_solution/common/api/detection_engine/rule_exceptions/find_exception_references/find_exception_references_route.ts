@@ -15,14 +15,14 @@ import {
 import { NonEmptyStringArray, NonEmptyString, UUID } from '@kbn/securitysolution-io-ts-types';
 
 // TODO https://github.com/elastic/security-team/issues/7491
-export type RuleObjectId = t.TypeOf<typeof RuleObjectId>;
-export const RuleObjectId = UUID;
+type RuleObjectId = t.TypeOf<typeof RuleObjectId>;
+const RuleObjectId = UUID;
 
-export type RuleSignatureId = t.TypeOf<typeof RuleSignatureId>;
-export const RuleSignatureId = t.string;
+type RuleSignatureId = t.TypeOf<typeof RuleSignatureId>;
+const RuleSignatureId = t.string;
 
-export type RuleName = t.TypeOf<typeof RuleName>;
-export const RuleName = NonEmptyString;
+type RuleName = t.TypeOf<typeof RuleName>;
+const RuleName = NonEmptyString;
 
 // If ids and list_ids are undefined, route will fetch all lists matching the
 // specified namespace type
