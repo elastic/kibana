@@ -15,15 +15,11 @@ import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import {
-  PhaseEvent,
-  PublishesFilters,
-  PublishesUnifiedSearch,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import { PhaseEvent, PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render } from '@testing-library/react';
 
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
@@ -32,7 +28,6 @@ import {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
 } from './types';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 describe('saved search embeddable', () => {
   const mockServices = {

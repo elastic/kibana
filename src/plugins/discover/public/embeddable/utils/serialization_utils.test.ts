@@ -72,12 +72,12 @@ describe('Serialization utils', () => {
     test('by reference', async () => {
       discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue({
         savedObjectId: 'savedSearch',
-        ...discoverServiceMock.savedSearch.byValueToSavedSearch(
+        ...(await discoverServiceMock.savedSearch.byValueToSavedSearch(
           {
             attributes: mockedSavedSearchAttributes,
           } as unknown as SavedSearchUnwrapResult,
           true
-        ),
+        )),
       });
 
       const serializedState: SerializedPanelState<SearchEmbeddableSerializedState> = {
@@ -93,7 +93,6 @@ describe('Serialization utils', () => {
         serializedState,
         discoverServices: discoverServiceMock,
       });
-
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.title).toEqual('test panel title');

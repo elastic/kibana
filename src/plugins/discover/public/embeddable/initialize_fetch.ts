@@ -126,11 +126,16 @@ export function initializeFetch({
         const searchSessionId = fetchContext.searchSessionId;
         const searchSourceQuery = savedSearch.searchSource.getField('query');
 
+        // Log request to inspector
+        requestAdapter.reset();
+
         try {
           api.dataLoading.next(true);
 
-          // Log request to inspector
-          requestAdapter.reset();
+          // Get new abort controller
+          const currentAbortController = new AbortController();
+          abortController = currentAbortController;
+
           await discoverServices.profilesManager.resolveDataSourceProfile({
             dataSource: isOfAggregateQueryType(searchSourceQuery)
               ? createEsqlDataSource()
@@ -140,10 +145,6 @@ export function initializeFetch({
             dataView,
             query: searchSourceQuery,
           });
-
-          // Get new abort controller
-          const currentAbortController = new AbortController();
-          abortController = currentAbortController;
 
           const esqlMode = isEsqlMode(savedSearch);
           if (
