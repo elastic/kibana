@@ -69,13 +69,11 @@ export const updateSearchSource = (
   // if the search source has a parent, update that too based on fetch context
   const parentSearchSource = searchSource.getParent();
   if (parentSearchSource) {
-    parentSearchSource.setField('filter', fetchContext.filters);
-    parentSearchSource.setField('query', fetchContext.query);
     const timeRangeFilter = getTimeRangeFilter(discoverServices, dataView, fetchContext);
-
     const filters = timeRangeFilter
       ? [timeRangeFilter, ...(fetchContext.filters ?? [])]
       : fetchContext.filters;
     parentSearchSource.setField('filter', filters);
+    parentSearchSource.setField('query', fetchContext.query);
   }
 };
