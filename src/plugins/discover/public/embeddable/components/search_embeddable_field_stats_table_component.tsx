@@ -22,7 +22,7 @@ interface SavedSearchEmbeddableComponentProps {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
   };
   dataView: DataView;
-  onAddFilter: DocViewFilterFn;
+  onAddFilter?: DocViewFilterFn;
   stateManager: SearchEmbeddableStateManager;
 }
 

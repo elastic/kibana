@@ -15,7 +15,12 @@ import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { PhaseEvent, StateComparators } from '@kbn/presentation-publishing';
+import {
+  PhaseEvent,
+  PublishesFilters,
+  PublishesUnifiedSearch,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render } from '@testing-library/react';
 
@@ -27,6 +32,7 @@ import {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
 } from './types';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 describe('saved search embeddable', () => {
   const mockServices = {
@@ -40,7 +46,12 @@ describe('saved search embeddable', () => {
 
   const uuid = 'mock-embeddable-id';
   const factory = getSearchEmbeddableFactory(mockServices);
-  const mockedDashboardApi = {} as unknown as PresentationContainer;
+  const dashboadFilters = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const mockedDashboardApi = {
+    filters$: dashboadFilters,
+    timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+    query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+  } as unknown as PresentationContainer & PublishesUnifiedSearch;
 
   const getSearchResponse = (nrOfHits: number) => {
     const hits = new Array(nrOfHits).fill(null).map((_, idx) => ({ id: idx }));
@@ -248,6 +259,11 @@ describe('saved search embeddable', () => {
       });
       resolveDataSourceProfileSpy.mockReset();
       expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
+
+      // trigger a refetch
+      dashboadFilters.next([]);
+      await waitOneTick();
+      expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
     });
 
     it('should pass cell renderers from profile', async () => {

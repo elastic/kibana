@@ -285,7 +285,7 @@ export const getSearchEmbeddableFactory = ({
                       fetchContext$,
                     }}
                     dataView={dataView!}
-                    onAddFilter={onAddFilter}
+                    onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                     stateManager={searchEmbeddable.stateManager}
                   />
                 ) : (
