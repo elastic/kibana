@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { useEffect, useState } from 'react';
 import { pluginServices } from '../services';
 
@@ -19,7 +20,9 @@ export const useFieldFormatter = ({
   const {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
-  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
+  const [fieldFormatter, setFieldFormatter] = useState<FieldFormatConvertFunction>(
+    () => (toFormat: string) => toFormat
+  );
 
   /**
    * derive field formatter from fieldSpec and dataViewId
@@ -29,10 +32,13 @@ export const useFieldFormatter = ({
       if (!dataViewId || !fieldSpec) return;
       // dataViews are cached, and should always be available without having to hit ES.
       const dataView = await getDataViewById(dataViewId);
-      setFieldFormatter(
-        () =>
-          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: string) => toFormat)
+      const formatterForField =
+        dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
+        ((toFormat: string) => toFormat);
+      setFieldFormatter(() =>
+        fieldSpec.type === 'date'
+          ? (value: string) => formatterForField(parseInt(value, 10))
+          : formatterForField
       );
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);

@@ -119,9 +119,9 @@ describe('options list fetch all suggestions query', () => {
         aggregations: {
           suggestions: {
             buckets: [
-              { doc_count: 5, key: '1' },
-              { doc_count: 4, key: '2' },
-              { doc_count: 3, key: '3' },
+              { doc_count: 5, key: 1 },
+              { doc_count: 4, key: 2 },
+              { doc_count: 3, key: 3 },
             ],
           },
           unique_terms: {
@@ -237,9 +237,9 @@ describe('options list fetch all suggestions query', () => {
       const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
-          { value: 1707810859000, docCount: 5 },
-          { value: 1707728532000, docCount: 4 },
-          { value: 1707216874000, docCount: 2 },
+          { value: '1707810859000', docCount: 5 },
+          { value: '1707728532000', docCount: 4 },
+          { value: '1707216874000', docCount: 2 },
         ],
         totalCardinality: 3,
       });

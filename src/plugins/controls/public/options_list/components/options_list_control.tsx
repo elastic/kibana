@@ -135,6 +135,7 @@ export const OptionsListControl = ({
                         const isInvalid = invalidSelections?.includes(value);
                         return (
                           <span
+                            key={text}
                             className={`optionsList__filter ${
                               isInvalid ? 'optionsList__filterInvalid' : ''
                             }`}

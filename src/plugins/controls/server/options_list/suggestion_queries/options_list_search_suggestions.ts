@@ -118,7 +118,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+          acc.push({ value: String(suggestion.key), docCount: suggestion.doc_count });
           return acc;
         },
         []

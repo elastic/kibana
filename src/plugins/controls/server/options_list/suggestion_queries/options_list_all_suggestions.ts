@@ -76,7 +76,7 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
         value:
           fieldSpec?.type === 'boolean' && suggestion.key_as_string
             ? suggestion.key_as_string
-            : suggestion.key,
+            : String(suggestion.key),
         docCount: suggestion.doc_count,
       });
       return acc;
