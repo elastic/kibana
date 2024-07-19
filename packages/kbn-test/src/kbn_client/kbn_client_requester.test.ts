@@ -42,6 +42,4 @@ describe('KBN Client Requester Functions', () => {
       'http://localhost:5620/internal/ftr/kbn_client_so/task/serverless-security%3Anlp-cleanup-task%3A1.0.0'
     );
   });
-
-  it(`errMsg() throws when there is not a ConcliftOnGetError AND `, () => {});
 });
