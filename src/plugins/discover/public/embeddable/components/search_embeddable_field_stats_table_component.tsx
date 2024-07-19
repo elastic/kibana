@@ -32,10 +32,9 @@ export function SearchEmbeddablFieldStatsTableComponent({
   onAddFilter,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
-  const [fetchContext, savedSearch, columns] = useBatchedPublishingSubjects(
+  const [fetchContext, savedSearch] = useBatchedPublishingSubjects(
     api.fetchContext$,
-    api.savedSearch$,
-    stateManager.columns
+    api.savedSearch$
   );
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
@@ -43,7 +42,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
   return (
     <FieldStatisticsTable
       dataView={dataView}
-      columns={columns ?? []}
+      columns={savedSearch.columns ?? []}
       savedSearch={savedSearch}
       filters={fetchContext?.filters}
       query={fetchContext?.query}
