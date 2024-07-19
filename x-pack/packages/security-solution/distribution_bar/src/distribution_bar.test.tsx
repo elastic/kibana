@@ -79,4 +79,6 @@ describe('DistributionBar', () => {
       expect(part.textContent).toContain(expectedPrettyNames[index]);
     });
   });
+
+  // todo: test tooltip visibility logic
 });
