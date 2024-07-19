@@ -188,6 +188,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         cleanupIntegrationsSetup =
           await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+        // Ensure that number of installed packages equals the initial packages
+        await retry.try(async () => {
+          const installedPackagesResponse =
+            await PageObjects.observabilityLogsExplorer.getInstalledPackages();
+          expect(installedPackagesResponse.body.items.length).to.eql(initialPackagesTexts.length);
+        });
       });
 
       after(async () => {
