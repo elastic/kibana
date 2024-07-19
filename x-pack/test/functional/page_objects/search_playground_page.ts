@@ -37,7 +37,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async expectSession(): Promise<void> {
-        const session = await browser.getLocalStorageItem(SESSION_KEY);
+        const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
         const state = JSON.parse(session);
         expect(state.prompt).to.be('You are an assistant for question-answering tasks.');
         expect(state.doc_size).to.be(3);
