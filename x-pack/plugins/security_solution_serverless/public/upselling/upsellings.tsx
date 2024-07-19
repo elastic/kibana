@@ -32,7 +32,7 @@ import {
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
-import { IntegrationsAssistantLazy } from './sections/integration_assistant';
+import { IntegrationImportLazy } from './sections/integration_import';
 
 interface UpsellingsConfig {
   pli: ProductFeatureKeyType;
@@ -128,10 +128,10 @@ export const upsellingSections: UpsellingSections = [
     ),
   },
   {
-    id: 'integration_assistant',
-    pli: ProductFeatureKey.integrationAssistant,
+    id: 'integration_import',
+    pli: ProductFeatureKey.integrationImport,
     component: () => (
-      <IntegrationsAssistantLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
+      <IntegrationImportLazy requiredPLI={ProductFeatureKey.integrationImport} />
     ),
   },
 ];

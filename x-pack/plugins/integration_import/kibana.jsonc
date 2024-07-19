@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/integration-import-plugin",
+  "owner": "@elastic/security-solution",
+  "description": "Plugin implementing the Integration Import API and UI",
+  "plugin": {
+    "id": "integrationImport",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      // TODO: rename to `integration_import` when we enable the plugin by default and all references to the xpack.integration_assistant namespace configs are removed
+      "integration_assistant" 
+    ],
+    "requiredPlugins": [
+      "kibanaReact",
+      "licensing",
+      "triggersActionsUi",
+      "actions",
+      "stackConnectors",
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+    ]
+  }
+}

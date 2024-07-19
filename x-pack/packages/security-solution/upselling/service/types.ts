@@ -19,7 +19,7 @@ export type UpsellingSectionId =
   | 'endpoint_agent_tamper_protection'
   | 'cloud_security_posture_integration_installation'
   | 'ruleDetailsEndpointExceptions'
-  | 'integration_assistant';
+  | 'integration_import';
 
 export type UpsellingMessageId =
   | 'investigation_guide'

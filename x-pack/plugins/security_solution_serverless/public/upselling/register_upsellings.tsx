@@ -73,9 +73,9 @@ const registerSecuritySolutionUpsellings = (
  * Configures the upsellings for other plugins.
  */
 const configurePluginsUpsellings = (upsellingService: UpsellingService, services: Services) => {
-  const { integrationAssistant } = services;
+  const { integrationImport } = services;
 
   upsellingService.sections$.subscribe((sections) => {
-    integrationAssistant?.renderUpselling(sections.get('integration_assistant'));
+    integrationImport?.renderUpselling(sections.get('integration_import'));
   });
 };

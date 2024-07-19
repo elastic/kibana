@@ -20,7 +20,7 @@ import { useProductTypeByPLI } from '../../hooks/use_product_type_by_pli';
 
 export const UPGRADE_PRODUCT_MESSAGE = (requiredProductType: string) =>
   i18n.translate(
-    'xpack.securitySolutionServerless.upselling.integrationAssistant.upgradeProductMessage',
+    'xpack.securitySolutionServerless.upselling.integrationImport.upgradeProductMessage',
     {
       defaultMessage:
         'To turn on the Integration Assistant feature, you must upgrade the product tier to {requiredProductType}',
@@ -30,23 +30,23 @@ export const UPGRADE_PRODUCT_MESSAGE = (requiredProductType: string) =>
     }
   );
 export const TIER_REQUIRED = (requiredProductType: string) =>
-  i18n.translate('xpack.securitySolutionServerless.upselling.integrationAssistant.tierRequired', {
+  i18n.translate('xpack.securitySolutionServerless.upselling.integrationImport.tierRequired', {
     defaultMessage: '{requiredProductType} tier required',
     values: {
       requiredProductType,
     },
   });
 export const CONTACT_ADMINISTRATOR = i18n.translate(
-  'xpack.securitySolutionServerless.upselling.integrationAssistant.contactAdministrator',
+  'xpack.securitySolutionServerless.upselling.integrationImport.contactAdministrator',
   {
     defaultMessage: 'Contact your administrator for assistance.',
   }
 );
 
-export interface IntegrationsAssistantProps {
+export interface IntegrationImportProps {
   requiredPLI: ProductFeatureKeyType;
 }
-export const IntegrationsAssistant = React.memo<IntegrationsAssistantProps>(({ requiredPLI }) => {
+export const IntegrationImport = React.memo<IntegrationImportProps>(({ requiredPLI }) => {
   const requiredProductType = useProductTypeByPLI(requiredPLI);
   return (
     <>
@@ -84,4 +84,4 @@ export const IntegrationsAssistant = React.memo<IntegrationsAssistantProps>(({ r
     </>
   );
 });
-IntegrationsAssistant.displayName = 'IntegrationsAssistant';
+IntegrationImport.displayName = 'IntegrationImport';

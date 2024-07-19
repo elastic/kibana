@@ -9,11 +9,11 @@ import React from 'react';
 
 import { useStartServices, useBreadcrumbs } from '../../../../hooks';
 
-export const CreateIntegration = React.memo(() => {
-  const { integrationAssistant } = useStartServices();
+export const ImportIntegrations = React.memo(() => {
+  const { integrationImport } = useStartServices();
   useBreadcrumbs('integration_create');
 
-  const CreateIntegrationAssistant = integrationAssistant?.components.CreateIntegration;
+  const ImportIntegrationsComponent = integrationImport?.components.CreateIntegration;
 
-  return CreateIntegrationAssistant ? <CreateIntegrationAssistant /> : null;
+  return ImportIntegrationsComponent ? <ImportIntegrationsComponent /> : null;
 });

@@ -76,7 +76,7 @@ export enum ProductFeatureSecurityKey {
   /**
    * enables the integration assistant
    */
-  integrationAssistant = 'integration_assistant',
+  integrationImport = 'integration_import',
 }
 
 export enum ProductFeatureCasesKey {
