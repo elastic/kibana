@@ -40,7 +40,7 @@ export const RankAggregationSection: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.description"
-                  defaultMessage="Combine different result set rankings to achieve better overall relevance."
+                  defaultMessage="Combine rankings from different search algorithms for superior overall relevance. For example, combine the results of keyword search and dense or sparse vector search."
                 />
               </p>
             </EuiText>

@@ -178,7 +178,7 @@ export const VectorSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
-                defaultMessage="Want to use Semantic Search?"
+                defaultMessage="Want to use semantic search?"
               />
             </h2>
           </EuiTitle>
@@ -186,7 +186,7 @@ export const VectorSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.description"
-                defaultMessage="Elastic can help you generate embeddings with Inference Endpoints."
+                defaultMessage="Deploy ML models easily with Elastic Inference Endpoints to generate embeddings for your documents."
               />
             </p>
           </EuiText>

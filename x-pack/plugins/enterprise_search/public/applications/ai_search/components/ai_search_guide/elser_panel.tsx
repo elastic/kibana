@@ -27,7 +27,7 @@ export const ElserPanel: React.FC = () => (
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.aiSearch.elser.description"
-              defaultMessage="Effortlessly use the {elser} for instant text semantic search capabilities in just a few commands. We use 'semantic_text' field to simplify setting up semantic search."
+              defaultMessage="The {elser} enables textual semantic search over your Elasticsearch documents in just a few commands. Use the 'semantic_text' field to simplify model deployment and generate sparse vector document embeddings."
               values={{
                 elser: (
                   <EuiLink
@@ -59,7 +59,7 @@ export const ElserPanel: React.FC = () => (
             data-telemetry-id="entSearch-aiSearch-semanticSearch-elserPanel-setupSemanticSearch"
           >
             {i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.buttonLabel', {
-              defaultMessage: 'Setup Semantic Search',
+              defaultMessage: 'Set up Semantic Search',
             })}
           </EuiButton>
         </EuiLinkTo>

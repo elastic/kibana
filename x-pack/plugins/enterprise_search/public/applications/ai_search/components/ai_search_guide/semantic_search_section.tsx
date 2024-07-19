@@ -58,7 +58,7 @@ export const SemanticSearchSection: React.FC = () => {
               initialIsOpen
               icon={elserIllustration}
               title={i18n.translate('xpack.enterpriseSearch.aiSearch.elserAccordion.title', {
-                defaultMessage: 'Semantic Search with ELSER',
+                defaultMessage: 'Semantic search with ELSER',
               })}
               description={i18n.translate(
                 'xpack.enterpriseSearch.aiSearch.elserAccordion.description',
