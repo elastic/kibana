@@ -41,7 +41,6 @@ export type VisContextUnmapped =
 
 /** @internal **/
 export interface SavedSearchAttributes {
-  id?: string;
   title: string;
   sort: SortOrder[];
   columns: string[];

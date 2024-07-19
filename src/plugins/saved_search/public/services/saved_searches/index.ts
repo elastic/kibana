@@ -19,4 +19,4 @@ export {
   toSavedSearch,
   type SavedSearchUnwrapMetaInfo,
   type SavedSearchUnwrapResult,
-} from './saved_search_attribute_service';
+} from './to_saved_search';

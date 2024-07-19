@@ -56,13 +56,11 @@ export interface SavedSearchPublicPluginStart {
   checkForDuplicateTitle: (
     props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
   ) => Promise<void>;
-  byValue: {
-    toSavedSearch: <Serialized extends boolean = false>(
-      id: string | undefined,
-      result: SavedSearchUnwrapResult,
-      serialized?: Serialized
-    ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
-  };
+  toSavedSearch: <Serialized extends boolean = false>(
+    id: string | undefined,
+    result: SavedSearchUnwrapResult,
+    serialized?: Serialized
+  ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
 }
 
 /**
@@ -156,17 +154,15 @@ export class SavedSearchPublicPlugin
           contentManagement: deps.contentManagement,
         });
       },
-      byValue: {
-        toSavedSearch: async <
-          Serialized extends boolean = boolean,
-          ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
-        >(
-          id: string | undefined,
-          result: SavedSearchUnwrapResult,
-          serialized?: Serialized
-        ): Promise<ReturnType> => {
-          return (await toSavedSearch(id, result, deps, serialized)) as ReturnType;
-        },
+      toSavedSearch: async <
+        Serialized extends boolean = boolean,
+        ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+      >(
+        id: string | undefined,
+        result: SavedSearchUnwrapResult,
+        serialized?: Serialized
+      ): Promise<ReturnType> => {
+        return (await toSavedSearch(id, result, deps, serialized)) as ReturnType;
       },
     };
   }

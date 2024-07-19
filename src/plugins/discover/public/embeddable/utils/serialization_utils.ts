@@ -55,7 +55,7 @@ export const deserializeState = async ({
     };
   } else {
     // by value
-    const { toSavedSearch } = discoverServices.savedSearch.byValue;
+    const { toSavedSearch } = discoverServices.savedSearch;
     const savedSearch = await toSavedSearch(
       undefined,
       inject(

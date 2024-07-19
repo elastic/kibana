@@ -61,7 +61,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(discoverServiceMock.savedSearch.byValue.toSavedSearch).toBeCalledWith(
+      expect(discoverServiceMock.savedSearch.toSavedSearch).toBeCalledWith(
         undefined,
         serializedState.rawState,
         true // should be serializable
@@ -72,7 +72,7 @@ describe('Serialization utils', () => {
 
     test('by reference', async () => {
       discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue(
-        discoverServiceMock.savedSearch.byValue.toSavedSearch(
+        discoverServiceMock.savedSearch.toSavedSearch(
           'savedSearch',
           {
             attributes: mockedSavedSearchAttributes,

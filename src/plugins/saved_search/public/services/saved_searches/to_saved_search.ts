@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-
-import { SavedSearchAttributes } from '../../../common';
 import { convertToSavedSearch } from '../../../common/service/get_saved_searches';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
@@ -23,13 +20,6 @@ export interface SavedSearchUnwrapResult {
   attributes: SavedSearchByValueAttributes;
   metaInfo?: SavedSearchUnwrapMetaInfo;
 }
-
-export const savedObjectToEmbeddableAttributes = (
-  savedObject: SavedObjectCommon<SavedSearchAttributes>
-) => ({
-  ...savedObject.attributes,
-  references: savedObject.references,
-});
 
 export const toSavedSearch = async (
   id: string | undefined,
