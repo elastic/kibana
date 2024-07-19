@@ -295,10 +295,13 @@ export const selectSortedNotesByDocumentId = createSelector(
     const { field, direction } = sort;
     return notes
       .filter((note: Note) => note.eventId === documentId)
-      .sort((a: Note, b: Note) =>
-        // @ts-ignore Object is possibly null or undefined
-        direction === 'asc' ? (a[field] > b[field] ? 1 : -1) : a[field] > b[field] ? -1 : 1
-      );
+      .sort((first: Note, second: Note) => {
+        const a = first[field];
+        const b = second[field];
+        if (a == null) return 1;
+        if (b == null) return -1;
+        return direction === 'asc' ? (a > b ? 1 : -1) : a > b ? -1 : 1;
+      });
   }
 );
 
