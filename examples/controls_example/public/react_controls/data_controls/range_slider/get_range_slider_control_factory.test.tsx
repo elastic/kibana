@@ -7,19 +7,22 @@
  */
 
 import React from 'react';
-import { estypes } from '@elastic/elasticsearch';
-import { TimeRange } from '@kbn/es-query';
 import { BehaviorSubject, first, of, skip } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
+
+import { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
-import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { ControlApiRegistration } from '../../types';
-import { RangesliderControlApi, RangesliderControlState } from './types';
-import { StateComparators } from '@kbn/presentation-publishing';
+import { TimeRange } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
+import { StateComparators } from '@kbn/presentation-publishing';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+
+import { ControlFetchContext } from '../../control_group/control_fetch';
+import { ControlGroupApi } from '../../control_group/types';
+import { ControlApiRegistration } from '../../types';
+import { getRangesliderControlFactory } from './get_range_slider_control_factory';
+import { RangesliderControlApi, RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -31,7 +34,7 @@ describe('RangesliderControlApi', () => {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
   const controlGroupApi = {
-    dataControlFetch$: new BehaviorSubject<DataControlFetchContext>({}),
+    controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
     ignoreParentSettings$: new BehaviorSubject(undefined),
     parentApi: dashboardApi,
   } as unknown as ControlGroupApi;
@@ -181,7 +184,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         await findByTestId('range-slider-control-invalid-append-myControl1');
       });
@@ -199,7 +202,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         const minInput = await findByTestId('rangeSlider__lowerBoundFieldNumber');
         expect(minInput).toHaveAttribute('placeholder', String(DEFAULT_MIN));
@@ -237,6 +240,55 @@ describe('RangesliderControlApi', () => {
       );
       const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
       expect(serializedState.rawState.step).toBe(1024);
+    });
+  });
+
+  describe('custom options component', () => {
+    test('defaults to step size of 1', async () => {
+      const CustomSettings = factory.CustomOptionsComponent!;
+      const component = render(
+        <CustomSettings
+          initialState={{}}
+          updateState={jest.fn()}
+          setControlEditorValid={jest.fn()}
+        />
+      );
+      expect(
+        component.getByTestId('rangeSliderControl__stepAdditionalSetting').getAttribute('value')
+      ).toBe('1');
+    });
+
+    test('validates step setting is greater than 0', async () => {
+      const setControlEditorValid = jest.fn();
+      const CustomSettings = factory.CustomOptionsComponent!;
+      const component = render(
+        <CustomSettings
+          initialState={{}}
+          updateState={jest.fn()}
+          setControlEditorValid={setControlEditorValid}
+        />
+      );
+
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: -1 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { value: '' },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 0 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 0.5 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(true);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 10 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(true);
     });
   });
 });

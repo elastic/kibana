@@ -7,18 +7,18 @@
 
 import mapValues from 'lodash/mapValues';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
-import { FieldMetadata, FieldName, TEcsFields } from '../../../../common';
+import { AnyFieldName, EcsFieldName, FieldMetadata, TEcsFields } from '../../../../common';
 
 interface EcsFieldsRepositoryDeps {
   ecsFields: TEcsFields;
 }
 
 interface FindOptions {
-  fieldNames?: FieldName[];
+  fieldNames?: EcsFieldName[];
 }
 
 export class EcsFieldsRepository {
-  private readonly ecsFields: Record<FieldName, FieldMetadata>;
+  private readonly ecsFields: Record<EcsFieldName, FieldMetadata>;
 
   private constructor(ecsFields: TEcsFields) {
     this.ecsFields = mapValues(ecsFields, (field) =>
@@ -26,8 +26,8 @@ export class EcsFieldsRepository {
     );
   }
 
-  getByName(fieldName: FieldName): FieldMetadata | undefined {
-    return this.ecsFields[fieldName];
+  getByName(fieldName: EcsFieldName | AnyFieldName): FieldMetadata | undefined {
+    return this.ecsFields[fieldName as EcsFieldName];
   }
 
   find({ fieldNames }: FindOptions = {}): FieldsMetadataDictionary {
@@ -43,7 +43,7 @@ export class EcsFieldsRepository {
       }
 
       return fieldsMetadata;
-    }, {} as Record<FieldName, FieldMetadata>);
+    }, {} as Record<EcsFieldName, FieldMetadata>);
 
     return FieldsMetadataDictionary.create(fields);
   }

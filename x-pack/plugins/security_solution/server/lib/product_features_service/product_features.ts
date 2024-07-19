@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type {
   FeatureKibanaPrivileges,
   KibanaFeatureConfig,
-  PluginSetupContract as FeaturesPluginSetup,
+  FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type {
   ProductFeaturesConfig,

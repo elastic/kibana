@@ -11,6 +11,8 @@
     "@kbn/field-types",
     "@kbn/expressions-plugin",
     "@kbn/data-view-utils",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": ["target/**/*"]
 }
