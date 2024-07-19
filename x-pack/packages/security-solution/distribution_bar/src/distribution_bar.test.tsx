@@ -74,7 +74,6 @@ describe('DistributionBar', () => {
     const { container } = render(<DistributionBar stats={stats} data-test-subj={testSubj} />);
     expect(container).toBeInTheDocument();
     const parts = container.querySelectorAll(`[data-test-subj="${testSubj}__part"]`);
-    // check for each part that in contains the count text
     parts.forEach((part, index) => {
       expect(part.textContent).toContain(expectedPrettyNames[index]);
     });

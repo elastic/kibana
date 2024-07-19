@@ -27,7 +27,7 @@ const useStyles = () => {
   return {
     bar: css`
       gap: ${euiTheme.size.xxs};
-      min-height: 7px;
+      min-height: 7px; // for hovered bar to have enough space to grow
     `,
     part: {
       base: css`
@@ -64,12 +64,13 @@ const useStyles = () => {
           &::after {
             opacity: 1;
             transition: all 0.3s ease;
-            top: -9px;
+            top: -9px; // 10px - 1px to accommodate for height of hovered bar
           }
 
           transition: all 0.3s ease;
         }
       `,
+      // last tooltip should be displayed initially even without hover
       lastTooltip: css`
         &:last-child > div {
           opacity: 1;
@@ -89,14 +90,20 @@ const useStyles = () => {
       opacity: 0;
       position: absolute;
       width: 100%;
-      height: calc(${euiTheme.base + 2}px + 14px + 7px); // for clickable area
+      height: calc(
+        ${euiTheme.base + 2}px + 14px + 7px
+      ); // 2px border of the badge + 14px height of the tick + 7px height of the bar
       text-align: right;
-      top: calc(-${euiTheme.base + 2}px - 14px); // 2px border of the badge? 14px height of the line
+      top: calc(
+        -${euiTheme.base + 2}px - 14px
+      ); // 2px border of the badge + 14px height of the tick
       right: 0;
 
       &:hover {
         opacity: 1;
-        top: calc(-${euiTheme.base + 2}px - 13px);
+        top: calc(
+          -${euiTheme.base + 2}px - 13px
+        ); // 2px border of the badge + 14px height of the tick - 1px to accomodate for height of hovered bar
         transition: all 0.3s ease;
       }
     `,
