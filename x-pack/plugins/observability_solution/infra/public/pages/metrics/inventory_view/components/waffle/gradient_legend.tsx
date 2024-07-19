@@ -13,7 +13,7 @@ import {
   InfraWaffleMapBounds,
   InfraWaffleMapGradientLegend,
   InfraWaffleMapGradientRule,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 
 interface Props {
   legend: InfraWaffleMapGradientLegend;

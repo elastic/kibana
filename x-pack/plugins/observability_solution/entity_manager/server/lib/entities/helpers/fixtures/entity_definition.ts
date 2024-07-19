@@ -6,7 +6,7 @@
  */
 
 import { entityDefinitionSchema } from '@kbn/entities-schema';
-export const entityDefinition = entityDefinitionSchema.parse({
+export const rawEntityDefinition = {
   id: 'admin-console-services',
   version: '999.999.999',
   name: 'Services for Admin Console',
@@ -43,4 +43,5 @@ export const entityDefinition = entityDefinitionSchema.parse({
       ],
     },
   ],
-});
+};
+export const entityDefinition = entityDefinitionSchema.parse(rawEntityDefinition);

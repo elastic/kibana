@@ -313,6 +313,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         ?.listAgents({
           perPage: this.maxRecords,
           showInactive: true,
+          kuery: 'status:*', // include unenrolled agents
           sortField: 'enrolled_at',
           sortOrder: 'desc',
         })
