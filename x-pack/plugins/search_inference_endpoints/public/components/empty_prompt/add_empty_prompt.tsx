@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -23,6 +23,7 @@ import * as i18n from '../../../common/translations';
 import inferenceEndpoint from '../../assets/images/inference_endpoint.svg';
 
 import { EndpointPrompt } from './endpoint_prompt';
+import { useKibana } from '../../hooks/use_kibana';
 
 import './add_empty_prompt.scss';
 
@@ -31,6 +32,23 @@ interface AddEmptyPromptProps {
 }
 
 export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFlyoutVisible }) => {
+  const {
+    services: { ml },
+  } = useKibana();
+
+  const [trainedModelPageUrl, setTrainedModelPageUrl] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchMlTrainedModelPageUrl = async () => {
+      const url = await ml?.locator?.getUrl({
+        page: 'trained_models',
+      });
+      setTrainedModelPageUrl(url);
+    };
+
+    fetchMlTrainedModelPageUrl();
+  }, [ml]);
+
   return (
     <EuiPageTemplate.EmptyPrompt
       layout="horizontal"
@@ -51,6 +69,11 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
               data-test-subj="learn-more-about-inference-endpoints"
             >
               {i18n.LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLink href={trainedModelPageUrl} target="_blank" data-test-subj="view-your-models">
+              {i18n.VIEW_YOUR_MODELS_LINK}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>

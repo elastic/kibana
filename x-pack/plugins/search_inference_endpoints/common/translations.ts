@@ -57,7 +57,14 @@ export const ELSER_TITLE = i18n.translate(
 export const LEARN_MORE_ABOUT_INFERENCE_ENDPOINTS_LINK = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.learnMoreAboutInferenceEndpoints',
   {
-    defaultMessage: 'Learn more about inference endpoints.',
+    defaultMessage: 'Learn more about inference endpoints',
+  }
+);
+
+export const VIEW_YOUR_MODELS_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.addEmptyPrompt.viewYourModels',
+  {
+    defaultMessage: 'View your models',
   }
 );
 

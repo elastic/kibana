@@ -26,8 +26,13 @@ describe('When empty prompt is loaded', () => {
     ).toBeInTheDocument();
   });
 
-  it('should have a learn more link', () => {
+  it('should have a learn-more link', () => {
     const learnMoreLink = screen.getByTestId('learn-more-about-inference-endpoints');
+    expect(learnMoreLink).toBeInTheDocument();
+  });
+
+  it('should have a view-your-models link', () => {
+    const learnMoreLink = screen.getByTestId('view-your-models');
     expect(learnMoreLink).toBeInTheDocument();
   });
 });
