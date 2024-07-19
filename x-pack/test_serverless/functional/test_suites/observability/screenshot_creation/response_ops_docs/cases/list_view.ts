@@ -67,12 +67,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await svlCommonScreenshots.takeScreenshot('cases', screenshotDirectories, 1700, 1024);
     });
 
-    it('case settings screenshot', async () => {
-      await navigateToCasesApp(getPageObject, getService, owner);
-      await testSubjects.click('configure-case-button');
-      await svlCommonScreenshots.takeScreenshot('add-case-connector', screenshotDirectories);
-    });
-
     it('case detail screenshot', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'observability',

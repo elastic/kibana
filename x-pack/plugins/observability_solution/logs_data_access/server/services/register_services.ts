@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import { Logger } from '@kbn/logging';
 import { createGetLogsRatesService } from './get_logs_rates_service';
-import { createGetLogSourcesService } from './log_sources_service';
 
 export interface RegisterServicesParams {
   logger: Logger;
-  deps: {
-    savedObjects: SavedObjectsServiceStart;
-    uiSettings: UiSettingsServiceStart;
-  };
+  deps: {};
 }
 
 export function registerServices(params: RegisterServicesParams) {
   return {
     getLogsRatesService: createGetLogsRatesService(params),
-    getLogSourcesService: createGetLogSourcesService(params),
   };
 }

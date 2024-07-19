@@ -18,12 +18,12 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import { MessagesPlaceholder } from '@langchain/core/prompts';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
 import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';
-import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
@@ -35,7 +35,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
   esClient,
@@ -51,6 +50,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   size,
   traceOptions,
   dataClients,
+  conversationId,
 }) => {
   const isOpenAI = llmType === 'openai';
   const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
@@ -105,7 +105,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
-    isEnabledKnowledgeBase,
+    isEnabledKnowledgeBase: true,
     llm,
     logger,
     modelExists,
@@ -272,6 +272,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       trace_data: traceData,
       replacements,
       status: 'ok',
+      conversationId,
     },
     headers: {
       'content-type': 'application/json',

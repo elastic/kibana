@@ -68,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         'process_operations_all',
         'file_operations_all',
         'execute_operations_all',
+        'scan_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
       securitySolutionAssistant: [
