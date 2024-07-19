@@ -34,30 +34,27 @@ const createEmptySearchSource = jest.fn(() => {
   return searchSource;
 });
 
-const toSavedSearchMock = jest.fn((id, result, serialized) =>
+const toSavedSearchMock = jest.fn((result, serialized) =>
   Promise.resolve(
     serialized
       ? ({
-          id,
           title: result.attributes.title,
           serializedSearchSource: createEmptySearchSource().getSerializedFields(),
           managed: false,
         } as SerializableSavedSearch)
       : ({
-          id,
           title: result.attributes.title,
           searchSource: createEmptySearchSource(),
           managed: false,
         } as SavedSearch)
   )
-) as SavedSearchPublicPluginStart['byValue']['toSavedSearch'];
+) as SavedSearchPublicPluginStart['byValueToSavedSearch'];
 
 const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
   get: jest
     .fn()
     .mockImplementation((id, serialized) =>
       toSavedSearchMock(
-        id ?? 'savedSearch',
         { attributes: { title: 'savedSearchTitle' } } as SavedSearchUnwrapResult,
         serialized
       )
@@ -68,9 +65,7 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
   })),
   save: jest.fn(),
   checkForDuplicateTitle: jest.fn(),
-  byValue: {
-    toSavedSearch: toSavedSearchMock,
-  },
+  byValueToSavedSearch: toSavedSearchMock,
 });
 
 export const savedSearchPluginMock = {

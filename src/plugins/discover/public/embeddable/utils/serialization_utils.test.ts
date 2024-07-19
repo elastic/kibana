@@ -61,8 +61,7 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
 
-      expect(discoverServiceMock.savedSearch.toSavedSearch).toBeCalledWith(
-        undefined,
+      expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toBeCalledWith(
         serializedState.rawState,
         true // should be serializable
       );
@@ -71,15 +70,15 @@ describe('Serialization utils', () => {
     });
 
     test('by reference', async () => {
-      discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue(
-        discoverServiceMock.savedSearch.toSavedSearch(
-          'savedSearch',
+      discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue({
+        savedObjectId: 'savedSearch',
+        ...discoverServiceMock.savedSearch.byValueToSavedSearch(
           {
             attributes: mockedSavedSearchAttributes,
           } as unknown as SavedSearchUnwrapResult,
           true
-        )
-      );
+        ),
+      });
 
       const serializedState: SerializedPanelState<SearchEmbeddableSerializedState> = {
         rawState: {

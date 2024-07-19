@@ -12,7 +12,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { AttributeService, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { SavedSearchByValueAttributes, toSavedSearch } from '.';
+import { SavedSearchByValueAttributes, byValueToSavedSearch } from '.';
 
 const mockServices = {
   contentManagement: contentManagementMock.createStartContract().client,
@@ -32,7 +32,6 @@ const mockServices = {
 
 describe('toSavedSearch', () => {
   it('succesfully converts attributes to saved search', async () => {
-    const savedObjectId = 'saved-object-id';
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
       sort: [['@timestamp', 'desc']],
@@ -51,7 +50,7 @@ describe('toSavedSearch', () => {
         },
       ],
     };
-    const savedSearch = await toSavedSearch(savedObjectId, { attributes }, mockServices);
+    const savedSearch = await byValueToSavedSearch({ attributes }, mockServices);
     expect(savedSearch).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
@@ -64,7 +63,7 @@ describe('toSavedSearch', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
-          "id": "saved-object-id",
+          "id": undefined,
           "isTextBasedQuery": false,
           "managed": false,
           "references": Array [

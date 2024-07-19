@@ -21,8 +21,7 @@ export interface SavedSearchUnwrapResult {
   metaInfo?: SavedSearchUnwrapMetaInfo;
 }
 
-export const toSavedSearch = async (
-  id: string | undefined,
+export const byValueToSavedSearch = async (
   result: SavedSearchUnwrapResult,
   services: SavedSearchesServiceDeps,
   serializable?: boolean
@@ -32,7 +31,7 @@ export const toSavedSearch = async (
   return await convertToSavedSearch(
     {
       ...splitReferences(result.attributes),
-      savedSearchId: id,
+      savedSearchId: undefined,
       sharingSavedObjectProps,
       managed,
     },

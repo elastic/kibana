@@ -16,7 +16,7 @@ export { saveSavedSearch } from './save_saved_searches';
 export { SAVED_SEARCH_TYPE } from './constants';
 export type { SavedSearch, SavedSearchByValueAttributes } from './types';
 export {
-  toSavedSearch,
+  byValueToSavedSearch,
   type SavedSearchUnwrapMetaInfo,
   type SavedSearchUnwrapResult,
 } from './to_saved_search';
