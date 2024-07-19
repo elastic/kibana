@@ -6,20 +6,23 @@
  */
 
 import React from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 import { UsageTrackerContextProvider } from '../contexts/usage_tracker_context';
 import { useKibana } from '../hooks/use_kibana';
-import { SearchHomepageBody } from './search_homepage_body';
-import { SearchHomepageHeader } from './search_homepage_header';
+import { initQueryClient } from '../utils/query_client';
+import { HomepageView } from './homepage_view';
 
 export const App: React.FC = () => {
   const {
-    services: { usageCollection },
+    services: { notifications, usageCollection },
   } = useKibana();
+  const queryClient = initQueryClient(notifications.toasts);
   return (
     <UsageTrackerContextProvider usageCollection={usageCollection}>
-      <SearchHomepageHeader showEndpointsAPIKeys={false} />
-      <SearchHomepageBody />
+      <QueryClientProvider client={queryClient}>
+        <HomepageView showEndpointsAPIKeys={false} />
+      </QueryClientProvider>
     </UsageTrackerContextProvider>
   );
 };

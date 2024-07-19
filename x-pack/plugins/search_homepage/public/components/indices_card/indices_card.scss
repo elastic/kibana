@@ -1,0 +1,10 @@
+.override.euiListGroupItem {
+  .euiListGroupItem__label {
+    width: 100%;
+    padding: .5rem 0;
+  }
+}
+
+.euiPanel.override {
+  min-height: 104px;
+}

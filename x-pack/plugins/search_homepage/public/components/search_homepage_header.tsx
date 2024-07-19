@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EndpointsHeaderAction } from './endpoints_header_action';
 
 export interface SearchHomepageHeaderProps {
+  onCreateIndex: () => void;
   showEndpointsAPIKeys: boolean;
 }
 

@@ -9,8 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { useKibana } from '../hooks/use_kibana';
-import { SearchHomepageBody } from './search_homepage_body';
-import { SearchHomepageHeader } from './search_homepage_header';
+import { HomepageView } from './homepage_view';
 
 export const SearchHomepagePage = () => {
   const {
@@ -24,8 +23,7 @@ export const SearchHomepagePage = () => {
 
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="search-homepage" grow={false}>
-      <SearchHomepageHeader showEndpointsAPIKeys />
-      <SearchHomepageBody />
+      <HomepageView showEndpointsAPIKeys />
       {embeddableConsole}
     </EuiPageTemplate>
   );
