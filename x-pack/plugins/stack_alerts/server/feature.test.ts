@@ -27,31 +27,157 @@ describe('Stack Alerts Feature Privileges', () => {
     const featuresSetup = featuresPluginMock.createSetup();
     plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
-    const ruleTypeIdsAlerting = new Set(
-      BUILT_IN_ALERTS_FEATURE.alerting?.map((feature) => feature.ruleTypeId) ?? []
-    );
+    const ruleTypeAlerting = BUILT_IN_ALERTS_FEATURE.alerting ?? [];
+    const ruleTypeAll = BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all ?? [];
+    const ruleTypeRead = BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read ?? [];
 
-    const ruleTypeIdsAll = new Set(
-      BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all?.map(
-        (feature) => feature.ruleTypeId
-      ) ?? []
-    );
+    expect(ruleTypeAlerting).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".index-threshold",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".geo-containment",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "transform_health",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "xpack.ml.anomaly_detection_alert",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "observability.rules.custom_threshold",
+        },
+      ]
+    `);
 
-    const ruleTypeIdsRead = new Set(
-      BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read?.map(
-        (feature) => feature.ruleTypeId
-      ) ?? []
-    );
+    expect(ruleTypeAll).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".index-threshold",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".geo-containment",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "transform_health",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "xpack.ml.anomaly_detection_alert",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "observability.rules.custom_threshold",
+        },
+      ]
+    `);
 
-    // transform alerting rule is initialized during the transform plugin setup
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(ruleTypeIdsAlerting.size - 1);
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(ruleTypeIdsAll.size - 1);
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(ruleTypeIdsRead.size - 1);
+    expect(ruleTypeRead).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".index-threshold",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".geo-containment",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "transform_health",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "xpack.ml.anomaly_detection_alert",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "observability.rules.custom_threshold",
+        },
+      ]
+    `);
 
     alertingSetup.registerType.mock.calls.forEach((call) => {
-      expect(ruleTypeIdsAlerting.has(call[0].id)).toBe(true);
-      expect(ruleTypeIdsAll.has(call[0].id)).toBe(true);
-      expect(ruleTypeIdsRead.has(call[0].id)).toBe(true);
+      expect(
+        ruleTypeAlerting.find((feature) => feature.ruleTypeId === call[0].id)
+      ).not.toBeUndefined();
+      expect(ruleTypeAll.find((feature) => feature.ruleTypeId === call[0].id)).not.toBeUndefined();
+      expect(ruleTypeRead.find((feature) => feature.ruleTypeId === call[0].id)).not.toBeUndefined();
     });
   });
 });
