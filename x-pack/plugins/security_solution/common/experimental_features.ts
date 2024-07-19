@@ -168,7 +168,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables alerts suppression for machine learning rules
    */
-  alertSuppressionForMachineLearningRuleEnabled: false,
+  alertSuppressionForMachineLearningRuleEnabled: true,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
