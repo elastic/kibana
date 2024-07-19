@@ -1,3 +1,30 @@
+# ES|QL AST Walker
+
+The ES|QL AST Walker is a utility that traverses the ES|QL AST and provides a
+set of callbacks that can be used to perform introspection of the AST.
+
+To start a new *walk* you create a `Walker` instance and call the `walk()` method
+with the AST node to start the walk from.
+
+```ts
+
+import { Walker, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+
+const walker = new Walker({
+  // Called every time a function node is visited.
+  visitFunction: (fn) => {
+    console.log('Function:', fn.name);
+  },
+  // Called every time a source identifier node is visited.
+  visitSource: (source) => {
+    console.log('Source:', source.name);
+  },
+});
+
+const { ast } = getAstAndSyntaxErrors('FROM source | STATS fn()');
+walker.walk(ast);
+```
+
 Conceptual structure of an ES|QL AST:
 
 - A single ES|QL query is composed of one or more source commands and zero or
