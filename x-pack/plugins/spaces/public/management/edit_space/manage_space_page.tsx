@@ -74,7 +74,6 @@ interface State {
 
 export class ManageSpacePage extends Component<Props, State> {
   private readonly validator: SpaceValidator;
-  private initialSpaceState: State['space'] | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -314,8 +313,7 @@ export class ManageSpacePage extends Component<Props, State> {
         const haveDisabledFeaturesChanged =
           space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
           difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
-        const hasSolutionViewChanged =
-          this.state.space.solution !== this.initialSpaceState?.solution;
+        const hasSolutionViewChanged = space.solution !== originalSpace.solution;
 
         if (editingActiveSpace && (haveDisabledFeaturesChanged || hasSolutionViewChanged)) {
           this.setState({
@@ -344,19 +342,17 @@ export class ManageSpacePage extends Component<Props, State> {
           onLoadSpace(space);
         }
 
-        this.initialSpaceState = {
-          ...space,
-          avatarType: space.imageUrl ? 'image' : 'initials',
-          initials: space.initials || getSpaceInitials(space),
-          color: space.color || getSpaceColor(space),
-          customIdentifier: false,
-          customAvatarInitials:
-            !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
-          customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
-        };
-
         this.setState({
-          space: { ...this.initialSpaceState },
+          space: {
+            ...space,
+            avatarType: space.imageUrl ? 'image' : 'initials',
+            initials: space.initials || getSpaceInitials(space),
+            color: space.color || getSpaceColor(space),
+            customIdentifier: false,
+            customAvatarInitials:
+              !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
+            customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
+          },
           features,
           originalSpace: space,
           isLoading: false,
