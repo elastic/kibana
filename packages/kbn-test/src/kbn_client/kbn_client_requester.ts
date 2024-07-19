@@ -119,12 +119,12 @@ export class KbnClientRequester {
     const redacted = redactUrl(url);
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
-    const fromError = errMsg({
+    const msgOrThrow = errMsg({
       redacted,
       attempt,
       maxAttempts,
       requestedRetries: options.retries !== undefined,
-      failedToGetResponseF: (error: Error) => isAxiosRequestError(error),
+      failedToGetResponseSvc: (error: Error) => isAxiosRequestError(error),
       ...options,
     });
 
@@ -139,7 +139,7 @@ export class KbnClientRequester {
           await delay(1000 * attempt);
           continue;
         }
-        throw new KbnClientRequesterError(`${fromError(error)} -- and ran out of retries`, error);
+        throw new KbnClientRequesterError(`${msgOrThrow(error)} -- and ran out of retries`, error);
       }
     }
   }
@@ -150,7 +150,7 @@ export function errMsg({
   attempt,
   maxAttempts,
   requestedRetries,
-  failedToGetResponseF,
+  failedToGetResponseSvc,
   path,
   method,
   description,
@@ -159,12 +159,12 @@ export function errMsg({
   attempt: number;
   maxAttempts: number;
   requestedRetries: boolean;
-  failedToGetResponseF: (x: Error) => boolean;
+  failedToGetResponseSvc: (x: Error) => boolean;
 }) {
-  return (_: any) => {
-    const result = isConcliftOnGetError(_) // Should be a type imho
+  return function errMsgOrReThrow(_: any) {
+    const result = isConcliftOnGetError(_)
       ? `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`
-      : requestedRetries || failedToGetResponseF(_)
+      : requestedRetries || failedToGetResponseSvc(_)
       ? `[${
           description || `${method} - ${redacted}`
         }] request failed (attempt=${attempt}/${maxAttempts}): ${_?.code}`
