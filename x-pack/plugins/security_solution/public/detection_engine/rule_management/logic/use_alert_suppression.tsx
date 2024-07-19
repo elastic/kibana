@@ -6,29 +6,20 @@
  */
 import { useCallback } from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { isMlRule, isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
 
 export interface UseAlertSuppressionReturn {
   isSuppressionEnabled: boolean;
 }
 
 export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppressionReturn => {
-  const isAlertSuppressionForMachineLearningRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForMachineLearningRuleEnabled'
-  );
-
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) {
       return false;
     }
 
-    if (isMlRule(ruleType)) {
-      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForMachineLearningRuleEnabled;
-    }
-
     return isSuppressibleAlertRule(ruleType);
-  }, [isAlertSuppressionForMachineLearningRuleEnabled, ruleType]);
+  }, [ruleType]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),
