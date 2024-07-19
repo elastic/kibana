@@ -186,7 +186,7 @@ describe('updateState', () => {
 
 describe('setRecoveredAlertsContext', () => {
   const alertUuid = 'alert-id';
-  const location = 'US Central';
+  const location = 'us_west';
   const configId = '12345';
   const idWithLocation = `${configId}-${location}`;
   const basePath = {
@@ -226,13 +226,15 @@ describe('setRecoveredAlertsContext', () => {
       getRecoveredAlerts: jest.fn().mockReturnValue([
         {
           alert: {
-            getId: () => alertUuid,
-            getState: () => ({
-              idWithLocation,
-              monitorName: 'test-monitor',
-            }),
-            setContext: jest.fn(),
             getUuid: () => alertUuid,
+            getId: () => idWithLocation,
+            getState: () => ({}),
+            setContext: jest.fn(),
+          },
+          hit: {
+            'kibana.alert.instance.id': idWithLocation,
+            'location.id': location,
+            configId,
           },
         },
       ]),
@@ -273,11 +275,10 @@ describe('setRecoveredAlertsContext', () => {
       pendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
+      id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
         configId: '12345',
-        idWithLocation,
         linkMessage: '',
         'kibana.alert.reason': 'the monitor has been deleted',
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
@@ -291,6 +292,8 @@ describe('setRecoveredAlertsContext', () => {
 
         stateId: '123456',
         status: 'recovered',
+        locationId: location,
+        idWithLocation,
         timestamp: '2023-02-26T00:00:00.000Z',
       },
     });
@@ -304,13 +307,15 @@ describe('setRecoveredAlertsContext', () => {
       getRecoveredAlerts: jest.fn().mockReturnValue([
         {
           alert: {
-            getId: () => alertUuid,
-            getState: () => ({
-              idWithLocation,
-              monitorName: 'test-monitor',
-            }),
-            setContext: jest.fn(),
             getUuid: () => alertUuid,
+            getId: () => idWithLocation,
+            getState: () => ({}),
+            setContext: jest.fn(),
+          },
+          hit: {
+            'kibana.alert.instance.id': idWithLocation,
+            'location.id': location,
+            configId,
           },
         },
       ]),
@@ -351,7 +356,7 @@ describe('setRecoveredAlertsContext', () => {
       pendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
+      id: idWithLocation,
       context: {
         configId: '12345',
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
@@ -369,6 +374,8 @@ describe('setRecoveredAlertsContext', () => {
         timestamp: '2023-02-26T00:00:00.000Z',
         reason:
           'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
+        idWithLocation,
+        locationId: location,
       },
     });
   });
@@ -381,15 +388,15 @@ describe('setRecoveredAlertsContext', () => {
       getRecoveredAlerts: jest.fn().mockReturnValue([
         {
           alert: {
-            getId: () => alertUuid,
-            getState: () => ({
-              idWithLocation,
-              monitorName: 'test-monitor',
-              locationId: 'us_west',
-              configId: '12345-67891',
-            }),
-            setContext: jest.fn(),
+            getId: () => idWithLocation,
             getUuid: () => alertUuid,
+            getState: () => ({}),
+            setContext: jest.fn(),
+          },
+          hit: {
+            'kibana.alert.instance.id': idWithLocation,
+            'location.id': location,
+            configId,
           },
         },
       ]),
@@ -401,7 +408,7 @@ describe('setRecoveredAlertsContext', () => {
         configId,
         monitorQueryId: 'stale-config',
         status: 'down',
-        locationId: 'location',
+        locationId: location,
         ping: {
           state: {
             id: '123456',
@@ -430,9 +437,9 @@ describe('setRecoveredAlertsContext', () => {
       pendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
+      id: idWithLocation,
       context: {
-        configId: '12345-67891',
+        configId,
         idWithLocation,
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         monitorName: 'test-monitor',
@@ -442,10 +449,10 @@ describe('setRecoveredAlertsContext', () => {
         'kibana.alert.reason':
           'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
         recoveryStatus: 'is now up',
-        locationId: 'us_west',
+        locationId: location,
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
         linkMessage:
-          '- Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
+          '- Link: https://localhost:5601/app/synthetics/monitor/12345/errors/123456?locationId=us_west',
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:

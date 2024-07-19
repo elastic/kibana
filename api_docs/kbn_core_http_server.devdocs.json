@@ -14062,7 +14062,7 @@
         "tags": [],
         "label": "VersionedRouter",
         "description": [
-          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead.\n"
+          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead\n"
         ],
         "signature": [
           {
