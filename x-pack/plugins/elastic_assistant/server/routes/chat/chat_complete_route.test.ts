@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { BaseMessage } from '@langchain/core/messages';
+import { IRouter } from '@kbn/core/server';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../../__mocks__/action_result_data';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import {
-  INVOKE_ASSISTANT_ERROR_EVENT,
-  INVOKE_ASSISTANT_SUCCESS_EVENT,
-} from '../../lib/telemetry/event_based_telemetry';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { chatCompleteRoute } from './chat_complete_route';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import {
+  appendAssistantMessageToConversation,
+  createConversationWithUserInput,
+  langChainExecute,
+} from '../helpers';
 
 const license = licensingMock.createLicenseMock();
 
@@ -33,43 +32,12 @@ const actionsClient = actionsClientMock.create();
 jest.mock('../../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
+jest.mock('../helpers');
+const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
+
+const mockLangChainExecute = langChainExecute as jest.Mock;
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
-jest.mock('../../lib/langchain/execute_custom_llm_chain', () => ({
-  callAgentExecutor: jest.fn().mockImplementation(
-    async ({
-      connectorId,
-      isStream,
-      onLlmResponse,
-    }: {
-      onLlmResponse: (
-        content: string,
-        replacements: Record<string, string>,
-        isError: boolean
-      ) => Promise<void>;
-      actionsClient: PublicMethodsOf<ActionsClient>;
-      connectorId: string;
-      esClient: ElasticsearchClient;
-      langChainMessages: BaseMessage[];
-      logger: Logger;
-      isStream: boolean;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      request: KibanaRequest<unknown, unknown, any, any>;
-    }) => {
-      if (!isStream && connectorId === 'mock-connector-id') {
-        return {
-          connector_id: 'mock-connector-id',
-          data: mockActionResponse,
-          status: 'ok',
-        };
-      } else if (isStream && connectorId === 'mock-connector-id') {
-        return mockStream;
-      } else {
-        onLlmResponse('simulated error', {}, true).catch(() => {});
-        throw new Error('simulated error');
-      }
-    }
-  ),
-}));
+
 const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
 const appendConversationMessages = jest.fn();
@@ -103,6 +71,13 @@ const mockContext = {
         appendConversationMessages:
           appendConversationMessages.mockResolvedValue(existingConversation),
       }),
+      getAIAssistantKnowledgeBaseDataClient: jest.fn().mockResolvedValue({
+        getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
+        indexTemplateAndPattern: {
+          alias: 'knowledge-base-alias',
+        },
+        isModelDeployed: jest.fn().mockResolvedValue(true),
+      }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
       }),
@@ -125,8 +100,6 @@ const mockRequest = {
     conversationId: 'mock-conversation-id',
     connectorId: 'mock-connector-id',
     persist: true,
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: false,
     model: 'gpt-4',
     messages: [
       {
@@ -164,7 +137,37 @@ describe('chatCompleteRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAppendAssistantMessageToConversation.mockResolvedValue(true);
     license.hasAtLeast.mockReturnValue(true);
+    (createConversationWithUserInput as jest.Mock).mockResolvedValue({ id: 'something' });
+    mockLangChainExecute.mockImplementation(
+      async ({
+        connectorId,
+        isStream,
+        onLlmResponse,
+      }: {
+        connectorId: string;
+        isStream: boolean;
+        onLlmResponse: (
+          content: string,
+          replacements: Record<string, string>,
+          isError: boolean
+        ) => Promise<void>;
+      }) => {
+        if (!isStream && connectorId === 'mock-connector-id') {
+          return {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            status: 'ok',
+          };
+        } else if (isStream && connectorId === 'mock-connector-id') {
+          return mockStream;
+        } else {
+          onLlmResponse('simulated error', {}, true).catch(() => {});
+          throw new Error('simulated error');
+        }
+      }
+    );
     actionsClient.execute.mockImplementation(
       jest.fn().mockResolvedValue(() => ({
         data: 'mockChatCompletion',
@@ -256,72 +259,6 @@ describe('chatCompleteRoute', () => {
     );
   });
 
-  it('reports success events to telemetry - kb on, RAG alerts off', async () => {
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, mockRequest, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: false,
-                actionTypeId: '.gen-ai',
-                model: 'gpt-4',
-                assistantStreamingEnabled: false,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('reports success events to telemetry - kb on, RAG alerts on', async () => {
-    const ragRequest = {
-      ...mockRequest,
-      body: {
-        ...mockRequest.body,
-        isEnabledRAGAlerts: true,
-        anonymizationFields: [
-          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
-          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
-        ],
-      },
-    };
-
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, ragRequest, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: true,
-                actionTypeId: '.gen-ai',
-                model: 'gpt-4',
-                assistantStreamingEnabled: false,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
   it('reports error events to telemetry - kb on, RAG alerts off', async () => {
     const requestWithBadConnectorId = {
       ...mockRequest,
@@ -340,8 +277,6 @@ describe('chatCompleteRoute', () => {
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
                 errorMessage: 'simulated error',
-                isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: true,
                 actionTypeId: '.gen-ai',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,
@@ -363,7 +298,7 @@ describe('chatCompleteRoute', () => {
       ...mockRequest,
       body: {
         ...mockRequest.body,
-        conversationId: '99999',
+        conversationId: undefined,
         connectorId: 'bad-connector-id',
       },
     };
@@ -374,11 +309,10 @@ describe('chatCompleteRoute', () => {
           return {
             addVersion: jest.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, badRequest, mockResponse);
-              expect(appendConversationMessages.mock.calls[1][0].messages[0]).toEqual(
+              expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  content: 'simulated error',
+                  messageContent: 'simulated error',
                   isError: true,
-                  role: 'assistant',
                 })
               );
             }),
