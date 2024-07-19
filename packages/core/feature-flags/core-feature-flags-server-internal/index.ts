@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+export { featureFlagsConfig } from './src/feature_flags_config';
 export { FeatureFlagsService } from './src/feature_flags_service';

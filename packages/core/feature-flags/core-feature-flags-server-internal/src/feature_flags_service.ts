@@ -17,16 +17,27 @@ import apm from 'elastic-apm-node';
 import { type Client, OpenFeature, ServerProviderEvents } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
 import { filter, mergeMap, startWith, Subject } from 'rxjs';
+import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
+  private overrides: Record<string, unknown> = {};
   private context: EvaluationContext = { kind: 'multi' };
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
     this.featureFlagsClient = OpenFeature.getClient();
     OpenFeature.setLogger(this.logger.get('open-feature'));
+
+    // Register "overrides" to be changed via the dynamic config endpoint (enabled in test environments only)
+    core.configService.addDynamicConfigPaths(featureFlagsConfig.path, ['overrides']);
+
+    core.configService
+      .atPath<FeatureFlagsConfig>(featureFlagsConfig.path)
+      .subscribe(({ overrides = {} }) => {
+        this.overrides = overrides;
+      });
   }
 
   /**
@@ -124,9 +135,11 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): Promise<T> {
-    // TODO: intercept with config overrides
-    // We have to bind the evaluation or the client will lose its internal context
-    const value = await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    const value =
+      typeof this.overrides[flagName] !== 'undefined'
+        ? (this.overrides[flagName] as T)
+        : // We have to bind the evaluation or the client will lose its internal context
+          await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName}`]: value });
     // TODO: increment usage counter
     return value;

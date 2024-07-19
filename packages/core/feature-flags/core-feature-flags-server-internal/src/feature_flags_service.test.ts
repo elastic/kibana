@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import apm from 'elastic-apm-node';
 import { type Client, OpenFeature, type Provider } from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import { FeatureFlagsService } from '..';
 
@@ -19,7 +20,17 @@ describe('FeatureFlagsService Server', () => {
 
   beforeEach(() => {
     const getClientSpy = jest.spyOn(OpenFeature, 'getClient');
-    featureFlagsService = new FeatureFlagsService(mockCoreContext.create());
+    featureFlagsService = new FeatureFlagsService(
+      mockCoreContext.create({
+        configService: configServiceMock.create({
+          atPath: {
+            overrides: {
+              'my-overriden-flag': true,
+            },
+          },
+        }),
+      })
+    );
     featureFlagsClient = getClientSpy.mock.results[0].value;
   });
 
@@ -215,6 +226,13 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+    });
+
+    test('with overrides', async () => {
+      await expect(startContract.getBooleanValue('my-overriden-flag', false)).resolves.toEqual(
+        true
+      );
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overriden-flag': true });
     });
   });
 });
