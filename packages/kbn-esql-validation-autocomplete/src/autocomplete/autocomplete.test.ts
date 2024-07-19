@@ -1050,18 +1050,97 @@ describe('autocomplete', () => {
     // testSuggestions('FROM index1 | GROK field ""', getFieldNamesByType('string'), undefined, 20);
 
     // KEEP (first field)
+    testSuggestions('FROM index1 | KEEP f', getFieldNamesByType('any'), undefined, 20);
+
     // KEEP (subsequent fields)
-    // LIMIT number
+    testSuggestions(
+      'FROM index1 | KEEP booleanField, f',
+      getFieldNamesByType('any').filter((name) => name !== 'booleanField'),
+      undefined,
+      34
+    );
+
     // MV_EXPAND field
+    testSuggestions('FROM index1 | MV_EXPAND f', getFieldNamesByType('any'), undefined, 25);
+
     // RENAME field
+    testSuggestions('FROM index1 | RENAME f', getFieldNamesByType('any'), undefined, 22);
+
     // RENAME field AS
+    testSuggestions('FROM index1 | RENAME field A', ['AS'], undefined, 28);
+
     // RENAME field AS var0
+    testSuggestions('FROM index1 | RENAME field AS v', ['var0'], undefined, 31);
+
     // SORT field
+    testSuggestions(
+      'FROM index1 | SORT f',
+      [
+        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
+        ...getFieldNamesByType('any'),
+      ],
+      undefined,
+      20
+    );
+
     // SORT field order
+    testSuggestions('FROM index1 | SORT stringField a', ['asc', 'desc'], undefined, 32);
+
+    // SORT field order nulls
+    testSuggestions(
+      'FROM index1 | SORT stringField ASC n',
+      ['nulls first', 'nulls last'],
+      undefined,
+      36
+    );
+
     // STATS argument
+    testSuggestions(
+      'FROM index1 | STATS f',
+      ['var0 =', ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true })],
+      undefined,
+      21
+    );
+
     // STATS argument BY
+    testSuggestions('FROM index1 | STATS AVG(booleanField) B', ['BY $0', ',', '|'], undefined, 39);
+
     // STATS argument BY expression
+    testSuggestions(
+      'FROM index1 | STATS field BY f',
+      [
+        'var0 =',
+        ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
+        ...getFieldNamesByType('any'),
+      ],
+      undefined,
+      30
+    );
+
     // WHERE argument
+    testSuggestions(
+      'FROM index1 | WHERE f',
+      [
+        ...getFieldNamesByType('any'),
+        ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
+      ],
+      undefined,
+      22
+    );
+
     // WHERE argument comparison
+    testSuggestions(
+      'FROM index1 | WHERE stringField i',
+      getFunctionSignaturesByReturnType(
+        'where',
+        'boolean',
+        {
+          builtin: true,
+        },
+        ['string']
+      ),
+      undefined,
+      33
+    );
   });
 });
