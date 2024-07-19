@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { createNewAPIKeySet, updateMeta } from '../lib';
-import { RulesClientContext } from '../types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import Boom from '@hapi/boom';
+import { RawRule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { UpdateApiKeyParams } from './types';
+import { updateApiKeyParamsSchema } from './schemas';
 
 export async function updateApiKey(
   context: RulesClientContext,
-  { id }: { id: string }
+  { id }: UpdateApiKeyParams
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
@@ -25,11 +28,17 @@ export async function updateApiKey(
   );
 }
 
-async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateApiKeyParams) {
   let oldApiKeyToInvalidate: string | null = null;
   let oldApiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
   let version: string | undefined;
+
+  try {
+    updateApiKeyParamsSchema.validate({ id });
+  } catch (error) {
+    throw Boom.badRequest(`Error validating update api key parameters - ${error.message}`);
+  }
 
   try {
     const decryptedAlert =

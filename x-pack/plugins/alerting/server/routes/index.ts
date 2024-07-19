@@ -35,7 +35,7 @@ import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
-import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_api_key';
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
 import { snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute } from './rule/apis/unsnooze';

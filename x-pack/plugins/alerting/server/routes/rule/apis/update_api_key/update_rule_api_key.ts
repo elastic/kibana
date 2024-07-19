@@ -6,14 +6,13 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-const paramSchema = schema.object({
-  id: schema.string(),
-});
+import {
+  UpdateApiKeyParams,
+  updateApiKeyParamsSchema,
+} from '../../../../../common/routes/rule/apis/update_api_key';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 
 export const updateRuleApiKeyRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -27,13 +26,14 @@ export const updateRuleApiKeyRoute = (
         summary: `Update the API key for a rule`,
       },
       validate: {
-        params: paramSchema,
+        params: updateApiKeyParamsSchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
+        const { id }: UpdateApiKeyParams = req.params;
+
         try {
           await rulesClient.updateApiKey({ id });
           return res.noContent();
