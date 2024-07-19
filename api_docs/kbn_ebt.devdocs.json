@@ -1879,8 +1879,8 @@
                 "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
+                "plugin": "datasetQuality",
+                "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -1888,7 +1888,7 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -1904,7 +1904,7 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/helpers.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -2285,6 +2285,14 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "datasetQuality",

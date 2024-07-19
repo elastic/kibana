@@ -85,6 +85,7 @@ export function Functions({ kuery }: Props) {
         isLoading={isPending(status)}
         rangeFrom={from}
         rangeTo={to}
+        height="60vh"
       />
     </>
   );
