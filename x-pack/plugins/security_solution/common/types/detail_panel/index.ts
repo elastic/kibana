@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FlowTargetSourceDest } from '../../search_strategy';
 import type { TimelineTabs } from '../timeline';
 
 type EmptyObject = Record<string | number, never>;
@@ -21,17 +20,7 @@ export type ExpandedEventType =
     }
   | EmptyObject;
 
-export type ExpandedNetworkType =
-  | {
-      panelView?: 'networkDetail';
-      params?: {
-        ip: string;
-        flowTarget: FlowTargetSourceDest;
-      };
-    }
-  | EmptyObject;
-
-export type ExpandedDetailType = ExpandedEventType | ExpandedNetworkType;
+export type ExpandedDetailType = ExpandedEventType;
 
 export type ExpandedDetailTimeline = {
   [tab in TimelineTabs]?: ExpandedDetailType;
