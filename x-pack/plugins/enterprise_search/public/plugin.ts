@@ -398,9 +398,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchVectorSearch } = await import('./applications/semantic_search');
+        const { EnterpriseSearchSemanticSearch } = await import('./applications/semantic_search');
 
-        return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
+        return renderApp(EnterpriseSearchSemanticSearch, kibanaDeps, pluginData);
       },
       title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
     });

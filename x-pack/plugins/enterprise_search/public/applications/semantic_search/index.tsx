@@ -20,7 +20,7 @@ import { SemanticSearchGuide } from './components/semantic_search_guide/semantic
 
 import { ROOT_PATH } from './routes';
 
-export const EnterpriseSearchVectorSearch: React.FC<InitialAppData> = (props) => {
+export const EnterpriseSearchSemanticSearch: React.FC<InitialAppData> = (props) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
