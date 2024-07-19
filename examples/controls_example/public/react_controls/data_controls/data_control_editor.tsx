@@ -220,7 +220,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     const CustomSettings = controlFactory.CustomOptionsComponent;
 
     if (!CustomSettings) return;
-    console.log('customOptionsState', customOptionsState);
     return (
       <EuiDescribedFormGroup
         ratio="third"
