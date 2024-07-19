@@ -117,7 +117,7 @@ const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) =
 
   const emptyBarStyle = [styles.part.base, styles.part.empty];
 
-  return <div css={emptyBarStyle} data-test-subj={`${dataTestSubj}__emptyBar`} />;
+  return <div css={emptyBarStyle} data-test-subj={`${dataTestSubj}`} />;
 };
 
 // TODO: fix tooltip direction if not enough space;
@@ -144,7 +144,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
     const prettyNumber = numeral(stat.count).format('0,0a');
 
     return (
-      <div key={stat.key} css={partStyle}>
+      <div key={stat.key} css={partStyle} data-test-subj={`${dataTestSubj}__part`}>
         <div css={styles.tooltip}>
           <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'} wrap={false}>
             <EuiFlexItem grow={false}>
@@ -170,7 +170,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
 
   return (
     <EuiFlexGroup alignItems={'center'} css={styles.bar} data-test-subj={dataTestSubj}>
-      {parts.length ? parts : <EmptyBar data-test-subj={dataTestSubj} />}
+      {parts.length ? parts : <EmptyBar data-test-subj={`${dataTestSubj}__emptyBar`} />}
     </EuiFlexGroup>
   );
 });
