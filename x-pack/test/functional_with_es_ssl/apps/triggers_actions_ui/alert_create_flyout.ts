@@ -371,7 +371,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
-    it('should successfully test a valid APM error count rule', async () => {
+    it('should successfully load an APM error count rule flyout', async () => {
       const ruleName = generateUniqueKey();
       await defineAPMErrorCountRule(ruleName);
 
