@@ -68,6 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merge_outcome: ThreeWayMergeOutcome.Target,
               conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
+              has_base_version: true,
             },
           });
           expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
@@ -116,6 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merge_outcome: ThreeWayMergeOutcome.Current,
               conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: false,
+              has_base_version: true,
             },
             version: {
               base_version: 1,
@@ -126,6 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merge_outcome: ThreeWayMergeOutcome.Target,
               conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
+              has_base_version: true,
             },
           });
           expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
@@ -168,6 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merge_outcome: ThreeWayMergeOutcome.Target,
               conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
+              has_base_version: true,
             },
             version: {
               base_version: 1,
@@ -178,6 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
               merge_outcome: ThreeWayMergeOutcome.Target,
               conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
               has_update: true,
+              has_base_version: true,
             },
           });
           expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
@@ -225,6 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merge_outcome: ThreeWayMergeOutcome.Current,
                 conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: false,
+                has_base_version: true,
               },
               version: {
                 base_version: 1,
@@ -235,6 +241,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merge_outcome: ThreeWayMergeOutcome.Target,
                 conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: true,
+                has_base_version: true,
               },
             });
             expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
@@ -284,6 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merge_outcome: ThreeWayMergeOutcome.Conflict,
                 conflict: ThreeWayDiffConflictResolutionResult.NON_SOLVABLE_CONFLICT,
                 has_update: true,
+                has_base_version: true,
               },
               version: {
                 base_version: 1,
@@ -294,6 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 merge_outcome: ThreeWayMergeOutcome.Target,
                 conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                 has_update: true,
+                has_base_version: true,
               },
             });
             expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
@@ -346,6 +355,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   merge_outcome: ThreeWayMergeOutcome.Target,
                   conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                   has_update: true,
+                  has_base_version: false,
                 },
               });
               expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
@@ -397,6 +407,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   merge_outcome: ThreeWayMergeOutcome.Target,
                   conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                   has_update: true,
+                  has_base_version: false,
                 },
                 version: {
                   current_version: 1,
@@ -406,6 +417,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   merge_outcome: ThreeWayMergeOutcome.Target,
                   conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
                   has_update: true,
+                  has_base_version: false,
                 },
               });
               expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
