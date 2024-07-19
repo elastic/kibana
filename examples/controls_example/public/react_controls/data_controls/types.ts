@@ -26,12 +26,13 @@ export type DataControlApi = DefaultControlApi &
 
 export interface DataControlFactory<
   State extends DefaultDataControlState = DefaultDataControlState,
-  Api extends DataControlApi = DataControlApi
+  Api extends DataControlApi = DataControlApi,
+  TypeSpecificState = Omit<State, keyof DefaultDataControlState>
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{
-    initialState: Omit<State, keyof DefaultDataControlState>;
-    updateState: (newState: Partial<State>) => void;
+    initialState: TypeSpecificState;
+    updateState: (newState: Partial<TypeSpecificState>) => void;
     setControlEditorValid: (valid: boolean) => void;
   }>;
 }

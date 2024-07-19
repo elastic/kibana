@@ -66,16 +66,14 @@ export const getSearchControlFactory = ({
       );
     },
     CustomOptionsComponent: ({ initialState, updateState }) => {
-      const [searchTechnique, setSearchTechnique] = useState(initialState.searchTechnique);
-
+      const searchTechnique = initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE;
       return (
         <EuiFormRow label={'Searching'} data-test-subj="searchControl__searchOptionsRadioGroup">
           <EuiRadioGroup
             options={allSearchOptions}
-            idSelected={searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE}
+            idSelected={searchTechnique}
             onChange={(id) => {
               const newSearchTechnique = id as SearchControlTechniques;
-              setSearchTechnique(newSearchTechnique);
               updateState({ searchTechnique: newSearchTechnique });
             }}
           />
