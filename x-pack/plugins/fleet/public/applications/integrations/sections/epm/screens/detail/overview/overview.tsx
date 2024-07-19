@@ -313,7 +313,7 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
-          {useIsStillYear2024 && isElasticDefend && showAVCBanner && (
+          {useIsStillYear2024() && isElasticDefend && showAVCBanner && (
             <>
               <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
               <EuiSpacer size="s" />

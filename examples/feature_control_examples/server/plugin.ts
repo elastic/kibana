@@ -8,7 +8,7 @@
 
 import { CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/server';
 import {
-  PluginSetupContract as FeaturesPluginSetup,
+  FeaturesPluginSetup,
   // PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 import { FEATURE_PRIVILEGES_PLUGIN_ID } from '../common';
