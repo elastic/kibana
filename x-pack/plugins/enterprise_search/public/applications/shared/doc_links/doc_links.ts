@@ -103,6 +103,7 @@ class DocLinks {
   public crawlerOverview: string;
   public deployTrainedModels: string;
   public documentLevelSecurity: string;
+  public e5Model: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
   public elasticsearchMapping: string;
@@ -138,6 +139,7 @@ class DocLinks {
   public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
+  public semanticTextField: string;
   public start: string;
   public supportedNlpModels: string;
   public syncRules: string;
@@ -280,6 +282,7 @@ class DocLinks {
     this.crawlerOverview = '';
     this.deployTrainedModels = '';
     this.documentLevelSecurity = '';
+    this.e5Model = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
     this.elasticsearchMapping = '';
@@ -315,6 +318,7 @@ class DocLinks {
     this.searchLabs = '';
     this.searchLabsRepo = '';
     this.searchTemplates = '';
+    this.semanticTextField = '';
     this.start = '';
     this.supportedNlpModels = '';
     this.syncRules = '';
@@ -459,6 +463,7 @@ class DocLinks {
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
     this.documentLevelSecurity = docLinks.links.enterpriseSearch.documentLevelSecurity;
+    this.e5Model = docLinks.links.enterpriseSearch.e5Model;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
@@ -494,6 +499,7 @@ class DocLinks {
     this.searchLabs = docLinks.links.enterpriseSearch.searchLabs;
     this.searchLabsRepo = docLinks.links.enterpriseSearch.searchLabsRepo;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
+    this.semanticTextField = docLinks.links.enterpriseSearch.semanticTextField;
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;

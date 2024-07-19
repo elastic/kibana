@@ -10,12 +10,13 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 
 import {
+  EuiCard,
   EuiCode,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -100,6 +101,37 @@ const QUERY_SNIPPET = `POST /my-index/_search
   }
 }`;
 
+const modelSelection: InferenceModel[] = [
+  {
+    id: 'elser',
+    modelName: 'ELSER v2',
+    code: SETUP_INFERENCE_ENDPOINT_ELSER,
+    link: docLinks.elser,
+    description: "Elastic's proprietary, best-in-class sparse vector model for semantic search.",
+  },
+  {
+    id: 'e5',
+    modelName: 'E5 Multilingual',
+    code: SETUP_INFERENCE_ENDPOINT_E5,
+    link: docLinks.e5Model,
+    description: 'Dense vector model optimized for multi-lingual semantic search.',
+  },
+  {
+    code: SETUP_INFERENCE_ENDPOINT_OPENAI,
+    id: 'openai',
+    modelName: 'OpenAI',
+    link: 'https://platform.openai.com/docs/guides/embeddings',
+    description: "Connect with OpenAI's embedding models.",
+  },
+  {
+    id: 'bedrock',
+    modelName: 'Amazon Bedrock',
+    code: SETUP_INFERENCE_ENDPOINT_BEDROCK,
+    link: 'https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html',
+    description: "Use Amazon Bedrock's own embedding models.",
+  },
+];
+
 interface SelectModelPanelProps {
   isSelectedModel: boolean;
   model: InferenceModel;
@@ -109,7 +141,9 @@ interface SelectModelPanelProps {
 interface InferenceModel {
   code: string;
   id: string;
+  link: string;
   modelName: string;
+  description: string;
 }
 
 const SelectModelPanel: React.FC<SelectModelPanelProps> = ({
@@ -118,42 +152,38 @@ const SelectModelPanel: React.FC<SelectModelPanelProps> = ({
   isSelectedModel,
 }) => {
   return (
-    <EuiFlexGroup gutterSize="xs" direction="row">
-      <EuiFlexItem>
-        <EuiPanel
-          hasBorder
-          borderRadius="m"
-          onClick={() => setSelectedModel(model)}
-          color={isSelectedModel ? 'primary' : 'plain'}
-        >
-          <EuiFlexGroup direction="column" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiText textAlign="center">
-                <h4>{model.modelName}</h4>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiCard
+        title={model.modelName}
+        description={
+          <>
+            <EuiText>
+              <p>{model.description}</p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiLink
+              data-test-subj="enterpriseSearchSelectModelPanelReadMoreLink"
+              href={model.link}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.enterpriseSearch.semanticSearch.guide.model.link"
+                defaultMessage="Read more"
+              />
+            </EuiLink>
+          </>
+        }
+        display={isSelectedModel ? 'primary' : 'plain'}
+        onClick={() => setSelectedModel(model)}
+        titleSize="xs"
+        hasBorder
+        textAlign="left"
+      />
+    </EuiFlexItem>
   );
 };
 
 export const SemanticSearchGuide: React.FC = () => {
-  const modelSelection: InferenceModel[] = [
-    { id: 'elser', modelName: 'ELSER', code: SETUP_INFERENCE_ENDPOINT_ELSER },
-    { id: 'e5', modelName: 'E5', code: SETUP_INFERENCE_ENDPOINT_E5 },
-    {
-      code: SETUP_INFERENCE_ENDPOINT_OPENAI,
-      id: 'openai',
-      modelName: 'OpenAI',
-    },
-    {
-      id: 'bedrock',
-      modelName: 'Amazon Bedrock',
-      code: SETUP_INFERENCE_ENDPOINT_BEDROCK,
-    },
-  ];
   const [searchParams] = useSearchParams();
   const chosenUrlModel =
     modelSelection.find((model) => model.id === searchParams.get('model_example')) ||
@@ -171,7 +201,7 @@ export const SemanticSearchGuide: React.FC = () => {
               defaultMessage="Semantic search in Elasticsearch is now simpler and more intuitive when you use inference endpoints and the `semantic_text` field type."
             />{' '}
             <EuiLink
-              href={docLinks.knnSearch}
+              href={docLinks.semanticTextField}
               target="_blank"
               data-test-subj="vector-search-documentation-link"
             >
@@ -212,7 +242,7 @@ export const SemanticSearchGuide: React.FC = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiFlexGroup>
+          <EuiFlexGrid columns={1} direction="column">
             {modelSelection.map((model) => (
               <SelectModelPanel
                 model={model}
@@ -220,7 +250,7 @@ export const SemanticSearchGuide: React.FC = () => {
                 isSelectedModel={selectedModel === model}
               />
             ))}
-          </EuiFlexGroup>
+          </EuiFlexGrid>
         </EuiFlexItem>
         <EuiFlexItem grow={6}>
           <DevToolsConsoleCodeBlock>{selectedModel.code}</DevToolsConsoleCodeBlock>
