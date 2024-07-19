@@ -37,7 +37,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
   try {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
-    if (skippable || true) {
+    if (skippable) {
       console.log(emptyStep);
       return;
     }
