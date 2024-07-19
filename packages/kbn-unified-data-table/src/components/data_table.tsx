@@ -621,6 +621,8 @@ export const UnifiedDataTable = ({
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
 
+  const { density, onChangeDensity } = useDensity({ storage, consumer, onUpdateDensity });
+
   /**
    * Cell rendering
    */
@@ -636,6 +638,7 @@ export const UnifiedDataTable = ({
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
+        isCompressed: density.fontSize === 's',
       }),
     [
       dataView,
@@ -646,6 +649,7 @@ export const UnifiedDataTable = ({
       fieldFormats,
       externalCustomRenderers,
       isPlainRecord,
+      density,
     ]
   );
 
@@ -763,8 +767,6 @@ export const UnifiedDataTable = ({
     rowHeightState,
     onUpdateRowHeight,
   });
-
-  const { density, onChangeDensity } = useDensity({ storage, consumer, onUpdateDensity });
 
   const euiGridColumns = useMemo(
     () =>
@@ -995,6 +997,7 @@ export const UnifiedDataTable = ({
     rowHeight,
     rowHeightLines,
     sampleSizeState,
+    showDensitySelector,
   ]);
 
   const inMemory = useMemo(() => {

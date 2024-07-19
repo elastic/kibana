@@ -14,12 +14,18 @@ import { GRID_STYLE } from '../constants';
 interface UseDensityProps {
   storage: Storage;
   consumer: string;
+  densityState?: EuiDataGridStyle;
   onUpdateDensity?: (gridStyle: EuiDataGridStyle) => void;
 }
 
-export const useDensity = ({ storage, consumer, onUpdateDensity }: UseDensityProps) => {
+export const useDensity = ({
+  storage,
+  consumer,
+  densityState,
+  onUpdateDensity,
+}: UseDensityProps) => {
   const [density, setDensity] = useState<EuiDataGridStyle>(
-    storage.get(`${consumer}:dataGridStyle`) ?? GRID_STYLE
+    densityState ?? storage.get(`${consumer}:dataGridStyle`) ?? GRID_STYLE
   );
 
   const onChangeDensity = useCallback(
