@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../../assistant_context/types';
 
 export const getSelectedConversations = (
-  allSystemPrompts: PromptResponse[],
   conversationSettings: Record<string, Conversation>,
   systemPromptId: string
 ) => {
-  return Object.values(conversationSettings).filter((conversation) => {
-    const conversationSystemPrompt = allSystemPrompts.find(
-      (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
-    );
-    return conversationSystemPrompt?.id === systemPromptId;
-  });
+  return Object.values(conversationSettings).filter(
+    (conversation) => conversation?.apiConfig?.defaultSystemPromptId === systemPromptId
+  );
 };
