@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { KueryNode, toKqlExpression } from '@kbn/es-query';
 import { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -356,7 +357,7 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+      // @ts-expect-error: ruleTypesConsumersMap is a private method of the auth class
       expect(auth.ruleTypesConsumersMap).toMatchInlineSnapshot(`
         Map {
           "rule-type-1" => Set {
@@ -374,10 +375,49 @@ describe('AlertingAuthorization', () => {
       `);
     });
 
-    it('throws an error when a failure occurs', async () => {
+    it('throws an error when a generic error occurs', async () => {
       expect.assertions(1);
 
       getSpace.mockRejectedValue(new Error('Error'));
+
+      const authPromise = AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      await expect(authPromise).rejects.toThrow();
+    });
+
+    it('construct the AlertingAuthorization with empty features if the error is boom and 403', async () => {
+      getSpace.mockRejectedValue(
+        new Boom.Boom('Server error', { statusCode: 403, message: 'my error message' })
+      );
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+      expect(auth.ruleTypesConsumersMap).toMatchInlineSnapshot(`Map {}`);
+      // @ts-expect-error: allRegisteredConsumers is a private method of the auth class
+      expect(auth.allRegisteredConsumers).toMatchInlineSnapshot(`Set {}`);
+    });
+
+    it('throws an error if the error is boom but not 403', async () => {
+      expect.assertions(1);
+
+      getSpace.mockRejectedValue(
+        new Boom.Boom('Server error', { statusCode: 400, message: 'my error message' })
+      );
 
       const authPromise = AlertingAuthorization.create({
         request,

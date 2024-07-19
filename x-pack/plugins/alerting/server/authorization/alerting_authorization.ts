@@ -93,63 +93,80 @@ export class AlertingAuthorization {
     authorization,
     ruleTypeRegistry,
   }: CreateOptions): Promise<AlertingAuthorization> {
+    const allRegisteredConsumers = new Set<string>();
+    const ruleTypesConsumersMap = new Map<string, Set<string>>();
+    let maybeSpace;
+
     try {
-      const maybeSpace = await getSpace(request);
-      const disabledFeatures = new Set(maybeSpace?.disabledFeatures ?? []);
-      const featuresWithAlertingConfigured = features.getKibanaFeatures().filter(
-        ({ id, alerting }) =>
-          // ignore features which are disabled in the user's space
-          !disabledFeatures.has(id) &&
-          // ignore features which don't grant privileges to alerting
-          Boolean(alerting?.length)
-      );
-
-      const allRegisteredConsumers = new Set<string>();
-      const ruleTypesConsumersMap = new Map<string, Set<string>>();
-
-      /**
-       * Each feature configures a set of rule types. Each
-       * rule type configures its valid consumers. For example,
-       *
-       * { id: 'my-feature-id-1', alerting: [{ ruleTypeId: 'my-rule-type', consumers: ['consumer-a', 'consumer-b'] }] }
-       * { id: 'my-feature-id-2', alerting: [{ ruleTypeId: 'my-rule-type-2', consumers: ['consumer-a', 'consumer-d'] }] }
-       *
-       * In this loop we iterate over all features and we construct:
-       * a) a set that contains all registered consumers and
-       * b) a map that contains all valid consumers per rule type.
-       * We remove duplicates in the process. For example,
-       *
-       * allRegisteredConsumers: Set(1) { 'consumer-a', 'consumer-b', 'consumer-d' }
-       * ruleTypesConsumersMap: Map(1) {
-       *  'my-rule-type' => Set(1) { 'consumer-a', 'consumer-b' }
-       *  'my-rule-type-2' => Set(1) { 'consumer-a', 'consumer-d' }
-       * }
-       */
-      for (const feature of featuresWithAlertingConfigured) {
-        if (feature.alerting) {
-          for (const entry of feature.alerting) {
-            const consumers = ruleTypesConsumersMap.get(entry.ruleTypeId) ?? new Set();
-
-            entry.consumers.forEach((consumer) => {
-              consumers.add(consumer);
-              allRegisteredConsumers.add(consumer);
-            });
-            ruleTypesConsumersMap.set(entry.ruleTypeId, consumers);
-          }
-        }
+      maybeSpace = await getSpace(request);
+    } catch (error) {
+      if (Boom.isBoom(error) && error.output.statusCode === 403) {
+        return new AlertingAuthorization({
+          request,
+          authorization,
+          getSpaceId,
+          ruleTypeRegistry,
+          allRegisteredConsumers,
+          ruleTypesConsumersMap,
+        });
       }
 
-      return new AlertingAuthorization({
-        request,
-        authorization,
-        getSpaceId,
-        ruleTypeRegistry,
-        allRegisteredConsumers,
-        ruleTypesConsumersMap,
-      });
-    } catch (error) {
+      if (Boom.isBoom(error)) {
+        throw error;
+      }
+
       throw new Error(`Failed to create AlertingAuthorization class: ${error}`);
     }
+
+    const disabledFeatures = new Set(maybeSpace?.disabledFeatures ?? []);
+    const featuresWithAlertingConfigured = features.getKibanaFeatures().filter(
+      ({ id, alerting }) =>
+        // ignore features which are disabled in the user's space
+        !disabledFeatures.has(id) &&
+        // ignore features which don't grant privileges to alerting
+        Boolean(alerting?.length)
+    );
+
+    /**
+     * Each feature configures a set of rule types. Each
+     * rule type configures its valid consumers. For example,
+     *
+     * { id: 'my-feature-id-1', alerting: [{ ruleTypeId: 'my-rule-type', consumers: ['consumer-a', 'consumer-b'] }] }
+     * { id: 'my-feature-id-2', alerting: [{ ruleTypeId: 'my-rule-type-2', consumers: ['consumer-a', 'consumer-d'] }] }
+     *
+     * In this loop we iterate over all features and we construct:
+     * a) a set that contains all registered consumers and
+     * b) a map that contains all valid consumers per rule type.
+     * We remove duplicates in the process. For example,
+     *
+     * allRegisteredConsumers: Set(1) { 'consumer-a', 'consumer-b', 'consumer-d' }
+     * ruleTypesConsumersMap: Map(1) {
+     *  'my-rule-type' => Set(1) { 'consumer-a', 'consumer-b' }
+     *  'my-rule-type-2' => Set(1) { 'consumer-a', 'consumer-d' }
+     * }
+     */
+    for (const feature of featuresWithAlertingConfigured) {
+      if (feature.alerting) {
+        for (const entry of feature.alerting) {
+          const consumers = ruleTypesConsumersMap.get(entry.ruleTypeId) ?? new Set();
+
+          entry.consumers.forEach((consumer) => {
+            consumers.add(consumer);
+            allRegisteredConsumers.add(consumer);
+          });
+          ruleTypesConsumersMap.set(entry.ruleTypeId, consumers);
+        }
+      }
+    }
+
+    return new AlertingAuthorization({
+      request,
+      authorization,
+      getSpaceId,
+      ruleTypeRegistry,
+      allRegisteredConsumers,
+      ruleTypesConsumersMap,
+    });
   }
 
   private shouldCheckAuthorization(): boolean {
