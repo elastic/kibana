@@ -219,6 +219,8 @@ export class ManageSpacePage extends Component<Props, State> {
 
         <EuiSpacer />
 
+        {this.getChangeImpactWarning()}
+
         {this.getFormButtons()}
 
         {showAlteringActiveSpaceDialog && (
@@ -299,28 +301,25 @@ export class ManageSpacePage extends Component<Props, State> {
     const saveText = this.editingExistingSpace() ? updateSpaceText : createSpaceText;
 
     return (
-      <>
-        {this.getChangeImpactWarning()}
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={this.saveSpace}
-              data-test-subj="save-space-button"
-              isLoading={this.state.saveInProgress}
-            >
-              {saveText}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
-              {cancelButtonText}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true} />
-          {this.getActionButton()}
-        </EuiFlexGroup>
-      </>
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={this.saveSpace}
+            data-test-subj="save-space-button"
+            isLoading={this.state.saveInProgress}
+          >
+            {saveText}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
+            {cancelButtonText}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true} />
+        {this.getActionButton()}
+      </EuiFlexGroup>
     );
   };
 
