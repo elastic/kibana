@@ -389,7 +389,7 @@ export const SettingsPage: React.FC<Props> = memo(
                             <InstallButton
                               {...packageInfo}
                               numOfAssets={numOfAssets}
-                              disabled={!packageMetadata?.has_policies}
+                              disabled={packageMetadata?.has_policies}
                             />
                           </p>
                         </EuiFlexItem>
