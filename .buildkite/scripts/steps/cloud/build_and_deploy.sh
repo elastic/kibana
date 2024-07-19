@@ -72,6 +72,12 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
+  if is_pr_with_label "ci:cloud-deploy-elser"; then
+    jq '.resources.elasticsearch[0].plan.cluster_topology |=
+      map( if .id == "ml" then .size.value = 4096 else . end)' /tmp/deploy.json > /tmp/deploy.json.tmp
+    mv /tmp/deploy.json.tmp /tmp/deploy.json
+  fi
+
   echo "Creating deployment..."
   ecctl deployment create --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 
