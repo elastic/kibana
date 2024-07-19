@@ -14,7 +14,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
-import type { IntegrationImportPluginStart } from '@kbn/integration-assistant-plugin/public';
+import type { IntegrationImportPluginStart } from '@kbn/integration-import-plugin/public';
 import type { ServerlessSecurityConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
