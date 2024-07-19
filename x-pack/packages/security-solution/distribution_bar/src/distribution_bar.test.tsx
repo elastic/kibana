@@ -40,4 +40,43 @@ describe('DistributionBar', () => {
     );
     expect(container.querySelector(`[data-test-subj="${testSubj}__emptyBar"]`)).toBeInTheDocument();
   });
+
+  it('should render pretty names', () => {
+    const stats = [
+      {
+        key: 'low',
+        count: 9,
+        color: 'green',
+      },
+      {
+        key: 'medium',
+        count: 90,
+        color: 'red',
+      },
+      {
+        key: 'high',
+        count: 900,
+        color: 'red',
+      },
+      {
+        key: 'critical',
+        count: 9000,
+        color: 'red',
+      },
+      {
+        key: 'mega-critical',
+        count: 90000,
+        color: 'red',
+      },
+    ];
+    const expectedPrettyNames = ['9', '90', '900', '9k', '90k'];
+
+    const { container } = render(<DistributionBar stats={stats} data-test-subj={testSubj} />);
+    expect(container).toBeInTheDocument();
+    const parts = container.querySelectorAll(`[data-test-subj="${testSubj}__part"]`);
+    // check for each part that in contains the count text
+    parts.forEach((part, index) => {
+      expect(part.textContent).toContain(expectedPrettyNames[index]);
+    });
+  });
 });
