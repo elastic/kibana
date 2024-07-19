@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { get, has } from 'lodash';
 import { duration } from 'moment';
-import { concatMap } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Logger } from '@kbn/logging';
-
 import { LaunchDarklyClientProvider } from '@openfeature/launchdarkly-client-provider';
-import type { LDMultiKindContext } from 'launchdarkly-js-client-sdk';
-import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
-import type {
-  CloudExperimentsFeatureFlagNames,
-  CloudExperimentsMetric,
-  CloudExperimentsPluginStart,
-} from '../common';
+import { type LDLogLevel, basicLogger } from 'launchdarkly-js-client-sdk';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
-import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
 
 interface CloudExperimentsPluginSetupDeps {
   cloud: CloudSetup;
@@ -32,25 +22,25 @@ interface CloudExperimentsPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
 }
 
+interface LaunchDarklyClientConfig {
+  client_id: string;
+  client_log_level: LDLogLevel;
+}
+
 /**
  * Browser-side implementation of the Cloud Experiments plugin
  */
 export class CloudExperimentsPlugin
-  implements Plugin<void, CloudExperimentsPluginStart, CloudExperimentsPluginSetupDeps>
+  implements Plugin<void, void, CloudExperimentsPluginSetupDeps, CloudExperimentsPluginStartDeps>
 {
   private readonly logger: Logger;
   private readonly metadataService: MetadataService;
-  private readonly launchDarklyClient?: LaunchDarklyClient;
-  private readonly flagOverrides?: Record<string, unknown>;
-  private readonly isDev: boolean;
 
   /** Constructor of the plugin **/
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.isDev = initializerContext.env.mode.dev;
     const config = initializerContext.config.get<{
       launch_darkly?: LaunchDarklyClientConfig;
-      flag_overrides?: Record<string, unknown>;
       metadata_refresh_interval: string;
     }>();
 
@@ -59,11 +49,6 @@ export class CloudExperimentsPlugin
       this.logger.get('metadata')
     );
 
-    // TODO: Legacy client. Remove when the migration is complete
-    if (config.flag_overrides) {
-      this.flagOverrides = config.flag_overrides;
-    }
-
     const ldConfig = config.launch_darkly;
     if (!ldConfig?.client_id && !initializerContext.env.mode.dev) {
       // If the plugin is enabled, and it's in prod mode, launch_darkly must exist
@@ -71,16 +56,6 @@ export class CloudExperimentsPlugin
       throw new Error(
         'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
       );
-    }
-
-    // TODO: Legacy client. Remove when the migration is complete
-    if (ldConfig?.client_id) {
-      // Disabled to make it easier for manual tests of the new client
-      // this.launchDarklyClient = new LaunchDarklyClient(
-      //   ldConfig,
-      //   this.initializerContext.env.packageInfo.version,
-      //   this.logger
-      // );
     }
   }
 
@@ -102,87 +77,30 @@ export class CloudExperimentsPlugin
     if (launchDarklyOpenFeatureProvider) {
       core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
     }
-
-    // TODO: Legacy client. Remove when the migration is complete
-    if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId && this.launchDarklyClient) {
-      // Update the client's contexts when we get any updates in the metadata.
-      this.metadataService.userMetadata$
-        .pipe(
-          // Using concatMap to ensure we call the promised update in an orderly manner to avoid concurrency issues
-          concatMap(async (userMetadata) => {
-            try {
-              await this.launchDarklyClient?.updateUserMetadata(userMetadata as LDMultiKindContext);
-            } catch (err) {
-              this.logger.warn(`Failed to set the context in the legacy client ${err}`);
-            }
-          })
-        )
-        .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
-    } else {
-      this.launchDarklyClient?.cancel();
-    }
   }
 
   /**
-   * Returns the contract {@link CloudExperimentsPluginStart}
+   * Sets the metadata service update hooks
    * @param core {@link CoreStart}
+   * @param deps {@link CloudExperimentsPluginStartDeps}
    */
-  public start(
-    core: CoreStart,
-    { dataViews }: CloudExperimentsPluginStartDeps
-  ): CloudExperimentsPluginStart {
-    this.logger.info(
-      `The value is ${core.featureFlags.getStringValue('building-materials', 'fallback')}`
-    );
-
+  public start(core: CoreStart, { dataViews }: CloudExperimentsPluginStartDeps) {
     this.metadataService.start({
       hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
     });
-
-    return {
-      getVariation: this.getVariation,
-      reportMetric: this.reportMetric,
-    };
   }
 
   /**
    * Cleans up and flush the sending queues.
    */
   public stop() {
-    this.launchDarklyClient?.stop();
     this.metadataService.stop();
   }
 
-  private getVariation = async <Data>(
-    featureFlagName: CloudExperimentsFeatureFlagNames,
-    defaultValue: Data
-  ): Promise<Data> => {
-    const configKey = FEATURE_FLAG_NAMES[featureFlagName];
-
-    // Apply overrides if they exist without asking LaunchDarkly.
-    if (this.flagOverrides && has(this.flagOverrides, configKey)) {
-      return get(this.flagOverrides, configKey, defaultValue) as Data;
-    }
-
-    // Skip any action if no LD Client is defined
-    if (!this.launchDarklyClient) {
-      return defaultValue;
-    }
-
-    return await this.launchDarklyClient.getVariation(configKey, defaultValue);
-  };
-
-  private reportMetric = <Data>({ name, meta, value }: CloudExperimentsMetric<Data>): void => {
-    const metricName = METRIC_NAMES[name];
-    this.launchDarklyClient?.reportMetric(metricName, meta, value);
-    if (this.isDev) {
-      // eslint-disable-next-line no-console
-      console.debug(`Reported experimentation metric ${metricName}`, {
-        experimentationMetric: { name, meta, value },
-      });
-    }
-  };
-
+  /**
+   * Sets up the OpenFeature LaunchDarkly provider
+   * @private
+   */
   private createOpenFeatureProvider() {
     const { launch_darkly: ldConfig } = this.initializerContext.config.get<{
       launch_darkly?: LaunchDarklyClientConfig;
@@ -191,7 +109,9 @@ export class CloudExperimentsPlugin
     if (!ldConfig) return;
 
     return new LaunchDarklyClientProvider(ldConfig.client_id, {
-      logger: this.logger.get('launch-darkly'),
+      // logger: this.logger.get('launch-darkly'),
+      // Using basicLogger for now because we can't limit the level for now if we're using core's logger.
+      logger: basicLogger({ level: ldConfig.client_log_level }),
       streaming: true, // Necessary to react to flag changes
       application: {
         id: 'kibana-browser',

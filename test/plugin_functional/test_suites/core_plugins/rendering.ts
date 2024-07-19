@@ -130,6 +130,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'enterpriseSearch.ui.enabled (boolean)',
+        // No PII. This is an escape patch to override the flag resolution mechanism for testing or quick fixes.
+        'feature_flags.overrides (record)',
         'home.disableWelcomeScreen (boolean)',
         'management.deeplinks.navLinkStatus (string)',
         'map.emsFileApiUrl (string)',
@@ -234,8 +236,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
         'xpack.cloud_integrations.chat.trialBuffer (number)',
-        // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
-        'xpack.cloud_integrations.experiments.flag_overrides (record)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
         // Added here for documentation purposes.
         // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
