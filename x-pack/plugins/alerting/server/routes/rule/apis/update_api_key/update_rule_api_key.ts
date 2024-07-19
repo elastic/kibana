@@ -7,8 +7,8 @@
 
 import { IRouter } from '@kbn/core/server';
 import {
-  UpdateApiKeyParams,
-  updateApiKeyParamsSchema,
+  UpdateApiKeyParamsV1,
+  updateApiKeyParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update_api_key';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -23,16 +23,16 @@ export const updateRuleApiKeyRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_update_api_key`,
       options: {
         access: 'public',
-        summary: `Update the API key for a rule`,
+        summary: 'Update the API key for a rule',
       },
       validate: {
-        params: updateApiKeyParamsSchema,
+        params: updateApiKeyParamsSchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id }: UpdateApiKeyParams = req.params;
+        const { id }: UpdateApiKeyParamsV1 = req.params;
 
         try {
           await rulesClient.updateApiKey({ id });
