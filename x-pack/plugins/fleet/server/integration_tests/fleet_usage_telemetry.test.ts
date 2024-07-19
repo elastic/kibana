@@ -613,8 +613,8 @@ describe('fleet usage telemetry', () => {
             shared_integration_policies: 1,
             shared_integrations: {
               agents: undefined,
-              name: 'nginx',
-              pkg_name: 'nginx-1',
+              name: 'nginx-1',
+              pkg_name: 'nginx',
               pkg_version: '1.0.0',
               shared_by_agent_policies: 2,
             },
