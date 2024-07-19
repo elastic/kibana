@@ -209,7 +209,7 @@ export function initializeFetch({
     )
     .subscribe((next) => {
       api.dataLoading.next(false);
-      if (!next || next.hasOwnProperty('error')) {
+      if (!next || Object.hasOwn(next, 'error')) {
         api.blockingError.next(next?.error);
         return;
       }
@@ -218,7 +218,7 @@ export function initializeFetch({
       stateManager.totalHitCount.next(next.hitCount);
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
-      if (next.hasOwnProperty('columnsMeta')) {
+      if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
       }
     });

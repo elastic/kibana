@@ -49,7 +49,8 @@ const initializeSearchSource = async (
 
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
-  searchSource: ISearchSource
+  searchSource: ISearchSource,
+  discoverServices: DiscoverServices
 ): SavedSearch => {
   return {
     ...Object.keys(stateManager).reduce((prev, key) => {
@@ -57,7 +58,7 @@ const initializedSavedSearch = (
         ...prev,
         [key]: stateManager[key as keyof SearchEmbeddableStateManager].getValue(),
       };
-    }, {} as SavedSearch),
+    }, discoverServices.savedSearch.getNew()),
     searchSource,
   };
 };
@@ -134,7 +135,9 @@ export const initializeSearchEmbeddableApi = async (
   };
 
   /** The saved search should be the source of truth for all state  */
-  const savedSearch$ = new BehaviorSubject(initializedSavedSearch(stateManager, searchSource));
+  const savedSearch$ = new BehaviorSubject(
+    initializedSavedSearch(stateManager, searchSource, discoverServices)
+  );
 
   /** This will fire when any of the **editable** state changes */
   const onAnyStateChange: Observable<Partial<SearchEmbeddableSerializedAttributes>> = combineLatest(
@@ -145,13 +148,11 @@ export const initializeSearchEmbeddableApi = async (
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
       skip(1),
-      map(
-        ([newState, newSearchSource]) =>
-          ({
-            ...newState,
-            searchSource: newSearchSource,
-          } as SavedSearch)
-      )
+      map(([newState, newSearchSource]) => ({
+        ...savedSearch$.getValue(),
+        ...newState,
+        searchSource: newSearchSource,
+      }))
     )
     .subscribe((newSavedSearch) => {
       savedSearch$.next(newSavedSearch);
