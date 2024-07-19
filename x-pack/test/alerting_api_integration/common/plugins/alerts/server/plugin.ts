@@ -8,10 +8,7 @@
 import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import {
-  PluginStartContract as AlertingPluginsStart,
-  PluginSetupContract as AlertingPluginSetup,
-} from '@kbn/alerting-plugin/server/plugin';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -34,13 +31,13 @@ import { defineConnectorAdapters } from './connector_adapters';
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   taskManager: TaskManagerSetupContract;
   ruleRegistry: RuleRegistryPluginSetupContract;
 }
 
 export interface FixtureStartDeps {
-  alerting: AlertingPluginsStart;
+  alerting: AlertingServerStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
@@ -101,7 +98,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      alerting: testRuleTypes,
+      alerting: testAlertingFeatures,
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -111,7 +108,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: testRuleTypes,
+              all: testAlertingFeatures,
             },
           },
           ui: [],
@@ -124,7 +121,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              read: testRuleTypes,
+              read: testAlertingFeatures,
             },
           },
           ui: [],
