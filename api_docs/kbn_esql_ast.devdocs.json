@@ -391,6 +391,202 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.findFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "findFunction",
+            "description": [
+              "\nReturns the first function that matches the predicate.\n"
+            ],
+            "signature": [
+              "(node: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstNode",
+                "text": "ESQLAstNode"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstNode",
+                "text": "ESQLAstNode"
+              },
+              "[], predicate: (fn: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLFunction",
+                "text": "ESQLFunction"
+              },
+              ") => boolean) => ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLFunction",
+                "text": "ESQLFunction"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.findFunction.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [
+                  "AST subtree to search in."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstNode",
+                    "text": "ESQLAstNode"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstNode",
+                    "text": "ESQLAstNode"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.findFunction.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "predicate",
+                "description": [
+                  "Function to test each function with."
+                ],
+                "signature": [
+                  "(fn: ",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLFunction",
+                    "text": "ESQLFunction"
+                  },
+                  ") => boolean"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The first function that matches the predicate."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.hasFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "hasFunction",
+            "description": [
+              "\nSearches for at least one occurrence of a function or expression in the AST.\n"
+            ],
+            "signature": [
+              "(node: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstNode",
+                "text": "ESQLAstNode"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstNode",
+                "text": "ESQLAstNode"
+              },
+              "[], name: string) => boolean"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.hasFunction.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [
+                  "AST subtree to search in."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstNode",
+                    "text": "ESQLAstNode"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstNode",
+                    "text": "ESQLAstNode"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.hasFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "Function or expression name to search for."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "True if the function or expression is found in the AST."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.Walker.Unnamed",
             "type": "Function",
             "tags": [],

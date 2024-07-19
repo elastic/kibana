@@ -7,7 +7,11 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { fetchRuleTypeAadTemplateFields } from './fetch_rule_type_aad_template_fields';
+import {
+  fetchRuleTypeAadTemplateFields,
+  getDescription,
+} from './fetch_rule_type_aad_template_fields';
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 const http = httpServiceMock.createStartContract();
 
@@ -31,5 +35,33 @@ describe('fetchRuleTypeAadTemplateFields', () => {
         },
       ]
     `);
+  });
+});
+
+describe('getDescription', () => {
+  test('should return ecsField description', () => {
+    const result = getDescription('test-field-name', {
+      'test-field-name': {
+        description: 'this is the test field description',
+      } as EcsMetadata,
+    });
+
+    expect(result).toEqual('this is the test field description');
+  });
+
+  test('should return empty string if ecsField does not have a description', () => {
+    const result = getDescription('test-field-name', {});
+
+    expect(result).toEqual('');
+  });
+
+  test('should truncate field name if it contains kibana.alert', () => {
+    const result = getDescription('kibana.alert.test-field-name', {
+      'test-field-name': {
+        description: 'this is the test field description',
+      } as EcsMetadata,
+    });
+
+    expect(result).toEqual('this is the test field description');
   });
 });

@@ -43,6 +43,11 @@ export {
   isNestedFieldParent,
   isLegacyTableEnabled,
   usePager,
+  getLogLevelColor,
+  getLogLevelCoalescedValue,
+  getLogLevelCoalescedValueLabel,
+  LogLevelCoalescedValue,
+  LogLevelBadge,
 } from './src';
 
 export type { LogsContextService } from './src';

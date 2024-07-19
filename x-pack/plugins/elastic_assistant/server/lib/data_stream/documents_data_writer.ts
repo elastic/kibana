@@ -67,10 +67,16 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         return { errors: [], docs_created: [], docs_deleted: [], docs_updated: [], took: 0 };
       }
 
-      const { errors, items, took } = await this.options.esClient.bulk({
-        refresh: 'wait_for',
-        body: await this.buildBulkOperations(params),
-      });
+      const { errors, items, took } = await this.options.esClient.bulk(
+        {
+          refresh: 'wait_for',
+          body: await this.buildBulkOperations(params),
+        },
+        {
+          // Increasing timout to 2min as KB docs were failing to load after 30s
+          requestTimeout: 120000,
+        }
+      );
 
       return {
         errors: errors ? this.formatErrorsResponse(items) : [],

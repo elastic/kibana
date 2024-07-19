@@ -80,7 +80,7 @@ export const RuleActionsAlertsFilter = ({
     <>
       <EuiSwitch
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryToggleLabel',
+          'alertsUIShared.ruleActionsAlertsFilter.ActionAlertsFilterQueryToggleLabel',
           {
             defaultMessage: 'If alert matches a query',
           }
@@ -111,7 +111,7 @@ export const RuleActionsAlertsFilter = ({
             showDatePicker={false}
             showSubmitButton={false}
             placeholder={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryPlaceholder',
+              'alertsUIShared.ruleActionsAlertsFilter.ActionAlertsFilterQueryPlaceholder',
               {
                 defaultMessage: 'Filter alerts using KQL syntax',
               }

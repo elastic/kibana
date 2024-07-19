@@ -67,7 +67,6 @@ const useTimeframe = ({
   };
   return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
 };
-
 const useTimeFormat = (settings: SettingsStart) => {
   const dateFormatScaled: Array<[string, string]> = settings.client.get('dateFormat:scaled') ?? [
     ['PT1M', 'HH:mm'],

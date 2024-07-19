@@ -37,10 +37,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { DEFAULT_FREQUENCY } from '../constants';
 import { getTimeOptions } from '../utils';
 
-const FOR_EACH_ALERT = i18n.translate('AlertsUIShared.actiActionsonNotifyWhen.forEachOption', {
+const FOR_EACH_ALERT = i18n.translate('alertsUIShared.actiActionsonNotifyWhen.forEachOption', {
   defaultMessage: 'For each alert',
 });
-const SUMMARY_OF_ALERTS = i18n.translate('AlertsUIShared.actiActionsonNotifyWhen.summaryOption', {
+const SUMMARY_OF_ALERTS = i18n.translate('alertsUIShared.actiActionsonNotifyWhen.summaryOption', {
   defaultMessage: 'Summary of alerts',
 });
 
@@ -57,7 +57,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     value: {
       value: 'onActionGroupChange',
       inputDisplay: i18n.translate(
-        'AlertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.display',
+        'alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.display',
         {
           defaultMessage: 'On status changes',
         }
@@ -68,14 +68,14 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
           <strong>
             <FormattedMessage
               defaultMessage="On status changes"
-              id="AlertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.label"
+              id="alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if the alert status changes."
-                id="AlertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.description"
+                id="alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.description"
               />
             </p>
           </EuiText>
@@ -88,7 +88,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onActiveAlert',
-      inputDisplay: i18n.translate('AlertsUIShared.ruleActionsNotifyWhen.onActiveAlert.display', {
+      inputDisplay: i18n.translate('alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.display', {
         defaultMessage: 'On check intervals',
       }),
       'data-test-subj': 'onActiveAlert',
@@ -97,14 +97,14 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
           <strong>
             <FormattedMessage
               defaultMessage="On check intervals"
-              id="AlertsUIShared.ruleActionsNotifyWhen.onActiveAlert.label"
+              id="alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="AlertsUIShared.ruleActionsNotifyWhen.onActiveAlert.description"
+                id="alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.description"
               />
             </p>
           </EuiText>
@@ -118,7 +118,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     value: {
       value: 'onThrottleInterval',
       inputDisplay: i18n.translate(
-        'AlertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.display',
+        'alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.display',
         {
           defaultMessage: 'On custom action intervals',
         }
@@ -129,14 +129,14 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
           <strong>
             <FormattedMessage
               defaultMessage="On custom action intervals"
-              id="AlertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.label"
+              id="alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="AlertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.description"
+                id="alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.description"
               />
             </p>
           </EuiText>
