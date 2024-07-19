@@ -135,7 +135,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
       const agentStatuses = await this.getAgentStatusFromConnectorAction(agentIds);
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
-        const agentInfo = mostRecentAgentInfosByAgentId[agentId].crowdstrike;
+        const agentInfo = mostRecentAgentInfosByAgentId[agentId]?.crowdstrike;
 
         const agentStatus = agentStatuses[agentId];
         const pendingActions = allPendingActions.find(

@@ -37,6 +37,7 @@
       "ingestPipelines",
       "spaces",
       "guidedOnboarding",
+      "integrationAssistant",
     ],
     "requiredBundles": [
       "kibanaReact",

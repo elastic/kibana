@@ -26,5 +26,4 @@ enum:
   - .torq
   - .webhook
   - .xmatters
-examples:
-  - .server-log
+example: .server-log

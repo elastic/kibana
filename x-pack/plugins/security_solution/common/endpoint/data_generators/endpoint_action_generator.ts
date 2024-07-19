@@ -10,28 +10,28 @@ import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type {
-  ActionDetails,
-  EndpointActivityLogAction,
-  EndpointActivityLogActionResponse,
-  EndpointPendingActions,
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-  ProcessesEntry,
-  EndpointActionDataParameterTypes,
-  ActionResponseOutput,
-  ResponseActionGetFileOutputContent,
-  ResponseActionGetFileParameters,
-  ResponseActionsExecuteParameters,
-  ResponseActionExecuteOutputContent,
-  ResponseActionUploadOutputContent,
-  ResponseActionUploadParameters,
-  EndpointActionResponseDataOutput,
-  WithAllKeys,
-  ResponseActionScanOutputContent,
-  ResponseActionsScanParameters,
+import {
+  type ActionDetails,
+  type ActionResponseOutput,
+  ActivityLogItemTypes,
+  type EndpointActionDataParameterTypes,
+  type EndpointActionResponseDataOutput,
+  type EndpointActivityLogAction,
+  type EndpointActivityLogActionResponse,
+  type EndpointPendingActions,
+  type LogsEndpointAction,
+  type LogsEndpointActionResponse,
+  type ProcessesEntry,
+  type ResponseActionExecuteOutputContent,
+  type ResponseActionGetFileOutputContent,
+  type ResponseActionGetFileParameters,
+  type ResponseActionScanOutputContent,
+  type ResponseActionsExecuteParameters,
+  type ResponseActionScanParameters,
+  type ResponseActionUploadOutputContent,
+  type ResponseActionUploadParameters,
+  type WithAllKeys,
 } from '../types';
-import { ActivityLogItemTypes } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -231,7 +231,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,
-      outputs: {},
+      outputs: undefined,
       agentState: {
         'agent-a': {
           errors: undefined,
@@ -265,8 +265,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionGetFileOutputContent,
             ResponseActionGetFileParameters
           >
-        ).outputs = {
-          [details.agents[0]]: {
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
             type: 'json',
             content: {
               code: 'ra_get-file_success',
@@ -281,8 +286,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                 },
               ],
             },
-          },
-        };
+          };
+          return acc;
+        }, {});
       }
     }
 
@@ -291,10 +297,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
         ).parameters = {
-          path: '/some/file.txt',
+          path: '/some/folder/to/scan',
         };
       }
 
@@ -302,16 +308,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
-        ).outputs = {
-          [details.agents[0]]: {
+        ).outputs = details.agents.reduce<
+          ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
             type: 'json',
             content: {
-              code: 'ra_scan_success_done',
+              code: 'ra_scan_success',
             },
-          },
-        };
+          };
+
+          return acc;
+        }, {});
       }
     }
 
@@ -336,14 +346,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionExecuteOutputContent,
             ResponseActionsExecuteParameters
           >
-        ).outputs = {
-          [details.agents[0]]: this.generateExecuteActionResponseOutput({
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = this.generateExecuteActionResponseOutput({
             content: {
               output_file_id: getFileDownloadId(details, details.agents[0]),
               ...(overrides.outputs?.[details.agents[0]]?.content ?? {}),
             },
-          }),
-        };
+          });
+          return acc;
+        }, {});
       }
     }
 
@@ -360,16 +376,19 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         file_sha256: 'file-hash-sha-256',
       };
 
-      uploadActionDetails.outputs = {
-        'agent-a': {
+      uploadActionDetails.outputs = details.agents.reduce<
+        ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>['outputs']
+      >((acc = {}, agentId) => {
+        acc[agentId] = {
           type: 'json',
           content: {
             code: 'ra_upload_file-success',
             path: '/path/to/uploaded/file',
             disk_free_space: 1234567,
           },
-        },
-      };
+        };
+        return acc;
+      }, {});
     }
 
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<

@@ -28,7 +28,11 @@ export const getErrorBudgetPanelTitle = () =>
 const queryClient = new QueryClient();
 
 export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<SloErrorBudgetEmbeddableState, ErrorBudgetApi> = {
+  const factory: ReactEmbeddableFactory<
+    SloErrorBudgetEmbeddableState,
+    SloErrorBudgetEmbeddableState,
+    ErrorBudgetApi
+  > = {
     type: SLO_ERROR_BUDGET_ID,
     deserializeState: (state) => {
       return state.rawState as SloErrorBudgetEmbeddableState;

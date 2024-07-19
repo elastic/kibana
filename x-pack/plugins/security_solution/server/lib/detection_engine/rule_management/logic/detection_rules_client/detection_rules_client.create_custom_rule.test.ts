@@ -6,12 +6,15 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
   getCreateRulesSchemaMock,
   getCreateMachineLearningRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getRuleMock } from '../../../routes/__mocks__/request_responses';
+import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -29,8 +32,12 @@ describe('DetectionRulesClient.createCustomRule', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
+    const savedObjectsClient = savedObjectsClientMock.create();
+    detectionRulesClient = createDetectionRulesClient({ rulesClient, mlAuthz, savedObjectsClient });
   });
 
   it('should create a rule with the correct parameters and options', async () => {

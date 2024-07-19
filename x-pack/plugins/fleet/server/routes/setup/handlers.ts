@@ -16,10 +16,9 @@ import { isSecretStorageEnabled } from '../../services/secrets';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   const coreContext = await context.core;
-  const fleetContext = await context.fleet;
 
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = fleetContext.internalSoClient;
+  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
   try {
     const isApiKeysEnabled = await appContextService

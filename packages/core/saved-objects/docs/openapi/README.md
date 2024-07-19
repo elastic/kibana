@@ -16,19 +16,23 @@ To validate and bundle the docs, you can use [Redocly](https://redocly.com/docs/
 
 For example, run the following commands from the `packages/core/saved-objects/docs/openapi/` folder:
 
-  ```bash
-  npx swagger-cli validate entrypoint.yaml
-  ```
+```bash
+npx swagger-cli validate entrypoint.yaml
+npx swagger-cli validate entrypoint-serverless.yaml
+```
 
 Then you can generate the `bundled` files by running the following commands:
 
-  ```bash
-  npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
-  npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
-  ```
+```bash
+npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
+npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
+npx @redocly/cli bundle entrypoint_serverless.yaml --output bundled_serverless.yaml --ext yaml
+npx @redocly/cli bundle entrypoint_serverless.yaml --output bundled_serverless.json --ext json
+```
 
 After generating the json bundle ensure that it is also valid by running the following command:
 
-  ```bash
-  npx @redocly/cli lint bundled.json
-  ```
+```bash
+npx @redocly/cli lint bundled.json
+npx @redocly/cli lint bundled_serverless.json
+```

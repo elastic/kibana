@@ -29,11 +29,11 @@ export default function ({ getService }: FtrProviderContext) {
   describe('hosts', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should return an edge of length 1 when given a pagination of length 1', async () => {

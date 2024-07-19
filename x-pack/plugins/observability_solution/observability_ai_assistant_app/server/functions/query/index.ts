@@ -28,6 +28,7 @@ import { runAndValidateEsqlQuery } from './validate_esql_query';
 import { INLINE_ESQL_QUERY_REGEX } from './constants';
 
 export const QUERY_FUNCTION_NAME = 'query';
+export const EXECUTE_QUERY_NAME = 'execute_query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -89,13 +90,13 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   even if it has been called before.
 
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
-  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
+  If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
       : undefined
   );
 
   functions.registerFunction(
     {
-      name: 'execute_query',
+      name: EXECUTE_QUERY_NAME,
       visibility: FunctionVisibility.UserOnly,
       description: 'Display the results of an ES|QL query.',
       parameters: {
@@ -173,7 +174,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
               to classify the user's request in the user message before this ("${abbreviatedUserQuestion}...").
               and get more information about specific functions and commands
               you think are candidates for answering the question.
-              
+
               Examples for functions and commands:
               Do you need to group data? Request \`STATS\`.
               Extract data? Request \`DISSECT\` AND \`GROK\`.
@@ -215,7 +216,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
               "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
               "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
               "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
-              
+
               "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
               "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
               "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
@@ -275,9 +276,10 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
 
       if (!response.message.function_call.arguments) {
         resources.logger.debug(
-          `LLM should have called "classify_esql", but instead responded with the following message: ${JSON.stringify(
-            response.message
-          )}`
+          () =>
+            `LLM should have called "classify_esql", but instead responded with the following message: ${JSON.stringify(
+              response.message
+            )}`
         );
         throw new Error(
           'LLM did not call classify_esql function during query generation, execute the "query" function and try again'
@@ -365,7 +367,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              content: `Answer the user's question that was previously asked ("${abbreviatedUserQuestion}...") using the attached documentation. Take into account any previous errors from the \`execute_query\` or \`visualize_query\` function.
+              content: `Answer the user's question that was previously asked ("${abbreviatedUserQuestion}...") using the attached documentation. Take into account any previous errors from the \`${EXECUTE_QUERY_NAME}\` or \`visualize_query\` function.
 
                 Format any ES|QL query as follows:
                 \`\`\`esql
@@ -373,41 +375,41 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
                 \`\`\`
 
                 Respond in plain text. Do not attempt to use a function.
-  
+
                 You must use commands and functions for which you have requested documentation.
-  
+
                 ${
                   args.intention !== VisualizeESQLUserIntention.generateQueryOnly
                     ? `DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
                     If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
-                    
+
                     Human: plot both yesterday's and today's data.
-                    
+
                     Assistant: Here's how you can plot yesterday's data:
                     \`\`\`esql
                     <query>
                     \`\`\`
-  
+
                     Let's see that first. We'll look at today's data next.
-  
+
                     Human: <response from yesterday's data>
-  
+
                     Assistant: Let's look at today's data:
-  
+
                     \`\`\`esql
                     <query>
                     \`\`\`
                     `
                     : ''
                 }
-  
+
                 ${userIntentionMessage}
-  
+
                 DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
                 as mentioned in the system message and documentation. When converting queries from one language
                 to ES|QL, make sure that the functions are available and documented in ES|QL.
                 E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-                
+
                 `,
             },
           },
@@ -449,7 +451,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             functionCall = undefined;
           } else if (args.intention === VisualizeESQLUserIntention.executeAndReturnResults) {
             functionCall = {
-              name: 'execute_query',
+              name: EXECUTE_QUERY_NAME,
               arguments: JSON.stringify({ query: esqlQuery }),
               trigger: MessageRole.Assistant as const,
             };

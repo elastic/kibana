@@ -3,9 +3,6 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
 
   - wait
@@ -13,9 +10,6 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-16
       preemptible: true
     key: build
@@ -29,9 +23,6 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
       preemptible: true
     key: quick_checks
@@ -46,9 +37,6 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 10
     depends_on:
@@ -62,9 +50,6 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 10
     env:
@@ -79,9 +64,6 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-8
       preemptible: true
     key: linting
@@ -94,9 +76,6 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-4
       preemptible: true
     key: check_types
@@ -109,9 +88,6 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-16
       preemptible: true
     key: linting_with_types
@@ -125,9 +101,6 @@ steps:
     label: 'Checks'
     key: checks
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
       preemptible: true
     timeout_in_minutes: 60
@@ -139,9 +112,6 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-4
       preemptible: true
     key: build_api_docs

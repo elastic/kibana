@@ -15121,13 +15121,13 @@
                 "description": "The number of spaces which have solution set to classic."
               }
             },
-            "search": {
+            "es": {
               "type": "long",
               "_meta": {
                 "description": "The number of spaces which have solution set to search."
               }
             },
-            "observability": {
+            "oblt": {
               "type": "long",
               "_meta": {
                 "description": "The number of spaces which have solution set to observability."

@@ -43,7 +43,7 @@ else
     --skip-docker-ubi \
     --skip-docker-fips \
     --skip-docker-ubuntu \
-    --skip-docker-chainguard \
+    --skip-docker-wolfi \
     --skip-docker-serverless \
     --skip-docker-contexts
 fi
@@ -82,7 +82,9 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 
   echo "Writing to vault..."
 
-  vault_kv_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+  set_in_legacy_vault "$CLOUD_DEPLOYMENT_NAME" \
+    username="$CLOUD_DEPLOYMENT_USERNAME" \
+    password="$CLOUD_DEPLOYMENT_PASSWORD"
 
   echo "Enabling Stack Monitoring..."
   jq '
@@ -114,6 +116,7 @@ else
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 fi
 
+VAULT_READ_COMMAND=$(print_legacy_vault_read "$CLOUD_DEPLOYMENT_NAME")
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
@@ -125,9 +128,7 @@ Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
 
 Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-Credentials: \`vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
-
-(Stored in the production vault: VAULT_ADDR=https://vault-ci-prod.elastic.dev, more info: https://docs.elastic.dev/ci/using-secrets)
+Credentials: \`$VAULT_READ_COMMAND\`
 
 Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 

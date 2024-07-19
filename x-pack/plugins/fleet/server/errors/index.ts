@@ -51,6 +51,12 @@ export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
 export class AgentPolicyInvalidError extends FleetError {}
 
+export class AgentlessAgentCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating agentless agent in Fleet, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}

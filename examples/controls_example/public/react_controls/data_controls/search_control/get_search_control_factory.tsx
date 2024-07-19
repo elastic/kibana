@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
@@ -63,8 +65,8 @@ export const getSearchControlFactory = ({
         (field.spec.esTypes ?? []).includes('text')
       );
     },
-    CustomOptionsComponent: ({ stateManager }) => {
-      const searchTechnique = useStateFromPublishingSubject(stateManager.searchTechnique);
+    CustomOptionsComponent: ({ initialState, updateState }) => {
+      const [searchTechnique, setSearchTechnique] = useState(initialState.searchTechnique);
 
       return (
         <EuiFormRow label={'Searching'} data-test-subj="searchControl__searchOptionsRadioGroup">
@@ -73,7 +75,8 @@ export const getSearchControlFactory = ({
             idSelected={searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE}
             onChange={(id) => {
               const newSearchTechnique = id as SearchControlTechniques;
-              stateManager.searchTechnique.next(newSearchTechnique);
+              setSearchTechnique(newSearchTechnique);
+              updateState({ searchTechnique: newSearchTechnique });
             }}
           />
         </EuiFormRow>
@@ -86,12 +89,7 @@ export const getSearchControlFactory = ({
       );
       const editorStateManager = { searchTechnique };
 
-      const {
-        dataControlApi,
-        dataControlComparators,
-        dataControlStateManager,
-        serializeDataControl,
-      } = initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
+      const dataControl = initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
         uuid,
         SEARCH_CONTROL_TYPE,
         initialState,
@@ -105,13 +103,13 @@ export const getSearchControlFactory = ({
 
       const api = buildApi(
         {
-          ...dataControlApi,
+          ...dataControl.api,
           getTypeDisplayName: () =>
             i18n.translate('controlsExamples.searchControl.displayName', {
               defaultMessage: 'Search',
             }),
           serializeState: () => {
-            const { rawState: dataControlState, references } = serializeDataControl();
+            const { rawState: dataControlState, references } = dataControl.serialize();
             return {
               rawState: {
                 ...dataControlState,
@@ -126,7 +124,7 @@ export const getSearchControlFactory = ({
           },
         },
         {
-          ...dataControlComparators,
+          ...dataControl.comparators,
           searchTechnique: [
             searchTechnique,
             (newTechnique: SearchControlTechniques | undefined) =>
@@ -146,8 +144,8 @@ export const getSearchControlFactory = ({
       const onSearchStringChanged = combineLatest([searchString, searchTechnique])
         .pipe(debounceTime(200), distinctUntilChanged(deepEqual))
         .subscribe(([newSearchString, currentSearchTechnnique]) => {
-          const currentDataView = dataControlApi.dataViews.getValue()?.[0];
-          const currentField = dataControlStateManager.fieldName.getValue();
+          const currentDataView = dataControl.api.dataViews.getValue()?.[0];
+          const currentField = dataControl.stateManager.fieldName.getValue();
 
           if (currentDataView && currentField) {
             if (newSearchString) {
@@ -179,8 +177,8 @@ export const getSearchControlFactory = ({
        *  clear the previous search string.
        */
       const onFieldChanged = combineLatest([
-        dataControlStateManager.fieldName,
-        dataControlStateManager.dataViewId,
+        dataControl.stateManager.fieldName,
+        dataControl.stateManager.dataViewId,
       ])
         .pipe(distinctUntilChanged(deepEqual))
         .subscribe(() => {
@@ -190,15 +188,16 @@ export const getSearchControlFactory = ({
       return {
         api,
         /**
-         * The `conrolStyleProps` prop is necessary because it contains the props from the generic
+         * The `controlPanelClassNamess` prop is necessary because it contains the class names from the generic
          * ControlPanel that are necessary for styling
          */
-        Component: (conrolStyleProps) => {
+        Component: ({ className: controlPanelClassName }) => {
           const currentSearch = useStateFromPublishingSubject(searchString);
 
           useEffect(() => {
             return () => {
               // cleanup on unmount
+              dataControl.cleanup();
               onSearchStringChanged.unsubscribe();
               onFieldChanged.unsubscribe();
             };
@@ -206,7 +205,10 @@ export const getSearchControlFactory = ({
 
           return (
             <EuiFieldSearch
-              {...conrolStyleProps}
+              className={controlPanelClassName}
+              css={css`
+                height: calc(${euiThemeVars.euiButtonHeight} - 2px) !important;
+              `}
               incremental={true}
               isClearable={false} // this will be handled by the clear floating action instead
               value={currentSearch ?? ''}

@@ -155,21 +155,18 @@ There's a bit of setup involved to actually get `react-query` up and running. Fi
 
 ```tsx
 //...
-
-<EuiThemeProvider darkMode={isDarkMode}>
-  <QueryClientProvider client={queryClient}>
-    <ReactQueryDevtools initialIsOpen={true} />
-    <UIExtensionsContext.Provider value={extensions}>
-      <FleetStatusProvider>
-        <Router history={history}>
-          <PackageInstallProvider notifications={startServices.notifications} theme$={theme$}>
-            <FlyoutContextProvider>{children}</FlyoutContextProvider>
-          </PackageInstallProvider>
-        </Router>
-      </FleetStatusProvider>
-    </UIExtensionsContext.Provider>
-  </QueryClientProvider>
-</EuiThemeProvider>
+<QueryClientProvider client={queryClient}>
+  <ReactQueryDevtools initialIsOpen={true} />
+  <UIExtensionsContext.Provider value={extensions}>
+    <FleetStatusProvider>
+      <Router history={history}>
+        <PackageInstallProvider notifications={startServices.notifications} theme$={theme$}>
+          <FlyoutContextProvider>{children}</FlyoutContextProvider>
+        </PackageInstallProvider>
+      </Router>
+    </FleetStatusProvider>
+  </UIExtensionsContext.Provider>
+</QueryClientProvider>
 ```
 
 We also set up `react-query`'s [dev tools](https://tanstack.com/query/v4/docs/react/devtools), which provide a useful developer console for debugging query and mutation state across the whole application.

@@ -133,7 +133,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
+              "{ registerProfilingComponent: <T>(key: string, component: React.FC<T>) => void; locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -410,26 +410,26 @@
             "signature": [
               "{ get: (id: string) => ",
               {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>; list: () => ",
               {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>[]; register: (objectType: ",
               {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.ActionTypeModel",
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
@@ -1358,8 +1358,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               }
             ],
             "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",

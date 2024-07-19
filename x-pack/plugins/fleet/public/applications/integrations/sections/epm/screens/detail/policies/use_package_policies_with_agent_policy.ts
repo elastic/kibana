@@ -19,13 +19,9 @@ import { agentPolicyRouteService } from '../../../../../services';
 import { useGetPackagePolicies, useConditionalRequest } from '../../../../../hooks';
 import type { SendConditionalRequestConfig } from '../../../../../hooks';
 
-export interface PackagePolicyEnriched extends PackagePolicy {
-  _agentPolicy: GetAgentPoliciesResponseItem | undefined;
-}
-
 export interface PackagePolicyAndAgentPolicy {
   packagePolicy: PackagePolicy;
-  agentPolicy: GetAgentPoliciesResponseItem;
+  agentPolicies: GetAgentPoliciesResponseItem[];
 }
 
 type GetPackagePoliciesWithAgentPolicy = Omit<GetPackagePoliciesResponse, 'items'> & {
@@ -34,7 +30,7 @@ type GetPackagePoliciesWithAgentPolicy = Omit<GetPackagePoliciesResponse, 'items
 
 /**
  * Works similar to `useGetAgentPolicies()`, except that it will add an additional property to
- * each package policy named `_agentPolicy` which may hold the Agent Policy associated with the
+ * each package policy named `agentPolicies` which may hold the Agent Policies associated with the
  * given package policy.
  * @param query
  */
@@ -105,7 +101,9 @@ export const usePackagePoliciesWithAgentPolicy = (
       (packagePolicy) => {
         return {
           packagePolicy,
-          agentPolicy: agentPoliciesById[packagePolicy.policy_ids[0]], // TODO multiple agent policies
+          agentPolicies: packagePolicy.policy_ids
+            .map((policyId: string) => agentPoliciesById[policyId])
+            .filter((policy) => !!policy),
         };
       }
     );

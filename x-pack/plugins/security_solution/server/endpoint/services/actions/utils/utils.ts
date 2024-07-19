@@ -9,7 +9,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
-import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FetchActionResponsesResult } from '../..';
 import type {
@@ -487,11 +486,13 @@ export const categorizeResponseResults = ({
         return isResponseDoc
           ? {
               type: ActivityLogItemTypes.RESPONSE,
-              item: { id: e._id, data: e._source as LogsEndpointActionResponse },
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              item: { id: e._id!, data: e._source as LogsEndpointActionResponse },
             }
           : {
               type: ActivityLogItemTypes.FLEET_RESPONSE,
-              item: { id: e._id, data: e._source as EndpointActionResponse },
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              item: { id: e._id!, data: e._source as EndpointActionResponse },
             };
       })
     : [];
@@ -511,11 +512,13 @@ export const categorizeActionResults = ({
         return isActionDoc
           ? {
               type: ActivityLogItemTypes.ACTION,
-              item: { id: e._id, data: e._source as LogsEndpointAction },
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              item: { id: e._id!, data: e._source as LogsEndpointAction },
             }
           : {
               type: ActivityLogItemTypes.FLEET_ACTION,
-              item: { id: e._id, data: e._source as EndpointAction },
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              item: { id: e._id!, data: e._source as EndpointAction },
             };
       })
     : [];
@@ -530,7 +533,8 @@ export const formatEndpointActionResults = (
     ? results?.map((e) => {
         return {
           type: ActivityLogItemTypes.ACTION,
-          item: { id: e._id, data: e._source as LogsEndpointAction },
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          item: { id: e._id!, data: e._source as LogsEndpointAction },
         };
       })
     : [];
@@ -606,12 +610,3 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
 export const getActionRequestExpiration = (): string => {
   return moment().add(2, 'weeks').toISOString();
 };
-
-export const ELASTIC_RESPONSE_ACTION_MESSAGE = (
-  username: string = 'system',
-  responseActionId: string = 'response-action-id' // I believe actionId exists always and there is a mismatch in types, but this default is just a safety net
-): string =>
-  i18n.translate('xpack.securitySolution.responseActions.comment.message', {
-    values: { username, responseActionId },
-    defaultMessage: `Action triggered from Elastic Security by user {username} for action {responseActionId}`,
-  });

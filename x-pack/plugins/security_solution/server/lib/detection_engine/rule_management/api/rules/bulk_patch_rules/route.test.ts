@@ -17,6 +17,10 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
+import {
+  getRulesSchemaMock,
+  getRulesMlSchemaMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { bulkPatchRulesRoute } from './route';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
@@ -34,7 +38,7 @@ describe('Bulk patch rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // update succeeds
-    clients.detectionRulesClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.patchRule.mockResolvedValue(getRulesSchemaMock());
 
     bulkPatchRulesRoute(server.router, logger);
   });
@@ -72,14 +76,11 @@ describe('Bulk patch rules route', () => {
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
-      clients.detectionRulesClient.patchRule.mockResolvedValueOnce(
-        getRuleMock(
-          getMlRuleParams({
-            anomalyThreshold,
-            machineLearningJobId: [machineLearningJobId],
-          })
-        )
-      );
+      clients.detectionRulesClient.patchRule.mockResolvedValueOnce({
+        ...getRulesMlSchemaMock(),
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: [machineLearningJobId],
+      });
 
       const request = requestMock.create({
         method: 'patch',

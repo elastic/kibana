@@ -18,11 +18,9 @@ import {
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
 import { CustomThresholdAlertFields } from '../../types';
-import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { CustomThresholdAlert } from '../types';
 import AlertDetailsAppSection from './alert_details_app_section';
-import { Groups } from './groups';
-import { Tags } from './tags';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
@@ -49,7 +47,7 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
+jest.mock('../../../rule_condition_chart/rule_condition_chart', () => ({
   RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
@@ -80,7 +78,6 @@ jest.mock('../../../../utils/kibana_react', () => ({
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
   const mockedSetAlertSummaryFields = jest.fn();
-  const ruleLink = 'ruleLink';
 
   const renderComponent = (
     alert: Partial<CustomThresholdAlert> = {},
@@ -92,7 +89,6 @@ describe('AlertDetailsAppSection', () => {
           <AlertDetailsAppSection
             alert={buildCustomThresholdAlert(alert, alertFields)}
             rule={buildCustomThresholdRule()}
-            ruleLink={ruleLink}
             setAlertSummaryFields={mockedSetAlertSummaryFields}
           />
         </QueryClientProvider>
@@ -111,65 +107,22 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
-  it('should render alert summary fields', async () => {
+  it('should render additional alert summary fields', async () => {
     renderComponent();
 
     expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
       {
-        label: 'Source',
+        label: 'Related logs',
         value: (
-          <React.Fragment>
-            <Groups
-              groups={[
-                {
-                  field: 'host.name',
-                  value: 'host-1',
-                },
-              ]}
-              timeRange={{
-                from: '2023-03-28T10:43:13.802Z',
-                to: 'now',
-              }}
-            />
-            <span>
-              <EuiLink
-                data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
-                href="/view-in-app-url"
-              >
-                View related logs
-              </EuiLink>
-            </span>
-          </React.Fragment>
-        ),
-      },
-      {
-        label: 'Tags',
-        value: <Tags tags={['tag 1', 'tag 2']} />,
-      },
-      {
-        label: 'Rule',
-        value: (
-          <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-            Monitoring hosts
-          </EuiLink>
-        ),
-      },
-    ]);
-  });
-
-  it('should not render group and tag summary fields', async () => {
-    const alertFields = { tags: [], 'kibana.alert.group': undefined };
-    renderComponent({}, alertFields);
-
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
-    expect(mockedSetAlertSummaryFields).toBeCalledWith([
-      {
-        label: 'Rule',
-        value: (
-          <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-            Monitoring hosts
-          </EuiLink>
+          <span>
+            <EuiLink
+              data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
+              href="/view-in-app-url"
+            >
+              View related logs
+            </EuiLink>
+          </span>
         ),
       },
     ]);

@@ -122,7 +122,9 @@ describe('Tags', () => {
     });
 
     act(() => {
-      userEvent.click(screen.getByText('The tags of the rule.'));
+      userEvent.click(screen.getByText('The tags of the rule.'), undefined, {
+        skipPointerEventsCheck: true,
+      });
     });
 
     await waitFor(() =>

@@ -1,8 +1,8 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Machine learning APIs
   description: Kibana APIs for the machine learning feature
-  version: "1.0.2"
+  version: "1.0.1"
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
@@ -14,8 +14,10 @@ servers:
 paths:
   /api/ml/saved_objects/sync:
     get:
-      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
-      description: This API runs automatically when you start Kibana and periodically thereafter.
+      summary: Sync machine learning saved objects
+      description: >
+        Synchronizes Kibana saved objects for machine learning jobs and trained models.
+        This API runs automatically when you start Kibana and periodically thereafter.
       operationId: mlSync
       tags:
         - ml
@@ -46,8 +48,7 @@ components:
     required: false
     schema:
       type: boolean
-      examples:
-        - true
+    example: 'true'
  securitySchemes:
   apiKeyAuth:
     type: apiKey
@@ -149,14 +150,12 @@ components:
       properties:
         error:
           type: string
-          examples:
-            - Unauthorized
+          example: Unauthorized
         message:
           type: string 
         statusCode:
           type: integer
-          examples:
-            - 401
+          example: 401
  examples:
    mlSyncExample:
      summary: Two anomaly detection jobs required synchronization in this example.

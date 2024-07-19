@@ -38,7 +38,14 @@ export class DataQualityPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       order: 2,
-      keywords: ['data', 'quality', 'data quality', 'datasets', 'datasets quality'],
+      keywords: [
+        'data',
+        'quality',
+        'data quality',
+        'datasets',
+        'datasets quality',
+        'data set quality',
+      ],
       async mount(params: ManagementAppMountParams) {
         const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
           import('./application'),
@@ -47,7 +54,7 @@ export class DataQualityPlugin
 
         return renderApp(coreStart, pluginsStartDeps, pluginStart, params);
       },
-      hideFromSidebar: true,
+      hideFromSidebar: false,
     });
 
     const managementLocator =

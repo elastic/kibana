@@ -15,6 +15,7 @@ import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import { CreateSloBtn } from './components/common/create_slo_btn';
@@ -31,14 +32,9 @@ export function SlosPage() {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
+  const { data: permissions } = usePermissions();
 
-  const {
-    isLoading,
-    isError,
-    data: sloList,
-  } = useFetchSloList({
-    perPage: 0,
-  });
+  const { isLoading, isError, data: sloList } = useFetchSloList({ perPage: 0 });
   const { total } = sloList ?? { total: 0 };
 
   useBreadcrumbs([
@@ -55,7 +51,11 @@ export function SlosPage() {
     if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
       navigateToUrl(basePath.prepend(paths.slosWelcome));
     }
-  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
+
+    if (permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
 
   return (
     <ObservabilityPageTemplate

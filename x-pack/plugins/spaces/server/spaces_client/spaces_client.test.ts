@@ -42,7 +42,7 @@ describe('#getAll', () => {
         imageUrl: 'go-bots/predates/transformers',
         disabledFeatures: [],
         _reserved: true,
-        solution: 'search',
+        solution: 'es',
         bar: 'foo-bar', // an extra attribute that will be ignored during conversion
       },
     },
@@ -81,7 +81,7 @@ describe('#getAll', () => {
       initials: 'FB',
       imageUrl: 'go-bots/predates/transformers',
       disabledFeatures: [],
-      solution: 'search',
+      solution: 'es',
       _reserved: true,
     },
     {
@@ -224,7 +224,7 @@ describe('#get', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue({
       ...savedObject,
-      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'search' },
+      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'es' },
     });
     const mockConfig = createMockConfig();
 
@@ -247,7 +247,7 @@ describe('#get', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue({
       ...savedObject,
-      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'search' },
+      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'es' },
     });
     const mockConfig = createMockConfig();
 
@@ -261,7 +261,7 @@ describe('#get', () => {
     const id = savedObject.id;
     const actualSpace = await client.get(id);
 
-    expect(actualSpace).toEqual({ ...expectedSpace, solution: 'search' });
+    expect(actualSpace).toEqual({ ...expectedSpace, solution: 'es' });
   });
 });
 
@@ -399,7 +399,7 @@ describe('#create', () => {
     );
 
     await expect(
-      client.create({ ...spaceToCreate, solution: 'search' })
+      client.create({ ...spaceToCreate, solution: 'es' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to create Space, solution property is forbidden in serverless"`
     );
@@ -418,7 +418,7 @@ describe('#create', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.create.mockResolvedValue({
       ...savedObject,
-      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'search' },
+      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'es' },
     });
     mockCallWithRequestRepository.find.mockResolvedValue({
       total: maxSpaces - 1,
@@ -438,9 +438,9 @@ describe('#create', () => {
       'traditional'
     );
 
-    const actualSpace = await client.create({ ...spaceToCreate, solution: 'search' });
+    const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
 
-    expect(actualSpace).toEqual({ ...expectedReturnedSpace, solution: 'search' });
+    expect(actualSpace).toEqual({ ...expectedReturnedSpace, solution: 'es' });
 
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
       type: 'space',
@@ -449,7 +449,7 @@ describe('#create', () => {
     });
     expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith(
       'space',
-      { ...attributes, solution: 'search' },
+      { ...attributes, solution: 'es' },
       {
         id,
       }
@@ -609,7 +609,7 @@ describe('#update', () => {
     );
 
     await expect(
-      client.update(id, { ...spaceToUpdate, solution: 'search' })
+      client.update(id, { ...spaceToUpdate, solution: 'es' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to update Space, solution property is forbidden in serverless"`
     );
@@ -659,11 +659,11 @@ describe('#update', () => {
       'traditional'
     );
     const id = savedObject.id;
-    await client.update(id, { ...spaceToUpdate, solution: 'search' });
+    await client.update(id, { ...spaceToUpdate, solution: 'es' });
 
     expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
       ...attributes,
-      solution: 'search',
+      solution: 'es',
     });
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });

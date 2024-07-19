@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { SearchResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  SearchResponse,
+  FieldCapsResponse,
+  IndicesGetMappingResponse,
+  FieldCapsFieldCapability,
+  MappingPropertyBase,
+} from '@elastic/elasticsearch/lib/api/types';
+
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { IndicesQuerySourceFields } from '../types';
 
@@ -15,33 +21,47 @@ interface FieldModelId {
   modelId: string | undefined;
 }
 
+type SemanticEmbeddingType = 'sparse_vector' | 'dense_vector';
+
+interface SemanticField {
+  field: string;
+  inferenceId: string;
+  embeddingType?: SemanticEmbeddingType;
+}
+
 interface IndexFieldModel {
   index: string;
   fields: FieldModelId[];
+  semanticTextFields: SemanticField[];
 }
+
+type TaskType = 'sparse_embedding' | 'text_embedding';
+
+interface MappingSemanticTextProperty extends MappingPropertyBase {
+  type: 'semantic_text';
+  inference_id: string;
+  model_settings?: {
+    task_type: TaskType;
+  };
+}
+
+const EMBEDDING_TYPE: Record<TaskType, SemanticEmbeddingType> = {
+  sparse_embedding: 'sparse_vector',
+  text_embedding: 'dense_vector',
+};
 
 export const getModelIdFields = (fieldCapsResponse: FieldCapsResponse) => {
   const { fields } = fieldCapsResponse;
   return Object.keys(fields).reduce<Array<{ path: string; aggField: string }>>((acc, fieldKey) => {
-    const field = fields[fieldKey];
     if (fieldKey.endsWith('model_id')) {
-      if ('keyword' in field && field.keyword.aggregatable) {
-        acc.push({
-          path: fieldKey,
-          aggField: fieldKey,
-        });
-        return acc;
-      }
-      const keywordModelIdField = fields[fieldKey + '.keyword'];
+      const multiField = Object.keys(fields)
+        .filter((key) => key.startsWith(fieldKey))
+        .find((key) => fields[key].keyword && fields[key].keyword.aggregatable);
 
-      if (
-        keywordModelIdField &&
-        `keyword` in keywordModelIdField &&
-        keywordModelIdField.keyword.aggregatable
-      ) {
+      if (multiField) {
         acc.push({
           path: fieldKey,
-          aggField: fieldKey + '.keyword',
+          aggField: multiField,
         });
         return acc;
       }
@@ -64,7 +84,7 @@ export const fetchFields = async (
 
   const modelIdFields = getModelIdFields(fieldCapabilities);
 
-  const indicesAggs = await Promise.all(
+  const indicesAggsMappings = await Promise.all(
     indices.map(async (index) => ({
       index,
       doc: await client.asCurrentUser.search({
@@ -85,13 +105,18 @@ export const fetchFields = async (
           ),
         },
       }),
+      mapping: await client.asCurrentUser.indices.getMapping({ index }),
     }))
   );
 
-  return parseFieldsCapabilities(fieldCapabilities, indicesAggs);
+  return parseFieldsCapabilities(fieldCapabilities, indicesAggsMappings);
 };
 
 const INFERENCE_MODEL_FIELD_REGEXP = /\.predicted_value|\.tokens/;
+
+const getSemanticField = (field: string, semanticFields: SemanticField[]) => {
+  return semanticFields.find((sf) => sf.field === field);
+};
 
 const getModelField = (field: string, modelIdFields: FieldModelId[]) => {
   // For input_output inferred fields, the model_id is at the top level
@@ -139,14 +164,23 @@ const isFieldInIndex = (
   );
 };
 
+const sortFields = (fields: FieldCapsResponse['fields']): FieldCapsResponse['fields'] => {
+  const entries = Object.entries(fields);
+
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+
+  return Object.fromEntries(entries);
+};
+
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
-  aggDocs: Array<{ index: string; doc: SearchResponse }>
+  aggMappingDocs: Array<{ index: string; doc: SearchResponse; mapping: IndicesGetMappingResponse }>
 ): IndicesQuerySourceFields => {
-  const { fields, indices: indexOrIndices } = fieldCapsResponse;
+  const { indices: indexOrIndices } = fieldCapsResponse;
+  const fields = sortFields(fieldCapsResponse.fields);
   const indices = Array.isArray(indexOrIndices) ? indexOrIndices : [indexOrIndices];
 
-  const indexModelIdFields = aggDocs.map<IndexFieldModel>((aggDoc) => {
+  const indexModelIdFields = aggMappingDocs.map<IndexFieldModel>((aggDoc) => {
     const modelIdFields = Object.keys(aggDoc.doc.aggregations || {}).map<FieldModelId>((field) => {
       return {
         field,
@@ -154,9 +188,28 @@ export const parseFieldsCapabilities = (
       };
     });
 
+    const mappingProperties = aggDoc.mapping[aggDoc.index].mappings.properties || {};
+
+    const semanticTextFields: SemanticField[] = Object.keys(mappingProperties || {})
+      .filter(
+        // @ts-ignore
+        (field) => mappingProperties[field].type === 'semantic_text'
+      )
+      .map((field) => {
+        const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
+        return {
+          field,
+          inferenceId: mapping?.inference_id,
+          embeddingType: mapping?.model_settings?.task_type
+            ? EMBEDDING_TYPE[mapping.model_settings.task_type]
+            : undefined,
+        };
+      });
+
     return {
       index: aggDoc.index,
       fields: modelIdFields,
+      semanticTextFields,
     };
   });
 
@@ -167,6 +220,7 @@ export const parseFieldsCapabilities = (
       bm25_query_fields: [],
       source_fields: [],
       skipped_fields: 0,
+      semantic_fields: [],
     };
     return acc;
   }, {});
@@ -186,17 +240,37 @@ export const parseFieldsCapabilities = (
           : (indices as unknown as string[]);
 
       for (const index of indicesPresentIn) {
-        const modelIdFields = indexModelIdFields.find(
+        const { fields: modelIdFields, semanticTextFields } = indexModelIdFields.find(
           (indexModelIdField) => indexModelIdField.index === index
-        )!.fields;
+        )!;
+        const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
 
-        if (
-          isFieldInIndex(field, 'rank_features', index) ||
-          isFieldInIndex(field, 'sparse_vector', index)
-        ) {
-          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
+        if (isFieldInIndex(field, 'semantic_text', index)) {
+          const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
+
+          // only use this when embeddingType and inferenceId is defined
+          // this requires semantic_text field to be set up correctly and ingested
+          if (
+            semanticFieldMapping &&
+            semanticFieldMapping.embeddingType &&
+            semanticFieldMapping.inferenceId &&
+            !nestedField
+          ) {
+            const semanticField = {
+              field: fieldKey,
+              inferenceId: semanticFieldMapping.inferenceId,
+              embeddingType: semanticFieldMapping.embeddingType,
+              indices: (field.semantic_text.indices as string[]) || indicesPresentIn,
+            };
+
+            acc[index].semantic_fields.push(semanticField);
+            acc[index].source_fields.push(fieldKey);
+          } else {
+            acc[index].skipped_fields++;
+          }
+        } else if (isFieldInIndex(field, 'sparse_vector', index)) {
           const modelId = getModelField(fieldKey, modelIdFields);
-          const fieldCapabilities = field.rank_features || field.sparse_vector;
+          const fieldCapabilities = field.sparse_vector;
 
           // Check if the sparse vector field has a model_id associated with it
           // skip this field if has no model associated with it
@@ -205,15 +279,34 @@ export const parseFieldsCapabilities = (
             const elserModelField = {
               field: fieldKey,
               model_id: modelId,
-              nested: !!isFieldNested(fieldKey, fieldCapsResponse),
               indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
+              // we must use sparse_vector query
+              sparse_vector: true,
+            };
+            acc[index].elser_query_fields.push(elserModelField);
+          } else {
+            acc[index].skipped_fields++;
+          }
+        } else if (isFieldInIndex(field, 'rank_features', index)) {
+          const modelId = getModelField(fieldKey, modelIdFields);
+          const fieldCapabilities = field.rank_features;
+
+          // Check if the sparse vector field has a model_id associated with it
+          // skip this field if has no model associated with it
+          // and the vectors were embedded outside of stack
+          if (modelId && !nestedField) {
+            const elserModelField = {
+              field: fieldKey,
+              model_id: modelId,
+              indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
+              // we must use text_expansion query
+              sparse_vector: false,
             };
             acc[index].elser_query_fields.push(elserModelField);
           } else {
             acc[index].skipped_fields++;
           }
         } else if (isFieldInIndex(field, 'dense_vector', index)) {
-          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
           const modelId = getModelField(fieldKey, modelIdFields);
           const fieldCapabilities = field.dense_vector;
 
@@ -224,7 +317,6 @@ export const parseFieldsCapabilities = (
             const denseVectorField = {
               field: fieldKey,
               model_id: modelId,
-              nested: !!nestedField,
               indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
             };
             acc[index].dense_vector_query_fields.push(denseVectorField);

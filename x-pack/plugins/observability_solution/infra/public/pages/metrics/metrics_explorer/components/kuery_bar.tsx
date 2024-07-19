@@ -9,9 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { AutocompleteField } from '@kbn/observability-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
-import { AutocompleteField } from '../../../../components/autocomplete_field';
 
 type LoadSuggestionsFn = (
   e: string,
@@ -58,6 +59,8 @@ export const MetricsExplorerKueryBar = ({
     }
   }, [value]);
 
+  const { euiTheme } = useEuiTheme();
+
   const handleChange = (query: string) => {
     setValidation(validateQuery(query));
     setDraftQuery(query);
@@ -87,6 +90,7 @@ export const MetricsExplorerKueryBar = ({
           placeholder={placeholder || defaultPlaceholder}
           suggestions={suggestions}
           value={draftQuery}
+          theme={euiTheme}
         />
       )}
     </WithKueryAutocompletion>

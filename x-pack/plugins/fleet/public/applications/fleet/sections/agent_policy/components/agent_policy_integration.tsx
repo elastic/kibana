@@ -47,6 +47,7 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
   return (
     <EuiForm>
       <EuiDescribedFormGroup
+        fullWidth
         title={
           <h3>
             <FormattedMessage

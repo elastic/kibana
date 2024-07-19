@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { errors, TransportResult } from '@elastic/elasticsearch';
+import { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import { getMockSearchConfig } from '@kbn/data-plugin/config.mock';
+import { ISearchStrategy } from '@kbn/data-plugin/server';
+import { enhancedEsSearchStrategyProvider } from '@kbn/data-plugin/server/search';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
+import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
+import { loggerMock } from '@kbn/logging-mocks';
+import { EMPTY, lastValueFrom } from 'rxjs';
 import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
 import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';
@@ -26,23 +30,34 @@ import {
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {
-    const esSearchStrategyMock = createEsSearchStrategyMock({
-      id: 'ASYNC_REQUEST_ID',
-      isRunning: true,
-      rawResponse: {
-        took: 0,
-        _shards: { total: 1, failed: 0, skipped: 0, successful: 0 },
-        timed_out: false,
-        hits: { total: 0, max_score: 0, hits: [] },
+    const esSearchStrategy = createEsSearchStrategy();
+    const mockDependencies = createSearchStrategyDependenciesMock();
+    const esClient = mockDependencies.esClient.asCurrentUser;
+    esClient.asyncSearch.submit.mockResolvedValueOnce({
+      body: {
+        id: 'ASYNC_REQUEST_ID',
+        response: {
+          took: 0,
+          _shards: { total: 1, failed: 0, skipped: 0, successful: 0 },
+          timed_out: false,
+          hits: { total: 0, max_score: 0, hits: [] },
+        },
+        is_partial: false,
+        is_running: false,
+        expiration_time_in_millis: 0,
+        start_time_in_millis: 0,
       },
-    });
+      statusCode: 200,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    } as TransportResult<AsyncSearchSubmitResponse> as any); // type inference for the mock fails
 
-    const dataMock = createDataPluginMock(esSearchStrategyMock);
+    const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
     logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
-    const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
@@ -62,72 +77,88 @@ describe('LogEntry search strategy', () => {
       )
     );
 
+    // ensure log view was resolved
     expect(logViewsMock.getScopedClient).toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();
-    expect(esSearchStrategyMock.search).toHaveBeenCalledWith(
-      {
-        params: expect.objectContaining({
-          index: 'log-indices-*',
-          body: expect.objectContaining({
-            track_total_hits: false,
-            terminate_after: 1,
-            query: {
-              ids: {
-                values: ['LOG_ENTRY_ID'],
+
+    // ensure search request was made
+    expect(esClient.asyncSearch.submit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'log-indices-*',
+        body: expect.objectContaining({
+          track_total_hits: false,
+          terminate_after: 1,
+          query: {
+            ids: {
+              values: ['LOG_ENTRY_ID'],
+            },
+          },
+          runtime_mappings: {
+            runtime_field: {
+              type: 'keyword',
+              script: {
+                source: 'emit("runtime value")',
               },
             },
-            runtime_mappings: {
-              runtime_field: {
-                type: 'keyword',
-                script: {
-                  source: 'emit("runtime value")',
-                },
-              },
-            },
-          }),
+          },
         }),
-      },
-      expect.anything(),
+      }),
       expect.anything()
     );
+
+    // ensure response content is as expected
     expect(response.id).toEqual(expect.any(String));
-    expect(response.isRunning).toBe(true);
+    expect(response.isRunning).toBe(false);
   });
 
   it('handles subsequent polling requests', async () => {
     const date = new Date(1605116827143).toISOString();
-    const esSearchStrategyMock = createEsSearchStrategyMock({
-      id: 'ASYNC_REQUEST_ID',
-      isRunning: false,
-      rawResponse: {
-        took: 1,
-        _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
-        timed_out: false,
-        hits: {
-          total: 0,
-          max_score: 0,
-          hits: [
-            {
-              _id: 'HIT_ID',
-              _index: 'HIT_INDEX',
-              _score: 0,
-              _source: null,
-              fields: {
-                '@timestamp': [date],
-                message: ['HIT_MESSAGE'],
+    const esSearchStrategy = createEsSearchStrategy();
+    const mockDependencies = createSearchStrategyDependenciesMock();
+    const esClient = mockDependencies.esClient.asCurrentUser;
+
+    // set up response to polling request
+    esClient.asyncSearch.get.mockResolvedValueOnce({
+      body: {
+        id: 'ASYNC_REQUEST_ID',
+        response: {
+          took: 0,
+          _shards: { total: 1, failed: 0, skipped: 0, successful: 0 },
+          timed_out: false,
+          hits: {
+            total: 1,
+            max_score: 0,
+            hits: [
+              {
+                _id: 'HIT_ID',
+                _index: 'HIT_INDEX',
+                _score: 0,
+                _source: null,
+                fields: {
+                  '@timestamp': [date],
+                  message: ['HIT_MESSAGE'],
+                },
+                sort: [date as any, 1 as any], // incorrectly typed as string upstream
               },
-              sort: [date as any, 1 as any], // incorrectly typed as string upstream
-            },
-          ],
+            ],
+          },
         },
+        is_partial: false,
+        is_running: false,
+        expiration_time_in_millis: 0,
+        start_time_in_millis: 0,
       },
-    });
-    const dataMock = createDataPluginMock(esSearchStrategyMock);
+      statusCode: 200,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    } as TransportResult<AsyncSearchSubmitResponse> as any);
+
+    const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
     logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
-    const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
@@ -151,9 +182,18 @@ describe('LogEntry search strategy', () => {
       )
     );
 
+    // ensure search was polled using the get API
+    expect(esClient.asyncSearch.get).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'ASYNC_REQUEST_ID' }),
+      expect.anything()
+    );
+    expect(esClient.asyncSearch.status).not.toHaveBeenCalled();
+
+    // ensure log view was not resolved again
     expect(logViewsMock.getScopedClient).not.toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).not.toHaveBeenCalled();
-    expect(esSearchStrategyMock.search).toHaveBeenCalled();
+
+    // ensure response content is as expected
     expect(response.id).toEqual(requestId);
     expect(response.isRunning).toBe(false);
     expect(response.rawResponse.data).toEqual({
@@ -171,22 +211,30 @@ describe('LogEntry search strategy', () => {
   });
 
   it('forwards errors from the underlying search strategy', async () => {
-    const esSearchStrategyMock = createEsSearchStrategyMock({
-      id: 'ASYNC_REQUEST_ID',
-      isRunning: false,
-      rawResponse: {
-        took: 1,
-        _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
-        timed_out: false,
-        hits: { total: 0, max_score: 0, hits: [] },
-      },
-    });
-    const dataMock = createDataPluginMock(esSearchStrategyMock);
+    const esSearchStrategy = createEsSearchStrategy();
+    const mockDependencies = createSearchStrategyDependenciesMock();
+    const esClient = mockDependencies.esClient.asCurrentUser;
+
+    // set up failing response
+    esClient.asyncSearch.get.mockRejectedValueOnce(
+      new errors.ResponseError({
+        body: {
+          error: {
+            type: 'mock_error',
+          },
+        },
+        headers: {},
+        meta: {} as any,
+        statusCode: 404,
+        warnings: [],
+      })
+    );
+
+    const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
     logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
-    const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
@@ -205,26 +253,24 @@ describe('LogEntry search strategy', () => {
       mockDependencies
     );
 
-    await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
+    await expect(lastValueFrom(response)).rejects.toThrowError(KbnSearchError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {
-    const esSearchStrategyMock = createEsSearchStrategyMock({
-      id: 'ASYNC_REQUEST_ID',
-      isRunning: false,
-      rawResponse: {
-        took: 1,
-        _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
-        timed_out: false,
-        hits: { total: 0, max_score: 0, hits: [] },
-      },
+    const esSearchStrategy = createEsSearchStrategy();
+    const mockDependencies = createSearchStrategyDependenciesMock();
+    const esClient = mockDependencies.esClient.asCurrentUser;
+
+    // set up response to cancellation request
+    esClient.asyncSearch.delete.mockResolvedValueOnce({
+      acknowledged: true,
     });
-    const dataMock = createDataPluginMock(esSearchStrategyMock);
+
+    const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
     logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
-    const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
@@ -236,34 +282,23 @@ describe('LogEntry search strategy', () => {
 
     await logEntrySearchStrategy.cancel?.(requestId, {}, mockDependencies);
 
-    expect(esSearchStrategyMock.cancel).toHaveBeenCalled();
+    // ensure cancellation request is forwarded
+    expect(esClient.asyncSearch.delete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'ASYNC_REQUEST_ID',
+      })
+    );
   });
 });
 
-const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
-  search: jest.fn((esSearchRequest: IEsSearchRequest) => {
-    if (typeof esSearchRequest.id === 'string') {
-      if (esSearchRequest.id === esSearchResponse.id) {
-        return of(esSearchResponse);
-      } else {
-        return throwError(
-          new errors.ResponseError({
-            body: {},
-            headers: {},
-            meta: {} as any,
-            statusCode: 404,
-            warnings: [],
-          })
-        );
-      }
-    } else {
-      return of(esSearchResponse);
-    }
-  }),
-  cancel: jest.fn().mockResolvedValue(undefined),
-});
+const createEsSearchStrategy = () => {
+  const legacyConfig$ = EMPTY;
+  const searchConfig = getMockSearchConfig({});
+  const logger = loggerMock.create();
+  return enhancedEsSearchStrategyProvider(legacyConfig$, searchConfig, logger);
+};
 
-const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => ({
+const createSearchStrategyDependenciesMock = () => ({
   uiSettingsClient: uiSettingsServiceMock.createClient(),
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),

@@ -33,7 +33,9 @@ import { RowCommandContext } from "./esql_parser";
 import { FieldsContext } from "./esql_parser";
 import { FieldContext } from "./esql_parser";
 import { FromCommandContext } from "./esql_parser";
-import { IndexIdentifierContext } from "./esql_parser";
+import { IndexPatternContext } from "./esql_parser";
+import { ClusterStringContext } from "./esql_parser";
+import { IndexStringContext } from "./esql_parser";
 import { MetadataContext } from "./esql_parser";
 import { MetadataOptionContext } from "./esql_parser";
 import { Deprecated_metadataContext } from "./esql_parser";
@@ -51,11 +53,13 @@ import { QualifiedIntegerLiteralContext } from "./esql_parser";
 import { DecimalLiteralContext } from "./esql_parser";
 import { IntegerLiteralContext } from "./esql_parser";
 import { BooleanLiteralContext } from "./esql_parser";
-import { InputParamContext } from "./esql_parser";
+import { InputParamsContext } from "./esql_parser";
 import { StringLiteralContext } from "./esql_parser";
 import { NumericArrayLiteralContext } from "./esql_parser";
 import { BooleanArrayLiteralContext } from "./esql_parser";
 import { StringArrayLiteralContext } from "./esql_parser";
+import { InputParamContext } from "./esql_parser";
+import { InputNamedOrPositionalParamContext } from "./esql_parser";
 import { LimitCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
 import { OrderExpressionContext } from "./esql_parser";
@@ -417,15 +421,35 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFromCommand?: (ctx: FromCommandContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.indexIdentifier`.
+	 * Enter a parse tree produced by `esql_parser.indexPattern`.
 	 * @param ctx the parse tree
 	 */
-	enterIndexIdentifier?: (ctx: IndexIdentifierContext) => void;
+	enterIndexPattern?: (ctx: IndexPatternContext) => void;
 	/**
-	 * Exit a parse tree produced by `esql_parser.indexIdentifier`.
+	 * Exit a parse tree produced by `esql_parser.indexPattern`.
 	 * @param ctx the parse tree
 	 */
-	exitIndexIdentifier?: (ctx: IndexIdentifierContext) => void;
+	exitIndexPattern?: (ctx: IndexPatternContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.clusterString`.
+	 * @param ctx the parse tree
+	 */
+	enterClusterString?: (ctx: ClusterStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.clusterString`.
+	 * @param ctx the parse tree
+	 */
+	exitClusterString?: (ctx: ClusterStringContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.indexString`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexString?: (ctx: IndexStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.indexString`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexString?: (ctx: IndexStringContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.metadata`.
 	 * @param ctx the parse tree
@@ -607,17 +631,17 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitBooleanLiteral?: (ctx: BooleanLiteralContext) => void;
 	/**
-	 * Enter a parse tree produced by the `inputParam`
+	 * Enter a parse tree produced by the `inputParams`
 	 * labeled alternative in `esql_parser.constant`.
 	 * @param ctx the parse tree
 	 */
-	enterInputParam?: (ctx: InputParamContext) => void;
+	enterInputParams?: (ctx: InputParamsContext) => void;
 	/**
-	 * Exit a parse tree produced by the `inputParam`
+	 * Exit a parse tree produced by the `inputParams`
 	 * labeled alternative in `esql_parser.constant`.
 	 * @param ctx the parse tree
 	 */
-	exitInputParam?: (ctx: InputParamContext) => void;
+	exitInputParams?: (ctx: InputParamsContext) => void;
 	/**
 	 * Enter a parse tree produced by the `stringLiteral`
 	 * labeled alternative in `esql_parser.constant`.
@@ -666,6 +690,30 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitStringArrayLiteral?: (ctx: StringArrayLiteralContext) => void;
+	/**
+	 * Enter a parse tree produced by the `inputParam`
+	 * labeled alternative in `esql_parser.params`.
+	 * @param ctx the parse tree
+	 */
+	enterInputParam?: (ctx: InputParamContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputParam`
+	 * labeled alternative in `esql_parser.params`.
+	 * @param ctx the parse tree
+	 */
+	exitInputParam?: (ctx: InputParamContext) => void;
+	/**
+	 * Enter a parse tree produced by the `inputNamedOrPositionalParam`
+	 * labeled alternative in `esql_parser.params`.
+	 * @param ctx the parse tree
+	 */
+	enterInputNamedOrPositionalParam?: (ctx: InputNamedOrPositionalParamContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputNamedOrPositionalParam`
+	 * labeled alternative in `esql_parser.params`.
+	 * @param ctx the parse tree
+	 */
+	exitInputNamedOrPositionalParam?: (ctx: InputNamedOrPositionalParamContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.limitCommand`.
 	 * @param ctx the parse tree

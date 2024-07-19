@@ -17,7 +17,9 @@ export type UpsellingSectionId =
   | 'osquery_automated_response_actions'
   | 'endpoint_protection_updates'
   | 'endpoint_agent_tamper_protection'
-  | 'ruleDetailsEndpointExceptions';
+  | 'cloud_security_posture_integration_installation'
+  | 'ruleDetailsEndpointExceptions'
+  | 'integration_assistant';
 
 export type UpsellingMessageId =
   | 'investigation_guide'

@@ -93,7 +93,8 @@ export const COLUMN_SOURCE_EVENT_TIME_RANGE = i18n.translate(
 export const COLUMN_SOURCE_EVENT_TIME_RANGE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.sourceEventTimeRangeTooltip',
   {
-    defaultMessage: "Only for manual rule runs. Don't include additional lookback time.",
+    defaultMessage:
+      "Only applies to manual rule executions. If the rule has look-back time, it's included in the logged time range.",
   }
 );
 

@@ -211,11 +211,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           transformPreview: {
             column: 0,
             values: [
-              'July 12th 2019, 22:16:19',
-              'July 12th 2019, 22:50:53',
-              'July 12th 2019, 23:06:43',
-              'July 12th 2019, 23:15:22',
-              'July 12th 2019, 23:31:12',
+              'July 12th 2023, 22:16:19',
+              'July 12th 2023, 22:50:53',
+              'July 12th 2023, 23:06:43',
+              'July 12th 2023, 23:15:22',
+              'July 12th 2023, 23:31:12',
             ],
           },
           discoverQueryHits: '10',

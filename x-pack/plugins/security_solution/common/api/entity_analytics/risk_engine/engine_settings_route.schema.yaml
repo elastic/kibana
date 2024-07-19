@@ -12,9 +12,10 @@ servers:
         default: '5601'
 
 paths:
-  /engine/settings:
-    x-internal: true
+  /internal/risk_score/engine/settings:
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: RiskEngineSettingsGet
       summary: Get the settings of the Risk Engine
       responses:

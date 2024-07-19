@@ -8,7 +8,7 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { LegendLayout, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { LEGEND_CONFIG } from '../constants';
 import { LegendConfigFn } from '../types';
 
@@ -105,6 +105,26 @@ export const legendConfigFunction: LegendConfigFn = {
       help: i18n.translate('expressionXY.legendConfig.legendStats.help', {
         defaultMessage: 'Specifies the legend stats.',
       }),
+    },
+    title: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.legendConfig.title.help', {
+        defaultMessage: 'Specifies the legend title.',
+      }),
+    },
+    isTitleVisible: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.legendConfig.isTitleVisible.help', {
+        defaultMessage: 'Specifies if the legend title is visible.',
+      }),
+    },
+    layout: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.legendConfig.legendLayout.help', {
+        defaultMessage: 'Specifies the legend layout.',
+      }),
+      options: [LegendLayout.Table, LegendLayout.List],
+      strict: true,
     },
   },
   async fn(input, args, handlers) {

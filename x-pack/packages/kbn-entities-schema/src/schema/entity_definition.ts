@@ -8,19 +8,20 @@
 import { z } from 'zod';
 import {
   arrayOfStringsSchema,
-  entityTypeSchema,
   keyMetricSchema,
   metadataSchema,
   filterSchema,
   durationSchema,
   identityFieldsSchema,
+  semVerSchema,
 } from './common';
 
 export const entityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
+  version: semVerSchema,
   name: z.string(),
   description: z.optional(z.string()),
-  type: entityTypeSchema,
+  type: z.string(),
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
@@ -34,7 +35,6 @@ export const entityDefinitionSchema = z.object({
     interval: durationSchema.refine((val) => val.asMinutes() >= 1, {
       message: 'The history.interval can not be less than 1m',
     }),
-    lookbackPeriod: z.optional(durationSchema),
     settings: z.optional(
       z.object({
         syncField: z.optional(z.string()),

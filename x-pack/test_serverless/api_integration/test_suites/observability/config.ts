@@ -21,6 +21,10 @@ export default createTestConfig({
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
   esServerArgs: ['xpack.ml.dfa.enabled=false'],
-  // defined in MKI control plane
-  kbnServerArgs: ['--xpack.uptime.service.manifestUrl=mockDevUrl'],
+  kbnServerArgs: [
+    // defined in MKI control plane
+    '--xpack.uptime.service.manifestUrl=mockDevUrl',
+    // useful for testing (also enabled in MKI QA)
+    '--coreApp.allowDynamicConfigOverrides=true',
+  ],
 });

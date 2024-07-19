@@ -26,6 +26,11 @@ import { EventFiltersForm } from './form';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  FILTER_PROCESS_DESCENDANTS_TAG,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -88,7 +93,7 @@ describe('Event filter form', () => {
       os_types: [OperatingSystem.WINDOWS],
       entries: [createEntry()],
       type: 'simple',
-      tags: ['policy:all'],
+      tags: [GLOBAL_ARTIFACT_TAG, FILTER_PROCESS_DESCENDANTS_TAG],
     };
     return {
       ...defaults,
@@ -333,9 +338,9 @@ describe('Event filter form', () => {
 
       // move back to global
       userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-global'));
-      formProps.item.tags = ['policy:all'];
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerenderWithLatestProps();
-      expect(formProps.item.tags).toEqual(['policy:all']);
+      expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
       expect(
         renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
       ).toBeFalsy();
@@ -366,7 +371,7 @@ describe('Event filter form', () => {
 
     it('should hide assignment section when no license', () => {
       render();
-      formProps.item.tags = ['policy:all'];
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerender();
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
     });
@@ -395,12 +400,12 @@ describe('Event filter form', () => {
         'eventFilters-form-effectedPolicies-global'
       ) as HTMLButtonElement;
       userEvent.click(globalButtonInput);
-      formProps.item.tags = ['policy:all'];
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerender();
       const expected = createOnChangeArgs({
         item: {
           ...formProps.item,
-          tags: ['policy:all'],
+          tags: [GLOBAL_ARTIFACT_TAG],
         },
       });
       expect(formProps.onChange).toHaveBeenCalledWith(expected);
@@ -409,95 +414,426 @@ describe('Event filter form', () => {
         ? formProps.onChange.mock.calls[0][0].item.tags[0]
         : '';
 
-      expect(policyItem).toBe('policy:all');
+      expect(policyItem).toBe(GLOBAL_ARTIFACT_TAG);
+    });
+  });
+
+  describe('Filter process descendants', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
+    });
+
+    it('should not display selector when feature flag is disabled', () => {
+      mockedContext.setExperimentalFlag({
+        filterProcessDescendantsForEventFiltersEnabled: false,
+      });
+      render();
+
+      expect(
+        renderResult.queryByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show `Events` filter selected when tags are missing', () => {
+      delete formProps.item.tags;
+      render();
+
+      expect(renderResult.getByTestId(`${formPrefix}-filterEventsButton`)).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      expect(
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+      ).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('should show `Events` filter selected when filtering process descendants is disabled in config', () => {
+      formProps.item.tags = [];
+      render();
+
+      expect(renderResult.getByTestId(`${formPrefix}-filterEventsButton`)).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      expect(
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+      ).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('should show `Process descendants` filter selected when enabled in config', () => {
+      formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+      render();
+
+      expect(renderResult.getByTestId(`${formPrefix}-filterEventsButton`)).toHaveAttribute(
+        'aria-pressed',
+        'false'
+      );
+      expect(
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+      ).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('should add process tree filtering tag to tags when filtering descendants enabled', () => {
+      formProps.item.tags = [];
+      render();
+
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+
+      expect(latestUpdatedItem.tags).toStrictEqual([FILTER_PROCESS_DESCENDANTS_TAG]);
+    });
+
+    it('should remove process tree filtering tag from tags when filtering descendants disabled', () => {
+      formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+      render();
+
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+
+      expect(latestUpdatedItem.tags).toStrictEqual([]);
+    });
+
+    it('should add the tag always after policy assignment tags', () => {
+      formProps.policies = createPolicies();
+      const perPolicyTags = formProps.policies.map(
+        (p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`
+      );
+      formProps.item.tags = perPolicyTags;
+      render();
+
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        ...perPolicyTags,
+        FILTER_PROCESS_DESCENDANTS_TAG,
+      ]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        GLOBAL_ARTIFACT_TAG,
+        FILTER_PROCESS_DESCENDANTS_TAG,
+      ]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+      expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        GLOBAL_ARTIFACT_TAG,
+        FILTER_PROCESS_DESCENDANTS_TAG,
+      ]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        ...perPolicyTags,
+        FILTER_PROCESS_DESCENDANTS_TAG,
+      ]);
+    });
+
+    it('should display a tooltip to the user', async () => {
+      const tooltipIconSelector = `${formPrefix}-filterProcessDescendantsTooltip-tooltipIcon`;
+      const tooltipTextSelector = `${formPrefix}-filterProcessDescendantsTooltip-tooltipText`;
+      render();
+
+      expect(renderResult.getByTestId(tooltipIconSelector)).toBeInTheDocument();
+      expect(renderResult.queryByTestId(tooltipTextSelector)).not.toBeInTheDocument();
+
+      userEvent.hover(renderResult.getByTestId(tooltipIconSelector));
+
+      expect(await renderResult.findByTestId(tooltipTextSelector)).toBeInTheDocument();
     });
   });
 
   describe('Warnings', () => {
-    beforeEach(() => {
-      render();
+    describe('duplicate fields', () => {
+      it('should not show warning text when unique fields are added', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: 'some value',
+          },
+          {
+            field: 'file.name',
+            operator: 'excluded',
+            type: 'match',
+            value: 'some other value',
+          },
+        ];
+        render();
+        expect(await renderResult.findByDisplayValue('some value')).toBeInTheDocument();
+
+        expect(
+          renderResult.queryByTestId('duplicate-fields-warning-message')
+        ).not.toBeInTheDocument();
+      });
+
+      it('should not show warning text when field values are not added', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: '',
+          },
+          {
+            field: 'event.category',
+            operator: 'excluded',
+            type: 'match',
+            value: '',
+          },
+        ];
+        render();
+        expect((await renderResult.findAllByTestId('fieldAutocompleteComboBox')).length).toBe(2);
+
+        expect(
+          renderResult.queryByTestId('duplicate-fields-warning-message')
+        ).not.toBeInTheDocument();
+      });
+
+      it('should show warning text when duplicate fields are added with values', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: 'some value',
+          },
+          {
+            field: 'event.category',
+            operator: 'excluded',
+            type: 'match',
+            value: 'some other value',
+          },
+        ];
+        render();
+
+        expect(
+          await renderResult.findByTestId('duplicate-fields-warning-message')
+        ).toBeInTheDocument();
+      });
+
+      describe('in relation with Process Descendant filtering', () => {
+        it('should not show warning text when event.category is added but feature flag is disabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: false,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 1',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 1')).toBeInTheDocument();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should not show warning text when event.category is added but process descendant filter is disabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 2',
+            },
+          ];
+          formProps.item.tags = [];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 2')).toBeInTheDocument();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should not show warning text when event.category is NOT added and process descendant filter is enabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.action',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 3',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 3')).toBeInTheDocument();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should show warning text when event.category is added and process descendant filter is enabled', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 4',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 4')).toBeInTheDocument();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+        });
+
+        it('should add warning text when switching to process descendant filtering', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 5',
+            },
+          ];
+          formProps.item.tags = [];
+
+          render();
+          expect(await renderResult.findByDisplayValue('some value 5')).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+
+          // switch to Process Descendant filtering
+          userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+          rerenderWithLatestProps();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+        });
+
+        it('should remove warning text when switching from process descendant filtering', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 6',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+
+          // switch to classic Event filtering
+          userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+          rerenderWithLatestProps();
+
+          expect(await renderResult.findByDisplayValue('some value 6')).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should remove warning text when removing `event.category`', async () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForEventFiltersEnabled: true,
+          });
+
+          formProps.item.entries = [
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'some value 6',
+            },
+          ];
+          formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
+
+          render();
+
+          expect(
+            await renderResult.findByTestId('duplicate-fields-warning-message')
+          ).toBeInTheDocument();
+
+          // switch to classic Event filtering
+          userEvent.click(renderResult.getByTestId(`builderItemEntryDeleteButton`));
+          rerenderWithLatestProps();
+
+          expect(
+            renderResult.queryByTestId('duplicate-fields-warning-message')
+          ).not.toBeInTheDocument();
+        });
+      });
     });
 
-    it('should not show warning text when unique fields are added', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: 'some value',
-        },
-        {
-          field: 'file.name',
-          operator: 'excluded',
-          type: 'match',
-          value: 'some other value',
-        },
-      ];
-      rerender();
-      expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
-    });
+    describe('wildcard with wrong operator', () => {
+      it('should not show warning callout when wildcard is used with the "MATCHES" operator', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'wildcard',
+            value: 'valuewithwildcard*',
+          },
+        ];
+        render();
+        expect(await renderResult.findByDisplayValue('valuewithwildcard*')).toBeInTheDocument();
 
-    it('should not show warning text when field values are not added', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: '',
-        },
-        {
-          field: 'event.category',
-          operator: 'excluded',
-          type: 'match',
-          value: '',
-        },
-      ];
-      rerender();
-      expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
-    });
+        expect(
+          renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+        ).not.toBeInTheDocument();
+      });
 
-    it('should show warning text when duplicate fields are added with values', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: 'some value',
-        },
-        {
-          field: 'event.category',
-          operator: 'excluded',
-          type: 'match',
-          value: 'some other value',
-        },
-      ];
-      rerender();
-      expect(renderResult.findByTestId('duplicate-fields-warning-message')).not.toBeNull();
-    });
+      it('should show warning callout when wildcard is used with the "IS" operator', async () => {
+        formProps.item.entries = [
+          {
+            field: 'event.category',
+            operator: 'included',
+            type: 'match',
+            value: 'valuewithwildcard*',
+          },
+        ];
+        render();
 
-    it('should not show warning callout when wildcard is used with the "MATCHES" operator', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'wildcard',
-          value: 'valuewithwildcard*',
-        },
-      ];
-      rerender();
-      expect(renderResult.queryByTestId('wildcardWithWrongOperatorCallout')).toBeNull();
-    });
-    it('should show warning callout when wildcard is used with the "IS" operator', async () => {
-      formProps.item.entries = [
-        {
-          field: 'event.category',
-          operator: 'included',
-          type: 'match',
-          value: 'valuewithwildcard*',
-        },
-      ];
-      rerender();
-      await expect(renderResult.findByTestId('wildcardWithWrongOperatorCallout')).not.toBeNull();
+        expect(
+          await renderResult.findByTestId('wildcardWithWrongOperatorCallout')
+        ).toBeInTheDocument();
+      });
     });
   });
 

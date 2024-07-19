@@ -1,0 +1,47 @@
+openapi: 3.0.0
+info:
+  title: Create an alerts index API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/index:
+    post:
+      x-labels: [ess]
+      operationId: CreateAlertsIndex
+      x-codegen-enabled: true
+      summary: Create an alerts index
+      tags:
+        - Alert index API
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+                required: [acknowledged]
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough permissions response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        404:
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

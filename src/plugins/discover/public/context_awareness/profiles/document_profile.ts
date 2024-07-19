@@ -8,12 +8,14 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Profile } from '../types';
-import { ProfileService } from '../profile_service';
+import { ProfileProvider, ProfileService } from '../profile_service';
 
 export enum DocumentType {
   Log = 'log',
   Default = 'default',
 }
+
+export type DocumentProfile = Omit<Profile, 'getCellRenderers'>;
 
 export interface DocumentProfileProviderParams {
   record: DataTableRecord;
@@ -23,7 +25,11 @@ export interface DocumentContext {
   type: DocumentType;
 }
 
-export type DocumentProfile = Omit<Profile, 'getCellRenderers'>;
+export type DocumentProfileProvider = ProfileProvider<
+  DocumentProfile,
+  DocumentProfileProviderParams,
+  DocumentContext
+>;
 
 export class DocumentProfileService extends ProfileService<
   DocumentProfile,
@@ -37,5 +43,3 @@ export class DocumentProfileService extends ProfileService<
     });
   }
 }
-
-export type DocumentProfileProvider = Parameters<DocumentProfileService['registerProvider']>[0];

@@ -158,7 +158,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
         <EuiFormRow
           display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.legendPosition', {
-            defaultMessage: 'Legend position',
+            defaultMessage: 'Position',
           })}
           fullWidth
         >
@@ -167,7 +167,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
               <EuiButtonGroup
                 isFullWidth
                 legend={i18n.translate('xpack.lens.shared.legendPosition', {
-                  defaultMessage: 'Legend position',
+                  defaultMessage: 'Position',
                 })}
                 data-test-subj="lens-legend-location-btn"
                 buttonSize="compressed"

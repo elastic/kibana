@@ -47,10 +47,11 @@ import {
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
-  KillOrSuspendProcessRequestBody,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -165,7 +166,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canKillProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'kill-process'
         )
@@ -188,7 +189,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canSuspendProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'suspend-process'
         )
@@ -301,7 +302,7 @@ export function registerResponseActionRoutes(
         withEndpointAuthz(
           { all: ['canWriteScanOperations'] },
           logger,
-          responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
+          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
         )
       );
   }
@@ -319,7 +320,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   const logger = endpointContext.logFactory.get('responseActionsHandler');
 
   return async (context, req, res) => {
-    logger.debug(`response action [${command}]:\n${stringify(req.body)}`);
+    logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
 
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
@@ -337,8 +338,9 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       );
     }
 
-    const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const coreContext = await context.core;
+    const user = coreContext.security.authc.getCurrentUser();
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
     const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
@@ -374,14 +376,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
         case 'suspend-process':
           action = await responseActionsClient.suspendProcess(
-            req.body as KillOrSuspendProcessRequestBody
+            req.body as SuspendProcessRequestBody
           );
           break;
 
         case 'kill-process':
-          action = await responseActionsClient.killProcess(
-            req.body as KillOrSuspendProcessRequestBody
-          );
+          action = await responseActionsClient.killProcess(req.body as KillProcessRequestBody);
           break;
 
         case 'get-file':

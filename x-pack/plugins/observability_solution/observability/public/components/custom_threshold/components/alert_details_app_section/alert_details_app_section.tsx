@@ -21,13 +21,7 @@ import {
 } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import {
-  ALERT_END,
-  ALERT_START,
-  ALERT_EVALUATION_VALUES,
-  ALERT_GROUP,
-  TAGS,
-} from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type {
   EventAnnotationConfig,
@@ -37,18 +31,16 @@ import type {
 import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { TimeRange } from '@kbn/es-query';
+import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
-import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField } from '../../../..';
 import { AlertParams } from '../../types';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
-import { Groups } from './groups';
-import { Tags } from './tags';
-import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
 import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
@@ -56,7 +48,6 @@ import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and
 interface AppSectionProps {
   alert: CustomThresholdAlert;
   rule: CustomThresholdRule;
-  ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
@@ -64,7 +55,6 @@ interface AppSectionProps {
 export default function AlertDetailsAppSection({
   alert,
   rule,
-  ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
   const services = useKibana().services;
@@ -89,7 +79,6 @@ export default function AlertDetailsAppSection({
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
-  const tags = alert.fields[TAGS];
 
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
@@ -145,64 +134,30 @@ export default function AlertDetailsAppSection({
 
   useEffect(() => {
     const alertSummaryFields = [];
-    if (groups) {
-      alertSummaryFields.push({
-        label: i18n.translate(
-          'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.source',
-          {
-            defaultMessage: 'Source',
-          }
-        ),
-        value: (
-          <>
-            <Groups
-              groups={groups}
-              timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
-            />
-            <span>
-              <EuiLink
-                data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
-                href={viewInAppUrl}
-              >
-                {i18n.translate(
-                  'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
-                  {
-                    defaultMessage: 'View related logs',
-                  }
-                )}
-              </EuiLink>
-            </span>
-          </>
-        ),
-      });
-    }
-    if (tags && tags.length > 0) {
-      alertSummaryFields.push({
-        label: i18n.translate(
-          'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.tags',
-          {
-            defaultMessage: 'Tags',
-          }
-        ),
-        value: <Tags tags={tags} />,
-      });
-    }
+
     alertSummaryFields.push({
       label: i18n.translate(
-        'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.rule',
+        'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.relatedLogs',
         {
-          defaultMessage: 'Rule',
+          defaultMessage: 'Related logs',
         }
       ),
       value: (
-        <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-          {rule.name}
-        </EuiLink>
+        <span>
+          <EuiLink
+            data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
+            href={viewInAppUrl}
+          >
+            {i18n.translate('xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel', {
+              defaultMessage: 'View related logs',
+            })}
+          </EuiLink>
+        </span>
       ),
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, timeRange, alertEnd, viewInAppUrl]);
+  }, [viewInAppUrl, setAlertSummaryFields]);
 
   useEffect(() => {
     const initDataView = async () => {

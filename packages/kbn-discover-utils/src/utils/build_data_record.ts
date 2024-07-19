@@ -32,15 +32,19 @@ export function buildDataTableRecord(
 
 /**
  * Helper to build multiple DataTableRecords at once, saved a bit of testing code lines
- * @param docs Array of documents returned from Elasticsearch
+ * @param records Array of documents returned from Elasticsearch
  * @param dataView this current data view
  */
-export function buildDataTableRecordList<T extends DataTableRecord = DataTableRecord>(
-  docs: EsHitRecord[],
-  dataView?: DataView,
-  { processRecord }: { processRecord?: (record: DataTableRecord) => T } = {}
-): DataTableRecord[] {
-  return docs.map((doc) => {
+export function buildDataTableRecordList<T extends DataTableRecord = DataTableRecord>({
+  records,
+  dataView,
+  processRecord,
+}: {
+  records: EsHitRecord[];
+  dataView?: DataView;
+  processRecord?: (record: DataTableRecord) => T;
+}): DataTableRecord[] {
+  return records.map((doc) => {
     const record = buildDataTableRecord(doc, dataView);
     return processRecord ? processRecord(record) : record;
   });

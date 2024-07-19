@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
-import { useVisibilityState } from '../../../../utils/use_visibility_state';
+import { useVisibilityState } from '../../../../hooks/use_visibility_state';
 import { CategoryQualityWarningReasonDescription } from '../../log_analysis_job_status/quality_warning_notices';
 
 export const IndexSetupDatasetFilter: React.FC<{
@@ -68,7 +68,7 @@ export const IndexSetupDatasetFilter: React.FC<{
     >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
-        defaultMessage="{includeType, select, includeAll {All datasets} other {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"
+        defaultMessage="{includeType, select, includeAll {All datasets} includeSome {{includedDatasetCount, plural, one {# dataset} other {# datasets}}} other {No dataset available}}"
         values={{
           includeType: datasetFilter.type,
           includedDatasetCount:
