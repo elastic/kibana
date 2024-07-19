@@ -465,6 +465,14 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    importTimelines(props: ImportTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_import')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     /**
      * Install and update all Elastic prebuilt detection rules and Timelines.
      */
@@ -474,6 +482,14 @@ detection engine rules.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_prepackaged')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
       * And tags to detection alerts, and remove them from alerts.
@@ -495,6 +511,17 @@ detection engine rules.
     patchRule(props: PatchRuleProps) {
       return supertest
         .patch('/api/detection_engine/rules')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+     */
+    patchTimeline(props: PatchTimelineProps) {
+      return supertest
+        .patch('/api/timeline')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

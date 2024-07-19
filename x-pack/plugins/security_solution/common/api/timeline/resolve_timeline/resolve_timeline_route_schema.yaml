@@ -39,9 +39,9 @@ paths:
                     type: object
                     properties:
                       getOneTimeline:
-                        oneOf:
-                          - $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
-                          - nullable: true
+                        nullable: true
+                        allOf:
+                          - $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
                 required:
                   - data
         '400':
