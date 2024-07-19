@@ -212,3 +212,8 @@ export interface FleetServerPolicy {
    */
   inactivity_timeout?: number;
 }
+
+export interface AgentlessApiResponse {
+  id: string;
+  region_id: string;
+}
