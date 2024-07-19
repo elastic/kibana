@@ -987,7 +987,7 @@
         "label": "Type",
         "description": [],
         "signature": [
-          "\"eql\" | \"esql\" | \"query\" | \"saved_query\" | \"threshold\" | \"threat_match\" | \"machine_learning\" | \"new_terms\""
+          "\"eql\" | \"esql\" | \"query\" | \"threshold\" | \"saved_query\" | \"threat_match\" | \"machine_learning\" | \"new_terms\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
@@ -1002,7 +1002,7 @@
         "label": "TypeOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"esql\" | \"query\" | \"saved_query\" | \"threshold\" | \"threat_match\" | \"machine_learning\" | \"new_terms\" | undefined"
+          "\"eql\" | \"esql\" | \"query\" | \"threshold\" | \"saved_query\" | \"threat_match\" | \"machine_learning\" | \"new_terms\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
