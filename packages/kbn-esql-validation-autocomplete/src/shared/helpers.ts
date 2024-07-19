@@ -17,6 +17,7 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
+import { isNumericDecimalType } from '@kbn/esql-ast/src/ast_helpers';
 import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
@@ -222,6 +223,10 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
 
 function compareLiteralType(argType: string, item: ESQLLiteral) {
   if (item.literalType === 'null') {
+    return true;
+  }
+
+  if (item.literalType === 'decimal' && isNumericDecimalType(argType)) {
     return true;
   }
 
@@ -437,7 +442,12 @@ export function checkFunctionArgMatchesDefinition(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
+    return wrappedTypes.some(
+      (ct) =>
+        ['any', 'null'].includes(ct) ||
+        (isNumericDecimalType(argType) && ct === 'decimal') ||
+        argType === ct
+    );
   }
   if (arg.type === 'inlineCast') {
     return argType === arg.castType;

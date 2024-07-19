@@ -19,10 +19,6 @@ const ESQL_NUMBER_TYPES = [
 
 const ESQL_TEXT_TYPES = ['text', 'keyword', 'string'];
 
-// @todo: consolidate with kbn-esql-ast
-export const isNumericType = (type: string) => ESQL_NUMBER_TYPES.includes(type);
-export const isTextType = (type: string) => ESQL_TEXT_TYPES.includes(type);
-
 export const esqlToKibanaType = (elasticsearchType: string) => {
   if (ESQL_NUMBER_TYPES.includes(elasticsearchType)) {
     return 'number';

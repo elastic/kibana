@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
 import { i18n } from '@kbn/i18n';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
@@ -227,7 +228,7 @@ export const mathFunctions: FunctionDefinition[] = [
       const [left, right] = fnDef.args;
       const messages = [];
       if (!Array.isArray(left) && !Array.isArray(right)) {
-        if (right.type === 'literal' && right.literalType === 'number') {
+        if (right.type === 'literal' && isNumericType(right.literalType)) {
           if (right.value === 0) {
             messages.push({
               type: 'warning' as const,

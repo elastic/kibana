@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import * as recast from 'recast';
 import { camelCase } from 'lodash';
+import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
 import { getParamAtPosition } from '../src/autocomplete/helper';
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
 import { evalFunctionDefinitions } from '../src/definitions/functions';
@@ -25,7 +26,6 @@ import {
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
 import { getMaxMinNumberOfParams } from '../src/validation/helpers';
-import { isNumericType } from '../src/shared/esql_to_kibana_type';
 
 export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
 

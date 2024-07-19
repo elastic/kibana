@@ -13,13 +13,17 @@ export const DOUBLE_TICKS_REGEX = /``/g;
 export const SINGLE_TICK_REGEX = /`/g;
 export const SINGLE_BACKTICK = '`';
 export const DOUBLE_BACKTICK = '``';
-export const ESQL_NUMBER_TYPES = [
+
+export const ESQL_NUMERIC_DECIMAL_TYPES = [
   'double',
   'unsigned_long',
   'long',
+  'counter_long',
+  'counter_double',
+] as const;
+export const ESQL_NUMBER_TYPES = [
   'integer',
   'int',
   'counter_integer',
-  'counter_long',
-  'counter_double',
+  ...ESQL_NUMERIC_DECIMAL_TYPES,
 ] as const;

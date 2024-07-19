@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ESQL_NUMBER_TYPES } from './constants';
-
 export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
@@ -109,16 +107,11 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
-export type ESQLNumericLiteralType = typeof ESQL_NUMBER_TYPES[number];
+export type ESQLNumericLiteralType = 'decimal' | 'integer' | 'int';
 
 export type ESQLLiteral =
-  | ESQLDoubleLiteral
-  | ESQLUnsignedLongLiteral
-  | ESQLLongLiteral
+  | ESQLDecimalLiteral
   | ESQLIntegerLiteral
-  | ESQLCounterIntegerLiteral
-  | ESQLCounterLongLiteral
-  | ESQLCounterDouble
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
@@ -134,21 +127,11 @@ export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ES
   literalType: T;
   value: number;
 }
-// @todo: verify if we need 'int' type
+// We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
 // @internal
-export type ESQLDoubleLiteral = ESQLNumericLiteral<'double'>;
-// @internal
-export type ESQLUnsignedLongLiteral = ESQLNumericLiteral<'unsigned_long'>;
-// @internal
-export type ESQLLongLiteral = ESQLNumericLiteral<'long'>;
-// @internal
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+// @todo: Verify if we need to support 'int'
 export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'> | ESQLNumericLiteral<'int'>;
-// @internal
-export type ESQLCounterIntegerLiteral = ESQLNumericLiteral<'counter_integer'>;
-// @internal
-export type ESQLCounterLongLiteral = ESQLNumericLiteral<'counter_long'>;
-// @internal
-export type ESQLCounterDouble = ESQLNumericLiteral<'counter_double'>;
 
 // @internal
 export interface ESQLBooleanLiteral extends ESQLAstBaseItem {

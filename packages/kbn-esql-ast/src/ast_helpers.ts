@@ -19,7 +19,13 @@ import type {
   QualifiedIntegerLiteralContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
-import { DOUBLE_TICKS_REGEX, ESQL_NUMBER_TYPES, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
+import {
+  DOUBLE_TICKS_REGEX,
+  ESQL_NUMBER_TYPES,
+  ESQL_NUMERIC_DECIMAL_TYPES,
+  SINGLE_BACKTICK,
+  TICKS_REGEX,
+} from './constants';
 import type {
   ESQLAstBaseItem,
   ESQLCommand,
@@ -42,7 +48,16 @@ export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
 }
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
-  return typeof type === 'string' && ESQL_NUMBER_TYPES.includes(type as ESQLNumericLiteralType);
+  return (
+    typeof type === 'string' && ESQL_NUMBER_TYPES.includes(type as typeof ESQL_NUMBER_TYPES[number])
+  );
+}
+
+export function isNumericDecimalType(type: unknown): type is ESQLNumericLiteralType {
+  return (
+    typeof type === 'string' &&
+    ESQL_NUMERIC_DECIMAL_TYPES.includes(type as typeof ESQL_NUMERIC_DECIMAL_TYPES[number])
+  );
 }
 
 export function createAstBaseItem<Name = string>(

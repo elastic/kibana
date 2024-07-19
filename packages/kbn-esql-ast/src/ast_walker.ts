@@ -84,7 +84,7 @@ import {
   createUnknownItem,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
-import type {
+import {
   ESQLLiteral,
   ESQLColumn,
   ESQLFunction,
@@ -323,9 +323,13 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     // e.g. 1 year, 15 months
     return createTimeUnit(ctx);
   }
+
+  // Decimal type covers multiple ES|QL types: long, double, etc.
   if (ctx instanceof DecimalLiteralContext) {
-    return createNumericLiteral(ctx.decimalValue(), 'double');
+    return createNumericLiteral(ctx.decimalValue(), 'decimal');
   }
+
+  // Integer type encompasses integer
   if (ctx instanceof IntegerLiteralContext) {
     return createNumericLiteral(ctx.integerValue(), 'integer');
   }
@@ -346,7 +350,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     for (const numericValue of ctx.getTypedRuleContexts(NumericValueContext)) {
       const isDecimal = numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
+      values.push(createNumericLiteral(value!, isDecimal ? 'decimal' : 'integer'));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(BooleanValueContext)) {
       values.push(getBooleanValue(booleanValue)!);

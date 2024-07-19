@@ -16,6 +16,7 @@ import type {
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
+import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   lookupColumn,
@@ -1288,7 +1289,7 @@ async function getFunctionArgsSuggestions(
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
-      if (isLiteralItem(arg) && arg.literalType === 'number') {
+      if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
