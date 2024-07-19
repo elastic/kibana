@@ -28,6 +28,7 @@ import { docLinks } from '../../../shared/doc_links';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { DevToolsConsoleCodeBlock } from '../../../vector_search/components/dev_tools_console_code_block/dev_tools_console_code_block';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../../../vector_search/components/layout/page_template';
+import './semantic_search_guide.scss';
 
 const SETUP_INFERENCE_ENDPOINT_ELSER = `PUT _inference/sparse_embedding/my-inference-endpoint
 {
@@ -155,6 +156,9 @@ const SelectModelPanel: React.FC<SelectModelPanelProps> = ({
     <EuiFlexItem>
       <EuiCard
         title={model.modelName}
+        className={
+          isSelectedModel ? 'chooseEmbeddingModelSelectedBorder' : 'chooseEmbeddingModelBorder'
+        }
         description={
           <>
             <EuiText>

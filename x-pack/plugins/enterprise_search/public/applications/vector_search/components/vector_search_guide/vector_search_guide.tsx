@@ -230,7 +230,7 @@ export const VectorSearchGuide: React.FC = () => {
               title={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.title"
-                  defaultMessage="E5 Multi-Lingual"
+                  defaultMessage="E5 Multilingual"
                 />
               }
               description={
