@@ -46,7 +46,7 @@ export const DefaultLayout: React.FC<Props> = memo(
       },
     ];
 
-    const { CreateIntegrationCardButton } = integrationImport?.components ?? {};
+    const { IntegrationImportCardButton } = integrationImport?.components ?? {};
 
     return (
       <WithHeaderLayout
@@ -79,9 +79,9 @@ export const DefaultLayout: React.FC<Props> = memo(
         }
         rightColumnGrow={false}
         rightColumn={
-          CreateIntegrationCardButton ? (
+          IntegrationImportCardButton ? (
             <EuiFlexItem grow={false}>
-              <CreateIntegrationCardButton />
+              <IntegrationImportCardButton />
             </EuiFlexItem>
           ) : undefined
         }

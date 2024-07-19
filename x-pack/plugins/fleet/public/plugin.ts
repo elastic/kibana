@@ -18,7 +18,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { IntegrationImportPluginStart } from '@kbn/integration-assistant-plugin/public';
+import type { IntegrationImportPluginStart } from '@kbn/integration-import-plugin/public';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type {

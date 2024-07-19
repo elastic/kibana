@@ -130,9 +130,7 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'integration_import',
     pli: ProductFeatureKey.integrationImport,
-    component: () => (
-      <IntegrationImportLazy requiredPLI={ProductFeatureKey.integrationImport} />
-    ),
+    component: () => <IntegrationImportLazy requiredPLI={ProductFeatureKey.integrationImport} />,
   },
 ];
 
