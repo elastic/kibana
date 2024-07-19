@@ -19,5 +19,6 @@
     "@kbn/core-base-browser-internal",
     "@kbn/core-feature-flags-browser",
     "@kbn/logging",
+    "@kbn/core-base-browser-mocks",
   ]
 }

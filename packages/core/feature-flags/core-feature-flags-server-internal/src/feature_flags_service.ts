@@ -54,7 +54,7 @@ export class FeatureFlagsService {
     const observeFeatureFlag$ = (flagName: string) =>
       featureFlagsChanged$.pipe(
         filter((flagNames) => flagNames.includes(flagName)),
-        startWith([]) // only to emit on the first call
+        startWith([flagName]) // only to emit on the first call
       );
 
     return {
@@ -125,7 +125,8 @@ export class FeatureFlagsService {
     fallbackValue: T
   ): Promise<T> {
     // TODO: intercept with config overrides
-    const value = await evaluationFn(flagName, fallbackValue);
+    // We have to bind the evaluation or the client will lose its internal context
+    const value = await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName}`]: value });
     // TODO: increment usage counter
     return value;

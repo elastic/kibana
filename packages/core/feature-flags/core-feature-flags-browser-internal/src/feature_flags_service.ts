@@ -55,7 +55,7 @@ export class FeatureFlagsService {
     const observeFeatureFlag$ = (flagName: string) =>
       featureFlagsChanged$.pipe(
         filter((flagNames) => flagNames.includes(flagName)),
-        startWith([]) // only to emit on the first call
+        startWith([flagName]) // only to emit on the first call
       );
 
     await this.waitForProviderInitialization();
@@ -116,7 +116,7 @@ export class FeatureFlagsService {
     let timeoutId: NodeJS.Timeout | undefined;
     await Promise.race([
       this.isProviderReadyPromise,
-      await new Promise((resolve) => {
+      new Promise((resolve) => {
         timeoutId = setTimeout(resolve, 2 * 1000);
       }).then(() => {
         this.logger.warn('The feature flags provider took too long to initialize');
@@ -138,7 +138,8 @@ export class FeatureFlagsService {
     fallbackValue: T
   ): T {
     // TODO: intercept with config overrides
-    const value = evaluationFn(flagName, fallbackValue);
+    // We have to bind the evaluation or the client will lose its internal context
+    const value = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName}`]: value });
     // TODO: increment usage counter
     return value;
