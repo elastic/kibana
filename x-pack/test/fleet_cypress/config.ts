@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -44,8 +44,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'agentTamperProtectionEnabled',
           'subfeaturePrivileges',
+          'agentless',
         ])}`,
 
+        `--xpack.fleet.agentless.api.url=http://localhost.agentless.api/api/v1/ess`,
+        `--xpack.fleet.agentless.api.tls.certificate='${KBN_CERT_PATH}'`,
+        `--xpack.fleet.agentless.api.tls.key='${KBN_KEY_PATH}'`,
+        `--xpack.fleet.agentless.api.tls.ca='${CA_CERT_PATH}'`,
+        `--xpack.cloud.id=something-anything`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),
 
