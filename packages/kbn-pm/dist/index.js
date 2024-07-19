@@ -69491,6 +69491,14 @@ const ResetCommand = {
       });
       _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Removed disk caches');
     }
+
+    // Deletes the data folder
+    if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isDirectory"])(kbn.getDataFolder())) {
+      await del__WEBPACK_IMPORTED_MODULE_1___default()(kbn.getDataFolder(), {
+        force: true
+      });
+      _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Removed data folder');
+    }
     if (toDelete.length === 0) {
       return;
     }
@@ -69950,6 +69958,9 @@ class Kibana {
       }
       throw error;
     }
+  }
+  getDataFolder() {
+    return this.getAbsolute('data');
   }
 }
 
