@@ -194,6 +194,8 @@ export const setRecoveredAlertsContext = ({
     const locationId = alertHit?.['location.id'];
     const configId = alertHit?.configId;
 
+    const { checks, downThreshold } = state;
+
     let recoveryReason = '';
     let recoveryStatus = i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.defaultRecovery.status',
