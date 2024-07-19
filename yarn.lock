@@ -5250,6 +5250,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/integration-import-plugin@link:x-pack/plugins/integration_import":
+  version "0.0.0"
+  uid ""
+
 "@kbn/interactive-setup-plugin@link:src/plugins/interactive_setup":
   version "0.0.0"
   uid ""
