@@ -374,7 +374,6 @@ describe('setRecoveredAlertsContext', () => {
         timestamp: '2023-02-26T00:00:00.000Z',
         reason:
           'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
-        idWithLocation,
         locationId: location,
       },
     });
