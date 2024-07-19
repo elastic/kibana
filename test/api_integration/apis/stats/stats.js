@@ -9,37 +9,65 @@
 import expect from '@kbn/expect';
 import { schema } from '@kbn/config-schema';
 
-const statsResponseSchema = schema.object({
+const processSchema = schema.object({
+  pid: schema.number(),
+  uptime_ms: schema.number(),
+  event_loop_delay: schema.number(),
+  event_loop_delay_histogram: schema.object({
+    min: schema.number(),
+    mean: schema.number(),
+    exceeds: schema.number(),
+    stddev: schema.number(),
+    max: schema.number(),
+    from_timestamp: schema.string(),
+    last_updated_at: schema.string(),
+    percentiles: schema.object({
+      50: schema.number(),
+      75: schema.number(),
+      95: schema.number(),
+      99: schema.number(),
+    }),
+  }),
+  event_loop_utilization: schema.object({
+    active: schema.number(),
+    idle: schema.number(),
+    utilization: schema.number(),
+  }),
+  memory: schema.object({
+    heap: schema.object({
+      total_bytes: schema.number(),
+      used_bytes: schema.number(),
+      size_limit: schema.number(),
+    }),
+    resident_set_size_bytes: schema.number(),
+    external_bytes: schema.number(),
+    array_buffers_bytes: schema.number(),
+  }),
+});
+
+const baseResponseSchema = schema.object({
+  last_updated: schema.string(),
+  collection_interval_ms: schema.number(),
+  usage: schema.object({}),
   kibana: schema.object({
     name: schema.string(),
     uuid: schema.string(),
     host: schema.string(),
+    index: schema.string(),
+    locale: schema.string(),
     transport_address: schema.string(),
     version: schema.string(),
-    snapshot: schema.string(),
+    snapshot: schema.boolean(),
     status: schema.string(),
   }),
-  process: schema.object({
-    pid: schema.number(),
-    uptime_ms: schema.number(),
-    event_loop_delay: schema.number(),
-    event_loop_utilization: schema.object({
-      active: schema.number(),
-      idle: schema.number(),
-      utilization: schema.number(),
-    }),
-    memory: schema.object({
-      heap: schema.object({
-        total_bytes: schema.number(),
-        used_bytes: schema.number(),
-        size_limit: schema.number(),
-      }),
-      resident_set_size_bytes: schema.number(),
-    }),
-  }),
+  process: processSchema,
+  processes: schema.arrayOf(processSchema),
   os: schema.object({
+    platform: schema.string(),
+    platform_release: schema.string(),
     memory: schema.object({
       free_bytes: schema.number(),
+      used_bytes: schema.number(),
       total_bytes: schema.number(),
     }),
     uptime_ms: schema.number(),
@@ -49,6 +77,11 @@ const statsResponseSchema = schema.object({
       '15m': schema.number(),
     }),
   }),
+  elasticsearch_client: schema.object({
+    total_active_sockets: schema.number(),
+    total_idle_sockets: schema.number(),
+    total_queued_requests: schema.number(),
+  }),
   response_times: schema.object({
     avg_ms: schema.maybe(schema.number()),
     max_ms: schema.maybe(schema.number()),
@@ -56,12 +89,29 @@ const statsResponseSchema = schema.object({
   requests: schema.object({
     total: schema.number(),
     disconnects: schema.number(),
+    status_codes: schema.recordOf(schema.number(), schema.number()),
   }),
   concurrent_connections: schema.number(),
 });
 
-const assertStatsAndMetrics = (body) => {
-  expect(() => statsResponseSchema.validate(body)).not.to.throwError();
+const legacyResponseSchema = baseResponseSchema.extends({
+  clusterUuid: schema.string(),
+});
+
+const statsResponseSchema = baseResponseSchema.extends({
+  cluster_uuid: schema.maybe(schema.string()),
+});
+
+const assertStatsAndMetrics = (body, legacy = false) => {
+  try {
+    if (legacy) {
+      legacyResponseSchema.validate(body);
+    } else {
+      statsResponseSchema.validate(body);
+    }
+  } catch (e) {
+    expect().fail(`Expected /api/stats response to match schema: ${e.message}`);
+  }
 };
 
 export default function ({ getService }) {
