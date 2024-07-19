@@ -32,7 +32,7 @@ export const SemanticSearchSection: React.FC = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.semanticSearch.title"
-                  defaultMessage="Set up semantic search"
+                  defaultMessage="ML Applications"
                 />
               </h2>
             </EuiTitle>
@@ -42,7 +42,7 @@ export const SemanticSearchSection: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.semanticSearch.description"
-                  defaultMessage="Combine any of these information retrieval tools."
+                  defaultMessage="Use Elasticsearch to build applications that leverage machine learning capabilities."
                 />
               </p>
             </EuiText>
@@ -90,6 +90,29 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <VectorSearchPanel />
+            </AISearchGuideAccordion>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AISearchGuideAccordion
+              id="nlpEnrichmentAccordion"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentAccordion"
+              icon={nlpEnrichmentIllustration}
+              title={i18n.translate(
+                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.title',
+                {
+                  defaultMessage: 'NLP Enrichment',
+                }
+              )}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.description',
+                {
+                  defaultMessage: 'Extract entities and sentiment from text',
+                }
+              )}
+              currentExpandedId={currentExpandedId}
+              onToggle={setCurrentExpandedId}
+            >
+              <NlpEnrichmentPanel />
             </AISearchGuideAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>

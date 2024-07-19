@@ -9,16 +9,7 @@ import React from 'react';
 
 import { generatePath } from 'react-router-dom';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-} from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -66,7 +57,6 @@ export const ElserPanel: React.FC = () => (
           <EuiButton
             data-test-subj="enterpriseSearchElserPanelSetupSemanticSearchButton"
             data-telemetry-id="entSearch-aiSearch-semanticSearch-elserPanel-setupSemanticSearch"
-            iconType="plusInCircle"
           >
             {i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.buttonLabel', {
               defaultMessage: 'Setup Semantic Search',

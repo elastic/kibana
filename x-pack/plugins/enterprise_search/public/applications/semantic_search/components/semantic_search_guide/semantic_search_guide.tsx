@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useSearchParams } from 'react-router-dom-v5-compat';
+
 import {
   EuiCode,
   EuiFlexGroup,
@@ -20,10 +22,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SetAISearchChromeSearchDocsSection } from '../../../ai_search/components/ai_search_guide/ai_search_docs_section';
 import { docLinks } from '../../../shared/doc_links';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { DevToolsConsoleCodeBlock } from '../dev_tools_console_code_block/dev_tools_console_code_block';
-import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
+import { DevToolsConsoleCodeBlock } from '../../../vector_search/components/dev_tools_console_code_block/dev_tools_console_code_block';
+import { EnterpriseSearchVectorSearchPageTemplate } from '../../../vector_search/components/layout/page_template';
 
 const SETUP_INFERENCE_ENDPOINT_ELSER = `PUT _inference/sparse_embedding/my-inference-endpoint
 {
@@ -98,14 +101,15 @@ const QUERY_SNIPPET = `POST /my-index/_search
 }`;
 
 interface SelectModelPanelProps {
+  isSelectedModel: boolean;
   model: InferenceModel;
   setSelectedModel: (model: InferenceModel) => void;
-  isSelectedModel: boolean;
 }
 
 interface InferenceModel {
-  modelName: string;
   code: string;
+  id: string;
+  modelName: string;
 }
 
 const SelectModelPanel: React.FC<SelectModelPanelProps> = ({
@@ -137,18 +141,24 @@ const SelectModelPanel: React.FC<SelectModelPanelProps> = ({
 
 export const SemanticSearchGuide: React.FC = () => {
   const modelSelection: InferenceModel[] = [
-    { modelName: 'ELSER', code: SETUP_INFERENCE_ENDPOINT_ELSER },
-    { modelName: 'E5', code: SETUP_INFERENCE_ENDPOINT_E5 },
+    { id: 'elser', modelName: 'ELSER', code: SETUP_INFERENCE_ENDPOINT_ELSER },
+    { id: 'e5', modelName: 'E5', code: SETUP_INFERENCE_ENDPOINT_E5 },
     {
-      modelName: 'OpenAI',
       code: SETUP_INFERENCE_ENDPOINT_OPENAI,
+      id: 'openai',
+      modelName: 'OpenAI',
     },
     {
+      id: 'bedrock',
       modelName: 'Amazon Bedrock',
       code: SETUP_INFERENCE_ENDPOINT_BEDROCK,
     },
   ];
-  const [selectedModel, setSelectedModel] = React.useState<InferenceModel>(modelSelection[0]);
+  const [searchParams] = useSearchParams();
+  const chosenUrlModel =
+    modelSelection.find((model) => model.id === searchParams.get('model_example')) ||
+    modelSelection[0];
+  const [selectedModel, setSelectedModel] = React.useState<InferenceModel>(chosenUrlModel);
 
   return (
     <EnterpriseSearchVectorSearchPageTemplate
@@ -191,11 +201,12 @@ export const SemanticSearchGuide: React.FC = () => {
               />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText>
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.setupInferenceEndpoint.description"
-                defaultMessage="Start by setting up an inference endpoint to manage the machine learning model for your task. Endpoints have a unique ID and a specific task type, in this example we use `text_embeddings` via the Amazon Bedrock service."
+                defaultMessage="Start by setting up an inference endpoint to manage the machine learning model for your task. This may take a while to complete depending on the model you choose and your ML node configuration."
                 values={{ semanticText: <EuiCode>semantic_text</EuiCode> }}
               />
             </p>
@@ -226,6 +237,7 @@ export const SemanticSearchGuide: React.FC = () => {
               />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText>
             <p>
               <FormattedMessage
@@ -251,6 +263,7 @@ export const SemanticSearchGuide: React.FC = () => {
               />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText>
             <p>
               <FormattedMessage
@@ -275,6 +288,7 @@ export const SemanticSearchGuide: React.FC = () => {
               />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText>
             <p>
               <FormattedMessage
@@ -288,6 +302,8 @@ export const SemanticSearchGuide: React.FC = () => {
           <DevToolsConsoleCodeBlock>{QUERY_SNIPPET}</DevToolsConsoleCodeBlock>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiHorizontalRule />
+      <SetAISearchChromeSearchDocsSection />
     </EnterpriseSearchVectorSearchPageTemplate>
   );
 };

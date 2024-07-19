@@ -17,12 +17,13 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AI_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { SEMANTIC_SEARCH_PLUGIN } from '../../../../../common/constants';
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { docLinks } from '../../../shared/doc_links';
@@ -107,6 +108,7 @@ export const VectorSearchGuide: React.FC = () => {
               />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText>
             <p>
               <FormattedMessage
@@ -152,7 +154,7 @@ export const VectorSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.query.title"
-                defaultMessage="Build your vector search query"
+                defaultMessage="Perform vector search"
               />
             </h2>
           </EuiTitle>
@@ -176,7 +178,7 @@ export const VectorSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
-                defaultMessage="Semantic Search"
+                defaultMessage="Want to use Semantic Search?"
               />
             </h2>
           </EuiTitle>
@@ -193,7 +195,10 @@ export const VectorSearchGuide: React.FC = () => {
           <EuiFlexGroup gutterSize="l" direction="column">
             <EuiCard
               onClick={() =>
-                application.navigateToApp(AI_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1'))
+                application.navigateToApp(
+                  SEMANTIC_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1') +
+                    '?model_example=elser'
+                )
               }
               layout="horizontal"
               titleSize="s"
@@ -212,7 +217,12 @@ export const VectorSearchGuide: React.FC = () => {
               }
             />
             <EuiCard
-              href={docLinks.textEmbedding}
+              onClick={() =>
+                application.navigateToApp(
+                  SEMANTIC_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1') +
+                    '?model_example=e5'
+                )
+              }
               target="_blank"
               layout="horizontal"
               titleSize="s"

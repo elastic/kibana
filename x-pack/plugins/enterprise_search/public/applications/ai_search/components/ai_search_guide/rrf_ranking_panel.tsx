@@ -47,7 +47,7 @@ const steps: EuiContainedStepProps[] = [
   },
   {
     title: i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.title', {
-      defaultMessage: 'Example in Action',
+      defaultMessage: 'Example Python Code',
     }),
     children: (
       <EuiLinkTo
