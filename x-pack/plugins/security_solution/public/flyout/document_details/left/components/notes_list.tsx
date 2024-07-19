@@ -37,7 +37,7 @@ import {
   selectDeleteNotesStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
-  selectNotesByDocumentId,
+  selectSortedNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -90,7 +90,12 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
 
-  const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
+  const notes: Note[] = useSelector((state: State) =>
+    selectSortedNotesByDocumentId(state, {
+      documentId: eventId,
+      sort: { field: 'created', direction: 'desc' },
+    })
+  );
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
