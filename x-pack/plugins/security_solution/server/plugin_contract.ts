@@ -38,7 +38,6 @@ import type {
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
@@ -73,7 +72,6 @@ export interface SecuritySolutionPluginStartDependencies {
   alerting: AlertingServerStart;
   cases?: CasesServerStart;
   cloud: CloudSetup;
-  cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   elasticAssistant: ElasticAssistantPluginStart;

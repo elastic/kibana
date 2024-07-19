@@ -52,7 +52,8 @@
     "@kbn/shared-ux-prompt-no-data-views-types",
     "@kbn/core-analytics-server",
     "@kbn/ebt",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/fields-metadata-plugin"
   ],
   "exclude": [
     "target/**/*"
