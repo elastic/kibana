@@ -245,11 +245,6 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
-
-  /**
    * Enables the manual rule run
    */
   manualRuleRunEnabled: false,
