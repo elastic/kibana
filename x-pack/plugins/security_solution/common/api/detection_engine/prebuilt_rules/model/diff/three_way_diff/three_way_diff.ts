@@ -105,6 +105,13 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
   merge_outcome: ThreeWayMergeOutcome;
 
   /**
+   * Bolean which determines if a base version was found and return for the three-way-diff for the field
+   * - true: the base version of the field was found and is either defined or undefined
+   * - false: the base version of the field was not found
+   */
+  has_base_version: boolean;
+
+  /**
    * Tells if the value has changed in the target version and the current version could be updated.
    * True if:
    *   - base=A, current=A, target=B

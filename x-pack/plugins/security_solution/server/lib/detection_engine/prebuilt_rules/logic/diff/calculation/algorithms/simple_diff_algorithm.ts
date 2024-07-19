@@ -13,6 +13,7 @@ import type {
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
+  MissingVersion,
   ThreeWayDiffConflictResolutionResult,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
@@ -42,6 +43,7 @@ export const simpleDiffAlgorithm = <TValue>(
   });
 
   return {
+    has_base_version: baseVersion !== MissingVersion,
     base_version: baseVersion,
     current_version: currentVersion,
     target_version: targetVersion,
