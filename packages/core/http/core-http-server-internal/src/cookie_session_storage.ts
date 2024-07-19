@@ -106,7 +106,15 @@ export async function createCookieSessionStorageFactory<T extends object>(
       contextualize: (
         definition: Omit<ServerStateCookieOptions, 'isSameSite'> & { isSameSite: string }
       ) => {
-        // correctly appends the Partitioned attribute to the cookie
+        /**
+         * This is a temporary solution to support the Partitioned attribute.
+         * Statehood performs validation for the params, but only before the contextualize function call.
+         * Since value for the isSameSite is used directly when making segment,
+         * we can leverage that to append the Partitioned attribute to the cookie.
+         *
+         * Once statehood is updated to support the Partitioned attribute, we can remove this.
+         * Issue: https://github.com/elastic/kibana/issues/188720
+         */
         if (definition.isSameSite === 'None' && definition.isSecure && !disableEmbedding) {
           definition.isSameSite = 'None;Partitioned';
         }
