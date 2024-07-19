@@ -26,7 +26,10 @@ import { IndicesQuerySourceFields } from '../types';
 describe('useSourceIndicesFields Hook', () => {
   let postMock: jest.Mock;
 
-  afterEach(() => {
+  beforeEach(() => {
+    // Playground Provider has the formProvider which
+    // persists the form state into local storage
+    // We need to clear the local storage before each test
     localStorage.clear();
   });
 
