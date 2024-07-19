@@ -14,13 +14,14 @@ import {
   type RouteValidator,
 } from '@kbn/core-http-server';
 import type { ObjectType, Type } from '@kbn/config-schema';
+import type { ZodEsque } from '@kbn/zod';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
 }
 
 interface ResponseValidation {
-  [statusCode: number]: { body: () => ObjectType | Type<unknown> };
+  [statusCode: number]: { body: () => ObjectType | Type<unknown> | ZodEsque<unknown> };
 }
 
 export function prepareResponseValidation(validation: ResponseValidation): ResponseValidation {

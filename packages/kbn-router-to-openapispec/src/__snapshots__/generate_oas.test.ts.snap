@@ -3,7 +3,25 @@
 exports[`generateOpenApiDocument @kbn/config-schema generates references in the expected format 1`] = `
 Object {
   "components": Object {
-    "schemas": Object {},
+    "schemas": Object {
+      "foo": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "name": Object {
+            "minLength": 1,
+            "type": "string",
+          },
+          "other": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "name",
+          "other",
+        ],
+        "type": "object",
+      },
+    },
     "securitySchemes": Object {
       "apiKeyAuth": Object {
         "in": "header",
@@ -55,21 +73,7 @@ Object {
           "content": Object {
             "application/json; Elastic-Api-Version=2023-10-31": Object {
               "schema": Object {
-                "additionalProperties": false,
-                "properties": Object {
-                  "name": Object {
-                    "minLength": 1,
-                    "type": "string",
-                  },
-                  "other": Object {
-                    "type": "string",
-                  },
-                },
-                "required": Array [
-                  "name",
-                  "other",
-                ],
-                "type": "object",
+                "$ref": "#/components/schemas/foo",
               },
             },
           },
