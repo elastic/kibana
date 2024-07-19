@@ -16,7 +16,6 @@
         "tsv",
         "yaml"
       ],
-      "delimiter": "",
       "drop_null_columns": [
         "false",
         "true"
