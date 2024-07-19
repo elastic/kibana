@@ -20,7 +20,6 @@ import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
-import { NetworkDetailsPanel } from './network_details';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -102,7 +101,6 @@ export const DetailsPanel = React.memo(
     let visiblePanel = null; // store in variable to make return statement more readable
     let panelSize: EuiFlyoutProps['size'] = 's';
     let flyoutUniqueKey = scopeId;
-    const contextID = `${scopeId}-${activeTab}`;
     const isDraggable = scopeId === TimelineId.active && activeTab === TimelineTabs.query;
 
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
@@ -120,19 +118,6 @@ export const DetailsPanel = React.memo(
           tabType={activeTab}
           scopeId={scopeId}
           isReadOnly={isReadOnly}
-        />
-      );
-    }
-
-    if (currentTabDetail?.panelView === 'networkDetail' && currentTabDetail?.params?.ip) {
-      flyoutUniqueKey = currentTabDetail.params.ip;
-      visiblePanel = (
-        <NetworkDetailsPanel
-          contextID={contextID}
-          expandedNetwork={currentTabDetail?.params}
-          handleOnNetworkClosed={closePanel}
-          isDraggable={isDraggable}
-          isFlyoutView={isFlyoutView}
         />
       );
     }
