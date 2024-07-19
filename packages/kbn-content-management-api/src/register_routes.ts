@@ -60,7 +60,7 @@ export function registerAPIRoutes<P extends Props>({
 
   // Create API route
   const createRoute = versionedRouter.post({
-    path: `/api/${appName}/${contentId}/`,
+    path: `/api/${appName}/${contentId}/{id?}`,
     access: 'public',
     description: `Create an item of type ${contentId}.`,
   });
@@ -71,6 +71,12 @@ export function registerAPIRoutes<P extends Props>({
         version,
         validate: {
           request: {
+            params: schema.object({
+              id: schema.maybe(schema.string()),
+            }),
+            query: schema.object({
+              overwrite: schema.boolean({ defaultValue: false }),
+            }),
             body: getSchemas()[version].schema,
           },
           response: {
@@ -84,6 +90,8 @@ export function registerAPIRoutes<P extends Props>({
         },
       },
       async (ctx, req, res) => {
+        const { id } = req.params;
+        const { overwrite } = req.query;
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
           .for(contentId);
@@ -91,7 +99,7 @@ export function registerAPIRoutes<P extends Props>({
         try {
           ({
             result: { item: result },
-          } = await client.create(req.body));
+          } = await client.create(req.body, { id, overwrite }));
         } catch (e) {
           // TODO do some error handling
           throw e;
