@@ -13,4 +13,8 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
 };
 
-export type { EnterpriseSearchPublicSetup, EnterpriseSearchPublicStart } from './plugin';
+export type {
+  EnterpriseSearchPublicSetup,
+  EnterpriseSearchPublicStart,
+  EnterpriseSearchKibanaServicesContext,
+} from './plugin';

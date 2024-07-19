@@ -41,6 +41,7 @@ import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpo
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -110,7 +111,10 @@ export interface PluginsStart {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
+  usageCollection?: UsageCollectionStart;
 }
+
+export type EnterpriseSearchKibanaServicesContext = CoreStart & PluginsStart;
 
 export interface ESConfig {
   elasticsearch_host: string;
