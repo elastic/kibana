@@ -122,6 +122,8 @@ describe('numberDiffAlgorithm', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
+          has_base_version: false,
+          base_version: MissingVersion,
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
@@ -141,6 +143,8 @@ describe('numberDiffAlgorithm', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
+          has_base_version: false,
+          base_version: MissingVersion,
           merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
