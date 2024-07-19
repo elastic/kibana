@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSelectOption } from '@elastic/eui';
 import * as i18n from './translations';
 
 export enum SelectedVersions {
@@ -16,7 +17,29 @@ export enum SelectedVersions {
   TargetFinal = 'target_final',
 }
 
-export const BASE_OPTIONS = [
+export const CURRENT_OPTIONS: EuiSelectOption[] = [
+  {
+    value: SelectedVersions.CurrentFinal,
+    text: i18n.CURRENT_VS_FINAL,
+  },
+  {
+    value: SelectedVersions.CurrentTarget,
+    text: i18n.CURRENT_VS_TARGET,
+  },
+];
+
+export const TARGET_OPTIONS: EuiSelectOption[] = [
+  {
+    value: SelectedVersions.TargetFinal,
+    text: i18n.TARGET_VS_FINAL,
+  },
+];
+
+export const BASE_OPTIONS: EuiSelectOption[] = [
+  {
+    value: SelectedVersions.BaseFinal,
+    text: i18n.BASE_VS_FINAL,
+  },
   {
     value: SelectedVersions.BaseTarget,
     text: i18n.BASE_VS_TARGET,
@@ -24,27 +47,5 @@ export const BASE_OPTIONS = [
   {
     value: SelectedVersions.BaseCurrent,
     text: i18n.BASE_VS_CURRENT,
-  },
-  {
-    value: SelectedVersions.BaseFinal,
-    text: i18n.BASE_VS_FINAL,
-  },
-];
-
-export const CURRENT_OPTIONS = [
-  {
-    value: SelectedVersions.CurrentTarget,
-    text: i18n.CURRENT_VS_TARGET,
-  },
-  {
-    value: SelectedVersions.CurrentFinal,
-    text: i18n.CURRENT_VS_FINAL,
-  },
-];
-
-export const TARGET_OPTIONS = [
-  {
-    value: SelectedVersions.TargetFinal,
-    text: i18n.TARGET_VS_FINAL,
   },
 ];

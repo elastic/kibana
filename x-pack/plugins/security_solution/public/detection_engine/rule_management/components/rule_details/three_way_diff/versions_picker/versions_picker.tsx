@@ -8,8 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import type { EuiSelectOption } from '@elastic/eui';
-import { BASE_OPTIONS, CURRENT_OPTIONS, TARGET_OPTIONS } from './constants';
-import type { SelectedVersions } from './constants';
+import { BASE_OPTIONS, CURRENT_OPTIONS, TARGET_OPTIONS, SelectedVersions } from './constants';
 import * as i18n from './translations';
 
 interface VersionsPickerProps {
@@ -20,11 +19,11 @@ interface VersionsPickerProps {
 
 export function VersionsPicker({
   hasBaseVersion,
-  selectedVersions,
+  selectedVersions = SelectedVersions.CurrentFinal,
   onChange,
 }: VersionsPickerProps) {
   const options: EuiSelectOption[] = useMemo(
-    () => [...(hasBaseVersion ? BASE_OPTIONS : []), ...CURRENT_OPTIONS, ...TARGET_OPTIONS],
+    () => [...CURRENT_OPTIONS, ...TARGET_OPTIONS, ...(hasBaseVersion ? BASE_OPTIONS : [])],
     [hasBaseVersion]
   );
 
