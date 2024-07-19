@@ -4382,10 +4382,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-di-server-internal@link:src/core/packages/di/server-internal":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-di-server-mocks@link:src/core/packages/di/server-mocks":
   version "0.0.0"
   uid ""
