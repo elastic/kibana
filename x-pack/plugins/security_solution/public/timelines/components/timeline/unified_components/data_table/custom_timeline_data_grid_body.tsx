@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
-import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
+import { getEventTypeRowClassName } from './get_event_type_row_classname';
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
@@ -181,7 +181,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         : {},
     [canShowRowRenderer]
   );
-  const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
+  const eventTypeRowClassName = useMemo(() => getEventTypeRowClassName(rowData.ecs), [rowData.ecs]);
 
   return (
     <CustomGridRow

@@ -4744,10 +4744,6 @@
               },
               {
                 "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/ping.ts"
-              },
-              {
-                "plugin": "entityManager",
                 "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/get.ts"
               },
               {
@@ -14066,7 +14062,7 @@
         "tags": [],
         "label": "VersionedRouter",
         "description": [
-          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead.\n"
+          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead\n"
         ],
         "signature": [
           {
