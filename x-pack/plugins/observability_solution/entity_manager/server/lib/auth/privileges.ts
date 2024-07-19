@@ -82,7 +82,7 @@ const hasAllApplicationPrivileges = (
 };
 
 export const entityDefinitionRuntimePrivileges = {
-  cluster: ['manage_transform', 'monitor_transform', 'manage_ingest_pipelines', 'monitor'],
+  cluster: ['manage_transform', 'monitor_transform', 'manage_ingest_pipelines'],
   index: [
     {
       names: [ENTITY_INDICES_PATTERN],
