@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { NoLogAnalysisMlJobError } from './errors';
 
@@ -14,7 +15,6 @@ import {
   LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_data_sets';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 
 export interface MappedAnomalyHit {

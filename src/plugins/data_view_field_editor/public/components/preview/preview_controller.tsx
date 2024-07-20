@@ -206,7 +206,10 @@ export class PreviewController {
       updatedField.customDescription
     );
 
-    editedField.count = updatedField.popularity || 0;
+    if (updatedField.popularity !== undefined) {
+      this.dataView.setFieldCount(updatedField.name, updatedField.popularity || 0);
+    }
+
     if (updatedField.format) {
       this.dataViewToUpdate.setFieldFormat(updatedField.name, updatedField.format!);
     } else {
