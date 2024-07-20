@@ -6,7 +6,7 @@
  */
 
 import { PluginStartContract as TriggersActionsUiStartContract } from '@kbn/triggers-actions-ui-plugin/server';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 export type {
   PluginSetupContract as AlertingSetup,
@@ -19,7 +19,7 @@ import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
-  alerting: AlertingSetup;
+  alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
 }
 
