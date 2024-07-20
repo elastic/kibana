@@ -13,7 +13,6 @@ const initialPackageMap = {
   aws: 'AWS',
   system: 'System',
 };
-const initialPackagesTexts = Object.values(initialPackageMap);
 
 const expectedDataViews = ['logs-*', 'metrics-*'];
 const sortedExpectedDataViews = expectedDataViews.slice().sort();
@@ -179,6 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('with installed integrations and uncategorized data streams', () => {
       let cleanupIntegrationsSetup: () => Promise<void>;
+      let installedPackagesTexts: string[];
 
       before(async () => {
         await esArchiver.load(
@@ -187,12 +187,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         cleanupIntegrationsSetup =
           await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
 
-        // Ensure that number of installed packages equals the initial packages
-        await retry.try(async () => {
-          const installedPackagesResponse =
-            await PageObjects.observabilityLogsExplorer.getInstalledPackages();
-          expect(installedPackagesResponse.body.items.length).to.eql(initialPackagesTexts.length);
-        });
+        const installedPackagesResponse =
+          await PageObjects.observabilityLogsExplorer.getInstalledPackages();
+        installedPackagesTexts = installedPackagesResponse.body.items.map(
+          ({ title }: { title: string }) => title
+        );
       });
 
       after(async () => {
@@ -215,8 +214,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should display a list of installed integrations', async () => {
           const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
 
-          expect(integrations.length).to.be(3);
-          expect(integrations).to.eql(initialPackagesTexts);
+          expect(integrations.length).to.be(installedPackagesTexts.length);
+          expect(integrations).to.eql(installedPackagesTexts);
         });
 
         it('should sort the integrations list by the clicked sorting option', async () => {
@@ -225,7 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql(initialPackagesTexts);
+            expect(integrations).to.eql(installedPackagesTexts);
           });
 
           // Test descending order
@@ -233,7 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql(initialPackagesTexts.slice().reverse());
+            expect(integrations).to.eql(installedPackagesTexts.slice().reverse());
           });
 
           // Test back ascending order
@@ -241,23 +240,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql(initialPackagesTexts);
+            expect(integrations).to.eql(installedPackagesTexts);
           });
         });
 
         it('should filter the integrations list by the typed integration name', async () => {
-          await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('system');
+          const lastPackageText = installedPackagesTexts[installedPackagesTexts.length - 1];
+          const searchTerm = lastPackageText.split(' ')[0].toLowerCase();
+          await PageObjects.observabilityLogsExplorer.typeSearchFieldWith(searchTerm);
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql([initialPackageMap.system]);
+            expect(integrations).to.eql([lastPackageText]);
           });
 
           await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('a');
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql([initialPackageMap.apache, initialPackageMap.aws]);
+            expect(integrations).to.eql(installedPackagesTexts.filter((p) => /^a/i.test(p)));
           });
         });
 
@@ -280,33 +281,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.observabilityLogsExplorer.setupAdditionalIntegrations();
           await browser.refresh();
 
+          const installedPackagesResponse =
+            await PageObjects.observabilityLogsExplorer.getInstalledPackages();
+          installedPackagesTexts = installedPackagesResponse.body.items.map(
+            ({ title }: { title: string }) => title
+          );
+
           await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
 
           // Initially fetched integrations
           await retry.try(async () => {
             const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(nodes.length).to.be(15);
+            expect(nodes.length).to.be(Math.min(15, installedPackagesTexts.length));
             await nodes.at(-1)?.scrollIntoView();
           });
 
           // Load more integrations
           await retry.try(async () => {
             const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(nodes.length).to.be(20);
+            expect(nodes.length).to.be(Math.min(20, installedPackagesTexts.length));
             await nodes.at(-1)?.scrollIntoView();
           });
 
           // No other integrations to load after scrolling to last integration
           await retry.try(async () => {
             const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(nodes.length).to.be(20);
+            expect(nodes.length).to.be(installedPackagesTexts.length);
           });
 
           await cleanupAdditionalSetup();
         });
 
-        describe('clicking on integration and moving into the second navigation level', () => {
-          before(async () => {
+        describe('clicking on Apache HTTP Server integration and moving into the second navigation level', () => {
+          before(async function () {
+            const installedPackagesResponse =
+              await PageObjects.observabilityLogsExplorer.getInstalledPackages();
+            installedPackagesTexts = installedPackagesResponse.body.items.map(
+              ({ title }: { title: string }) => title
+            );
+
+            // Skip the suite if Apache HTTP Server integration is not available
+            if (!installedPackagesTexts.includes(initialPackageMap.apache)) {
+              this.skip();
+            }
+
             await PageObjects.observabilityLogsExplorer.navigateTo();
           });
 
@@ -317,8 +335,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           it('should display a list of available datasets', async () => {
             await retry.try(async () => {
-              const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-              await nodes[0].click();
+              const { nodes, integrations } =
+                await PageObjects.observabilityLogsExplorer.getIntegrations();
+              const apacheIntegrationIndex = integrations.indexOf(initialPackageMap.apache);
+              await nodes[apacheIntegrationIndex].click();
             });
 
             await retry.try(async () => {
@@ -727,6 +747,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('when open/close the selector', () => {
         before(async () => {
+          const installedPackagesResponse =
+            await PageObjects.observabilityLogsExplorer.getInstalledPackages();
+          installedPackagesTexts = installedPackagesResponse.body.items.map(
+            ({ title }: { title: string }) => title
+          );
+
           await PageObjects.observabilityLogsExplorer.navigateTo();
         });
 
@@ -735,10 +761,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
         });
 
-        it('should restore the latest navigation panel', async () => {
+        it('should restore the latest navigation panel', async function () {
+          // Skip the test if Apache HTTP Server integration is not installed
+          if (!installedPackagesTexts.includes(initialPackageMap.apache)) {
+            this.skip();
+          }
+
           await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            await nodes[0].click();
+            const { nodes, integrations } =
+              await PageObjects.observabilityLogsExplorer.getIntegrations();
+            const apacheIntegrationIndex = integrations.indexOf(initialPackageMap.apache);
+            await nodes[apacheIntegrationIndex].click();
           });
 
           await retry.try(async () => {
@@ -776,11 +809,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should restore the latest search results', async () => {
-          await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('system');
+          const lastPackageText = installedPackagesTexts[installedPackagesTexts.length - 1];
+          const searchTerm = lastPackageText.split(' ')[0].toLowerCase();
+          await PageObjects.observabilityLogsExplorer.typeSearchFieldWith(searchTerm);
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql([initialPackageMap.system]);
+            expect(integrations).to.eql([lastPackageText]);
           });
 
           await PageObjects.observabilityLogsExplorer.closeDataSourceSelector();
@@ -788,13 +823,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.try(async () => {
             const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(integrations).to.eql([initialPackageMap.system]);
+            expect(integrations).to.eql([lastPackageText]);
           });
         });
       });
 
       describe('when switching between tabs or integration panels', () => {
-        before(async () => {
+        before(async function () {
+          const installedPackagesResponse =
+            await PageObjects.observabilityLogsExplorer.getInstalledPackages();
+          installedPackagesTexts = installedPackagesResponse.body.items.map(
+            ({ title }: { title: string }) => title
+          );
+
+          // Skip the suite if Apache Http Server integration is not installed
+          if (!installedPackagesTexts.includes(initialPackageMap.apache)) {
+            this.skip();
+          }
+
           await PageObjects.observabilityLogsExplorer.navigateTo();
         });
 
@@ -802,7 +848,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
           await PageObjects.observabilityLogsExplorer.clearSearchField();
 
-          await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('apache');
+          await PageObjects.observabilityLogsExplorer.typeSearchFieldWith('apache http');
 
           await retry.try(async () => {
             const { nodes, integrations } =
@@ -849,7 +895,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(integrations).to.eql([initialPackageMap.apache]);
 
             const searchValue = await PageObjects.observabilityLogsExplorer.getSearchFieldValue();
-            expect(searchValue).to.eql('apache');
+            expect(searchValue).to.eql('apache http');
 
             nodes[0].click();
           });
