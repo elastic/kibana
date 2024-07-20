@@ -300,7 +300,6 @@ export class PreviewController {
 
       if (this.dataViewToUpdate.isPersisted()) {
         await this.deps.dataViews.updateSavedObject(this.dataViewToUpdate);
-        // await this.deps.dataViews.updateSavedObject(this.dataView);
       }
       afterSave();
 
