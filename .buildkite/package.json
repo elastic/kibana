@@ -27,7 +27,7 @@
     "mocha": "^10.3.0",
     "nock": "^12.0.2",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.4"
+    "typescript": "^5.5.3"
   },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",
