@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
@@ -29,6 +29,8 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize?: (sampleSize: number) => void;
+  showStripes?: boolean;
+  onChangeShowStripes?: (showStripes: boolean) => void;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -47,6 +49,8 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
+  showStripes = true,
+  onChangeShowStripes,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -136,6 +140,21 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           value={activeSampleSize}
           onChange={onChangeActiveSampleSize}
           data-test-subj="unifiedDataTableSampleSizeInput"
+        />
+      </EuiFormRow>
+    );
+  }
+
+  if (onChangeShowStripes) {
+    settings.push(
+      <EuiFormRow>
+        <EuiSwitch
+          label={i18n.translate('unifiedDataTable.showStripesLabel', {
+            defaultMessage: 'Show row stripes',
+          })}
+          checked={showStripes}
+          onChange={(e) => onChangeShowStripes(e.target.checked)}
+          data-test-subj="unifiedDataTableShowStripes"
         />
       </EuiFormRow>
     );

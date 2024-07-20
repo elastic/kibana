@@ -235,4 +235,28 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });
   });
+
+  describe('showStripes', () => {
+    it('should render showStripes if onChangeShowStripes is defined', () => {
+      renderDisplaySettings({
+        onChangeShowStripes: jest.fn(),
+      });
+      expect(screen.queryByText('Show row stripes')).toBeInTheDocument();
+    });
+
+    it('should not render showStripes if onChangeShowStripes is undefined', () => {
+      renderDisplaySettings();
+      expect(screen.queryByText('Show row stripes')).not.toBeInTheDocument();
+    });
+
+    it('should call onChangeShowStripes when showStripes changes', () => {
+      const onChangeShowStripes = jest.fn();
+      renderDisplaySettings({
+        showStripes: false,
+        onChangeShowStripes,
+      });
+      userEvent.click(screen.getByTestId('unifiedDataTableShowStripes'));
+      expect(onChangeShowStripes).toHaveBeenCalledWith(true);
+    });
+  });
 });

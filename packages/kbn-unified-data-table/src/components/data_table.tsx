@@ -238,6 +238,10 @@ export interface UnifiedDataTableProps {
    */
   showDensitySelector?: boolean;
   /**
+   * Whether or not to show the stripes selector
+   */
+  showStripesSelector?: boolean;
+  /**
    * Callback when the data grid style configuration is modified
    */
   onUpdateDataGridStyle?: (dataGridStyle: EuiDataGridStyle) => void;
@@ -477,6 +481,7 @@ export const UnifiedDataTable = ({
   renderCellPopover,
   getRowIndicator,
   showDensitySelector = false,
+  showStripesSelector = false,
   onUpdateDataGridStyle,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
@@ -958,12 +963,18 @@ export const UnifiedDataTable = ({
     [renderCustomToolbar, additionalControls]
   );
 
+  const onChangeShowStripes = useMemo(() => {
+    return !showStripesSelector
+      ? undefined
+      : (stripes: boolean) => onChangeDataGridStyle({ ...dataGridStyle, stripes });
+  }, [showStripesSelector, onChangeDataGridStyle, dataGridStyle]);
+
   const showDisplaySelector = useMemo(() => {
     const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {
       allowDensity: showDensitySelector,
     };
 
-    if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {
+    if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize || showStripesSelector) {
       options.allowRowHeight = false;
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
@@ -981,6 +992,8 @@ export const UnifiedDataTable = ({
             maxAllowedSampleSize={maxAllowedSampleSize}
             sampleSize={sampleSizeState}
             onChangeSampleSize={onUpdateSampleSize}
+            showStripes={dataGridStyle.stripes}
+            onChangeShowStripes={onChangeShowStripes}
           />
         </>
       );
@@ -1002,6 +1015,9 @@ export const UnifiedDataTable = ({
     rowHeightLines,
     sampleSizeState,
     showDensitySelector,
+    dataGridStyle,
+    onChangeShowStripes,
+    onUpdateDataGridStyle,
   ]);
 
   const inMemory = useMemo(() => {

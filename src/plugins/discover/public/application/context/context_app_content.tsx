@@ -224,6 +224,7 @@ export function ContextAppContent({
               settings={gridSettings}
               onResize={onResize}
               showDensitySelector={true}
+              showStripesSelector={true}
             />
           </CellActionsProvider>
         </div>
