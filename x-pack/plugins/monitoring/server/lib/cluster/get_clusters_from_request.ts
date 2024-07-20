@@ -123,25 +123,19 @@ export async function getClustersFromRequest(
     // update clusters with license check results
     const getSupportedClusters = flagSupportedClusters(req, CCS_REMOTE_PATTERN);
     clusters = await getSupportedClusters(clusters);
+    clusters = initializeClusters(clusters);
 
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-      const rulesClient = req.getRulesClient();
-      const alertStatus = await fetchStatus(
-        rulesClient,
-        undefined,
-        clusters.map((cluster) => get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid))
+      const rulesClient = await req.getRulesClient();
+      const clustersIds = clusters.map((cluster) =>
+        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
       );
 
-      for (const cluster of clusters) {
-        if (!rulesClient) {
-          cluster.alerts = {
-            list: {},
-            alertsMeta: {
-              enabled: false,
-            },
-          };
-        } else {
+      if (rulesClient) {
+        const alertStatus = await fetchStatus(rulesClient, undefined, clustersIds);
+
+        for (const cluster of clusters) {
           try {
             cluster.alerts = {
               list: Object.keys(alertStatus).reduce<RulesByType>((acc, ruleTypeName) => {
@@ -163,12 +157,6 @@ export async function getClustersFromRequest(
             req.logger.warn(
               `Unable to fetch alert status because '${err.message}'. Alerts may not properly show up in the UI.`
             );
-            cluster.alerts = {
-              list: {},
-              alertsMeta: {
-                enabled: true,
-              },
-            };
           }
         }
       }
@@ -284,3 +272,13 @@ export async function getClustersFromRequest(
 
   return getClustersSummary(req.server, clusters as EnhancedClusters[], kibanaUuid, isCcrEnabled);
 }
+
+const initializeClusters = (clusters: Cluster[]): Cluster[] => {
+  return clusters.map((cluster) => ({
+    ...cluster,
+    list: {},
+    alertsMeta: {
+      enabled: false,
+    },
+  }));
+};

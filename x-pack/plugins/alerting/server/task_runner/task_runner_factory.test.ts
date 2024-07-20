@@ -110,7 +110,7 @@ describe('Task Runner Factory', () => {
     share: {} as SharePluginStart,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
+    getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClient),
     actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingSystemMock.create().get(),

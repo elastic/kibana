@@ -341,7 +341,7 @@ export class MonitoringPlugin
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => coreContext.uiSettings.client,
-            getActionTypeRegistry: () => actionContext?.listTypes(),
+            getActionTypeRegistry: () => actionContext?.listTypes() ?? [],
             getRulesClient: () => {
               try {
                 return plugins.alerting.getRulesClientWithRequest(req);

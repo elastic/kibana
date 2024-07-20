@@ -56,7 +56,7 @@ export function mockHandlerArguments(
       alerting: {
         listTypes,
         getRulesClient() {
-          return rulesClient || rulesClientMock.create();
+          return Promise.resolve(rulesClient || rulesClientMock.create());
         },
         getRulesSettingsClient() {
           return rulesSettingsClient || rulesSettingsClientMock.create();

@@ -167,7 +167,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   eventLogger: eventLoggerMock.create(),
   executionContext: executionContextServiceMock.createInternalStartContract(),
   getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
-  getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
+  getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClient),
   getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
   kibanaBaseUrl: 'https://localhost:5601',
   logger,

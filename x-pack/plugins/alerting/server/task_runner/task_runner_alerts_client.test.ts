@@ -195,7 +195,7 @@ describe('Task Runner', () => {
       uiSettings: uiSettingsService,
       elasticsearch: elasticsearchService,
       actionsPlugin: actionsMock.createStart(),
-      getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
+      getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClient),
       encryptedSavedObjectsClient,
       logger,
       executionContext: executionContextServiceMock.createInternalStartContract(),

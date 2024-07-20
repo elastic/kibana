@@ -16,11 +16,7 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import type {
-  PluginSetupContract as AlertingSetup,
-  IRuleTypeAlerts,
-  RuleType,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, IRuleTypeAlerts, RuleType } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
@@ -74,7 +70,7 @@ export const TRANSFORM_ISSUE_DETECTED: ActionGroup<TransformIssue> = {
 
 interface RegisterParams {
   logger: Logger;
-  alerting: AlertingSetup;
+  alerting: AlertingServerSetup;
   getFieldFormatsStart: () => FieldFormatsStart;
 }
 

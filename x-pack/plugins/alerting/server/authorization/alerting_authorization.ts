@@ -483,10 +483,10 @@ function getConsumersWithPrivileges(
 }
 
 function getUnauthorizedMessage(
-  alertTypeId: string,
+  ruleTypeId: string,
   scope: string,
   operation: string,
   entity: string
 ): string {
-  return `Unauthorized by "${scope}" to ${operation} "${alertTypeId}" ${entity}`;
+  return `Unauthorized by "${scope}" to ${operation} "${ruleTypeId}" ${entity}`;
 }

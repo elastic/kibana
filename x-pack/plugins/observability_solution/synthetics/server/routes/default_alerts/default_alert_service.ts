@@ -72,7 +72,7 @@ export class DefaultAlertService {
   }
 
   async getExistingAlert(ruleType: DefaultRuleType) {
-    const rulesClient = (await this.context.alerting)?.getRulesClient();
+    const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const { data } = await rulesClient.find({
       options: {
@@ -95,7 +95,7 @@ export class DefaultAlertService {
     }
 
     const actions = await this.getAlertActions(ruleType);
-    const rulesClient = (await this.context.alerting)?.getRulesClient();
+    const rulesClient = await (await this.context.alerting)?.getRulesClient();
     const {
       actions: actionsFromRules = [],
       systemActions = [],
@@ -129,7 +129,7 @@ export class DefaultAlertService {
   }
 
   async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
-    const rulesClient = (await this.context.alerting)?.getRulesClient();
+    const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {

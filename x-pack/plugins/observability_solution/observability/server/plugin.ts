@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
@@ -60,7 +60,7 @@ import { uiSettings } from './ui_settings';
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -71,7 +71,7 @@ interface PluginSetup {
 }
 
 interface PluginStart {
-  alerting: PluginStartContract;
+  alerting: AlertingServerStart;
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
 }

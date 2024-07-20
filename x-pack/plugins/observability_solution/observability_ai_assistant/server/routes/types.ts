@@ -29,7 +29,7 @@ export type ObservabilityAIAssistantRequestHandlerContext = Omit<
     // these two are here for compatibility with APM functions
     rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
     alerting: {
-      getRulesClient: () => RulesClientApi;
+      getRulesClient: () => Promise<RulesClientApi>;
     };
   }>,
   'core' | 'resolve'

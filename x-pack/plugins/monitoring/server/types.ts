@@ -24,18 +24,15 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
-import {
-  PluginStartContract as AlertingPluginStartContract,
-  PluginSetupContract as AlertingPluginSetupContract,
-} from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { InfraPluginSetup, InfraRequestHandlerContext } from '@kbn/infra-plugin/server';
-import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
+import { ActionTypeRegistry } from '@kbn/actions-plugin/server/action_type_registry';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -54,7 +51,7 @@ export interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   usageCollection?: UsageCollectionSetup;
   features: FeaturesPluginSetup;
-  alerting?: AlertingPluginSetupContract;
+  alerting?: AlertingServerSetup;
   infra: InfraPluginSetup;
   cloud?: CloudSetup;
   logsShared: LogsSharedPluginSetup;
@@ -68,7 +65,7 @@ export type RequestHandlerContextMonitoringPlugin = CustomRequestHandlerContext<
 }>;
 
 export interface PluginsStart {
-  alerting: AlertingPluginStartContract;
+  alerting: AlertingServerStart;
   actions: ActionsPluginsStartContact;
   licensing: LicensingPluginStart;
 }
@@ -78,7 +75,7 @@ export interface RouteDependencies {
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  alerting?: AlertingPluginSetup;
+  alerting?: AlertingServerSetup;
   logger: Logger;
 }
 
@@ -129,9 +126,11 @@ export interface LegacyRequest<Params = any, Query = any, Body = any> {
   headers: Headers;
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
-  getActionTypeRegistry: () => any;
-  getRulesClient: () => any;
-  getActionsClient: () => any;
+  getActionTypeRegistry: () => ReturnType<ActionTypeRegistry['list']>;
+  getRulesClient: () => ReturnType<AlertingServerStart['getRulesClientWithRequest']> | null;
+  getActionsClient: () => ReturnType<
+    ActionsPluginsStartContact['getActionsClientWithRequest']
+  > | null;
   server: LegacyServer;
 }
 
