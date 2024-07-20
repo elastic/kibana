@@ -208,6 +208,7 @@ export class PreviewController {
 
     if (updatedField.popularity !== undefined) {
       this.dataView.setFieldCount(updatedField.name, updatedField.popularity || 0);
+      this.dataViewToUpdate.setFieldCount(updatedField.name, updatedField.popularity || 0);
     }
 
     if (updatedField.format) {
@@ -220,7 +221,6 @@ export class PreviewController {
   };
 
   updateRuntimeField = async (updatedField: Field): Promise<DataViewField[]> => {
-    console.log('updateRuntimeField');
     const nameHasChanged =
       Boolean(this.fieldToEdit) && this.fieldToEdit!.name !== updatedField.name;
     const typeHasChanged =
@@ -231,6 +231,7 @@ export class PreviewController {
 
     const { script } = updatedField;
 
+    // this seems a bit convoluted
     if (this.fieldTypeToProcess === 'runtime') {
       try {
         this.deps.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
@@ -239,9 +240,15 @@ export class PreviewController {
       // rename an existing runtime field
       if (nameHasChanged || hasChangeToOrFromComposite) {
         this.dataViewToUpdate.removeRuntimeField(this.fieldToEdit!.name);
+        this.dataView.removeRuntimeField(this.fieldToEdit!.name);
       }
 
       this.dataViewToUpdate.addRuntimeField(updatedField.name, {
+        type: updatedField.type as RuntimeType,
+        script,
+        fields: updatedField.fields,
+      });
+      this.dataView.addRuntimeField(updatedField.name, {
         type: updatedField.type as RuntimeType,
         script,
         fields: updatedField.fields,
@@ -253,6 +260,7 @@ export class PreviewController {
       } catch {}
     }
 
+    this.dataView.addRuntimeField(updatedField.name, updatedField);
     return this.dataViewToUpdate.addRuntimeField(updatedField.name, updatedField);
   };
 
@@ -286,6 +294,7 @@ export class PreviewController {
 
       if (this.dataViewToUpdate.isPersisted()) {
         await this.deps.dataViews.updateSavedObject(this.dataViewToUpdate);
+        // await this.deps.dataViews.updateSavedObject(this.dataView);
       }
       afterSave();
 

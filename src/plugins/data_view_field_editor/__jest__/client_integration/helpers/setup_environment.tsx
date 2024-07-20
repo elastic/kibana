@@ -163,6 +163,7 @@ export const WithFieldEditorDependencies =
         notifications: notificationServiceMock.createStartContract(),
       },
       dataView,
+      dataViewToUpdate: dataView,
       onSave: jest.fn(),
       fieldTypeToProcess: 'runtime',
     });
