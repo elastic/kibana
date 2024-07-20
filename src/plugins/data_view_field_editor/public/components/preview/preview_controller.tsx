@@ -88,6 +88,8 @@ const previewStateDefault: PreviewState = {
 export class PreviewController {
   constructor({
     deps,
+    // using two different data view references while API consumers might be passing in
+    // dataView or dataViewLazy. Don't want to rely on DataView with full field list.
     dataView,
     dataViewToUpdate,
     onSave,
@@ -201,20 +203,24 @@ export class PreviewController {
 
     // Update custom label, popularity and format
     this.dataViewToUpdate.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+    this.dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
     this.dataViewToUpdate.setFieldCustomDescription(
       updatedField.name,
       updatedField.customDescription
     );
+    this.dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
 
     if (updatedField.popularity !== undefined) {
-      this.dataView.setFieldCount(updatedField.name, updatedField.popularity || 0);
       this.dataViewToUpdate.setFieldCount(updatedField.name, updatedField.popularity || 0);
+      this.dataView.setFieldCount(updatedField.name, updatedField.popularity || 0);
     }
 
     if (updatedField.format) {
       this.dataViewToUpdate.setFieldFormat(updatedField.name, updatedField.format!);
+      this.dataView.setFieldFormat(updatedField.name, updatedField.format!);
     } else {
       this.dataViewToUpdate.deleteFieldFormat(updatedField.name);
+      this.dataView.deleteFieldFormat(updatedField.name);
     }
 
     return [editedField];

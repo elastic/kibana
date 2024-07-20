@@ -108,7 +108,6 @@ export const getFieldEditorOpener =
         closeEditor();
 
         if (onSave) {
-          console.log('ON SAVE');
           onSave(updatedField);
         }
       };
@@ -195,7 +194,10 @@ export const getFieldEditorOpener =
               fieldToEdit={field}
               fieldToCreate={fieldToCreate}
               fieldTypeToProcess={fieldTypeToProcess}
+              // currently using two dataView versions since API consumer is still potentially using legacy dataView
+              // this is what is used internally
               dataView={dataViewLazy}
+              // this is what has been passed by API consumer
               dataViewToUpdate={dataViewLazyOrNot}
               search={search}
               dataViews={dataViews}
