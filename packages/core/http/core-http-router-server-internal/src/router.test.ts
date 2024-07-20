@@ -208,7 +208,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [params]."`
+        `"Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params]."`
       );
     });
 
