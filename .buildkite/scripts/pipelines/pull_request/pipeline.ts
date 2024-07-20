@@ -11,11 +11,7 @@ import prConfigs from '../../../pull_requests.json';
 import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
-const emptyStep = `
-steps:
-  - label: ':pipeline: No steps to run'
-    command: echo 'Changes are skippable - no steps to run'
-`.trim();
+const emptyStep = `steps: []`;
 
 if (!prConfig) {
   console.error(`'kibana-pull-request' pipeline not found in .buildkite/pull_requests.json`);
