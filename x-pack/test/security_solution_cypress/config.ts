@@ -46,7 +46,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'alertSuppressionForEsqlRuleEnabled',
-          'bulkCustomHighlightedFieldsEnabled',
           'alertSuppressionForMachineLearningRuleEnabled',
           'manualRuleRunEnabled',
         ])}`,
