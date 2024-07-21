@@ -266,7 +266,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('bulkEnable', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
