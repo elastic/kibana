@@ -11,7 +11,6 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { History } from 'history';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import {
   DiscoverAppStateContainer,
@@ -20,6 +19,9 @@ import {
 } from './discover_app_state_container';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
+import { getInternalStateContainer } from './discover_internal_state_container';
+import { getSavedSearchContainer } from './discover_saved_search_container';
+import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 
 let history: History;
 let state: DiscoverAppStateContainer;
@@ -35,7 +37,11 @@ describe('Test discover app state container', () => {
     });
     state = getDiscoverAppStateContainer({
       stateStorage,
-      savedSearch: savedSearchMock,
+      internalStateContainer: getInternalStateContainer(),
+      savedSearchContainer: getSavedSearchContainer({
+        services: discoverServiceMock,
+        globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
+      }),
       services: discoverServiceMock,
     });
   });

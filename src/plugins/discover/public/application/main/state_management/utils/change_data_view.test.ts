@@ -31,6 +31,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
   discoverState.appState.update = jest.fn();
   discoverState.internalState.transitions = {
     setIsDataViewLoading: jest.fn(),
+    setResetDefaultProfileState: jest.fn(),
   } as unknown as Readonly<PureTransitionsToTransitions<InternalStateTransitions>>;
   return {
     services,
