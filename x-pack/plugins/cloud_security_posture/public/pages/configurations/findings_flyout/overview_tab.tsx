@@ -51,7 +51,7 @@ const getDetailsList = (
       ruleFlyoutLink && data.rule?.name ? (
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTooltip', {
+          content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
             defaultMessage: 'Manage Rule',
           })}
         >
