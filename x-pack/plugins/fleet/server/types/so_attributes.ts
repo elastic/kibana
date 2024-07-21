@@ -65,6 +65,7 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
+  version?: string;
 }
 
 export interface AgentSOAttributes {
@@ -118,7 +119,8 @@ export interface PackagePolicySOAttributes {
   created_at: string;
   created_by: string;
   inputs: PackagePolicyInput[];
-  policy_id: string;
+  policy_id?: string;
+  policy_ids: string[];
   updated_at: string;
   updated_by: string;
   description?: string;
@@ -235,6 +237,11 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+}
+
+export interface SpaceSettingsSOAttributes {
+  allowed_namespace_prefixes?: string[] | null;
+  managed_by?: 'kibana_config' | null;
 }
 
 export interface DownloadSourceSOAttributes {

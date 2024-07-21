@@ -9,23 +9,57 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { getAgentsPerOutput } from './agents_per_output';
 
+jest.mock('../services/agents', () => {
+  return {
+    getAgentsByKuery: jest
+      .fn()
+      .mockImplementation(async (esClient, soClient, { kuery }: { kuery: string }) => {
+        if (kuery.includes('policy_id:policy1')) {
+          return {
+            total: 0,
+          };
+        } else {
+          return {
+            total: 1,
+          };
+        }
+      }),
+  };
+});
+
 jest.mock('../services', () => {
   return {
     agentPolicyService: {
       list: jest.fn().mockResolvedValue({
         items: [
-          { agents: 0, data_output_id: 'logstash1', monitoring_output_id: 'kafka1' },
-          { agents: 1 },
-          { agents: 1, data_output_id: 'logstash1' },
-          { agents: 1, monitoring_output_id: 'kafka1' },
-          { agents: 1, data_output_id: 'elasticsearch2', monitoring_output_id: 'elasticsearch2' },
-          { agents: 1, data_output_id: 'elasticsearch3', monitoring_output_id: 'elasticsearch3' },
+          { id: 'policy1', agents: 0, data_output_id: 'logstash1', monitoring_output_id: 'kafka1' },
+          { id: 'policy2', agents: 1 },
+          { id: 'policy3', agents: 1, data_output_id: 'logstash1' },
+          { id: 'policy4', agents: 1, monitoring_output_id: 'kafka1' },
           {
+            id: 'policy5',
+            agents: 1,
+            data_output_id: 'elasticsearch2',
+            monitoring_output_id: 'elasticsearch2',
+          },
+          {
+            id: 'policy5',
+            agents: 1,
+            data_output_id: 'elasticsearch3',
+            monitoring_output_id: 'elasticsearch3',
+          },
+          {
+            id: 'policy6',
             agents: 1,
             data_output_id: 'es-containerhost',
             monitoring_output_id: 'es-containerhost',
           },
-          { agents: 1, data_output_id: 'remote-es', monitoring_output_id: 'remote-es' },
+          {
+            id: 'policy7',
+            agents: 1,
+            data_output_id: 'remote-es',
+            monitoring_output_id: 'remote-es',
+          },
         ],
       }),
     },

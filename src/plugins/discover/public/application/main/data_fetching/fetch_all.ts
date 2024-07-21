@@ -64,7 +64,7 @@ export function fetchAll(
     savedSearch,
     abortController,
   } = fetchDeps;
-  const { data } = services;
+  const { data, expressions, profilesManager } = services;
   const searchSource = savedSearch.searchSource.createChild();
 
   try {
@@ -100,14 +100,15 @@ export function fetchAll(
 
     // Start fetching all required requests
     const response = isEsqlQuery
-      ? fetchEsql(
+      ? fetchEsql({
           query,
           dataView,
-          data,
-          services.expressions,
+          abortSignal: abortController.signal,
           inspectorAdapters,
-          abortController.signal
-        )
+          data,
+          expressions,
+          profilesManager,
+        })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();

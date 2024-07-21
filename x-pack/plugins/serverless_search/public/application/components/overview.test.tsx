@@ -30,6 +30,9 @@ describe('<Overview />', () => {
           case '/internal/serverless_search/connectors':
             resolve({});
             return;
+          case '/internal/serverless_search/ingest_pipelines':
+            resolve({ pipelines: [] });
+            return;
           default:
             return reject(`unknown path requested ${fetchedUrl}`);
         }

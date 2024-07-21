@@ -55,3 +55,8 @@ export interface UserProfile {
   enabled: boolean;
   elastic_cloud_user: boolean;
 }
+
+export interface RetryParams {
+  attemptsCount: number;
+  attemptDelay: number;
+}

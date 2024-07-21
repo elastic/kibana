@@ -11,14 +11,10 @@ export type { AlertLifecycleStatusBadgeProps } from './src/alert_lifecycle_statu
 export { MaintenanceWindowCallout } from './src/maintenance_window_callout';
 export { AddMessageVariables } from './src/add_message_variables';
 
-export * from './src/alerts_search_bar/hooks';
-export * from './src/alerts_search_bar/apis';
+export * from './src/common/hooks';
 export { AlertsSearchBar } from './src/alerts_search_bar';
 export type { AlertsSearchBarProps } from './src/alerts_search_bar/types';
 
 export * from './src/alert_fields_table';
-
-export * from './src/rule_type_modal';
 export * from './src/alert_filter_controls/types';
-export * from './src/rule_form';
-export * from './src/common/hooks';
+export * from './src/common/types';

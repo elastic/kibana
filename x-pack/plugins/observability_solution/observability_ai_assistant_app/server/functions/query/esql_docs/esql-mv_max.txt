@@ -1,18 +1,23 @@
-MV_MAX
+## MV_MAX
 
-Syntax
-Parameters
-field
-Multivalue expression.
-DescriptionConverts a multivalued expression into a single valued column containing the maximum value.Supported types
-Examples
+The `MV_MAX` function in ES|QL is used to convert a multivalued expression into a single valued column containing the maximum value. This function can be used with any column type, including keyword columns. In the case of keyword columns, it picks the last string, comparing their utf-8 representation byte by byte.
+
+### Examples
+
+Here are a couple of examples of how you can use the `MV_MAX` function in ES|QL:
+
+1. To find the maximum value in a multivalued numeric field:
+
 ```esql
 ROW a=[3, 5, 1]
 | EVAL max_a = MV_MAX(a)
 ```
 
-It can be used by any column type, including keyword columns. In that case it picks the last string, comparing their utf-8 representation byte by byte:
+2. To find the last string in a multivalued keyword field:
+
 ```esql
 ROW a=["foo", "zoo", "bar"]
 | EVAL max_a = MV_MAX(a)
 ```
+
+In both examples, the `MV_MAX` function is used to find the maximum value in the multivalued field `a`. The result is stored in the new field `max_a`.

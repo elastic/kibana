@@ -21,7 +21,7 @@ export const createCloudDefendIntegrationFixture = ({
     enabled: true,
     id: chance.guid(),
     name: chance.string(),
-    policy_id: chance.guid(),
+    policy_ids: [chance.guid()],
     namespace: chance.string(),
     updated_at: chance.date().toISOString(),
     updated_by: chance.word(),

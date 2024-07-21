@@ -257,6 +257,7 @@ describe('embeddable', () => {
 
     jest.spyOn(embeddable, 'getUserMessages').mockReturnValue([
       {
+        uniqueId: 'error',
         severity: 'error',
         fixableInEditor: true,
         displayLocations: [{ id: 'visualization' }],

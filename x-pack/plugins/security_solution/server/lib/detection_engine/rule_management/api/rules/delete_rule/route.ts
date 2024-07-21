@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { DeleteRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   DeleteRuleRequestQuery,
@@ -14,9 +15,8 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
 
 export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
@@ -49,7 +49,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const rule = await readRules({ rulesClient, id, ruleId });
 
@@ -61,7 +61,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await rulesManagementClient.deleteRule({
+          await detectionRulesClient.deleteRule({
             ruleId: rule.id,
           });
 

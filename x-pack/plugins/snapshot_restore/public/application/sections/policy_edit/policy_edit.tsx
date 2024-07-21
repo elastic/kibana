@@ -151,7 +151,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
         ? {
             data: {
               error: i18n.translate('xpack.snapshotRestore.editPolicy.policyNotFoundErrorMessage', {
-                defaultMessage: `The policy '{name}' does not exist.`,
+                defaultMessage: `The policy ''{name}'' does not exist.`,
                 values: {
                   name,
                 },

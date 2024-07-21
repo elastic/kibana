@@ -16,12 +16,13 @@ import { ChartLoadError } from './chart_load_error';
 
 const MIN_HEIGHT = 300;
 
-export type LensChartProps = UseLensAttributesParams &
-  BaseChartProps &
+export type LensChartProps = BaseChartProps &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
     searchSessionId?: string;
     description?: string;
+  } & {
+    lensAttributes: UseLensAttributesParams;
   };
 
 export const LensChart = React.memo(
@@ -31,7 +32,6 @@ export const LensChart = React.memo(
     dateRange,
     filters,
     hidePanelTitles,
-    lastReloadRequestTime,
     query,
     onBrushEnd,
     onFilter,
@@ -41,9 +41,9 @@ export const LensChart = React.memo(
     disableTriggers = false,
     height = MIN_HEIGHT,
     loading = false,
-    ...lensAttributesParams
+    lensAttributes,
   }: LensChartProps) => {
-    const { formula, attributes, getExtraActions, error } = useLensAttributes(lensAttributesParams);
+    const { formula, attributes, getExtraActions, error } = useLensAttributes(lensAttributes);
 
     const isLoading = loading || !attributes;
 

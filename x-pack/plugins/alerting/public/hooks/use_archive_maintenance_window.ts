@@ -30,13 +30,13 @@ export function useArchiveMaintenanceWindow() {
   return useMutation(mutationFn, {
     onSuccess: (data, { archive }) => {
       const archiveToast = i18n.translate('xpack.alerting.maintenanceWindowsArchiveSuccess', {
-        defaultMessage: "Archived maintenance window '{title}'",
+        defaultMessage: "Archived maintenance window ''{title}''",
         values: {
           title: data.title,
         },
       });
       const unarchiveToast = i18n.translate('xpack.alerting.maintenanceWindowsUnarchiveSuccess', {
-        defaultMessage: "Unarchived maintenance window '{title}'",
+        defaultMessage: "Unarchived maintenance window ''{title}''",
         values: {
           title: data.title,
         },

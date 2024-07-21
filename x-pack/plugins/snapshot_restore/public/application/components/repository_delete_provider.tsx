@@ -65,7 +65,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
           : i18n.translate(
               'xpack.snapshotRestore.deleteRepository.successSingleNotificationTitle',
               {
-                defaultMessage: "Removed repository '{name}'",
+                defaultMessage: "Removed repository ''{name}''",
                 values: { name: itemsDeleted[0] },
               }
             );
@@ -92,7 +92,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
               }
             )
           : i18n.translate('xpack.snapshotRestore.deleteRepository.errorSingleNotificationTitle', {
-              defaultMessage: "Error removing repository '{name}'",
+              defaultMessage: "Error removing repository ''{name}''",
               values: { name: (errors && errors[0].name) || repositoriesToDelete[0] },
             });
         toastNotifications.addDanger(errorMessage);
@@ -114,7 +114,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
           isSingle ? (
             <FormattedMessage
               id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleTitle"
-              defaultMessage="Remove repository '{name}'?"
+              defaultMessage="Remove repository ''{name}''?"
               values={{ name: repositoryNames[0] }}
             />
           ) : (

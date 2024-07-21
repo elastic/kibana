@@ -79,6 +79,11 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/react-kibana-context-render",
     "@kbn/core-i18n-browser-mocks",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/esql-utils",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/lens-plugin",
+    "@kbn/recently-accessed",
   ],
   "exclude": ["target/**/*"]
 }

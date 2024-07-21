@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { disableNewFeaturesTours } from '../../tasks/navigation';
 import { initializeDataViews } from '../../tasks/login';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
-import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
 describe('Alert Test', { tags: ['@ess'] }, () => {
   let ruleName: string;
@@ -27,10 +27,11 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.T1_ANALYST);
 
-      cy.visit('/app/security/rules');
+      cy.visit('/app/security/rules', {
+        onBeforeLoad: (win) => disableNewFeaturesTours(win),
+      });
       clickRuleName(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
-      closeAlertsStepTourIfVisible();
 
       cy.wait(500);
       cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();

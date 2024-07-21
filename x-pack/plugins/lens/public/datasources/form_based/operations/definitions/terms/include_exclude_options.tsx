@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiSwitch, EuiFieldText, EuiText } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 
 export interface IncludeExcludeOptions {
   label: string;
@@ -32,16 +32,7 @@ const getTermsIncludeExcludeOptions = (
   };
 };
 
-export const IncludeExcludeRow = ({
-  include,
-  exclude,
-  tableRows,
-  columnId,
-  isNumberField,
-  includeIsRegex,
-  excludeIsRegex,
-  updateParams,
-}: {
+export interface IncludeExcludeRowProps {
   include?: string[] | number[];
   exclude?: string[] | number[];
   tableRows?: DatatableRow[];
@@ -55,7 +46,18 @@ export const IncludeExcludeRow = ({
     regexParam: string,
     regexValue: boolean
   ) => void;
-}) => {
+}
+
+export const IncludeExcludeRow = ({
+  include,
+  exclude,
+  tableRows,
+  columnId,
+  isNumberField,
+  includeIsRegex,
+  excludeIsRegex,
+  updateParams,
+}: IncludeExcludeRowProps) => {
   const [includeExcludeSelectedOptions, setIncludeExcludeSelectedOptions] = useState(
     getTermsIncludeExcludeOptions(include, exclude)
   );

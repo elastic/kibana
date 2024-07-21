@@ -8,6 +8,7 @@
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
+import { EuiPanel } from '@elastic/eui';
 import { useLLMsModels } from '../../hooks/use_llms_models';
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
@@ -17,13 +18,11 @@ import { SummarizationModel } from './summarization_model';
 export const SummarizationPanel: React.FC = () => {
   const { control } = useFormContext<ChatForm>();
   const models = useLLMsModels();
-  const defaultModel = models.find((model) => !model.disabled);
 
   return (
-    <>
+    <EuiPanel data-test-subj="summarizationPanel">
       <Controller
         name={ChatFormFields.summarizationModel}
-        defaultValue={defaultModel}
         rules={{ required: true }}
         control={control}
         render={({ field }) => (
@@ -51,6 +50,6 @@ export const SummarizationPanel: React.FC = () => {
           <IncludeCitationsField checked={field.value} onChange={field.onChange} />
         )}
       />
-    </>
+    </EuiPanel>
   );
 };

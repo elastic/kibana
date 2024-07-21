@@ -9,7 +9,7 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { DiscoverPlugin } from './plugin';
 
-export type { DiscoverSetup, DiscoverStart } from './plugin';
+export type { DiscoverSetup, DiscoverStart } from './types';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
@@ -24,7 +24,6 @@ export type {
   DiscoverCustomization,
   DiscoverCustomizationService,
   FlyoutCustomization,
-  FlyoutContentProps,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
   TopNavCustomization,

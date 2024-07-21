@@ -1,14 +1,30 @@
-SPLIT
+## SPLIT
 
-Syntax
-Parameters
-string
-String expression. If null, the function returns null.
-delim
-Delimiter. Only single byte delimiters are currently supported.
-DescriptionSplit a single valued string into multiple strings.Supported types
-Example
+The `SPLIT` function in ES|QL is used to split a single valued string into multiple strings based on a specified delimiter. 
+
+### Syntax
+
+`SPLIT(string, delim)`
+
+#### Parameters
+
+- `string`: This is the string expression that you want to split. If null, the function returns null.
+- `delim`: This is the delimiter that will be used to split the string. Only single byte delimiters are currently supported.
+
+### Examples
+
+Here are a couple of examples of how you can use the `SPLIT` function in ES|QL:
+
 ```esql
 ROW words="foo;bar;baz;qux;quux;corge"
 | EVAL word = SPLIT(words, ";")
 ```
+
+In this example, the string "foo;bar;baz;qux;quux;corge" is split into multiple strings using the semicolon (;) as the delimiter.
+
+```esql
+ROW data="John,Doe,30"
+| EVAL details = SPLIT(data, ",")
+```
+
+In this second example, the string "John,Doe,30" is split into multiple strings using the comma (,) as the delimiter.

@@ -11,10 +11,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -25,10 +24,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -64,10 +62,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -78,10 +75,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -324,6 +320,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -353,10 +350,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -367,10 +363,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -570,6 +565,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -606,10 +602,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -620,10 +615,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -828,6 +822,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -853,10 +848,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -867,10 +861,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1073,6 +1066,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1103,10 +1097,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1117,10 +1110,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1363,6 +1355,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1388,10 +1381,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1402,10 +1394,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1646,6 +1637,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1676,10 +1668,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1690,10 +1681,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1811,6 +1801,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1835,10 +1826,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1849,10 +1839,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1968,6 +1957,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1997,10 +1987,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2011,10 +2000,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2172,6 +2160,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2208,10 +2197,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2222,10 +2210,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2388,6 +2375,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2412,10 +2400,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2426,10 +2413,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2590,6 +2576,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2619,10 +2606,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2633,10 +2619,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2794,6 +2779,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2840,10 +2826,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2854,10 +2839,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3035,6 +3019,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -3059,10 +3044,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3073,10 +3057,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3254,6 +3237,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],

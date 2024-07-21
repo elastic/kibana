@@ -22,7 +22,7 @@ export function defineGetAllRolesRoutes({
     {
       path: '/api/security/role',
       options: {
-        description: `Get all roles`,
+        summary: `Get all roles`,
       },
       validate: false,
     },

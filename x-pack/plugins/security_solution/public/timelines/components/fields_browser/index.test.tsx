@@ -164,7 +164,7 @@ describe('useFieldBrowserOptions', () => {
   it('should dispatch the proper action when a new field is saved', async () => {
     let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async (options) => {
       onSave = options.onSave;
       return () => {};
     };
@@ -198,7 +198,7 @@ describe('useFieldBrowserOptions', () => {
   it('should dispatch the proper actions when a field is edited', async () => {
     let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async (options) => {
       onSave = options.onSave;
       return () => {};
     };
@@ -266,7 +266,7 @@ describe('useFieldBrowserOptions', () => {
   it("should store 'closeEditor' in the actions ref when editor is open by create button", async () => {
     const mockCloseEditor = jest.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async () => mockCloseEditor;
 
     const editorActionsRef: FieldEditorActionsRef = React.createRef();
 
@@ -280,6 +280,7 @@ describe('useFieldBrowserOptions', () => {
     expect(editorActionsRef?.current).toBeNull();
 
     getByRole('button').click();
+    await runAllPromises();
 
     expect(mockCloseEditor).not.toHaveBeenCalled();
     expect(editorActionsRef?.current?.closeEditor).toBeDefined();
@@ -293,7 +294,7 @@ describe('useFieldBrowserOptions', () => {
   it("should store 'closeEditor' in the actions ref when editor is open by edit button", async () => {
     const mockCloseEditor = jest.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async () => mockCloseEditor;
 
     const editorActionsRef: FieldEditorActionsRef = React.createRef();
 
@@ -311,6 +312,7 @@ describe('useFieldBrowserOptions', () => {
     expect(editorActionsRef?.current).toBeNull();
 
     getByTestId('actionEditRuntimeField').click();
+    await runAllPromises();
 
     expect(mockCloseEditor).not.toHaveBeenCalled();
     expect(editorActionsRef?.current?.closeEditor).toBeDefined();

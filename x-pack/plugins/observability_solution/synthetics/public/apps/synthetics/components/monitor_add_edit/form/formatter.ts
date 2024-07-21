@@ -5,7 +5,13 @@
  * 2.0.
  */
 import { get, pick } from 'lodash';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType, MonitorFields } from '../types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  FormMonitorType,
+  MonitorFields,
+  SyntheticsMonitorSchedule,
+} from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 
 export const serializeNestedFormField = (fields: Record<string, any>) => {
@@ -28,6 +34,15 @@ export const format = (fields: Record<string, unknown>, readOnly: boolean = fals
     ? `
           await page.getByText('${formattedFields[ConfigKey.TEXT_ASSERTION]}').first().waitFor();`
     : ``;
+
+  const schedule = formattedFields[ConfigKey.SCHEDULE];
+  if (schedule.number.endsWith('s')) {
+    formattedFields[ConfigKey.SCHEDULE] = {
+      number: `${schedule.number.slice(0, -1)}`,
+      unit: 's' as SyntheticsMonitorSchedule['unit'],
+    };
+  }
+
   const formattedMap = {
     [FormMonitorType.SINGLE]: {
       ...formattedFields,

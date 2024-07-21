@@ -13,6 +13,8 @@ import semverGte from 'semver/functions/gte';
 import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 
+import type { ExtractedIntegrationFields } from '@kbn/fields-metadata-plugin/server';
+
 import { splitPkgKey as split } from '../../../../common/services';
 
 import { KibanaAssetType } from '../../../types';
@@ -48,7 +50,7 @@ import {
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
 
-import { withPackageSpan } from '../packages/utils';
+import { resolveDataStreamFields, resolveDataStreamsMap, withPackageSpan } from '../packages/utils';
 
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
@@ -350,6 +352,49 @@ export async function getPackage(
   }
 
   return { paths, packageInfo, assetsMap, verificationResult };
+}
+
+export async function getPackageFieldsMetadata(
+  params: { packageName: string; datasetName?: string },
+  options: { excludedFieldsAssets?: string[] } = {}
+): Promise<ExtractedIntegrationFields> {
+  const { packageName, datasetName } = params;
+  const { excludedFieldsAssets = ['ecs.yml'] } = options;
+
+  // Attempt retrieving latest package name and version
+  const latestPackage = await fetchFindLatestPackageOrThrow(packageName);
+  const { name, version } = latestPackage;
+
+  // Attempt retrieving latest package
+  const resolvedPackage = await getPackage(name, version);
+
+  // We need to collect all the available data streams for the package.
+  // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.
+  // As a fallback case, we'll try to read the fields for all the data streams in the package.
+  const dataStreamsMap = resolveDataStreamsMap(resolvedPackage.packageInfo.data_streams);
+
+  const { assetsMap } = resolvedPackage;
+
+  const dataStream = datasetName ? dataStreamsMap.get(datasetName) : null;
+
+  if (dataStream) {
+    // Resolve a single data stream fields when the `datasetName` parameter is specified
+    return resolveDataStreamFields({ dataStream, assetsMap, excludedFieldsAssets });
+  } else {
+    // Resolve and merge all the integration data streams fields otherwise
+    return [...dataStreamsMap.values()].reduce(
+      (packageDataStreamsFields, currentDataStream) =>
+        Object.assign(
+          packageDataStreamsFields,
+          resolveDataStreamFields({
+            dataStream: currentDataStream,
+            assetsMap,
+            excludedFieldsAssets,
+          })
+        ),
+      {}
+    );
+  }
 }
 
 function ensureContentType(archivePath: string) {

@@ -17,11 +17,11 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
+import { getEcsGroups } from './lib/get_ecs_groups';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
@@ -242,7 +242,7 @@ export const createCustomThresholdExecutor = ({
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const groups: Group[] = groupByKeysObjectMapping[group];
+        const groups = groupByKeysObjectMapping[group];
 
         const { uuid, start } = alertsClient.report({
           id: `${group}`,
@@ -253,6 +253,7 @@ export const createCustomThresholdExecutor = ({
             [ALERT_EVALUATION_THRESHOLD]: threshold,
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(additionalContext),
+            ...getEcsGroups(groups),
           },
         });
 
@@ -322,6 +323,7 @@ export const createCustomThresholdExecutor = ({
       alertsClient.setAlertData({
         id: recoveredAlertId,
         context,
+        ...getEcsGroups(group),
       });
     }
 

@@ -11,7 +11,7 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
     <EuiText
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Update rule condition from {conditionValue} to"
         id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
         values={
@@ -41,10 +41,9 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Update"
         id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
-        values={Object {}}
       />
     </EuiLink>
   </EuiFlexItem>
@@ -62,7 +61,7 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
     <EuiText
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Update rule condition from {conditionValue} to"
         id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
         values={
@@ -92,10 +91,9 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Update"
         id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
-        values={Object {}}
       />
     </EuiLink>
   </EuiFlexItem>
@@ -113,7 +111,7 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
     <EuiText
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Update rule condition from {conditionValue} to"
         id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
         values={
@@ -143,10 +141,9 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Update"
         id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
-        values={Object {}}
       />
     </EuiLink>
   </EuiFlexItem>

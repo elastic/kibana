@@ -41,6 +41,8 @@ jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 

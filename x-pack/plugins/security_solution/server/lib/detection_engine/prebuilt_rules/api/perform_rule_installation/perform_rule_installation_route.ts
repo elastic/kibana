@@ -19,7 +19,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
-import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
@@ -59,7 +58,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           const config = ctx.securitySolution.getConfig();
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
           const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
@@ -110,7 +109,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           }
 
           const { results: installedRules, errors: installationErrors } = await createPrebuiltRules(
-            rulesManagementClient,
+            detectionRulesClient,
             installableRules
           );
           const ruleErrors = [...fetchErrors, ...installationErrors];
@@ -135,7 +134,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
               failed: ruleErrors.length,
             },
             results: {
-              created: installedRules.map(({ result }) => internalRuleToAPIResponse(result)),
+              created: installedRules.map(({ result }) => result),
               skipped: skippedRules,
             },
             errors: allErrors,

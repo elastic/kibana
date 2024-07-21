@@ -120,6 +120,7 @@ describe('apm', () => {
 
     expect(result.passed).to.be(true);
   });
+
   it('services in environment', async () => {
     let conversation = await chatClient.complete(
       'What are the active services in the environment "test"?'
@@ -152,8 +153,10 @@ describe('apm', () => {
 
     const result = await chatClient.evaluate(conversation, [
       'Responds with the active services in the environment "test"',
-      'Executes get_apm_timeseries to obtain the error rate of the services for the last 4 hours, for the specified services in test environment',
-      'Obtains the top 2 frequent errors of the services in the last hour, for the specified services in test environment',
+      'Successfully executes a query that filters on service.environment and return service.name',
+      'Mentions the two active services and their service names',
+      'Succesfully executes a query that returns the error rate for the services in the last four hours',
+      'Mentions the top 2 frequent errors of the services in the last hour, for the specified services in test environment',
       'Returns the current alerts for the services, for the specified services in test environment',
     ]);
 

@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 const FLYOUT_BODY_PADDING = 24;
 const COPY_TO_CLIPBOARD_BUTTON_HEIGHT = 24;
@@ -21,7 +21,7 @@ const FLYOUT_FOOTER_HEIGHT = 72;
  * Json view displayed in the document details expandable flyout right section
  */
 export const JsonTab = memo(() => {
-  const { searchHit, isPreview } = useRightPanelContext();
+  const { searchHit, isPreview } = useDocumentDetailsContext();
   const jsonValue = JSON.stringify(searchHit, null, 2);
 
   const flexGroupElement = useRef<HTMLDivElement>(null);

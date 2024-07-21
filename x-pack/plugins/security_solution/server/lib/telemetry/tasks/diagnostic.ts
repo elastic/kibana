@@ -33,12 +33,11 @@ export function createTelemetryDiagnosticsTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('diagnostic'));
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('diagnostic'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         if (!taskExecutionPeriod.last) {
@@ -57,13 +56,15 @@ export function createTelemetryDiagnosticsTaskConfig() {
           );
 
           if (alerts.length === 0) {
-            log.l('no diagnostic alerts retrieved');
+            log.debug('no diagnostic alerts retrieved');
             await taskMetricsService.end(trace);
             return alertCount;
           }
 
           alertCount += alerts.length;
-          log.l(`Sending ${alerts.length} diagnostic alerts`);
+          log.l('Sending diagnostic alerts', {
+            alerts_count: alerts.length,
+          });
           await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
         }
 

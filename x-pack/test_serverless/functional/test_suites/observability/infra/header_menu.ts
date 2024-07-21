@@ -16,12 +16,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Header menu', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('Alerts dropdown', () => {

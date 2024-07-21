@@ -12,13 +12,14 @@ import { i18n } from '@kbn/i18n';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { getEarliestLatestParams } from '@kbn/esql-utils';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
+import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
@@ -152,6 +153,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
+
+            const namedParams = getEarliestLatestParams(query, input.timeRange);
+
+            if (namedParams.length) {
+              params.params = namedParams;
+            }
+
             const timeFilter =
               input.timeRange &&
               getTime(undefined, input.timeRange, {
@@ -194,7 +202,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
-            IKibanaSearchResponse<ESQLSearchReponse>
+            IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
             { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }

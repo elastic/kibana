@@ -107,6 +107,10 @@
     "timestamp"
   ],
   "application_usage_totals": [],
+  "background-task-node": [
+    "id",
+    "last_seen"
+  ],
   "canvas-element": [
     "@created",
     "@timestamp",
@@ -290,7 +294,25 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-definition": [
+    "description",
+    "filter",
+    "id",
+    "identityFields",
+    "indexPatterns",
+    "managed",
+    "metadata",
+    "metrics",
+    "name",
+    "staticFields",
+    "type",
+    "version"
+  ],
+  "entity-discovery-api-key": [
+    "apiKey"
+  ],
   "epm-packages": [
+    "additional_spaces_installed_kibana",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -457,6 +479,12 @@
     "proxy_headers",
     "url"
   ],
+  "fleet-setup-lock": [
+    "started_at",
+    "status",
+    "uuid"
+  ],
+  "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"
@@ -607,6 +635,7 @@
     "package.title",
     "package.version",
     "policy_id",
+    "policy_ids",
     "revision",
     "secret_references",
     "secret_references.id",
@@ -976,6 +1005,7 @@
     "attempts",
     "enabled",
     "ownerId",
+    "partition",
     "retryAt",
     "runAt",
     "schedule",
@@ -1005,6 +1035,13 @@
     "accessDate",
     "createDate",
     "slug"
+  ],
+  "usage-counter": [
+    "count",
+    "counterName",
+    "counterType",
+    "domainId",
+    "source"
   ],
   "usage-counters": [
     "domainId"

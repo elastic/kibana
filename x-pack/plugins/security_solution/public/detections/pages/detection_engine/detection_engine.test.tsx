@@ -111,9 +111,6 @@ jest.mock('../../../common/lib/kibana', () => {
         cases: {
           ui: { getCasesContext: mockCasesContext },
         },
-        uiSettings: {
-          get: jest.fn(),
-        },
         timelines: { ...mockTimelines },
         data: {
           query: {

@@ -14,6 +14,11 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
 import { waitFor } from '@testing-library/react';
 import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
+import {
+  COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+  COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
+} from './complete_external_actions_task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -25,7 +30,9 @@ describe('CompleteExternalTaskRunner class', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     runnerInstance = new CompleteExternalActionsTaskRunner(
       endpointContextServicesMock,
-      esClientMock
+      esClientMock,
+      '60s',
+      `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`
     );
     const actionGenerator = new EndpointActionGenerator('seed');
 
@@ -50,6 +57,22 @@ describe('CompleteExternalTaskRunner class', () => {
 
     expect(endpointContextServicesMock.createLogger().debug).toHaveBeenCalledWith(
       `Exiting: Run aborted due to license not being Enterprise`
+    );
+  });
+
+  it('should do nothing if task instance id is outdated', async () => {
+    runnerInstance = new CompleteExternalActionsTaskRunner(
+      endpointContextServicesMock,
+      esClientMock,
+      '60s',
+      'old-id'
+    );
+    const result = await runnerInstance.run();
+
+    expect(result).toEqual(getDeleteTaskRunResult());
+
+    expect(endpointContextServicesMock.createLogger().info).toHaveBeenCalledWith(
+      `Outdated task version. Got [old-id] from task instance. Current version is [endpoint:complete-external-response-actions-1.0.0]`
     );
   });
 

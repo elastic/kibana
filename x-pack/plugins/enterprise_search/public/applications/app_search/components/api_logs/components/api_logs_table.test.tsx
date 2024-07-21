@@ -9,19 +9,23 @@ import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 // NOTE: We're mocking FormattedRelative here because it (currently) has
 // console warn issues, and it allows us to skip mocking dates
-jest.mock('@kbn/i18n-react', () => ({
-  ...(jest.requireActual('@kbn/i18n-react') as object),
-  FormattedRelative: jest.fn(() => '20 hours ago'),
-}));
+jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
+
+  return {
+    ...(jest.requireActual('@kbn/i18n-react') as object),
+    FormattedRelative: jest.fn(() => '20 hours ago'),
+  };
+});
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
-
 import { EuiBasicTable, EuiBadge, EuiHealth, EuiButtonEmpty } from '@elastic/eui';
 
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
+
 import { DEFAULT_META } from '../../../../shared/constants';
-import { mountWithIntl } from '../../../../test_helpers';
 
 import { ApiLogsTable } from '.';
 
@@ -93,13 +97,13 @@ describe('ApiLogsTable', () => {
 
   describe('hasPagination', () => {
     it('does not render with pagination by default', () => {
-      const wrapper = shallow(<ApiLogsTable />);
+      const wrapper = shallowWithIntl(<ApiLogsTable />);
 
       expect(wrapper.find(EuiBasicTable).prop('pagination')).toBeFalsy();
     });
 
     it('renders pagination if hasPagination is true', () => {
-      const wrapper = shallow(<ApiLogsTable hasPagination />);
+      const wrapper = shallowWithIntl(<ApiLogsTable hasPagination />);
 
       expect(wrapper.find(EuiBasicTable).prop('pagination')).toBeTruthy();
     });

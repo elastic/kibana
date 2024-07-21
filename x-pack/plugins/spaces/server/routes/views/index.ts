@@ -36,17 +36,17 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
     async (context, request, response) => {
       try {
         const { uiSettings } = await context.core;
-        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request });
         const basePath = deps.basePath.get(request);
         const nextCandidateRoute = parseNextURL(request.url.href);
 
         const route = nextCandidateRoute === '/' ? defaultRoute : nextCandidateRoute;
         // need to get reed of ../../ to make sure we will not be out of space basePath
-        const normalizedRoute = new URL(route, 'https://localhost').pathname;
+        const normalizedRoute = new URL(route, 'https://localhost');
 
         return response.redirected({
           headers: {
-            location: `${basePath}${normalizedRoute}`,
+            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}`,
           },
         });
       } catch (e) {

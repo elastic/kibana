@@ -45,13 +45,13 @@ function parseAndExtract(
   dateRange: DateRange | undefined,
   label?: string
 ) {
-  const { root, error } = tryToParse(text, operations);
-  if (error || root == null) {
+  const parseResponse = tryToParse(text, operations);
+  if ('error' in parseResponse) {
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
   const errors = runASTValidation(
-    root,
+    parseResponse.root,
     layer,
     indexPattern,
     operations,
@@ -67,7 +67,7 @@ function parseAndExtract(
   const extracted = extractColumns(
     columnId,
     operations,
-    root,
+    parseResponse.root,
     layer,
     indexPattern,
     i18n.translate('xpack.lens.indexPattern.formulaPartLabel', {

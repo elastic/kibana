@@ -26,13 +26,12 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180062
-  describe.skip('Installing custom integrations', async () => {
+  describe('TESTME Installing custom integrations', async () => {
     afterEach(async () => {
       await uninstallPackage();
     });
 
-    it("Correcty installs a custom integration and all of it's assets", async () => {
+    it('Correcty installs a custom integration and all of its assets', async () => {
       const response = await supertest
         .post(`/api/fleet/epm/custom_integrations`)
         .set('kbn-xsrf', 'xxxx')
@@ -170,20 +169,40 @@ export default function (providerContext: FtrProviderContext) {
         dynamic_templates: [
           {
             ecs_timestamp: {
-              match: '@timestamp',
               mapping: {
                 ignore_malformed: false,
                 type: 'date',
               },
+              match: '@timestamp',
             },
           },
           {
             ecs_message_match_only_text: {
-              path_match: ['message', '*.message'],
-              unmatch_mapping_type: 'object',
               mapping: {
                 type: 'match_only_text',
               },
+              path_match: ['message', '*.message'],
+              unmatch_mapping_type: 'object',
+            },
+          },
+          {
+            ecs_non_indexed_keyword: {
+              mapping: {
+                doc_values: false,
+                index: false,
+                type: 'keyword',
+              },
+              path_match: 'event.original',
+            },
+          },
+          {
+            ecs_non_indexed_long: {
+              mapping: {
+                doc_values: false,
+                index: false,
+                type: 'long',
+              },
+              path_match: '*.x509.public_key_exponent',
             },
           },
           {
@@ -305,7 +324,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ecs_geo_point: {
-              path_match: ['location', '*.location'],
+              path_match: '*.geo.location',
               mapping: {
                 type: 'geo_point',
               },
@@ -426,6 +445,7 @@ export default function (providerContext: FtrProviderContext) {
           'event.ingested': {
             type: 'date',
             format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+            ignore_malformed: false,
           },
           'host.architecture': {
             type: 'keyword',
@@ -506,6 +526,34 @@ export default function (providerContext: FtrProviderContext) {
           },
         },
       });
+    });
+
+    it('Works correctly when there is an existing datastream with the same name', async () => {
+      const INTEGRATION_NAME_1 = 'myintegration';
+      const DATASET_NAME = 'test';
+      await esClient.transport.request({
+        method: 'POST',
+        path: `logs-${INTEGRATION_NAME_1}.${DATASET_NAME}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: `${DATASET_NAME}`,
+          data_stream: {
+            dataset: `${INTEGRATION_NAME_1}.${DATASET_NAME}_logs`,
+            namespace: 'default',
+            type: 'logs',
+          },
+        },
+      });
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME_1,
+          datasets: [{ name: `${INTEGRATION_NAME_1}.${DATASET_NAME}`, type: 'logs' }],
+        })
+        .expect(200);
     });
 
     it('Throws an error when there is a naming collision with a current package installation', async () => {

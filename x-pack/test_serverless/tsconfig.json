@@ -75,7 +75,6 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/fleet-plugin",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
     "@kbn/reporting-export-types-csv-common",
@@ -100,6 +99,11 @@
     "@kbn/synthetics-plugin",
     "@kbn/dataset-quality-plugin",
     "@kbn/alerting-comparators",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/reporting-server",
+    "@kbn/config-schema",
+    "@kbn/features-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/ml-trained-models-utils",
   ]
 }

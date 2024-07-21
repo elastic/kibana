@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves all connectors.
+  summary: Get all connectors
   operationId: getConnectors
   tags:
     - connectors

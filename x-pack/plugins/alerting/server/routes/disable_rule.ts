@@ -32,7 +32,7 @@ export const disableRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_disable`,
       options: {
         access: 'public',
-        description: `Disable a rule`,
+        summary: `Disable a rule`,
       },
       validate: {
         params: paramSchema,

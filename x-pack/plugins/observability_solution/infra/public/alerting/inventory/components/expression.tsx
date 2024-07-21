@@ -12,11 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiHealth,
-  EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -69,7 +68,7 @@ import {
   useSourceContext,
   withSourceProvider,
 } from '../../../containers/metrics_source';
-import { InfraWaffleMapOptions } from '../../../lib/lib';
+import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
@@ -360,14 +359,14 @@ export const Expressions: React.FC<Props> = (props) => {
             {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
               defaultMessage: "Alert me if there's no data",
             })}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
                 defaultMessage:
                   'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
               })}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         checked={ruleParams.alertOnNoData}

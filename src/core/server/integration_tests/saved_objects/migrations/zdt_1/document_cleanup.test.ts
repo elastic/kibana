@@ -13,7 +13,6 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
 import {
   getBaseMigratorParams,
   getDeletedType,
@@ -35,7 +34,6 @@ describe('ZDT upgrades - document cleanup', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const createBaseline = async () => {

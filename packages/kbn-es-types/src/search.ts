@@ -673,7 +673,7 @@ export interface ESQLColumn {
 
 export type ESQLRow = unknown[];
 
-export interface ESQLSearchReponse {
+export interface ESQLSearchResponse {
   columns: ESQLColumn[];
   // In case of ?drop_null_columns in the query, then
   // all_columns will have available and empty fields
@@ -691,4 +691,5 @@ export interface ESQLSearchParams {
   filter?: unknown;
   locale?: string;
   dropNullColumns?: boolean;
+  params?: Array<Record<string, string | undefined>>;
 }

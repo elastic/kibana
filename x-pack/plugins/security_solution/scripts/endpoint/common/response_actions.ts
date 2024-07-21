@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
@@ -24,6 +26,7 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   EndpointActionResponseDataOutput,
+  ResponseActionScanOutputContent,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -108,6 +111,16 @@ export const sendEndpointActionResponse = async (
         endpointResponse.EndpointActions.data.output
           .content as unknown as ResponseActionGetFileOutputContent
       ).code = endpointActionGenerator.randomGetFileFailureCode();
+    }
+
+    if (
+      endpointResponse.EndpointActions.data.command === 'scan' &&
+      endpointResponse.EndpointActions.data.output
+    ) {
+      (
+        endpointResponse.EndpointActions.data.output
+          .content as unknown as ResponseActionScanOutputContent
+      ).code = endpointActionGenerator.randomScanFailureCode();
     }
 
     if (

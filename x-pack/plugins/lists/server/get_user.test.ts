@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { CoreKibanaRequest } from '@kbn/core/server';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 
 import { getUser } from './get_user';
 
 describe('get_user', () => {
-  let request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+  let security: SecurityRequestHandlerContext;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+    security = securityServiceMock.createRequestHandlerContext();
   });
 
   afterEach(() => {
@@ -23,44 +23,38 @@ describe('get_user', () => {
   });
 
   test('it returns "bob" as the user given a security request with "bob"', () => {
-    const security = securityMock.createStart();
     security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'bob' });
-    const user = getUser({ request, security });
+    const user = getUser({ security });
     expect(user).toEqual('bob');
   });
 
   test('it returns "alice" as the user given a security request with "alice"', () => {
-    const security = securityMock.createStart();
     security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'alice' });
-    const user = getUser({ request, security });
+    const user = getUser({ security });
     expect(user).toEqual('alice');
   });
 
   test('it returns "elastic" as the user given null as the current user', () => {
-    const security = securityMock.createStart();
     security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
-    const user = getUser({ request, security });
+    const user = getUser({ security });
     expect(user).toEqual('elastic');
   });
 
   test('it returns "elastic" as the user given undefined as the current user', () => {
-    const security = securityMock.createStart();
     security.authc.getCurrentUser = jest.fn().mockReturnValue(undefined);
-    const user = getUser({ request, security });
+    const user = getUser({ security });
     expect(user).toEqual('elastic');
   });
 
   test('it returns "elastic" as the user given undefined as the plugin', () => {
-    const security = securityMock.createStart();
     security.authc.getCurrentUser = jest.fn().mockReturnValue(undefined);
-    const user = getUser({ request, security: undefined });
+    const user = getUser({ security });
     expect(user).toEqual('elastic');
   });
 
   test('it returns "elastic" as the user given null as the plugin', () => {
-    const security = securityMock.createStart();
     security.authc.getCurrentUser = jest.fn().mockReturnValue(undefined);
-    const user = getUser({ request, security: null });
+    const user = getUser({ security });
     expect(user).toEqual('elastic');
   });
 });

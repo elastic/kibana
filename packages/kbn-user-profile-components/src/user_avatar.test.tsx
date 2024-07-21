@@ -31,7 +31,7 @@ describe('UserAvatar', () => {
       <EuiAvatar
         color="plain"
         imageUrl="https://source.unsplash.com/64x64/?cat"
-        name="Delighted Nightingale"
+        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
       />
     `);
   });
@@ -56,7 +56,7 @@ describe('UserAvatar', () => {
         color="#09e8ca"
         initials="DN"
         initialsLength={2}
-        name="Delighted Nightingale"
+        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
       />
     `);
   });
@@ -76,7 +76,7 @@ describe('UserAvatar', () => {
         color="#AA6556"
         initials="DN"
         initialsLength={2}
-        name="Delighted Nightingale"
+        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
       />
     `);
   });

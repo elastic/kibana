@@ -13,9 +13,10 @@ export const configSchema = schema.object({
   experimental: schema.maybe(
     schema.object({
       ruleFormV2Enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+      enabledProfiles: schema.maybe(schema.arrayOf(schema.string(), { defaultValue: [] })),
     })
   ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
-export type ExperimentalFeatures = ConfigSchema['experimental'];
+export type ExperimentalFeatures = NonNullable<ConfigSchema['experimental']>;

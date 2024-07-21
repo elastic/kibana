@@ -42,6 +42,22 @@ function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
   return body.map(({ stats }) => (stats as UsageStatsPayload).cacheDetails);
 }
 
+function updateClusterUuidInLogstashStats(
+  clusterUuid: string,
+  payload: Array<Record<string, any>>
+) {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  return payload.map(({ stack_stats, ...item }) => {
+    const { logstash } = stack_stats;
+    if (logstash) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { cluster_stats } = logstash;
+      cluster_stats.monitoringClusterUuid = clusterUuid;
+    }
+    return { stack_stats, ...item };
+  });
+}
+
 /**
  * Update the .monitoring-* documents loaded via the archiver to the recent `timestamp`
  * @param esSupertest The client to send requests to ES
@@ -161,7 +177,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitoring).length(3);
         expect(localXPack.collectionSource).to.eql('local_xpack');
 
-        expect(omitCacheDetails(monitoring)).to.eql(
+        const withoutCacheDetailsMonitoring = omitCacheDetails(monitoring);
+        const lsClusterUuidChangedMonitoring = updateClusterUuidInLogstashStats(
+          'integrationTestClusterUuid',
+          withoutCacheDetailsMonitoring
+        );
+        expect(lsClusterUuidChangedMonitoring).to.eql(
           updateFixtureTimestamps(multiClusterFixture, timestamp)
         );
       });

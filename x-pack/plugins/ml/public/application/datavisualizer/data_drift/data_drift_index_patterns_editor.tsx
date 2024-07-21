@@ -167,7 +167,7 @@ export function DataDriftIndexPatternsEditor({
                 i18n.translate(
                   'xpack.ml.dataDrift.indexPatternsEditor.hasDataViewWithDifferentTimeField',
                   {
-                    defaultMessage: `Found a data view matching pattern '{indexPattern}' but with a different time field. Creating a new data view to analyze data drift.`,
+                    defaultMessage: `Found a data view matching pattern ''{indexPattern}'' but with a different time field. Creating a new data view to analyze data drift.`,
                     values: { indexPattern: indicesName },
                   }
                 )

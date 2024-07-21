@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
@@ -16,11 +16,10 @@ import {
 } from '@kbn/elastic-assistant';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+
+const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
 export const ManagementSettings = React.memo(() => {
-  const isFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
-
   const {
     baseConversations,
     http,
@@ -38,28 +37,17 @@ export const ManagementSettings = React.memo(() => {
     isAssistantEnabled,
   });
 
-  const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    WELCOME_CONVERSATION_TITLE
-  );
-
   const { getDefaultConversation } = useConversation();
 
   const currentConversation = useMemo(
     () =>
-      conversations?.[selectedConversationId] ??
-      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode }),
-    [conversations, getDefaultConversation, selectedConversationId, isFlyoutMode]
+      conversations?.[defaultSelectedConversationId] ??
+      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
+    [conversations, getDefaultConversation]
   );
 
   if (conversations) {
-    return (
-      <AssistantSettingsManagement
-        selectedConversation={currentConversation}
-        setSelectedConversationId={setSelectedConversationId}
-        conversations={conversations}
-        isFlyoutMode={isFlyoutMode}
-      />
-    );
+    return <AssistantSettingsManagement selectedConversation={currentConversation} />;
   }
 
   return <></>;

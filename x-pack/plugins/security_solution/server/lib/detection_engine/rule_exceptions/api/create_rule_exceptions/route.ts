@@ -5,45 +5,31 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
-
+import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type {
-  CreateExceptionListSchema,
-  CreateExceptionListSchemaDecoded,
-  CreateRuleExceptionListItemSchemaDecoded,
-  ExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  createExceptionListSchema,
-  exceptionListItemSchema,
-  ExceptionListTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers';
 import type {
-  CreateRuleExceptionsRequestBodyDecoded,
-  CreateRuleExceptionsRequestParamsDecoded,
-} from '../../../../../../common/api/detection_engine/rule_exceptions';
+  CreateRuleExceptionListItemProps,
+  ExceptionList,
+} from '@kbn/securitysolution-exceptions-common/api';
 import {
-  CREATE_RULE_EXCEPTIONS_URL,
-  CreateRuleExceptionsRequestBody,
-  CreateRuleExceptionsRequestParams,
-} from '../../../../../../common/api/detection_engine/rule_exceptions';
+  CreateExceptionListRequestBody,
+  CreateRuleExceptionListItemsRequestBody,
+  CreateRuleExceptionListItemsRequestParams,
+  CreateRuleExceptionListItemsResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
-import { readRules } from '../../../rule_management/logic/rule_management/read_rules';
+import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
+
+import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../rule_management/logic/exceptions/check_for_default_rule_exception_list';
 import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import type { IRulesManagementClient } from '../../../rule_management/logic/rule_management/rules_management_client';
+import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -59,14 +45,8 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
         version: '2023-10-31',
         validate: {
           request: {
-            params: buildRouteValidation<
-              typeof CreateRuleExceptionsRequestParams,
-              CreateRuleExceptionsRequestParamsDecoded
-            >(CreateRuleExceptionsRequestParams),
-            body: buildRouteValidation<
-              typeof CreateRuleExceptionsRequestBody,
-              CreateRuleExceptionsRequestBodyDecoded
-            >(CreateRuleExceptionsRequestBody),
+            params: buildRouteValidationWithZod(CreateRuleExceptionListItemsRequestParams),
+            body: buildRouteValidationWithZod(CreateRuleExceptionListItemsRequestBody),
           },
         },
       },
@@ -83,7 +63,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           ]);
           const rulesClient = ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const { items } = request.body;
           const { id: ruleId } = request.params;
@@ -106,15 +86,10 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             items,
             rule,
             listsClient,
-            rulesManagementClient,
+            detectionRulesClient,
           });
 
-          const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+          return response.ok({ body: CreateRuleExceptionListItemsResponse.parse(createdItems) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
@@ -130,11 +105,11 @@ export const createRuleExceptions = async ({
   items,
   rule,
   listsClient,
-  rulesManagementClient,
+  detectionRulesClient,
 }: {
-  items: CreateRuleExceptionListItemSchemaDecoded[];
+  items: CreateRuleExceptionListItemProps[];
   listsClient: ExceptionListClient | null;
-  rulesManagementClient: IRulesManagementClient;
+  detectionRulesClient: IDetectionRulesClient;
   rule: SanitizedRule<RuleParams>;
 }) => {
   const ruleDefaultLists = rule.params.exceptionsList.filter(
@@ -159,7 +134,7 @@ export const createRuleExceptions = async ({
     if (exceptionListAssociatedToRule != null) {
       return createExceptionListItems({
         items,
-        defaultList: exceptionListAssociatedToRule,
+        defaultList: exceptionListAssociatedToRule as ExceptionList,
         listsClient,
       });
     } else {
@@ -169,7 +144,7 @@ export const createRuleExceptions = async ({
       const defaultList = await createAndAssociateDefaultExceptionList({
         rule,
         listsClient,
-        rulesManagementClient,
+        detectionRulesClient,
         removeOldAssociation: true,
       });
 
@@ -179,7 +154,7 @@ export const createRuleExceptions = async ({
     const defaultList = await createAndAssociateDefaultExceptionList({
       rule,
       listsClient,
-      rulesManagementClient,
+      detectionRulesClient,
       removeOldAssociation: false,
     });
 
@@ -192,8 +167,8 @@ export const createExceptionListItems = async ({
   defaultList,
   listsClient,
 }: {
-  items: CreateRuleExceptionListItemSchemaDecoded[];
-  defaultList: ExceptionListSchema;
+  items: CreateRuleExceptionListItemProps[];
+  defaultList: ExceptionList;
   listsClient: ExceptionListClient | null;
 }) => {
   return Promise.all(
@@ -203,7 +178,7 @@ export const createExceptionListItems = async ({
         description: item.description,
         entries: item.entries,
         expireTime: item.expire_time,
-        itemId: item.item_id,
+        itemId: item.item_id ?? uuidv4(),
         listId: defaultList.list_id,
         meta: item.meta,
         name: item.name,
@@ -222,10 +197,10 @@ export const createExceptionList = async ({
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-}): Promise<ExceptionListSchema | null> => {
+}): Promise<ExceptionList | null> => {
   if (!listsClient) return null;
 
-  const exceptionList: CreateExceptionListSchema = {
+  const exceptionList: CreateExceptionListRequestBody = {
     description: `Exception list containing exceptions for rule with id: ${rule.id}`,
     meta: undefined,
     name: `Exceptions for rule - ${rule.name}`,
@@ -235,25 +210,22 @@ export const createExceptionList = async ({
     version: 1,
   };
 
-  // The `as` defeated me. Please send help
-  // if you know what's missing here.
-  const validated = pipe(
-    createExceptionListSchema.decode(exceptionList),
-    fold((errors) => {
-      throw new Error(formatErrors(errors).join());
-    }, identity)
-  ) as CreateExceptionListSchemaDecoded;
+  const parseResult = CreateExceptionListRequestBody.safeParse(exceptionList);
+
+  if (!parseResult.success) {
+    throw new Error(stringifyZodError(parseResult.error));
+  }
 
   const {
     description,
-    list_id: listId,
+    list_id: listId = uuidv4(),
     meta,
     name,
     namespace_type: namespaceType,
     tags,
     type,
     version,
-  } = validated;
+  } = parseResult.data;
 
   // create the default rule list
   return listsClient.createExceptionList({
@@ -266,20 +238,20 @@ export const createExceptionList = async ({
     tags,
     type,
     version,
-  });
+  }) as Promise<ExceptionList>;
 };
 
 export const createAndAssociateDefaultExceptionList = async ({
   rule,
   listsClient,
-  rulesManagementClient,
+  detectionRulesClient,
   removeOldAssociation,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  rulesManagementClient: IRulesManagementClient;
+  detectionRulesClient: IDetectionRulesClient;
   removeOldAssociation: boolean;
-}): Promise<ExceptionListSchema> => {
+}): Promise<ExceptionList> => {
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
 
   if (exceptionListToAssociate == null) {
@@ -294,8 +266,8 @@ export const createAndAssociateDefaultExceptionList = async ({
     ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
     : existingRuleExceptionLists;
 
-  await rulesManagementClient.patchRule({
-    nextParams: {
+  await detectionRulesClient.patchRule({
+    rulePatch: {
       rule_id: rule.params.ruleId,
       ...rule.params,
       exceptions_list: [

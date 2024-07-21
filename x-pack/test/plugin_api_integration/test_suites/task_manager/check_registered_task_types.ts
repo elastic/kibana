@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
+    'sampleRecurringTaskThatDeletesItself',
     'sampleTask',
     'sampleTaskWithLimitedConcurrency',
     'sampleTaskWithSingleConcurrency',
@@ -57,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.crowdstrike',
         'actions:.d3security',
         'actions:.email',
+        'actions:.gemini',
         'actions:.gen-ai',
         'actions:.index',
         'actions:.jira',
@@ -156,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
+        'task_manager:delete_inactive_background_task_nodes',
       ]);
     });
   });

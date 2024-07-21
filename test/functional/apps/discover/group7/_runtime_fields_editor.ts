@@ -105,9 +105,54 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check it in the doc viewer too
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      await testSubjects.click('fieldDescriptionPopoverButton-agent');
+      await dataGrid.expandFieldNameCellInFlyout('agent');
       await retry.waitFor('doc viewer popover text', async () => {
         return (await testSubjects.getVisibleText('fieldDescription-agent')) === customDescription2;
+      });
+
+      await dataGrid.closeFlyout();
+    });
+
+    it('allows to replace ECS description with a custom field description', async function () {
+      await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
+      await retry.waitFor('field popover text', async () => {
+        return (await testSubjects.getVisibleText('fieldDescription-@timestamp')).startsWith(
+          'Date'
+        );
+      });
+      await PageObjects.unifiedFieldList.closeFieldPopover();
+      // check it in the doc viewer too
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      await dataGrid.expandFieldNameCellInFlyout('@timestamp');
+      await retry.waitFor('doc viewer popover text', async () => {
+        return (await testSubjects.getVisibleText('fieldDescription-@timestamp')).startsWith(
+          'Date'
+        );
+      });
+      await dataGrid.closeFlyout();
+
+      const customDescription = 'custom @timestamp description here';
+      // set a custom description
+      await PageObjects.discover.editField('@timestamp');
+      await fieldEditor.enableCustomDescription();
+      await fieldEditor.setCustomDescription(customDescription);
+      await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
+      await retry.waitFor('field popover text', async () => {
+        return (
+          (await testSubjects.getVisibleText('fieldDescription-@timestamp')) === customDescription
+        );
+      });
+      await PageObjects.unifiedFieldList.closeFieldPopover();
+      // check it in the doc viewer too
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      await dataGrid.expandFieldNameCellInFlyout('@timestamp');
+      await retry.waitFor('doc viewer popover text', async () => {
+        return (
+          (await testSubjects.getVisibleText('fieldDescription-@timestamp')) === customDescription
+        );
       });
 
       await dataGrid.closeFlyout();

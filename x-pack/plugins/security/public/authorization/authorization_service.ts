@@ -5,18 +5,30 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import type { ConfigType } from '../config';
+import { RolesAPIClient } from '../management';
 
 interface SetupParams {
   config: ConfigType;
+  http: HttpStart;
 }
 
 export class AuthorizationService {
-  public setup({ config }: SetupParams): AuthorizationServiceSetup {
+  public setup({ config, http }: SetupParams): AuthorizationServiceSetup {
     const isRoleManagementEnabled = () => config.roleManagementEnabled;
+    const rolesAPIClient = new RolesAPIClient(http);
 
-    return { isRoleManagementEnabled };
+    return {
+      isRoleManagementEnabled,
+      roles: {
+        getRoles: rolesAPIClient.getRoles,
+        getRole: rolesAPIClient.getRole,
+        deleteRole: rolesAPIClient.deleteRole,
+        saveRole: rolesAPIClient.saveRole,
+      },
+    };
   }
 }

@@ -22,8 +22,8 @@ import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
 import { PaletteOutput } from '@kbn/coloring';
-import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedPieVisualizationState } from './persistence';
+import { LegendValue } from '@elastic/charts';
 
 jest.mock('../../id_generator');
 
@@ -169,7 +169,7 @@ describe('pie_visualization', () => {
     describe('converting to legendStats', () => {
       it('loads a chart with `legendStats` property', () => {
         const persistedState = getExampleState();
-        persistedState.layers[0].legendStats = [PartitionLegendValue.Value];
+        persistedState.layers[0].legendStats = [LegendValue.Value];
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
 

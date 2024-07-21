@@ -16,7 +16,8 @@ import {
 } from '../../common/components/super_date_picker/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useSourcererDataView, getScopeFromPath } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer/containers';
+import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
 import { sourcererSelectors } from '../../common/store';
 
 export function useTimelineDataFilters(isActiveTimelines: boolean) {

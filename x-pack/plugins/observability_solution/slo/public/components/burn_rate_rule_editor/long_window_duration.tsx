@@ -8,23 +8,15 @@
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
-
 import { Duration } from '../../typings';
-import { toMinutes } from '../../utils/slo/duration';
 
 interface Props {
-  shortWindowDuration: Duration;
   initialDuration?: Duration;
   errors?: string[];
   onChange: (duration: Duration) => void;
 }
 
-export function LongWindowDuration({
-  shortWindowDuration,
-  initialDuration,
-  onChange,
-  errors,
-}: Props) {
+export function LongWindowDuration({ initialDuration, onChange, errors }: Props) {
   const [durationValue, setDurationValue] = useState<number>(initialDuration?.value ?? 1);
   const hasError = errors !== undefined && errors.length > 0;
 
@@ -35,7 +27,7 @@ export function LongWindowDuration({
   };
 
   return (
-    <EuiFormRow label={getRowLabel(shortWindowDuration)} fullWidth isInvalid={hasError}>
+    <EuiFormRow label={getRowLabel()} fullWidth isInvalid={hasError}>
       <EuiFieldNumber
         isInvalid={hasError}
         min={1}
@@ -44,7 +36,7 @@ export function LongWindowDuration({
         value={String(durationValue)}
         onChange={onDurationValueChange}
         aria-label={i18n.translate('xpack.slo.rules.longWindow.valueLabel', {
-          defaultMessage: 'Lookback period in hours',
+          defaultMessage: 'Long lookback period in hours',
         })}
         data-test-subj="durationValueInput"
       />
@@ -52,18 +44,16 @@ export function LongWindowDuration({
   );
 }
 
-const getRowLabel = (shortWindowDuration: Duration) => (
+const getRowLabel = () => (
   <>
     {i18n.translate('xpack.slo.rules.longWindow.rowLabel', {
-      defaultMessage: 'Lookback (hours)',
+      defaultMessage: 'Long lookback (hours)',
     })}{' '}
-    <EuiIconTip position="top" content={getTooltipText(shortWindowDuration)} />
+    <EuiIconTip
+      position="top"
+      content={i18n.translate('xpack.slo.rules.longWindowDuration.tooltip', {
+        defaultMessage: 'Long lookback period over which the burn rate is computed.',
+      })}
+    />
   </>
 );
-
-const getTooltipText = (shortWindowDuration: Duration) =>
-  i18n.translate('xpack.slo.rules.longWindowDuration.tooltip', {
-    defaultMessage:
-      'Lookback period over which the burn rate is computed. A shorter lookback period of {shortWindowDuration} minutes (1/12 the lookback period) will be used for faster recovery',
-    values: { shortWindowDuration: toMinutes(shortWindowDuration) },
-  });

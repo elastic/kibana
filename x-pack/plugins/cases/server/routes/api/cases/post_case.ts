@@ -16,7 +16,7 @@ export const postCaseRoute = createCasesRoute({
   path: CASES_URL,
   routerOptions: {
     access: 'public',
-    description: `Create a case`,
+    summary: `Create a case`,
   },
   handler: async ({ context, request, response }) => {
     try {

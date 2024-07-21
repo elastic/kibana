@@ -8,60 +8,70 @@
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
-// the archived data holds a report created by test_user
-const TEST_USERNAME = 'test_user';
-const TEST_USER_PASSWORD = 'changeme';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 export default ({ getService }: FtrProviderContext) => {
-  const esArchiver = getService('esArchiver');
-  const supertest = getService('supertestWithoutAuth');
-  const config = getService('config');
-
-  const REPORTING_USER_USERNAME = config.get('servers.kibana.username');
-  const REPORTING_USER_PASSWORD = config.get('servers.kibana.password');
+  const log = getService('log');
+  const reportingAPI = getService('svlReportingApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  let adminUser: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Reporting Management', function () {
-    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
-    this.tags(['failsOnMKI']);
-
-    const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
-
-    beforeEach(async () => {
-      await esArchiver.load(dataArchive);
+    before(async () => {
+      adminUser = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
-
     after(async () => {
-      await esArchiver.unload(dataArchive);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminUser);
     });
 
     describe('Deletion', () => {
-      const DELETE_REPORT_ID = 'krazcyw4156m0763b503j7f9';
+      let reportJob: ReportApiJSON;
 
-      // archived data uses the test user but functionality for specific users is not possible yet for svl
-      xit(`user can delete a report they've created`, async () => {
-        const response = await supertest
-          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
-          .auth(TEST_USERNAME, TEST_USER_PASSWORD)
+      const createJob = async (roleAuthc: RoleCredentials): Promise<ReportApiJSON> => {
+        log.info(`request report job with ApiKey ${adminUser.apiKey.name}`);
+        const { job } = await reportingAPI.createReportJobInternal(
+          'csv_searchsource',
+          {
+            browserTimezone: 'UTC',
+            objectType: 'search',
+            searchSource: {
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              query: { language: 'kuery', query: '' },
+              version: true,
+            },
+            title: 'Ecommerce Data',
+            version: '8.15.0',
+          },
+          roleAuthc,
+          internalReqHeader
+        );
+        log.info(`created report job ${job.id} with ApiKey ${adminUser.apiKey.name}`);
+        return job;
+      };
+
+      before(async () => {
+        reportJob = await createJob(adminUser);
+      });
+
+      it(`user can delete a report they've created`, async () => {
+        // for this test, we don't need to wait for the job to finish or verify the result
+        const response = await supertestWithoutAuth
+          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
           .set(...API_HEADER)
-          .set(...INTERNAL_HEADER);
+          .set(...INTERNAL_HEADER)
+          .set(adminUser.apiKeyHeader);
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql({ deleted: true });
-      });
-
-      it(`user can not delete a report they haven't created`, async () => {
-        const response = await supertest
-          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
-          .auth(REPORTING_USER_USERNAME, REPORTING_USER_PASSWORD)
-          .set(...API_HEADER)
-          .set(...INTERNAL_HEADER);
-
-        expect(response.status).to.be(404);
-        expect(response.body.message).to.be('Not Found');
       });
     });
   });

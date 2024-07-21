@@ -184,9 +184,9 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async assertFieldFilterPopoverButtonExists(isOpen: boolean) {
+    async assertFilterPopoverButtonExists(selector: string, isOpen: boolean) {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('aiopsFieldFilterButton');
+        await testSubjects.existOrFail(selector);
 
         if (isOpen) {
           await testSubjects.existOrFail('aiopsFieldSelectorSearch');
@@ -196,11 +196,11 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async clickFieldFilterPopoverButton(expectPopoverToBeOpen: boolean) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsFieldFilterButton');
+    async clickFilterPopoverButton(selector: string, expectPopoverToBeOpen: boolean) {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(selector);
 
       await retry.tryForTime(30 * 1000, async () => {
-        await this.assertFieldFilterPopoverButtonExists(expectPopoverToBeOpen);
+        await this.assertFilterPopoverButtonExists(selector, expectPopoverToBeOpen);
       });
     },
 
@@ -246,11 +246,17 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async clickFieldFilterApplyButton() {
+    async clickFieldFilterApplyButton(selector: string) {
       await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsFieldFilterApplyButton');
 
       await retry.tryForTime(30 * 1000, async () => {
-        await this.assertFieldFilterPopoverButtonExists(false);
+        await this.assertFilterPopoverButtonExists(selector, false);
+      });
+    },
+
+    async clickFieldSelectorListItem(selector: string) {
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click(selector);
       });
     },
 

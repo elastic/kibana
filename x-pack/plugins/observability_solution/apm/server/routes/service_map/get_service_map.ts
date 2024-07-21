@@ -82,6 +82,8 @@ async function getConnectionData({
             start,
             end,
             terminateAfter: config.serviceMapTerminateAfter,
+            serviceMapMaxAllowableBytes: config.serviceMapMaxAllowableBytes,
+            numOfRequests: chunks.length,
             logger,
           })
         )

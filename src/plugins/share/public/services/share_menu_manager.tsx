@@ -52,6 +52,7 @@ export class ShareMenuManager {
           overlays: core.overlays,
           i18n: core.i18n,
           toasts: core.notifications.toasts,
+          publicAPIEnabled: !disableEmbed,
         });
       },
     };
@@ -86,6 +87,7 @@ export class ShareMenuManager {
     isDirty,
     toasts,
     delegatedShareUrlHandler,
+    publicAPIEnabled,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
@@ -111,6 +113,7 @@ export class ShareMenuManager {
         toMountPoint(
           <ShareMenu
             shareContext={{
+              publicAPIEnabled,
               anchorElement,
               allowEmbed,
               allowShortUrl,

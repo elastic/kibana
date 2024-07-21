@@ -14,6 +14,8 @@ servers:
 paths:
   /internal/risk_score/engine/init:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Initialize the Risk Engine
       description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
       responses:

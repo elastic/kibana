@@ -42,7 +42,7 @@ import {
   INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -138,7 +138,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
           .should('have.text', `${humanizedDuration}`);
       });
 
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
@@ -165,28 +164,33 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
 
-    it('Creates and enables a new EQL rule with a sequence', function () {
-      login();
-      visit(CREATE_RULE_URL);
-      selectEqlRuleType();
-      fillDefineEqlRuleAndContinue(rule);
-      fillAboutRuleAndContinue(rule);
-      fillScheduleRuleAndContinue(rule);
-      createAndEnableRule();
-      openRuleManagementPageViaBreadcrumbs();
-      goToRuleDetailsOf(rule.name);
-      waitForTheRuleToBeExecuted();
-      waitForAlertsToPopulate();
+    it(
+      'Creates and enables a new EQL rule with a sequence',
+      {
+        tags: ['@skipInServerlessMKI'],
+      },
+      function () {
+        login();
+        visit(CREATE_RULE_URL);
+        selectEqlRuleType();
+        fillDefineEqlRuleAndContinue(rule);
+        fillAboutRuleAndContinue(rule);
+        fillScheduleRuleAndContinue(rule);
+        createAndEnableRule();
+        openRuleManagementPageViaBreadcrumbs();
+        goToRuleDetailsOf(rule.name);
+        waitForAlertsToPopulate();
 
-      cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
-      cy.get(ALERT_DATA_GRID)
-        .invoke('text')
-        .then((text) => {
-          cy.log('ALERT_DATA_GRID', text);
-          expect(text).contains(rule.name);
-          expect(text).contains(rule.severity);
-        });
-    });
+        cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
+        cy.get(ALERT_DATA_GRID)
+          .invoke('text')
+          .then((text) => {
+            cy.log('ALERT_DATA_GRID', text);
+            expect(text).contains(rule.name);
+            expect(text).contains(rule.severity);
+          });
+      }
+    );
   });
 
   describe('with source data requiring EQL overrides', () => {
@@ -203,7 +207,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
-      getRuleIndexInput().type(`no_at_timestamp_field{enter}`);
+      getRuleIndexInput().type(`auditbeat-no_at_timestamp_field{enter}`);
 
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');

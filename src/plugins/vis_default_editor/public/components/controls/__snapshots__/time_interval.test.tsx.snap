@@ -9,10 +9,9 @@ exports[`TimeIntervalParamEditor should match snapshot 1`] = `
   hasEmptyLabelSpace={false}
   helpText={
     <React.Fragment>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Select an option or create a custom value. Examples: 30s, 20m, 24h, 2d, 1w, 1M"
         id="visDefaultEditor.controls.timeInterval.selectOptionHelpText"
-        values={Object {}}
       />
     </React.Fragment>
   }

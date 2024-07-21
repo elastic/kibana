@@ -47,9 +47,9 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/slo-plugin",
     "@kbn/es-query",
-    "@kbn/analytics-client",
     "@kbn/core-analytics-browser",
     "@kbn/react-hooks",
+    "@kbn/ebt",
   ],
   "exclude": [
     "target/**/*"
