@@ -1276,6 +1276,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'Github',
     }),
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
@@ -2566,7 +2570,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
     },
@@ -2868,7 +2872,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
       [FeatureName.INCREMENTAL_SYNC]: {
@@ -3098,6 +3102,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'OneDrive',
     }),
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
@@ -3864,7 +3872,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
     },
@@ -4013,7 +4021,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: false,
       },
     },
-    features: {},
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
     name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
     }),
@@ -4021,6 +4034,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   },
   salesforce: {
     features: {
+      FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
