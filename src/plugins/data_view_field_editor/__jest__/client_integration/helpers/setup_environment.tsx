@@ -33,6 +33,7 @@ const { search } = dataStart;
 export const spySearchQuery = jest.fn();
 export const spySearchQueryResponse = jest.fn(() => Promise.resolve({}));
 export const spyIndexPatternGetByName = jest.fn().mockImplementation(() => {});
+export const spyGetFieldsForWildcard = jest.fn().mockResolvedValue({ fields: [] });
 
 let searchResponseDelay = 0;
 
@@ -123,6 +124,11 @@ export const WithFieldEditorDependencies =
     const dataView = createStubDataViewLazy({
       spec: {
         title: indexPatternNameForTest,
+      },
+      deps: {
+        apiClient: {
+          getFieldsForWildcard: spyGetFieldsForWildcard,
+        },
       },
     });
 

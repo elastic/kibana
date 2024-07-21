@@ -52,7 +52,10 @@ export const createStubDataViewLazy = ({
     metaFields: opts?.metaFields ?? ['_id', '_type', '_source'],
     shortDotsEnable: opts?.shortDotsEnable,
     fieldFormats: deps?.fieldFormats ?? fieldFormatsMock,
-    apiClient: deps?.apiClient,
+    apiClient: {
+      getFieldsForWildcard: jest.fn().mockResolvedValue({ fields: [] }),
+      ...deps?.apiClient,
+    },
     scriptedFieldsEnabled: true,
   });
 };
