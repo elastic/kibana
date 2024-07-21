@@ -32,10 +32,6 @@ export const createLogsDataSourceProfileProvider = (
 
       return { columns, rowHeight: 0 };
     },
-    getCellRenderers: (prev) => () => ({
-      ...prev(),
-      'log.level': LogLevelBadgeCell,
-    }),
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
