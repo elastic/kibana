@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { LogLevelBadgeCell } from '../../../components/data_types/logs/log_level_badge_cell';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
 import { getRowIndicatorProvider } from './accessors';
