@@ -187,11 +187,20 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     },
   };
 
-  const navigateToComplianceDashboardPage = async () => {
+  const navigateToComplianceDashboardPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/dashboard',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 

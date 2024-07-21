@@ -51,7 +51,7 @@ const getDataViewSafe = async (
         namespace: currentSpaceId,
       }
     );
-    return;
+    return dataView;
   } catch (e) {
     return;
   }
@@ -80,6 +80,7 @@ const setupCdrDataView = async (
     );
 
     const currentSpaceDataViewId = `${dataViewId}-${currentSpaceId}`;
+    console.log('currentSpaceDataViewId', currentSpaceDataViewId);
     const isDataView = await getDataViewSafe(soClient, currentSpaceId, currentSpaceDataViewId);
 
     if (!isDataView) {
@@ -131,39 +132,6 @@ const migrateCdrDataView = async (
   // keep the index pattern that we are not manage
   // create new data view with the index pattern we kept
   const allSpaces = (await soClient.find({ type: 'space' })).saved_objects.map((space) => space.id);
-
-  // allSpaces.forEach(async (spaceId) => {
-  //   const currentSpaceDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${spaceId}`;
-  //   const dataView = await getDataViewSafe(soClient, spaceId, currentSpaceDataViewId);
-
-  // if (dataView) {
-  //   const indexPattern = dataView.attributes.title;
-  //   if (indexPattern !== CDR_MISSCONFIGURATIONS_INDEX_PATTERN) {
-  //     logger.info(
-  //       `Migrating data view ${currentSpaceDataViewId} to new index pattern ${CDR_MISSCONFIGURATIONS_INDEX_PATTERN}`
-  //     );
-  //     let existsIndexPattern = indexPattern.split(',');
-
-  //     if (!existsIndexPattern.includes(CDR_MISSCONFIGURATIONS_INDEX_PATTERN)) {
-  //       existsIndexPattern.push(CDR_MISSCONFIGURATIONS_INDEX_PATTERN);
-  //     }
-
-  //     // Join the array back into a string with elements separated by commas
-  //     const newIndexPatterns = existsIndexPattern.join(',');
-
-  // const foo: AbstractDataView = {
-  //   id: currentSpaceDataViewId,
-  //   title: newIndexPatterns,
-  //   name: `${CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME} - ${spaceId} `,
-  //   namespaces: [spaceId],
-  //   allowNoIndex: true,
-  //   timeFieldName: '@timestamp',
-  // };
-  // await dataViewsClient.updateSavedObject();
-  //         logger.info(`Data view ${currentSpaceDataViewId} migrated successfully`);
-  //       }
-  //     }
-  // });
 };
 
 /**
