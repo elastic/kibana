@@ -24,7 +24,7 @@ export interface RowIndicatorExtensionParams {
   dataView: DataView;
 }
 
-export interface DefaultAppStateColumns {
+export interface DefaultAppStateColumn {
   name: string;
   width?: number;
 }
@@ -34,7 +34,7 @@ export interface DefaultAppStateExtensionParams {
 }
 
 export interface DefaultAppStateExtension {
-  columns?: DefaultAppStateColumns[];
+  columns?: DefaultAppStateColumn[];
   rowHeight?: number;
 }
 

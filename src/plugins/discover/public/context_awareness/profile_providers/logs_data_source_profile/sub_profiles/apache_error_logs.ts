@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceProfileProvider } from '../../../profiles';
 import { extendProfileProvider } from '../../extend_profile_provider';
-import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { createGetDefaultAppState } from '../accessors';
+import { CLIENT_IP_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { createResolve } from './create_resolve';
 
 export const createApacheErrorLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
@@ -16,32 +18,9 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
   extendProfileProvider(logsDataSourceProfileProvider, {
     profileId: 'apache_error_logs_data_source',
     profile: {
-      getDefaultAppState: () => (params) => {
-        const columns = [];
-
-        if (params.dataView.isTimeBased()) {
-          columns.push({ name: params.dataView.timeFieldName, width: 212 });
-        }
-
-        columns.push(
-          { name: 'log.level', width: 150 },
-          { name: 'client.ip', width: 150 },
-          { name: 'message' }
-        );
-
-        return { columns, rowHeight: 0 };
-      },
+      getDefaultAppState: createGetDefaultAppState({
+        defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
+      }),
     },
-    resolve: (params) => {
-      const indexPattern = extractIndexPatternFrom(params);
-
-      if (indexPattern !== 'logs-apache_error') {
-        return { isMatch: false };
-      }
-
-      return {
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
-      };
-    },
+    resolve: createResolve((indexPattern) => indexPattern === 'logs-apache_error'),
   });

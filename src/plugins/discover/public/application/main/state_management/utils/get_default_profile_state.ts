@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import {
-  DefaultAppStateColumns,
+  DefaultAppStateColumn,
   getMergedAccessor,
   ProfilesManager,
 } from '../../../../context_awareness';
@@ -65,7 +65,7 @@ const getDefaultState = (profilesManager: ProfilesManager, dataView: DataView) =
 
 const getIsValidColumn =
   (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>
-  (column: DefaultAppStateColumns) => {
+  (column: DefaultAppStateColumn) => {
     const isValid = esqlQueryColumns
       ? esqlQueryColumns.some((esqlColumn) => esqlColumn.name === column.name)
       : dataView.fields.getByName(column.name);

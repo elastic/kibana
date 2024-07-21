@@ -8,9 +8,10 @@
 
 import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
-import { getRowIndicatorProvider } from './accessors';
+import { createGetDefaultAppState, getRowIndicatorProvider } from './accessors';
 import { extractIndexPatternFrom } from '../extract_index_pattern_from';
 import { getCellRenderers } from './accessors';
+import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from './consts';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -19,18 +20,9 @@ export const createLogsDataSourceProfileProvider = (
   profile: {
     getRowIndicatorProvider,
     getCellRenderers,
-    getDefaultAppState: (prev) => (params) => {
-      const prevState = prev(params);
-      const columns = prevState?.columns ?? [];
-
-      if (params.dataView.isTimeBased()) {
-        columns.push({ name: params.dataView.timeFieldName, width: 212 });
-      }
-
-      columns.push({ name: 'log.level', width: 150 }, { name: 'message' });
-
-      return { columns, rowHeight: 0 };
-    },
+    getDefaultAppState: createGetDefaultAppState({
+      defaultColumns: [LOG_LEVEL_COLUMN, MESSAGE_COLUMN],
+    }),
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

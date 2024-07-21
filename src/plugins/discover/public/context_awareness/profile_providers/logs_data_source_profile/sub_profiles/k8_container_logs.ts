@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceProfileProvider } from '../../../profiles';
 import { extendProfileProvider } from '../../extend_profile_provider';
-import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { createGetDefaultAppState } from '../accessors';
+import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { createResolve } from './create_resolve';
 
 export const createK8ContainerLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
@@ -16,34 +18,15 @@ export const createK8ContainerLogsDataSourceProfileProvider = (
   extendProfileProvider(logsDataSourceProfileProvider, {
     profileId: 'k8_container_logs_data_source',
     profile: {
-      getDefaultAppState: () => (params) => {
-        const columns = [];
-
-        if (params.dataView.isTimeBased()) {
-          columns.push({ name: params.dataView.timeFieldName, width: 212 });
-        }
-
-        columns.push(
-          { name: 'log.level', width: 150 },
+      getDefaultAppState: createGetDefaultAppState({
+        defaultColumns: [
+          LOG_LEVEL_COLUMN,
           { name: 'kubernetes.pod.name', width: 200 },
           { name: 'kubernetes.namespace', width: 200 },
           { name: 'orchestrator.cluster.name', width: 200 },
-          { name: 'message' }
-        );
-
-        return { columns, rowHeight: 0 };
-      },
+          MESSAGE_COLUMN,
+        ],
+      }),
     },
-    resolve: (params) => {
-      const indexPattern = extractIndexPatternFrom(params);
-
-      if (indexPattern !== 'logs-k8_container') {
-        return { isMatch: false };
-      }
-
-      return {
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
-      };
-    },
+    resolve: createResolve((indexPattern) => indexPattern === 'logs-k8_container'),
   });

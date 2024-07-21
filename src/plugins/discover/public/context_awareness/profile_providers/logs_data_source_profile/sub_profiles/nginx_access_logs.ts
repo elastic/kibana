@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceProfileProvider } from '../../../profiles';
 import { extendProfileProvider } from '../../extend_profile_provider';
-import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { createGetDefaultAppState } from '../accessors';
+import { CLIENT_IP_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { createResolve } from './create_resolve';
 
 export const createNginxAccessLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
@@ -16,34 +18,15 @@ export const createNginxAccessLogsDataSourceProfileProvider = (
   extendProfileProvider(logsDataSourceProfileProvider, {
     profileId: 'nginx_access_logs_data_source',
     profile: {
-      getDefaultAppState: () => (params) => {
-        const columns = [];
-
-        if (params.dataView.isTimeBased()) {
-          columns.push({ name: params.dataView.timeFieldName, width: 212 });
-        }
-
-        columns.push(
+      getDefaultAppState: createGetDefaultAppState({
+        defaultColumns: [
           { name: 'url.path', width: 150 },
           { name: 'http.response.status_code', width: 200 },
-          { name: 'client.ip', width: 150 },
-          { name: 'host.name', width: 250 },
-          { name: 'message' }
-        );
-
-        return { columns, rowHeight: 0 };
-      },
+          CLIENT_IP_COLUMN,
+          HOST_NAME_COLUMN,
+          MESSAGE_COLUMN,
+        ],
+      }),
     },
-    resolve: (params) => {
-      const indexPattern = extractIndexPatternFrom(params);
-
-      if (indexPattern !== 'logs-nginx_access') {
-        return { isMatch: false };
-      }
-
-      return {
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
-      };
-    },
+    resolve: createResolve((indexPattern) => indexPattern === 'logs-nginx_access'),
   });
