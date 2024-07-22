@@ -23,8 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   describe('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
-
-  describe('@ess @serverless Endpoint `execute` response action', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
 
