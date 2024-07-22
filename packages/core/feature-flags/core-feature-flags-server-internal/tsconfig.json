@@ -18,5 +18,7 @@
     "@kbn/core-feature-flags-server",
     "@kbn/logging",
     "@kbn/core-base-server-mocks",
+    "@kbn/config-schema",
+    "@kbn/config-mocks",
   ]
 }
