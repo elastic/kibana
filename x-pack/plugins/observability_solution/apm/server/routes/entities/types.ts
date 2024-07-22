@@ -10,12 +10,7 @@ import { SignalTypes, EntityMetrics } from '../../../common/entities/types';
 export interface Entity {
   id: string;
   latestTimestamp: string;
-  identityFields: {
-    service: {
-      name: string;
-      environment?: string | null;
-    };
-  };
+  identityFields: string[];
   metrics: EntityMetrics;
 }
 
@@ -27,6 +22,7 @@ export interface TraceMetrics {
 
 export interface ServiceEntities {
   serviceName: string;
+  environment?: string;
   agentName: AgentName;
   signalTypes: string[];
   entity: Entity;
@@ -38,6 +34,10 @@ export interface EntitiesRaw {
   };
   data_stream: {
     type: string[];
+  };
+  service: {
+    name: string;
+    environment: string;
   };
   entity: Entity;
 }
