@@ -64,13 +64,12 @@ const controlGroupApi = {
   grow: new BehaviorSubject(DEFAULT_CONTROL_GROW),
   width: new BehaviorSubject(DEFAULT_CONTROL_WIDTH),
 } as unknown as ControlGroupApi;
-const onSave = jest.fn();
 
 describe('Data control editor', () => {
-  const mountComponent = async <State extends DataControlEditorState = DataControlEditorState>({
+  const mountComponent = async ({
     initialState,
   }: {
-    initialState?: Partial<State>;
+    initialState?: Partial<DataControlEditorState>;
   }) => {
     mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
@@ -78,7 +77,7 @@ describe('Data control editor', () => {
       <I18nProvider>
         <DataControlEditor
           onCancel={() => {}}
-          onSave={onSave}
+          onSave={() => {}}
           parentApi={controlGroupApi}
           initialState={{
             dataViewId: dashboardApi.lastUsedDataViewId$.getValue(),
