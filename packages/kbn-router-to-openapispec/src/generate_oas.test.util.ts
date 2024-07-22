@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { schema } from '@kbn/config-schema';
+import type { ZodType } from '@kbn/zod';
+import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 
 type RoutesMeta = ReturnType<Router['getRoutes']>[number];
 type VersionedRoutesMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
+type RuntimeSchema = Type<unknown> | ZodType<unknown>;
 
 export const createRouter = (args: { routes: RoutesMeta[] }) => {
   return {
@@ -24,7 +25,7 @@ export const createVersionedRouter = (args: { routes: VersionedRoutesMeta[] }) =
   } as unknown as CoreVersionedRouter;
 };
 
-export const getRouterDefaults = () => ({
+export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   isVersioned: false,
   path: '/foo/{id}/{path*}',
   method: 'get',
@@ -42,7 +43,7 @@ export const getRouterDefaults = () => ({
       query: schema.object({
         page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
       }),
-      body: createLargeSchema(),
+      body: bodySchema ?? createLargeSchema(),
     },
     response: {
       200: {
@@ -54,7 +55,7 @@ export const getRouterDefaults = () => ({
   handler: jest.fn(),
 });
 
-export const getVersionedRouterDefaults = () => ({
+export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   method: 'get',
   path: '/bar',
   options: {
@@ -71,12 +72,14 @@ export const getVersionedRouterDefaults = () => ({
       options: {
         validate: {
           request: {
-            body: schema.object({
-              foo: schema.string(),
-              deprecatedFoo: schema.maybe(
-                schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
-              ),
-            }),
+            body:
+              bodySchema ??
+              schema.object({
+                foo: schema.string(),
+                deprecatedFoo: schema.maybe(
+                  schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
+                ),
+              }),
           },
           response: {
             [200]: {
@@ -117,10 +120,11 @@ interface CreatTestRouterArgs {
   versionedRouters?: {
     [routerId: string]: { routes: Array<Partial<VersionedRoutesMeta>> };
   };
+  bodySchema?: RuntimeSchema;
 }
 
 export const createTestRouters = (
-  { routers = {}, versionedRouters = {} }: CreatTestRouterArgs = {
+  { routers = {}, versionedRouters = {}, bodySchema }: CreatTestRouterArgs = {
     routers: { testRouter: { routes: [{}] } },
     versionedRouters: { testVersionedRouter: { routes: [{}] } },
   }
@@ -128,13 +132,15 @@ export const createTestRouters = (
   return [
     [
       ...Object.values(routers).map((rs) =>
-        createRouter({ routes: rs.routes.map((r) => Object.assign(getRouterDefaults(), r)) })
+        createRouter({
+          routes: rs.routes.map((r) => Object.assign(getRouterDefaults(bodySchema), r)),
+        })
       ),
     ],
     [
       ...Object.values(versionedRouters).map((rs) =>
         createVersionedRouter({
-          routes: rs.routes.map((r) => Object.assign(getVersionedRouterDefaults(), r)),
+          routes: rs.routes.map((r) => Object.assign(getVersionedRouterDefaults(bodySchema), r)),
         })
       ),
     ],
