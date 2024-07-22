@@ -1404,6 +1404,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
     },
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
@@ -2973,7 +2977,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
     },
-    features: {},
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
     name: i18n.translate('searchConnectors.nativeConnectors.notion.name', {
       defaultMessage: 'Notion',
     }),
