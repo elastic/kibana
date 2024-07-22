@@ -158,6 +158,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           additionalControls: (
             <EuiLink
               href={discoverLink}
+              target="_blank"
               color="text"
               css={css`
                 display: flex;
