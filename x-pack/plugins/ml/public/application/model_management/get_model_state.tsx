@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import type { ModelState } from '@kbn/ml-trained-models-utils';
-import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
+import { DEPLOYMENT_STATE, MODEL_STATE, type ModelState } from '@kbn/ml-trained-models-utils';
 import type { EuiHealthProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ModelItem } from './models_list';
+
+/**
+ * Resolves result model state based on the download status and deployments stats.
+ */
+export const getModelDeploymentState = (model: ModelItem): ModelState | undefined => {
+  if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED)) {
+    return MODEL_STATE.STARTED;
+  }
+  if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTING)) {
+    return MODEL_STATE.STARTING;
+  }
+  if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STOPPING)) {
+    return MODEL_STATE.STOPPING;
+  }
+};
 
 export const getModelStateColor = (
-  state: ModelState
+  state: ModelState | undefined
 ): { color: EuiHealthProps['color']; name: string } | null => {
   switch (state) {
     case MODEL_STATE.DOWNLOADED:
