@@ -124,7 +124,6 @@ export const IndicesCard = ({ onCreateIndex }: IndicesCardProps) => {
               <IndicesList indices={data?.indices ?? []} />
               <EuiSpacer size="s" />
               <EuiButton
-                fill
                 fullWidth
                 color="primary"
                 iconType="plusInCircleFilled"
