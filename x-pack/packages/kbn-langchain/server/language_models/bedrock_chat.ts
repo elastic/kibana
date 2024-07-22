@@ -15,22 +15,23 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';
 
+export interface CustomChatModelInput extends BaseChatModelParams {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  connectorId: string;
+  logger: Logger;
+  temperature?: number;
+  signal?: AbortSignal;
+  model?: string;
+  maxTokens?: number;
+}
+
 export class ActionsClientBedrockChatModel extends _BedrockChat {
-  constructor({
-    actionsClient,
-    connectorId,
-    logger,
-    ...params
-  }: {
-    actionsClient: PublicMethodsOf<ActionsClient>;
-    connectorId: string;
-    logger: Logger;
-  } & BaseChatModelParams) {
+  constructor({ actionsClient, connectorId, logger, ...params }: CustomChatModelInput) {
     super({
       ...params,
       credentials: { accessKeyId: '', secretAccessKey: '' },
       // only needed to force BedrockChat to use messages api for Claude v2
-      model: DEFAULT_BEDROCK_MODEL,
+      model: params.model ?? DEFAULT_BEDROCK_MODEL,
       region: DEFAULT_BEDROCK_REGION,
       fetchFn: async (url, options) => {
         const inputBody = JSON.parse(options?.body as string);
@@ -42,10 +43,10 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
               subAction: 'invokeStream',
               subActionParams: {
                 messages: inputBody.messages,
-                temperature: inputBody.temperature,
+                temperature: params.temperature ?? inputBody.temperature,
                 stopSequences: inputBody.stop_sequences,
                 system: inputBody.system,
-                maxTokens: inputBody.max_tokens,
+                maxTokens: params.maxTokens ?? inputBody.max_tokens,
                 tools: inputBody.tools,
                 anthropicVersion: inputBody.anthropic_version,
               },
@@ -63,10 +64,10 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
             subAction: 'invokeAIRaw',
             subActionParams: {
               messages: inputBody.messages,
-              temperature: inputBody.temperature,
+              temperature: params.temperature ?? inputBody.temperature,
               stopSequences: inputBody.stop_sequences,
               system: inputBody.system,
-              maxTokens: inputBody.max_tokens,
+              maxTokens: params.maxTokens ?? inputBody.max_tokens,
               tools: inputBody.tools,
               anthropicVersion: inputBody.anthropic_version,
             },
