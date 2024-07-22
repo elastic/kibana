@@ -14,9 +14,7 @@
       "navigation",
       "licensing",
     ],
-    "optionalPlugins": [
-      "cloudExperiments",
-    ],
+    "optionalPlugins": [],
     "requiredBundles": [ "kibanaReact"]
   }
 }

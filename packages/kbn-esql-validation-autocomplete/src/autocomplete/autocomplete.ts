@@ -70,6 +70,8 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
   buildValueDefinitions,
+  getDateLiterals,
+  buildFieldsDefinitionsWithMetadata,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -86,6 +88,7 @@ import {
   getQueryForFields,
   getSourcesFromCommands,
   isAggFunctionUsedAlready,
+  removeQuoteForSuggestedSources,
 } from './helper';
 import { FunctionParameter } from '../definitions/types';
 
@@ -291,7 +294,7 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitions(fields);
+      return buildFieldsDefinitionsWithMetadata(fields);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -857,19 +860,28 @@ async function getExpressionSuggestionsByType(
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
         const index = getSourcesFromCommands(commands, 'index');
+        const canRemoveQuote = isNewExpression && innerText.includes('"');
+
         // This is going to be empty for simple indices, and not empty for integrations
-        if (index && index.text) {
+        if (index && index.text && index.text !== EDITOR_MARKER) {
           const source = index.text.replace(EDITOR_MARKER, '');
           const dataSource = await getDatastreamsForIntegration(source);
+
           const newDefinitions = buildSourcesDefinitions(
             dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
           );
-          suggestions.push(...newDefinitions);
+          suggestions.push(
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
+          );
         } else {
           // FROM <suggest>
           // @TODO: filter down the suggestions here based on other existing sources defined
           const sourcesDefinitions = await getSources();
-          suggestions.push(...sourcesDefinitions);
+          suggestions.push(
+            ...(canRemoveQuote
+              ? removeQuoteForSuggestedSources(sourcesDefinitions)
+              : sourcesDefinitions)
+          );
         }
       }
     }
@@ -1075,7 +1087,11 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+
   const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
@@ -1315,7 +1331,7 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ text, ...rest }) => ({
     ...rest,
-    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', text),
+    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && text !== '', text),
   }));
 }
 
@@ -1530,7 +1546,14 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    if (isNewExpression) {
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else if (existingFields.size > 0) {
+      if (filteredMetaFields.length > 0) {
+        suggestions.push(commaCompleteItem);
+      }
+      suggestions.push(pipeCompleteItem);
+    }
   }
 
   if (command.name === 'stats') {

@@ -348,6 +348,17 @@
     "dynamic": false,
     "properties": {}
   },
+  "background-task-node": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "last_seen": {
+        "type": "date"
+      }
+    }
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -1028,6 +1039,9 @@
       },
       "type": {
         "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
       }
     }
   },
@@ -1608,6 +1622,10 @@
         "type": "text"
       }
     }
+  },
+  "fleet-space-settings": {
+    "dynamic": false,
+    "properties": {}
   },
   "fleet-uninstall-tokens": {
     "dynamic": false,
@@ -3308,6 +3326,9 @@
       },
       "ownerId": {
         "type": "keyword"
+      },
+      "partition": {
+        "type": "integer"
       },
       "retryAt": {
         "type": "date"

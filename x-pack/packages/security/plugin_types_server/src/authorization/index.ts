@@ -42,7 +42,6 @@ export type {
   PrivilegeDeprecationsRolesByFeatureIdResponse,
 } from './deprecations';
 export type { AuthorizationMode } from './mode';
-export type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from './role_schema';
 
 export { GLOBAL_RESOURCE } from './constants';
 export { elasticsearchRoleSchema, getKibanaRoleSchema } from './role_schema';

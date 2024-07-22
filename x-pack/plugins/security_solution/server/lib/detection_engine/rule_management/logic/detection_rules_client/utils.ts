@@ -12,21 +12,21 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
-import type { RuleAlertType } from '../../../rule_schema';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { throwAuthzError } from '../../../../machine_learning/validation';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 
 export const toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
-  existingRule: RuleAlertType,
-  updatedRuleEnabled?: boolean
+  existingRule: RuleResponse,
+  updatedRule: RuleResponse
 ): Promise<{ enabled: boolean }> => {
-  if (existingRule.enabled && updatedRuleEnabled === false) {
+  if (existingRule.enabled && !updatedRule.enabled) {
     await rulesClient.disable({ id: existingRule.id });
     return { enabled: false };
   }
 
-  if (!existingRule.enabled && updatedRuleEnabled === true) {
+  if (!existingRule.enabled && updatedRule.enabled) {
     await rulesClient.enable({ id: existingRule.id });
     return { enabled: true };
   }

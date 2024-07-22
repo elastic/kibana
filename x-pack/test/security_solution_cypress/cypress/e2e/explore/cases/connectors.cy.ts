@@ -18,7 +18,8 @@ import { visit } from '../../../tasks/navigation';
 
 import { CASES_URL } from '../../../urls/navigation';
 
-describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187701
+describe.skip('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',
