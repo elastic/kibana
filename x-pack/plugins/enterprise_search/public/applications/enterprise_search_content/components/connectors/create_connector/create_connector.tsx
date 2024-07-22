@@ -122,6 +122,8 @@ export const CreateConnector: React.FC = () => {
           allConnectors={allConnectors}
           connectorName={connectorName}
           setConnectorName={setConnectorName}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
         />
       ),
       status: startStepStatus,
@@ -131,7 +133,7 @@ export const CreateConnector: React.FC = () => {
     },
     {
       children: '',
-      content: <DeploymentStep />,
+      content: <DeploymentStep currentStep={currentStep} setCurrentStep={setCurrentStep} />,
 
       status: deploymentStepStatus,
       title: i18n.translate(
@@ -147,6 +149,8 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
             { defaultMessage: 'Configuration' }
           )}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
         />
       ),
       status: configurationStepStatus,
@@ -188,6 +192,8 @@ export const CreateConnector: React.FC = () => {
           allConnectors={allConnectors}
           connectorName={connectorName}
           setConnectorName={setConnectorName}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
         />
       ),
       status: startStepStatus,
@@ -208,6 +214,8 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
             { defaultMessage: 'Configuration' }
           )}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
         />
       ),
       status: configurationStepStatus,
@@ -348,18 +356,20 @@ export const CreateConnector: React.FC = () => {
               min-height: 600px;
             `}
           >
-            <EuiFlexGroup>
-              <EuiButtonEmpty
-                data-test-subj="enterpriseSearchCreateConnectorBackButton"
-                iconType="arrowLeft"
-                size="s"
-                onClick={() => updateStep('back')}
-              >
-                {i18n.translate('xpack.enterpriseSearch.createConnector.backButtonEmptyLabel', {
-                  defaultMessage: 'Back',
-                })}
-              </EuiButtonEmpty>
-              <EuiButtonEmpty
+            {currentStep > 0 && (
+              <>
+                <EuiFlexGroup>
+                  <EuiButtonEmpty
+                    data-test-subj="enterpriseSearchCreateConnectorBackButton"
+                    iconType="arrowLeft"
+                    size="s"
+                    onClick={() => updateStep('back')}
+                  >
+                    {i18n.translate('xpack.enterpriseSearch.createConnector.backButtonEmptyLabel', {
+                      defaultMessage: 'Back',
+                    })}
+                  </EuiButtonEmpty>
+                  {/*         <EuiButtonEmpty
                 data-test-subj="enterpriseSearchCreateConnectorNextButton"
                 iconSide="right"
                 iconType="arrowRight"
@@ -369,10 +379,12 @@ export const CreateConnector: React.FC = () => {
                 {i18n.translate('xpack.enterpriseSearch.createConnector.nextButtonEmptyLabel', {
                   defaultMessage: 'Next',
                 })}
-              </EuiButtonEmpty>
-            </EuiFlexGroup>
+              </EuiButtonEmpty> */}
+                </EuiFlexGroup>
+                <EuiSpacer size="xl" />
+              </>
+            )}
 
-            <EuiSpacer size="xl" />
             <EuiSteps
               titleSize="xxs"
               steps={selfManaged === true ? selfManagedSteps : elasticManagedSteps}

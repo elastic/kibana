@@ -29,6 +29,7 @@ import { ConnectorDescriptionPopover } from './components/connector_description_
 
 interface StartStepProps {
   allConnectors: unknown;
+  connectorName: string;
   connectorSelected: {
     description: string;
     iconPath: string;
@@ -37,12 +38,13 @@ interface StartStepProps {
     isTechPreview: boolean;
     name: string;
   };
+  currentStep: number;
   selfManaged: boolean;
+  setConnectorName: Function;
   setConnectorSelected: Function;
+  setCurrentStep: Function;
   setSelfManaged: Function;
   title: string;
-  connectorName: string;
-  setConnectorName: Function;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -54,6 +56,8 @@ export const StartStep: React.FC<StartStepProps> = ({
   allConnectors,
   connectorName,
   setConnectorName,
+  currentStep,
+  setCurrentStep,
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
@@ -227,7 +231,11 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiButton data-test-subj="enterpriseSearchStartStepNextButton" fill>
+              <EuiButton
+                data-test-subj="enterpriseSearchStartStepNextButton"
+                onClick={() => setCurrentStep(currentStep + 1)}
+                fill
+              >
                 {i18n.translate('xpack.enterpriseSearch.startStep.nextButtonLabel', {
                   defaultMessage: 'Next',
                 })}
@@ -258,6 +266,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
                 iconType="sparkles"
                 fill
+                onClick={() => setCurrentStep(currentStep + 1)}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',

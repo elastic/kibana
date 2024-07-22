@@ -7,15 +7,30 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiButton,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 // import { FormattedMessage } from '@kbn/i18n-react';
 
 interface ConfigurationStepProps {
+  currentStep: number;
+  setCurrentStep: Function;
   title: string;
 }
 
-export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title }) => {
+export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
+  title,
+  currentStep,
+  setCurrentStep,
+}) => {
   return (
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
@@ -25,6 +40,36 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title }) =
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+            <EuiTitle size="s">
+              <h4>
+                {i18n.translate('xpack.enterpriseSearch.configurationStep.h4.finishUpLabel', {
+                  defaultMessage: 'Finish up',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s">
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.configurationStep.p.description', {
+                  defaultMessage:
+                    'You can manually sync your data, schedule a recurring sync or manage your domains.',
+                })}
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiButton
+              data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+              onClick={() => setCurrentStep(currentStep + 1)}
+              fill
+            >
+              {i18n.translate('xpack.enterpriseSearch.configurationStep.button', {
+                defaultMessage: 'Contiue',
+              })}
+            </EuiButton>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -69,7 +69,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           <EuiBadge iconType="beaker" color="hollow">
             {i18n.translate(
               'xpack.enterpriseSearch.chooseConnectorSelectable.thechPreviewBadgeLabel',
-              { defaultMessage: 'Thech preview' }
+              { defaultMessage: 'Tech preview' }
             )}
           </EuiBadge>
         );
