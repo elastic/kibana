@@ -88,8 +88,6 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
   return {
     ruleDiff: {
       fields: fieldsDiff,
-      has_conflict: numberFieldsWithConflicts > 0,
-      has_non_solvable_conflict: numberFieldsWithNonSolvableConflicts > 0,
       num_fields_with_updates: numberFieldsWithUpdates,
       num_fields_with_conflicts: numberFieldsWithConflicts,
       num_fields_with_non_solvable_conflicts: numberFieldsWithNonSolvableConflicts,

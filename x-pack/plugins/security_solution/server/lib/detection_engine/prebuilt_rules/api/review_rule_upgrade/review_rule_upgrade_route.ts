@@ -87,17 +87,34 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
 };
 
 const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStatsForReview => {
-  const allTags = new Set<string>(
-    results.flatMap((result) => result.ruleVersions.input.current?.tags ?? [])
+  const allTags = new Set<string>();
+
+  const stats = results.reduce(
+    (acc, result) => {
+      acc.num_rules_to_upgrade_total += 1;
+
+      if (result.ruleDiff.num_fields_with_conflicts > 0) {
+        acc.num_rules_with_conflicts += 1;
+      }
+
+      if (result.ruleDiff.num_fields_with_non_solvable_conflicts > 0) {
+        acc.num_rules_with_non_solvable_conflicts += 1;
+      }
+
+      result.ruleVersions.input.current?.tags.forEach((tag) => allTags.add(tag));
+
+      return acc;
+    },
+    {
+      num_rules_to_upgrade_total: 0,
+      num_rules_with_conflicts: 0,
+      num_rules_with_non_solvable_conflicts: 0,
+    }
   );
 
   return {
-    num_rules_with_conflicts: results.filter((result) => result.ruleDiff.has_conflict).length,
-    num_rules_with_non_solvable_conflicts: results.filter(
-      (result) => result.ruleDiff.has_non_solvable_conflict
-    ).length,
-    num_rules_to_upgrade_total: results.length,
-    tags: [...allTags].sort((a, b) => a.localeCompare(b)),
+    ...stats,
+    tags: Array.from(allTags),
   };
 };
 
@@ -130,8 +147,6 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
           ruleDiff.fields,
           (fieldDiff) => fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate
         ),
-        has_conflict: ruleDiff.has_conflict,
-        has_non_solvable_conflict: ruleDiff.has_non_solvable_conflict,
         num_fields_with_updates: ruleDiff.num_fields_with_updates,
         num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,
         num_fields_with_non_solvable_conflicts: ruleDiff.num_fields_with_non_solvable_conflicts,

@@ -67,7 +67,27 @@ export interface ThreeVersionsOf<TValue> {
  * 6. base=A, current=B, target=C => merged=C, conflict=true
  *    Customized rule, the value has changed, conflict between B and C couldn't be resolved automatically.
  */
-export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
+export interface ThreeWayDiff<TValue> {
+  /**
+   * Corresponds to the stock version of the currently installed prebuilt rule.
+   * This field is optional because the base version is not always available in the package.
+   * This type is part of the API response, so the type of this field is replaced from possibly
+   * a MissingVersion (a JS Symbol), which can't be serialized in JSON, to possibly `undefined`.
+   */
+  base_version: TValue | undefined;
+
+  /**
+   * Corresponds exactly to the currently installed prebuilt rule:
+   *   - to the customized version (if it's customized)
+   *   - to the stock version (if it's not customized)
+   */
+  current_version: TValue;
+
+  /**
+   * Corresponds to the "new" stock version that the user is trying to upgrade to.
+   */
+  target_version: TValue;
+
   /**
    * The result of an automatic three-way merge of three values:
    *   - base version

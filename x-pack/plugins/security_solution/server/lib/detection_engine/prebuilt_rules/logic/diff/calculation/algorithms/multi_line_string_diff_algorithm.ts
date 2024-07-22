@@ -41,10 +41,11 @@ export const multiLineStringDiffAlgorithm = (
     targetVersion,
     diffOutcome,
   });
+  const hasBaseVersion = baseVersion !== MissingVersion;
 
   return {
-    has_base_version: baseVersion !== MissingVersion,
-    base_version: baseVersion,
+    has_base_version: hasBaseVersion,
+    base_version: hasBaseVersion ? baseVersion : undefined,
     current_version: currentVersion,
     target_version: targetVersion,
     merged_version: mergedVersion,

@@ -35,8 +35,6 @@ const ruleFieldsDiffMock: PartialRuleDiff = {
       target_version: 2,
     },
   },
-  has_conflict: false,
-  has_non_solvable_conflict: false,
   num_fields_with_updates: 1,
   num_fields_with_conflicts: 0,
   num_fields_with_non_solvable_conflicts: 0,

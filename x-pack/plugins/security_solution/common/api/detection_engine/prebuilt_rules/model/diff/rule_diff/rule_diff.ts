@@ -55,8 +55,6 @@ export type RuleFieldsDiff = CommonFieldsDiff &
   );
 
 interface BaseRuleDiff {
-  has_conflict: boolean;
-  has_non_solvable_conflict: boolean;
   num_fields_with_updates: number;
   num_fields_with_conflicts: number;
   num_fields_with_non_solvable_conflicts: number;
@@ -69,7 +67,6 @@ interface BaseRuleDiff {
  */
 export interface FullRuleDiff extends BaseRuleDiff {
   fields: RuleFieldsDiff;
-  has_conflict: boolean;
 }
 
 /**
@@ -78,7 +75,6 @@ export interface FullRuleDiff extends BaseRuleDiff {
  */
 export interface PartialRuleDiff extends BaseRuleDiff {
   fields: Partial<RuleFieldsDiff>;
-  has_conflict: boolean;
 }
 
 export type RuleFieldsDiffWithDataSource =
