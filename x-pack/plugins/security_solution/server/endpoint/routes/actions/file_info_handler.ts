@@ -83,7 +83,7 @@ export const registerActionFileInfoRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
+        { any: ['canWriteFileOperations', 'canWriteExecuteOperations'] },
         endpointContext.logFactory.get('actionFileInfo'),
         getActionFileInfoRouteHandler(endpointContext)
       )
