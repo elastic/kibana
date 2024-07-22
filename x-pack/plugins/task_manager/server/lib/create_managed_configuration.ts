@@ -10,15 +10,20 @@ import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'r
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
-import { DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
 import { TaskCost } from '../task';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 export const PREFERRED_MAX_POLL_INTERVAL = 60 * 1000;
 
-// Need at least enough capacity to run an extra large task
-export const MIN_CAPACITY = TaskCost.ExtraLarge;
+// Capacity is measured in number of normal cost tasks that can be run
+// At a minimum, we need to be able to run a single task with the greatest cost
+// so we should convert the greatest cost to normal cost
+export const MIN_COST = TaskCost.ExtraLarge / TaskCost.Normal;
+
+// For default claim strategy
+export const MIN_WORKERS = 1;
 
 // When errors occur, reduce capacity by CAPACITY_DECREASE_PERCENTAGE
 // When errors no longer occur, start increasing capacity by CAPACITY_INCREASE_PERCENTAGE
@@ -55,7 +60,7 @@ export function createManagedConfiguration({
   return {
     startingCapacity,
     capacityConfiguration$: errorCheck$.pipe(
-      createCapacityScan(logger, startingCapacity),
+      createCapacityScan(config, logger, startingCapacity),
       startWith(startingCapacity),
       distinctUntilChanged()
     ),
@@ -67,15 +72,17 @@ export function createManagedConfiguration({
   };
 }
 
-function createCapacityScan(logger: Logger, startingCapacity: number) {
+function createCapacityScan(config: TaskManagerConfig, logger: Logger, startingCapacity: number) {
   return scan((previousCapacity: number, errorCount: number) => {
     let newCapacity: number;
+    // console.log(`errorCount: ${errorCount}`);
     if (errorCount > 0) {
-      // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than MIN_CAPACITY.
+      const minCapacity = getMinCapacity(config);
+      // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
       // Using Math.floor to make sure the number is different than previous while not being a decimal value.
       newCapacity = Math.max(
         Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
-        MIN_CAPACITY
+        minCapacity
       );
     } else {
       // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
@@ -86,6 +93,9 @@ function createCapacityScan(logger: Logger, startingCapacity: number) {
         Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
       );
     }
+
+    // console.log(`newCapacity: ${newCapacity}`);
+    // console.log(`previousCapacity: ${previousCapacity}`);
     if (newCapacity !== previousCapacity) {
       logger.debug(
         `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
@@ -191,6 +201,16 @@ function resetErrorCount() {
     tag: 'initial',
     count: 0,
   };
+}
+
+function getMinCapacity(config: TaskManagerConfig) {
+  switch (config.claim_strategy) {
+    case CLAIM_STRATEGY_MGET:
+      return MIN_COST;
+
+    default:
+      return MIN_WORKERS;
+  }
 }
 
 export function calculateStartingCapacity(config: TaskManagerConfig, logger: Logger): number {

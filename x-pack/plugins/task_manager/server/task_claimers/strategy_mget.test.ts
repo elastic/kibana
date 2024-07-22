@@ -1432,6 +1432,17 @@ describe('TaskClaiming', () => {
 
     test('it should filter for specific partitions and tasks without partitions', async () => {
       const taskManagerId = uuidv4();
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+      });
       const [
         {
           args: {
@@ -1441,6 +1452,7 @@ describe('TaskClaiming', () => {
       ] = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
+          definitions,
         },
         taskClaimingOpts: {},
         claimingOpts: {
@@ -1496,9 +1508,8 @@ describe('TaskClaiming', () => {
                     Object {
                       "terms": Object {
                         "task.taskType": Array [
-                          "report",
-                          "dernstraight",
-                          "yawn",
+                          "foo",
+                          "bar",
                         ],
                       },
                     },
