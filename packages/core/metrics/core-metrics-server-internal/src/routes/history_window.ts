@@ -13,9 +13,15 @@ const twoDeci = (num: number) => Math.ceil(num * 100) / 100;
 
 export class HistoryWindow {
   readonly #window: number[];
+  readonly #size: number;
 
-  constructor(private readonly size: number) {
-    this.#window = new Array(size).fill(0);
+  constructor(size: number) {
+    this.#size = size;
+    this.#window = new Array(this.#size).fill(0);
+  }
+
+  public get size(): number {
+    return this.#window.length;
   }
 
   addObservation(value: number) {

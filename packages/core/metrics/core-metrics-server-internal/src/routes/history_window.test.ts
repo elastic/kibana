@@ -13,6 +13,14 @@ describe('HistoryWindow', () => {
     const hw = new HistoryWindow(3);
     expect(hw.getAverage(1)).toBe(0);
   });
+
+  it('Window size remains constant', () => {
+    const hw = new HistoryWindow(7);
+    for (let i = 0; i < 100; i++) {
+      hw.addObservation(i);
+      expect(hw.size).toBe(7);
+    }
+  });
   it.each([
     [-1000],
     [-1],
