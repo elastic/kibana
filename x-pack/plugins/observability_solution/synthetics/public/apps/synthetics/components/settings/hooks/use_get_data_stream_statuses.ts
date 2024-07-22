@@ -34,10 +34,7 @@ export interface DataStreamStatusResponse {
 export function useGetDataStreamStatuses(): DataStreamStatusResponse {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
   const { data, error, loading } = useFetcher(getDslPolicies, [lastRefresh]);
-  const { data: indicesData } = useFetcher(
-    () => getIndicesData({ useMetering: true }),
-    []
-  );
+  const { data: indicesData } = useFetcher(() => getIndicesData({ useMetering: true }), []);
 
   if (!Array.isArray(data) || !!error) return { dataStreamStatuses: undefined, error, loading };
 
