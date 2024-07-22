@@ -350,12 +350,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return cachedResponse;
     }
 
-    return fetchActionRequestById<TParameters, TOutputContent, TMeta>(actionId).then(
-      (actionRequestDoc) => {
-        this.cache.set(cacheKey, actionRequestDoc);
-        return actionRequestDoc;
-      }
-    );
+    return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
+      this.options.esClient,
+      actionId
+    ).then((actionRequestDoc) => {
+      this.cache.set(cacheKey, actionRequestDoc);
+      return actionRequestDoc;
+    });
   }
 
   /**

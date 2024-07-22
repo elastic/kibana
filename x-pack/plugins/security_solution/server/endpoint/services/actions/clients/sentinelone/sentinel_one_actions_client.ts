@@ -508,7 +508,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   async getFileInfo(actionId: string, agentId: string): Promise<UploadedFileInfo> {
     await this.ensureValidActionId(actionId);
-    const actionDetails = await this.fetchActionDetails(actionId);
+    const {
+      EndpointActions: {
+        data: { command },
+      },
+    } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
       responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
@@ -516,8 +520,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (actionDetails.command === 'get-file' && !isGetFileEnabled) ||
-      (actionDetails.command === 'running-processes' && !isRunningProcessesEnabled)
+      (command === 'get-file' && !isGetFileEnabled) ||
+      (command === 'running-processes' && !isRunningProcessesEnabled)
     ) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
@@ -538,7 +542,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     try {
-      switch (actionDetails.command) {
+      switch (command) {
         case 'get-file':
           {
             const agentResponse = await this.fetchEsResponseDocForAgentId<
@@ -592,17 +596,14 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               fileInfo.status = 'DELETED';
             } else {
               fileInfo.status = 'READY';
-              fileInfo.name = fileDownloadLink.fileName ?? `${actionDetails.id}-${agentId}.zip`;
+              fileInfo.name = fileDownloadLink.fileName ?? `${actionRequestDoc.id}-${agentId}.zip`;
               fileInfo.mimeType = 'application/octet-stream';
             }
           }
           break;
 
         default:
-          throw new ResponseActionsClientError(
-            `${actionDetails.command} does not support file downloads`,
-            400
-          );
+          throw new ResponseActionsClientError(`${command} does not support file downloads`, 400);
       }
     } catch (e) {
       // Ignore "no response doc" error for the agent and just return the file info with the status of 'AWAITING_UPLOAD'
@@ -616,7 +617,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
     await this.ensureValidActionId(actionId);
-    const actionDetails = await this.fetchActionDetails(actionId);
+    const {
+      EndpointActions: {
+        data: { command },
+      },
+    } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
       responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
@@ -624,8 +629,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (actionDetails.command === 'get-file' && !isGetFileEnabled) ||
-      (actionDetails.command === 'running-processes' && !isRunningProcessesEnabled)
+      (command === 'get-file' && !isGetFileEnabled) ||
+      (command === 'running-processes' && !isRunningProcessesEnabled)
     ) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
@@ -637,7 +642,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     let fileName: string | undefined;
 
     try {
-      switch (actionDetails.command) {
+      switch (command) {
         case 'get-file':
           {
             const getFileAgentResponse = await this.fetchEsResponseDocForAgentId<
@@ -676,7 +681,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
             if (!processesAgentResponse.meta?.taskId) {
               throw new ResponseActionsClientError(
-                `Unable to retrieve file from SentinelOne for Response Action [${actionDetails.id}]. Response ES document is missing [meta.taskId]`
+                `Unable to retrieve file from SentinelOne for Response Action [${actionId}]. Response ES document is missing [meta.taskId]`
               );
             }
 
@@ -695,15 +700,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           break;
 
         default:
-          throw new ResponseActionsClientError(
-            `${actionDetails.command} does not support file downloads`,
-            400
-          );
+          throw new ResponseActionsClientError(`${command} does not support file downloads`, 400);
       }
 
       if (!downloadStream) {
         throw new ResponseActionsClientError(
-          `Unable to establish a file download Readable stream with SentinelOne for response action [${actionDetails.command}] [${actionDetails.id}]`
+          `Unable to establish a file download Readable stream with SentinelOne for response action [${command}] [${actionId}]`
         );
       }
     } catch (e) {
