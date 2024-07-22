@@ -56,10 +56,6 @@ export interface InternalInjectedMetadataSetup {
       user?: Record<string, any> | undefined;
     };
   };
-  getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  getInjectedVars: () => {
-    [key: string]: unknown;
-  };
   getCustomBranding: () => CustomBranding;
 }
 
