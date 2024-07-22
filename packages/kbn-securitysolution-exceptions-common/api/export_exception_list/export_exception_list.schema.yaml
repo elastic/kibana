@@ -5,6 +5,7 @@ info:
 paths:
   /api/exception_lists/_export:
     post:
+      x-labels: [serverless, ess]
       operationId: ExportExceptionList
       x-codegen-enabled: true
       summary: Exports an exception list
