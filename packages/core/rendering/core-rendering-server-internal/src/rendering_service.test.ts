@@ -14,6 +14,7 @@ import {
   getThemeStylesheetPathsMock,
   getScriptPathsMock,
   getBrowserLoggingConfigMock,
+  getApmConfigMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -257,6 +258,25 @@ function renderTestCases(
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
       expect(data.logging).toEqual(loggingConfig);
+    });
+
+    it('renders "core" with APM config injected', async () => {
+      const someApmConfig = { someConfig: 9000 };
+      getApmConfigMock.mockReturnValue(someApmConfig);
+
+      const request = createKibanaRequest();
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+
+      expect(getApmConfigMock).toHaveBeenCalledTimes(1);
+      expect(getApmConfigMock).toHaveBeenCalledWith(request.url.pathname);
+
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.apmConfig).toEqual(someApmConfig);
     });
 
     it('use the correct translation url when CDN is enabled', async () => {
@@ -511,6 +531,7 @@ describe('RenderingService', () => {
     getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
     getScriptPathsMock.mockReturnValue(['/script-1.js']);
     getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
+    getApmConfigMock.mockReset().mockReturnValue({ stubApmConfig: true });
   });
 
   describe('preboot()', () => {
