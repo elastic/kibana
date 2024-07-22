@@ -9,15 +9,16 @@ import { mockLogger } from '../../__mocks__';
 
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { MlModelDeploymentState } from '../../../common/types/ml';
-
-import { fetchMlModels } from './fetch_ml_models';
 import {
   E5_LINUX_OPTIMIZED_MODEL_ID,
   E5_MODEL_ID,
   ELSER_LINUX_OPTIMIZED_MODEL_ID,
   ELSER_MODEL_ID,
-} from './utils';
+} from '@kbn/ml-trained-models-utils';
+
+import { MlModelDeploymentState } from '../../../common/types/ml';
+
+import { fetchMlModels } from './fetch_ml_models';
 
 describe('fetchMlModels', () => {
   const mockTrainedModelsProvider = {
