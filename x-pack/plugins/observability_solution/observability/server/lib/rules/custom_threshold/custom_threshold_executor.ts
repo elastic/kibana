@@ -318,12 +318,12 @@ export const createCustomThresholdExecutor = ({
           startedAt: indexedStartedAt,
         }),
         ...additionalContext,
-        ...getEcsGroups(group),
       };
 
       alertsClient.setAlertData({
         id: recoveredAlertId,
         context,
+        ...getEcsGroups(group),
       });
     }
 
