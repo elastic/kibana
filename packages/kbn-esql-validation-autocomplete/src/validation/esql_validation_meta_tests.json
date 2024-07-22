@@ -929,6 +929,13 @@
       "warning": []
     },
     {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"bogus\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
+    },
+    {
       "query": "row var = mv_sort([\"a\", \"b\"], \"ASC\")",
       "error": [],
       "warning": []
@@ -5980,7 +5987,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField > stringField",
+      "query": "from a_index | eval textField > textField",
       "error": [],
       "warning": []
     },
@@ -6126,7 +6133,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField >= stringField",
+      "query": "from a_index | eval textField >= textField",
       "error": [],
       "warning": []
     },
@@ -6272,7 +6279,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField < stringField",
+      "query": "from a_index | eval textField < textField",
       "error": [],
       "warning": []
     },
@@ -6418,7 +6425,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField <= stringField",
+      "query": "from a_index | eval textField <= textField",
       "error": [],
       "warning": []
     },
@@ -6564,7 +6571,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField == stringField",
+      "query": "from a_index | eval textField == textField",
       "error": [],
       "warning": []
     },
@@ -6703,7 +6710,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField != stringField",
+      "query": "from a_index | eval textField != textField",
       "error": [],
       "warning": []
     },
@@ -7275,10 +7282,10 @@
     },
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"bogus\")",
-      "error": [
+      "error": [],
+      "warning": [
         "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
-      ],
-      "warning": []
+      ]
     },
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"ASC\")",

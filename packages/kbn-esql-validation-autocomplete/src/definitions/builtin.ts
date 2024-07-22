@@ -41,6 +41,8 @@ function createMathDefinition(
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-functions-operators.html#_less_than
 const baseComparisonTypeTable: MathFunctionSignature[] = [
+  // Verify what's the different between date and datetime
+  ['date', 'date', 'boolean'],
   ['datetime', 'datetime', 'boolean'],
   ['double', 'double', 'boolean'],
   ['double', 'integer', 'boolean'],
@@ -138,6 +140,8 @@ const addTypeTable: MathFunctionSignature[] = [
   ['time_duration', 'datetime', 'datetime'],
   ['time_duration', 'time_duration', 'time_duration'],
   ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+  ['date', 'time_literal', 'date'],
+  ['time_literal', 'date', 'date'],
 ];
 
 const subtractTypeTable: MathFunctionSignature[] = [
@@ -156,6 +160,8 @@ const subtractTypeTable: MathFunctionSignature[] = [
   ['time_duration', 'datetime', 'datetime'],
   ['time_duration', 'time_duration', 'time_duration'],
   ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+  ['date', 'time_literal', 'date'],
+  ['time_literal', 'date', 'date'],
 ];
 
 const multiplyTypeTable: MathFunctionSignature[] = [
@@ -257,7 +263,33 @@ export const mathFunctions: FunctionDefinition[] = [
     modulusTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.moduleDoc', {
       defaultMessage: 'Module (%)',
-    })
+    }),
+    (fnDef) => {
+      const [left, right] = fnDef.args;
+      const messages = [];
+      if (!Array.isArray(left) && !Array.isArray(right)) {
+        if (right.type === 'literal' && isNumericType(right.literalType)) {
+          if (right.value === 0) {
+            messages.push({
+              type: 'warning' as const,
+              code: 'moduleByZero',
+              text: i18n.translate(
+                'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
+                {
+                  defaultMessage: 'Module by zero can return null value: {left}%{right}',
+                  values: {
+                    left: left.text,
+                    right: right.value,
+                  },
+                }
+              ),
+              location: fnDef.location,
+            });
+          }
+        }
+      }
+      return messages;
+    }
   ),
 ];
 

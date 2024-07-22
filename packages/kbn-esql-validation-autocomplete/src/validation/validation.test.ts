@@ -415,10 +415,11 @@ describe('validation logic', () => {
         ]);
       }
 
-      // @TODO: verify why validation not returning any error
-      // testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "bogus")`, [
-      //   'Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].',
-      // ]);
+      testErrorsAndWarnings(
+        `row var = mv_sort(["a", "b"], "bogus")`,
+        [],
+        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
+      );
 
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "DESC")`, []);
@@ -1047,7 +1048,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval (doubleField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | eval (NOT (doubleField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 0`, []);
-        for (const type of ['string', 'double', 'date', 'boolean', 'ip']) {
+        for (const type of ['text', 'double', 'date', 'boolean', 'ip']) {
           testErrorsAndWarnings(
             `from a_index | eval ${type}Field ${op} ${type}Field`,
             type !== 'boolean' || ['==', '!='].includes(op)
@@ -1232,9 +1233,11 @@ describe('validation logic', () => {
         "SyntaxError: mismatched input '<EOF>' expecting {',', ')'}",
       ]);
 
-      testErrorsAndWarnings('from a_index | eval mv_sort(["a", "b"], "bogus")', [
-        'Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].',
-      ]);
+      testErrorsAndWarnings(
+        'from a_index | eval mv_sort(["a", "b"], "bogus")',
+        [],
+        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
+      );
 
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
