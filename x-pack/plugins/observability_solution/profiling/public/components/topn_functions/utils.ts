@@ -108,15 +108,6 @@ export function getFunctionsRows({
           })
         : undefined;
 
-    if (topN.Rank === 15710) {
-      console.log(
-        '### caue  returntopNFunctions.TopN.filter  topN:',
-        topN,
-        topNFunctions,
-        impactEstimates,
-        totalSeconds
-      );
-    }
     function calculateDiff() {
       if (comparisonTopNFunctions && comparisonRow) {
         const comparisonScaledSelfCPU = scaleValue({
