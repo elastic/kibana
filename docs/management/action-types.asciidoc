@@ -16,9 +16,9 @@ a| <<cases-action-type,Cases>>
 
 | Add alerts to cases.
 
-a| <<crowdstrike-action-type,Crowdstrike>>
+a| <<crowdstrike-action-type,CrowdStrike>>
 
-| Send a request to Crowdstrike.
+| Send a request to CrowdStrike.
 
 a| <<d3security-action-type,D3 Security>>
 
