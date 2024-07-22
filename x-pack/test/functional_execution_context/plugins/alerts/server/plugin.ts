@@ -9,7 +9,7 @@ import apmAgent from 'elastic-apm-node';
 import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
