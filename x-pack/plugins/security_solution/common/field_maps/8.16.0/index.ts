@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export * from './src/schema/entity_definition';
-export * from './src/schema/entity';
-export * from './src/schema/common';
-export * from './src/rest_spec/delete';
-export * from './src/rest_spec/reset';
-export * from './src/rest_spec/get';
+import type { AlertsFieldMap8160 } from './alerts';
+import { alertsFieldMap8160 } from './alerts';
+export type { AlertsFieldMap8160 };
+export { alertsFieldMap8160 };
