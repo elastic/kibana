@@ -7,16 +7,17 @@
  */
 
 import React from 'react';
+
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { render, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-
-import { pluginServices } from '../../services';
-import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
-import { OptionsListComponentState, OptionsListReduxState } from '../types';
+import { mockOptionsListEmbeddable } from '../../../common/mocks';
+import { pluginServices } from '../../services';
 import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
+import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
 
 describe('Options list popover', () => {
@@ -361,6 +362,58 @@ describe('Options list popover', () => {
         explicitInput: { hideSort: true },
         testSubject: 'optionsListControl__sortingOptionsButton',
       });
+    });
+  });
+
+  describe('field formatter', () => {
+    const mockedFormatter = jest.fn().mockImplementation((value: unknown) => `formatted:${value}`);
+
+    beforeAll(() => {
+      stubDataView.getFormatterForField = jest.fn().mockReturnValue({
+        getConverterFor: () => mockedFormatter,
+      });
+      pluginServices.getServices().dataViews.get = jest.fn().mockResolvedValue(stubDataView);
+    });
+
+    afterEach(() => {
+      mockedFormatter.mockClear();
+    });
+
+    test('uses field formatter on suggestions', async () => {
+      const popover = await mountComponent({
+        componentState: {
+          field: stubDataView.fields.getByName('bytes')?.toSpec(),
+          availableOptions: [
+            { value: '1000', docCount: 1 },
+            { value: '123456789', docCount: 4 },
+          ],
+        },
+      });
+
+      expect(mockedFormatter).toHaveBeenNthCalledWith(1, '1000');
+      expect(mockedFormatter).toHaveBeenNthCalledWith(2, '123456789');
+      const options = await popover.findAllByRole('option');
+      expect(options[0].textContent).toEqual('Exists');
+      expect(
+        options[1].getElementsByClassName('euiSelectableListItem__text')[0].textContent
+      ).toEqual('formatted:1000');
+      expect(
+        options[2].getElementsByClassName('euiSelectableListItem__text')[0].textContent
+      ).toEqual('formatted:123456789');
+    });
+
+    test('converts string to number for date field', async () => {
+      await mountComponent({
+        componentState: {
+          field: stubDataView.fields.getByName('@timestamp')?.toSpec(),
+          availableOptions: [
+            { value: '1721283696000', docCount: 1 },
+            { value: '1721295533000', docCount: 2 },
+          ],
+        },
+      });
+      expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1721283696000);
+      expect(mockedFormatter).toHaveBeenNthCalledWith(2, 1721295533000);
     });
   });
 });
