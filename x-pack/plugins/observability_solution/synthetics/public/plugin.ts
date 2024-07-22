@@ -56,6 +56,7 @@ import {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import { SloPublicStart } from '@kbn/slo-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
@@ -102,6 +103,7 @@ export interface ClientPluginsStart {
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  slo?: SloPublicStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {
