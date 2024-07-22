@@ -47,6 +47,10 @@ export const EntityResolutionPostRequestBody = z.object({
    */
   langSmithApiKey: z.string().optional(),
   model: z.string().optional(),
+  /**
+   * Optional prompt template must include $$ENTITY and $$CANDIDATES for entity and candidates respectively to be replaced
+   */
+  promptTemplate: z.string().optional(),
   size: z.number().min(1).max(100),
 });
 export type EntityResolutionPostRequestBodyInput = z.input<typeof EntityResolutionPostRequestBody>;

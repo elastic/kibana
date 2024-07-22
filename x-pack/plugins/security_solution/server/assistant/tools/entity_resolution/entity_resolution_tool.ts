@@ -23,6 +23,7 @@ import { getEntityResolutionPrompt } from './get_entity_resolution_prompt';
 export interface EntityResolutionToolParams extends AssistantToolParams {
   entitiesIndexPattern: string;
   size: number;
+  promptTemplate?: string;
 }
 
 export interface EntityResolutionToolResponse extends EntityResolutionOutput {
@@ -56,6 +57,7 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
       size,
       logger,
       entityResolutionClient,
+      promptTemplate,
     } = params as EntityResolutionToolParams;
 
     if (!entityResolutionClient) {
@@ -104,6 +106,7 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
         const query = getEntityResolutionPrompt({
           searchEntity,
           candidateEntities: candidateEntities.map((e) => e.entity),
+          promptTemplate,
         });
 
         logger.debug(`Entity Resolution LLM prompt: ${query}`);

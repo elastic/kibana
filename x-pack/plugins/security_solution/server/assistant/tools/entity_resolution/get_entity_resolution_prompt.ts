@@ -8,25 +8,35 @@
 import type { SearchEntity } from '@kbn/elastic-assistant-common';
 import type { CandidateEntity } from './get_candidate_entities';
 
+const DEFAULT_TEMPLATE = `Your role is to facilitate entity resolution	by providing the best matches for the given record.		 
+
+Given the following entity from elasticsearch:
+
+$$ENTITY
+
+Do any of the follwing candidates match the entity? :
+
+$$CANDIDATES
+`;
+
 export const getEntityResolutionPrompt = ({
   candidateEntities,
   searchEntity,
+  promptTemplate = DEFAULT_TEMPLATE,
 }: {
+  promptTemplate?: string;
   searchEntity: SearchEntity;
   candidateEntities: CandidateEntity[];
-}) => `Your role is to facilitate entity resolution	by providing the best matches for the given record.		 
+}) => {
+  if (!searchEntity || candidateEntities.length === 0) {
+    throw new Error('searchEntity and candidateEntities are required');
+  }
 
-${searchEntity.type} entity from elasticsearch:
+  if (!promptTemplate.includes('$$ENTITY') || !promptTemplate.includes('$$CANDIDATES')) {
+    throw new Error('Prompt template must include $$ENTITY and $$CANDIDATES');
+  }
 
-${JSON.stringify(searchEntity)}
-
-Given the following list:
-
-"""
-${candidateEntities.map((e) => JSON.stringify(e)).join('\n\n')}
-"""
-
-Does a new record '${JSON.stringify(
-  searchEntity
-)}' match an entity in the list? If no entities match do not provide any input.
-`;
+  return promptTemplate
+    .replace('$$ENTITY', JSON.stringify(searchEntity, null, 2))
+    .replace('$$CANDIDATES', candidateEntities.map((c) => JSON.stringify(c)).join('\n'));
+};

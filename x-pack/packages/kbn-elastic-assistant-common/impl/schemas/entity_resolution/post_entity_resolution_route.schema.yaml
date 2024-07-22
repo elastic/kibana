@@ -40,6 +40,10 @@ paths:
                   type: string
                 model:
                   type: string
+                promptTemplate:
+                  description: Optional prompt template must include $$ENTITY and $$CANDIDATES for entity and candidates respectively to be replaced
+                  example: "Does $$ENTITY match one of these candidates? $$CANDIDATES"
+                  type: string
                 size:
                   type: number
                   minimum: 1

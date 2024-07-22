@@ -22,6 +22,7 @@ import type { GetRegisteredTools } from '../../services/app_context';
 import { AssistantToolParams } from '../../types';
 import { EntityResolutionDataClient } from '../../ai_assistant_data_clients/entity_resolution';
 export const getAssistantToolParams = ({
+  promptTemplate,
   searchEntity,
   actionsClient,
   entityResolutionClient,
@@ -36,6 +37,7 @@ export const getAssistantToolParams = ({
   request,
   size,
 }: {
+  promptTemplate?: string;
   searchEntity: SearchEntity;
   actionsClient: PublicMethodsOf<ActionsClient>;
   entityResolutionClient: EntityResolutionDataClient;
@@ -49,7 +51,7 @@ export const getAssistantToolParams = ({
   logger: Logger;
   request: KibanaRequest<unknown, unknown, EntityResolutionPostRequestBody>;
   size: number;
-}) => {
+}): AssistantToolParams => {
   const traceOptions = {
     projectName: langSmithProject,
     tracers: [
@@ -71,53 +73,22 @@ export const getAssistantToolParams = ({
     traceOptions,
   });
 
-  return formatAssistantToolParams({
+  return {
     entityResolutionClient,
     searchEntity,
     entitiesIndexPattern,
+    isEnabledKnowledgeBase: false, // not required
+    chain: undefined, // not required
     esClient,
     langChainTimeout,
     llm,
     logger,
+    modelExists: false, // not required
     request,
     size,
-  });
+    promptTemplate,
+  };
 };
-
-const formatAssistantToolParams = ({
-  entityResolutionClient,
-  entitiesIndexPattern,
-  esClient,
-  langChainTimeout,
-  llm,
-  logger,
-  request,
-  size,
-  searchEntity,
-}: {
-  entityResolutionClient: EntityResolutionDataClient;
-  entitiesIndexPattern: string;
-  esClient: ElasticsearchClient;
-  langChainTimeout: number;
-  llm: ActionsClientLlm;
-  logger: Logger;
-  request: KibanaRequest<unknown, unknown, EntityResolutionPostRequestBody>;
-  size: number;
-  searchEntity: SearchEntity;
-}): AssistantToolParams => ({
-  entityResolutionClient,
-  searchEntity,
-  entitiesIndexPattern,
-  isEnabledKnowledgeBase: false, // not required
-  chain: undefined, // not required
-  esClient,
-  langChainTimeout,
-  llm,
-  logger,
-  modelExists: false, // not required
-  request,
-  size,
-});
 
 export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginName: string) => {
   // get the entity resolution tool:

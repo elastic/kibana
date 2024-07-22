@@ -88,6 +88,7 @@ export const postEntityResolutionRoute = (
             langSmithProject,
             size,
             entity: searchEntity,
+            promptTemplate,
           } = request.body;
 
           if (!searchEntity) {
@@ -118,6 +119,7 @@ export const postEntityResolutionRoute = (
           }
 
           const assistantToolParams = getAssistantToolParams({
+            promptTemplate,
             searchEntity,
             actionsClient,
             entityResolutionClient,

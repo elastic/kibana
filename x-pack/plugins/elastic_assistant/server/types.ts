@@ -216,6 +216,7 @@ export interface AssistantTool {
 }
 
 export interface AssistantToolParams {
+  promptTemplate?: string;
   entityResolutionClient?: EntityResolutionDataClient;
   alertsIndexPattern?: string;
   entitiesIndexPattern?: string;
