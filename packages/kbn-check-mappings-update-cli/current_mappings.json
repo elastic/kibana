@@ -348,6 +348,17 @@
     "dynamic": false,
     "properties": {}
   },
+  "background-task-node": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "last_seen": {
+        "type": "date"
+      }
+    }
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -3315,6 +3326,9 @@
       },
       "ownerId": {
         "type": "keyword"
+      },
+      "partition": {
+        "type": "integer"
       },
       "retryAt": {
         "type": "date"

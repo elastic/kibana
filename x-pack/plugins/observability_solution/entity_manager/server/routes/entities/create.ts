@@ -21,7 +21,7 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, EntityDefinition>(
     {
-      path: '/internal/api/entities/definition',
+      path: '/internal/entities/definition',
       validate: {
         body: (body, res) => {
           try {

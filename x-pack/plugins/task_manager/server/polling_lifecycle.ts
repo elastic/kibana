@@ -43,6 +43,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
+import { TaskPartitioner } from './lib/task_partitioner';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -60,6 +61,7 @@ export type TaskPollingLifecycleOpts = {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
+  taskPartitioner: TaskPartitioner;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -111,6 +113,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     unusedTypes,
     executionContext,
     usageCounter,
+    taskPartitioner,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -144,6 +147,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       unusedTypes,
       logger: this.logger,
       getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),
+      taskPartitioner,
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);

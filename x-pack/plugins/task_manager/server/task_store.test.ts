@@ -160,6 +160,7 @@ describe('TaskStore', () => {
           taskType: 'report',
           user: undefined,
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
         {
           id: 'id',
@@ -183,6 +184,7 @@ describe('TaskStore', () => {
         user: undefined,
         version: '123',
         traceparent: 'apmTraceparent',
+        partition: 225,
       });
     });
 
@@ -506,6 +508,7 @@ describe('TaskStore', () => {
         version: '123',
         ownerId: null,
         traceparent: 'myTraceparent',
+        partition: 99,
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -548,6 +551,7 @@ describe('TaskStore', () => {
           user: undefined,
           ownerId: null,
           traceparent: 'myTraceparent',
+          partition: 99,
         },
         { version: '123', refresh: false }
       );
@@ -1066,6 +1070,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
             references: [],
             version: '123',
@@ -1105,6 +1110,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
           },
         ],
@@ -1129,6 +1135,7 @@ describe('TaskStore', () => {
           user: undefined,
           version: '123',
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
       ]);
     });

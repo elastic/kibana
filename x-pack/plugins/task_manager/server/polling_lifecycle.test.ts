@@ -22,6 +22,8 @@ import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import { CLAIM_STRATEGY_MGET } from './config';
+import { TaskPartitioner } from './lib/task_partitioner';
+import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -93,6 +95,7 @@ describe('TaskPollingLifecycle', () => {
     capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
+    taskPartitioner: new TaskPartitioner('test', {} as KibanaDiscoveryService),
   };
 
   beforeEach(() => {

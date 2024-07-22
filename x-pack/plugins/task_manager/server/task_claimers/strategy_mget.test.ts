@@ -17,7 +17,7 @@ import {
   TaskPriority,
   TaskCost,
 } from '../task';
-import { StoreOpts } from '../task_store';
+import { SearchOpts, StoreOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
 import { asOk, asErr, isOk, unwrap } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -35,6 +35,16 @@ import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { TaskPartitioner } from '../lib/task_partitioner';
+import type { MustNotCondition } from '../queries/query_clauses';
+import {
+  createDiscoveryServiceMock,
+  createFindSO,
+} from '../kibana_discovery_service/mock_kibana_discovery_service';
+
+jest.mock('../lib/assign_pod_partitions', () => ({
+  assignPodPartitions: jest.fn().mockReturnValue([1, 3]),
+}));
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -86,6 +96,15 @@ taskDefinitions.registerTaskDefinitions({
 const mockApmTrans = {
   end: jest.fn(),
 };
+
+const discoveryServiceMock = createDiscoveryServiceMock('test');
+const lastSeen = '2024-08-10T10:00:00.000Z';
+discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
+  createFindSO('test', lastSeen),
+  createFindSO('test-pod-2', lastSeen),
+  createFindSO('test-pod-3', lastSeen),
+]);
+const taskPartitioner = new TaskPartitioner('test', discoveryServiceMock);
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
 describe('TaskClaiming', () => {
@@ -163,6 +182,7 @@ describe('TaskClaiming', () => {
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 10),
+        taskPartitioner,
         ...taskClaimingOpts,
       });
 
@@ -216,7 +236,14 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls).toMatchObject({});
       expect(store.getDocVersions.mock.calls).toMatchObject({});
-      return results;
+      return results.map((result, index) => ({
+        result,
+        args: {
+          search: store.fetch.mock.calls[index][0] as SearchOpts & {
+            query: MustNotCondition;
+          },
+        },
+      }));
     }
 
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
@@ -328,6 +355,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -417,6 +445,7 @@ describe('TaskClaiming', () => {
         unusedTypes: ['report'],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -510,6 +539,7 @@ describe('TaskClaiming', () => {
         unusedTypes: ['report'],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -599,6 +629,7 @@ describe('TaskClaiming', () => {
         unusedTypes: ['report'],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -679,6 +710,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -740,6 +772,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -816,6 +849,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -892,6 +926,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -974,6 +1009,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -1081,6 +1117,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -1172,6 +1209,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -1251,6 +1289,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -1348,6 +1387,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
+        taskPartitioner,
       });
 
       const [resultOrErr] = await getAllAsPromise(
@@ -1388,6 +1428,151 @@ describe('TaskClaiming', () => {
 
       expect(result.stats).toEqual({ tasksClaimed: 0, tasksConflicted: 0, tasksUpdated: 0 });
       expect(result.docs.length).toEqual(0);
+    });
+
+    test('it should filter for specific partitions and tasks without partitions', async () => {
+      const taskManagerId = uuidv4();
+      const [
+        {
+          args: {
+            search: { query },
+          },
+        },
+      ] = await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "terms": Object {
+                        "task.partition": Array [
+                          1,
+                          3,
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must_not": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "task.partition",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            "must": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "task.enabled": true,
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "terms": Object {
+                        "task.taskType": Array [
+                          "report",
+                          "dernstraight",
+                          "yawn",
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "idle",
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.runAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "bool": Object {
+                              "should": Array [
+                                Object {
+                                  "term": Object {
+                                    "task.status": "running",
+                                  },
+                                },
+                                Object {
+                                  "term": Object {
+                                    "task.status": "claiming",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.retryAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "task.status": "unrecognized",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
     });
   });
 
@@ -1490,6 +1675,7 @@ describe('TaskClaiming', () => {
         taskStore,
         maxAttempts: 2,
         getAvailableCapacity,
+        taskPartitioner,
       });
 
       return { taskManagerId, runAt, taskClaiming };
