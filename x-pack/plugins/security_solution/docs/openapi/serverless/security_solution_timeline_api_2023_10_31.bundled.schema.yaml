@@ -944,7 +944,6 @@ components:
         type:
           $ref: '#/components/schemas/DataProviderType'
     DataProviderType:
-      default: default
       description: >-
         The type of data provider to create. Valid values are `default` and
         `template`.
@@ -1322,7 +1321,6 @@ components:
             - savedObjectId
             - version
     TimelineStatus:
-      default: draft
       description: >-
         The status of the timeline. Valid values are `active`, `draft`, and
         `immutable`.
@@ -1332,7 +1330,6 @@ components:
         - immutable
       type: string
     TimelineType:
-      default: default
       description: >-
         The type of timeline to create. Valid values are `default` and
         `template`.
