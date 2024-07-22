@@ -19,6 +19,7 @@ import {
   getPathParameters,
   getVersionedContentTypeString,
   getVersionedHeaderParam,
+  mergeResponseContent,
   prepareRoutes,
 } from './util';
 import type { OperationIdCounter } from './operation_id_counter';
@@ -102,18 +103,23 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
     const contentType = extractContentType(route.options?.body);
     return Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
       (acc, [statusCode, schema]) => {
-        const oasSchema = converter.convert(schema.body());
+        const newContent = schema.body
+          ? {
+              [getVersionedContentTypeString(
+                SERVERLESS_VERSION_2023_10_31,
+                schema.bodyContentType ? [schema.bodyContentType] : contentType
+              )]: {
+                schema: converter.convert(schema.body()),
+              },
+            }
+          : undefined;
         acc[statusCode] = {
           ...acc[statusCode],
-          content: {
-            ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-            [getVersionedContentTypeString(
-              SERVERLESS_VERSION_2023_10_31,
-              schema.bodyContentType ? [schema.bodyContentType] : contentType
-            )]: {
-              schema: oasSchema,
-            },
-          },
+          description: schema.description!,
+          ...mergeResponseContent(
+            ((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+            newContent
+          ),
         };
         return acc;
       },
