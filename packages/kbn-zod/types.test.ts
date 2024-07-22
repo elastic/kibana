@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-export const getApmConfigMock = jest.fn();
+import { expectAssignable } from 'tsd';
+import { ZodEsque } from './types';
+import { z } from '.';
 
-jest.doMock('./get_apm_config', () => ({
-  getApmConfig: getApmConfigMock,
-}));
+describe('ZodEsque', () => {
+  it('correctly extracts generic from Zod values', () => {
+    const s = z.object({ n: z.number() });
+    expectAssignable<ZodEsque<{ n: number }>>(s);
+  });
+});

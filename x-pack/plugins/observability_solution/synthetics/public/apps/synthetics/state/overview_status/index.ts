@@ -9,7 +9,11 @@ import { createReducer } from '@reduxjs/toolkit';
 
 import { OverviewStatusState } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
-import { clearOverviewStatusErrorAction, fetchOverviewStatusAction } from './actions';
+import {
+  clearOverviewStatusErrorAction,
+  fetchOverviewStatusAction,
+  quietFetchOverviewStatusAction,
+} from './actions';
 
 export interface OverviewStatusStateReducer {
   loading: boolean;
@@ -29,6 +33,10 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchOverviewStatusAction.get, (state) => {
       state.status = null;
+      state.loading = true;
+    })
+    .addCase(quietFetchOverviewStatusAction.get, (state) => {
+      state.loading = true;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = {
@@ -36,9 +44,11 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
       };
       state.loaded = true;
+      state.loading = false;
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
+      state.loading = false;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;
