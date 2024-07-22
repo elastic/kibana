@@ -6,26 +6,32 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getEntityLatestIndexTemplateV1 } from '../../common/helpers';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_INDEX_PREFIX_V1,
-  ENTITY_LATEST_INDEX_TEMPLATE_V1,
 } from '../../common/constants_entities';
+import { getCustomLatestTemplateComponents } from './components/helpers';
 
-export const entitiesLatestIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
-  name: ENTITY_LATEST_INDEX_TEMPLATE_V1,
+export const getEntitiesLatestIndexTemplateConfig = (
+  definitionId: string
+): IndicesPutIndexTemplateRequest => ({
+  name: getEntityLatestIndexTemplateV1(definitionId),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
     ecs_version: '8.0.0',
     managed: true,
+    managed_by: 'elastic_entity_model',
   },
+  ignore_missing_component_templates: getCustomLatestTemplateComponents(definitionId),
   composed_of: [
     ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
+    ...getCustomLatestTemplateComponents(definitionId),
   ],
   index_patterns: [`${ENTITY_LATEST_INDEX_PREFIX_V1}.*`],
   priority: 1,
@@ -72,4 +78,4 @@ export const entitiesLatestIndexTemplateConfig: IndicesPutIndexTemplateRequest =
       },
     },
   },
-};
+});

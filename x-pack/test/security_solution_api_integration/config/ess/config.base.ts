@@ -84,7 +84,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'alertSuppressionForEsqlRuleEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'bulkCustomHighlightedFieldsEnabled',
             'alertSuppressionForMachineLearningRuleEnabled',
             'manualRuleRunEnabled',
           ])}`,
