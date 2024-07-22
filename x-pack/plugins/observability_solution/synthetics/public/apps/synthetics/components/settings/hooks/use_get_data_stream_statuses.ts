@@ -36,7 +36,7 @@ export function useGetDataStreamStatuses(): DataStreamStatusResponse {
   const { data, error, loading } = useFetcher(getDslPolicies, [lastRefresh]);
   const { data: indicesData } = useFetcher(
     () => getIndicesData({ useMetering: true }),
-    [lastRefresh]
+    []
   );
 
   if (!Array.isArray(data) || !!error) return { dataStreamStatuses: undefined, error, loading };
