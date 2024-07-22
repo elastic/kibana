@@ -5,8 +5,9 @@ info:
 paths:
   /internal/elastic_assistant/current_user/conversations/_bulk_action:
     post:
-      operationId: PerformBulkAction
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PerformBulkAction
       summary: Applies a bulk action to multiple conversations
       description: The bulk action is applied to all conversations that match the filter or to the list of conversations by their IDs.
       tags:
