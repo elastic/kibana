@@ -44,9 +44,9 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import type { PersistedState, Vis, VisParams } from '..';
 
-import { BehaviorSubject } from 'rxjs';
 import { ExtraSavedObjectProperties, VisualizeRuntimeState } from '../react_embeddable/types';
 import type { ListingViewRegistry, SavedVisState, SerializedVis } from '../types';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
