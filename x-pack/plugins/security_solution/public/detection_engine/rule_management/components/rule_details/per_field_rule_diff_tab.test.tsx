@@ -7,7 +7,7 @@
 
 import {
   KqlQueryType,
-  ThreeWayDiffConflictResolutionResult,
+  ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '../../../../../common/api/detection_engine';
@@ -19,7 +19,7 @@ import { PerFieldRuleDiffTab } from './per_field_rule_diff_tab';
 
 const ruleFieldsDiffBaseFieldsMock = {
   diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-  conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+  conflict: ThreeWayDiffConflict.NONE,
   has_update: true,
   merge_outcome: ThreeWayMergeOutcome.Target,
   has_base_version: true,

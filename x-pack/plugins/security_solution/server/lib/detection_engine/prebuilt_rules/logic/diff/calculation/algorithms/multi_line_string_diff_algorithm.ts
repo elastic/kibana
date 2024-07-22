@@ -17,7 +17,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
-  ThreeWayDiffConflictResolutionResult,
+  ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 /**
@@ -117,10 +117,10 @@ const mergeVersions = ({
 
 const determineConflictType = (mergeOutcome: ThreeWayMergeOutcome) => {
   if (mergeOutcome === ThreeWayMergeOutcome.Conflict) {
-    return ThreeWayDiffConflictResolutionResult.NON_SOLVABLE_CONFLICT;
+    return ThreeWayDiffConflict.NON_SOLVABLE;
   }
   if (mergeOutcome === ThreeWayMergeOutcome.Merged) {
-    return ThreeWayDiffConflictResolutionResult.SOLVABLE_CONFLICT;
+    return ThreeWayDiffConflict.SOLVABLE;
   }
-  return ThreeWayDiffConflictResolutionResult.NO_CONFLICT;
+  return ThreeWayDiffConflict.NONE;
 };

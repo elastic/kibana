@@ -13,7 +13,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   MissingVersion,
-  ThreeWayDiffConflictResolutionResult,
+  ThreeWayDiffConflict,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -120,10 +120,10 @@ const getNumberOfFieldsByChangeType = (fieldsDiff: RuleFieldsDiff) =>
         counts.numberFieldsWithUpdates += 1;
       }
 
-      if (fieldDiff.conflict !== ThreeWayDiffConflictResolutionResult.NO_CONFLICT) {
+      if (fieldDiff.conflict !== ThreeWayDiffConflict.NONE) {
         counts.numberFieldsWithConflicts += 1;
 
-        if (fieldDiff.conflict === ThreeWayDiffConflictResolutionResult.NON_SOLVABLE_CONFLICT) {
+        if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
           counts.numberFieldsWithNonSolvableConflicts += 1;
         }
       }

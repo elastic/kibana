@@ -14,7 +14,7 @@ import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
   MissingVersion,
-  ThreeWayDiffConflictResolutionResult,
+  ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -56,8 +56,8 @@ export const simpleDiffAlgorithm = <TValue>(
       // Simple Diffs algos can only results in NON_SOLVABLE conflicts
       // if the diff outcome is a conflict
       mergeOutcome === ThreeWayMergeOutcome.Conflict
-        ? ThreeWayDiffConflictResolutionResult.NON_SOLVABLE_CONFLICT
-        : ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+        ? ThreeWayDiffConflict.NON_SOLVABLE
+        : ThreeWayDiffConflict.NONE,
   };
 };
 

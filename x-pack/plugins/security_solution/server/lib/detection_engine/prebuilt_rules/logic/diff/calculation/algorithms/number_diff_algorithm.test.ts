@@ -10,7 +10,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
-  ThreeWayDiffConflictResolutionResult,
+  ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine';
 import { numberDiffAlgorithm } from './number_diff_algorithm';
 
@@ -29,7 +29,7 @@ describe('numberDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
-        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+        conflict: ThreeWayDiffConflict.NONE,
       })
     );
   });
@@ -48,7 +48,7 @@ describe('numberDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
-        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+        conflict: ThreeWayDiffConflict.NONE,
       })
     );
   });
@@ -67,7 +67,7 @@ describe('numberDiffAlgorithm', () => {
         merged_version: mockVersions.target_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
         merge_outcome: ThreeWayMergeOutcome.Target,
-        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+        conflict: ThreeWayDiffConflict.NONE,
       })
     );
   });
@@ -86,7 +86,7 @@ describe('numberDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
-        conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+        conflict: ThreeWayDiffConflict.NONE,
       })
     );
   });
@@ -105,7 +105,7 @@ describe('numberDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         merge_outcome: ThreeWayMergeOutcome.Conflict,
-        conflict: ThreeWayDiffConflictResolutionResult.NON_SOLVABLE_CONFLICT,
+        conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       })
     );
   });
@@ -127,7 +127,7 @@ describe('numberDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -148,7 +148,7 @@ describe('numberDiffAlgorithm', () => {
           merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflictResolutionResult.NO_CONFLICT,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
