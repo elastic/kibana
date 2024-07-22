@@ -988,6 +988,14 @@ describe('autocomplete', () => {
       ],
     ]);
 
+    // testSuggestions.only('FROM  ', ['index1', 'index2'], ' ', undefined, [
+    //   ,
+    //   [
+    //     { name: 'index1', hidden: false },
+    //     { name: 'index2', hidden: false },
+    //   ],
+    // ]);
+
     // FROM source METADATA
     testSuggestions('FROM index1 M', [',', 'METADATA $0', '|'], undefined, 13);
 

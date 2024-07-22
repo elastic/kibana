@@ -92,13 +92,9 @@ import {
 import { FunctionParameter } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
-type GetDataSourceFn = (sourceName: string) => Promise<
-  | {
-      name: string;
-      dataStreams?: Array<{ name: string; title?: string }>;
-    }
-  | undefined
->;
+type GetDataStreamsForIntegrationFn = (
+  sourceName: string
+) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[]
@@ -325,11 +321,13 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getDatastreamsForIntegrationRetriever(resourceRetriever?: ESQLCallbacks) {
+function getDatastreamsForIntegrationRetriever(
+  resourceRetriever?: ESQLCallbacks
+): GetDataStreamsForIntegrationFn {
   const helper = getSourcesHelper(resourceRetriever);
   return async (sourceName: string) => {
     const list = (await helper()) || [];
-    return list.find(({ name }) => name === sourceName);
+    return list.find(({ name }) => name === sourceName)?.dataStreams;
   };
 }
 
@@ -503,7 +501,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: GetSourceFn,
-  getDatastreamsForIntegration: GetDataSourceFn,
+  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -860,27 +858,31 @@ async function getExpressionSuggestionsByType(
       } else {
         const index = getSourcesFromCommands(commands, 'index');
         const canRemoveQuote = isNewExpression && innerText.includes('"');
+        // Function to add suggestions based on canRemoveQuote
+        const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
+          suggestions.push(
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions)
+          );
+        };
 
-        // This is going to be empty for simple indices, and not empty for integrations
         if (index && index.text && index.text !== EDITOR_MARKER) {
           const source = index.text.replace(EDITOR_MARKER, '');
-          const dataSource = await getDatastreamsForIntegration(source);
+          const dataStreams = await getDatastreamsForIntegration(source);
 
-          const newDefinitions = buildSourcesDefinitions(
-            dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
-          );
-          suggestions.push(
-            ...(canRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
-          );
+          if (dataStreams) {
+            // Integration name, suggest the datastreams
+            await addSuggestionsBasedOnQuote(
+              buildSourcesDefinitions(
+                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+              )
+            );
+          } else {
+            // Not an integration, just a partial source name
+            await addSuggestionsBasedOnQuote(await getSources());
+          }
         } else {
-          // FROM <suggest>
-          // @TODO: filter down the suggestions here based on other existing sources defined
-          const sourcesDefinitions = await getSources();
-          suggestions.push(
-            ...(canRemoveQuote
-              ? removeQuoteForSuggestedSources(sourcesDefinitions)
-              : sourcesDefinitions)
-          );
+          // FROM <suggest> or no index/text
+          await addSuggestionsBasedOnQuote(await getSources());
         }
       }
     }
