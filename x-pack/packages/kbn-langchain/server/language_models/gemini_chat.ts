@@ -98,9 +98,6 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
           );
         }
 
-        if (!actionResult.data?.candidates?.[0]?.content) {
-          console.log('stephhh actionResult', JSON.stringify(actionResult));
-        }
         return {
           response: {
             ...actionResult.data,

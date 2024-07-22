@@ -164,8 +164,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         },
       });
 
-  console.error('exectuor', executor);
-
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
@@ -281,8 +279,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       }
     );
   });
-
-  console.error('langChainResponse', langChainResponse);
 
   const langChainOutput = langChainResponse.output;
   if (onLlmResponse) {
