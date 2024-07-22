@@ -10,7 +10,7 @@ import { ENTITY_FETCH_STATUS, useEntityManager } from '../../hooks/use_entity_ma
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import {
-  serviceInventoryStorageKey,
+  SERVICE_INVENTORY_STORAGE_KEY,
   serviceInventoryViewType$,
 } from '../../analytics/register_service_inventory_view_type_context';
 import { useKibana } from '../kibana_context/use_kibana';
@@ -45,7 +45,7 @@ export function EntityManagerEnablementContextProvider({
   const { isEnabled: isEntityManagerEnabled, status, refetch } = useEntityManager();
 
   const [serviceInventoryViewLocalStorageSetting, setServiceInventoryViewLocalStorageSetting] =
-    useLocalStorage(serviceInventoryStorageKey, ServiceInventoryView.classic);
+    useLocalStorage(SERVICE_INVENTORY_STORAGE_KEY, ServiceInventoryView.classic);
 
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,

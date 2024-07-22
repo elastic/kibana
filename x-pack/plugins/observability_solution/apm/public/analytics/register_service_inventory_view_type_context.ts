@@ -9,11 +9,11 @@ import { AnalyticsServiceSetup } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { ServiceInventoryView } from '../context/entity_manager_context/entity_manager_context';
 
-export const serviceInventoryStorageKey = 'apm.service.inventory.view';
+export const SERVICE_INVENTORY_STORAGE_KEY = 'apm.service.inventory.view';
 
 export const serviceInventoryViewType$ = new BehaviorSubject({
   serviceInventoryViewType: JSON.parse(
-    window.localStorage.getItem(serviceInventoryStorageKey) || ServiceInventoryView.classic
+    window.localStorage.getItem(SERVICE_INVENTORY_STORAGE_KEY) || ServiceInventoryView.classic
   ),
 });
 

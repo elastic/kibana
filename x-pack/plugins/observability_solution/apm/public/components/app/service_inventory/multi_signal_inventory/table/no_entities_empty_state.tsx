@@ -5,31 +5,32 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
-  EuiLink,
   EuiEmptyPrompt,
-  EuiImage,
-  EuiHorizontalRule,
-  EuiText,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiImage,
+  EuiLink,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { dashboardsLight } from '@kbn/shared-svg';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../../../../../context/kibana_context/use_kibana';
 import { useLocalStorage } from '../../../../../hooks/use_local_storage';
+import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
+import { EntityInventoryAddDataParams } from '../../../../../services/telemetry';
 import {
   AddApmAgent,
   AssociateServiceLogs,
   CollectServiceLogs,
 } from '../../../../shared/add_data_buttons/buttons';
-import { useKibana } from '../../../../../context/kibana_context/use_kibana';
-import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
-import { EntityInventoryAddDataParams } from '../../../../../services/telemetry';
 
 export function NoEntitiesEmptyState() {
   const { core } = useApmPluginContext();
@@ -40,9 +41,9 @@ export function NoEntitiesEmptyState() {
     false
   );
 
-  useEffect(() => {
+  useEffectOnce(() => {
     services.telemetry.reportEntityInventoryPageState({ state: 'empty_state' });
-  }, [services.telemetry]);
+  });
 
   function reportButtonClick(journey: EntityInventoryAddDataParams['journey']) {
     services.telemetry.reportEntityInventoryAddData({
