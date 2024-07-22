@@ -13,18 +13,20 @@ export const createGetDefaultAppState =
   ({
     defaultColumns,
   }: {
-    defaultColumns: DefaultAppStateColumn[];
-  }): DataSourceProfileProvider['profile']['getDefaultAppState'] =>
+    defaultColumns?: DefaultAppStateColumn[];
+  } = {}): DataSourceProfileProvider['profile']['getDefaultAppState'] =>
   (prev) =>
   (params) => {
     const prevState = prev(params);
     const columns = prevState?.columns ?? [];
 
-    if (params.dataView.isTimeBased()) {
-      columns.push({ name: params.dataView.timeFieldName, width: 212 });
-    }
+    if (defaultColumns) {
+      if (params.dataView.isTimeBased()) {
+        columns.push({ name: params.dataView.timeFieldName, width: 212 });
+      }
 
-    columns.push(...defaultColumns);
+      columns.push(...defaultColumns);
+    }
 
     return { columns, rowHeight: 0 };
   };

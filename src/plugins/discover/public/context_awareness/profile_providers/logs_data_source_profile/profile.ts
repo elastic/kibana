@@ -11,7 +11,6 @@ import { ProfileProviderServices } from '../profile_provider_services';
 import { createGetDefaultAppState, getRowIndicatorProvider } from './accessors';
 import { extractIndexPatternFrom } from '../extract_index_pattern_from';
 import { getCellRenderers } from './accessors';
-import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from './consts';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -20,9 +19,7 @@ export const createLogsDataSourceProfileProvider = (
   profile: {
     getRowIndicatorProvider,
     getCellRenderers,
-    getDefaultAppState: createGetDefaultAppState({
-      defaultColumns: [LOG_LEVEL_COLUMN, MESSAGE_COLUMN],
-    }),
+    getDefaultAppState: createGetDefaultAppState(),
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
