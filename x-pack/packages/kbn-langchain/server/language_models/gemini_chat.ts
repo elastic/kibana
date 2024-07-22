@@ -7,15 +7,17 @@
 
 import {
   Content,
-  Part,
+  EnhancedGenerateContentResponse,
   FunctionCallPart,
   FunctionResponsePart,
-  POSSIBLE_ROLES,
-  EnhancedGenerateContentResponse,
   GenerateContentRequest,
-  TextPart,
-  InlineDataPart,
   GenerateContentResult,
+  HarmBlockThreshold,
+  HarmCategory,
+  InlineDataPart,
+  POSSIBLE_ROLES,
+  Part,
+  TextPart,
 } from '@google/generative-ai';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -57,6 +59,12 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       ...props,
       apiKey: 'asda',
       maxOutputTokens: props.maxTokens ?? 2048,
+      safetySettings: [
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+        },
+      ],
     });
     // LangChain needs model to be defined for logging purposes
     this.model = props.model ?? this.model;
