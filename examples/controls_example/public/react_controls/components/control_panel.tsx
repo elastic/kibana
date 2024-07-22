@@ -12,7 +12,6 @@ import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
@@ -26,12 +25,11 @@ import {
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
-  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
-import { ControlError } from './control_error_component';
-import { ControlPanelProps, DefaultControlApi } from './types';
+import { ControlPanelProps, DefaultControlApi } from '../types';
+import { ControlError } from './control_error';
 
 import './control_panel.scss';
 
@@ -209,52 +207,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>
-    </EuiFlexItem>
-  );
-};
-
-/**
- * A simplified clone version of the control which is dragged. This version only shows
- * the title, because individual controls can be any size, and dragging a wide item
- * can be quite cumbersome.
- */
-export const ControlClone = ({
-  controlStyle,
-  controlApi,
-}: {
-  controlStyle: string;
-  controlApi: DefaultControlApi;
-}) => {
-  const width = useStateFromPublishingSubject(controlApi.width);
-  const [panelTitle, defaultPanelTitle] = useBatchedOptionalPublishingSubjects(
-    controlApi.panelTitle,
-    controlApi.defaultPanelTitle
-  );
-
-  return (
-    <EuiFlexItem
-      className={classNames('controlFrameCloneWrapper', {
-        'controlFrameCloneWrapper--small': width === 'small',
-        'controlFrameCloneWrapper--medium': width === 'medium',
-        'controlFrameCloneWrapper--large': width === 'large',
-        'controlFrameCloneWrapper--twoLine': controlStyle === 'twoLine',
-      })}
-    >
-      {controlStyle === 'twoLine' ? (
-        <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>
-      ) : undefined}
-      <EuiFlexGroup responsive={false} gutterSize="none" className={'controlFrame__draggable'}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
-        </EuiFlexItem>
-        {controlStyle === 'oneLine' ? (
-          <EuiFlexItem>
-            <label className="controlFrameCloneWrapper__label">
-              {panelTitle ?? defaultPanelTitle}
-            </label>
-          </EuiFlexItem>
-        ) : undefined}
-      </EuiFlexGroup>
     </EuiFlexItem>
   );
 };

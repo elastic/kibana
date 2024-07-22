@@ -13,7 +13,7 @@ import { StateComparators } from '@kbn/presentation-publishing';
 
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
-import { ControlPanel } from './control_panel';
+import { ControlPanel } from './components/control_panel';
 import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
 
 /**

@@ -52,7 +52,6 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { ControlClone } from '../control_panel';
 import { ControlRenderer } from '../control_renderer';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
@@ -64,6 +63,7 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
+import { ControlClone } from '../components/control_clone';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
