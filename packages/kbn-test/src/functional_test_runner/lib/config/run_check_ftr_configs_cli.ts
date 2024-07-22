@@ -100,10 +100,14 @@ export async function runCheckFtrConfigsCli() {
       if (invalid.length) {
         const invalidList = invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n  - ');
         log.error(
-          `The following files look like FTR configs which are not listed in one of manifest files:\nstateful: ${manifestPaths.stateful}\nserverless: ${manifestPaths.serverless}\n  - ${invalidList}`
+          `The following files look like FTR configs which are not listed in one of manifest files:\n${invalidList}\n
+Make sure to add your new FTR config to the correct manifest file.\n
+Stateful tests:\n${(manifestPaths.stateful as string[]).join('\n')}\n
+Serverless tests:\n${(manifestPaths.serverless as string[]).join('\n')}
+          `
         );
         throw createFailError(
-          `Please add the listed paths to the correct manifest file. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
+          `Please add the listed paths to the correct manifest files. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
         );
       }
     },
