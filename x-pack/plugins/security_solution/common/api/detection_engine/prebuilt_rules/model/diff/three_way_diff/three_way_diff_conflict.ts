@@ -12,7 +12,7 @@
  *   - NO_CONFLICT:
  *       - current == target (value won't change)
  *       - current != target && current == base (stock rule will get a new value)
- *
+ * See RFC: https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/docs/rfcs/detection_response/prebuilt_rules_customization.md#concrete-field-diff-algorithms-by-type
  */
 export enum ThreeWayDiffConflict {
   NONE = 'NONE',
