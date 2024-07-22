@@ -11,7 +11,7 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { STATUS_OVERVIEW_EMBEDDABLE } from '../status_overview/status_overview_embeddable_factory';
+import { STATUS_OVERVIEW_EMBEDDABLE } from '../constants';
 
 export const COMMON_SYNTHETICS_GROUPING = [
   {

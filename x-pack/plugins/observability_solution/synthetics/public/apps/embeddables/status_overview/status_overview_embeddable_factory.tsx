@@ -20,17 +20,9 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import { STATUS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
 import { StatusOverviewComponent } from './status_overview_component';
-export const STATUS_OVERVIEW_EMBEDDABLE = 'STATUS_OVERVIEW_EMBEDDABLE';
-
-// public readonly grouping = [
-//   {
-//     id: PLUGIN.SYNTHETICS_PLUGIN_ID,
-//     getDisplayName: () => PLUGIN.SYNTHETICS,
-//     getIconType: () => 'uptimeApp',
-//   },
-// ];
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.displayName', {
@@ -69,7 +61,7 @@ export const getStatusOverviewEmbeddableFactory = (
       const api = buildApi(
         {
           ...titlesApi,
-          isEditingEnabled: () => true,
+          isEditingEnabled: () => false,
           getTypeDisplayName: () => getOverviewPanelTitle(),
           defaultPanelTitle: defaultTitle$,
           onEdit: async () => {},

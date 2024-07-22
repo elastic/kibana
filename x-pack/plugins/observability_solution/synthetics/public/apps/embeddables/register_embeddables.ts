@@ -10,7 +10,7 @@ import { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
 import { createStatusOverviewPanelAction } from './ui_actions/create_overview_panel_action';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { STATUS_OVERVIEW_EMBEDDABLE } from './status_overview/status_overview_embeddable_factory';
+import { STATUS_OVERVIEW_EMBEDDABLE } from './constants';
 
 export const registerSyntheticsEmbeddables = (
   core: CoreSetup<ClientPluginsStart, unknown>,
