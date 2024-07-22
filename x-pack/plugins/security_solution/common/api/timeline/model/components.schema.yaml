@@ -1,3 +1,8 @@
+openapi: 3.0.0
+info:
+  title: Shared Timeline Components
+  version: 'not applicable'
+paths: {}
 components:
   schemas:
     TimelineType:
@@ -263,15 +268,6 @@ components:
           type: number
         updatedBy:
           type: string
-      Note:
-      allOf:
-        - $ref: '#/components/schemas/BareNote'
-        - type: object
-          properties:
-            noteId:
-              type: string
-            version:
-              type: string
     RowRendererId:
       type: string
       enum:
@@ -475,19 +471,24 @@ components:
       type: object
       properties:
         _maxListeners:
-          type: {}
+          type: object
+          additionalProperties: true
         _readableState:
-          type: {}
+          type: object
+          additionalProperties: true
         _read:
-          type: {}
+          type: object
+          additionalProperties: true
         readable:
           type: boolean
         _events:
-          type: {}
+          type: object
+          additionalProperties: true
         _eventsCount:
           type: number
         _data:
-          type: {}
+          type: object
+          additionalProperties: true
         _position:
           type: number
         _encoding:
