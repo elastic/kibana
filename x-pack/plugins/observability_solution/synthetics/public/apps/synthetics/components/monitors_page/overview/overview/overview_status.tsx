@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_panel_wrapper';
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { useGetUrlParams } from '../../../../hooks/use_url_params';
@@ -87,10 +88,7 @@ export function OverviewStatus() {
   }, [status, statusFilter]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiTitle size="xs">
-        <h3>{headingText}</h3>
-      </EuiTitle>
+    <EmbeddablePanelWrapper title={headingText}>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={false}>
@@ -136,7 +134,7 @@ export function OverviewStatus() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </EmbeddablePanelWrapper>
   );
 }
 

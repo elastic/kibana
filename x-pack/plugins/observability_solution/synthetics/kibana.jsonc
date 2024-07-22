@@ -31,7 +31,9 @@
       "triggersActionsUi",
       "usageCollection",
       "bfetch",
-      "unifiedSearch"
+      "uiActions",
+      "unifiedSearch",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "cloud",
@@ -53,7 +55,7 @@
       "observability",
       "spaces",
       "indexLifecycleManagement",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
     ]
   }
 }
