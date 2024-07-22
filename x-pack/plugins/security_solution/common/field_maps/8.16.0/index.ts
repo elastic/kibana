@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const getAgentDetailsRequestParamsSchema = t.unknown;
-
-export type GetAgentDetailsRequestParamsSchema = t.OutputOf<
-  typeof getAgentDetailsRequestParamsSchema
->;
+import type { AlertsFieldMap8160 } from './alerts';
+import { alertsFieldMap8160 } from './alerts';
+export type { AlertsFieldMap8160 };
+export { alertsFieldMap8160 };

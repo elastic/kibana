@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export * from './common_attributes';
+import { z } from 'zod';
+
+export const deleteEntityDefinitionParamsSchema = z.object({
+  id: z.string(),
+});
+
+export const deleteEntityDefinitionQuerySchema = z.object({
+  deleteData: z.optional(z.coerce.boolean().default(false)),
+});
