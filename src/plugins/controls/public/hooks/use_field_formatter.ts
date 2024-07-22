@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { useEffect, useState } from 'react';
 import { pluginServices } from '../services';
 
@@ -20,7 +19,7 @@ export const useFieldFormatter = ({
   const {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
-  const [fieldFormatter, setFieldFormatter] = useState<FieldFormatConvertFunction>(
+  const [fieldFormatter, setFieldFormatter] = useState<(toFormat: any) => string>(
     () => (toFormat: string) => toFormat
   );
 
