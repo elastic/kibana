@@ -43,6 +43,7 @@ interface CodeBoxProps {
   sharePlugin?: SharePluginStart;
   consoleRequest?: string;
   showTopBar?: boolean;
+  consoleTitle?: string;
 }
 
 export const CodeBox: React.FC<CodeBoxProps> = ({
@@ -56,6 +57,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   setSelectedLanguage,
   sharePlugin,
   consoleRequest,
+  consoleTitle,
   showTopBar = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -82,7 +84,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
       <EuiButtonEmpty
         aria-label={i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
           defaultMessage: 'Select a programming language for the {context} code snippet',
-          values: { context: consoleRequest },
+          values: { context: consoleTitle },
         })}
         color="text"
         iconType="arrowDown"
