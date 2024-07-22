@@ -204,6 +204,8 @@ export default ({ getService }: FtrProviderContext) => {
         .query({ id: createdRule.id })
         .expect(200);
 
+      console.log('rule response', JSON.stringify(response.body, null, 2));
+
       const ruleResponse = response.body;
       expect(ruleResponse.execution_summary.last_execution.message.includes('missing')).toEqual(
         true
@@ -340,8 +342,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched alert with criticality_level', async () => {
-        const { previewId } = await previewRule({ supertest, rule });
+        const { previewId, ...restOfRule } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        console.log('actual rule', JSON.stringify(rule, null, 2));
+        console.log('returned rule', JSON.stringify(restOfRule, null, 2));
 
         expect(previewAlerts).toHaveLength(1);
         expect(previewAlerts[0]._source).toEqual(
