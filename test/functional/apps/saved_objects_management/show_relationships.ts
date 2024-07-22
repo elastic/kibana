@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       let invalidRelations: any[] = [];
 
-      await retry.waitFor('2 invalidation relations to be found', async () => {
+      await retry.waitFor('2 invalid relations to be found', async () => {
         invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
         return invalidRelations.length === 2;
       });
