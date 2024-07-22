@@ -11,7 +11,7 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { STATUS_OVERVIEW_EMBEDDABLE } from '../constants';
+import { SYNTHETICS_OVERVIEW_EMBEDDABLE } from '../constants';
 
 export const COMMON_SYNTHETICS_GROUPING = [
   {
@@ -40,7 +40,7 @@ export function createStatusOverviewPanelAction(): UiActionsActionDefinition<Emb
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       try {
         embeddable.addNewPanel({
-          panelType: STATUS_OVERVIEW_EMBEDDABLE,
+          panelType: SYNTHETICS_OVERVIEW_EMBEDDABLE,
         });
       } catch (e) {
         return Promise.reject();

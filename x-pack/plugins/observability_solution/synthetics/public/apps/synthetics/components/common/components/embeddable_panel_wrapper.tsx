@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
+  EuiProgress,
   EuiTitle,
 } from '@elastic/eui';
 import {
@@ -23,14 +24,15 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { STATUS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/status_overview/status_overview_embeddable_factory';
+import { SYNTHETICS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const EmbeddablePanelWrapper: FC<{
   title: string;
-}> = ({ children, title }) => {
+  loading?: boolean;
+}> = ({ children, title, loading }) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = React.useState(false);
@@ -50,7 +52,7 @@ export const EmbeddablePanelWrapper: FC<{
 
       const state = {
         input: embeddableInput,
-        type: STATUS_OVERVIEW_EMBEDDABLE,
+        type: SYNTHETICS_OVERVIEW_EMBEDDABLE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
@@ -66,6 +68,7 @@ export const EmbeddablePanelWrapper: FC<{
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder>
+        {loading && <EuiProgress size="xs" color="accent" />}
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiTitle size="xs">

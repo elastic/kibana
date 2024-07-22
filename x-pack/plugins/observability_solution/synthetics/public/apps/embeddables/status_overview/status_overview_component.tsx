@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import { Subject } from 'rxjs';
 import { OverviewStatus } from '../../synthetics/components/monitors_page/overview/overview/overview_status';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 
-export const StatusOverviewComponent = () => {
+export const StatusOverviewComponent = ({ reload$ }: { reload$: Subject<boolean> }) => {
   return (
     <SyntheticsEmbeddableContext>
-      <OverviewStatus />
+      <OverviewStatus reload$={reload$} />
     </SyntheticsEmbeddableContext>
   );
 };

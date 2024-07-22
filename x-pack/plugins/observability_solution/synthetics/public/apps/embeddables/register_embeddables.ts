@@ -10,18 +10,21 @@ import { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
 import { createStatusOverviewPanelAction } from './ui_actions/create_overview_panel_action';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { STATUS_OVERVIEW_EMBEDDABLE } from './constants';
+import { SYNTHETICS_OVERVIEW_EMBEDDABLE } from './constants';
 
 export const registerSyntheticsEmbeddables = (
   core: CoreSetup<ClientPluginsStart, unknown>,
   pluginsSetup: ClientPluginsSetup
 ) => {
-  pluginsSetup.embeddable.registerReactEmbeddableFactory(STATUS_OVERVIEW_EMBEDDABLE, async () => {
-    const { getStatusOverviewEmbeddableFactory } = await import(
-      './status_overview/status_overview_embeddable_factory'
-    );
-    return getStatusOverviewEmbeddableFactory(core.getStartServices);
-  });
+  pluginsSetup.embeddable.registerReactEmbeddableFactory(
+    SYNTHETICS_OVERVIEW_EMBEDDABLE,
+    async () => {
+      const { getStatusOverviewEmbeddableFactory } = await import(
+        './status_overview/status_overview_embeddable_factory'
+      );
+      return getStatusOverviewEmbeddableFactory(core.getStartServices);
+    }
+  );
 
   const { uiActions, cloud, serverless } = pluginsSetup;
 

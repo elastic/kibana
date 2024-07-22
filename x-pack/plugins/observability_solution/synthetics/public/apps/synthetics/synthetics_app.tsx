@@ -18,11 +18,7 @@ import { SyntheticsSharedContext } from './contexts/synthetics_shared_context';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
-import {
-  SyntheticsAppProps,
-  SyntheticsRefreshContextProvider,
-  SyntheticsSettingsContextProvider,
-} from './contexts';
+import { SyntheticsAppProps, SyntheticsSettingsContextProvider } from './contexts';
 import { PageRouter } from './routes';
 import { setBasePath, store } from './state';
 
@@ -75,17 +71,15 @@ const Application = (props: SyntheticsAppProps) => {
         <SyntheticsSharedContext {...props}>
           <PresentationContextProvider>
             <Router history={appMountParameters.history}>
-              <SyntheticsRefreshContextProvider>
-                <SyntheticsSettingsContextProvider {...props}>
-                  <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                    <InspectorContextProvider>
-                      <PageRouter />
-                      <ActionMenu appMountParameters={appMountParameters} />
-                      <TestNowModeFlyoutContainer />
-                    </InspectorContextProvider>
-                  </div>
-                </SyntheticsSettingsContextProvider>
-              </SyntheticsRefreshContextProvider>
+              <SyntheticsSettingsContextProvider {...props}>
+                <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                  <InspectorContextProvider>
+                    <PageRouter />
+                    <ActionMenu appMountParameters={appMountParameters} />
+                    <TestNowModeFlyoutContainer />
+                  </InspectorContextProvider>
+                </div>
+              </SyntheticsSettingsContextProvider>
             </Router>
           </PresentationContextProvider>
         </SyntheticsSharedContext>

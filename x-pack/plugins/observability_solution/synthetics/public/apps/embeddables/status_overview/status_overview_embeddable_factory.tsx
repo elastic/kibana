@@ -20,7 +20,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { STATUS_OVERVIEW_EMBEDDABLE } from '../constants';
+import { SYNTHETICS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
 import { StatusOverviewComponent } from './status_overview_component';
 
@@ -46,13 +46,11 @@ export const getStatusOverviewEmbeddableFactory = (
     OverviewEmbeddableState,
     StatusOverviewApi
   > = {
-    type: STATUS_OVERVIEW_EMBEDDABLE,
+    type: SYNTHETICS_OVERVIEW_EMBEDDABLE,
     deserializeState: (state) => {
       return state.rawState as OverviewEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      // const [coreStart, pluginStart] = await getStartServices();
-
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const tags$ = new BehaviorSubject(state.tags);
@@ -96,7 +94,7 @@ export const getStatusOverviewEmbeddableFactory = (
               fetchSubscription.unsubscribe();
             };
           }, []);
-          return <StatusOverviewComponent />;
+          return <StatusOverviewComponent reload$={reload$} />;
         },
       };
     },
