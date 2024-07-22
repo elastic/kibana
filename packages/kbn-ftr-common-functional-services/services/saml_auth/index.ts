@@ -5,5 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { SamlAuthProvider, RoleCredentials } from './saml_auth_provider';
+export { SamlAuthProvider } from './saml_auth_provider';
+export type { RoleCredentials } from './saml_auth_provider';
+export type { InternalRequestHeader } from './internal_headers';

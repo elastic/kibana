@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const COMMON_REQUEST_HEADERS = {
+export const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
@@ -17,6 +17,11 @@ const INTERNAL_REQUEST_HEADERS = {
 
 export type InternalRequestHeader = typeof INTERNAL_REQUEST_HEADERS;
 
-export const getInternalRequestHeaders = (): InternalRequestHeader => {
+export const getServerlessInternalRequestHeaders = (): InternalRequestHeader => {
+  return INTERNAL_REQUEST_HEADERS;
+};
+
+export const getStatefulInternalRequestHeaders = (): InternalRequestHeader => {
+  // TBD
   return INTERNAL_REQUEST_HEADERS;
 };

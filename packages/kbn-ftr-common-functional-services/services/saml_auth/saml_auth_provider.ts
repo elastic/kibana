@@ -12,7 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { getAuthRoleProvider } from './auth_role_provider';
-import { getInternalRequestHeaders } from './internal_headers';
+import { InternalRequestHeader } from './internal_headers';
 
 export interface RoleCredentials {
   apiKey: { id: string; name: string };
@@ -26,8 +26,8 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
 
-  const roleProvider = getAuthRoleProvider(config);
-  const supportedRoleDescriptors = roleProvider.getSupportedRoleDescriptors();
+  const authRoleProvider = getAuthRoleProvider(config);
+  const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 
   const customRolesFileName: string | undefined = process.env.ROLES_FILENAME_OVERRIDE;
@@ -44,11 +44,16 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
     log,
     isCloud,
-    supportedRoles: { roles: supportedRoles, sourcePath: roleProvider.getRolesDefinitionPath() },
+    supportedRoles: {
+      roles: supportedRoles,
+      sourcePath: authRoleProvider.getRolesDefinitionPath(),
+    },
     cloudUsersFilePath,
   });
 
-  const DEFAULT_ROLE = roleProvider.getDefaultRole();
+  const DEFAULT_ROLE = authRoleProvider.getDefaultRole();
+  const COMMON_REQUEST_HEADERS = authRoleProvider.getCommonRequestHeader();
+  const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
 
   return {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
@@ -91,7 +96,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
       const { body, status } = await supertestWithoutAuth
         .post('/internal/security/api_key')
-        .set(getInternalRequestHeaders())
+        .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
         .send({
           name: 'myTestApiKey',
@@ -119,11 +124,18 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
       const { status } = await supertestWithoutAuth
         .post('/internal/security/api_key/invalidate')
-        .set(getInternalRequestHeaders())
+        .set(INTERNAL_REQUEST_HEADERS)
         .set(roleCredentials.cookieHeader)
         .send(requestBody);
 
       expect(status).to.be(200);
+    },
+    getCommonRequestHeader() {
+      return COMMON_REQUEST_HEADERS;
+    },
+
+    getInternalRequestHeader(): InternalRequestHeader {
+      return INTERNAL_REQUEST_HEADERS;
     },
     DEFAULT_ROLE,
   };

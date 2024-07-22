@@ -12,10 +12,10 @@ import { SvlReportingServiceProvider } from './svl_reporting';
 import { DataViewApiProvider } from './data_view_api';
 
 export type {
+  InternalRequestHeader,
   RoleCredentials,
   SupertestWithoutAuthType,
 } from '@kbn/ftr-common-functional-services';
-export type { InternalRequestHeader } from './svl_common_api';
 
 export const services = {
   supertest: SupertestProvider,

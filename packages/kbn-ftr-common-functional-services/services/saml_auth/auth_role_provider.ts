@@ -14,6 +14,8 @@ export interface AuthRoleProvider {
   getSupportedRoleDescriptors(): any;
   getDefaultRole(): string;
   getRolesDefinitionPath(): string;
+  getCommonRequestHeader(): { [key: string]: string };
+  getInternalRequestHeader(): { [key: string]: string };
 }
 
 export const getAuthRoleProvider = (config: Config) => {
