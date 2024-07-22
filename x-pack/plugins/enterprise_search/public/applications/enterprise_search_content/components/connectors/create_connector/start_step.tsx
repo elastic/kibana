@@ -224,7 +224,12 @@ export const StartStep: React.FC<StartStepProps> = ({
         </EuiFlexItem>
         {selfManaged ? (
           <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+            <EuiPanel
+              hasShadow={false}
+              hasBorder
+              paddingSize="l"
+              color={connectorSelected.name !== '' && connectorName !== '' ? 'plain' : 'subdued'}
+            >
               <EuiText
                 color={
                   connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
@@ -265,7 +270,12 @@ export const StartStep: React.FC<StartStepProps> = ({
           </EuiFlexItem>
         ) : (
           <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+            <EuiPanel
+              color={connectorSelected.name !== '' && connectorName !== '' ? 'plain' : 'subdued'}
+              hasShadow={false}
+              hasBorder
+              paddingSize="l"
+            >
               <EuiText
                 color={
                   connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'

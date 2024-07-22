@@ -59,7 +59,12 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+        <EuiPanel
+          hasShadow={false}
+          hasBorder
+          paddingSize="l"
+          color={isNextStepEnabled ? 'plain' : 'subdued'}
+        >
           <EuiText color={isNextStepEnabled ? 'default' : 'subdued'}>
             <h3>
               {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.title', {
