@@ -54,9 +54,7 @@ export const getStatusOverviewEmbeddableFactory = (
       const api = buildApi(
         {
           ...titlesApi,
-          getTypeDisplayName: () => getOverviewPanelTitle(),
           defaultPanelTitle: defaultTitle$,
-          onEdit: async () => {},
           serializeState: () => {
             return {
               rawState: {
