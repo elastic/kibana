@@ -64,7 +64,7 @@ import type { SimplifiedPackagePolicy } from '../../../common/services/simplifie
 
 import {
   canUseMultipleAgentPolicies,
-  canUseOutputPerIntegration,
+  canUseOutputForIntegration,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
@@ -254,10 +254,12 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       throw new PackagePolicyRequestError(canUseMultipleAgentPoliciesErrorMessage);
     }
 
-    const { canUseOutputPerIntegrationResult, errorMessage: outputPerIntegrationErrorMessage } =
-      canUseOutputPerIntegration();
-    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseOutputPerIntegrationResult) {
-      throw new PackagePolicyRequestError(outputPerIntegrationErrorMessage);
+    if (newPolicy.output_id && pkg) {
+      const { canUseOutputForIntegrationResult, errorMessage: outputForIntegrationErrorMessage } =
+        await canUseOutputForIntegration(soClient, pkg.name, newPolicy.output_id);
+      if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
+        throw new PackagePolicyRequestError(outputForIntegrationErrorMessage);
+      }
     }
 
     let newPackagePolicy: NewPackagePolicy;
@@ -381,10 +383,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     throw new PackagePolicyRequestError(errorMessage);
   }
 
-  const { canUseOutputPerIntegrationResult, errorMessage: outputPerIntegrationErrorMessage } =
-    canUseOutputPerIntegration();
-  if ((request.body.output_id ?? []).length > 1 && !canUseOutputPerIntegrationResult) {
-    throw new PackagePolicyRequestError(outputPerIntegrationErrorMessage);
+  if (request.body.output_id && request.body.package) {
+    const { canUseOutputForIntegrationResult, errorMessage: outputForIntegrationErrorMessage } =
+      await canUseOutputForIntegration(soClient, request.body.package.name, request.body.output_id);
+    if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
+      throw new PackagePolicyRequestError(outputForIntegrationErrorMessage);
+    }
   }
 
   try {

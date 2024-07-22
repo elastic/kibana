@@ -21,7 +21,8 @@ import type {
   PackagePolicyInput,
 } from '../../../types';
 import { appContextService } from '../../../services';
-import { agentPolicyService, licenseService } from '../../../services';
+import { agentPolicyService, licenseService, outputService } from '../../../services';
+import { getAllowedOutputTypesForIntegration } from '../../../../common/services/output_helpers';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
 
@@ -69,12 +70,32 @@ export function canUseMultipleAgentPolicies() {
   };
 }
 
-export function canUseOutputPerIntegration() {
+export async function canUseOutputForIntegration(
+  soClient: SavedObjectsClientContract,
+  packageName: string,
+  outputId: string
+) {
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
+  if (!hasEnterpriseLicence) {
+    return {
+      canUseOutputForIntegrationResult: false,
+      errorMessage: 'Output per integration is only available with an Enterprise license',
+    };
+  }
+
+  const allowedOutputTypes = getAllowedOutputTypesForIntegration(packageName);
+  const output = await outputService.get(soClient, outputId);
+
+  if (!allowedOutputTypes.includes(output.type)) {
+    return {
+      canUseOutputForIntegrationResult: false,
+      errorMessage: `Output type "${output.type}" is not usable with package "${packageName}".`,
+    };
+  }
 
   return {
-    canUseOutputPerIntegrationResult: hasEnterpriseLicence,
-    errorMessage: 'Output per integration is only available with an Enterprise license',
+    canUseOutputForIntegrationResult: true,
+    errorMessage: null,
   };
 }
 
