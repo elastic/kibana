@@ -171,17 +171,17 @@ export function getServiceColumns({
       },
     },
     {
-      field: ServiceInventoryFieldName.LogRatePerMinute,
+      field: ServiceInventoryFieldName.logRate,
       name: (
         <ColumnHeader
-          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logRate', {
             defaultMessage: 'Log rate (per min.)',
           })}
           formula={getMetricsFormula(ChartMetricType.LOG_RATE)}
           toolTip={
             <FormattedMessage
               defaultMessage="Rate of logs per minute observed for given {serviceName}."
-              id="xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description"
+              id="xpack.apm.multiSignal.servicesTable.logRate.tooltip.description"
               values={{
                 serviceName: (
                   <code
@@ -190,7 +190,7 @@ export function getServiceColumns({
                     `}
                   >
                     {i18n.translate(
-                      'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.serviceNameLabel',
+                      'xpack.apm.multiSignal.servicesTable.logRate.tooltip.serviceNameLabel',
                       {
                         defaultMessage: 'service.name',
                       }
@@ -213,7 +213,7 @@ export function getServiceColumns({
             isLoading={false}
             color={currentPeriodColor}
             series={timeseriesData?.currentPeriod?.logRate[serviceName] ?? []}
-            valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
+            valueLabel={asDecimalOrInteger(metrics.logRate)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
