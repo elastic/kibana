@@ -228,8 +228,8 @@ Use the *View code* button to see the Python code that powers the chat interface
 You can integrate it into your own application, modifying as needed.
 We currently support two implementation options:
 
-* {es} Python Client + OpenAI
-* LangChain + OpenAI
+* {es} Python Client + LLM provider
+* LangChain + LLM provider
 
 [.screenshot]
 image::images/view-code-button.png[width=100]
