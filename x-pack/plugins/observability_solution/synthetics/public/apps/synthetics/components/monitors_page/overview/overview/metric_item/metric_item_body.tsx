@@ -39,6 +39,7 @@ export const MetricItemBody = ({ monitor }: { monitor: MonitorOverviewItem }) =>
             <TagsList
               color="default"
               tags={tags}
+              disableExpand={true}
               onClick={(tag) => {
                 history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
               }}
