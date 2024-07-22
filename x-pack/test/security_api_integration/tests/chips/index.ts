@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const getAgentDetailsRequestParamsSchema = t.unknown;
-
-export type GetAgentDetailsRequestParamsSchema = t.OutputOf<
-  typeof getAgentDetailsRequestParamsSchema
->;
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security APIs - CHIPS support', function () {
+    loadTestFile(require.resolve('./chips_cookie'));
+  });
+}

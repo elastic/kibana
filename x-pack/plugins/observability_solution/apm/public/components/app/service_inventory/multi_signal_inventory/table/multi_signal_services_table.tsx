@@ -26,7 +26,7 @@ export enum ServiceInventoryFieldName {
   Throughput = 'metrics.throughput',
   Latency = 'metrics.latency',
   FailedTransactionRate = 'metrics.failedTransactionRate',
-  LogRatePerMinute = 'metrics.logRatePerMinute',
+  logRate = 'metrics.logRate',
   LogErrorRate = 'metrics.logErrorRate',
 }
 
