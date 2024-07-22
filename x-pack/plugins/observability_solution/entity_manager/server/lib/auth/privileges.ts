@@ -82,7 +82,7 @@ const hasAllApplicationPrivileges = (
 };
 
 export const entityDefinitionRuntimePrivileges = {
-  cluster: ['manage_transform', 'manage_ingest_pipelines'],
+  cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
   index: [
     {
       names: [ENTITY_INDICES_PATTERN],
@@ -102,8 +102,8 @@ export const entityDefinitionRuntimePrivileges = {
   ],
 };
 
-const entityDefinitionDeletionPrivileges = {
-  cluster: ['manage_transform', 'manage_ingest_pipelines'],
+export const entityDefinitionDeletionPrivileges = {
+  cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
   index: [
     {
       names: [ENTITY_INDICES_PATTERN],
@@ -119,7 +119,7 @@ const entityDefinitionDeletionPrivileges = {
   ],
 };
 
-const apiKeyCreationPrivileges = {
+export const apiKeyCreationPrivileges = {
   // any one of
   cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
   application: [
