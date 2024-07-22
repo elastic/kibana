@@ -18,7 +18,7 @@ import { z } from 'zod';
 
 import { DateRange } from '../common/common.gen';
 
-export type RiskEngineSettingsResponse = z.infer<typeof RiskEngineSettingsResponse>;
-export const RiskEngineSettingsResponse = z.object({
+export type ReadRiskEngineSettingsResponse = z.infer<typeof ReadRiskEngineSettingsResponse>;
+export const ReadRiskEngineSettingsResponse = z.object({
   range: DateRange.optional(),
 });
