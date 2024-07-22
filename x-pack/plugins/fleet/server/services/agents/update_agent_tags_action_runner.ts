@@ -149,6 +149,8 @@ export async function updateTagsBatch(
   const versionConflictCount = res.version_conflicts ?? 0;
   const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
 
+  const currentNameSpace = soClient.getCurrentNamespace();
+
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
   // this ensures that the action status count will be accurate
@@ -157,6 +159,7 @@ export async function updateTagsBatch(
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
       .concat(isLastRetry ? versionConflictIds : []),
+    namespace: currentNameSpace,
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
     total: options.total ?? res.total,
@@ -176,6 +179,7 @@ export async function updateTagsBatch(
       updatedIds.map((id) => ({
         agentId: id,
         actionId,
+        namespace: currentNameSpace,
       }))
     );
     appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);
@@ -188,6 +192,7 @@ export async function updateTagsBatch(
       failures.map((failure) => ({
         agentId: failure.id,
         actionId,
+        namespace: currentNameSpace,
         error: failure.cause.reason,
       }))
     );
@@ -202,6 +207,7 @@ export async function updateTagsBatch(
         versionConflictIds.map((id) => ({
           agentId: id,
           actionId,
+          namespace: currentNameSpace,
           error: 'version conflict on last retry',
         }))
       );
