@@ -31,6 +31,15 @@ export const registerSyntheticsEmbeddables = (
   // Initialize actions
   const addOverviewPanelAction = createStatusOverviewPanelAction();
 
+  core.getStartServices().then(([_, pluginsStart]) => {
+    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+      SYNTHETICS_OVERVIEW_EMBEDDABLE,
+      () => {
+        return { width: 10, height: 8 };
+      }
+    );
+  });
+
   // Assign triggers
   // Only register these actions in stateful kibana, and the serverless observability project
   if (Boolean((serverless && cloud?.serverless.projectType === 'observability') || !serverless)) {

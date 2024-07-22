@@ -59,6 +59,7 @@ import {
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -80,6 +81,7 @@ export interface ClientPluginsSetup {
   embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
   uiActions: UiActionsSetup;
+  dashboard: DashboardSetup;
 }
 
 export interface ClientPluginsStart {
@@ -110,6 +112,7 @@ export interface ClientPluginsStart {
   serverless: ServerlessPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
   presentationUtil: PresentationUtilPluginStart;
+  dashboard: DashboardStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {

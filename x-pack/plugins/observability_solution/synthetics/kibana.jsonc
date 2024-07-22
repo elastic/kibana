@@ -17,6 +17,7 @@
       "embeddable",
       "discover",
       "dataViews",
+      "dashboard",
       "encryptedSavedObjects",
       "exploratoryView",
       "features",
