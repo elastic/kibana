@@ -199,7 +199,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
-                defaultMessage: 'Host id',
+                defaultMessage: 'Host ID',
               }),
               description:
                 typeof agent.local_metadata?.host?.id === 'string'
