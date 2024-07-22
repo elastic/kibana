@@ -21,9 +21,10 @@ import {
   waitForEsStatusGreen,
   waitForKibanaAvailable,
   waitForEsAccess,
+  getApiKeyFromElasticCloudJsonFile,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/parallel_serverless';
 
-const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
+const BASE_ENV_URL = `${process.env.CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 
 // Function to execute a command and return a Promise with the status code
@@ -88,11 +89,28 @@ export const cli = () => {
         level: 'info',
         writeTo: process.stdout,
       });
+      const environment = process.env.ENVIRONMENT ? `${process.env.ENVIRONMENT}` : 'qa';
 
       const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
       const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
       const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
-      const API_KEY = process.env.CLOUD_QA_API_KEY ? process.env.CLOUD_QA_API_KEY : undefined;
+
+      // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
+      // This works for either local executions or fallback in case proxy service is unavailable.
+      if (!process.env.CLOUD_API_KEY && !getApiKeyFromElasticCloudJsonFile(environment)) {
+        log.error(
+          'The API key for the environment needs to be provided with the env var CLOUD_API_KEY.'
+        );
+        log.error(
+          'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the API key.'
+        );
+        // eslint-disable-next-line no-process-exit
+        return process.exit(1);
+      }
+
+      const API_KEY = process.env.CLOUD_API_KEY
+        ? process.env.CLOUD_API_KEY
+        : getApiKeyFromElasticCloudJsonFile(environment);
 
       log.info(`PROXY_URL is defined : ${PROXY_URL !== undefined}`);
       log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
@@ -100,15 +118,23 @@ export const cli = () => {
       log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+      const proxyServiceUse =
+        PROXY_URL &&
+        PROXY_CLIENT_ID &&
+        PROXY_SECRET &&
+        environment.toUpperCase() !== 'prod'.toUpperCase() &&
+        (await proxyHealthcheck(PROXY_URL));
+      if (proxyServiceUse) {
         log.info('Proxy service is up and running, so the tests will run using the proxyHandler.');
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
-        log.info('Proxy service is unavailable, so the tests will run using the cloudHandler.');
+        log.info(
+          'Proxy service is unavailable or execution environment is prod, so the tests will run using the cloudHandler.'
+        );
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
-
+        // eslint-disable-next-line no-process-exit
         return process.exit(1);
       }
 

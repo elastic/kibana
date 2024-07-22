@@ -41,8 +41,8 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
   { product_line: 'endpoint', product_tier: 'complete' },
 ] as const;
 
+const BASE_ENV_URL = `${process.env.CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 let log: ToolingLog = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
@@ -58,12 +58,12 @@ const PROVIDERS = Object.freeze({
   providerName: 'cloud-basic',
 });
 
-const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
+export const getApiKeyFromElasticCloudJsonFile = (environment: string): string | undefined => {
   const userHomeDir = os.homedir();
   try {
     const jsonString = fs.readFileSync(path.join(userHomeDir, '.elastic/cloud.json'), 'utf-8');
     const jsonData = JSON.parse(jsonString);
-    return jsonData.api_key.qa;
+    return environment === 'prod' ? jsonData.api_key.prod : jsonData.api_key.qa;
   } catch (e) {
     log.info('API KEY could not be found in .elastic/cloud.json');
   }
@@ -247,24 +247,27 @@ const getProductTypes = (
 export const cli = () => {
   run(
     async (context) => {
+      const environment = process.env.ENVIRONMENT ? `${process.env.ENVIRONMENT}` : 'qa';
+
+      const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
+      const PROXY_SECRET = process.env.PROXY_SECRET || undefined;
+      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID || undefined;
+
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
       // This works for either local executions or fallback in case proxy service is unavailable.
-      if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
-        log.error('The API key for the environment needs to be provided with the env var API_KEY.');
+      if (!process.env.CLOUD_API_KEY && !getApiKeyFromElasticCloudJsonFile(environment)) {
+        log.error(
+          'The API key for the environment needs to be provided with the env var CLOUD_API_KEY.'
+        );
         log.error(
           'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the API key.'
         );
         // eslint-disable-next-line no-process-exit
         return process.exit(1);
       }
-
-      const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
-      const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
-      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
-
-      const API_KEY = process.env.CLOUD_QA_API_KEY
-        ? process.env.CLOUD_QA_API_KEY
-        : getApiKeyFromElasticCloudJsonFile();
+      const API_KEY = process.env.CLOUD_API_KEY
+        ? process.env.CLOUD_API_KEY
+        : getApiKeyFromElasticCloudJsonFile(environment);
 
       log.info(`PROXY_URL is defined : ${PROXY_URL !== undefined}`);
       log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
@@ -272,11 +275,19 @@ export const cli = () => {
       log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+      const proxyServiceUse =
+        PROXY_URL &&
+        PROXY_CLIENT_ID &&
+        PROXY_SECRET &&
+        environment.toUpperCase() !== 'prod'.toUpperCase() &&
+        (await proxyHealthcheck(PROXY_URL));
+      if (proxyServiceUse) {
         log.info('Proxy service is up and running, so the tests will run using the proxyHandler.');
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
-        log.info('Proxy service is unavailable, so the tests will run using the cloudHandler.');
+        log.info(
+          'Proxy service is unavailable or execution environment is prod, so the tests will run using the cloudHandler.'
+        );
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
@@ -511,7 +522,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
                 CLOUD_SERVERLESS: true,
                 IS_SERVERLESS: true,
-                CLOUD_QA_API_KEY: API_KEY,
+                CLOUD_API_KEY: API_KEY,
                 // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
                 TEST_CLOUD: 1,
               };
