@@ -16,7 +16,6 @@ import {
   MissingVersion,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 /**
@@ -36,13 +35,14 @@ export const simpleDiffAlgorithm = <TValue>(
   const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
-  const { mergeOutcome, mergedVersion } = mergeVersions({
+  const hasBaseVersion = baseVersion !== MissingVersion;
+
+  const { conflict, mergedVersion } = mergeVersions({
+    hasBaseVersion,
     currentVersion,
     targetVersion,
     diffOutcome,
   });
-
-  const hasBaseVersion = baseVersion !== MissingVersion;
 
   return {
     has_base_version: hasBaseVersion,
@@ -52,52 +52,61 @@ export const simpleDiffAlgorithm = <TValue>(
     merged_version: mergedVersion,
 
     diff_outcome: diffOutcome,
-    merge_outcome: mergeOutcome,
     has_update: valueCanUpdate,
-    conflict:
-      // Simple Diffs algos can only results in NON_SOLVABLE conflicts
-      // if the diff outcome is a conflict
-      mergeOutcome === ThreeWayMergeOutcome.Conflict
-        ? ThreeWayDiffConflict.NON_SOLVABLE
-        : ThreeWayDiffConflict.NONE,
+    conflict,
   };
 };
 
 interface MergeResult<TValue> {
-  mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: TValue;
+  conflict: ThreeWayDiffConflict;
 }
 
 interface MergeArgs<TValue> {
+  hasBaseVersion: boolean;
   currentVersion: TValue;
   targetVersion: TValue;
   diffOutcome: ThreeWayDiffOutcome;
 }
 
 const mergeVersions = <TValue>({
+  hasBaseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
 }: MergeArgs<TValue>): MergeResult<TValue> => {
   switch (diffOutcome) {
-    case ThreeWayDiffOutcome.StockValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: {
+    case ThreeWayDiffOutcome.StockValueNoUpdate: // Scenarios AAA and -AA
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate: // Scenario ABA
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: // Scenario ABB
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Current,
         mergedVersion: currentVersion,
+        conflict: ThreeWayDiffConflict.NONE,
       };
-    }
+
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
+      if (!hasBaseVersion) {
+        // Scenario -AB. Treated as scenario ABC, returns target
+        // version and marked as "SOLVABLE" conflict.
+        // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+        return {
+          mergedVersion: targetVersion,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
+        };
+      }
+
+      // Scenario AAB
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Target,
         mergedVersion: targetVersion,
+        conflict: ThreeWayDiffConflict.NONE,
       };
     }
+
+    // Scenario ABC
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Conflict,
         mergedVersion: currentVersion,
+        conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       };
     }
     default:

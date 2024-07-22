@@ -15,7 +15,6 @@ import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -35,13 +34,15 @@ export const multiLineStringDiffAlgorithm = (
   const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
-  const { mergeOutcome, mergedVersion } = mergeVersions({
+  const hasBaseVersion = baseVersion !== MissingVersion;
+
+  const { conflict, mergedVersion } = mergeVersions({
+    hasBaseVersion,
     baseVersion,
     currentVersion,
     targetVersion,
     diffOutcome,
   });
-  const hasBaseVersion = baseVersion !== MissingVersion;
 
   return {
     has_base_version: hasBaseVersion,
@@ -51,18 +52,18 @@ export const multiLineStringDiffAlgorithm = (
     merged_version: mergedVersion,
 
     diff_outcome: diffOutcome,
-    merge_outcome: mergeOutcome,
+    conflict,
     has_update: valueCanUpdate,
-    conflict: determineConflictType(mergeOutcome),
   };
 };
 
 interface MergeResult {
-  mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: string;
+  conflict: ThreeWayDiffConflict;
 }
 
 interface MergeArgs {
+  hasBaseVersion: boolean;
   baseVersion: string | MissingVersion;
   currentVersion: string;
   targetVersion: string;
@@ -70,58 +71,58 @@ interface MergeArgs {
 }
 
 const mergeVersions = ({
+  hasBaseVersion,
   baseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
 }: MergeArgs): MergeResult => {
   switch (diffOutcome) {
-    case ThreeWayDiffOutcome.StockValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: {
+    case ThreeWayDiffOutcome.StockValueNoUpdate: // Scenarios AAA and -AA
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate: // Scenario ABA
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: // Scenario ABB
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Current,
+        conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: currentVersion,
       };
-    }
+
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
+      if (!hasBaseVersion) {
+        // Scenario -AB. Treated as scenario ABC, returns target
+        // version and marked as "SOLVABLE" conflict.
+        // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+        return {
+          mergedVersion: targetVersion,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
+        };
+      }
+
+      // Scenario AAB
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Target,
+        conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: targetVersion,
       };
     }
+
+    // Scenario ABC
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      if (baseVersion === MissingVersion) {
-        return {
-          mergeOutcome: ThreeWayMergeOutcome.Conflict,
-          mergedVersion: currentVersion,
-        };
-      }
-      const mergedVersion = merge(currentVersion, baseVersion, targetVersion, {
+      // TS does not realize that in ABC scenario, baseVersion cannot be missing
+      // Missing baseVersion scenarios were handled as -AA and -AB.
+      const mergedVersion = merge(currentVersion, baseVersion as string, targetVersion, {
         stringSeparator: /(\S+|\s+)/g, // Retains all whitespace, which we keep to preserve formatting
       });
 
       return mergedVersion.conflict
         ? {
-            mergeOutcome: ThreeWayMergeOutcome.Conflict,
+            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
             mergedVersion: currentVersion,
           }
         : {
-            mergeOutcome: ThreeWayMergeOutcome.Merged,
+            conflict: ThreeWayDiffConflict.SOLVABLE,
             mergedVersion: mergedVersion.result.join(''),
           };
     }
     default:
       return assertUnreachable(diffOutcome);
   }
-};
-
-const determineConflictType = (mergeOutcome: ThreeWayMergeOutcome) => {
-  if (mergeOutcome === ThreeWayMergeOutcome.Conflict) {
-    return ThreeWayDiffConflict.NON_SOLVABLE;
-  }
-  if (mergeOutcome === ThreeWayMergeOutcome.Merged) {
-    return ThreeWayDiffConflict.SOLVABLE;
-  }
-  return ThreeWayDiffConflict.NONE;
 };

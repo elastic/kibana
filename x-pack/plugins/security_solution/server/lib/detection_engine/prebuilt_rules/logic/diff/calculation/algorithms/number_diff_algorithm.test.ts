@@ -8,7 +8,6 @@
 import type { ThreeVersionsOf } from '../../../../../../../../common/api/detection_engine';
 import {
   ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine';
@@ -28,7 +27,6 @@ describe('numberDiffAlgorithm', () => {
       expect.objectContaining({
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Current,
         conflict: ThreeWayDiffConflict.NONE,
       })
     );
@@ -47,7 +45,6 @@ describe('numberDiffAlgorithm', () => {
       expect.objectContaining({
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Current,
         conflict: ThreeWayDiffConflict.NONE,
       })
     );
@@ -66,7 +63,6 @@ describe('numberDiffAlgorithm', () => {
       expect.objectContaining({
         merged_version: mockVersions.target_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Target,
         conflict: ThreeWayDiffConflict.NONE,
       })
     );
@@ -85,7 +81,6 @@ describe('numberDiffAlgorithm', () => {
       expect.objectContaining({
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Current,
         conflict: ThreeWayDiffConflict.NONE,
       })
     );
@@ -104,7 +99,6 @@ describe('numberDiffAlgorithm', () => {
       expect.objectContaining({
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Conflict,
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       })
     );
@@ -123,10 +117,9 @@ describe('numberDiffAlgorithm', () => {
       expect(result).toEqual(
         expect.objectContaining({
           has_base_version: false,
-          base_version: MissingVersion,
+          base_version: undefined,
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
           conflict: ThreeWayDiffConflict.NONE,
         })
       );
@@ -144,11 +137,10 @@ describe('numberDiffAlgorithm', () => {
       expect(result).toEqual(
         expect.objectContaining({
           has_base_version: false,
-          base_version: MissingVersion,
+          base_version: undefined,
           merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.NONE,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
         })
       );
     });

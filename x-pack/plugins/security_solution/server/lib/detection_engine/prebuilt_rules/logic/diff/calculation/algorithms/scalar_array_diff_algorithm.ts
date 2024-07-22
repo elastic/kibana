@@ -15,7 +15,6 @@ import {
   determineOrderAgnosticDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -37,13 +36,14 @@ export const scalarArrayDiffAlgorithm = <TValue>(
   const diffOutcome = determineOrderAgnosticDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
-  const { mergeOutcome, mergedVersion } = mergeVersions({
-    baseVersion,
+  const hasBaseVersion = baseVersion !== MissingVersion;
+  const { conflict, mergedVersion } = mergeVersions({
+    hasBaseVersion,
+    baseVersion: hasBaseVersion ? baseVersion : undefined,
     currentVersion,
     targetVersion,
     diffOutcome,
   });
-  const hasBaseVersion = baseVersion !== MissingVersion;
 
   return {
     has_base_version: hasBaseVersion,
@@ -53,65 +53,68 @@ export const scalarArrayDiffAlgorithm = <TValue>(
     merged_version: mergedVersion,
 
     diff_outcome: diffOutcome,
-    merge_outcome: mergeOutcome,
+    conflict,
     has_update: valueCanUpdate,
-    conflict:
-      // Scalar Arrays can only result in Merged outcomes on conflict
-      mergeOutcome === ThreeWayMergeOutcome.Merged
-        ? ThreeWayDiffConflict.SOLVABLE
-        : ThreeWayDiffConflict.NONE,
   };
 };
 
 interface MergeResult<TValue> {
-  mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: TValue[];
+  conflict: ThreeWayDiffConflict;
 }
 
 interface MergeArgs<TValue> {
-  baseVersion: TValue[] | MissingVersion;
+  hasBaseVersion: boolean;
+  baseVersion: TValue[] | undefined;
   currentVersion: TValue[];
   targetVersion: TValue[];
   diffOutcome: ThreeWayDiffOutcome;
 }
 
 const mergeVersions = <TValue>({
+  hasBaseVersion,
   baseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
 }: MergeArgs<TValue>): MergeResult<TValue> => {
-  const dedupedBaseVersion = baseVersion !== MissingVersion ? uniq(baseVersion) : MissingVersion;
+  const dedupedBaseVersion = uniq(baseVersion);
   const dedupedCurrentVersion = uniq(currentVersion);
   const dedupedTargetVersion = uniq(targetVersion);
 
   switch (diffOutcome) {
-    case ThreeWayDiffOutcome.StockValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: {
+    case ThreeWayDiffOutcome.StockValueNoUpdate: // Scenarios AAA and -AA
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate: // Scenario ABA
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: // Scenario ABB
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Current,
+        conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: dedupedCurrentVersion,
       };
-    }
+
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
-      return {
-        mergeOutcome: ThreeWayMergeOutcome.Target,
-        mergedVersion: dedupedTargetVersion,
-      };
-    }
-    case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      if (dedupedBaseVersion === MissingVersion) {
+      if (!hasBaseVersion) {
+        // Scenario -AB. Treated as scenario ABC, returns target
+        // version and marked as "SOLVABLE" conflict.
+        // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
         return {
-          mergeOutcome: ThreeWayMergeOutcome.Merged,
-          mergedVersion: union(currentVersion, targetVersion),
+          mergedVersion: targetVersion,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
         };
       }
 
-      const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion);
+      // Scenario AAB
+      return {
+        conflict: ThreeWayDiffConflict.NONE,
+        mergedVersion: dedupedTargetVersion,
+      };
+    }
+
+    // Scenario ABC
+    case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
+      const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion as TValue[]);
       const removedCurrent = difference(dedupedBaseVersion, dedupedCurrentVersion);
 
-      const addedTarget = difference(dedupedTargetVersion, dedupedBaseVersion);
+      const addedTarget = difference(dedupedTargetVersion, dedupedBaseVersion as TValue[]);
       const removedTarget = difference(dedupedBaseVersion, dedupedTargetVersion);
 
       const bothAdded = union(addedCurrent, addedTarget);
@@ -120,7 +123,7 @@ const mergeVersions = <TValue>({
       const merged = difference(union(dedupedBaseVersion, bothAdded), bothRemoved);
 
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Merged,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
         mergedVersion: merged,
       };
     }

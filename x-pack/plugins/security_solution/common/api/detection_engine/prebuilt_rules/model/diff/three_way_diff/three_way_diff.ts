@@ -6,7 +6,6 @@
  */
 
 import type { ThreeWayDiffOutcome } from './three_way_diff_outcome';
-import type { ThreeWayMergeOutcome } from './three_way_merge_outcome';
 import type { ThreeWayDiffConflict } from './three_way_diff_conflict';
 
 /**
@@ -110,14 +109,6 @@ export interface ThreeWayDiff<TValue> {
    * Tells which combination corresponds to the three input versions of the value for this specific diff.
    */
   diff_outcome: ThreeWayDiffOutcome;
-
-  /**
-   * The type of result of an automatic three-way merge of three values:
-   *   - base version
-   *   - current version
-   *   - target version
-   */
-  merge_outcome: ThreeWayMergeOutcome;
 
   /**
    * Boolean which determines if a base version was found and returned for the three-way-diff of the field
