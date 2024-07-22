@@ -13,7 +13,7 @@ import { StateComparators } from '@kbn/presentation-publishing';
 
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
-import { ControlPanel } from './control_panel';
+import { ControlPanel } from './components/control_panel';
 import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
 
 /**
@@ -68,6 +68,7 @@ export const ControlRenderer = <
         return React.forwardRef<typeof api, { className: string }>((props, ref) => {
           // expose the api into the imperative handle
           useImperativeHandle(ref, () => api, []);
+
           return <Component {...props} />;
         });
       })(),
@@ -79,5 +80,5 @@ export const ControlRenderer = <
     [type]
   );
 
-  return <ControlPanel<ApiType> Component={component} />;
+  return <ControlPanel<ApiType> Component={component} uuid={uuid} />;
 };
