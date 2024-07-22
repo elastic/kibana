@@ -76,7 +76,7 @@ function mergeObjects(
             `${sourcePointer}/${name}`
           )} is defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
             existingSchemaLocation
-          )} but has not matching definitions.`
+          )} but definitions DO NOT match.`
         );
       }
 

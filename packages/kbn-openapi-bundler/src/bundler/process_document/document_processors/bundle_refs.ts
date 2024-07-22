@@ -73,7 +73,7 @@ export class BundleRefProcessor implements DocumentNodeProcessor {
             ref.pointer
           )} is defined in ${chalk.blue(ref.absolutePath)} and in ${chalk.magenta(
             resolvedRef.absolutePath
-          )} but has not matching definitions.`
+          )} but definitions DO NOT match.`
         );
       }
 
