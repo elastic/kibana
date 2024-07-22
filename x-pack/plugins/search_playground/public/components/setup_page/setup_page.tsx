@@ -13,13 +13,11 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { CreateIndexButton } from './create_index_button';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { docLinks } from '../../../common/doc_links';
-import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { ConnectLLMButton } from './connect_llm_button';
@@ -27,16 +25,7 @@ import { AddDataSources } from './add_data_sources';
 
 export const SetupPage: React.FC = () => {
   const usageTracker = useUsageTracker();
-  const [searchParams] = useSearchParams();
   const { indices, isLoading: isIndicesLoading } = useQueryIndices();
-  const index = useMemo(() => searchParams.get('default-index'), [searchParams]);
-  const { addIndex } = useSourceIndicesFields();
-
-  useEffect(() => {
-    if (index) {
-      addIndex(index);
-    }
-  }, [index, addIndex]);
 
   useEffect(() => {
     usageTracker?.load(AnalyticsEvents.setupChatPageLoaded);
