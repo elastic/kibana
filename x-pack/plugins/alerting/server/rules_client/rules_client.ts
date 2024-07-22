@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
@@ -181,7 +182,7 @@ export class RulesClient {
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
   public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
-  public unmuteInstance = (options: MuteAlertParams) => unmuteInstance(this.context, options);
+  public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
