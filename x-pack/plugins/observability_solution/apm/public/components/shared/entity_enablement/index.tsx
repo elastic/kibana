@@ -28,7 +28,7 @@ import { FeedbackModal } from './feedback_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 import { Unauthorized } from './unauthorized_modal';
 
-export function EntityEnablement() {
+export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: string }) {
   const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
 
@@ -37,6 +37,7 @@ export function EntityEnablement() {
   } = useKibana<ApmPluginStartDeps>();
 
   const {
+    isEntityManagerEnabled,
     isEnablementPending,
     refetch,
     setServiceInventoryViewLocalStorageSetting,
@@ -52,6 +53,11 @@ export function EntityEnablement() {
   };
 
   const handleEnablement = async () => {
+    if (isEntityManagerEnabled) {
+      setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await entityManager.entityClient.enableManagedEntityDiscovery();
@@ -82,7 +88,11 @@ export function EntityEnablement() {
   ) : (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        {isLoading ? <EuiLoadingSpinner size="m" /> : <TechnicalPreviewBadge icon="beaker" />}
+        {isLoading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
@@ -94,54 +104,54 @@ export function EntityEnablement() {
             ? i18n.translate('xpack.apm.eemEnablement.enabled.', {
                 defaultMessage: 'Viewing our new experience',
               })
-            : i18n.translate('xpack.apm.eemEnablement.tryItButton.', {
-                defaultMessage: 'Try our new experience!',
-              })}
+            : label}
         </EuiLink>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              onClick={togglePopover}
-              data-test-subj="apmEntityEnablementWithFooterButton"
-              iconType="iInCircle"
-              size="xs"
-              aria-label={i18n.translate('xpack.apm.entityEnablement.euiButtonIcon.arial', {
-                defaultMessage: 'click to find more for the new ui experience',
-              })}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={togglePopover}
-          anchorPosition="downLeft"
-        >
-          <div style={{ width: '300px' }}>
-            <EuiText size="s">
-              <p>
-                {i18n.translate('xpack.apm.entityEnablement.content', {
-                  defaultMessage:
-                    'Our new experience combines both APM-instrumented services with services detected from logs in a single service inventory.',
+      {tooltip && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                onClick={togglePopover}
+                data-test-subj="apmEntityEnablementWithFooterButton"
+                iconType="iInCircle"
+                size="xs"
+                aria-label={i18n.translate('xpack.apm.entityEnablement.euiButtonIcon.arial', {
+                  defaultMessage: 'click to find more for the new ui experience',
                 })}
-              </p>
-            </EuiText>
-          </div>
-          <EuiPopoverFooter>
-            <EuiTextColor color="subdued">
-              <EuiLink
-                data-test-subj="apmEntityEnablementLink"
-                href="https://ela.st/new-experience-services"
-                external
-                target="_blank"
-              >
-                {i18n.translate('xpack.apm.entityEnablement.footer', {
-                  defaultMessage: 'Learn more',
-                })}
-              </EuiLink>
-            </EuiTextColor>
-          </EuiPopoverFooter>
-        </EuiPopover>
-      </EuiFlexItem>
+              />
+            }
+            isOpen={isPopoverOpen}
+            closePopover={togglePopover}
+            anchorPosition="downLeft"
+          >
+            <div style={{ width: '300px' }}>
+              <EuiText size="s">
+                <p>
+                  {i18n.translate('xpack.apm.entityEnablement.content', {
+                    defaultMessage:
+                      'Our new experience combines both APM-instrumented services with services detected from logs in a single service inventory.',
+                  })}
+                </p>
+              </EuiText>
+            </div>
+            <EuiPopoverFooter>
+              <EuiTextColor color="subdued">
+                <EuiLink
+                  data-test-subj="apmEntityEnablementLink"
+                  href="https://ela.st/new-experience-services"
+                  external
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.apm.entityEnablement.footer', {
+                    defaultMessage: 'Learn more',
+                  })}
+                </EuiLink>
+              </EuiTextColor>
+            </EuiPopoverFooter>
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
       {isEntityCentricExperienceViewEnabled && (
         <EuiFlexItem grow={false}>
           <EuiLink data-test-subj="restoreClassicView" onClick={handleRestoreView}>
@@ -158,6 +168,7 @@ export function EntityEnablement() {
       <Unauthorized
         isUnauthorizedModalVisible={isUnauthorizedModalVisible}
         onClose={() => setsIsUnauthorizedModalVisible(false)}
+        label={label}
       />
     </EuiFlexGroup>
   );
