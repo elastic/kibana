@@ -11,6 +11,7 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
@@ -30,14 +31,26 @@ interface LatestFindingsTableProps {
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
 }
+
+/**
+ * Type Guard for checking if the given source is a CspFinding
+ */
+const isCspFinding = (source: Record<string, any> | undefined): source is CspFinding => {
+  return source?.result?.evaluation !== undefined;
+};
+
+const getCspFinding = (source: Record<string, any> | undefined): CspFinding | undefined => {
+  if (isCspFinding(source)) return source as CspFinding;
+};
+
 /**
  * Flyout component for the latest findings table
  */
 const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
   const finding = row.raw._source;
-  if (!finding) return <></>;
+  if (!finding || !isCspFinding(finding)) return <></>;
 
-  return <FindingsRuleFlyout finding={row.raw._source} onClose={onCloseFlyout} />;
+  return <FindingsRuleFlyout finding={finding} onClose={onCloseFlyout} />;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
@@ -46,18 +59,18 @@ const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabe
 
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const finding = rows[rowIndex].raw._source;
+    const finding = getCspFinding(rows[rowIndex].raw._source);
 
     return <CspEvaluationBadge type={finding?.result?.evaluation} />;
   },
   'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const finding = rows[rowIndex].raw._source;
-    const source = getDatasetDisplayName(finding.data_stream.dataset);
+    const finding = getCspFinding(rows[rowIndex].raw._source);
+    const source = getDatasetDisplayName(finding?.data_stream?.dataset);
 
-    return source || finding.data_stream.dataset;
+    return <>{source || finding?.data_stream?.dataset || ''}</>;
   },
   '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const finding = rows[rowIndex].raw._source;
+    const finding = getCspFinding(rows[rowIndex].raw._source);
     if (!finding?.['@timestamp']) return <></>;
 
     return <TimestampTableCell timestamp={finding['@timestamp']} />;
@@ -89,7 +102,7 @@ export const LatestFindingsTable = ({
   });
 
   const createMisconfigurationRuleFn = (rowIndex: number) => {
-    const finding = rows[rowIndex].raw._source;
+    const finding = getCspFinding(rows[rowIndex].raw._source);
     if (!finding) return;
 
     return async (http: HttpSetup) => createDetectionRuleFromBenchmarkRule(http, finding.rule);
