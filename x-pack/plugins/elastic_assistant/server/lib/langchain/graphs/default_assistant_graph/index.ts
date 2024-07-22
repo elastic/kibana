@@ -59,7 +59,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       connectorId,
       llmType,
       logger,
-      apiKey: '',
       // possible client model override,
       // let this be undefined otherwise so the connector handles the model
       model: request.body.model,
@@ -124,14 +123,14 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         streamRunnable: isStream,
       })
     : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
-    ? await createToolCallingAgent({
+    ? createToolCallingAgent({
         llm,
         tools,
         prompt: ChatPromptTemplate.fromMessages([
           [
             'system',
             'You are a helpful assistant. ALWAYS use the provided tools.\n\n' +
-              `The final response will be the only output the user sees and should be a complete answer to the user's question.`,
+              `The final response will be the only output the user sees and should be a complete answer to the user's question. The final response should never be empty.`,
           ],
           ['placeholder', '{chat_history}'],
           ['human', '{input}'],

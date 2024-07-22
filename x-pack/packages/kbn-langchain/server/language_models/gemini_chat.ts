@@ -12,6 +12,10 @@ import {
   FunctionResponsePart,
   POSSIBLE_ROLES,
   EnhancedGenerateContentResponse,
+  GenerateContentRequest,
+  TextPart,
+  InlineDataPart,
+  GenerateContentResult,
 } from '@google/generative-ai';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -26,42 +30,65 @@ import {
 } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { Logger } from '@kbn/logging';
+import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import { get } from 'lodash/fp';
+import { Readable } from 'stream';
+const DEFAULT_GEMINI_TEMPERATURE = 0;
+
+export interface CustomChatModelInput extends BaseChatModelParams {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  connectorId: string;
+  logger: Logger;
+  temperature?: number;
+  signal?: AbortSignal;
+  model?: string;
+  maxTokens?: number;
+}
 
 export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
+  #temperature: number;
+  #model?: string;
 
-  constructor({ actionsClient, connectorId, ...props }) {
+  constructor({ actionsClient, connectorId, ...props }: CustomChatModelInput) {
     super({
       ...props,
       apiKey: 'asda',
-      maxOutputTokens: 2048,
+      maxOutputTokens: props.maxTokens ?? 2048,
     });
-
+    // LangChain needs model to be defined for logging purposes
+    this.model = props.model ?? this.model;
+    // If model is not specified by consumer, the connector will defin eit so do not pass
+    // a LangChain default to the actionsClient
+    this.#model = props.model;
+    this.#temperature = props.temperature ?? DEFAULT_GEMINI_TEMPERATURE;
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
-    this.apiKey = 'sadd';
   }
 
   async completionWithRetry(
-    request: string | GenerateContentRequest | Array<string | GenerativeAIPart>,
+    request: string | GenerateContentRequest | Array<string | Part>,
     options?: this['ParsedCallOptions']
-  ) {
+  ): Promise<GenerateContentResult> {
     return this.caller.callWithOptions({ signal: options?.signal }, async () => {
       try {
-        // console.error('requses', request);
         const requestBody = {
-          actionId: 'my-gemini-ai' || this.#connectorId,
+          actionId: this.#connectorId,
           params: {
             subAction: 'invokeAIRaw',
             subActionParams: {
-              model: 'gemini-1.5-pro-preview-0409' || this.model,
+              model: this.#model,
               messages: request,
             },
           },
         };
 
-        const actionResult = await this.#actionsClient.execute(requestBody);
+        const actionResult = (await this.#actionsClient.execute(requestBody)) as {
+          status: string;
+          data: EnhancedGenerateContentResponse;
+        };
 
         return {
           response: {
@@ -69,7 +96,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
             functionCalls: () =>
               actionResult.data?.candidates?.[0]?.content.parts[0].functionCall
                 ? [actionResult.data?.candidates?.[0]?.content.parts[0].functionCall]
-                : null,
+                : [],
           },
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,12 +124,12 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
 
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
       const requestBody = {
-        actionId: 'my-gemini-ai' || this.#connectorId,
+        actionId: this.#connectorId,
         params: {
           subAction: 'invokeStream',
           subActionParams: {
-            model: 'gemini-1.5-pro-preview-0409' || this.model,
-            messages: request.contents.reduce((acc, item) => {
+            model: this.#model,
+            messages: request.contents.reduce((acc: Content[], item) => {
               if (!acc?.length) {
                 acc.push(item);
                 return acc;
@@ -118,6 +145,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
             }, []),
             tools: request.tools,
           },
+          temperature: this.#temperature,
         },
       };
 
@@ -126,8 +154,12 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       if (actionResult.status === 'error') {
         throw new Error(actionResult.serviceMessage);
       }
+      const readable = get('data', actionResult) as Readable;
 
-      return actionResult.data;
+      if (typeof readable?.read !== 'function') {
+        throw new Error('Action result status is error: result is not streamable');
+      }
+      return readable;
     });
 
     let usageMetadata: UsageMetadata | undefined;
@@ -138,7 +170,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
 
       const nextChunk = `${partialStreamChunk + streamChunk}`;
 
-      let parsedStreamChunk;
+      let parsedStreamChunk: EnhancedGenerateContentResponse | null = null;
       try {
         parsedStreamChunk = JSON.parse(nextChunk.replaceAll('data: ', '').replaceAll('\r\n', ''));
         partialStreamChunk = '';
@@ -146,57 +178,55 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
         partialStreamChunk += nextChunk;
       }
 
-      if (!parsedStreamChunk || parsedStreamChunk.candidates[0].finishReason) continue;
-
-      const response = {
-        ...parsedStreamChunk,
-        functionCalls: () =>
-          parsedStreamChunk?.candidates?.[0]?.content.parts[0].functionCall
-            ? [parsedStreamChunk.candidates?.[0]?.content.parts[0].functionCall]
-            : null,
-      };
-
-      if (
-        'usageMetadata' in response &&
-        this.streamUsage !== false &&
-        options.streamUsage !== false
-      ) {
-        const genAIUsageMetadata = response.usageMetadata as {
-          promptTokenCount: number;
-          candidatesTokenCount: number;
-          totalTokenCount: number;
+      if (parsedStreamChunk !== null && !parsedStreamChunk.candidates?.[0]?.finishReason) {
+        const response = {
+          ...parsedStreamChunk,
+          functionCalls: () =>
+            parsedStreamChunk?.candidates?.[0]?.content.parts[0].functionCall
+              ? [parsedStreamChunk.candidates?.[0]?.content.parts[0].functionCall]
+              : [],
         };
-        if (!usageMetadata) {
-          usageMetadata = {
-            input_tokens: genAIUsageMetadata.promptTokenCount,
-            output_tokens: genAIUsageMetadata.candidatesTokenCount,
-            total_tokens: genAIUsageMetadata.totalTokenCount,
+
+        if (
+          'usageMetadata' in response &&
+          this.streamUsage !== false &&
+          options.streamUsage !== false
+        ) {
+          const genAIUsageMetadata = response.usageMetadata as {
+            promptTokenCount: number;
+            candidatesTokenCount: number;
+            totalTokenCount: number;
           };
-        } else {
-          // Under the hood, LangChain combines the prompt tokens. Google returns the updated
-          // total each time, so we need to find the difference between the tokens.
-          const outputTokenDiff =
-            genAIUsageMetadata.candidatesTokenCount - usageMetadata.output_tokens;
-          usageMetadata = {
-            input_tokens: 0,
-            output_tokens: outputTokenDiff,
-            total_tokens: outputTokenDiff,
-          };
+          if (!usageMetadata) {
+            usageMetadata = {
+              input_tokens: genAIUsageMetadata.promptTokenCount,
+              output_tokens: genAIUsageMetadata.candidatesTokenCount,
+              total_tokens: genAIUsageMetadata.totalTokenCount,
+            };
+          } else {
+            // Under the hood, LangChain combines the prompt tokens. Google returns the updated
+            // total each time, so we need to find the difference between the tokens.
+            const outputTokenDiff =
+              genAIUsageMetadata.candidatesTokenCount - usageMetadata.output_tokens;
+            usageMetadata = {
+              input_tokens: 0,
+              output_tokens: outputTokenDiff,
+              total_tokens: outputTokenDiff,
+            };
+          }
+        }
+
+        const chunk = convertResponseContentToChatGenerationChunk(response, {
+          usageMetadata,
+          index,
+        });
+        index += 1;
+
+        if (chunk) {
+          yield chunk;
+          await runManager?.handleLLMNewToken(chunk.text ?? '');
         }
       }
-
-      const chunk = convertResponseContentToChatGenerationChunk(response, {
-        usageMetadata,
-        index,
-      });
-      index += 1;
-
-      if (!chunk) {
-        continue;
-      }
-
-      yield chunk;
-      await runManager?.handleLLMNewToken(chunk.text ?? '');
     }
   }
 }
@@ -275,12 +305,6 @@ export function convertBaseMessagesToContent(messages: BaseMessage[], isMultimod
         throw new Error('System message should be the first one');
       }
       const role = convertAuthorToRole(author);
-
-      const prevContent = acc.content[acc.content.length];
-      if (!acc.mergeWithPreviousContent && prevContent && prevContent.role === role) {
-        throw new Error('Google Generative AI requires alternate messages between authors');
-      }
-
       const parts = convertMessageContentToParts(message, isMultimodalModel);
 
       if (acc.mergeWithPreviousContent) {
@@ -352,7 +376,7 @@ export function convertMessageContentToParts(
       if (c.type === 'text') {
         return {
           text: c.text,
-        };
+        } as TextPart;
       }
 
       if (c.type === 'image_url') {
@@ -382,16 +406,16 @@ export function convertMessageContentToParts(
             data,
             mimeType,
           },
-        };
+        } as InlineDataPart;
       } else if (c.type === 'media') {
-        return c;
+        return messageContentMedia(c);
       } else if (c.type === 'tool_use') {
         return {
           functionCall: {
             name: c.name,
             args: c.input,
           },
-        };
+        } as FunctionCallPart;
       }
       throw new Error(`Unknown content type ${(c as { type: string }).type}`);
     });
@@ -409,4 +433,17 @@ export function getMessageAuthor(message: BaseMessage) {
     return type;
   }
   return message.name ?? type;
+}
+
+// will be removed once FileDataPart is supported in @langchain/google-genai
+function messageContentMedia(content: Record<string, unknown>): InlineDataPart {
+  if ('mimeType' in content && 'data' in content) {
+    return {
+      inlineData: {
+        mimeType: content.mimeType,
+        data: content.data,
+      },
+    } as InlineDataPart;
+  }
+  throw new Error('Invalid media content');
 }
