@@ -38,7 +38,7 @@ export async function createAndInstallHistoryBackfillTransform(
       logger,
     });
   } catch (e) {
-    logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
+    logger.error(`Cannot create entity history backfill transform for [${definition.id}] entity definition`);
     throw e;
   }
 }
