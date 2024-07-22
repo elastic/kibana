@@ -7,7 +7,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, skip, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -23,46 +23,32 @@ import { ControlApiInitialization, ControlStateManager, DefaultControlState } fr
 import { openDataControlEditor } from './open_data_control_editor';
 import { DataControlApi, DefaultDataControlState } from './types';
 
-export const initializeDataControl = async <EditorState extends object = {}>(
+export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
   controlType: string,
   state: DefaultDataControlState,
   editorStateManager: ControlStateManager<EditorState>,
   controlGroup: ControlGroupApi,
-  hasSelections: boolean,
-  buildInitialFilter: (dataView: DataView, fieldName: string) => Filter | undefined,
   services: {
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
   }
-): Promise<{
+): {
   api: ControlApiInitialization<DataControlApi>;
   cleanup: () => void;
   comparators: StateComparators<DefaultDataControlState>;
   stateManager: ControlStateManager<DefaultDataControlState>;
   serialize: () => SerializedPanelState<DefaultControlState>;
-}> => {
+  untilFiltersInitialized: () => Promise<void>;
+} => {
   const defaultControl = initializeDefaultControlApi(state);
-
-  let initialDataView: DataView | undefined;
-  let initialFilter: Filter | undefined;
-  if (hasSelections) {
-    try {
-      initialDataView = await services.dataViews.get(state.dataViewId);
-    } catch (error) {
-      defaultControl.api.setBlockingError(error);
-    }
-    initialFilter = initialDataView
-      ? buildInitialFilter(initialDataView, state.fieldName)
-      : undefined;
-  }
 
   const panelTitle = new BehaviorSubject<string | undefined>(state.title);
   const defaultPanelTitle = new BehaviorSubject<string | undefined>(undefined);
   const dataViewId = new BehaviorSubject<string>(state.dataViewId);
   const fieldName = new BehaviorSubject<string>(state.fieldName);
-  const dataViews = new BehaviorSubject<DataView[] | undefined>(initialDataView? [initialDataView] : undefined);
-  const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilter ? [initialFilter] : undefined);
+  const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   const stateManager: ControlStateManager<DefaultDataControlState> = {
     ...defaultControl.stateManager,
@@ -79,13 +65,10 @@ export const initializeDataControl = async <EditorState extends object = {}>(
 
   const dataViewIdSubscription = dataViewId
     .pipe(
-      skipWhile((nextDataViewId) => {
-        return nextDataViewId === dataViews.value?.[0]?.id;
-      }),
-      switchMap(async (nextDataViewId) => {
+      switchMap(async (currentDataViewId) => {
         let dataView: DataView | undefined;
         try {
-          dataView = await services.dataViews.get(nextDataViewId);
+          dataView = await services.dataViews.get(currentDataViewId);
           return { dataView };
         } catch (error) {
           return { error };
@@ -212,6 +195,18 @@ export const initializeDataControl = async <EditorState extends object = {}>(
           },
         ],
       };
-    }
+    },
+    untilFiltersInitialized: async () => {
+      return new Promise((resolve) => {
+        const subscription = combineLatest([defaultControl.api.blockingError, filters$]).subscribe(
+          ([blockingError, filters]) => {
+            if (blockingError || filters?.length) {
+              subscription.unsubscribe();
+              resolve();
+            }
+          }
+        );
+      });
+    },
   };
 };

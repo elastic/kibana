@@ -89,14 +89,12 @@ export const getSearchControlFactory = ({
       );
       const editorStateManager = { searchTechnique };
 
-      const dataControl = await initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
+      const dataControl = initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
         uuid,
         SEARCH_CONTROL_TYPE,
         initialState,
         editorStateManager,
         parentApi,
-        false,
-        () => undefined,
         {
           core,
           dataViews: dataViewsService,
@@ -186,6 +184,10 @@ export const getSearchControlFactory = ({
         .subscribe(() => {
           searchString.next(undefined);
         });
+
+      /* if (initialState.searchString?.length) {
+        await dataControl.untilFiltersInitialized();
+      }*/
 
       return {
         api,
