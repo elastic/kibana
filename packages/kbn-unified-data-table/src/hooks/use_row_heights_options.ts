@@ -38,6 +38,7 @@ export const useRowHeightsOptions = ({
     return {
       defaultHeight,
       lineHeight: rowLineHeight,
+      scrollAnchorRow: 'start',
     };
   }, [rowHeightLines, rowLineHeight]);
 };
