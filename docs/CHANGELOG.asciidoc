@@ -76,6 +76,24 @@ Review important information about the {kib} 8.x releases.
 
 coming::[8.15.0]
 
+[float]
+[[deprecations-8.15.0]]
+=== Deprecations
+
+The following functionality is deprecated in 8.15.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.15.0.
+
+[discrete]
+[[deprecation-uptime]]
+.Uptime is deprecated in 8.15.0 and will be removed in 9.0.0.
+[%collapsible]
+====
+*Details* +
+The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, but will be completely removed in 9.0.0. You should migrate to Synthetics as an alternative. See the https://www.elastic.co/guide/en/observability/8.15/uptime-intro.html[_Uptime documentation_] for more details.
+====
+
+
 [[release-notes-8.14.3]]
 == {kib} 8.14.3
 
