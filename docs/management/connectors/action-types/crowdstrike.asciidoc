@@ -37,4 +37,4 @@ URL:: The Crowdstrike tenant URL. If you are using the <<action-settings,`xpack.
 [[crowdstrike-action-parameters]]
 === Test connectors
 
-At this time, you cannot test the Crowdstrike connector.
+At this time, you cannot test the CrowdStrike connector.
