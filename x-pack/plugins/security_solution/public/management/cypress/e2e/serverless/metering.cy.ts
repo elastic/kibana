@@ -17,8 +17,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHeartbeats } from '../../tasks/index_endpoint_heartbeats';
 import { login, ROLE } from '../../tasks/login';
 
-// Failing: See https://github.com/elastic/kibana/issues/187083
-describe.skip(
+describe(
   'Metering',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],
@@ -30,6 +29,7 @@ describe.skip(
         ],
       },
     },
+    pageLoadTimeout: 1 * 60 * 1000,
   },
   () => {
     const HEARTBEAT_COUNT = 2001;
