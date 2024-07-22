@@ -410,7 +410,7 @@ describe('autocomplete', () => {
         'geoShapeField',
         'cartesianPointField',
         'cartesianShapeField',
-        'any#Char$Field',
+        '`any#Char$Field`',
         'kubernetes.something.something',
       ]);
       testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['WITH $0', ',', '|']);
@@ -1037,7 +1037,6 @@ describe('autocomplete', () => {
     testSuggestions('FROM index1 | ENRICH policy O', ['ON $0', 'WITH $0', '|'], undefined, 29);
 
     // ENRICH policy ON field
-    // TODO — failing because we aren't correctly escaping the value
     testSuggestions('FROM index1 | ENRICH policy ON f', getFieldNamesByType('any'), undefined, 32);
 
     // ENRICH policy WITH policyfield
