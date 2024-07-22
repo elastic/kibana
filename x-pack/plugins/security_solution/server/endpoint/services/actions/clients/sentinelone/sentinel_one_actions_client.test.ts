@@ -35,9 +35,6 @@ import type {
   ResponseActionGetFileParameters,
   SentinelOneGetFileRequestMeta,
   KillOrSuspendProcessRequestBody,
-  KillProcessActionOutputContent,
-  ResponseActionParametersWithProcessName,
-  SentinelOneKillProcessRequestMeta,
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
@@ -375,6 +372,22 @@ describe('SentinelOneActionsClient class', () => {
   describe('#processPendingActions()', () => {
     let abortController: AbortController;
     let processPendingActionsOptions: ProcessPendingActionsMethodOptions;
+
+    const setGetRemoteScriptStatusConnectorResponse = (
+      response: SentinelOneGetRemoteScriptStatusApiResponse
+    ): void => {
+      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+
+      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPT_STATUS) {
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: response,
+          });
+        }
+
+        return executeMockFn!(options);
+      });
+    };
 
     beforeEach(() => {
       abortController = new AbortController();
@@ -746,42 +759,23 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    describe('for kill-process response action', () => {
-      let actionRequestsSearchResponse: SearchResponse<
-        LogsEndpointAction<
-          ResponseActionParametersWithProcessName,
-          KillProcessActionOutputContent,
-          SentinelOneKillProcessRequestMeta
-        >
-      >;
-
-      const setGetRemoteScriptStatusConnectorResponse = (
-        response: SentinelOneGetRemoteScriptStatusApiResponse
-      ): void => {
-        const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
-
-        (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
-          if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPT_STATUS) {
-            return responseActionsClientMock.createConnectorActionExecuteResponse({
-              data: response,
-            });
-          }
-
-          return executeMockFn!(options);
-        });
-      };
+    // The following response actions use SentinelOne's remote execution scripts, thus they can be
+    // tested the same
+    describe.each`
+      actionName             | requestData                                                         | responseOutputContent
+      ${'kill-process'}      | ${{ command: 'kill-process', parameters: { process_name: 'foo' } }} | ${{ code: 'ok', command: 'kill-process', process_name: 'foo' }}
+      ${'running-processes'} | ${{ command: 'running-processes', parameters: undefined }}          | ${{ code: '', entries: [] }}
+    `('for $actionName response action', ({ actionName, requestData, responseOutputContent }) => {
+      let actionRequestsSearchResponse: SearchResponse<LogsEndpointAction>;
 
       beforeEach(() => {
         const s1DataGenerator = new SentinelOneDataGenerator('seed');
+
         actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
-          s1DataGenerator.generateActionEsHit<
-            ResponseActionParametersWithProcessName,
-            KillProcessActionOutputContent,
-            SentinelOneKillProcessRequestMeta
-          >({
+          s1DataGenerator.generateActionEsHit({
             agent: { id: 'agent-uuid-1' },
             EndpointActions: {
-              data: { command: 'kill-process', parameters: { process_name: 'foo' } },
+              data: requestData,
             },
             meta: {
               agentId: 's1-agent-a',
@@ -819,7 +813,7 @@ describe('SentinelOneActionsClient class', () => {
             action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
             completed_at: expect.any(String),
             data: {
-              command: 'kill-process',
+              command: requestData.command,
               comment: '',
             },
             input_type: 'sentinel_one',
@@ -881,11 +875,7 @@ describe('SentinelOneActionsClient class', () => {
                   data: expect.objectContaining({
                     output: {
                       type: 'json',
-                      content: {
-                        code: 'ok',
-                        command: 'kill-process',
-                        process_name: 'foo',
-                      },
+                      content: responseOutputContent,
                     },
                   }),
                 }),
@@ -1230,6 +1220,8 @@ describe('SentinelOneActionsClient class', () => {
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
         false;
 
       await expect(s1ActionsClient.getFileDownload('acb', '123')).rejects.toThrow(
