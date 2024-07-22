@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -180,14 +180,14 @@ export const getSearchControlFactory = ({
         dataControl.stateManager.fieldName,
         dataControl.stateManager.dataViewId,
       ])
-        .pipe(distinctUntilChanged(deepEqual))
+        .pipe(skip(1))
         .subscribe(() => {
           searchString.next(undefined);
         });
 
-      /* if (initialState.searchString?.length) {
+      if (initialState.searchString?.length) {
         await dataControl.untilFiltersInitialized();
-      }*/
+      }
 
       return {
         api,

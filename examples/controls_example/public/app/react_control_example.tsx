@@ -73,7 +73,6 @@ const controlGroupPanels = {
       title: 'Message',
       grow: true,
       width: 'medium',
-      searchString: 'this',
       enhancements: {},
     },
   },
