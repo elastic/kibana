@@ -33,7 +33,7 @@ fi
 echo " -- Running on OS: $OS"
 
 NODE_VARIANT=""
-if [[ "${CI_USE_POINTER_COMPRESSION:-}" = "true" ]]; then
+if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
   NODE_VARIANT="node-pointer-compression/"
   # Node.js 20.15.1 with pointer compression enabled
   sed -i 's#kibana-ci-proxy-cache/dist#kibana-ci-proxy-cache/node-pointer-compression/dist#' WORKSPACE.bazel
