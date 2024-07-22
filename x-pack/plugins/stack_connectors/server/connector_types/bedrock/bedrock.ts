@@ -298,7 +298,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     signal,
     timeout,
     tools,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
+  }: InvokeAIActionParams | InvokeAIRawActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(
         formatBedrockBody({ messages, stopSequences, system, temperature, tools })

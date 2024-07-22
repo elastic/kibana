@@ -100,7 +100,7 @@ export const streamGraph = async ({
           const msg = data.chunk as AIMessageChunk;
 
           if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
-            push({ payload: msg.content, type: 'content' });
+            push({ payload: msg.content as string, type: 'content' });
           }
         }
 

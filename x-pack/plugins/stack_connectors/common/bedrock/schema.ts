@@ -32,7 +32,7 @@ export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(
     schema.object({
       role: schema.string(),
-      content: schema.any(),
+      content: schema.string(),
     })
   ),
   model: schema.maybe(schema.string()),
