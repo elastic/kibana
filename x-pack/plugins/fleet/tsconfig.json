@@ -114,5 +114,6 @@
     "@kbn/core-security-server-mocks",
     "@kbn/slo-schema",
     "@kbn/server-http-tools",
+    "@kbn/avc-banner",
   ]
 }
