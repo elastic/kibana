@@ -25,7 +25,7 @@ export function SimpleTestResults({ name, testRunId, expectPings, onDone }: Prop
 
   useEffect(() => {
     if (retriesExceeded) {
-      const { core, toasts } = kibanaService;
+      const { coreStart, toasts } = kibanaService;
 
       toasts.addDanger(
         {
@@ -36,7 +36,7 @@ export function SimpleTestResults({ name, testRunId, expectPings, onDone }: Prop
               defaultMessage="Manual test run failed for {name}"
               values={{ name }}
             />,
-            core
+            coreStart
           ),
         },
         {
