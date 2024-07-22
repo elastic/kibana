@@ -8,7 +8,13 @@
 
 import { IUiSettingsClient } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from '.';
+import {
+  TimeHistory,
+  Timefilter,
+  TimeHistoryContract,
+  TimefilterContract,
+  TimefilterConfig,
+} from '.';
 import { UI_SETTINGS } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 
@@ -26,9 +32,10 @@ export class TimefilterService {
   constructor(private readonly nowProvider: NowProviderInternalContract) {}
 
   public setup({ uiSettings, storage }: TimeFilterServiceDependencies): TimefilterSetup {
-    const timefilterConfig = {
+    const timefilterConfig: TimefilterConfig = {
       timeDefaults: uiSettings.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS),
       refreshIntervalDefaults: uiSettings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS),
+      minRefreshIntervalDefault: 5000,
     };
     const history = new TimeHistory(storage);
     const timefilter = new Timefilter(timefilterConfig, history, this.nowProvider);

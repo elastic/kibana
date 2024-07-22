@@ -41,6 +41,7 @@ export class Timefilter {
   // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.
   private _isTimeTouched: boolean = false;
   private _refreshInterval!: RefreshInterval;
+  private _minRefreshInterval: number;
   // Denotes whether the refresh interval defaults were overriden.
   private _isRefreshIntervalTouched: boolean = false;
   private _history: TimeHistoryContract;
@@ -62,6 +63,7 @@ export class Timefilter {
     this._history = timeHistory;
     this.timeDefaults = config.timeDefaults;
     this.refreshIntervalDefaults = config.refreshIntervalDefaults;
+    this._minRefreshInterval = config.minRefreshIntervalDefault;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
   }
@@ -148,6 +150,14 @@ export class Timefilter {
     return _.clone(this._refreshInterval);
   };
 
+  public getMinRefreshInterval = () => {
+    return this._minRefreshInterval;
+  };
+
+  public setMinRefreshInterval = (t: number) => {
+    this._minRefreshInterval = Math.max(t, 0);
+  };
+
   /**
    * Set timefilter refresh interval.
    * @param {Object} refreshInterval
@@ -157,6 +167,9 @@ export class Timefilter {
   public setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
+
+    if (newRefreshInterval.value < this._minRefreshInterval) return;
+
     let shouldUnpauseRefreshLoop =
       newRefreshInterval.pause === false && prevRefreshInterval != null;
     if (prevRefreshInterval?.value > 0 && newRefreshInterval.value <= 0) {

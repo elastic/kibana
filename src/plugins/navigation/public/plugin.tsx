@@ -67,7 +67,7 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud, cloudExperiments, spaces } = depsStart;
+    const { unifiedSearch, data, cloud, cloudExperiments, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
     const activeSpace$ = spaces?.getActiveSpace$() ?? of(undefined);
@@ -89,7 +89,11 @@ export class NavigationPublicPlugin
       customUnifiedSearch?: UnifiedSearchPublicPluginStart,
       customExtensions?: RegisteredTopNavMenuData[]
     ) => {
-      return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
+      return createTopNav(
+        data,
+        customUnifiedSearch ?? unifiedSearch,
+        customExtensions ?? extensions
+      );
     };
 
     const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
@@ -118,8 +122,8 @@ export class NavigationPublicPlugin
 
     return {
       ui: {
-        TopNavMenu: createTopNav(unifiedSearch, extensions),
-        AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        TopNavMenu: createTopNav(data, unifiedSearch, extensions),
+        AggregateQueryTopNavMenu: createTopNav(data, unifiedSearch, extensions),
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {

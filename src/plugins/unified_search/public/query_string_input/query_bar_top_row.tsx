@@ -153,6 +153,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
   refreshInterval?: number;
+  minRefreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
   showAddFilter?: boolean;
@@ -502,6 +503,7 @@ export const QueryBarTopRow = React.memo(
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}
           refreshInterval={props.refreshInterval}
+          refreshMinInterval={props.minRefreshInterval}
           onTimeChange={onTimeChange}
           onRefresh={onRefresh}
           onRefreshChange={props.onRefreshChange}
