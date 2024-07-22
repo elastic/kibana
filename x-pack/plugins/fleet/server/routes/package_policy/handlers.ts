@@ -64,6 +64,7 @@ import type { SimplifiedPackagePolicy } from '../../../common/services/simplifie
 
 import {
   canUseMultipleAgentPolicies,
+  canUseOutputPerIntegration,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
@@ -241,19 +242,22 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
 
-  if ('output_id' in newPolicy) {
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    delete newPolicy.output_id;
-  }
   const spaceId = fleetContext.spaceId;
   try {
     if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
       throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
     }
 
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+    const { canUseReusablePolicies, errorMessage: canUseMultipleAgentPoliciesErrorMessage } =
+      canUseMultipleAgentPolicies();
     if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
+      throw new PackagePolicyRequestError(canUseMultipleAgentPoliciesErrorMessage);
+    }
+
+    const { canUseOutputPerIntegrationResult, errorMessage: outputPerIntegrationErrorMessage } =
+      canUseOutputPerIntegration();
+    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseOutputPerIntegrationResult) {
+      throw new PackagePolicyRequestError(outputPerIntegrationErrorMessage);
     }
 
     let newPackagePolicy: NewPackagePolicy;
@@ -365,13 +369,26 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     }
   }
 
+  if (
+    !request.body.policy_id &&
+    (!request.body.policy_ids || request.body.policy_ids.length === 0)
+  ) {
+    throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
+  }
+
+  const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+  if ((request.body.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+    throw new PackagePolicyRequestError(errorMessage);
+  }
+
+  const { canUseOutputPerIntegrationResult, errorMessage: outputPerIntegrationErrorMessage } =
+    canUseOutputPerIntegration();
+  if ((request.body.output_id ?? []).length > 1 && !canUseOutputPerIntegrationResult) {
+    throw new PackagePolicyRequestError(outputPerIntegrationErrorMessage);
+  }
+
   try {
     const { force, package: pkg, ...body } = request.body;
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    if ('output_id' in body) {
-      delete body.output_id;
-    }
-
     let newData: NewPackagePolicy;
 
     if (
@@ -416,14 +433,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       if (overrides) {
         newData.overrides = overrides;
       }
-    }
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
-    }
-
-    if (newData.policy_ids && newData.policy_ids.length === 0) {
-      throw new PackagePolicyRequestError('At least one agent policy id must be provided');
     }
 
     await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);

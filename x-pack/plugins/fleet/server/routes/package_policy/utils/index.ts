@@ -55,6 +55,7 @@ export function removeFieldsFromInputSchema(
 }
 
 const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
+const LICENCE_FOR_OUTPUT_PER_INTEGRATION = 'enterprise';
 
 export function canUseMultipleAgentPolicies() {
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
@@ -65,6 +66,15 @@ export function canUseMultipleAgentPolicies() {
     errorMessage: !hasEnterpriseLicence
       ? 'Reusable integration policies are only available with an Enterprise license'
       : 'Reusable integration policies are not supported',
+  };
+}
+
+export function canUseOutputPerIntegration() {
+  const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
+
+  return {
+    canUseOutputPerIntegrationResult: hasEnterpriseLicence,
+    errorMessage: 'Output per integration is only available with an Enterprise license',
   };
 }
 
