@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import assert from 'node:assert';
-
 /** We .ceil to rather _slightly_ over-report usage in certain circumstances */
 const twoDeci = (num: number) => Math.ceil(num * 100) / 100;
 
@@ -27,10 +25,6 @@ export class HistoryWindow {
   addObservation(value: number) {
     this.#window.unshift(Math.max(0, value));
     this.#window.pop();
-    assert(
-      this.#window.length === this.size,
-      `Expected window size of ${this.size}, but received ${this.#window.length}`
-    );
   }
 
   /**
