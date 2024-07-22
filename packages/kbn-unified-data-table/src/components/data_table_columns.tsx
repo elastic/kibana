@@ -53,7 +53,7 @@ export const SELECT_ROW = 'select';
 
 const openDetails = {
   id: OPEN_DETAILS,
-  width: 26,
+  width: 24,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>
@@ -68,7 +68,7 @@ const openDetails = {
 
 const select = {
   id: SELECT_ROW,
-  width: 24,
+  width: 26,
   rowCellRender: SelectButton,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
@@ -92,7 +92,7 @@ export function getLeadControlColumns(canSetExpandedDoc: boolean) {
   if (!canSetExpandedDoc) {
     return [select];
   }
-  return [openDetails, select];
+  return [select, openDetails];
 }
 
 function buildEuiGridColumn({
