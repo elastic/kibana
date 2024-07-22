@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const LAST_SEEN = 'entity.lastSeenTimestamp';
-export const FIRST_SEEN = 'entity.firstSeenTimestamp';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const ENTITY = 'entity';
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security APIs - CHIPS support', function () {
+    loadTestFile(require.resolve('./chips_cookie'));
+  });
+}
