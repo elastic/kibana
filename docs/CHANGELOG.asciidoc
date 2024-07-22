@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.0>>
 * <<release-notes-8.14.3>>
 * <<release-notes-8.14.2>>
 * <<release-notes-8.14.1>>
@@ -69,6 +70,11 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.15.0]]
+== {kib} 8.15.0
+
+coming::[8.15.0]
 
 [[release-notes-8.14.3]]
 == {kib} 8.14.3
