@@ -122,6 +122,7 @@ describe('Monitor Detail Flyout', () => {
       status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       data: {
         enabled: true,
+        type: 'http',
         name: 'test-monitor',
         schedule: {
           number: '1',
