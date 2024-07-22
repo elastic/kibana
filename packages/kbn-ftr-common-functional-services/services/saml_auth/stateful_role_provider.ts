@@ -9,9 +9,9 @@
 import { readRolesDescriptorsFromResource, STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import { RoleProvider } from './role_provider';
+import { AuthRoleProvider } from './auth_role_provider';
 
-export class StatefulRoleProvider implements RoleProvider {
+export class StatefuAuthRoleProvider implements AuthRoleProvider {
   private rolesDefinitionPath: string;
 
   constructor() {

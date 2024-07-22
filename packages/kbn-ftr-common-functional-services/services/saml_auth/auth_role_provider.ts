@@ -7,16 +7,16 @@
  */
 
 import { type Config } from '@kbn/test';
-import { ServerlessRoleProvider } from './serverless_role_provider';
-import { StatefulRoleProvider } from './stateful_role_provider';
+import { ServerlessAuthRoleProvider } from './serverless_role_provider';
+import { StatefuAuthRoleProvider } from './stateful_role_provider';
 
-export interface RoleProvider {
+export interface AuthRoleProvider {
   getSupportedRoleDescriptors(): any;
   getDefaultRole(): string;
   getRolesDefinitionPath(): string;
 }
 
-export const getRoleProvider = (config: Config) => {
+export const getAuthRoleProvider = (config: Config) => {
   const isServerless = !!config.get('serverless');
-  return isServerless ? new ServerlessRoleProvider(config) : new StatefulRoleProvider();
+  return isServerless ? new ServerlessAuthRoleProvider(config) : new StatefuAuthRoleProvider();
 };

@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { getRoleProvider } from './role_provider';
+import { getAuthRoleProvider } from './auth_role_provider';
 import { getInternalRequestHeaders } from './internal_headers';
 
 export interface RoleCredentials {
@@ -26,7 +26,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
 
-  const roleProvider = getRoleProvider(config);
+  const roleProvider = getAuthRoleProvider(config);
   const supportedRoleDescriptors = roleProvider.getSupportedRoleDescriptors();
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 
