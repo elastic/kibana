@@ -34,7 +34,7 @@ export const simpleDiffAlgorithm = <TValue>(
 
   const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
-  console.log({diffOutcome})
+
   const hasBaseVersion = baseVersion !== MissingVersion;
 
   const { conflict, mergedVersion } = mergeVersions({
