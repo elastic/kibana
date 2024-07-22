@@ -38,7 +38,6 @@ export function useGetDataStreamStatuses(): DataStreamStatusResponse {
     () => getIndicesData({ useMetering: true }),
     [lastRefresh]
   );
-  console.log('indiciesData', indicesData);
 
   if (!Array.isArray(data) || !!error) return { dataStreamStatuses: undefined, error, loading };
 
