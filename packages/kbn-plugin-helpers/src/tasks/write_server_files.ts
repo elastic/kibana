@@ -32,6 +32,7 @@ export async function writeServerFiles({
     vfs.src(
       [
         'kibana.json',
+        '.i18nrc.json',
         ...(plugin.manifest.server
           ? config.serverSourcePatterns || [
               'yarn.lock',
