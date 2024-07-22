@@ -46,7 +46,14 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     } = options;
     const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
-    const hits = response.rawResponse.hits.hits;
+    // NOTE: for reasons unknown, .hits might be undefined (to investigate later),
+    // adding custom exception when this is the case (to make trackign this easier).
+    // related issue: https://github.com/elastic/sdh-security-team/issues/1003
+    const hits = response.rawResponse.hits?.hits;
+
+    if (typeof hits === 'undefined') {
+      throw new Error('timeline search strategy exception: .hits are undefined');
+    }
 
     if (fieldRequested.includes('*') && hits.length > 0) {
       const fieldsReturned = hits.flatMap((hit) => Object.keys(hit.fields ?? {}));
