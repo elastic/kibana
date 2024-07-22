@@ -80,7 +80,7 @@ const setupCdrDataView = async (
     );
 
     const currentSpaceDataViewId = `${dataViewId}-${currentSpaceId}`;
-    console.log('currentSpaceDataViewId', currentSpaceDataViewId);
+
     const isDataView = await getDataViewSafe(soClient, currentSpaceId, currentSpaceDataViewId);
 
     if (!isDataView) {
