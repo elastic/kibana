@@ -13,7 +13,7 @@ import {
   type SearchResponseWarning,
   SearchResponseWarningsBadge,
 } from '@kbn/search-response-warnings';
-import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
+import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 
 const containerStyles = css`
   width: 100%;
