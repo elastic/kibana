@@ -34,7 +34,7 @@ describe(
     },
   },
   () => {
-    describe('User with no access can not create an endpoint response action', () => {
+    describe('@skipInServerlessMKI User with no access can not create an endpoint response action', () => {
       beforeEach(() => {
         login(ROLE.rule_author);
       });
