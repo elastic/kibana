@@ -94,7 +94,13 @@ export const getStatusOverviewEmbeddableFactory = (
               fetchSubscription.unsubscribe();
             };
           }, []);
-          return <StatusOverviewComponent reload$={reload$} />;
+          return (
+            <div
+              data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
+            >
+              <StatusOverviewComponent reload$={reload$} />
+            </div>
+          );
         },
       };
     },
