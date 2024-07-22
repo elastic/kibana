@@ -217,7 +217,9 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: templates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
         const { name, version } = indexTemplate;
         expect(
-          templates.templates.find(({ name: catTemplateName }: { name: string }) => catTemplateName === name)?.version
+          templates.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
         ).to.equal(version);
 
         // Update template with new version
@@ -232,8 +234,9 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: templates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          templates2.templates.find(({ name: catTemplateName }: { name: string }) => catTemplateName === name)
-            ?.version
+          templates2.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
         ).to.equal(updatedVersion);
       });
 
@@ -296,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: allTemplates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          allTemplates.templates.find(({ name } : { name: string }) => name === payload.name)?.name
+          allTemplates.templates.find(({ name }: { name: string }) => name === payload.name)?.name
         ).to.equal(templateName);
 
         const { status: deleteStatus, body: deleteBody } = await svlTemplatesApi.deleteTemplates(
@@ -311,9 +314,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body: allTemplates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
-        expect(allTemplates2.templates.find(({ name }: { name: string }) => name === payload.name)).to.equal(
-          undefined
-        );
+        expect(
+          allTemplates2.templates.find(({ name }: { name: string }) => name === payload.name)
+        ).to.equal(undefined);
       });
     });
 
