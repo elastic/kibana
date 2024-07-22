@@ -3649,7 +3649,7 @@
             "tags": [],
             "label": "homePage",
             "description": [
-              "The page to navigate to when switching to this solution navigation."
+              "The page to navigate to when clicking on the Kibana (or custom) logo."
             ],
             "signature": [
               "LinkId | undefined"

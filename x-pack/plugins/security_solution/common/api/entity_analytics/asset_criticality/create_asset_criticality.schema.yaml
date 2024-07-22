@@ -14,14 +14,23 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-internal: true
-      operationId: AssetCriticalityCreateRecord
+      x-codegen-enabled: true
+      operationId: InternalCreateAssetCriticalityRecord
       summary: Deprecated Internal Create Criticality Record
+      deprecated: true
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: './common.schema.yaml#/components/schemas/CreateSingleAssetCriticalityRequest'
+              allOf:
+                - $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+                - type: object
+                  properties:
+                    refresh:
+                      type: string
+                      enum: [wait_for]
+                      description: If 'wait_for' the request will wait for the index refresh.
       responses:
         '200':
           description: Successful response
@@ -34,14 +43,22 @@ paths:
   /api/asset_criticality:
     post:
       x-labels: [ess, serverless]
-      operationId: AssetCriticalityCreateRecord
+      x-codegen-enabled: true
+      operationId: CreateAssetCriticalityRecord
       summary: Create Criticality Record
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: './common.schema.yaml#/components/schemas/CreateSingleAssetCriticalityRequest'
+              allOf:
+                - $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+                - type: object
+                  properties:
+                    refresh:
+                      type: string
+                      enum: [wait_for]
+                      description: If 'wait_for' the request will wait for the index refresh.
       responses:
         '200':
           description: Successful response
