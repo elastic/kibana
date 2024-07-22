@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const getAgentDetailsRequestParamsSchema = t.unknown;
-
-export type GetAgentDetailsRequestParamsSchema = t.OutputOf<
-  typeof getAgentDetailsRequestParamsSchema
->;
+export const SYNTHETICS_OVERVIEW_EMBEDDABLE = 'SYNTHETICS_OVERVIEW_EMBEDDABLE';
