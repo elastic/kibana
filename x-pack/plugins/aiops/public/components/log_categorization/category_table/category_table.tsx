@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import type { UseTableState } from '@kbn/ml-in-memory-table';
 
 import { css } from '@emotion/react';
-// import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
