@@ -23,10 +23,8 @@ export function MonitorTypeBadge({
     <EuiBadge
       onClick={onClick}
       onClickAriaLabel={getFilterTitle(monitorType)}
-      iconOnClick={onClick}
       title={ariaLabel}
       aria-label={ariaLabel}
-      iconOnClickAriaLabel={ariaLabel}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       onMouseDown={(e: MouseEvent) => {
         // Prevents the click event from being propagated to the @elastic/chart metric
