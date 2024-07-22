@@ -62,13 +62,36 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (file.match(/jest.config.(t|j)s$/)) {
+        if (file.match(/(jest(\.integration)?)\.config\.(t|j)s$/)) {
           return false;
         }
 
-        return readFileSync(file)
-          .toString()
-          .match(/(testRunner)|(testFiles)/);
+        if (file.match(/mocks.ts$/)) {
+          return false;
+        }
+
+        const fileContent = readFileSync(file).toString();
+
+        if (fileContent.match(/(testRunner)|(testFiles)/)) {
+          // test config
+          return true;
+        }
+
+        if (fileContent.match(/(describe)|(defineCypressConfig)/)) {
+          // test file or Cypress config
+          return false;
+        }
+
+        // FTR config file should have default export
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const exports = require(file);
+          const defaultExport = exports.__esModule ? exports.default : exports;
+          return !!defaultExport;
+        } catch (err) {
+          log.debug(`Failed to load file: ${err.message}`);
+          return false;
+        }
       });
 
       const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
