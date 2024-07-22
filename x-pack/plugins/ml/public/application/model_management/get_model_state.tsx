@@ -20,7 +20,7 @@ export const getModelDeploymentState = (model: ModelItem): ModelState | undefine
   if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTING)) {
     return MODEL_STATE.STARTING;
   }
-  if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STOPPING)) {
+  if (model.stats?.deployment_stats?.every((v) => v.state === DEPLOYMENT_STATE.STOPPING)) {
     return MODEL_STATE.STOPPING;
   }
 };
