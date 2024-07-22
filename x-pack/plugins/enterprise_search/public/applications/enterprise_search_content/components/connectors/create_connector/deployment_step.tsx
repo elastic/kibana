@@ -60,15 +60,15 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h4>
+          <EuiText color={isNextStepEnabled ? 'default' : 'subdued'}>
+            <h3>
               {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.title', {
                 defaultMessage: 'Configuration',
               })}
-            </h4>
-          </EuiTitle>
+            </h3>
+          </EuiText>
           <EuiSpacer size="m" />
-          <EuiText size="s">
+          <EuiText color={isNextStepEnabled ? 'default' : 'subdued'} size="s">
             <p>
               {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.description', {
                 defaultMessage: 'Now configure your Elastic crawler and sync the data.',

@@ -56,15 +56,15 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-            <EuiTitle size="s">
-              <h4>
+            <EuiText color={isNextStepEnabled ? 'default' : 'subdued'}>
+              <h3>
                 {i18n.translate('xpack.enterpriseSearch.configurationStep.h4.finishUpLabel', {
                   defaultMessage: 'Finish up',
                 })}
-              </h4>
-            </EuiTitle>
+              </h3>
+            </EuiText>
             <EuiSpacer size="m" />
-            <EuiText size="s">
+            <EuiText color={isNextStepEnabled ? 'default' : 'subdued'} size="s">
               <p>
                 {i18n.translate('xpack.enterpriseSearch.configurationStep.p.description', {
                   defaultMessage:

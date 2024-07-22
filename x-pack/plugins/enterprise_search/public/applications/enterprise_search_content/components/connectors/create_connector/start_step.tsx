@@ -225,15 +225,24 @@ export const StartStep: React.FC<StartStepProps> = ({
         {selfManaged ? (
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-              <EuiTitle size="s">
-                <h4>
+              <EuiText
+                color={
+                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
+                }
+              >
+                <h3>
                   {i18n.translate('xpack.enterpriseSearch.startStep.h4.deploymentLabel', {
                     defaultMessage: 'Deployment',
                   })}
-                </h4>
-              </EuiTitle>
+                </h3>
+              </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="s">
+              <EuiText
+                color={
+                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
+                }
+                size="s"
+              >
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.startStep.p.youWillStartTheLabel', {
                     defaultMessage:
@@ -257,15 +266,24 @@ export const StartStep: React.FC<StartStepProps> = ({
         ) : (
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-              <EuiTitle size="s">
-                <h4>
+              <EuiText
+                color={
+                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
+                }
+              >
+                <h3>
                   {i18n.translate('xpack.enterpriseSearch.startStep.h4.configureIndexAndAPILabel', {
                     defaultMessage: 'Configure index and API key',
                   })}
-                </h4>
-              </EuiTitle>
+                </h3>
+              </EuiText>
               <EuiSpacer size="m" />
-              <EuiText size="s">
+              <EuiText
+                color={
+                  connectorSelected.name !== '' && connectorName !== '' ? 'default' : 'subdued'
+                }
+                size="s"
+              >
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.startStep.p.thisProcessWillCreateLabel', {
                     defaultMessage:
