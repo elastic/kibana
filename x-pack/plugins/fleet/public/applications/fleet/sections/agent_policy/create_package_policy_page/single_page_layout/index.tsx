@@ -205,11 +205,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const updateNewAgentPolicy = useCallback(
-    (updatedFields: Partial<NewAgentPolicy>) => {
-      const updatedAgentPolicy = {
-        ...newAgentPolicy,
-        ...updatedFields,
-      };
+    (updatedFields: Partial<NewAgentPolicy>, isNew?: boolean) => {
+      const updatedAgentPolicy = isNew
+        ? (updatedFields as NewAgentPolicy)
+        : {
+            ...newAgentPolicy,
+            ...updatedFields,
+          };
+
+      console.log('updatedFields updatedAgentPolicy', updatedAgentPolicy);
       setNewAgentPolicy(updatedAgentPolicy);
       setPolicyValidation(selectedPolicyTab, updatedAgentPolicy);
     },

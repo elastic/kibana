@@ -83,7 +83,7 @@ export function useSetupTechnology({
   packagePolicy,
   isEditPage,
 }: {
-  updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
+  updateNewAgentPolicy: (policy: NewAgentPolicy, isNew?: boolean) => void;
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicies: (policies: AgentPolicy[]) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
@@ -180,11 +180,15 @@ export function useSetupTechnology({
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
-        updateNewAgentPolicy({
+        const agentPolicy = {
           ...newAgentBasedPolicy.current,
           supports_agentless: false,
           is_managed: false,
-        } as NewAgentPolicy);
+        } as NewAgentPolicy;
+
+        console.log('agentPolicy', agentPolicy);
+
+        updateNewAgentPolicy(agentPolicy, true);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
         updateAgentPolicies([newAgentBasedPolicy.current] as AgentPolicy[]);
       }

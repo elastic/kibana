@@ -61,6 +61,7 @@ export async function createAgentPolicy({
 }): Promise<AgentPolicy> {
   // do not create agent policy with system integration if package policy already is for system package
   const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
+  console.log('newAgentPolicy', newAgentPolicy);
   const resp = await sendCreateAgentPolicy(newAgentPolicy, {
     withSysMonitoring: withSysMonitoring && !packagePolicyIsSystem,
   });
@@ -326,6 +327,7 @@ export function useOnSubmit({
       if (!overrideCreatedAgentPolicy) {
         try {
           setFormState('LOADING');
+          console.log('newAgentPolicy before', newAgentPolicy);
           const newPolicy = await createAgentPolicyIfNeeded({
             newAgentPolicy,
             packagePolicy,
@@ -333,6 +335,8 @@ export function useOnSubmit({
             packageInfo,
             selectedPolicyTab,
           });
+
+          console.log('newPolicy', newPolicy);
           if (newPolicy) {
             createdPolicy = newPolicy;
             setAgentPolicies([createdPolicy]);
