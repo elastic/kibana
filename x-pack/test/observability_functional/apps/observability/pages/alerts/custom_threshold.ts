@@ -209,8 +209,8 @@ export default ({ getService }: FtrProviderContext) => {
           name: 'test custom threshold rule',
           tags: ['tag1'],
           params: expect.objectContaining({
-            alertOnGroupDisappear: true,
-            alertOnNoData: true,
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
             criteria: [
               {
                 comparator: '>',
