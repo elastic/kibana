@@ -88,13 +88,24 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
         const actionResult = (await this.#actionsClient.execute(requestBody)) as {
           status: string;
           data: EnhancedGenerateContentResponse;
+          message?: string;
+          serviceMessage?: string;
         };
 
+        if (actionResult.status === 'error') {
+          throw new Error(
+            `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+          );
+        }
+
+        if (!actionResult.data?.candidates?.[0]?.content) {
+          console.log('stephhh actionResult', JSON.stringify(actionResult));
+        }
         return {
           response: {
             ...actionResult.data,
             functionCalls: () =>
-              actionResult.data?.candidates?.[0]?.content.parts[0].functionCall
+              actionResult.data?.candidates?.[0]?.content?.parts[0].functionCall
                 ? [actionResult.data?.candidates?.[0]?.content.parts[0].functionCall]
                 : [],
           },
@@ -152,8 +163,11 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       const actionResult = await this.#actionsClient.execute(requestBody);
 
       if (actionResult.status === 'error') {
-        throw new Error(actionResult.serviceMessage);
+        throw new Error(
+          `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+        );
       }
+
       const readable = get('data', actionResult) as Readable;
 
       if (typeof readable?.read !== 'function') {
