@@ -156,16 +156,18 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       },
       untilInitialized: () => {
         return new Promise((resolve) => {
-          children$.pipe(
-            first((children) => {
-              const atLeastOneControlNotInitialized = initialControlIds.some(
-                (controlId) => !children[controlId]
-              );
-              return !atLeastOneControlNotInitialized;
-            })
-          ).subscribe(() => {
-            resolve()
-          });
+          children$
+            .pipe(
+              first((children) => {
+                const atLeastOneControlNotInitialized = initialControlIds.some(
+                  (controlId) => !children[controlId]
+                );
+                return !atLeastOneControlNotInitialized;
+              })
+            )
+            .subscribe(() => {
+              resolve();
+            });
         });
       },
     } as PresentationContainer &

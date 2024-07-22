@@ -7,7 +7,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, first, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -198,14 +198,16 @@ export const initializeDataControl = <EditorState extends object = {}>(
     },
     untilFiltersInitialized: async () => {
       return new Promise((resolve) => {
-        const subscription = combineLatest([defaultControl.api.blockingError, filters$]).subscribe(
-          ([blockingError, filters]) => {
-            if (blockingError || filters?.length) {
-              subscription.unsubscribe();
-              resolve();
-            }
-          }
-        );
+        combineLatest([defaultControl.api.blockingError, filters$])
+          .pipe(
+            first(
+              ([blockingError, filters]) =>
+                blockingError !== undefined || (filters?.length ?? 0) > 0
+            )
+          )
+          .subscribe(() => {
+            resolve();
+          });
       });
     },
   };

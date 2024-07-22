@@ -238,9 +238,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
           return (
             <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
-              {!isInitialized && (
-                <EuiLoadingChart />
-              )}
+              {!isInitialized && <EuiLoadingChart />}
               {controlsInOrder.map(({ id, type }) => (
                 <ControlRenderer
                   key={id}
