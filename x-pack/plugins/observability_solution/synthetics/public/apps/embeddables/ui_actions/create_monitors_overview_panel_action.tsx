@@ -11,16 +11,17 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { COMMON_SYNTHETICS_GROUPING, SYNTHETICS_OVERVIEW_EMBEDDABLE } from '../constants';
+import { COMMON_SYNTHETICS_GROUPING, SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 
-export const ADD_SYNTHETICS_OVERVIEW_ACTION_ID = 'CREATE_SYNTHETICS_OVERVIEW_EMBEDDABLE';
+export const ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID =
+  'CREATE_SYNTHETICS_MONITORS_OVERVIEW_EMBEDDABLE';
 
-export function createStatusOverviewPanelAction(): UiActionsActionDefinition<EmbeddableApiContext> {
+export function createMonitorsOverviewPanelAction(): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
-    id: ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
+    id: ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID,
     grouping: COMMON_SYNTHETICS_GROUPING,
     order: 30,
-    getIconType: () => 'online',
+    getIconType: () => 'play',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
@@ -28,7 +29,7 @@ export function createStatusOverviewPanelAction(): UiActionsActionDefinition<Emb
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       try {
         embeddable.addNewPanel({
-          panelType: SYNTHETICS_OVERVIEW_EMBEDDABLE,
+          panelType: SYNTHETICS_MONITORS_EMBEDDABLE,
         });
       } catch (e) {
         return Promise.reject();
@@ -36,7 +37,7 @@ export function createStatusOverviewPanelAction(): UiActionsActionDefinition<Emb
     },
     getDisplayName: () =>
       i18n.translate('xpack.synthetics.syntheticsEmbeddable.ariaLabel', {
-        defaultMessage: 'Monitors stats',
+        defaultMessage: 'Monitors overview',
       }),
   };
 }

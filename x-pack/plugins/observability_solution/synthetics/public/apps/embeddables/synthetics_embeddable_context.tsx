@@ -6,26 +6,33 @@
  */
 
 import React from 'react';
-import { createBrowserHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import { EuiPanel } from '@elastic/eui';
 import { Router } from '@kbn/shared-ux-router';
+import { Subject } from 'rxjs';
 import { SyntheticsSharedContext } from '../synthetics/contexts/synthetics_shared_context';
 import { SyntheticsEmbeddableStateContextProvider } from '../synthetics/contexts/synthetics_embeddable_context';
 import { getSyntheticsAppProps } from '../synthetics/render_app';
 import { SyntheticsSettingsContextProvider } from '../synthetics/contexts';
 
-export const SyntheticsEmbeddableContext: React.FC<{ search?: string }> = ({
-  search,
-  children,
-}) => {
+export const SyntheticsEmbeddableContext: React.FC<{
+  reload$: Subject<boolean>;
+}> = ({ reload$, children }) => {
   const props = getSyntheticsAppProps();
 
   return (
-    <SyntheticsSharedContext {...props}>
+    <SyntheticsSharedContext {...props} reload$={reload$}>
       <SyntheticsEmbeddableStateContextProvider>
-        <Router history={createBrowserHistory()}>
+        <Router history={createMemoryHistory()}>
           <SyntheticsSettingsContextProvider {...props}>
-            <EuiPanel hasShadow={false}>{children}</EuiPanel>
+            <EuiPanel
+              hasShadow={false}
+              css={{
+                width: '100%',
+              }}
+            >
+              {children}
+            </EuiPanel>
           </SyntheticsSettingsContextProvider>
         </Router>
       </SyntheticsEmbeddableStateContextProvider>

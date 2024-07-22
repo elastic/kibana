@@ -12,8 +12,8 @@ import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 
 export const StatusOverviewComponent = ({ reload$ }: { reload$: Subject<boolean> }) => {
   return (
-    <SyntheticsEmbeddableContext>
-      <OverviewStatus reload$={reload$} />
+    <SyntheticsEmbeddableContext reload$={reload$}>
+      <OverviewStatus />
     </SyntheticsEmbeddableContext>
   );
 };
