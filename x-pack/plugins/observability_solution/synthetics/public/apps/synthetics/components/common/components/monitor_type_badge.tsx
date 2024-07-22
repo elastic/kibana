@@ -6,8 +6,9 @@
  */
 
 import React, { MouseEvent, KeyboardEvent } from 'react';
-import { EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FormMonitorType, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
 export function MonitorTypeBadge({
@@ -29,13 +30,31 @@ export function MonitorTypeBadge({
   );
 
   return onClick ? (
-    <div title={ariaLabel} aria-label={ariaLabel} onClick={onClick} onKeyPress={onKeyPress}>
-      {badge}
-    </div>
+    <EuiToolTip content={getFilterTitle(monitorType)} position="left">
+      <div
+        title={ariaLabel}
+        aria-label={ariaLabel}
+        onClick={onClick}
+        onKeyPress={onKeyPress}
+        onMouseDown={(e: MouseEvent) => {
+          // Prevents the click event from being propagated to the @elastic/chart metric
+          e.stopPropagation();
+        }}
+      >
+        {badge}
+      </div>
+    </EuiToolTip>
   ) : (
     badge
   );
 }
+
+const getFilterTitle = (type: string) => {
+  return i18n.translate('xpack.synthetics.management.monitorList.monitorType.filter', {
+    defaultMessage: 'Click to filter monitors for type: {type}',
+    values: { type: getMonitorTypeBadgeTitle(type) },
+  });
+};
 
 function getMonitorTypeBadgeTitle(monitorType: string) {
   switch (monitorType) {
