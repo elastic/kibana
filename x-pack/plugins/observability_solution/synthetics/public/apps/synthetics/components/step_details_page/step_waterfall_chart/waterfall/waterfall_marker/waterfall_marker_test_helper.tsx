@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { SyntheticsStartupPluginsContext } from '../../../../../contexts';
+import { i18n } from '@kbn/i18n';
 import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import { WaterfallContext } from '../context/waterfall_context';
 
@@ -25,9 +26,21 @@ const EmbeddableMock = ({
 }) => (
   <div>
     <h1>{title}</h1>
-    <div aria-label="append title">{appendTitle}</div>
+    <div
+      aria-label={i18n.translate('xpack.synthetics.embeddableMock.div.appendTitleLabel', {
+        defaultMessage: 'append title',
+      })}
+    >
+      {appendTitle}
+    </div>
     <div>{reportType}</div>
-    <div aria-label="attributes">{JSON.stringify(attributes)}</div>
+    <div
+      aria-label={i18n.translate('xpack.synthetics.embeddableMock.div.attributesLabel', {
+        defaultMessage: 'attributes',
+      })}
+    >
+      {JSON.stringify(attributes)}
+    </div>
   </div>
 );
 
@@ -40,9 +53,8 @@ export const TestWrapper = ({
   activeStep?: JourneyStep;
   children: JSX.Element;
 }) => (
-  <SyntheticsStartupPluginsContext.Provider
-    value={{
-      // @ts-expect-error incomplete implementation for test purposes
+  <KibanaContextProvider
+    services={{
       exploratoryView: {
         ExploratoryViewEmbeddable: jest.fn((props: any) => <EmbeddableMock {...props} />),
       },
@@ -55,5 +67,5 @@ export const TestWrapper = ({
     >
       {children}
     </WaterfallContext.Provider>
-  </SyntheticsStartupPluginsContext.Provider>
+  </KibanaContextProvider>
 );
