@@ -16,7 +16,7 @@ interface FieldsByCategory {
   [key: string]: string | boolean | string[] | { [key: string]: string };
 }
 
-export const getAllFields = (metadata: InfraMetadata | null) => {
+export const getAllFields = (metadata?: InfraMetadata) => {
   if (!metadata?.info) return [];
 
   const mapNestedProperties = (

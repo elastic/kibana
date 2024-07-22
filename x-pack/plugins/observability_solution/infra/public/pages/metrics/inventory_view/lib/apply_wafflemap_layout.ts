@@ -7,7 +7,7 @@
 
 import { first, sortBy } from 'lodash';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
-import { InfraWaffleMapGroup } from '../../../../lib/lib';
+import { InfraWaffleMapGroup } from '../../../../common/inventory/types';
 import { sizeOfSquares } from './size_of_squares';
 
 export function getColumns(n: number, w = 1, h = 1) {

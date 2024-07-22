@@ -72,7 +72,7 @@ describe('useConversation helpers', () => {
     {
       id: '2',
       content: 'Prompt 2',
-      name: 'Prompt 2',
+      name: 'Default system prompt',
       promptType: 'quick',
       isNewConversationDefault: true,
     },
@@ -99,16 +99,31 @@ describe('useConversation helpers', () => {
   });
 
   describe('getDefaultNewSystemPrompt', () => {
+    const systemPrompts: PromptResponse[] = [
+      {
+        id: '1',
+        content: 'Prompt 1',
+        name: 'Default system prompt',
+        promptType: 'system',
+      },
+      {
+        id: '2',
+        content: 'Prompt 2',
+        name: 'Prompt 2',
+        promptType: 'system',
+        isNewConversationDefault: true,
+      },
+    ];
     test('should return the default (starred) isNewConversationDefault system prompt', () => {
-      const result = getDefaultNewSystemPrompt(allSystemPrompts);
+      const result = getDefaultNewSystemPrompt(systemPrompts);
 
-      expect(result).toEqual(allSystemPrompts[1]);
+      expect(result).toEqual(systemPrompts[1]);
     });
 
-    test('should return the first prompt if default new system prompt do not exist', () => {
-      const result = getDefaultNewSystemPrompt(allSystemPromptsNoDefault);
+    test('should return the fallback prompt if default new system prompt do not exist', () => {
+      const result = getDefaultNewSystemPrompt([systemPrompts[0]]);
 
-      expect(result).toEqual(allSystemPromptsNoDefault[0]);
+      expect(result).toEqual(systemPrompts[0]);
     });
 
     test('should return undefined if default (starred) isNewConversationDefault system prompt does not exist and there are no system prompts', () => {
@@ -131,53 +146,25 @@ describe('useConversation helpers', () => {
       replacements: {},
       title: '1',
     };
-    test('should return the conversation system prompt if it exists', () => {
+    test('should return the conversation system prompt', () => {
       const result = getDefaultSystemPrompt({ allSystemPrompts, conversation });
 
       expect(result).toEqual(allSystemPrompts[2]);
     });
 
-    test('should return the default (starred) isNewConversationDefault system prompt if conversation system prompt does not exist', () => {
-      const conversationWithoutSystemPrompt: Conversation = {
-        ...conversation,
-        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-      };
+    test('should return undefined if the conversation system prompt does not exist', () => {
       const result = getDefaultSystemPrompt({
         allSystemPrompts,
-        conversation: conversationWithoutSystemPrompt,
+        conversation: {
+          ...conversation,
+          apiConfig: {
+            ...conversation.apiConfig,
+            defaultSystemPromptId: undefined,
+          },
+        } as Conversation,
       });
 
-      expect(result).toEqual(allSystemPrompts[1]);
-    });
-
-    test('should return the default (starred) isNewConversationDefault system prompt if conversation system prompt does not exist within all system prompts', () => {
-      const conversationWithoutSystemPrompt: Conversation = {
-        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-        replacements: {},
-        category: 'assistant',
-        id: '4', // this id does not exist within allSystemPrompts
-        messages: [],
-        title: '4',
-      };
-      const result = getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: conversationWithoutSystemPrompt,
-      });
-
-      expect(result).toEqual(allSystemPrompts[1]);
-    });
-
-    test('should return the first prompt if both conversation system prompt and default new system prompt do not exist', () => {
-      const conversationWithoutSystemPrompt: Conversation = {
-        ...conversation,
-        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-      };
-      const result = getDefaultSystemPrompt({
-        allSystemPrompts: allSystemPromptsNoDefault,
-        conversation: conversationWithoutSystemPrompt,
-      });
-
-      expect(result).toEqual(allSystemPromptsNoDefault[0]);
+      expect(result).toBeUndefined();
     });
 
     test('should return undefined if conversation system prompt does not exist and there are no system prompts', () => {
@@ -190,40 +177,21 @@ describe('useConversation helpers', () => {
         conversation: conversationWithoutSystemPrompt,
       });
 
-      expect(result).toEqual(undefined);
+      expect(result).toBeUndefined();
     });
 
     test('should return undefined if conversation system prompt does not exist within all system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         ...conversation,
-        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-        replacements: {},
-        id: '4', // this id does not exist within allSystemPrompts
+        apiConfig: { connectorId: '123', actionTypeId: '.gen-ai', defaultSystemPromptId: 'xxx' },
+        id: '4',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts: allSystemPromptsNoDefault,
         conversation: conversationWithoutSystemPrompt,
       });
 
-      expect(result).toEqual(allSystemPromptsNoDefault[0]);
-    });
-
-    test('should return (starred) isNewConversationDefault system prompt if conversation is undefined', () => {
-      const result = getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: undefined,
-      });
-
-      expect(result).toEqual(allSystemPrompts[1]);
-    });
-
-    test('should return the first system prompt if the conversation is undefined and isNewConversationDefault is not present in system prompts', () => {
-      const result = getDefaultSystemPrompt({
-        allSystemPrompts: allSystemPromptsNoDefault,
-        conversation: undefined,
-      });
-
-      expect(result).toEqual(allSystemPromptsNoDefault[0]);
+      expect(result).toBeUndefined();
     });
 
     test('should return undefined if conversation is undefined and no system prompts are provided', () => {
@@ -235,242 +203,142 @@ describe('useConversation helpers', () => {
       expect(result).toEqual(undefined);
     });
   });
-});
 
-describe('getConversationApiConfig', () => {
-  const allSystemPrompts: PromptResponse[] = [
-    {
+  describe('getConversationApiConfig', () => {
+    const conversation: Conversation = {
+      apiConfig: {
+        connectorId: '123',
+        actionTypeId: '.gen-ai',
+        defaultSystemPromptId: '2',
+        model: 'gpt-3',
+      },
+      category: 'assistant',
       id: '1',
-      content: 'Prompt 1',
-      name: 'Prompt 1',
-      promptType: 'quick',
-    },
-    {
-      id: '2',
-      content: 'Prompt 2',
-      name: 'Prompt 2',
-      promptType: 'quick',
-      isNewConversationDefault: true,
-    },
-    {
-      id: '3',
-      content: 'Prompt 3',
-      name: 'Prompt 3',
-      promptType: 'quick',
-    },
-  ];
+      messages: [],
+      replacements: {},
+      title: 'Test Conversation',
+    };
 
-  const conversation: Conversation = {
-    apiConfig: {
-      connectorId: '123',
-      actionTypeId: '.gen-ai',
-      defaultSystemPromptId: '2',
-      model: 'gpt-3',
-    },
-    category: 'assistant',
-    id: '1',
-    messages: [],
-    replacements: {},
-    title: 'Test Conversation',
-  };
+    const connectors: AIConnector[] = [
+      {
+        id: '123',
+        actionTypeId: '.gen-ai',
+        apiProvider: OpenAiProviderType.OpenAi,
+        config: {
+          provider: OpenAiProviderType.OpenAi,
+        },
+      },
+      {
+        id: '456',
+        actionTypeId: '.gen-ai',
+        apiProvider: OpenAiProviderType.AzureAi,
+      },
+    ] as AIConnector[];
 
-  const connectors: AIConnector[] = [
-    {
-      id: '123',
-      actionTypeId: '.gen-ai',
-      apiProvider: OpenAiProviderType.OpenAi,
-    },
-    {
+    const defaultConnector: AIConnector = {
       id: '456',
       actionTypeId: '.gen-ai',
       apiProvider: OpenAiProviderType.AzureAi,
-    },
-  ] as AIConnector[];
+    } as AIConnector;
 
-  const defaultConnector: AIConnector = {
-    id: '456',
-    actionTypeId: '.gen-ai',
-    apiProvider: OpenAiProviderType.AzureAi,
-  } as AIConnector;
+    test('should return the correct API config when connector and system prompt are found', () => {
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation,
+        connectors,
+        defaultConnector,
+      });
 
-  test('should return the correct API config when connector and system prompt are found', () => {
-    const result = getConversationApiConfig({
-      allSystemPrompts,
-      conversation,
-      connectors,
-      defaultConnector,
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '123',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.OpenAi,
+          defaultSystemPromptId: '2',
+          model: 'gpt-3',
+        },
+      });
     });
 
-    expect(result).toEqual({
-      apiConfig: {
-        connectorId: '123',
-        actionTypeId: '.gen-ai',
-        provider: OpenAiProviderType.OpenAi,
-        defaultSystemPromptId: '2',
-        model: 'gpt-3',
-      },
-    });
-  });
+    test('should return the default connector when specific connector is not found', () => {
+      const conversationWithMissingConnector: Conversation = {
+        ...conversation,
+        apiConfig: { ...conversation.apiConfig, connectorId: '999' } as Conversation['apiConfig'],
+      };
 
-  test('should return the default connector when specific connector is not found', () => {
-    const conversationWithMissingConnector: Conversation = {
-      ...conversation,
-      apiConfig: { ...conversation.apiConfig, connectorId: '999' } as Conversation['apiConfig'],
-    };
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation: conversationWithMissingConnector,
+        connectors,
+        defaultConnector,
+      });
 
-    const result = getConversationApiConfig({
-      allSystemPrompts,
-      conversation: conversationWithMissingConnector,
-      connectors,
-      defaultConnector,
-    });
-
-    expect(result).toEqual({
-      apiConfig: {
-        connectorId: '456',
-        actionTypeId: '.gen-ai',
-        provider: OpenAiProviderType.AzureAi,
-        defaultSystemPromptId: '2',
-        model: 'gpt-3',
-      },
-    });
-  });
-
-  test('should return an empty object when no connectors are provided and default connector is missing', () => {
-    const result = getConversationApiConfig({
-      allSystemPrompts,
-      conversation,
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '456',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.AzureAi,
+          defaultSystemPromptId: '2',
+          model: 'gpt-3',
+        },
+      });
     });
 
-    expect(result).toEqual({});
-  });
+    test('should return an empty object when no connectors are provided and default connector is missing', () => {
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation,
+      });
 
-  test('should return the default system prompt if conversation system prompt is not found', () => {
-    const conversationWithMissingSystemPrompt: Conversation = {
-      ...conversation,
-      apiConfig: {
-        ...conversation.apiConfig,
-        defaultSystemPromptId: '999',
-      } as Conversation['apiConfig'],
-    };
-
-    const result = getConversationApiConfig({
-      allSystemPrompts,
-      conversation: conversationWithMissingSystemPrompt,
-      connectors,
-      defaultConnector,
+      expect(result).toEqual({
+        apiConfig: {
+          defaultSystemPromptId: '2',
+        },
+      });
     });
 
-    expect(result).toEqual({
-      apiConfig: {
-        connectorId: '123',
-        actionTypeId: '.gen-ai',
-        provider: OpenAiProviderType.OpenAi,
-        defaultSystemPromptId: '2', // Returns the default system prompt for new conversations
-        model: 'gpt-3',
-      },
-    });
-  });
+    test('should set default system prompt as undefined if conversation system prompt is not found', () => {
+      const conversationWithMissingSystemPrompt: Conversation = {
+        ...conversation,
+        apiConfig: {
+          ...conversation.apiConfig,
+          defaultSystemPromptId: '999',
+        } as Conversation['apiConfig'],
+      };
 
-  test('should return the correct config when connectors are not provided', () => {
-    const result = getConversationApiConfig({
-      allSystemPrompts,
-      conversation,
-      defaultConnector,
-    });
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation: conversationWithMissingSystemPrompt,
+        connectors,
+        defaultConnector,
+      });
 
-    expect(result).toEqual({
-      apiConfig: {
-        connectorId: '456',
-        actionTypeId: '.gen-ai',
-        provider: OpenAiProviderType.AzureAi,
-        defaultSystemPromptId: '2',
-        model: 'gpt-3',
-      },
-    });
-  });
-
-  test('should return the first system prompt if both conversation system prompt and default new system prompt do not exist', () => {
-    const allSystemPromptsNoDefault: PromptResponse[] = allSystemPrompts.filter(
-      ({ isNewConversationDefault }) => isNewConversationDefault !== true
-    );
-
-    const conversationWithoutSystemPrompt: Conversation = {
-      ...conversation,
-      apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-    };
-
-    const result = getConversationApiConfig({
-      allSystemPrompts: allSystemPromptsNoDefault,
-      conversation: conversationWithoutSystemPrompt,
-      connectors,
-      defaultConnector,
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '123',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.OpenAi,
+          model: 'gpt-3',
+        },
+      });
     });
 
-    expect(result).toEqual({
-      apiConfig: {
-        connectorId: '123',
-        actionTypeId: '.gen-ai',
-        provider: OpenAiProviderType.OpenAi,
-        defaultSystemPromptId: '1', // Uses the first prompt in the list
-        model: undefined, // default connector's model
-      },
-    });
-  });
+    test('should return the correct config when connectors are not provided', () => {
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation,
+        defaultConnector,
+      });
 
-  test('should return the first system prompt if conversation system prompt does not exist within all system prompts', () => {
-    const allSystemPromptsNoDefault: PromptResponse[] = allSystemPrompts.filter(
-      ({ isNewConversationDefault }) => isNewConversationDefault !== true
-    );
-
-    const conversationWithoutSystemPrompt: Conversation = {
-      ...conversation,
-      apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-      id: '4', // this id does not exist within allSystemPrompts
-    };
-
-    const result = getConversationApiConfig({
-      allSystemPrompts: allSystemPromptsNoDefault,
-      conversation: conversationWithoutSystemPrompt,
-      connectors,
-      defaultConnector,
-    });
-
-    expect(result).toEqual({
-      apiConfig: {
-        connectorId: '123',
-        actionTypeId: '.gen-ai',
-        provider: OpenAiProviderType.OpenAi,
-        defaultSystemPromptId: '1', // Uses the first prompt in the list
-        model: undefined, // default connector's model
-      },
-    });
-  });
-
-  test('should return the new default system prompt if defaultSystemPromptId is undefined', () => {
-    const conversationWithUndefinedPrompt: Conversation = {
-      ...conversation,
-      apiConfig: {
-        ...conversation.apiConfig,
-        defaultSystemPromptId: undefined,
-      } as Conversation['apiConfig'],
-    };
-
-    const result = getConversationApiConfig({
-      allSystemPrompts,
-      conversation: conversationWithUndefinedPrompt,
-      connectors,
-      defaultConnector,
-    });
-
-    expect(result).toEqual({
-      apiConfig: {
-        connectorId: '123',
-        actionTypeId: '.gen-ai',
-        provider: OpenAiProviderType.OpenAi,
-        defaultSystemPromptId: '1',
-        model: 'gpt-3',
-      },
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '456',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.AzureAi,
+          defaultSystemPromptId: '2',
+          model: 'gpt-3',
+        },
+      });
     });
   });
 });

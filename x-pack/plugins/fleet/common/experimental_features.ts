@@ -27,7 +27,7 @@ const _allowedExperimentalValues = {
   enablePackagesStateMachine: true,
   advancedPolicySettings: true,
   useSpaceAwareness: false,
-  enableReusableIntegrationPolicies: false,
+  enableReusableIntegrationPolicies: true,
 };
 
 /**
