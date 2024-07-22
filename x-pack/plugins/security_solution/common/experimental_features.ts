@@ -126,12 +126,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
-  assistantKnowledgeBaseByDefault: true,
+  assistantKnowledgeBaseByDefault: false,
 
   /**
    * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
    */
-  assistantBedrockChat: true,
+  assistantBedrockChat: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
