@@ -22,7 +22,7 @@ export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 describe(
   'Form',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -34,20 +34,16 @@ describe(
     },
   },
   () => {
-    describe(
-      'User with no access can not create an endpoint response action',
-      { tags: ['@skipInServerlessMKI'] },
-      () => {
-        beforeEach(() => {
-          login(ROLE.rule_author);
-        });
+    describe('User with no access can not create an endpoint response action', () => {
+      beforeEach(() => {
+        login(ROLE.rule_author);
+      });
 
-        it('no endpoint response action option during rule creation', () => {
-          fillUpNewRule();
-          tryAddingDisabledResponseAction();
-        });
-      }
-    );
+      it('no endpoint response action option during rule creation', () => {
+        fillUpNewRule();
+        tryAddingDisabledResponseAction();
+      });
+    });
 
     describe('User with access can create and save an endpoint response action', () => {
       const testedCommand = 'isolate';
