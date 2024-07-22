@@ -238,37 +238,5 @@ describe('Data control editor', () => {
       expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
       expect(getPressedAttribute(controlEditor, 'create__search')).toBe('false');
     });
-
-    test('removes unrelated state', async () => {
-      const controlEditor = await mountComponent<
-        DataControlEditorState & { someOtherState: string; moreRandomState: number }
-      >({
-        initialState: {
-          controlType: 'rangeSlider',
-          controlId: 'testId',
-          dataViewId: 'logstash-*',
-          fieldName: 'bytes',
-          someOtherState: 'test',
-          moreRandomState: 2,
-        },
-      });
-
-      await act(async () => {
-        fireEvent.click(controlEditor.getByTestId('create__optionsList'));
-      });
-      await act(async () => {
-        fireEvent.click(controlEditor.getByTestId('control-editor-save'));
-      });
-
-      expect(onSave).toBeCalledWith(
-        {
-          controlId: 'testId',
-          controlType: 'optionsList',
-          dataViewId: 'logstash-*',
-          fieldName: 'bytes',
-        },
-        'optionsList'
-      );
-    });
   });
 });

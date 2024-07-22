@@ -5,7 +5,6 @@
  * Side Public License, v 1.
  */
 
-import { omit, pick } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -49,7 +48,6 @@ import {
 
 import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { ControlGroupApi } from '../control_group/types';
-import { DEFAULT_DATA_CONTROL_EDITOR_KEYS } from './constants';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
 import { DataControlEditorState } from './open_data_control_editor';
@@ -140,19 +138,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     controlGroup.width
     // controlGroup.parentApi?.lastUsedDataViewId, // TODO: Make this work
   );
-  /**
-   * Define two state managers for keeping track of the control state:
-   * (1) `dataControlState`: Used to manage the generic state that all data controls share
-   * (2) `customOptionsState`: Used to manage type-specific editor state
-   */
-  const [dataControlState, setDataControlState] = useState<DataControlEditorState>(
-    pick(initialState, DEFAULT_DATA_CONTROL_EDITOR_KEYS)
-  );
-  const [customOptionsState, setCustomOptionsState] = useState<
-    Omit<State, keyof DataControlEditorState>
-  >(omit(initialState, DEFAULT_DATA_CONTROL_EDITOR_KEYS));
-
-  /** The remaining state will be managed via hooks */
+  const [editorState, setEditorState] = useState<State>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
     initialState.defaultPanelTitle ?? initialState.fieldName ?? ''
   );
@@ -183,38 +169,26 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     },
     error: fieldListError,
   } = useAsync(async () => {
-    if (!dataControlState.dataViewId) {
+    if (!editorState.dataViewId) {
       return;
     }
 
-    const dataView = await dataViewService.get(dataControlState.dataViewId);
+    const dataView = await dataViewService.get(editorState.dataViewId);
     const registry = await getDataControlFieldRegistry(dataView);
     return {
       selectedDataView: dataView,
       fieldRegistry: registry,
     };
-  }, [dataControlState.dataViewId]);
+  }, [editorState.dataViewId]);
 
   useEffect(() => {
     setControlEditorValid(
-      Boolean(dataControlState.fieldName) &&
-        Boolean(selectedDataView) &&
-        Boolean(selectedControlType)
+      Boolean(editorState.fieldName) && Boolean(selectedDataView) && Boolean(selectedControlType)
     );
-  }, [dataControlState.fieldName, setControlEditorValid, selectedDataView, selectedControlType]);
-
-  useEffect(() => {
-    if (initialState.controlType === selectedControlType) {
-      /** if the same type is picked, restore the initial state */
-      setCustomOptionsState(omit(initialState, DEFAULT_DATA_CONTROL_EDITOR_KEYS));
-    } else {
-      /** when selectedControlType changes to a new type, empty type-specific state */
-      setCustomOptionsState({} as Omit<State, keyof DataControlEditorState>);
-    }
-  }, [initialState, selectedControlType]);
+  }, [editorState.fieldName, setControlEditorValid, selectedDataView, selectedControlType]);
 
   const CustomSettingsComponent = useMemo(() => {
-    if (!selectedControlType || !dataControlState.fieldName || !fieldRegistry) return;
+    if (!selectedControlType || !editorState.fieldName || !fieldRegistry) return;
 
     const controlFactory = getControlFactory(selectedControlType) as DataControlFactory;
     const CustomSettings = controlFactory.CustomOptionsComponent;
@@ -236,13 +210,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         data-test-subj="control-editor-custom-settings"
       >
         <CustomSettings
-          initialState={customOptionsState}
-          updateState={(newState) => setCustomOptionsState({ ...customOptionsState, ...newState })}
+          initialState={editorState}
+          updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlEditorValid}
         />
       </EuiDescribedFormGroup>
     );
-  }, [fieldRegistry, selectedControlType, dataControlState, customOptionsState]);
+  }, [fieldRegistry, selectedControlType, editorState]);
 
   return (
     <>
@@ -277,9 +251,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               ) : (
                 <DataViewPicker
                   dataViews={dataViewListItems}
-                  selectedDataViewId={dataControlState.dataViewId}
+                  selectedDataViewId={editorState.dataViewId}
                   onChangeDataViewId={(newDataViewId) => {
-                    setDataControlState({ ...dataControlState, dataViewId: newDataViewId });
+                    setEditorState({ ...editorState, dataViewId: newDataViewId });
                     setSelectedControlType(undefined);
                   }}
                   trigger={{
@@ -309,15 +283,15 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     // const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
                     return Boolean(fieldRegistry?.[field.name]);
                   }}
-                  selectedFieldName={dataControlState.fieldName}
+                  selectedFieldName={editorState.fieldName}
                   dataView={selectedDataView}
                   onSelectField={(field) => {
-                    setDataControlState({ ...dataControlState, fieldName: field.name });
+                    setEditorState({ ...editorState, fieldName: field.name });
                     setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
 
                     const newDefaultTitle = field.displayName ?? field.name;
                     setDefaultPanelTitle(newDefaultTitle);
-                    const currentTitle = dataControlState.title;
+                    const currentTitle = editorState.title;
                     if (!currentTitle || currentTitle === newDefaultTitle) {
                       setPanelTitle(newDefaultTitle);
                     }
@@ -333,7 +307,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               <div>
                 <CompatibleControlTypesComponent
                   fieldRegistry={fieldRegistry}
-                  selectedFieldName={dataControlState.fieldName}
+                  selectedFieldName={editorState.fieldName}
                   selectedControlType={selectedControlType}
                   setSelectedControlType={setSelectedControlType}
                 />
@@ -356,8 +330,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 value={panelTitle}
                 onChange={(e) => {
                   setPanelTitle(e.target.value ?? '');
-                  setDataControlState({
-                    ...dataControlState,
+                  setEditorState({
+                    ...editorState,
                     title: e.target.value === '' ? undefined : e.target.value,
                   });
                 }}
@@ -372,9 +346,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   color="primary"
                   legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
                   options={CONTROL_WIDTH_OPTIONS}
-                  idSelected={dataControlState.width ?? defaultWidth ?? DEFAULT_CONTROL_WIDTH}
+                  idSelected={editorState.width ?? defaultWidth ?? DEFAULT_CONTROL_WIDTH}
                   onChange={(newWidth: string) =>
-                    setDataControlState({ ...dataControlState, width: newWidth as ControlWidth })
+                    setEditorState({ ...editorState, width: newWidth as ControlWidth })
                   }
                 />
                 <EuiSpacer size="s" />
@@ -382,12 +356,10 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
                   color="primary"
                   checked={
-                    (dataControlState.grow === undefined ? defaultGrow : dataControlState.grow) ??
+                    (editorState.grow === undefined ? defaultGrow : editorState.grow) ??
                     DEFAULT_CONTROL_GROW
                   }
-                  onChange={() =>
-                    setDataControlState({ ...dataControlState, grow: !dataControlState.grow })
-                  }
+                  onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
                   data-test-subj="control-editor-grow-switch"
                 />
               </div>
@@ -400,7 +372,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             <>
               <EuiSpacer size="l" />
               <EuiButtonEmpty
-                aria-label={`delete-${dataControlState.title ?? dataControlState.fieldName}`}
+                aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
                 iconType="trash"
                 flush="left"
                 color="danger"
@@ -419,11 +391,11 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={`cancel-${dataControlState.title ?? dataControlState.fieldName}`}
+              aria-label={`cancel-${editorState.title ?? editorState.fieldName}`}
               data-test-subj="control-editor-cancel"
               iconType="cross"
               onClick={() => {
-                onCancel({ ...dataControlState, ...customOptionsState } as State);
+                onCancel(editorState);
               }}
             >
               {DataControlEditorStrings.manageControl.getCancelTitle()}
@@ -431,20 +403,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              aria-label={`save-${dataControlState.title ?? dataControlState.fieldName}`}
+              aria-label={`save-${editorState.title ?? editorState.fieldName}`}
               data-test-subj="control-editor-save"
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
               onClick={() => {
-                onSave(
-                  {
-                    ...dataControlState,
-                    ...customOptionsState,
-                    controlType: selectedControlType,
-                  } as State,
-                  selectedControlType!
-                );
+                onSave(editorState, selectedControlType!);
               }}
             >
               {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
