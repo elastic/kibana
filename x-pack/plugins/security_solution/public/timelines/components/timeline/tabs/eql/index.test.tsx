@@ -17,7 +17,7 @@ import { TestProviders } from '../../../../../common/mock/test_providers';
 import type { Props as EqlTabContentComponentProps } from '.';
 import { EqlTabContentComponent } from '.';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -90,6 +90,7 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
+      timelineId: TimelineId.test,
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
