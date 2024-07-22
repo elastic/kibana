@@ -13,7 +13,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
 
-  describe('saved objects relationships flyout', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/179977
+  describe.skip('saved objects relationships flyout', () => {
     beforeEach(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/show_relationships'
