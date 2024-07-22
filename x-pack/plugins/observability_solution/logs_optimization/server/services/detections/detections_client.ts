@@ -5,41 +5,53 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
+import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
 import { Detection } from '../../../common/detections/types';
-import { IntegrationLikeMessageDetection } from './detections/integration_like_message';
-import { MisspeltLogLevelDetection } from './detections/misspelt_log_level';
-import { MisspeltMessageDetection } from './detections/misspelt_message';
-import { MisspeltTimestampDetection } from './detections/misspelt_timestamp';
-import { IDetectionsClient, LogDocument } from './types';
+import { EsqlTransport } from '../../lib/esql_transport';
+import { LogLevelExtractionDetection } from './detection_rules/log_level_extraction';
+import { MappingEcsGapsDetection } from './detection_rules/mapping_ecs_gaps';
+import { TimestampExtractionDetection } from './detection_rules/timestamp_extraction';
+import { IDetectionsClient } from './types';
 
 interface DetectionsClientDeps {
   logger: Logger;
+  esClient: ElasticsearchClient;
+  esqlTransport: EsqlTransport;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export class DetectionsClient implements IDetectionsClient {
-  private constructor(private readonly logger: Logger) {}
+  private constructor(
+    private readonly logger: Logger,
+    private readonly esClient: ElasticsearchClient,
+    private readonly esqlTransport: EsqlTransport,
+    private readonly fieldsMetadataClient: IFieldsMetadataClient
+  ) {}
 
-  detectFrom(logDocument: LogDocument): Detection[] {
+  async detectFrom(index: NewestIndex): Promise<Detection[]> {
     const detectionRules = [
-      new MisspeltTimestampDetection(),
-      new MisspeltLogLevelDetection(),
-      new MisspeltMessageDetection(),
-      new IntegrationLikeMessageDetection(),
+      new MappingEcsGapsDetection(this.fieldsMetadataClient),
+      new TimestampExtractionDetection(this.esqlTransport),
+      new LogLevelExtractionDetection(this.esqlTransport),
     ];
 
-    const detections = detectionRules
-      .map((detection) => detection.process(logDocument._source ?? {}))
-      .filter(Boolean) as Detection[];
+    const detections = (
+      await Promise.all(detectionRules.map((detection) => detection.process(index)))
+    ).filter(Boolean) as Detection[];
 
-    this.logger.debug(
-      `Detected ${detections.length} possible changes document with id "${logDocument._id}"`
-    );
+    this.logger.debug(`Detected ${detections.length} possible changes`);
 
     return detections;
   }
 
-  public static create({ logger }: DetectionsClientDeps) {
-    return new DetectionsClient(logger);
+  public static create({
+    logger,
+    esClient,
+    fieldsMetadataClient,
+    esqlTransport,
+  }: DetectionsClientDeps) {
+    return new DetectionsClient(logger, esClient, esqlTransport, fieldsMetadataClient);
   }
 }

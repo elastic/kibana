@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { DetectionsService } from './detections_service';
-export { DetectionsClient } from './detections_client';
-export type { DetectionsServiceSetup, DetectionsServiceStart } from './types';
+export { RecommendationsService } from './recommendations_service';
+export { RecommendationsClient } from './recommendations_client';
+export type { RecommendationsServiceSetup, RecommendationsServiceStart } from './types';

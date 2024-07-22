@@ -6,7 +6,12 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
 import { DetectionsServiceSetup, DetectionsServiceStart } from './services/detections';
+import {
+  RecommendationsServiceSetup,
+  RecommendationsServiceStart,
+} from './services/recommendations/types';
 
 export type LogsOptimizationPluginCoreSetup = CoreSetup<
   LogsOptimizationServerPluginStartDeps,
@@ -17,14 +22,17 @@ export type LogsOptimizationPluginStartServicesAccessor =
 
 export interface LogsOptimizationServerSetup {
   detectionsService: DetectionsServiceSetup;
+  recommendationsService: RecommendationsServiceSetup;
 }
 
 export interface LogsOptimizationServerStart {
   detectionsService: DetectionsServiceStart;
+  recommendationsService: RecommendationsServiceStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsOptimizationServerPluginSetupDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsOptimizationServerPluginStartDeps {}
+export interface LogsOptimizationServerPluginStartDeps {
+  fieldsMetadata: FieldsMetadataServerStart;
+}

@@ -14,6 +14,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/io-ts-utils",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/fields_metadata-plugin"
   ]
 }

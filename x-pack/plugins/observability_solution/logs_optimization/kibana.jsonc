@@ -8,7 +8,9 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "logs_optimization"],
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "fieldsMetadata"
+    ],
     "requiredBundles": [],
   }
 }

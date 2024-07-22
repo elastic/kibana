@@ -4,7 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { DetectionsService } from './detections_service';
-export { DetectionsClient } from './detections_client';
-export type { DetectionsServiceSetup, DetectionsServiceStart } from './types';

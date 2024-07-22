@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { GrokSimulator } from '../../lib/grok_simulator';
 import { DetectionsClient } from './detections_client';
 
 const mockLogDocument = {
@@ -14,12 +16,15 @@ const mockLogDocument = {
 
 describe('DetectionClient class', () => {
   const logger = loggerMock.create();
+  const coreStartMock = coreMock.createStart();
+  const esClient = coreStartMock.elasticsearch.client.asInternalUser;
 
   let detectionsClient: DetectionsClient;
 
   beforeEach(() => {
     detectionsClient = DetectionsClient.create({
       logger,
+      grokSimulator: new GrokSimulator(esClient),
     });
   });
 

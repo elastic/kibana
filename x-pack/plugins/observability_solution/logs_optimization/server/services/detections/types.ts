@@ -6,19 +6,30 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import { Detection } from '@kbn/logs-optimization-plugin/common/detections/types';
+import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
+import { DetectionsClient } from './detections_client';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DetectionsServiceStartDeps {}
+export interface DetectionsServiceSetupDeps {
+  getStartServices: CoreSetup['getStartServices'];
+}
+
+export interface DetectionsServiceStartDeps {
+  fieldsMetadata: FieldsMetadataServerStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DetectionsServiceSetup {}
 
 export interface DetectionsServiceStart {
-  getClient(): IDetectionsClient;
+  getClient(client: ElasticsearchClient): Promise<DetectionsClient>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IDetectionsClient {}
+export interface IDetectionsClient {
+  detectFrom(index: NewestIndex): Promise<Detection[]>;
+}
 
 export interface LogSource {
   message?: string;

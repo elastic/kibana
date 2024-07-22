@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IntegrationLikeDetection, MisspeltFieldDetection } from './types';
+import { FieldExtractionDetection, IntegrationLikeDetection, MappingGapsDetection } from './types';
 
-export const createMisspeltFieldDetection = (
-  params: Omit<MisspeltFieldDetection, 'type'>
-): MisspeltFieldDetection => ({
+export const createMappingGapsDetection = (
+  params: Omit<MappingGapsDetection, 'type'>
+): MappingGapsDetection => ({
   ...params,
-  type: 'misspelt_field',
+  type: 'mapping_gap',
 });
 
 export const createIntegrationLikeDetection = (
@@ -19,4 +19,11 @@ export const createIntegrationLikeDetection = (
 ): IntegrationLikeDetection => ({
   ...params,
   type: 'integration_like',
+});
+
+export const createFieldExtractionDetection = (
+  params: Omit<FieldExtractionDetection, 'type'>
+): FieldExtractionDetection => ({
+  ...params,
+  type: 'field_extraction',
 });

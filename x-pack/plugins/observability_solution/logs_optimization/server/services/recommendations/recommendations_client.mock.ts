@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { DetectionsService } from './detections_service';
-export { DetectionsClient } from './detections_client';
-export type { DetectionsServiceSetup, DetectionsServiceStart } from './types';
+import type { IRecommendationsClient } from './types';
+
+export const createRecommendationsClientMock = (): jest.Mocked<IRecommendationsClient> => ({});

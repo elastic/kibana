@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { DetectionsService } from './detections_service';
-export { DetectionsClient } from './detections_client';
-export type { DetectionsServiceSetup, DetectionsServiceStart } from './types';
+import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+export interface NewestIndex extends IndicesIndexState {
+  name: string;
+}

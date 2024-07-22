@@ -6,22 +6,35 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { EsqlTransport } from '../../lib/esql_transport';
 import { DetectionsClient } from './detections_client';
-import { DetectionsServiceSetup, DetectionsServiceStart } from './types';
+import {
+  DetectionsServiceSetup,
+  DetectionsServiceSetupDeps,
+  DetectionsServiceStart,
+  DetectionsServiceStartDeps,
+} from './types';
 
 export class DetectionsService {
+  private getStartServices!: DetectionsServiceSetupDeps['getStartServices'];
+
   constructor(private readonly logger: Logger) {}
 
-  public setup(): DetectionsServiceSetup {
+  public setup({ getStartServices }: DetectionsServiceSetupDeps): DetectionsServiceSetup {
+    this.getStartServices = getStartServices;
+
     return {};
   }
 
-  public start(): DetectionsServiceStart {
+  public start({ fieldsMetadata }: DetectionsServiceStartDeps): DetectionsServiceStart {
     const { logger } = this;
 
     return {
-      getClient() {
-        return DetectionsClient.create({ logger });
+      async getClient(esClient) {
+        const fieldsMetadataClient = await fieldsMetadata.getClient();
+        const esqlTransport = new EsqlTransport(esClient);
+
+        return DetectionsClient.create({ esClient, esqlTransport, fieldsMetadataClient, logger });
       },
     };
   }

@@ -11,20 +11,21 @@ export interface IntegrationLikeDetection {
   detectedIntegration: string;
 }
 
-export interface MisspeltFieldDetection {
-  type: 'misspelt_field';
+interface MappingGap {
   field: string;
-  suggestedField: string;
+  suggestedField: string | null;
+}
+
+export interface MappingGapsDetection {
+  type: 'mapping_gap';
+  gaps: MappingGap[];
 }
 
 export interface FieldExtractionDetection {
   type: 'field_extraction';
-  message: string;
+  sourceField: string;
   targetField: string;
-  value: unknown;
+  pattern: string;
 }
 
-export type Detection =
-  | IntegrationLikeDetection
-  | MisspeltFieldDetection
-  | FieldExtractionDetection;
+export type Detection = IntegrationLikeDetection | MappingGapsDetection | FieldExtractionDetection;
