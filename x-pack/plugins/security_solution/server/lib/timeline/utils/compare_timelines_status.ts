@@ -217,9 +217,10 @@ export class CompareTimelinesStatus {
     if (
       templateTimelineVersion != null &&
       this.templateTimelineObject.isExists &&
-      existingTemplateTimelineVersion != null
+      existingTemplateTimelineVersion != null &&
+      typeof templateTimelineVersion === 'number' &&
+      typeof existingTemplateTimelineVersion === 'number'
     ) {
-      // @ts-expect-error upgrade typescript v5.1.6
       return templateTimelineVersion <= existingTemplateTimelineVersion;
     } else if (this.templateTimelineObject.isExists && templateTimelineVersion == null) {
       return true;
