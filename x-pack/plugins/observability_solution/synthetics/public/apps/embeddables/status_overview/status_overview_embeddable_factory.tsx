@@ -24,7 +24,7 @@ import { ClientPluginsStart } from '../../../plugin';
 import { StatusOverviewComponent } from './status_overview_component';
 
 export const getOverviewPanelTitle = () =>
-  i18n.translate('xpack.synthetics.statusOverview.displayName', {
+  i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
     defaultMessage: 'Synthetics Status Overview',
   });
 
@@ -86,6 +86,9 @@ export const getStatusOverviewEmbeddableFactory = (
           }, []);
           return (
             <div
+              style={{
+                width: '100%',
+              }}
               data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
               <StatusOverviewComponent reload$={reload$} />
