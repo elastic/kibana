@@ -27,6 +27,7 @@ import { BulkDeleteRulesPostRequestBodyInput } from '@kbn/security-solution-plug
 import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
+import { CreateEntityRelationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/relations/create_entity_relation.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
 import {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
@@ -47,6 +48,7 @@ import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
+import { GetEntityRelationsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/relations/get_entity_relations.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import {
@@ -170,6 +172,14 @@ Migrations are initiated per index. While the process is neither destructive nor
         .post('/api/detection_engine/signals/migration')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    createEntityRelation(props: CreateEntityRelationProps) {
+      return supertest
+        .post('/internal/entity_store/relations')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -303,6 +313,14 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    getEntityRelations(props: GetEntityRelationsProps) {
+      return supertest
+        .get('/entity_store/relations')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     getPolicyResponse(props: GetPolicyResponseProps) {
       return supertest
@@ -540,6 +558,9 @@ export interface BulkUpdateRulesProps {
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
 }
+export interface CreateEntityRelationProps {
+  body: CreateEntityRelationRequestBodyInput;
+}
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
@@ -575,6 +596,9 @@ export interface GetAlertsMigrationStatusProps {
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
+}
+export interface GetEntityRelationsProps {
+  query: GetEntityRelationsRequestQueryInput;
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
