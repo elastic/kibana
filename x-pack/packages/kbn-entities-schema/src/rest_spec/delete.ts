@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from 'zod';
 
-export const getAgentDetailsRequestParamsSchema = t.unknown;
+export const deleteEntityDefinitionParamsSchema = z.object({
+  id: z.string(),
+});
 
-export type GetAgentDetailsRequestParamsSchema = t.OutputOf<
-  typeof getAgentDetailsRequestParamsSchema
->;
+export const deleteEntityDefinitionQuerySchema = z.object({
+  deleteData: z.optional(z.coerce.boolean().default(false)),
+});

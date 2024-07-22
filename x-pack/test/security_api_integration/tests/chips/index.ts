@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './common_attributes';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security APIs - CHIPS support', function () {
+    loadTestFile(require.resolve('./chips_cookie'));
+  });
+}
