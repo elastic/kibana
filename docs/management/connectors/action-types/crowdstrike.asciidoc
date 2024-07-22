@@ -10,7 +10,7 @@
 
 preview::[]
 
-The Crowdstrike connector communicates with Crowdstrike Management Console via REST API.
+The CrowdStrike connector communicates with CrowdStrike Management Console via REST API.
 
 [float]
 [[define-crowdstrike-ui]]
