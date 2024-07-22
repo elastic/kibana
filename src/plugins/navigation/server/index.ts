@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { NavigationServerPlugin } from './plugin';
 
-export async function plugin() {
-  return new NavigationServerPlugin();
+export async function plugin(initContext: PluginInitializerContext) {
+  return new NavigationServerPlugin(initContext);
 }

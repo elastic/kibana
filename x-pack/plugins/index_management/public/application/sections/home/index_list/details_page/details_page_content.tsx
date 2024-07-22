@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
@@ -36,6 +37,7 @@ import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageSettings } from './details_page_settings';
 import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageTab } from './details_page_tab';
+import { IndexErrorCallout } from './index_error_callout';
 
 const defaultTabs: IndexDetailsTab[] = [
   {
@@ -92,10 +94,16 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   navigateToIndicesList,
 }) => {
   const {
+    core: {
+      application: { capabilities },
+    },
     config: { enableIndexStats },
-    plugins: { console: consolePlugin },
+    plugins: { console: consolePlugin, ml },
     services: { extensionsService },
   } = useAppContext();
+  const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
+
+  const indexErrors = useIndexErrors(index, ml, hasMLPermissions);
 
   const tabs = useMemo(() => {
     const sortedTabs = [...defaultTabs];
@@ -171,7 +179,9 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         }}
         responsive="reverse"
         tabs={headerTabs}
-      />
+      >
+        {indexErrors.length > 0 ? <IndexErrorCallout errors={indexErrors} /> : null}
+      </EuiPageHeader>
       <EuiSpacer size="l" />
       <div
         data-test-subj={`indexDetailsContent`}

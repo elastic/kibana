@@ -67,9 +67,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
               pageContent: request.body.text,
             },
           ];
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            false
-          );
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const createResponse = await kbDataClient?.addKnowledgeBaseDocuments({ documents });
 
           if (createResponse == null) {

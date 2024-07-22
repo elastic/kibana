@@ -16,12 +16,7 @@ import {
   PublishesPanelTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import {
-  ControlFactory,
-  ControlStateManager,
-  DefaultControlApi,
-  DefaultControlState,
-} from '../types';
+import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: string) => string);
 
@@ -45,7 +40,8 @@ export interface DataControlFactory<
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{
-    stateManager: ControlStateManager<State>;
+    initialState: Omit<State, keyof DefaultDataControlState>;
+    updateState: (newState: Partial<State>) => void;
     setControlEditorValid: (valid: boolean) => void;
   }>;
 }
