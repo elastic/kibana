@@ -8,28 +8,23 @@
 import React, { MouseEvent, KeyboardEvent } from 'react';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {
-  EncryptedSyntheticsMonitor,
-  ConfigKey,
-  FormMonitorType,
-  MonitorTypeEnum,
-} from '../../../../../../common/runtime_types';
+import { FormMonitorType, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
 export function MonitorTypeBadge({
-  monitor,
+  monitorType,
   ariaLabel,
   onClick,
   onKeyPress,
 }: {
-  monitor: EncryptedSyntheticsMonitor;
+  monitorType: string;
   ariaLabel?: string;
   onClick?: (evt: MouseEvent<HTMLDivElement>) => void;
   onKeyPress?: (evt: KeyboardEvent<HTMLDivElement>) => void;
 }) {
   const badge = (
     <EuiBadgeStyled data-is-clickable={!!onClick}>
-      <EuiIcon size="s" type={getMonitorTypeBadgeIcon(monitor)} />{' '}
-      {getMonitorTypeBadgeTitle(monitor)}
+      <EuiIcon size="s" type={getMonitorTypeBadgeIcon(monitorType)} />{' '}
+      {getMonitorTypeBadgeTitle(monitorType)}
     </EuiBadgeStyled>
   );
 
@@ -42,28 +37,28 @@ export function MonitorTypeBadge({
   );
 }
 
-function getMonitorTypeBadgeTitle(monitor: EncryptedSyntheticsMonitor) {
-  switch (monitor[ConfigKey.FORM_MONITOR_TYPE]) {
+function getMonitorTypeBadgeTitle(monitorType: string) {
+  switch (monitorType) {
     case FormMonitorType.TCP:
     case FormMonitorType.HTTP:
     case FormMonitorType.ICMP:
-      return monitor?.type?.toUpperCase();
+      return monitorType.toUpperCase();
     case FormMonitorType.SINGLE:
       return 'Page';
     case FormMonitorType.MULTISTEP:
       return 'Journey';
   }
 
-  switch (monitor?.type) {
+  switch (monitorType) {
     case MonitorTypeEnum.BROWSER:
       return 'Journey';
     default:
-      return monitor?.type?.toUpperCase();
+      return monitorType.toUpperCase();
   }
 }
 
-function getMonitorTypeBadgeIcon(monitor: EncryptedSyntheticsMonitor) {
-  return monitor?.type === 'browser' ? 'videoPlayer' : 'online';
+function getMonitorTypeBadgeIcon(monitorType: string) {
+  return monitorType === 'browser' ? 'videoPlayer' : 'online';
 }
 
 const EuiBadgeStyled = euiStyled(EuiBadge)<{ 'data-is-clickable': boolean }>`

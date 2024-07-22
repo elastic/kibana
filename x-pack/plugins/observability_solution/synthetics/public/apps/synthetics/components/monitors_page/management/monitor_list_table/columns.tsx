@@ -102,7 +102,7 @@ export function useMonitorListColumns({
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
         <MonitorTypeBadge
-          monitor={monitor}
+          monitorType={monitor[ConfigKey.MONITOR_TYPE]}
           ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
           onClick={() => {
             history.push({

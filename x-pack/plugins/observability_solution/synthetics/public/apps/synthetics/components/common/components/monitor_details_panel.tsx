@@ -125,7 +125,7 @@ export const MonitorDetailsPanel = ({
         <EuiDescriptionListDescription>{monitor.id}</EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <MonitorTypeBadge monitor={monitor} />
+          <MonitorTypeBadge monitorType={monitor.type} />
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>

@@ -23,7 +23,7 @@ export const MetricItemBody = ({ monitor }: { monitor: MonitorOverviewItem }) =>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <MonitorTypeBadge
-            monitor={monitor}
+            monitorType={monitor[ConfigKey.MONITOR_TYPE]}
             ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
             onClick={() => {
               history.push({
