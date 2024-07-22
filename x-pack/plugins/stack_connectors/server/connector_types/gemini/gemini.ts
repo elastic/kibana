@@ -328,7 +328,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
 /** Format the json body to meet Gemini payload requirements */
 const formatGeminiPayload = (
-  data: Array<{ role: string; content: string }>,
+  data: Array<{ role: string; content: string; parts: MessagePart[] }>,
   temperature: number
 ): Payload => {
   const payload: Payload = {
