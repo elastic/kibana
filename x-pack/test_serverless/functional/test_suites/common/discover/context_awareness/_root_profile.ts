@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('root profile', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
     });
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {

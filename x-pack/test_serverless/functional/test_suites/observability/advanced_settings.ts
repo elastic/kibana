@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Observability advanced settings', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
       await pageObjects.common.navigateToApp('settings');
     });
 
