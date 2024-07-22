@@ -11,45 +11,12 @@ import {
   ACTIVE_NODES_LOOK_BACK,
 } from './kibana_discovery_service';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
-import {
-  SavedObjectsBulkDeleteResponse,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core/server';
+import { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
-import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
+import { createFindResponse, createFindSO } from './mock_kibana_discovery_service';
 
 const currentNode = 'current-node-id';
 const now = '2024-08-10T10:00:00.000Z';
-
-const createNodeRecord = (id: string = '1', lastSeen: string = now): BackgroundTaskNode => ({
-  id,
-  last_seen: lastSeen,
-});
-
-const createFindSO = (
-  id: string = currentNode,
-  lastSeen: string = now
-): SavedObjectsFindResult<BackgroundTaskNode> => ({
-  attributes: createNodeRecord(id, lastSeen),
-  id: `${BACKGROUND_TASK_NODE_SO_NAME}:${id}`,
-  namespaces: ['default'],
-  references: [],
-  score: 1,
-  type: BACKGROUND_TASK_NODE_SO_NAME,
-  updated_at: new Date().toDateString(),
-  version: '1',
-});
-
-const createFindResponse = (
-  soList: Array<SavedObjectsFindResult<BackgroundTaskNode>>
-): SavedObjectsFindResponse<BackgroundTaskNode, unknown> => ({
-  total: 1,
-  per_page: 10000,
-  page: 1,
-  saved_objects: soList,
-});
 
 describe('KibanaDiscoveryService', () => {
   const savedObjectsRepository = savedObjectsRepositoryMock.create();
