@@ -28,27 +28,32 @@ const getDefaultServerlessRole = (projectType: string) => {
 };
 
 export class ServerlessRoleProvider implements RoleProvider {
-  private projectType: string | undefined;
+  private projectType: string;
+  private rolesDefinitonPath: string;
 
   constructor(config: Config) {
     const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
-    const projectType = kbnServerArgs
+    this.projectType = kbnServerArgs
       .filter((arg) => arg.startsWith('--serverless'))
       .reduce((acc, arg) => {
         const match = arg.match(/--serverless[=\s](\w+)/);
         return acc + (match ? match[1] : '');
       }, '') as ServerlessProjectType;
-    if (!isServerlessProjectType(projectType)) {
-      throw new Error(`Unsupported serverless projectType: ${projectType}`);
+
+    if (!isServerlessProjectType(this.projectType)) {
+      throw new Error(`Unsupported serverless projectType: ${this.projectType}`);
     }
+
+    this.rolesDefinitonPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
   getSupportedRoleDescriptors(): any {
-    return readRolesDescriptorsFromResource(
-      resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType!, 'roles.yml')
-    );
+    return readRolesDescriptorsFromResource(this.rolesDefinitonPath);
   }
   getDefaultRole(): string {
-    return getDefaultServerlessRole(this.projectType!);
+    return getDefaultServerlessRole(this.projectType);
+  }
+  getRolesDefinitionPath(): string {
+    return this.rolesDefinitonPath;
   }
 }

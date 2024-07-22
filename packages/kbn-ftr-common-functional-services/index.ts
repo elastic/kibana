@@ -20,6 +20,10 @@ export type EsArchiver = ProvidedType<typeof EsArchiverProvider>;
 import { EsProvider } from './services/es';
 export type Es = ProvidedType<typeof EsProvider>;
 
-export { SupertestWithoutAuthProvider } from './services/supertest_without_auth';
+import { SupertestWithoutAuthProvider } from './services/supertest_without_auth';
+export type SupertestWithoutAuthType = ProvidedType<typeof SupertestWithoutAuthProvider>;
+
+export type SamlAuthProvider = ProvidedType<typeof EsArchiverProvider>;
+export type { RoleCredentials } from './services/saml_auth';
 
 export type { FtrProviderContext } from './services/ftr_provider_context';

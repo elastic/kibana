@@ -8,6 +8,8 @@
 
 import { SamlSessionManager } from '@kbn/test';
 import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { resolve } from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { getRoleProvider } from './role_provider';
 import { getInternalRequestHeaders } from './internal_headers';
@@ -29,22 +31,22 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 
   const customRolesFileName: string | undefined = process.env.ROLES_FILENAME_OVERRIDE;
+  const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', customRolesFileName ?? 'role_users.json');
+
   // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
-  const sessionManager = new SamlSessionManager(
-    {
-      hostOptions: {
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: isCloud ? undefined : config.get('servers.kibana.port'),
-        username: config.get('servers.kibana.username'),
-        password: config.get('servers.kibana.password'),
-      },
-      log,
-      isCloud,
-      supportedRoles,
+  const sessionManager = new SamlSessionManager({
+    hostOptions: {
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: isCloud ? undefined : config.get('servers.kibana.port'),
+      username: config.get('servers.kibana.username'),
+      password: config.get('servers.kibana.password'),
     },
-    customRolesFileName
-  );
+    log,
+    isCloud,
+    supportedRoles: { roles: supportedRoles, sourcePath: roleProvider.getRolesDefinitionPath() },
+    cloudUsersFilePath,
+  });
 
   const DEFAULT_ROLE = roleProvider.getDefaultRole();
 

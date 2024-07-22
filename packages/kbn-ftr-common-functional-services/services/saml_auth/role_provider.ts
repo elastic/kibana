@@ -13,6 +13,7 @@ import { StatefulRoleProvider } from './stateful_role_provider';
 export interface RoleProvider {
   getSupportedRoleDescriptors(): any;
   getDefaultRole(): string;
+  getRolesDefinitionPath(): string;
 }
 
 export const getRoleProvider = (config: Config) => {

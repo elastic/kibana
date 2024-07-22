@@ -9,6 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import type { HostOptions } from '@kbn/test';
 import { SamlSessionManager } from '@kbn/test';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { SecurityRoleName } from '../../../../common/test';
 
 export const samlAuthentication = async (
@@ -34,15 +35,15 @@ export const samlAuthentication = async (
       role: string | SecurityRoleName
     ): Promise<{ cookie: string; username: string; password: string }> => {
       // If config.env.PROXY_ORG is set, it means that proxy service is used to create projects. Define the proxy org filename to override the roles.
-      const rolesFilename = config.env.PROXY_ORG ? `${config.env.PROXY_ORG}.json` : undefined;
-      const sessionManager = new SamlSessionManager(
-        {
-          hostOptions,
-          log,
-          isCloud: config.env.CLOUD_SERVERLESS,
-        },
-        rolesFilename
-      );
+      const rolesFilename = config.env.PROXY_ORG
+        ? `${config.env.PROXY_ORG}.json`
+        : 'role_users.json';
+      const sessionManager = new SamlSessionManager({
+        hostOptions,
+        log,
+        isCloud: config.env.CLOUD_SERVERLESS,
+        cloudUsersFilePath: `${REPO_ROOT}/.ftr/${rolesFilename}`,
+      });
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role).then((cookie) => {
         return {
           cookie,

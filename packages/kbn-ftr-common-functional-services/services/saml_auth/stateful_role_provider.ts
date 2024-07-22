@@ -7,14 +7,23 @@
  */
 
 import { readRolesDescriptorsFromResource, STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import { RoleProvider } from './role_provider';
 
 export class StatefulRoleProvider implements RoleProvider {
+  private rolesDefinitionPath: string;
+
+  constructor() {
+    this.rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
+  }
   getSupportedRoleDescriptors(): any {
-    return readRolesDescriptorsFromResource(resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml'));
+    return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
   }
   getDefaultRole(): string {
     return 'editor';
+  }
+  getRolesDefinitionPath(): string {
+    return this.rolesDefinitionPath;
   }
 }

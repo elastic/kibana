@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SamlAuthProvider } from './saml_auth_provider';
+export { SamlAuthProvider, RoleCredentials } from './saml_auth_provider';
