@@ -4034,7 +4034,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   },
   salesforce: {
     features: {
-      FeatureName.SYNC_RULES]: {
+      [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
       },
