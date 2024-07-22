@@ -9,7 +9,7 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { OpsMetrics } from '@kbn/core-metrics-server';
 import type { Observable } from 'rxjs';
-import { LoadWindow } from './load_window';
+import { HistoryWindow } from './history_window';
 
 interface ELULoadResponse {
   /**
@@ -28,15 +28,15 @@ interface ELULoadResponse {
   };
 }
 
-const LOAD_WINDOW_SIZE_SHORT = 3;
-const LOAD_WINDOW_SIZE_MED = 6;
-const LOAD_WINDOW_SIZE_LONG = 12;
+const HISTORY_WINDOW_SIZE_SHORT = 3;
+const HISTORY_WINDOW_SIZE_MED = 6;
+const HISTORY_WINDOW_SIZE_LONG = 12;
 
 /**
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
-export function registerEluLoadRoute(router: IRouter, metrics$: Observable<OpsMetrics>) {
-  const eluLoadWindow = new LoadWindow(LOAD_WINDOW_SIZE_LONG);
+export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<OpsMetrics>) {
+  const eluLoadWindow = new HistoryWindow(HISTORY_WINDOW_SIZE_LONG);
 
   metrics$.subscribe((metrics) => {
     eluLoadWindow.addObservation(metrics.process.event_loop_utilization.utilization);
@@ -58,9 +58,9 @@ export function registerEluLoadRoute(router: IRouter, metrics$: Observable<OpsMe
       async (ctx, req, res) => {
         const body: ELULoadResponse = {
           history: {
-            short: eluLoadWindow.getAverage(LOAD_WINDOW_SIZE_SHORT),
-            medium: eluLoadWindow.getAverage(LOAD_WINDOW_SIZE_MED),
-            long: eluLoadWindow.getAverage(LOAD_WINDOW_SIZE_LONG),
+            short: eluLoadWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT),
+            medium: eluLoadWindow.getAverage(HISTORY_WINDOW_SIZE_MED),
+            long: eluLoadWindow.getAverage(HISTORY_WINDOW_SIZE_LONG),
           },
         };
         return res.ok({ body });

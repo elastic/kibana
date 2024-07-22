@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { LoadWindow } from './load_window';
+import { HistoryWindow } from './history_window';
 
-describe('LoadWindow', () => {
+describe('HistoryWindow', () => {
   it('#getAverage should work without any observations', () => {
-    const lw = new LoadWindow(3);
-    expect(lw.getAverage(1)).toBe(0);
+    const hw = new HistoryWindow(3);
+    expect(hw.getAverage(1)).toBe(0);
   });
   it.each([
     [-1000],
@@ -20,8 +20,8 @@ describe('LoadWindow', () => {
     [9999],
     // [NaN] assuming this is nonsense input
   ])('#getAverage works given bad input: %s', (badInput) => {
-    const lw = new LoadWindow(3);
-    expect(lw.getAverage(badInput)).toBe(0);
+    const hw = new HistoryWindow(3);
+    expect(hw.getAverage(badInput)).toBe(0);
   });
 
   const WINDOW_SIZE = 3;
@@ -70,7 +70,7 @@ describe('LoadWindow', () => {
       expected: 0,
     },
   ])('$name', ({ observations, averageLast, expected }) => {
-    const lw = new LoadWindow(WINDOW_SIZE);
+    const lw = new HistoryWindow(WINDOW_SIZE);
     // reverse so that our test observations are in the order they appear above
     for (const observation of observations.reverse()) {
       lw.addObservation(observation);

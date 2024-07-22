@@ -11,7 +11,7 @@ import assert from 'node:assert';
 /** We .ceil to rather _slightly_ over-report usage in certain circumstances */
 const twoDeci = (num: number) => Math.ceil(num * 100) / 100;
 
-export class LoadWindow {
+export class HistoryWindow {
   readonly #window: number[];
 
   constructor(private readonly size: number) {
