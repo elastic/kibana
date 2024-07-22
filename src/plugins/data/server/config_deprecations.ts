@@ -9,8 +9,6 @@
 import type { ConfigDeprecationProvider } from '@kbn/core/server';
 
 const level = 'warning';
-const message =
-  'Configuring "data.search.sessions" is deprecated and will be removed in a future version.';
 
 export const configDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot,
@@ -35,8 +33,5 @@ export const configDeprecationProvider: ConfigDeprecationProvider = ({
   deprecateFromRoot('data.search.sessions.management.maxSessions', '9.0.0', { level }),
   deprecateFromRoot('data.search.sessions.management.refreshInterval', '9.0.0', { level }),
   deprecateFromRoot('data.search.sessions.management.refreshTimeout', '9.0.0', { level }),
-  deprecateFromRoot('data.search.sessions.management.expiresSoonWarning', '9.0.0', {
-    level,
-    message,
-  }),
+  deprecateFromRoot('data.search.sessions.management.expiresSoonWarning', '9.0.0', { level }),
 ];
