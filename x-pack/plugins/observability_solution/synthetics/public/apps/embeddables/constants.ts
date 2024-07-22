@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './synthetics_refresh_context';
-export * from './synthetics_settings_context';
+export const SYNTHETICS_OVERVIEW_EMBEDDABLE = 'SYNTHETICS_OVERVIEW_EMBEDDABLE';
