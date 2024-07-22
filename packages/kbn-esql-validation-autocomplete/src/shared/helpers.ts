@@ -555,6 +555,19 @@ export function sourceExists(index: string, sources: Set<string>) {
   return Boolean(fuzzySearch(index, sources.keys()));
 }
 
+export function pipePrecedesCurrentWord(text: string) {
+  let inLastWord = true;
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (inLastWord && /\s/.test(text[i])) {
+      inLastWord = false;
+    }
+
+    if (!inLastWord && !/\s/.test(text[i])) {
+      return text[i] === '|';
+    }
+  }
+}
+
 export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
 }
