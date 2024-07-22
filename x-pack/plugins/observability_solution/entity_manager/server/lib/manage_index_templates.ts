@@ -14,8 +14,7 @@ import { entitiesHistoryBaseComponentTemplateConfig } from '../templates/compone
 import { entitiesLatestBaseComponentTemplateConfig } from '../templates/components/base_latest';
 import { entitiesEntityComponentTemplateConfig } from '../templates/components/entity';
 import { entitiesEventComponentTemplateConfig } from '../templates/components/event';
-import { entitiesHistoryIndexTemplateConfig } from '../templates/entities_history_template';
-import { entitiesLatestIndexTemplateConfig } from '../templates/entities_latest_template';
+import { retryTransientEsErrors } from './entities/helpers/retry';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -58,27 +57,20 @@ export const installEntityManagerTemplates = async ({
       component: entitiesEntityComponentTemplateConfig,
     }),
   ]);
-
-  await Promise.all([
-    upsertTemplate({
-      esClient,
-      logger,
-      template: entitiesHistoryIndexTemplateConfig,
-    }),
-    upsertTemplate({
-      esClient,
-      logger,
-      template: entitiesLatestIndexTemplateConfig,
-    }),
-  ]);
 };
+
+interface DeleteTemplateOptions {
+  esClient: ElasticsearchClient;
+  name: string;
+  logger: Logger;
+}
 
 export async function upsertTemplate({ esClient, template, logger }: TemplateManagementOptions) {
   try {
-    await esClient.indices.putIndexTemplate(template);
+    await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(template), { logger });
   } catch (error: any) {
     logger.error(`Error updating entity manager index template: ${error.message}`);
-    return;
+    throw error;
   }
 
   logger.info(
@@ -87,12 +79,26 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
   logger.debug(() => `Entity manager index template: ${JSON.stringify(template)}`);
 }
 
+export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateOptions) {
+  try {
+    await retryTransientEsErrors(
+      () => esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] }),
+      { logger }
+    );
+  } catch (error: any) {
+    logger.error(`Error deleting entity manager index template: ${error.message}`);
+    throw error;
+  }
+}
+
 export async function upsertComponent({ esClient, component, logger }: ComponentManagementOptions) {
   try {
-    await esClient.cluster.putComponentTemplate(component);
+    await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(component), {
+      logger,
+    });
   } catch (error: any) {
     logger.error(`Error updating entity manager component template: ${error.message}`);
-    return;
+    throw error;
   }
 
   logger.info(

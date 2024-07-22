@@ -1,0 +1,33 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the Kibana API document
+  version: 0.0.1
+actions:
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
+  # - target: '$.components.securitySchemes'
+  #   description: Remove all security schemes so we can add our own.
+  #   remove: true
+  # - target: '$.components'
+  #   description: Add security schemes
+  #   update:
+  #     securitySchemes:
+  #       basicAuth:
+  #         type: http
+  #         scheme: basic
+  #       apiKeyAuth:
+  #         type: apiKey
+  #         in: header
+  #         name: Authorization
+  #         description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+  # - target: '$.paths["/api/actions/connector"][*].security'
+  #   remove: true

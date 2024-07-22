@@ -29,7 +29,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.put<unknown, unknown, unknown>(
     {
-      path: '/internal/api/entities/managed/enablement',
+      path: '/internal/entities/managed/enablement',
       validate: false,
     },
     async (context, req, res) => {
