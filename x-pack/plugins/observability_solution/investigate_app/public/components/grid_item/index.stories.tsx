@@ -11,7 +11,6 @@ import { v4 } from 'uuid';
 import { GridItem as Component } from '.';
 import { extendProps } from '../../../.storybook/extend_props';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
-import { MiniMapContextProvider } from '../../hooks/use_mini_map';
 
 type Props = React.ComponentProps<typeof Component>;
 
@@ -40,23 +39,21 @@ const defaultProps: Story = {
   render: ({ props }) => {
     return (
       <div style={{ width: 800, height: 600 }}>
-        <MiniMapContextProvider container={null}>
-          <Component
-            faded={false}
-            locked={false}
-            loading={false}
-            onCopy={() => {}}
-            onDelete={() => {}}
-            onLockToggle={() => {}}
-            onOverrideRemove={async () => {}}
-            onTitleChange={() => {}}
-            overrides={[]}
-            title="My visualization"
-            description="A long description"
-            onEditClick={() => {}}
-            {...props}
-          />
-        </MiniMapContextProvider>
+        <Component
+          faded={false}
+          locked={false}
+          loading={false}
+          onCopy={() => {}}
+          onDelete={() => {}}
+          onLockToggle={() => {}}
+          onOverrideRemove={async () => {}}
+          onTitleChange={() => {}}
+          overrides={[]}
+          title="My visualization"
+          description="A long description"
+          onEditClick={() => {}}
+          {...props}
+        />
       </div>
     );
   },

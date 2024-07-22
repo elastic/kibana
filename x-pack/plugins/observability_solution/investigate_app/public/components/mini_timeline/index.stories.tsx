@@ -7,7 +7,6 @@
 
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { MiniTimelineBase as Component } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
 
 interface Args {

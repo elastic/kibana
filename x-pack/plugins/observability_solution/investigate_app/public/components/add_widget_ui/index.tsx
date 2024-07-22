@@ -78,7 +78,7 @@ export function AddWidgetUI({
   timeRange,
   workflowBlocks,
 }: AddWidgetUIProps) {
-  const [mode, setMode] = useState(AddWidgetMode.Note);
+  const [mode] = useState(AddWidgetMode.Note);
 
   const workflowBlocksControl = useWorkflowBlocks({
     start: start.toISOString(),
