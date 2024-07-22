@@ -24202,6 +24202,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = max(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(ipField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(ipField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(ipField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(ipField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(ipField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(ipField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = min(numberField)",
       "error": [],
       "warning": []
@@ -24521,6 +24573,58 @@
     },
     {
       "query": "from a_index | eval min(booleanField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(ipField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(ipField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(ipField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(ipField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(ipField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(ipField) > 0",
       "error": [
         "EVAL does not support function min"
       ],
