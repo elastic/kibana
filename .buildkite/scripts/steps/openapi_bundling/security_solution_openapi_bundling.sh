@@ -19,3 +19,6 @@ check_for_changed_files "yarn openapi:bundle" true
 
 (cd packages/kbn-securitysolution-exceptions-common && yarn openapi:bundle)
 check_for_changed_files "yarn openapi:bundle" true
+
+(cd x-pack/packages/kbn-elastic-assistant-common && yarn openapi:bundle)
+check_for_changed_files "yarn openapi:bundle" true
