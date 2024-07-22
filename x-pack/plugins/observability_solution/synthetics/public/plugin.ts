@@ -104,7 +104,7 @@ export interface ClientPluginsStart {
   licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
-export interface UptimePluginServices extends Partial<CoreStart> {
+export interface SyntheticsPluginServices extends Partial<CoreStart> {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -114,7 +114,7 @@ export interface UptimePluginServices extends Partial<CoreStart> {
 export type ClientSetup = void;
 export type ClientStart = void;
 
-export class UptimePlugin
+export class SyntheticsPlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
   private readonly _packageInfo: Readonly<PackageInfo>;
