@@ -1047,6 +1047,13 @@ describe('autocomplete', () => {
       34
     );
 
+    testSuggestions(
+      'FROM index1 | ENRICH policy WITH \tv',
+      ['var0 =', ...getPolicyFields('policy')],
+      undefined,
+      34
+    );
+
     // GROK field
     testSuggestions('FROM index1 | GROK f', getFieldNamesByType('string'), undefined, 20);
 

@@ -580,8 +580,16 @@ export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
+/**
+ * Are we after a comma? i.e. STATS fieldA, <here>
+ */
 export function isRestartingExpression(text: string) {
   return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
+}
+
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
 }
 
 export function shouldBeQuotedSource(text: string) {
