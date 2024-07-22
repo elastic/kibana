@@ -23,8 +23,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Detection rules, Alert Suppression for Essentials tier',
   {
-    // skipped in MKI as it depends on feature flag, alertSuppressionForMachineLearningRuleEnabled
-    tags: ['@serverless', '@skipInServerlessMKI'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [
@@ -32,11 +31,6 @@ describe(
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
       },
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForMachineLearningRuleEnabled',
-        ])}`,
-      ],
     },
   },
   () => {
