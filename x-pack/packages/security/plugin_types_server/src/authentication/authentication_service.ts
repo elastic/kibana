@@ -6,14 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
-
-import type { APIKeys } from './api_keys';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { APIKeysService } from '@kbn/core-security-server';
 
 /**
  * Authentication services available on the security plugin's start contract.
  */
 export interface AuthenticationServiceStart {
-  apiKeys: APIKeys;
+  apiKeys: APIKeysService;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }

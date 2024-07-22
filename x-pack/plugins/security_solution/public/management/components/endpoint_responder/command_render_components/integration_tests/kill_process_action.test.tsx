@@ -13,11 +13,14 @@ import {
 } from '../../../console/components/console_manager/mocks';
 import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
-import { enterConsoleCommand } from '../../../console/mocks';
+import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
-import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  EndpointCapabilities,
+  ResponseActionAgentType,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetailsApiResponse,
@@ -25,10 +28,10 @@ import type {
 } from '../../../../../../common/endpoint/types';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
-
-jest.mock('../../../../../common/experimental_features_service');
+import type { CommandDefinition } from '../../../console';
 
 describe('When using the kill-process action from response actions console', () => {
+  let mockedContext: AppContextTestRender;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -37,31 +40,41 @@ describe('When using the kill-process action from response actions console', () 
   let consoleManagerMockAccess: ReturnType<
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
+  let consoleCommands: CommandDefinition[];
+  let consoleSelectors: ReturnType<typeof getConsoleSelectorsAndActionMock>;
+
+  /** Sets the console commands to the `consoleCommands` defined variable above */
+  const setConsoleCommands = (
+    capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES],
+    agentType: ResponseActionAgentType = 'endpoint'
+  ): void => {
+    consoleCommands = getEndpointConsoleCommands({
+      agentType,
+      endpointAgentId: 'a.b.c',
+      endpointCapabilities: capabilities,
+      endpointPrivileges: {
+        ...getEndpointAuthzInitialState(),
+        loading: false,
+        canKillProcess: true,
+        canSuspendProcess: true,
+        canGetRunningProcesses: true,
+      },
+    });
+  };
 
   beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
-
+    mockedContext = createAppRootMockRenderer();
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    setConsoleCommands();
 
-    render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
+    render = async () => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointConsoleCommands({
-                  agentType: 'endpoint',
-                  endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...capabilities],
-                  endpointPrivileges: {
-                    ...getEndpointAuthzInitialState(),
-                    loading: false,
-                    canKillProcess: true,
-                    canSuspendProcess: true,
-                    canGetRunningProcesses: true,
-                  },
-                }),
+                commands: consoleCommands,
               },
             };
           }}
@@ -69,16 +82,22 @@ describe('When using the kill-process action from response actions console', () 
       );
 
       consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
-
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
+      consoleSelectors = getConsoleSelectorsAndActionMock(renderResult);
 
       return renderResult;
     };
   });
 
+  afterEach(() => {
+    // @ts-expect-error
+    consoleSelectors = undefined;
+  });
+
   it('should show an error if the `kill_process` capability is not present in the endpoint', async () => {
-    await render([]);
+    setConsoleCommands([]);
+    await render();
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
@@ -359,6 +378,117 @@ describe('When using the kill-process action from response actions console', () 
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('and the agent type is `SentinelOne`', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneKillProcessEnabled: true,
+      });
+      setConsoleCommands(undefined, 'sentinel_one');
+    });
+
+    it('should display correct help data', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'kill-process --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent(
+          'About' +
+            'Kill/terminate a process' +
+            'Usage' +
+            'kill-process --processName [--comment]' +
+            'Example' +
+            'kill-process --processName="notepad" --comment="kill malware"' +
+            'Required parameters--processName - The process name to kill' +
+            'Optional parameters--comment - A comment to go along with the action'
+        );
+      });
+    });
+
+    it('should display correct entry in help panel', async () => {
+      await render();
+      consoleSelectors.openHelpPanel();
+
+      expect(
+        renderResult.getByTestId('test-commandList-Responseactions-kill-process')
+      ).toHaveTextContent('kill-process --processNameKill/terminate a process');
+    });
+
+    it('should only accept processName argument', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'kill-process --pid=9');
+    });
+
+    it.each`
+      description                              | command
+      ${'no argument is entered'}              | ${'kill-process'}
+      ${'no value provided for processName'}   | ${'kill-process --processName'}
+      ${'empty value provided to processName'} | ${'kill-process --processName=" "'}
+    `('should error when $description', async ({ command }) => {
+      await render();
+      enterConsoleCommand(renderResult, command);
+
+      expect(renderResult.getByTestId('test-badArgument')).toHaveTextContent(
+        'Unsupported argument'
+      );
+    });
+
+    it('should call API with correct payload for SentinelOne kill-process', async () => {
+      await render();
+      enterConsoleCommand(
+        renderResult,
+        'kill-process --processName="notepad" --comment="some comment"'
+      );
+
+      expect(renderResult.getByTestId('killProcess-pending'));
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.killProcess).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: JSON.stringify({
+              agent_type: 'sentinel_one',
+              endpoint_ids: ['a.b.c'],
+              comment: 'some comment',
+              parameters: {
+                process_name: 'notepad',
+              },
+            }),
+          })
+        );
+      });
+    });
+
+    describe('and `responseActionsSentinelOneKillProcessEnabled` feature flag is disabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ responseActionsSentinelOneKillProcessEnabled: false });
+        setConsoleCommands(undefined, 'sentinel_one');
+      });
+
+      it('should error if kill-process is entered', async () => {
+        await render();
+        enterConsoleCommand(renderResult, 'kill-process --processName=foo');
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('test-validationError')).toHaveTextContent(
+            'Unsupported actionSupport for kill-process is not currently available for SentinelOne.'
+          );
+        });
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.killProcess).not.toHaveBeenCalled();
+        });
+      });
+
+      it('should not display kill-process in help', async () => {
+        await render();
+        consoleSelectors.openHelpPanel();
+
+        expect(
+          renderResult.queryByTestId('test-commandList-Responseactions-kill-process')
+        ).toBeNull();
+      });
     });
   });
 });

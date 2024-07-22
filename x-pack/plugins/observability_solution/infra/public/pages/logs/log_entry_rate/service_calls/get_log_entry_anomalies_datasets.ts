@@ -7,8 +7,8 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { IdFormatByJobType } from '../../../../../common/http_api/latest';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
   getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT,

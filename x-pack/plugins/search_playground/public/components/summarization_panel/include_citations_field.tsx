@@ -27,7 +27,7 @@ export const IncludeCitationsField: React.FC<IncludeCitationsFieldProps> = ({
   };
 
   return (
-    <EuiFormRow>
+    <EuiFormRow fullWidth>
       <EuiSwitch
         label={i18n.translate('xpack.searchPlayground.sidebar.citationsField.label', {
           defaultMessage: 'Include citations',

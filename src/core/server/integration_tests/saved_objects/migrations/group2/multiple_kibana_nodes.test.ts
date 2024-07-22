@@ -171,7 +171,6 @@ describe.skip('migration v2', () => {
 
     if (esServer) {
       await esServer.stop();
-      await delay(10000);
     }
   });
 
