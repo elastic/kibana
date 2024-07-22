@@ -8,6 +8,8 @@
 import type {
   DiffableRule,
   FullRuleDiff,
+  ThreeWayDiff,
+  RuleFieldsDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   MissingVersion,
@@ -81,7 +83,34 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     numberFieldsWithUpdates,
     numberFieldsWithConflicts,
     numberFieldsWithNonSolvableConflicts,
-  } = Object.values(fieldsDiff).reduce<{
+  } = getNumberOfFieldsByChangeType(fieldsDiff);
+
+  return {
+    ruleDiff: {
+      fields: fieldsDiff,
+      has_conflict: numberFieldsWithConflicts > 0,
+      has_non_solvable_conflict: numberFieldsWithNonSolvableConflicts > 0,
+      num_fields_with_updates: numberFieldsWithUpdates,
+      num_fields_with_conflicts: numberFieldsWithConflicts,
+      num_fields_with_non_solvable_conflicts: numberFieldsWithNonSolvableConflicts,
+    },
+    ruleVersions: {
+      input: {
+        current,
+        base,
+        target,
+      },
+      output: {
+        current: diffableCurrentVersion,
+        base: diffableBaseVersion,
+        target: diffableTargetVersion,
+      },
+    },
+  };
+};
+
+const getNumberOfFieldsByChangeType = (fieldsDiff: RuleFieldsDiff) =>
+  Object.values<ThreeWayDiff<unknown>>(fieldsDiff).reduce<{
     numberFieldsWithUpdates: number;
     numberFieldsWithConflicts: number;
     numberFieldsWithNonSolvableConflicts: number;
@@ -107,27 +136,3 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
       numberFieldsWithNonSolvableConflicts: 0,
     }
   );
-
-  return {
-    ruleDiff: {
-      fields: fieldsDiff,
-      has_conflict: numberFieldsWithConflicts > 0,
-      has_non_solvable_conflict: numberFieldsWithNonSolvableConflicts > 0,
-      num_fields_with_updates: numberFieldsWithUpdates,
-      num_fields_with_conflicts: numberFieldsWithConflicts,
-      num_fields_with_non_solvable_conflicts: numberFieldsWithNonSolvableConflicts,
-    },
-    ruleVersions: {
-      input: {
-        current,
-        base,
-        target,
-      },
-      output: {
-        current: diffableCurrentVersion,
-        base: diffableBaseVersion,
-        target: diffableTargetVersion,
-      },
-    },
-  };
-};
