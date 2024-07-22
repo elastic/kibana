@@ -164,7 +164,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
               selectedDetectorIndex={singleMetricViewerData?.selectedDetectorIndex}
               selectedEntities={singleMetricViewerData?.selectedEntities}
               selectedJobId={singleMetricViewerData?.jobIds[0]}
+              forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
+              onForecastIdChange={api.updateForecastId}
               onRenderComplete={() => {
                 dataLoading.next(false);
               }}

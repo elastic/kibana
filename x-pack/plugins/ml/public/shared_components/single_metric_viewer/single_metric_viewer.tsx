@@ -28,7 +28,7 @@ import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeserie
 import type { SingleMetricViewerServices, MlEntity } from '../../embeddables/types';
 import './_index.scss';
 
-const containerPadding = 10;
+const containerPadding = 20;
 const minElemAndChartDiff = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
 interface AppStateZoom {
@@ -53,6 +53,7 @@ export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
 
 export interface SingleMetricViewerProps {
   bounds?: TimeRangeBounds;
+  forecastId?: string;
   selectedEntities?: MlEntity;
   selectedDetectorIndex?: number;
   functionDescription?: string;
@@ -63,6 +64,7 @@ export interface SingleMetricViewerProps {
   lastRefresh?: number;
   onRenderComplete?: () => void;
   onError?: (error: Error) => void;
+  onForecastIdChange?: (forecastId: string | undefined) => void;
   uuid: string;
 }
 
@@ -79,7 +81,9 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   functionDescription,
   lastRefresh,
   onError,
+  onForecastIdChange,
   onRenderComplete,
+  forecastId,
   selectedDetectorIndex,
   selectedEntities,
   selectedJobId,
@@ -90,7 +94,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
     height: 0,
   });
   const [zoom, setZoom] = useState<Zoom>();
-  const [selectedForecastId, setSelectedForecastId] = useState<ForecastId>();
+  const [selectedForecastId, setSelectedForecastId] = useState<ForecastId>(forecastId);
   const [selectedJobWrapper, setSelectedJobWrapper] = useState<
     { job: MlJob; stats: MlJobStats } | undefined
   >();
@@ -161,6 +165,9 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
        */
       switch (action) {
         case APP_STATE_ACTION.SET_FORECAST_ID:
+          if (onForecastIdChange) {
+            onForecastIdChange(payload as ForecastId);
+          }
           setSelectedForecastId(payload as ForecastId);
           setZoom(undefined);
           break;
@@ -175,7 +182,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
       }
     },
 
-    [setZoom, setSelectedForecastId]
+    [setZoom, setSelectedForecastId, onForecastIdChange]
   );
 
   const onForecastComplete = (forecastEndTimestamp?: number) => {

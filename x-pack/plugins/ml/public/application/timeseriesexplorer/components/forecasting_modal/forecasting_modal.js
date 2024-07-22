@@ -157,7 +157,7 @@ export class ForecastingModal extends Component {
 
     // A forecast can only be run on an opened job,
     // so open job if it is closed.
-    if (this.props.job.state === JOB_STATE.CLOSED) {
+    if (this.props.jobState === JOB_STATE.CLOSED || this.props.job.state === JOB_STATE.CLOSED) {
       this.openJobAndRunForecast();
     } else {
       this.runForecast(false);
