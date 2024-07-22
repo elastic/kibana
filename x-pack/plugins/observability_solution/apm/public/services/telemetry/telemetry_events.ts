@@ -72,7 +72,7 @@ const entityInventoryAddDataEventType: TelemetryEvent = {
       _meta: {
         optional: true,
         description:
-          'Which action was performed (add_apm_agent or associate_existing_service_logs orcollect_new_service_logs)',
+          'Which action was performed (add_apm_agent or associate_existing_service_logs or collect_new_service_logs)',
       },
     },
   },
