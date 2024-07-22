@@ -163,9 +163,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           setSearchCharLimitExceeded(false);
         }
 
-        setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
-        setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
 
@@ -192,7 +190,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         // so the SearchOption won't highlight anything if only one call is fired
         // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
         setSearchTerm(rawParams.term ?? '');
-        setIsLoading(true);
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
@@ -209,14 +206,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             setOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: (err) => {
-            setIsLoading(false);
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
             reportEvent.error({ message: err, searchValue });
           },
-          complete: () => {
-            setIsLoading(false);
-          },
+          complete: () => {},
         });
       }
     },
@@ -241,8 +235,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
   );
 
+  const onKeyUp = useCallback((event: KeyboardEvent) => {
+    setIsLoading(false);
+  }, []);
+
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
+      setIsLoading(true);
       let selectedRank: number | null = null;
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
@@ -317,6 +316,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   }`;
 
   useEvent('keydown', onKeyDown);
+  useEvent('keyUp', onKeyUp);
 
   if (chromeStyle === 'project' && !isVisible) {
     return (
