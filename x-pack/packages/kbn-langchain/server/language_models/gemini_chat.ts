@@ -89,6 +89,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
             subActionParams: {
               model: this.#model,
               messages: request,
+              temperature: this.#temperature,
             },
           },
         };
@@ -159,9 +160,9 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
               acc.push(item);
               return acc;
             }, []),
+            temperature: this.#temperature,
             tools: request.tools,
           },
-          temperature: this.#temperature,
         },
       };
 
