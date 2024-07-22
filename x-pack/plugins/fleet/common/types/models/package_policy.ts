@@ -81,6 +81,7 @@ export interface NewPackagePolicy {
   /** @deprecated */
   policy_id?: string;
   policy_ids: string[];
+  output_id?: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
