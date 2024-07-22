@@ -36,6 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover esql view', async function () {
+    // see details: https://github.com/elastic/kibana/issues/188816
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');

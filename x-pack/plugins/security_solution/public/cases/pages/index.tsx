@@ -34,6 +34,7 @@ import * as timelineMarkdownPlugin from '../../common/components/markdown_editor
 import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
+import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
@@ -84,6 +85,8 @@ const CaseContainerComponent: React.FC = () => {
     },
     [openFlyout, telemetry]
   );
+
+  const { onLoad: onAlertsTableLoaded } = useFetchNotes();
 
   const endpointDetailsHref = (endpointId: string) =>
     getAppUrl({
@@ -177,6 +180,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           useFetchAlertData,
+          onAlertsTableLoaded,
           permissions: userCasesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>
