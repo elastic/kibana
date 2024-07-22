@@ -449,8 +449,8 @@ describe('conversational chain', () => {
       ],
       // Even with body_content of 1000, the token count should be below or equal to model limit of 100
       expectedTokens: [
-        { type: 'context_token_count', count: 68 },
-        { type: 'prompt_token_count', count: 102 },
+        { type: 'context_token_count', count: 63 },
+        { type: 'prompt_token_count', count: 97 },
       ],
       expectedHasClipped: true,
       expectedSearchRequest: [

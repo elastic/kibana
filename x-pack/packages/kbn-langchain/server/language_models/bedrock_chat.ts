@@ -20,13 +20,11 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
     actionsClient,
     connectorId,
     logger,
-    graph,
     ...params
   }: {
     actionsClient: PublicMethodsOf<ActionsClient>;
     connectorId: string;
     logger: Logger;
-    graph?: boolean;
   } & BaseChatModelParams) {
     super({
       ...params,
