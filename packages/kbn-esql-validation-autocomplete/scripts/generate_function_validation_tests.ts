@@ -1023,18 +1023,6 @@ const toLongSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_
 const toUnsignedLongSignature = evalFunctionDefinitions.find(
   ({ name }) => name === 'to_unsigned_long'
 )!;
-const toCounterIntegerSignature = evalFunctionDefinitions.find(
-  ({ name }) => name === 'to_counter_integer'
-)!;
-const toCounterLongSignature = evalFunctionDefinitions.find(
-  ({ name }) => name === 'to_counter_long'
-)!;
-const toCounterDoubleSignature = evalFunctionDefinitions.find(
-  ({ name }) => name === 'to_counter_double'
-)!;
-const toDatetimeSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
-const toTextSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_text')!;
-const toKeywordSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_keyword')!;
 
 const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
 const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
@@ -1053,8 +1041,7 @@ const toCartesianShapeSignature = evalFunctionDefinitions.find(
 )!;
 const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
-// @TODO: verify again
-const nestedFunctions: Record<SupportedFieldType, string> = {
+const nestedFunctions = {
   double: prepareNestedFunction(toDoubleSignature),
   integer: prepareNestedFunction(toInteger),
   string: prepareNestedFunction(toStringSignature),
@@ -1069,12 +1056,6 @@ const nestedFunctions: Record<SupportedFieldType, string> = {
   unsigned_long: prepareNestedFunction(toUnsignedLongSignature),
   long: prepareNestedFunction(toLongSignature),
   int: prepareNestedFunction(toInteger),
-  counter_integer: prepareNestedFunction(toCounterIntegerSignature),
-  counter_long: prepareNestedFunction(toCounterLongSignature),
-  counter_double: prepareNestedFunction(toCounterDoubleSignature),
-  datetime: prepareNestedFunction(toDatetimeSignature),
-  text: prepareNestedFunction(toTextSignature),
-  keyword: prepareNestedFunction(toKeywordSignature),
   date_period: prepareNestedFunction(toDatePeriodSignature),
 };
 
