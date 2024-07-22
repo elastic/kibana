@@ -38,6 +38,7 @@ export type WizardSection = keyof WizardContent | 'review';
 interface Props {
   onSave: (componentTemplate: ComponentTemplateDeserialized) => void;
   clearSaveError: () => void;
+  setComponentName?: (name: string) => void;
   isSaving: boolean;
   saveError: any;
   defaultValue?: ComponentTemplateDeserialized;
@@ -91,6 +92,7 @@ export const ComponentTemplateForm = ({
       isManaged: false,
     },
   },
+  setComponentName,
   dataStreams,
   canRollover,
   isEditing,
@@ -239,6 +241,16 @@ export const ComponentTemplateForm = ({
       texts={i18nTexts}
       defaultActiveStep={defaultActiveStepIndex}
       onStepChange={onStepChange}
+      onChange={(attrs) => {
+        // Let the parent component know the name of the component template in the
+        // form has changed, so that it can re-compute the canRollover prop.
+        // This is needed for determinating if the user should see a rollover
+        // attached datastreams modal or not.
+        const data = attrs.getData();
+        if (setComponentName) {
+          setComponentName(data.logistics.name);
+        }
+      }}
     >
       <FormWizardStep
         id={wizardSections.logistics.id}

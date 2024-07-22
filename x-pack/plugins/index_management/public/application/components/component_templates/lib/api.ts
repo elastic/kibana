@@ -119,6 +119,15 @@ export const getApi = (
     });
   }
 
+  async function getReferencedIndexTemplateMeta(name: string) {
+    return sendRequest<ComponentTemplateMeta>({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(
+        name
+      )}/referenced_index_template_meta`,
+      method: 'get',
+    });
+  }
+
   return {
     useLoadComponentTemplates,
     deleteComponentTemplates,
@@ -127,6 +136,7 @@ export const getApi = (
     updateComponentTemplate,
     useLoadReferencedIndexTemplateMeta,
     useLoadComponentTemplatesDatastream,
+    getReferencedIndexTemplateMeta,
     getComponentTemplateDatastreams,
     postDataStreamRollover,
     postDataStreamMappingsFromTemplate,
