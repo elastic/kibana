@@ -7,7 +7,7 @@
  */
 
 import { OpenAPIV3 } from 'openapi-types';
-import { buildGlobalTags, prepareRoutes } from './util';
+import { buildGlobalTags, mergeResponseContent, prepareRoutes } from './util';
 import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
@@ -157,5 +157,31 @@ describe('prepareRoutes', () => {
     },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
     expect(prepareRoutes(input, filters)).toEqual(output);
+  });
+});
+
+describe('mergeResponseContent', () => {
+  it('returns an empty object if no content is provided', () => {
+    expect(mergeResponseContent(undefined, undefined)).toEqual({});
+    expect(mergeResponseContent({}, {})).toEqual({});
+  });
+
+  it('merges content objects', () => {
+    expect(
+      mergeResponseContent(
+        {
+          ['application/json+v1']: { encoding: {} },
+        },
+        {
+          ['application/json+v1']: { example: 'overridden' },
+          ['application/json+v2']: {},
+        }
+      )
+    ).toEqual({
+      content: {
+        ['application/json+v1']: { example: 'overridden' },
+        ['application/json+v2']: {},
+      },
+    });
   });
 });
