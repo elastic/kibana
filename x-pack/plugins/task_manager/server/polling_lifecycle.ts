@@ -290,12 +290,21 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       )
       .pipe(
         tap(
-          mapOk(() => {
+          mapOk((results: TimedFillPoolResult) => {
             // Emit event indicating task manager utilization % at the end of a polling cycle
-            // This represents the number of workers busy + number of tasks claimed in this cycle
-            this.emitEvent(
-              asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
-            );
+
+            // Get the actual utilization as a percentage
+            let tmUtilization = this.pool.usedCapacityPercentage;
+
+            // Check whether there are any tasks left unclaimed
+            // If we're not at capacity and there are unclaimed tasks, then
+            // there must be high cost tasks that need to be claimed
+            // Artificially inflate the utilization to represent the unclaimed load
+            if (tmUtilization < 100 && (results.stats?.tasksLeftUnclaimed ?? 0) > 0) {
+              tmUtilization = 100;
+            }
+
+            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(tmUtilization)));
           })
         )
       )

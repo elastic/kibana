@@ -60,7 +60,6 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 8,
               tasksClaimed: 0,
-              tasksRejected: 0,
             },
             docs: [],
           })
@@ -94,7 +93,6 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 8,
               tasksClaimed: 0,
-              tasksRejected: 0,
             },
             docs: [],
           })
@@ -111,7 +109,6 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 10,
               tasksClaimed: 0,
-              tasksRejected: 0,
             },
             docs: [],
           })
@@ -157,7 +154,6 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 8,
               tasksClaimed: 0,
-              tasksRejected: 0,
             },
             docs: [],
           })
@@ -178,7 +174,6 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 7,
               tasksClaimed: 0,
-              tasksRejected: 0,
             },
             docs: [],
           })
@@ -197,7 +192,6 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 9,
               tasksClaimed: 0,
-              tasksRejected: 0,
             },
             docs: [],
           })

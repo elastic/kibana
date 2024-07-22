@@ -414,7 +414,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 3, tasksConflicted: 0, tasksUpdated: 3 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 3,
+        tasksConflicted: 0,
+        tasksUpdated: 3,
+        tasksLeftUnclaimed: 3,
+      });
       expect(result.docs.length).toEqual(3);
     });
 
@@ -500,7 +505,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 1, tasksConflicted: 0, tasksUpdated: 1 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 1,
+        tasksConflicted: 0,
+        tasksUpdated: 1,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(1);
     });
 
@@ -598,7 +608,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 1, tasksConflicted: 0, tasksUpdated: 1 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 1,
+        tasksConflicted: 0,
+        tasksUpdated: 1,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(1);
     });
 
@@ -688,7 +703,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 1, tasksConflicted: 0, tasksUpdated: 1 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 1,
+        tasksConflicted: 0,
+        tasksUpdated: 1,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(1);
     });
 
@@ -740,7 +760,6 @@ describe('TaskClaiming', () => {
         tasksClaimed: 0,
         tasksConflicted: 0,
         tasksUpdated: 0,
-        tasksRejected: 0,
       });
       expect(result.docs.length).toEqual(0);
     });
@@ -818,7 +837,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 2, tasksConflicted: 0, tasksUpdated: 2 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 2,
+        tasksConflicted: 0,
+        tasksUpdated: 2,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(2);
     });
 
@@ -895,7 +919,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 2, tasksConflicted: 0, tasksUpdated: 2 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 2,
+        tasksConflicted: 0,
+        tasksUpdated: 2,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(2);
     });
 
@@ -972,7 +1001,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 2, tasksConflicted: 1, tasksUpdated: 2 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 2,
+        tasksConflicted: 1,
+        tasksUpdated: 2,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(2);
     });
 
@@ -1074,7 +1108,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 4, tasksConflicted: 0, tasksUpdated: 4 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 4,
+        tasksConflicted: 0,
+        tasksUpdated: 4,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(4);
     });
 
@@ -1178,7 +1217,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 3, tasksConflicted: 0, tasksUpdated: 3 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 3,
+        tasksConflicted: 0,
+        tasksUpdated: 3,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(3);
     });
 
@@ -1248,7 +1292,12 @@ describe('TaskClaiming', () => {
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
 
-      expect(result.stats).toEqual({ tasksClaimed: 0, tasksConflicted: 0, tasksUpdated: 0 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 0,
+        tasksConflicted: 0,
+        tasksUpdated: 0,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(0);
     });
 
@@ -1356,7 +1405,12 @@ describe('TaskClaiming', () => {
         { validate: false }
       );
 
-      expect(result.stats).toEqual({ tasksClaimed: 3, tasksConflicted: 0, tasksUpdated: 3 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 3,
+        tasksConflicted: 0,
+        tasksUpdated: 3,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(3);
     });
 
@@ -1426,7 +1480,12 @@ describe('TaskClaiming', () => {
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
 
-      expect(result.stats).toEqual({ tasksClaimed: 0, tasksConflicted: 0, tasksUpdated: 0 });
+      expect(result.stats).toEqual({
+        tasksClaimed: 0,
+        tasksConflicted: 0,
+        tasksUpdated: 0,
+        tasksLeftUnclaimed: 0,
+      });
       expect(result.docs.length).toEqual(0);
     });
 

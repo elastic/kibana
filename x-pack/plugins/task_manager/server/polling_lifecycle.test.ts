@@ -244,7 +244,7 @@ describe('TaskPollingLifecycle', () => {
         of(
           asOk({
             docs: [],
-            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksRejected: 0 },
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
           })
         )
       );
@@ -326,7 +326,7 @@ describe('TaskPollingLifecycle', () => {
         of(
           asOk({
             docs: [],
-            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksRejected: 0 },
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
           })
         )
       );
@@ -348,6 +348,55 @@ describe('TaskPollingLifecycle', () => {
         return !!emittedEvents.find(
           (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
         );
+      });
+
+      const workerUtilizationEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+      );
+      expect(workerUtilizationEvent).toEqual({
+        id: 'workerUtilization',
+        type: 'TASK_MANAGER_STAT',
+        event: { tag: 'ok', value: 0 },
+      });
+    });
+
+    test('should set utilization to max when capacity is not fully reached but there are tasks left unclaimed', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        of(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, tasksLeftUnclaimed: 2 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil('workerUtilizationEvent emitted', () => {
+        return !!emittedEvents.find(
+          (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+        );
+      });
+
+      const workerUtilizationEvent = emittedEvents.find(
+        (event: TaskLifecycleEvent) => event.id === 'workerUtilization'
+      );
+      expect(workerUtilizationEvent).toEqual({
+        id: 'workerUtilization',
+        type: 'TASK_MANAGER_STAT',
+        event: { tag: 'ok', value: 100 },
       });
     });
 

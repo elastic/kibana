@@ -289,6 +289,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksUpdated: finalResults.length,
       tasksConflicted: conflicts,
       tasksClaimed: finalResults.length,
+      tasksLeftUnclaimed: leftOverTasks.length,
     },
     docs: finalResults,
     timing: stopTaskTimer(),

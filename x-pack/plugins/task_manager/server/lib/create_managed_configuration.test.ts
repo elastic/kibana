@@ -13,7 +13,12 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
-import { DEFAULT_CAPACITY, TaskManagerConfig } from '../config';
+import {
+  CLAIM_STRATEGY_DEFAULT,
+  CLAIM_STRATEGY_MGET,
+  DEFAULT_CAPACITY,
+  TaskManagerConfig,
+} from '../config';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -145,7 +150,10 @@ describe('createManagedConfiguration()', () => {
   });
 
   describe('capacity configuration', () => {
-    function setupScenario(startingCapacity: number) {
+    function setupScenario(
+      startingCapacity: number,
+      claimStrategy: string = CLAIM_STRATEGY_DEFAULT
+    ) {
       const errors$ = new Subject<Error>();
       const subscription = jest.fn();
       const { capacityConfiguration$ } = createManagedConfiguration({
@@ -154,6 +162,7 @@ describe('createManagedConfiguration()', () => {
         config: {
           capacity: startingCapacity,
           poll_interval: 1,
+          claim_strategy: claimStrategy,
         } as TaskManagerConfig,
       });
       capacityConfiguration$.subscribe(subscription);
@@ -167,49 +176,103 @@ describe('createManagedConfiguration()', () => {
 
     afterEach(() => clock.restore());
 
-    test('should decrease configuration at the next interval when an error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(20);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-      expect(subscription).toHaveBeenCalledTimes(1);
-      clock.tick(1);
-      expect(subscription).toHaveBeenCalledTimes(2);
-      expect(subscription).toHaveBeenNthCalledWith(2, 16);
-    });
+    describe('default claim strategy', () => {
+      test('should decrease configuration at the next interval when an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
 
-    test('should log a warning when the configuration changes from the starting value', async () => {
-      const { errors$ } = setupScenario(20);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
-      );
-    });
-
-    test('should increase configuration back to normal incrementally after an error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(20);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
-      expect(subscription).toHaveBeenNthCalledWith(2, 16);
-      expect(subscription).toHaveBeenNthCalledWith(3, 17);
-      expect(subscription).toHaveBeenNthCalledWith(4, 18);
-      expect(subscription).toHaveBeenNthCalledWith(5, 19);
-      expect(subscription).toHaveBeenNthCalledWith(6, 20);
-      // No new calls due to value not changing and usage of distinctUntilChanged()
-      expect(subscription).toHaveBeenCalledTimes(6);
-    });
-
-    test('should keep reducing configuration when errors keep emitting until it reaches minimum', async () => {
-      const { subscription, errors$ } = setupScenario(20);
-      for (let i = 0; i < 20; i++) {
+      test('should log a warning when the configuration changes from the starting value', async () => {
+        const { errors$ } = setupScenario(10);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      }
-      expect(subscription).toHaveBeenNthCalledWith(2, 16);
-      expect(subscription).toHaveBeenNthCalledWith(3, 12);
-      expect(subscription).toHaveBeenNthCalledWith(4, 10);
-      // No new calls due to value not changing and usage of distinctUntilChanged()
-      expect(subscription).toHaveBeenCalledTimes(4);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        );
+      });
+
+      test('should increase configuration back to normal incrementally after an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 9);
+        expect(subscription).toHaveBeenNthCalledWith(4, 10);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(4);
+      });
+
+      test('should keep reducing configuration when errors keep emitting until it reaches minimum', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        for (let i = 0; i < 20; i++) {
+          errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 6);
+        expect(subscription).toHaveBeenNthCalledWith(4, 4);
+        expect(subscription).toHaveBeenNthCalledWith(5, 3);
+        expect(subscription).toHaveBeenNthCalledWith(6, 2);
+        expect(subscription).toHaveBeenNthCalledWith(7, 1);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(7);
+      });
+    });
+
+    describe('mget claim strategy', () => {
+      test('should decrease configuration at the next interval when an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should log a warning when the configuration changes from the starting value', async () => {
+        const { errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        );
+      });
+
+      test('should increase configuration back to normal incrementally after an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 9);
+        expect(subscription).toHaveBeenNthCalledWith(4, 10);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(4);
+      });
+
+      test('should keep reducing configuration when errors keep emitting until it reaches minimum', async () => {
+        const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        for (let i = 0; i < 20; i++) {
+          errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        expect(subscription).toHaveBeenNthCalledWith(3, 6);
+        expect(subscription).toHaveBeenNthCalledWith(4, 5);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(4);
+      });
     });
   });
 
