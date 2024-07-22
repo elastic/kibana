@@ -34,7 +34,7 @@
       "presentationUtil",
       "features",
       "licensing",
-      "usageCollection",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
@@ -44,6 +44,7 @@
       "observabilityAIAssistant"
     ],
     "requiredBundles": [
+      "controls",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",
