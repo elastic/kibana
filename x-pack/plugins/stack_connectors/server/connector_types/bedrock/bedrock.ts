@@ -194,14 +194,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   }
 
   private async runApiRaw(
-    params: SubActionRequestParams<RunActionResponse | InvokeAIRawActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+    params: SubActionRequestParams<RunActionResponse | InvokeAIRawActionResponse>
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
     const response = await this.request(params);
     return response.data;
   }
 
   private async runApiLatest(
-    params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+    params: SubActionRequestParams<RunApiLatestResponse>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
     // keeping the response the same as claude 2 for our APIs

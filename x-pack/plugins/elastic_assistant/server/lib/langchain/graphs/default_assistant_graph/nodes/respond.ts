@@ -22,7 +22,6 @@ export const respond = async ({ llm, state }: { llm: BaseChatModel; state: Agent
     ] as [StringWithAutocomplete<'user'>, string];
 
     const responseMessage = await llm
-      // .bindTools([])
       // use AGENT_NODE_TAG to identify as agent node for stream parsing
       .withConfig({ runName: 'Summarizer', tags: [AGENT_NODE_TAG] })
       .invoke([userMessage]);
