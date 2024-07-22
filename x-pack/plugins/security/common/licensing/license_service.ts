@@ -83,7 +83,7 @@ export class SecurityLicenseService {
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
-        allowFips: false,
+        allowFips: true,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
             ? 'error-xpack-unavailable'
@@ -106,7 +106,7 @@ export class SecurityLicenseService {
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
-        allowFips: false,
+        allowFips: true,
       };
     }
 
@@ -128,7 +128,7 @@ export class SecurityLicenseService {
       allowRemoteClusterPrivileges: isLicensePlatinumOrBetter,
       allowRbac: true,
       allowUserProfileCollaboration: isLicenseStandardOrBetter,
-      allowFips: isLicensePlatinumOrBetter,
+      allowFips: true,
     };
   }
 }
