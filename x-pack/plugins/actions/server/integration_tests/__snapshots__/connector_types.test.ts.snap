@@ -275,12 +275,15 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
-              "metas": Array [
+              "rules": Array [
                 Object {
-                  "x-oas-any-type": true,
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
                 },
               ],
-              "type": "any",
+              "type": "string",
             },
             "role": Object {
               "flags": Object {
@@ -555,12 +558,15 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
-              "metas": Array [
+              "rules": Array [
                 Object {
-                  "x-oas-any-type": true,
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
                 },
               ],
-              "type": "any",
+              "type": "string",
             },
             "role": Object {
               "flags": Object {
