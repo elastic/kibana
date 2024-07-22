@@ -166,10 +166,8 @@ export const CloudSecurityDataTable = ({
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
-  const renderDocumentView = (hit: DataTableRecord) => {
-    console.log(hit);
-    return flyoutComponent(hit, () => setExpandedDoc(undefined));
-  };
+  const renderDocumentView = (hit: DataTableRecord) =>
+    flyoutComponent(hit, () => setExpandedDoc(undefined));
 
   // services needed for unified-data-table package
   const {
