@@ -24,7 +24,7 @@ const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>>
     .map((item) => JSON.parse(item));
 };
 
-interface SendOptions {
+export interface SendOptions {
   supertestWithoutAuth: SuperTest.Agent;
   apiKeyHeader: { Authorization: string };
   referer?: string;
@@ -48,6 +48,10 @@ export class BsearchSecureService extends GenericFtrService<FtrProviderContext> 
     strategy,
     space,
   }: SendOptions) {
+    console.log(`supertestWithoutAuth====`, supertestWithoutAuth);
+    console.log(`options====`, options);
+    console.log(`internalOrigin====`, internalOrigin);
+    console.log(`apiKeyHeader====`, apiKeyHeader);
     const { body } = await this.retry.try(async () => {
       let result;
       const url = `/internal/search/${strategy}`;
@@ -92,6 +96,7 @@ export class BsearchSecureService extends GenericFtrService<FtrProviderContext> 
           .set('kbn-xsrf', 'true')
           .send(options);
       }
+      console.log(`bsearch response======: ${JSON.stringify(result)}`);
       if ((result.status === 500 || result.status === 200) && result.body) {
         return result;
       }

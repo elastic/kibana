@@ -8,10 +8,8 @@
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
-  describe('@ess SecuritySolution Explore Network', () => {
-    loadTestFile(require.resolve('./network_details'));
-    loadTestFile(require.resolve('./network_dns'));
-    loadTestFile(require.resolve('./network_top_n_flow'));
-    loadTestFile(require.resolve('./tls'));
+  describe('@ess @serverless SecuritySolution Explore Overview', () => {
+    loadTestFile(require.resolve('./overview_host'));
+    loadTestFile(require.resolve('./overview_network'));
   });
 }

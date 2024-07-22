@@ -7,9 +7,12 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
-import { RoleCredentials } from '../../../../test_serverless/shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecuritySolutionUtils } from './types';
+import type { SendOptions } from '../../../../../test/common/services/bsearch';
+
+import type { RoleCredentials } from '../../../../test_serverless/shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { SecuritySolutionUtils } from './types';
+import type { SecuritySolutionServerlessBsearchInitializer } from './security_solution_serverless_bsearch_initializer';
 
 export function SecuritySolutionServerlessUtils({
   getService,
@@ -19,6 +22,7 @@ export function SecuritySolutionServerlessUtils({
   const svlCommonApi = getService('svlCommonApi');
   const config = getService('config');
   const log = getService('log');
+  const securitySolutionServerlessBsearch = getService('bsearchInitializer');
 
   const rolesCredentials = new Map<string, RoleCredentials>();
   const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
@@ -48,6 +52,13 @@ export function SecuritySolutionServerlessUtils({
     });
   });
 
+  const createSuperTest = async (role = 'admin') => {
+    cleanCredentials(role);
+    const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
+    rolesCredentials.set(role, credentials);
+    return agentWithCommonHeaders.set(credentials.apiKeyHeader);
+  };
+
   return {
     getUsername: async (role = 'admin') => {
       const { username } = await svlUserManager.getUserData(role);
@@ -57,12 +68,32 @@ export function SecuritySolutionServerlessUtils({
     /**
      * Only one API key for each role can be active at a time.
      */
-    createSuperTest: async (role = 'admin') => {
-      cleanCredentials(role);
-      const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
-      rolesCredentials.set(role, credentials);
+    createSuperTest,
 
-      return agentWithCommonHeaders.set(credentials.apiKeyHeader);
+    createBsearch: async (
+      role = 'admin'
+    ): Promise<SecuritySolutionServerlessBsearchInitializer> => {
+      const credentials = rolesCredentials.get(role);
+      if (!credentials) {
+        await createSuperTest(role);
+      }
+      const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader ?? { Authorization: '' };
+
+      const send = (sendOptions: SendOptions) => {
+        return securitySolutionServerlessBsearch.send(
+          {
+            ...sendOptions,
+            // We need super test without auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
+            supertestWithoutAuth: supertest.agent(kbnUrl),
+          },
+          // We are setting the auth header in bsearch `apiKeyHeader`
+          {
+            apiKeyHeader,
+          }
+        );
+      };
+
+      return { ...securitySolutionServerlessBsearch, send };
     },
   };
 }

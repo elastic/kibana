@@ -8,8 +8,10 @@
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
-  describe('@ess SecuritySolution Explore Overview', () => {
-    loadTestFile(require.resolve('./overview_host'));
-    loadTestFile(require.resolve('./overview_network'));
+  describe('@ess @serverless @skipInServerless SecuritySolution Timeline', () => {
+    loadTestFile(require.resolve('./events'));
+    loadTestFile(require.resolve('./timeline_details'));
+    loadTestFile(require.resolve('./timeline'));
+    loadTestFile(require.resolve('./timeline_migrations'));
   });
 }

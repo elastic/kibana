@@ -6,8 +6,10 @@
  */
 
 import TestAgent from 'supertest/lib/agent';
+import { SecuritySolutionServerlessBsearch } from './security_solution_serverless_bsearch_initializer';
 
 export interface SecuritySolutionUtils {
   getUsername: (role?: string) => Promise<string>;
   createSuperTest: (role?: string) => Promise<TestAgent<any>>;
+  createBsearch: (role?: string) => Promise<SecuritySolutionServerlessBsearch>;
 }
