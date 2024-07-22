@@ -643,7 +643,7 @@
             ],
             "signature": [
               "{ [x: string]: ",
-              "ExpandedDetailType",
+              "ExpandedEventType",
               " | undefined; }"
             ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
@@ -1259,7 +1259,7 @@
           " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
           "AlertPageFilterType",
           ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
-          "ExpandedDetailType",
+          "ExpandedEventType",
           ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
