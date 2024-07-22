@@ -8,6 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { cloneDeep } from 'lodash';
+import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   ChildFieldName,
   ComboBoxOption,
@@ -730,6 +732,16 @@ export function getStateWithCopyToFields(state: State): State {
               : [field.path.join('.')],
           },
         };
+        // add existing text field and children to byId list
+        const children = existingTextField.childFields
+          ? existingTextField.childFields.reduce<Record<string, NormalizedField>>(
+              (acc, childFieldId) => {
+                acc[childFieldId] = state.mappingViewFields.byId[childFieldId];
+                return acc;
+              },
+              {}
+            )
+          : {};
         updatedState = {
           ...updatedState,
           fields: {
@@ -737,6 +749,7 @@ export function getStateWithCopyToFields(state: State): State {
             byId: {
               ...updatedState.fields.byId,
               [existingTextField.id]: updatedTextField,
+              ...children,
             },
           },
         };
@@ -772,3 +785,9 @@ export function getStateWithCopyToFields(state: State): State {
 export const getFieldByPathName = (fields: NormalizedFields, name: string) => {
   return Object.values(fields.byId).find((field) => field.path.join('.') === name);
 };
+
+export function isLocalModel(
+  model: InferenceServiceSettings
+): model is LocalInferenceServiceSettings {
+  return Boolean((model as LocalInferenceServiceSettings).service_settings.model_id);
+}
