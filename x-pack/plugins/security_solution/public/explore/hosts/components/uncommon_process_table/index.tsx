@@ -10,12 +10,11 @@ import { useDispatch } from 'react-redux';
 
 import type { HostsUncommonProcessesEdges } from '../../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import type { Columns, ItemsPerRow } from '../../../components/paginated_table';
+import type { ItemsPerRow } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 import * as i18n from './translations';
-import { HostsType } from '../../store/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { getUncommonColumns } from './columns';
+import { getUncommonColumnsCurated } from './columns';
 
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface UncommonProcessTableProps {
@@ -30,15 +29,6 @@ interface UncommonProcessTableProps {
   totalCount: number;
   type: hostsModel.HostsType;
 }
-
-export type UncommonProcessTableColumns = [
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>
-];
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -129,18 +119,3 @@ UncommonProcessTableComponent.displayName = 'UncommonProcessTableComponent';
 export const UncommonProcessTable = React.memo(UncommonProcessTableComponent);
 
 UncommonProcessTable.displayName = 'UncommonProcessTable';
-
-export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessTableColumns => {
-  const columns: UncommonProcessTableColumns = getUncommonColumns();
-  if (pageType === HostsType.details) {
-    return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce<UncommonProcessTableColumns>((acc, name) => {
-      acc.splice(
-        acc.findIndex((column) => column.name === name),
-        1
-      );
-      return acc;
-    }, columns);
-  } else {
-    return columns;
-  }
-};

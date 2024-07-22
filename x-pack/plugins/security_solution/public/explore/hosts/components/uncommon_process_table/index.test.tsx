@@ -14,10 +14,8 @@ import { hostsModel } from '../../store';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
-import { UncommonProcessTable, getUncommonColumnsCurated } from '.';
+import { UncommonProcessTable } from '.';
 import { mockData } from './mock';
-import { HostsType } from '../../store/model';
-import * as i18n from './translations';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -149,37 +147,6 @@ describe('Uncommon Process Table Component', () => {
       expect(wrapper.find('tr.euiTableRow').at(4).find('td.euiTableRowCell').at(3).text()).toBe(
         'hello-worldhello-world-2 '
       );
-    });
-  });
-
-  describe('#getUncommonColumnsCurated', () => {
-    test('on hosts page, we expect to get all columns', () => {
-      expect(getUncommonColumnsCurated(HostsType.page).length).toEqual(6);
-    });
-
-    test('on host details page, we expect to remove two columns', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.length).toEqual(4);
-    });
-
-    test('on host page, we should have hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.page);
-      expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(true);
-    });
-
-    test('on host page, we should have number of hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.page);
-      expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(true);
-    });
-
-    test('on host details page, we should not have hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(false);
-    });
-
-    test('on host details page, we should not have number of hosts', () => {
-      const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(false);
     });
   });
 });
