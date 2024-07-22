@@ -13,7 +13,7 @@ import { StateComparators } from '@kbn/presentation-publishing';
 
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
-import { ControlPanel } from './control_panel';
+import { ControlPanel } from './components/control_panel';
 import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
 
 /**
@@ -120,7 +120,7 @@ export const ControlRenderer = <
   );
 
   return component && isControlGroupInitialized ? (
-    <ControlPanel<ApiType> Component={component} />
+    <ControlPanel<ApiType> Component={component} uuid={uuid} />
   ) : // Control group will not display controls until all controls are initialized
   null;
 };
