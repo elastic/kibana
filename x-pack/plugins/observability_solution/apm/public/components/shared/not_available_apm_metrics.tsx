@@ -19,7 +19,7 @@ export function NotAvailableApmMetrics() {
 
   function handleClick() {
     services.telemetry.reportEntityInventoryAddData({
-      type: 'add_apm_n/a',
+      view: 'add_apm_n/a',
     });
     history.push('/tutorial');
   }

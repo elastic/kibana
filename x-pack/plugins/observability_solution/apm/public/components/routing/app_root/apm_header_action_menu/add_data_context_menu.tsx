@@ -50,7 +50,7 @@ export function AddDataContextMenu() {
 
   function reportButtonClick(journey: EntityInventoryAddDataParams['journey']) {
     services.telemetry.reportEntityInventoryAddData({
-      type: 'add_data_button',
+      view: 'add_data_button',
       journey,
     });
   }

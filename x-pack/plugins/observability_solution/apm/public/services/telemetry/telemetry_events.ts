@@ -60,7 +60,7 @@ const entityInventoryPageStateEventType: TelemetryEvent = {
 const entityInventoryAddDataEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA,
   schema: {
-    type: {
+    view: {
       type: 'keyword',
       _meta: {
         description:

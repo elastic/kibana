@@ -47,7 +47,7 @@ export function NoEntitiesEmptyState() {
 
   function reportButtonClick(journey: EntityInventoryAddDataParams['journey']) {
     services.telemetry.reportEntityInventoryAddData({
-      type: 'empty_state',
+      view: 'empty_state',
       journey,
     });
   }

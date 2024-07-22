@@ -31,7 +31,7 @@ export function AddAPMCallOut() {
 
   function handleClick() {
     services.telemetry.reportEntityInventoryAddData({
-      type: 'add_apm_cta',
+      view: 'add_apm_cta',
     });
     history.push('/tutorial');
   }

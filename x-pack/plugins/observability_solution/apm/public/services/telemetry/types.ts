@@ -30,7 +30,7 @@ export interface EntityInventoryPageStateParams {
 }
 
 export interface EntityInventoryAddDataParams {
-  type: 'empty_state' | 'add_data_button' | 'add_apm_cta' | 'add_apm_n/a';
+  view: 'empty_state' | 'add_data_button' | 'add_apm_cta' | 'add_apm_n/a';
   journey?: 'add_apm_agent' | 'associate_existing_service_logs' | 'collect_new_service_logs';
 }
 
