@@ -52,22 +52,22 @@ describe('GET /api/_elu_load', () => {
   });
 
   it('gets ELU load average', async () => {
-    const { body } = await supertest(listener).get('/api/_elu_load').expect(200);
+    const { body } = await supertest(listener).get('/api/_elu_history').expect(200);
     expect(body).toEqual({
-      load: {
+      history: {
         short: expect.any(Number),
         medium: expect.any(Number),
         long: expect.any(Number),
       },
     });
 
-    expect(body.load.short).toBeGreaterThanOrEqual(0);
-    expect(body.load.short).toBeLessThanOrEqual(1);
+    expect(body.history.short).toBeGreaterThanOrEqual(0);
+    expect(body.history.short).toBeLessThanOrEqual(1);
 
-    expect(body.load.medium).toBeGreaterThanOrEqual(0);
-    expect(body.load.medium).toBeLessThanOrEqual(1);
+    expect(body.history.medium).toBeGreaterThanOrEqual(0);
+    expect(body.history.medium).toBeLessThanOrEqual(1);
 
-    expect(body.load.long).toBeGreaterThanOrEqual(0);
-    expect(body.load.long).toBeLessThanOrEqual(1);
+    expect(body.history.long).toBeGreaterThanOrEqual(0);
+    expect(body.history.long).toBeLessThanOrEqual(1);
   });
 });

@@ -18,7 +18,7 @@ interface ELULoadResponse {
    *         actual time range covered is determined by our collection interval (configured via `ops.interval`, default 5s)
    *         and the number of samples held in each window. So by default short: 15s, medium: 30s and long 60s.
    */
-  load: {
+  history: {
     /** The load for the short window */
     short: number;
     /** The load for the medium window */
@@ -45,7 +45,7 @@ export function registerEluLoadRoute(router: IRouter, metrics$: Observable<OpsMe
   router.versioned
     .get({
       access: 'public', // Public but needs to remain undocumented
-      path: '/api/_elu_load',
+      path: '/api/_elu_history',
       options: {
         authRequired: false,
       },
@@ -57,7 +57,7 @@ export function registerEluLoadRoute(router: IRouter, metrics$: Observable<OpsMe
       },
       async (ctx, req, res) => {
         const body: ELULoadResponse = {
-          load: {
+          history: {
             short: eluLoadWindow.getAverage(LOAD_WINDOW_SIZE_SHORT),
             medium: eluLoadWindow.getAverage(LOAD_WINDOW_SIZE_MED),
             long: eluLoadWindow.getAverage(LOAD_WINDOW_SIZE_LONG),
