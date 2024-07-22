@@ -7,12 +7,12 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
+import { IEsSearchResponse } from '@kbn/search-types';
 import type { SendOptions } from '../../../../../test/common/services/bsearch';
-
+import type { SendOptions as SecureBsearchSendOptions } from '../../../../test_serverless/shared/services/bsearch_secure';
 import type { RoleCredentials } from '../../../../test_serverless/shared/services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { SecuritySolutionUtils } from './types';
-import type { SecuritySolutionServerlessBsearchInitializer } from './security_solution_serverless_bsearch_initializer';
 
 export function SecuritySolutionServerlessUtils({
   getService,
@@ -22,7 +22,7 @@ export function SecuritySolutionServerlessUtils({
   const svlCommonApi = getService('svlCommonApi');
   const config = getService('config');
   const log = getService('log');
-  const securitySolutionServerlessBsearch = getService('bsearchInitializer');
+  const SecureBsearch = getService('bsearchSecure');
 
   const rolesCredentials = new Map<string, RoleCredentials>();
   const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
@@ -70,30 +70,26 @@ export function SecuritySolutionServerlessUtils({
      */
     createSuperTest,
 
-    createBsearch: async (
-      role = 'admin'
-    ): Promise<SecuritySolutionServerlessBsearchInitializer> => {
+    createBsearch: async (role = 'admin') => {
       const credentials = rolesCredentials.get(role);
       if (!credentials) {
         await createSuperTest(role);
       }
       const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader ?? { Authorization: '' };
 
-      const send = (sendOptions: SendOptions) => {
-        return securitySolutionServerlessBsearch.send(
-          {
-            ...sendOptions,
-            // We need super test without auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
-            supertestWithoutAuth: supertest.agent(kbnUrl),
-          },
-          // We are setting the auth header in bsearch `apiKeyHeader`
-          {
-            apiKeyHeader,
-          }
-        );
+      const send = <T extends IEsSearchResponse>(sendOptions: SendOptions): Promise<T> => {
+        const { supertest: _, ...rest } = sendOptions;
+        const serverlessSendOptions: SecureBsearchSendOptions = {
+          ...rest,
+          // We need super test without auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
+          supertestWithoutAuth: supertest.agent(kbnUrl),
+          apiKeyHeader,
+          internalOrigin: 'Kibana',
+        };
+        return SecureBsearch.send(serverlessSendOptions);
       };
 
-      return { ...securitySolutionServerlessBsearch, send };
+      return { ...SecureBsearch, send };
     },
   };
 }

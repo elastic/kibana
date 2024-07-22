@@ -7,16 +7,16 @@
 
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { services as serverlessServices } from '../../../../test_serverless/api_integration/services';
-import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
 import { SecuritySolutionServerlessSuperTest } from '../services/security_solution_serverless_supertest';
 import { SecuritySolutionServerlessBsearchCreator } from '../services/security_solution_serverless_bsearch_creator';
-import { SecuritySolutionServerlessBsearchInitializer } from '../services/security_solution_serverless_bsearch_initializer';
+import { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
+import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
 
 export const services = {
   ...serverlessServices,
   spaces: SpacesServiceProvider,
   bsearch: SecuritySolutionServerlessBsearchCreator,
-  bsearchInitializer: SecuritySolutionServerlessBsearchInitializer,
+  bsearchSecure: BsearchSecureService,
   securitySolutionUtils: SecuritySolutionServerlessUtils,
   supertest: SecuritySolutionServerlessSuperTest,
 };
