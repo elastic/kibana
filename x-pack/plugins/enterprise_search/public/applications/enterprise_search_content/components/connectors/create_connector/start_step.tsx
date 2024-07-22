@@ -28,7 +28,14 @@ import { ChooseConnectorSelectable } from './components/choose_connector_selecta
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 
 interface StartStepProps {
-  allConnectors: unknown;
+  allConnectors: Array<{
+    description: string;
+    iconPath: string;
+    isBeta: boolean;
+    isNative: boolean;
+    isTechPreview: boolean;
+    name: string;
+  }>;
   connectorName: string;
   connectorSelected: {
     description: string;
@@ -39,10 +46,12 @@ interface StartStepProps {
     name: string;
   };
   currentStep: number;
+  isNextStepEnabled: boolean;
   selfManaged: boolean;
   setConnectorName: Function;
   setConnectorSelected: Function;
   setCurrentStep: Function;
+  setNextStepEnabled: Function;
   setSelfManaged: Function;
   title: string;
 }
@@ -58,6 +67,8 @@ export const StartStep: React.FC<StartStepProps> = ({
   setConnectorName,
   currentStep,
   setCurrentStep,
+  isNextStepEnabled,
+  setNextStepEnabled,
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
@@ -235,6 +246,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 data-test-subj="enterpriseSearchStartStepNextButton"
                 onClick={() => setCurrentStep(currentStep + 1)}
                 fill
+                disabled={connectorSelected.name === '' || connectorName === ''}
               >
                 {i18n.translate('xpack.enterpriseSearch.startStep.nextButtonLabel', {
                   defaultMessage: 'Next',
@@ -262,17 +274,31 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiButton
-                data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-                iconType="sparkles"
-                fill
-                onClick={() => setCurrentStep(currentStep + 1)}
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
-                  { defaultMessage: 'Generate configuration' }
-                )}
-              </EuiButton>
+              {isNextStepEnabled ? (
+                <EuiButton
+                  data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+                  fill
+                  onClick={() => setCurrentStep(currentStep + 1)}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
+                    { defaultMessage: 'Continue' }
+                  )}
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+                  iconType="sparkles"
+                  fill
+                  onClick={() => setNextStepEnabled(true)}
+                  disabled={connectorSelected.name === '' || connectorName === ''}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
+                    { defaultMessage: 'Generate configuration' }
+                  )}
+                </EuiButton>
+              )}
             </EuiPanel>
           </EuiFlexItem>
         )}

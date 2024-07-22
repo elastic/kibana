@@ -8,7 +8,15 @@
 import React from 'react';
 
 // import { useLocation } from 'react-router-dom';
-import { EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiButton,
+  EuiFlexGroup,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,13 +24,40 @@ import { i18n } from '@kbn/i18n';
 
 interface DeploymentStepProps {
   currentStep: number;
+  isNextStepEnabled: boolean;
   setCurrentStep: Function;
+  setNextStepEnabled: Function;
 }
 
-export const DeploymentStep: React.FC<DeploymentStepProps> = ({ currentStep, setCurrentStep }) => {
+export const DeploymentStep: React.FC<DeploymentStepProps> = ({
+  currentStep,
+  setCurrentStep,
+  isNextStepEnabled,
+  setNextStepEnabled,
+}) => {
   return (
-    <>
+    <EuiFlexGroup gutterSize="m" direction="column">
       {/* <ConnectorDeployment /> */}
+      <EuiFlexItem>
+        <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+          <EuiTitle size="m">
+            <h3>
+              {i18n.translate('xpack.enterpriseSearch.deploymentStep.h3.deploymentLabel', {
+                defaultMessage: 'Deployment',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiButton
+            data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+            onClick={() => setNextStepEnabled(true)}
+          >
+            {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
+              defaultMessage: 'Save',
+            })}
+          </EuiButton>
+        </EuiPanel>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder paddingSize="l">
           <EuiTitle size="s">
@@ -45,6 +80,7 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({ currentStep, set
             data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
             onClick={() => setCurrentStep(currentStep + 1)}
             fill
+            disabled={!isNextStepEnabled}
           >
             {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.button.continue', {
               defaultMessage: 'Contiue',
@@ -52,6 +88,6 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({ currentStep, set
           </EuiButton>
         </EuiPanel>
       </EuiFlexItem>
-    </>
+    </EuiFlexGroup>
   );
 };

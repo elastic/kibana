@@ -98,8 +98,6 @@ export const CreateConnector: React.FC = () => {
 
   const [connectorSelected, setConnectorSelected] = useState<any>('');
   const [connectorName, setConnectorName] = useState('');
-
-  const [startStepComplete, setStartStepComplete] = useState(false);
   const [deploymentStepComplete, setDeploymentStepComplete] = useState(false);
   const [configurationStepComplete, setConfigurationStepComplete] = useState(false);
   const [finishUpStepComplete, setFinishUpStepComplete] = useState(false);
@@ -124,6 +122,8 @@ export const CreateConnector: React.FC = () => {
           setConnectorName={setConnectorName}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+          isNextStepEnabled={deploymentStepComplete}
+          setNextStepEnabled={setDeploymentStepComplete}
         />
       ),
       status: startStepStatus,
@@ -133,7 +133,14 @@ export const CreateConnector: React.FC = () => {
     },
     {
       children: '',
-      content: <DeploymentStep currentStep={currentStep} setCurrentStep={setCurrentStep} />,
+      content: (
+        <DeploymentStep
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
+          isNextStepEnabled={configurationStepComplete}
+          setNextStepEnabled={setConfigurationStepComplete}
+        />
+      ),
 
       status: deploymentStepStatus,
       title: i18n.translate(
@@ -151,6 +158,8 @@ export const CreateConnector: React.FC = () => {
           )}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+          isNextStepEnabled={finishUpStepComplete}
+          setNextStepEnabled={setFinishUpStepComplete}
         />
       ),
       status: configurationStepStatus,
@@ -194,6 +203,8 @@ export const CreateConnector: React.FC = () => {
           setConnectorName={setConnectorName}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+          isNextStepEnabled={configurationStepComplete}
+          setNextStepEnabled={setConfigurationStepComplete}
         />
       ),
       status: startStepStatus,
@@ -216,6 +227,8 @@ export const CreateConnector: React.FC = () => {
           )}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+          isNextStepEnabled={finishUpStepComplete}
+          setNextStepEnabled={setFinishUpStepComplete}
         />
       ),
       status: configurationStepStatus,
@@ -390,7 +403,7 @@ export const CreateConnector: React.FC = () => {
               steps={selfManaged === true ? selfManagedSteps : elasticManagedSteps}
               css={() => css`
                 .euiStep__content {
-                  padding-block-end: ${euiTheme.size.m};
+                  padding-block-end: ${euiTheme.size.xs};
                 }
               `}
             />

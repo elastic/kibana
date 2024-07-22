@@ -22,7 +22,9 @@ import { i18n } from '@kbn/i18n';
 
 interface ConfigurationStepProps {
   currentStep: number;
+  isNextStepEnabled: boolean;
   setCurrentStep: Function;
+  setNextStepEnabled: Function;
   title: string;
 }
 
@@ -30,6 +32,8 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   title,
   currentStep,
   setCurrentStep,
+  isNextStepEnabled,
+  setNextStepEnabled,
 }) => {
   return (
     <>
@@ -40,6 +44,14 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
+            <EuiButton
+              data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+              onClick={() => setNextStepEnabled(true)}
+            >
+              {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -65,6 +77,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
               data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
               onClick={() => setCurrentStep(currentStep + 1)}
               fill
+              disabled={!isNextStepEnabled}
             >
               {i18n.translate('xpack.enterpriseSearch.configurationStep.button', {
                 defaultMessage: 'Contiue',

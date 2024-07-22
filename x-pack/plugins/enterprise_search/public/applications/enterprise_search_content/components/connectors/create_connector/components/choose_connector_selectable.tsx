@@ -29,7 +29,14 @@ interface ChooseConnectorSelectableProps {
     isTechPreview: boolean;
     name: string;
   }>;
-  connectorSelected: any;
+  connectorSelected: Array<{
+    description: string;
+    iconPath: string;
+    isBeta: boolean;
+    isNative: boolean;
+    isTechPreview: boolean;
+    name: string;
+  }>;
   selfManaged: boolean;
   setConnectorSelected: Function;
   setSelfManaged: Function;
