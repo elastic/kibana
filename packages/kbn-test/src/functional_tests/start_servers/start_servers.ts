@@ -37,6 +37,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
         vars.esTestCluster.license = 'trial';
         vars.esTestCluster.serverArgs.push('xpack.security.enabled=true');
+        vars.esTestCluster.serverArgs.push('xpack.security.transport.ssl.enabled=true');
       }
 
       return vars;
