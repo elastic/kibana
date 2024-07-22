@@ -26,11 +26,11 @@ image::management/connectors/images/crowdstrike-connector.png[Crowdstrike connec
 [[crowdstrike-connector-configuration]]
 ==== Connector configuration
 
-Crowdstrike connectors have the following configuration properties:
+CrowdStrike connectors have the following configuration properties:
 
-ClientId::  A Crowdstrike API client id.
-ClientSecret::  A Crowdstrike API client secret created by the user.
-URL:: The Crowdstrike tenant URL. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+CrowdStrike API URL:: The CrowdStrike tenant URL. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+CrowdStrike Client ID::  A CrowdStrike API client ID.
+Client Secret::  A CrowdStrike API client secret created by the user.
 
 
 [float]
