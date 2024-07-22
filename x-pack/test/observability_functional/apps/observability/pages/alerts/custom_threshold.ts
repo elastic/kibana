@@ -92,16 +92,16 @@ export default ({ getService }: FtrProviderContext) => {
       await testSubjects.click('o11yClosablePopoverTitleButton');
     });
 
-    // it('can set custom equation', async () => {
-    // set custom equation
-    // await testSubjects.click('customEquation');
-    // const customEquationField = await find.byCssSelector(
-    //   '[data-test-subj="thresholdRuleCustomEquationEditorFieldText"]'
-    // );
-    // await customEquationField.click();
-    // await customEquationField.type('A - B');
-    // await testSubjects.click('o11yClosablePopoverTitleButton');
-    // });
+    it('can set custom equation', async () => {
+      // set custom equation
+      await testSubjects.click('customEquation');
+      const customEquationField = await find.byCssSelector(
+        '[data-test-subj="thresholdRuleCustomEquationEditorFieldText"]'
+      );
+      await customEquationField.click();
+      await customEquationField.type('A - B');
+      await testSubjects.click('o11yClosablePopoverTitleButton');
+    });
 
     it('can set threshold', async () => {
       // set threshold
@@ -132,7 +132,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('can set equation label', async () => {
       // set equation label
-      await testSubjects.setValue('thresholdRuleCustomEquationEditorFieldText', 'test equation');
+      await testSubjects.setValue(
+        'thresholdRuleCustomEquationEditorFieldTextLabel',
+        'test equation'
+      );
     });
 
     it('can set time range', async () => {
@@ -215,6 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
               {
                 comparator: '>',
                 label: 'test equation',
+                equation: 'A - B',
                 metrics: [
                   {
                     aggType: 'avg',
