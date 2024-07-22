@@ -960,7 +960,7 @@ export const UnifiedDataTable = ({
 
   const showDisplaySelector = useMemo(() => {
     const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {
-      allowDensity: showDensitySelector,
+      ...(showDensitySelector && { allowDensity: showDensitySelector }),
     };
 
     if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {

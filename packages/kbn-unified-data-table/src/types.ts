@@ -53,7 +53,7 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
-  isCompressed: boolean;
+  isCompressed?: boolean;
 };
 
 export type CustomCellRenderer = Record<
