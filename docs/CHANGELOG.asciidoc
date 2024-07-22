@@ -82,8 +82,6 @@ Dashboard::
 * Fixes controls getting overwritten on navigation ({kibana-pull}187509[#187509]).
 Elastic Security::
 For the Elastic Security 8.14.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Logs::
-* Fixes log entry fly-out when response is slow ({kibana-pull}187303[#187303]).
 
 [[release-notes-8.14.2]]
 == {kib} 8.14.2

@@ -124,7 +124,7 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: true,
 
   /**
-   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: true,
 
@@ -243,11 +243,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
-
-  /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
 
   /**
    * Enables the manual rule run
