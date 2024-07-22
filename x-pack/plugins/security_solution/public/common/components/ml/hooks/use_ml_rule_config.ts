@@ -19,10 +19,9 @@ import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_lice
 export interface UseMlRuleConfigReturn {
   hasMlAdminPermissions: boolean;
   hasMlLicense: boolean;
+  loading: boolean;
   mlFields: DataViewFieldBase[];
-  mlFieldsLoading: boolean;
   mlSuppressionFields: BrowserField[];
-  noMlJobsStarted: boolean;
   someMlJobsStarted: boolean;
 }
 
@@ -37,11 +36,12 @@ export interface UseMlRuleConfigReturn {
 export const useMLRuleConfig = ({
   machineLearningJobId,
 }: {
-  machineLearningJobId: string[];
+  machineLearningJobId: string[] | undefined;
 }): UseMlRuleConfigReturn => {
   const mlCapabilities = useMlCapabilities();
-  const { someJobsStarted: someMlJobsStarted, noJobsStarted: noMlJobsStarted } =
-    useMlRuleValidations({ machineLearningJobId });
+  const { loading: validationsLoading, someJobsStarted: someMlJobsStarted } = useMlRuleValidations({
+    machineLearningJobId,
+  });
   const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({
     machineLearningJobId,
   });
@@ -54,9 +54,8 @@ export const useMLRuleConfig = ({
     hasMlAdminPermissions: hasMlAdminPermissions(mlCapabilities),
     hasMlLicense: hasMlLicense(mlCapabilities),
     mlFields,
-    mlFieldsLoading,
+    loading: validationsLoading || mlFieldsLoading,
     mlSuppressionFields,
-    noMlJobsStarted,
     someMlJobsStarted,
   };
 };

@@ -205,9 +205,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const {
     hasMlAdminPermissions,
     hasMlLicense,
-    mlFieldsLoading,
+    loading: mlRuleConfigLoading,
     mlSuppressionFields,
-    noMlJobsStarted,
     someMlJobsStarted,
   } = useMLRuleConfig({ machineLearningJobId });
 
@@ -485,7 +484,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
-    isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length);
+    isMlRule(ruleType) && (mlRuleConfigLoading || !mlSuppressionFields.length);
 
   const isThresholdSuppressionDisabled = isThresholdRule && !enableThresholdSuppression;
 
@@ -505,16 +504,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const suppressionGroupByDisabledText = useMemo(() => {
     if (areSuppressionFieldsDisabledBySequence) {
       return i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP;
-    } else if (isMlRule(ruleType) && noMlJobsStarted) {
+    } else if (areSuppressionFieldsDisabledByMlFields) {
       return i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL;
     } else {
       return alertSuppressionUpsellingMessage;
     }
   }, [
     alertSuppressionUpsellingMessage,
+    areSuppressionFieldsDisabledByMlFields,
     areSuppressionFieldsDisabledBySequence,
-    noMlJobsStarted,
-    ruleType,
   ]);
 
   const suppressionGroupByFields = useMemo(() => {
