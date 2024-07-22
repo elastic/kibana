@@ -125,7 +125,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       ref={setNodeRef}
       style={style}
       grow={grow}
-      data-control-id={api?.uuid}
+      data-control-id={uuid}
       data-test-subj={`control-frame`}
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
