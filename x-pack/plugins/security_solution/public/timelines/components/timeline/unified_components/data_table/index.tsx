@@ -13,6 +13,8 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
@@ -43,7 +45,6 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
 import type { UnifiedTimelineDataGridCellContext } from '../../types';
 
 export const SAMPLE_SIZE_SETTING = 500;
@@ -138,13 +139,12 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
     const [fetchedPage, setFechedPage] = useState<number>(0);
 
-    const onCloseExpandableFlyout = useCallback(() => {
+    const onCloseExpandableFlyout = useCallback((id: string) => {
       setExpandedDoc((prev) => (!prev ? prev : undefined));
     }, []);
 
-    const { openFlyout, closeFlyout } = useUnifiedTableExpandableFlyout({
-      onClose: onCloseExpandableFlyout,
-    });
+    const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+    useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
@@ -187,6 +187,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           }
         } else {
           closeFlyout();
+          setExpandedDoc(undefined);
         }
       },
       [tableRows, handleOnEventDetailPanelOpened, closeFlyout]

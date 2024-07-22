@@ -123,7 +123,7 @@ describe('LogsOverview', () => {
     });
 
     it('should display a log level badge when available', async () => {
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewLogLevel')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewLogLevel-info')).toBeInTheDocument();
     });
 
     it('should display a message code block when available', async () => {
