@@ -116,8 +116,8 @@ describe('autocomplete.suggest', () => {
       test('when typing inside function left paren', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
-          ...getFieldNamesByType(['number', 'date', 'boolean']),
-          ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean'], {
+          ...getFieldNamesByType(['number', 'date', 'boolean', 'ip']),
+          ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean', 'ip'], {
             evalMath: true,
           }),
         ];
