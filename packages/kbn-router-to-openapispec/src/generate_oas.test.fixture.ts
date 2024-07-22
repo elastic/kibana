@@ -121,6 +121,7 @@ export const sharedOas = {
         },
         responses: {
           '200': {
+            description: 'OK response oas-test-version-1\nOK response oas-test-version-2',
             content: {
               'application/json; Elastic-Api-Version=oas-test-version-1': {
                 schema: {
