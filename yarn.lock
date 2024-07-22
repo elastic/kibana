@@ -6238,6 +6238,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-common@link:packages/kbn-securitysolution-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-data-table@link:x-pack/packages/security-solution/data_table":
   version "0.0.0"
   uid ""
