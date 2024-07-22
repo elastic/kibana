@@ -360,6 +360,12 @@ describe('autocomplete', () => {
       );
 
       testSuggestions(
+        `from a | ${command} stringField,`,
+        getFieldNamesByType('any').filter((name) => name !== 'stringField'),
+        ','
+      );
+
+      testSuggestions(
         `from a_index | eval round(numberField) + 1 | eval \`round(numberField) + 1\` + 1 | eval \`\`\`round(numberField) + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`round(numberField) + 1\`\`\`\` + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`\`\`\`\`\`\`\`\`round(numberField) + 1\`\`\`\`\`\`\`\` + 1\`\`\`\` + 1\`\` + 1\` + 1 | ${command} `,
         [
           ...getFieldNamesByType('any'),
@@ -987,14 +993,6 @@ describe('autocomplete', () => {
         { name: 'index2', hidden: false },
       ],
     ]);
-
-    // testSuggestions.only('FROM  ', ['index1', 'index2'], ' ', undefined, [
-    //   ,
-    //   [
-    //     { name: 'index1', hidden: false },
-    //     { name: 'index2', hidden: false },
-    //   ],
-    // ]);
 
     // FROM source METADATA
     testSuggestions('FROM index1 M', [',', 'METADATA $0', '|'], undefined, 13);

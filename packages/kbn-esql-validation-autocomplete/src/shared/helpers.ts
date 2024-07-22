@@ -555,17 +555,25 @@ export function sourceExists(index: string, sources: Set<string>) {
   return Boolean(fuzzySearch(index, sources.keys()));
 }
 
-export function pipePrecedesCurrentWord(text: string) {
-  let inLastWord = true;
+/**
+ * Works backward from the cursor position to determine if
+ * the final character of the previous word matches the given character.
+ */
+function characterPrecedesCurrentWord(text: string, char: string) {
+  let inCurrentWord = true;
   for (let i = text.length - 1; i >= 0; i--) {
-    if (inLastWord && /\s/.test(text[i])) {
-      inLastWord = false;
+    if (inCurrentWord && /\s/.test(text[i])) {
+      inCurrentWord = false;
     }
 
-    if (!inLastWord && !/\s/.test(text[i])) {
-      return text[i] === '|';
+    if (!inCurrentWord && !/\s/.test(text[i])) {
+      return text[i] === char;
     }
   }
+}
+
+export function pipePrecedesCurrentWord(text: string) {
+  return characterPrecedesCurrentWord(text, '|');
 }
 
 export function getLastCharFromTrimmed(text: string) {
@@ -573,7 +581,7 @@ export function getLastCharFromTrimmed(text: string) {
 }
 
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',';
+  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
 
 export function shouldBeQuotedSource(text: string) {
