@@ -240,7 +240,7 @@ const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOptio
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const { onSaveClick, closeFlyout, features, roleAPIClient, systemRoles } = props;
 
-  const [space, setSpaceState] = useState(props.space);
+  const [space, setSpaceState] = useState<Partial<Space>>(props.space);
   const [spacePrivilege, setSpacePrivilege] = useState<KibanaPrivilegeBase | 'custom'>('all');
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     []
@@ -282,9 +282,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 if (prevRoles.length < value.length) {
                   const newlyAdded = value[value.length - 1];
 
+                  const { name: spaceName } = space;
+                  if (!spaceName) {
+                    throw new Error('space state requires name!');
+                  }
+
                   // Add kibana space privilege definition to role
                   newlyAdded.value!.kibana.push({
-                    spaces: [space.name],
+                    spaces: [spaceName],
                     base: spacePrivilege === 'custom' ? [] : [spacePrivilege],
                     feature: {},
                   });
@@ -339,7 +344,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             }))}
             color="primary"
             idSelected={spacePrivilege}
-            onChange={(id) => setSpacePrivilege(id)}
+            onChange={(id) => setSpacePrivilege(id as KibanaPrivilegeBase | 'custom')}
             buttonSize="compressed"
             isFullWidth
           />
