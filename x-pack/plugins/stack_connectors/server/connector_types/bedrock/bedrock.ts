@@ -298,7 +298,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     signal,
     timeout,
     tools,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
+  }: InvokeAIActionParams | InvokeAIRawActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(
         formatBedrockBody({ messages, stopSequences, system, temperature, tools })
@@ -378,7 +378,7 @@ const formatBedrockBody = ({
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
 }: {
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<{ role: string; content?: string }>;
   stopSequences?: string[];
   temperature?: number;
   maxTokens?: number;
@@ -401,12 +401,12 @@ const formatBedrockBody = ({
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: Array<{ role: string; content: string }>,
+  messages: Array<{ role: string; content?: string }>,
   systemPrompt?: string
-): { messages: Array<{ role: string; content: string }>; system?: string } => {
+): { messages: Array<{ role: string; content?: string }>; system?: string } => {
   let system = systemPrompt ? systemPrompt : '';
 
-  const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
+  const newMessages = messages.reduce((acc: Array<{ role: string; content?: string }>, m) => {
     const lastMessage = acc[acc.length - 1];
     if (m.role === 'system') {
       system = `${system.length ? `${system}\n` : ''}${m.content}`;

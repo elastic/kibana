@@ -37,9 +37,9 @@ import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server'
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
+  ActionsClientGeminiChatModel,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
-  ActionsClientVertexChatModel,
 } from '@kbn/langchain/server';
 
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
@@ -216,8 +216,8 @@ export interface AssistantTool {
 export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
-  | ActionsClientSimpleChatModel
-  | ActionsClientVertexChatModel;
+  | ActionsClientGeminiChatModel
+  | ActionsClientSimpleChatModel;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
