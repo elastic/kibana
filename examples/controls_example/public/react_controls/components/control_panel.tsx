@@ -19,6 +19,7 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,7 +33,6 @@ import { ControlPanelProps, DefaultControlApi } from '../types';
 import { ControlError } from './control_error';
 
 import './control_panel.scss';
-import { DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 
 const DragHandle = ({
   isEditable,

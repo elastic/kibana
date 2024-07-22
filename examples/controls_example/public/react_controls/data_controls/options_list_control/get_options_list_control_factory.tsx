@@ -66,16 +66,15 @@ export const getOptionsListControlFactory = ({
     },
     CustomOptionsComponent: () => {
       return <>Search techniques</>;
+      // return <OptionsListEditorOptions />;
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
-      /** State that is controlled via the editor */
+      /** Serializable state - i.e. the state that is saved with the control */
       const searchTechnique$ = new BehaviorSubject<OptionsListSearchTechnique | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
       );
       const runPastTimeout$ = new BehaviorSubject<boolean | undefined>(initialState.runPastTimeout);
       const singleSelect$ = new BehaviorSubject<boolean | undefined>(initialState.singleSelect);
-
-      /** State that is controlled via the control component */
       const selections$ = new BehaviorSubject<string[] | undefined>(
         initialState.selectedOptions ?? []
       );
@@ -85,8 +84,6 @@ export const getOptionsListControlFactory = ({
       const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
       const excludeSelected$ = new BehaviorSubject<boolean | undefined>(initialState.exclude);
       const searchString$ = new BehaviorSubject<string>('');
-      const searchStringValid$ = new BehaviorSubject<boolean>(true);
-      const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
 
       /** Creation options state - cannot currently be changed after creation, but need subjects for comparators */
       const placeholder$ = new BehaviorSubject<string | undefined>(initialState.placeholder);
@@ -95,7 +92,10 @@ export const getOptionsListControlFactory = ({
       const hideExists$ = new BehaviorSubject<boolean | undefined>(initialState.hideExists);
       const hideSort$ = new BehaviorSubject<boolean | undefined>(initialState.hideSort);
 
-      /** State that is reliant on fetching */
+      /** Runtime / component state - none of this is serialized */
+      const searchStringValid$ = new BehaviorSubject<boolean>(true);
+      const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
+
       const availableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(undefined);
       const invalidSelections$ = new BehaviorSubject<Set<string>>(new Set());
       const totalCardinality$ = new BehaviorSubject<number>(0);
@@ -274,6 +274,19 @@ export const getOptionsListControlFactory = ({
               rawState: {
                 ...dataControlState,
                 searchTechnique: searchTechnique$.getValue(),
+                runPastTimeout: runPastTimeout$.getValue(),
+                singleSelect: singleSelect$.getValue(),
+                selections: selections$.getValue(),
+                sort: sort$.getValue(),
+                existsSelected: existsSelected$.getValue(),
+                exclude: excludeSelected$.getValue(),
+
+                // serialize state that cannot be changed to keep it consistent
+                placeholder: placeholder$.getValue(),
+                hideActionBar: hideActionBar$.getValue(),
+                hideExclude: hideExclude$.getValue(),
+                hideExists: hideExists$.getValue(),
+                hideSort: hideSort$.getValue(),
               },
               references, // does not have any references other than those provided by the data control serializer
             };

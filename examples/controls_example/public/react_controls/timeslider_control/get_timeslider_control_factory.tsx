@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   apiHasParentApi,
   apiPublishesDataLoading,
@@ -17,18 +15,15 @@ import {
   useBatchedPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { ControlWidth } from '@kbn/controls-plugin/common';
-import { ControlFactory } from '../types';
-import {
-  TimesliderControlState,
-  TimesliderControlApi,
-  TIMESLIDER_CONTROL_TYPE,
-  Services,
-  Timeslice,
-} from './types';
+import React, { useEffect, useMemo } from 'react';
+import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
+import { ControlFactory } from '../types';
+import './components/index.scss';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
+import { TimeSliderPrepend } from './components/time_slider_prepend';
+import { initTimeRangePercentage } from './init_time_range_percentage';
 import { initTimeRangeSubscription } from './init_time_range_subscription';
 import {
   FROM_INDEX,
@@ -36,9 +31,13 @@ import {
   roundUpToNextStepSizeFactor,
   TO_INDEX,
 } from './time_utils';
-import { initTimeRangePercentage } from './init_time_range_percentage';
-import './components/index.scss';
-import { TimeSliderPrepend } from './components/time_slider_prepend';
+import {
+  Services,
+  Timeslice,
+  TimesliderControlApi,
+  TimesliderControlState,
+  TIMESLIDER_CONTROL_TYPE,
+} from './types';
 
 export const getTimesliderControlFactory = (
   services: Services
