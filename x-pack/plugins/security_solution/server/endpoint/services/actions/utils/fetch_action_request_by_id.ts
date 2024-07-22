@@ -41,9 +41,11 @@ export const fetchActionRequestById = async <
     )
     .catch(catchAndWrapError);
 
-  if (searchResponse.hits.hits.length === 0) {
+  const actionRequest = searchResponse.hits.hits?.[0]?._source;
+
+  if (!actionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  return searchResponse.hits.hits[0]._source;
+  return actionRequest;
 };
