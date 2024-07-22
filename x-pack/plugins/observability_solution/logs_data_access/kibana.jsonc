@@ -5,7 +5,7 @@
   "plugin": {
     "id": "logsDataAccess",
     "server": true,
-    "browser": false,
+    "browser": true,
     "requiredPlugins": [
       "data", 
       "dataViews"

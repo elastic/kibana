@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await synthtrace.clean();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('should render custom control columns properly', async () => {

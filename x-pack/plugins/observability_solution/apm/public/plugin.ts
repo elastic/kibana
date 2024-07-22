@@ -17,7 +17,9 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  SecurityServiceStart,
 } from '@kbn/core/public';
+import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
@@ -104,9 +106,11 @@ export interface ApmPluginSetupDeps {
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
+  entityManager: EntityManagerPublicPluginSetup;
 }
 
 export interface ApmServices {
+  securityService: SecurityServiceStart;
   telemetry: ITelemetryClient;
 }
 
@@ -138,7 +142,12 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
+  entityManager: EntityManagerPublicPluginSetup;
 }
+
+const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
+  defaultMessage: 'Applications',
+});
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
@@ -200,7 +209,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
             return [
               // APM navigation
               {
-                label: 'APM',
+                label: applicationsTitle,
                 sortKey: 400,
                 entries: [
                   {
@@ -390,6 +399,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
+            securityService: coreStart.security,
             telemetry,
           },
         });

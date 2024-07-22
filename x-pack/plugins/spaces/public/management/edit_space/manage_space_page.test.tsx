@@ -10,7 +10,6 @@ import { EuiButton } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { of } from 'rxjs';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -124,7 +123,7 @@ describe('ManageSpacePage', () => {
           spaces: { manage: true },
         }}
         allowFeatureVisibility
-        isSolutionNavEnabled$={of(true)}
+        solutionNavExperiment={Promise.resolve(true)}
       />
     );
 
@@ -180,7 +179,7 @@ describe('ManageSpacePage', () => {
             spaces: { manage: true },
           }}
           allowFeatureVisibility
-          isSolutionNavEnabled$={of(false)}
+          solutionNavExperiment={Promise.resolve(false)}
         />
       );
 

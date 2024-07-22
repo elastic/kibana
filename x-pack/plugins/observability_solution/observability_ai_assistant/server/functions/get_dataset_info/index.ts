@@ -48,7 +48,7 @@ export function registerGetDatasetInfoFunction({
 
       try {
         const body = await esClient.asCurrentUser.indices.resolveIndex({
-          name: index === '' ? '*' : index,
+          name: index === '' ? '*' : index.split(','),
           expand_wildcards: 'open',
         });
         indices = [
@@ -87,11 +87,11 @@ export function registerGetDatasetInfoFunction({
         signal,
         chat,
       });
-
       return {
         content: {
           indices: [index],
           fields: relevantFieldNames.fields,
+          stats: relevantFieldNames.stats,
         },
       };
     }

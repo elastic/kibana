@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await synthtrace.clean();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('columns selection initialization and update', () => {
@@ -171,9 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render a popover with cell actions when a chip on content column is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 4);
-          const logLevelChip = await cellElement.findByTestSubject(
-            'dataTablePopoverChip_log.level'
-          );
+          const logLevelChip = await cellElement.findByTestSubject('*logLevelBadge-');
           await logLevelChip.click();
           // Check Filter In button is present
           await testSubjects.existOrFail('dataTableCellAction_addToFilterAction_log.level');
@@ -187,9 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render the table filtered where log.level value is info when filter in action is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 4);
-          const logLevelChip = await cellElement.findByTestSubject(
-            'dataTablePopoverChip_log.level'
-          );
+          const logLevelChip = await cellElement.findByTestSubject('*logLevelBadge-');
           await logLevelChip.click();
 
           // Find Filter In button
@@ -198,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           await filterInButton.click();
-          const rowWithLogLevelInfo = await testSubjects.findAll('dataTablePopoverChip_log.level');
+          const rowWithLogLevelInfo = await testSubjects.findAll('*logLevelBadge-');
 
           expect(rowWithLogLevelInfo.length).to.be(4);
         });
@@ -207,9 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render the table filtered where log.level value is not info when filter out action is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 4);
-          const logLevelChip = await cellElement.findByTestSubject(
-            'dataTablePopoverChip_log.level'
-          );
+          const logLevelChip = await cellElement.findByTestSubject('*logLevelBadge-');
           await logLevelChip.click();
 
           // Find Filter Out button
@@ -218,7 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           await filterOutButton.click();
-          await testSubjects.missingOrFail('dataTablePopoverChip_log.level');
+          await testSubjects.missingOrFail('*logLevelBadge-');
         });
       });
 

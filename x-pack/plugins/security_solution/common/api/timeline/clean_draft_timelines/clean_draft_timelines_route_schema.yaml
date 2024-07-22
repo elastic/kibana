@@ -29,7 +29,7 @@ paths:
                 timelineType:
                   $ref: '../model/components.yaml#/components/schemas/TimelineType'
       responses:
-        200:
+        '200':
           description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
           content:
             application/json:
@@ -46,7 +46,7 @@ paths:
                             $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
                 required:
                   - data
-        403:
+        '403':
           description: Indicates that the user does not have the required permissions to create a draft timeline.
           content:
             application:json:
@@ -57,7 +57,7 @@ paths:
                     type: string
                   status_code:
                     type: number
-        409:
+        '409':
           description: Indicates that there is already a draft timeline with the given timelineId.
           content:
             application:json:

@@ -15,7 +15,7 @@ import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';

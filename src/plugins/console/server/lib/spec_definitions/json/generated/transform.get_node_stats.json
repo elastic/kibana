@@ -1,0 +1,15 @@
+{
+  "transform.get_node_stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_transform/_node_stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform-node-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

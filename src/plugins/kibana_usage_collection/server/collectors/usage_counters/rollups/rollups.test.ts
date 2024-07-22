@@ -7,70 +7,11 @@
  */
 
 import moment from 'moment';
-import { isSavedObjectOlderThan, rollUsageCountersIndices } from './rollups';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObjectsFindResult } from '@kbn/core/server';
-
-import {
-  UsageCountersSavedObjectAttributes,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-} from '@kbn/usage-collection-plugin/server';
-
+import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
-
-const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
-  ({
-    id,
-    type: 'usage-counter',
-    attributes: {
-      count: 3,
-      counterName: 'testName',
-      counterType: 'count',
-      domainId: 'testDomain',
-    },
-    references: [],
-    updated_at: updatedAt.format(),
-    version: 'WzI5LDFd',
-    score: 0,
-  } as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>);
-
-describe('isSavedObjectOlderThan', () => {
-  it(`returns true if doc is older than x days`, () => {
-    const numberOfDays = 1;
-    const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(2, 'days'), 'some-id');
-    const result = isSavedObjectOlderThan({
-      numberOfDays,
-      startDate,
-      doc,
-    });
-    expect(result).toBe(true);
-  });
-
-  it(`returns false if doc is exactly x days old`, () => {
-    const numberOfDays = 1;
-    const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id');
-    const result = isSavedObjectOlderThan({
-      numberOfDays,
-      startDate,
-      doc,
-    });
-    expect(result).toBe(false);
-  });
-
-  it(`returns false if doc is younger than x days`, () => {
-    const numberOfDays = 2;
-    const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id');
-    const result = isSavedObjectOlderThan({
-      numberOfDays,
-      startDate,
-      doc,
-    });
-    expect(result).toBe(false);
-  });
-});
+import { createMockSavedObjectDoc } from '../../common/saved_objects.test';
+import { rollUsageCountersIndices } from './rollups';
 
 describe('rollUsageCountersIndices', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -106,7 +47,7 @@ describe('rollUsageCountersIndices', () => {
       createMockSavedObjectDoc(moment().subtract(5, 'days'), 'doc-id-1'),
       createMockSavedObjectDoc(moment().subtract(9, 'days'), 'doc-id-1'),
       createMockSavedObjectDoc(moment().subtract(1, 'days'), 'doc-id-2'),
-      createMockSavedObjectDoc(moment().subtract(6, 'days'), 'doc-id-3'),
+      createMockSavedObjectDoc(moment().subtract(6, 'days'), 'doc-id-3', 'secondary'),
     ];
 
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
@@ -128,7 +69,8 @@ describe('rollUsageCountersIndices', () => {
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
       2,
       USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-      'doc-id-3'
+      'doc-id-3',
+      { namespace: 'secondary' }
     );
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });

@@ -11,7 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
@@ -180,6 +180,15 @@ export function getTextBasedDatasource({
     return Object.entries(state.layers)?.flatMap(([id, layer]) => {
       const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
 
+      if (!allColumns.length && layer.query) {
+        const layerColumns = layer.columns.map((c) => ({
+          id: c.columnId,
+          name: c.fieldName,
+          meta: c.meta,
+        })) as DatatableColumn[];
+        addColumnsToCache(layer.query, layerColumns);
+      }
+
       const unchangedSuggestionTable = getUnchangedSuggestionTable(state, allColumns, id);
 
       // we are trying here to cover the most common cases for the charts we offer
@@ -214,7 +223,7 @@ export function getTextBasedDatasource({
     if (fieldName) return [];
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
-      const textBasedQueryColumns = context.textBasedColumns ?? [];
+      const textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
       // will not return number fields. In these cases we want to suggest a datatable
       // Datatable works differently in this case. On the metrics dimension can be all type of fields
@@ -258,7 +267,7 @@ export function getTextBasedDatasource({
           [newLayerId]: {
             index,
             query,
-            columns: newColumns.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
+            columns: newColumns ?? [],
             timeField: context.dataViewSpec.timeFieldName,
           },
         },
@@ -275,7 +284,7 @@ export function getTextBasedDatasource({
             notAssignedMetrics: !hasNumberTypeColumns,
             layerId: newLayerId,
             columns:
-              newColumns?.slice(0, MAX_NUM_OF_COLUMNS)?.map((f) => {
+              newColumns?.map((f) => {
                 return {
                   columnId: f.columnId,
                   operation: {

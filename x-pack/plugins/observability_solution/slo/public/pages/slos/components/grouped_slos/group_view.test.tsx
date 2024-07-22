@@ -50,7 +50,7 @@ describe('Group View', () => {
       refetch: jest.fn(),
     });
     const { queryByTestId, getByTestId } = render(
-      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+      <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
     );
 
     expect(queryByTestId('sloGroupView')).toBeNull();
@@ -71,7 +71,7 @@ describe('Group View', () => {
     });
 
     const { queryByTestId, getByTestId } = render(
-      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+      <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
     );
 
     expect(queryByTestId('sloGroupView')).toBeNull();
@@ -85,7 +85,7 @@ describe('Group View', () => {
     });
 
     const { queryByTestId, getByTestId } = render(
-      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+      <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
     );
     expect(queryByTestId('sloGroupView')).toBeNull();
     expect(getByTestId('sloGroupListLoading')).toBeInTheDocument();
@@ -170,13 +170,7 @@ describe('Group View', () => {
         refetch: jest.fn(),
       });
       const { queryAllByTestId, getByTestId } = render(
-        <GroupView
-          groupBy="slo.tags"
-          kqlQuery=""
-          sloView="cardView"
-          sort="status"
-          direction="desc"
-        />
+        <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
       );
       expect(getByTestId('sloGroupView')).toBeInTheDocument();
       expect(useFetchSloGroups).toHaveBeenCalled();
@@ -220,13 +214,7 @@ describe('Group View', () => {
       });
 
       const { queryAllByTestId } = render(
-        <GroupView
-          groupBy="slo.tags"
-          kqlQuery=""
-          sloView="cardView"
-          sort="status"
-          direction="desc"
-        />
+        <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
       );
       expect(useFetchSloGroups).toHaveBeenCalled();
       expect(useFetchSloGroups).toHaveBeenCalledWith({
@@ -242,7 +230,7 @@ describe('Group View', () => {
   describe('group by status', () => {
     it('should render slo groups grouped by status', async () => {
       const { getByTestId } = render(
-        <GroupView groupBy="status" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
+        <GroupView groupBy="status" kqlQuery="" view="cardView" sort="status" direction="desc" />
       );
       expect(getByTestId('sloGroupView')).toBeInTheDocument();
       expect(useFetchSloGroups).toHaveBeenCalled();
@@ -261,7 +249,7 @@ describe('Group View', () => {
         <GroupView
           groupBy="slo.indicator.type"
           kqlQuery=""
-          sloView="cardView"
+          view="cardView"
           sort="status"
           direction="desc"
         />

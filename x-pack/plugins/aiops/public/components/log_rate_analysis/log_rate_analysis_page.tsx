@@ -6,12 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { isEqual, orderBy } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
@@ -25,6 +27,10 @@ import {
   setInitialAnalysisStart,
   setDocumentCountChartData,
 } from '@kbn/aiops-log-rate-analysis/state';
+import {
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+} from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -40,10 +46,26 @@ import {
 import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
 
+import type { LogRateAnalysisResultsData } from './log_rate_analysis_results';
+
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
 
-export const LogRateAnalysisPage: FC = () => {
-  const { data: dataService } = useAiopsAppContext();
+interface SignificantFieldValue {
+  field: string;
+  value: string | number;
+  docCount: number;
+  pValue: number | null;
+}
+
+interface LogRateAnalysisPageProps {
+  showContextualInsights?: boolean;
+}
+
+export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
+  showContextualInsights = false,
+}) => {
+  const aiopsAppContext = useAiopsAppContext();
+  const { data: dataService, observabilityAIAssistant } = aiopsAppContext;
   const { dataView, savedSearch } = useDataSource();
 
   const currentSelectedGroup = useCurrentSelectedGroup();
@@ -57,6 +79,15 @@ export const LogRateAnalysisPage: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
+
+  // Used to store analysis results to be passed on to the AI Assistant.
+  const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
+    | {
+        logRateAnalysisType: LogRateAnalysisType;
+        significantFieldValues: SignificantFieldValue[];
+      }
+    | undefined
+  >();
 
   useEffect(() => {
     if (savedSearch) {
@@ -182,6 +213,88 @@ export const LogRateAnalysisPage: FC = () => {
     }
   };
 
+  const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
+    const significantFieldValues = orderBy(
+      analysisResults?.significantItems?.map((item) => ({
+        field: item.fieldName,
+        value: item.fieldValue,
+        docCount: item.doc_count,
+        pValue: item.pValue,
+      })),
+      ['pValue', 'docCount'],
+      ['asc', 'asc']
+    ).slice(0, 50);
+
+    const logRateAnalysisType = analysisResults?.analysisType;
+    setLogRateAnalysisParams(
+      significantFieldValues && logRateAnalysisType
+        ? { logRateAnalysisType, significantFieldValues }
+        : undefined
+    );
+  };
+
+  const messages = useMemo<Message[] | undefined>(() => {
+    const hasLogRateAnalysisParams =
+      logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
+
+    if (!hasLogRateAnalysisParams || !observabilityAIAssistant) {
+      return undefined;
+    }
+
+    const { logRateAnalysisType } = logRateAnalysisParams;
+
+    const header = 'Field name,Field value,Doc count,p-value';
+    const rows = logRateAnalysisParams.significantFieldValues
+      .map((item) => Object.values(item).join(','))
+      .join('\n');
+
+    return observabilityAIAssistant.getContextualInsightMessages({
+      message:
+        'Can you identify possible causes and remediations for these log rate analysis results',
+      instructions: `You are an AIOps expert using Elastic's Kibana on call being consulted about a log rate change that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
+      "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
+      You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
+      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'contribute to the log rate spike'
+          : 'are less or not present in the log rate dip'
+      }:
+
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the results shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.'
+          : 'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.'
+      }
+
+      ${header}
+      ${rows}
+
+      Based on the above analysis results and your observability expert knowledge, output the following:
+      Analyse the type of these logs and explain their usual purpose (1 paragraph).
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this log rate spike (2 parapraphs)'
+          : 'Based on the type of these logs explain why the statistically significant field and value combinations are less in number or missing from the log rate dip with concrete examples based on the analysis results data which contains items that are present in the baseline time range and are missing or less in number in the deviation time range (2 paragraphs)'
+      }.
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'Recommend concrete remediations to resolve the root cause (3 bullet points).'
+          : ''
+      }
+
+      Do not mention individual p-values from the analysis results.
+      Do not repeat the full list of field names and field values back to the user.
+      Do not repeat the given instructions in your output.`,
+    });
+  }, [logRateAnalysisParams, observabilityAIAssistant]);
+
+  const logRateAnalysisTitle = i18n.translate(
+    'xpack.aiops.observabilityAIAssistantContextualInsight.logRateAnalysisTitle',
+    {
+      defaultMessage: 'Possible causes and remediations',
+    }
+  );
+
   return (
     <EuiPageBody data-test-subj="aiopsLogRateAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -196,11 +309,24 @@ export const LogRateAnalysisPage: FC = () => {
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
-          <LogRateAnalysisContent
-            embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
-            esSearchQuery={searchQuery}
-            onWindowParametersChange={onWindowParametersHandler}
-          />
+          <EuiFlexItem>
+            <LogRateAnalysisContent
+              embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
+              esSearchQuery={searchQuery}
+              onWindowParametersChange={onWindowParametersHandler}
+              onAnalysisCompleted={onAnalysisCompleted}
+            />
+          </EuiFlexItem>
+          {showContextualInsights &&
+          observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight &&
+          messages ? (
+            <EuiFlexItem grow={false}>
+              <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
+                title={logRateAnalysisTitle}
+                messages={messages}
+              />
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiPageSection>
     </EuiPageBody>

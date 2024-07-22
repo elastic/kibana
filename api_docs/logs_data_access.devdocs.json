@@ -124,7 +124,27 @@
           "section": "def-server.LogsRatesServiceReturnType",
           "text": "LogsRatesServiceReturnType"
         },
-        ">; }; }"
+        ">; getLogsRateTimeseries: ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo, kuery, serviceEnvironmentQuery, }: ",
+        "LogsRateTimeseries",
+        ") => Promise<",
+        "LogsRateTimeseriesReturnType",
+        ">; getLogsErrorRateTimeseries: ({ esClient, identifyingMetadata, serviceNames, timeFrom, timeTo, kuery, serviceEnvironmentQuery, }: ",
+        "LogsErrorRateTimeseries",
+        ") => Promise<",
+        "LogsErrorRateTimeseriesReturnType",
+        ">; getLogSourcesService: (request: ",
+        {
+          "pluginId": "@kbn/core-http-server",
+          "scope": "common",
+          "docId": "kibKbnCoreHttpServerPluginApi",
+          "section": "def-common.KibanaRequest",
+          "text": "KibanaRequest"
+        },
+        "<unknown, unknown, unknown, any>) => Promise<{ getLogSources: () => Promise<",
+        "LogSource",
+        "[]>; setLogSources: (sources: ",
+        "LogSource",
+        "[]) => Promise<void>; }>; }; }"
       ],
       "path": "x-pack/plugins/observability_solution/logs_data_access/server/plugin.ts",
       "deprecated": false,

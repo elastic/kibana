@@ -11,6 +11,8 @@ import React from 'react';
 import { mockObservedHostData } from '../../mocks';
 import { policyFields } from './endpoint_policy_fields';
 
+jest.mock('../../../../management/hooks/agents/use_get_agent_status');
+
 const TestWrapper = ({ el }: { el: JSX.Element | undefined }) => <>{el}</>;
 
 jest.mock(

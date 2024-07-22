@@ -11821,6 +11821,14 @@
             },
             {
               "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
             },
             {
@@ -12018,7 +12026,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection, fieldFormats, security }: ",
+              ">, { bfetch, expressions, usageCollection, fieldFormats }: ",
               "DataPluginSetupDependencies",
               ") => { search: ",
               "ISearchSetup",
@@ -12075,7 +12083,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ bfetch, expressions, usageCollection, fieldFormats, security }",
+                "label": "{ bfetch, expressions, usageCollection, fieldFormats }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"

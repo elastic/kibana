@@ -70,9 +70,10 @@ export async function fetchSearchSourceQuery({
   );
 
   logger.debug(
-    `search source query rule (${ruleId}) query: ${JSON.stringify(
-      searchSource.getSearchRequestBody()
-    )}`
+    () =>
+      `search source query rule (${ruleId}) query: ${JSON.stringify(
+        searchSource.getSearchRequestBody()
+      )}`
   );
 
   const searchResult = await searchSource.fetch();

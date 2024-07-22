@@ -17,7 +17,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
-import { isIndexPatternsBulkEditAction, isInvestigationFieldsBulkEditAction } from './utils';
+import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -38,6 +38,10 @@ interface DryRunBulkEditBulkActionsValidationArgs {
   rule: RuleAlertType;
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
+  experimentalFeatures: ExperimentalFeatures;
+}
+
+interface DryRunManualRuleRunBulkActionsValidationArgs extends BulkActionsValidationArgs {
   experimentalFeatures: ExperimentalFeatures;
 }
 
@@ -74,6 +78,27 @@ export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsVali
  */
 export const validateBulkDuplicateRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, rule.params.type);
+};
+
+/**
+ * runs validation for bulk schedule backfill for a single rule
+ * @param params - {@link DryRunManualRuleRunBulkActionsValidationArgs}
+ */
+export const validateBulkScheduleBackfill = async ({
+  rule,
+  experimentalFeatures,
+}: DryRunManualRuleRunBulkActionsValidationArgs) => {
+  // check whether "manual rule run" feature is enabled
+  await throwDryRunError(
+    () =>
+      invariant(experimentalFeatures?.manualRuleRunEnabled, 'Manual rule run feature is disabled.'),
+    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE
+  );
+
+  await throwDryRunError(
+    () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),
+    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE
+  );
 };
 
 /**
@@ -115,7 +140,6 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
-  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
@@ -144,16 +168,5 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
-  );
-
-  // check whether "custom highlighted fields" feature is enabled
-  await throwDryRunError(
-    () =>
-      invariant(
-        experimentalFeatures.bulkCustomHighlightedFieldsEnabled ||
-          !edit.some((action) => isInvestigationFieldsBulkEditAction(action.type)),
-        'Bulk custom highlighted fields action feature is disabled.'
-      ),
-    BulkActionsDryRunErrCode.INVESTIGATION_FIELDS_FEATURE
   );
 };

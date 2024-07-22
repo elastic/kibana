@@ -47,6 +47,17 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.BaseVisType.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.BaseVisType.description",
             "type": "string",
             "tags": [],
@@ -4656,6 +4667,20 @@
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeAlias.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5596,6 +5621,20 @@
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeDefinition.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6372,6 +6411,21 @@
           "\"AGG_BASED_VISUALIZATION_TRIGGER\""
         ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.COMMON_VISUALIZATION_GROUPING",
+        "type": "Array",
+        "tags": [],
+        "label": "COMMON_VISUALIZATION_GROUPING",
+        "description": [],
+        "signature": [
+          "{ id: string; getDisplayName: () => string; getIconType: () => string; order: number; }[]"
+        ],
+        "path": "src/plugins/visualizations/public/embeddable/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9637,7 +9691,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11124,7 +11178,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11411,7 +11465,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12159,7 +12213,7 @@
             "label": "categoryDisplay",
             "description": [],
             "signature": [
-              "\"default\" | \"hide\" | \"inside\""
+              "\"default\" | \"inside\" | \"hide\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14013,7 +14067,7 @@
             "label": "yLeftScale",
             "description": [],
             "signature": [
-              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
+              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14027,7 +14081,7 @@
             "label": "yRightScale",
             "description": [],
             "signature": [
-              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
+              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14255,7 +14309,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14550,7 +14604,7 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
+              "\"dashed\" | \"solid\" | \"dotted\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14585,7 +14639,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\" | undefined"
+              "\"right\" | \"left\" | \"auto\" | \"above\" | \"below\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14986,7 +15040,7 @@
         "label": "CategoryDisplayType",
         "description": [],
         "signature": [
-          "\"default\" | \"hide\" | \"inside\""
+          "\"default\" | \"inside\" | \"hide\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15605,7 +15659,7 @@
         "label": "GaugeCentralMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15635,7 +15689,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -16365,7 +16419,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -16683,7 +16737,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"bottom\" | \"auto\""
+          "\"right\" | \"bottom\" | \"left\" | \"auto\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,

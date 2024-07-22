@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useAgentStatusHook } from '../../../hooks/agents/use_get_agent_status';
+import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface OfflineCalloutProps {
@@ -23,45 +20,9 @@ interface OfflineCalloutProps {
 }
 
 export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
-  const isEndpointAgent = agentType === 'endpoint';
-  const isSentinelOneAgent = agentType === 'sentinel_one';
-  const isCrowdstrikeAgent = agentType === 'crowdstrike';
-  const getAgentStatus = useAgentStatusHook();
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+  const { data } = useGetAgentStatus(endpointId, agentType);
 
-  const isAgentTypeEnabled = useMemo(() => {
-    return isAgentTypeAndActionSupported(agentType);
-  }, [agentType]);
-
-  const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
-    refetchInterval: 10000,
-    enabled: isEndpointAgent && !agentStatusClientEnabled,
-  });
-
-  const { data } = getAgentStatus([endpointId], agentType, {
-    enabled:
-      (isEndpointAgent && agentStatusClientEnabled) || (!isEndpointAgent && isAgentTypeEnabled),
-  });
-  const showOfflineCallout = useMemo(
-    () =>
-      (isEndpointAgent && endpointDetails?.host_status === HostStatus.OFFLINE) ||
-      (isSentinelOneAgent && data?.[endpointId].status === HostStatus.OFFLINE) ||
-      (isCrowdstrikeAgent && data?.[endpointId].status === HostStatus.OFFLINE),
-    [
-      data,
-      endpointDetails?.host_status,
-      endpointId,
-      isEndpointAgent,
-      isCrowdstrikeAgent,
-      isSentinelOneAgent,
-    ]
-  );
-
-  if ((isEndpointAgent && !endpointDetails) || (isAgentTypeEnabled && !data)) {
-    return null;
-  }
-
-  if (showOfflineCallout) {
+  if (data?.[endpointId].status === HostStatus.OFFLINE) {
     return (
       <>
         <EuiCallOut

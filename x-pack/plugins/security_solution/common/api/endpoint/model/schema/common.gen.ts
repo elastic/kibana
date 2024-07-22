@@ -158,5 +158,10 @@ export const ProcessActionSchemas = BaseActionSchema.merge(
   })
 );
 
+export type ProtectionUpdatesNoteResponse = z.infer<typeof ProtectionUpdatesNoteResponse>;
+export const ProtectionUpdatesNoteResponse = z.object({
+  note: z.string().optional(),
+});
+
 export type SuccessResponse = z.infer<typeof SuccessResponse>;
 export const SuccessResponse = z.object({});

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('connectors', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {

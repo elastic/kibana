@@ -40,7 +40,7 @@ mockedAppContextService.getLogger.mockImplementation(() => {
   } as unknown as Logger;
 });
 
-mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
