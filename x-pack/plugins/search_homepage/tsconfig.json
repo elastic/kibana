@@ -24,7 +24,6 @@
     "@kbn/config-schema",
     "@kbn/cloud",
     "@kbn/analytics",
-    "@kbn/enterprise-search-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/logging",
   ],
