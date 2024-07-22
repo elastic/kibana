@@ -22,6 +22,12 @@ import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 
+const handleApiError = (error: Error) => {
+  // eslint-disable-next-line no-console
+  console.error(error);
+  throw error;
+};
+
 export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
   const { id: spaceId } = space;
   const { spacesManager, serverBasePath } = useViewSpaceServices();
@@ -89,8 +95,7 @@ export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
       setIsLoading(false);
     };
 
-    // eslint-disable-next-line no-console
-    getItems().catch(console.error);
+    getItems().catch(handleApiError);
   }, [spaceId, spacesManager]);
 
   if (isLoading) {

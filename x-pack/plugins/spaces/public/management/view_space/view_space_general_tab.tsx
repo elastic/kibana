@@ -26,11 +26,10 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space }) => {
   const onChangeSpaceSettings = (updatedSpace: Partial<Space>) => {
     setSpaceSettings(updatedSpace);
     setIsDirty(true);
-    console.log('value', updatedSpace);
   };
 
   const onUpdateSpace = () => {
-    window.alert('not yet implemented');
+    window.alert('not yet implemented'); // FIXME
   };
 
   const onCancel = () => {

@@ -65,17 +65,15 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({
   const onChangeSpaceNavigation = (updatedSpace: Partial<Space>) => {
     setIsDirty(true);
     setSpaceNavigation(updatedSpace);
-    console.log('updatedSpace-solutionView', updatedSpace);
   };
 
   const onChangeSpaceFeatures = (updatedSpace: Partial<Space>) => {
     setIsDirty(true);
     setSpaceFeatures({ ...updatedSpace, id: space.id });
-    console.log('updatedSpace-featuresTable', updatedSpace);
   };
 
   const onUpdateSpace = () => {
-    window.alert('not yet implemented');
+    window.alert('not yet implemented'); // FIXME
   };
 
   const onCancel = () => {
