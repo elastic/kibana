@@ -15,7 +15,6 @@ import {
   fetch$,
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
-  HasEditCapabilities,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -29,14 +28,11 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'Synthetics Status Overview',
   });
 
-export interface OverviewEmbeddableState extends SerializedTitles {
-  tags: string[];
-}
+export type OverviewEmbeddableState = SerializedTitles;
 
 export type StatusOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritablePanelTitle &
-  PublishesPanelTitle &
-  HasEditCapabilities;
+  PublishesPanelTitle;
 
 export const getStatusOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
@@ -53,7 +49,6 @@ export const getStatusOverviewEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
-      const tags$ = new BehaviorSubject(state.tags);
       const reload$ = new Subject<boolean>();
 
       const api = buildApi(
@@ -67,14 +62,12 @@ export const getStatusOverviewEmbeddableFactory = (
             return {
               rawState: {
                 ...serializeTitles(),
-                tags: tags$.getValue(),
               },
             };
           },
         },
         {
           ...titleComparators,
-          tags: [tags$, (value) => tags$.next(value)],
         }
       );
 
