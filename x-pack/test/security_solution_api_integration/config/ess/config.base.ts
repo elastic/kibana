@@ -83,7 +83,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'previewTelemetryUrlEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'bulkCustomHighlightedFieldsEnabled',
             'manualRuleRunEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',

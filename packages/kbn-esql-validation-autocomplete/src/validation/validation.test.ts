@@ -10552,6 +10552,42 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats weighted_avg(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats weighted_avg(nullVar, nullVar)', []);
       });
+
+      describe('exp', () => {
+        testErrorsAndWarnings('row var = exp(5)', []);
+        testErrorsAndWarnings('row exp(5)', []);
+        testErrorsAndWarnings('row var = exp(to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = exp(true)', [
+          'Argument of [exp] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where exp(numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where exp(booleanField) > 0', [
+          'Argument of [exp] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = exp(to_integer(booleanField))', []);
+
+        testErrorsAndWarnings('from a_index | eval exp(booleanField)', [
+          'Argument of [exp] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(*)', [
+          'Using wildcards (*) in exp is not allowed',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval exp(numberField, extraArg)', [
+          'Error: [exp] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval exp(nullVar)', []);
+      });
     });
   });
 
