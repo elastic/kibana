@@ -93,6 +93,7 @@ export const metadataSchema = z
     destination: metadata.destination ?? metadata.source,
     limit: metadata.limit ?? 1000,
   }))
+  .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })))
   .superRefine((value, ctx) => {
     if (value.limit < 0) {
       ctx.addIssue({
@@ -115,8 +116,7 @@ export const metadataSchema = z
         message: 'destination should not be empty',
       });
     }
-  })
-  .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })));
+  });
 
 export const identityFieldsSchema = z
   .object({
