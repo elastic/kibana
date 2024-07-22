@@ -309,6 +309,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      popoverRef.current?.focus();
     }
   }, []);
 
@@ -962,6 +963,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
                     editor.onDidFocusEditorText(() => {
                       onEditorFocus();
+                      setPopoverPosition({});
                     });
 
                     editor.onKeyDown(() => {
@@ -1145,13 +1147,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               overflow: 'auto',
             }}
             ref={popoverRef}
-            data-test-subj="TextBasedLangEditor-macro-menu"
+            data-test-subj="TextBasedLangEditor-timepicker-popover"
           >
             <EuiDatePicker
               selected={timePickerDate}
+              autoFocus
               onChange={(date) => {
                 if (date) {
                   setTimePickerDate(date);
+                }
+              }}
+              onSelect={(date, event) => {
+                if (date && event) {
                   const currentCursorPosition = editor1.current?.getPosition();
                   const lineContent = editorModel.current?.getLineContent(
                     currentCursorPosition?.lineNumber ?? 0
