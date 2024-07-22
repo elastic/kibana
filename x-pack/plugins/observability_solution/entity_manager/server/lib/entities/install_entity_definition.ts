@@ -29,6 +29,7 @@ import { findEntityDefinitions } from './find_entity_definition';
 import { saveEntityDefinition } from './save_entity_definition';
 import { startTransform } from './start_transform';
 import {
+  stopAndDeleteHistoryBackfillTransform,
   stopAndDeleteHistoryTransform,
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
@@ -125,6 +126,10 @@ export async function installEntityDefinition({
 
     if (installState.transforms.history) {
       await stopAndDeleteHistoryTransform(esClient, definition, logger);
+    }
+
+    if (installState.transforms.backfill) {
+      await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
     }
 
     if (installState.transforms.latest) {
