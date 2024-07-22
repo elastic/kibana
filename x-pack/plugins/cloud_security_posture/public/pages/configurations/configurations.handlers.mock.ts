@@ -132,6 +132,9 @@ export const generateCspFinding = (
       dataset: 'cloud_security_posture.findings',
       outcome: 'success',
     },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
+    },
   };
 };
 

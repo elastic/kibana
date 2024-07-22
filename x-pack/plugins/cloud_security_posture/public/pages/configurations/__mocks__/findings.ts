@@ -115,6 +115,9 @@ export const mockFindingsHit: CspFinding = {
     category: ['configuration'],
     outcome: 'success',
   },
+  data_stream: {
+    dataset: 'cloud_security_posture.findings',
+  },
 };
 
 export const mockWizFinding = {

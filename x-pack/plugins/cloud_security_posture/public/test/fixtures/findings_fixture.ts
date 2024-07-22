@@ -63,4 +63,7 @@ export const getFindingsFixture = (): CspFinding & { id: string } => ({
   ecs: {} as any,
   event: {} as EcsEvent,
   '@timestamp': new Date().toISOString(),
+  data_stream: {
+    dataset: 'cloud_security_posture.findings',
+  },
 });
