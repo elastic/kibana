@@ -25,7 +25,7 @@ describe('FeatureFlagsService Server', () => {
         configService: configServiceMock.create({
           atPath: {
             overrides: {
-              'my-overriden-flag': true,
+              'my-overridden-flag': true,
             },
           },
         }),
@@ -229,10 +229,15 @@ describe('FeatureFlagsService Server', () => {
     });
 
     test('with overrides', async () => {
-      await expect(startContract.getBooleanValue('my-overriden-flag', false)).resolves.toEqual(
+      await expect(startContract.getBooleanValue('my-overridden-flag', false)).resolves.toEqual(
         true
       );
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overriden-flag': true });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
     });
+  });
+
+  test('returns overrides', () => {
+    const { getOverrides } = featureFlagsService.setup();
+    expect(getOverrides()).toStrictEqual({ 'my-overridden-flag': true });
   });
 });

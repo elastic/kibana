@@ -8,7 +8,17 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-flags-server';
-import type { FeatureFlagsService } from '@kbn/core-feature-flags-server-internal';
+import type {
+  FeatureFlagsService,
+  InternalFeatureFlagsSetup,
+} from '@kbn/core-feature-flags-server-internal';
+
+const createFeatureFlagsInternalSetup = (): jest.Mocked<InternalFeatureFlagsSetup> => {
+  return {
+    ...createFeatureFlagsSetup(),
+    getOverrides: jest.fn().mockReturnValue({}),
+  };
+};
 
 const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
   return {
@@ -19,17 +29,19 @@ const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
 
 const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
   return {
-    addHandler: jest.fn(),
     appendContext: jest.fn(),
     getBooleanValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
     getNumberValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
     getStringValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getBooleanValue$: jest.fn(),
+    getStringValue$: jest.fn(),
+    getNumberValue$: jest.fn(),
   };
 };
 
 const createFeatureFlagsServiceMock = (): jest.Mocked<PublicMethodsOf<FeatureFlagsService>> => {
   return {
-    setup: jest.fn().mockImplementation(createFeatureFlagsSetup),
+    setup: jest.fn().mockImplementation(createFeatureFlagsInternalSetup),
     start: jest.fn().mockImplementation(createFeatureFlagsStart),
     stop: jest.fn().mockImplementation(Promise.resolve),
   };
@@ -37,6 +49,7 @@ const createFeatureFlagsServiceMock = (): jest.Mocked<PublicMethodsOf<FeatureFla
 
 export const coreFeatureFlagsMock = {
   create: createFeatureFlagsServiceMock,
+  createInternalSetup: createFeatureFlagsInternalSetup,
   createSetup: createFeatureFlagsSetup,
   createStart: createFeatureFlagsStart,
 };

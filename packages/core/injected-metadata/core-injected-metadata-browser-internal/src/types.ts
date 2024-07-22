@@ -57,6 +57,11 @@ export interface InternalInjectedMetadataSetup {
     };
   };
   getCustomBranding: () => CustomBranding;
+  getFeatureFlags: () =>
+    | {
+        overrides: Record<string, unknown>;
+      }
+    | undefined;
 }
 
 /** @internal */

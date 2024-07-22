@@ -19,6 +19,17 @@ import deepMerge from 'deepmerge';
 import { filter, mergeMap, startWith, Subject } from 'rxjs';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
+/**
+ * Core-internal contract for the setup lifecycle step.
+ * @private
+ */
+export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
+  /**
+   * Used by the rendering service to share the overrides with the service on the browser side.
+   */
+  getOverrides: () => Record<string, unknown>;
+}
+
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
@@ -43,8 +54,9 @@ export class FeatureFlagsService {
   /**
    * Setup lifecycle method
    */
-  public setup(): FeatureFlagsSetup {
+  public setup(): InternalFeatureFlagsSetup {
     return {
+      getOverrides: () => this.overrides,
       setProvider: (provider) => {
         OpenFeature.setProvider(provider);
       },

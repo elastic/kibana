@@ -29,6 +29,7 @@ const createSetupContractMock = () => {
     getPlugins: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
     getCustomBranding: jest.fn(),
+    getFeatureFlags: jest.fn(),
   };
   setupContract.getBasePath.mockReturnValue('/base-path');
   setupContract.getServerBasePath.mockReturnValue('/server-base-path');

@@ -253,7 +253,7 @@ export class CoreSystem {
 
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
-      const featureFlags = this.featureFlags.setup();
+      const featureFlags = this.featureFlags.setup({ injectedMetadata });
 
       const core: InternalCoreSetup = {
         analytics,

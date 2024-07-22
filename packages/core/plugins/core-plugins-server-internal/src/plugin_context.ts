@@ -336,11 +336,13 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     executionContext: deps.executionContext,
     featureFlags: {
-      addHandler: deps.featureFlags.addHandler,
       appendContext: deps.featureFlags.appendContext,
       getBooleanValue: deps.featureFlags.getBooleanValue,
       getStringValue: deps.featureFlags.getStringValue,
       getNumberValue: deps.featureFlags.getNumberValue,
+      getBooleanValue$: deps.featureFlags.getBooleanValue$,
+      getStringValue$: deps.featureFlags.getStringValue$,
+      getNumberValue$: deps.featureFlags.getNumberValue$,
     },
     http: {
       auth: deps.http.auth,

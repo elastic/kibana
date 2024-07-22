@@ -62,6 +62,9 @@ export interface InjectedMetadata {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
   };
+  featureFlags?: {
+    overrides: Record<string, unknown>;
+  };
   anonymousStatusPage: boolean;
   i18n: {
     translationsUrl: string;

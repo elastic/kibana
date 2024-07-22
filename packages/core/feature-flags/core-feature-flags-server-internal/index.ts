@@ -7,4 +7,4 @@
  */
 
 export { featureFlagsConfig } from './src/feature_flags_config';
-export { FeatureFlagsService } from './src/feature_flags_service';
+export { FeatureFlagsService, type InternalFeatureFlagsSetup } from './src/feature_flags_service';

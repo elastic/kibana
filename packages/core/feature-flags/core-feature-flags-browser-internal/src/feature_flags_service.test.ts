@@ -11,6 +11,8 @@ import { apm } from '@elastic/apm-rum';
 import { type Client, OpenFeature, type Provider } from '@openfeature/web-sdk';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { FeatureFlagsService } from '..';
 
 async function isSettledPromise(p: Promise<unknown>) {
@@ -22,11 +24,13 @@ async function isSettledPromise(p: Promise<unknown>) {
 describe('FeatureFlagsService Browser', () => {
   let featureFlagsService: FeatureFlagsService;
   let featureFlagsClient: Client;
+  let injectedMetadata: jest.Mocked<InternalInjectedMetadataSetup>;
 
   beforeEach(() => {
     const getClientSpy = jest.spyOn(OpenFeature, 'getClient');
     featureFlagsService = new FeatureFlagsService(coreContextMock.create());
     featureFlagsClient = getClientSpy.mock.results[0].value;
+    injectedMetadata = injectedMetadataServiceMock.createSetupContract();
   });
 
   afterEach(async () => {
@@ -39,7 +43,7 @@ describe('FeatureFlagsService Browser', () => {
   describe('provider handling', () => {
     test('appends a provider (without awaiting)', () => {
       expect.assertions(1);
-      const { setProvider } = featureFlagsService.setup();
+      const { setProvider } = featureFlagsService.setup({ injectedMetadata });
       const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
@@ -47,7 +51,7 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('awaits initialization in the start context', async () => {
-      const { setProvider } = featureFlagsService.setup();
+      const { setProvider } = featureFlagsService.setup({ injectedMetadata });
       let externalResolve: Function = () => void 0;
       const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementation(async () => {
         await new Promise((resolve) => {
@@ -65,7 +69,7 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('do not hold for too long during initialization', async () => {
-      const { setProvider } = featureFlagsService.setup();
+      const { setProvider } = featureFlagsService.setup({ injectedMetadata });
       const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementation(async () => {
         await new Promise(() => {}); // never resolves
       });
@@ -87,20 +91,20 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('appends context to the provider', async () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({ injectedMetadata });
       await appendContext({ kind: 'multi' });
       expect(setContextSpy).toHaveBeenCalledWith({ kind: 'multi' });
     });
 
     test('appends context to the provider (start method)', async () => {
-      featureFlagsService.setup();
+      featureFlagsService.setup({ injectedMetadata });
       const { appendContext } = await featureFlagsService.start();
       await appendContext({ kind: 'multi' });
       expect(setContextSpy).toHaveBeenCalledWith({ kind: 'multi' });
     });
 
     test('full multi context pass-through', async () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({ injectedMetadata });
       const context = {
         kind: 'multi' as const,
         kibana: {
@@ -115,7 +119,7 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('appends to the existing context', async () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({ injectedMetadata });
       const initialContext = {
         kind: 'multi' as const,
         kibana: {
@@ -139,7 +143,7 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('converts single-contexts to multi-context', async () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({ injectedMetadata });
       await appendContext({ kind: 'organization', key: 'organization-1' });
       expect(setContextSpy).toHaveBeenCalledWith({
         kind: 'multi',
@@ -150,7 +154,7 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('if no `kind` provided, it defaults to the kibana context', async () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({ injectedMetadata });
       await appendContext({ key: 'key-1', has_data: false });
       expect(setContextSpy).toHaveBeenCalledWith({
         kind: 'multi',
@@ -169,7 +173,10 @@ describe('FeatureFlagsService Browser', () => {
 
     beforeEach(async () => {
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
-      featureFlagsService.setup();
+      injectedMetadata.getFeatureFlags.mockReturnValue({
+        overrides: { 'my-overridden-flag': true },
+      });
+      featureFlagsService.setup({ injectedMetadata });
       startContract = await featureFlagsService.start();
       apmSpy = jest.spyOn(apm, 'addLabels');
     });
@@ -254,6 +261,11 @@ describe('FeatureFlagsService Browser', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+    });
+
+    test('with overrides', async () => {
+      expect(startContract.getBooleanValue('my-overridden-flag', false)).toEqual(true);
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
     });
   });
 });

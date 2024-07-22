@@ -7,22 +7,32 @@
  */
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { Logger } from '@kbn/logging';
 import type {
   EvaluationContext,
   FeatureFlagsSetup,
   FeatureFlagsStart,
 } from '@kbn/core-feature-flags-browser';
-import type { Logger } from '@kbn/logging';
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
 import { filter, map, startWith, Subject } from 'rxjs';
+
+/**
+ * setup method dependencies
+ * @private
+ */
+export interface FeatureFlagsSetupDeps {
+  injectedMetadata: InternalInjectedMetadataSetup;
+}
 
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
   private isProviderReadyPromise?: Promise<void>;
   private context: EvaluationContext = { kind: 'multi' };
+  private overrides: Record<string, unknown> = {};
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
@@ -33,7 +43,11 @@ export class FeatureFlagsService {
   /**
    * Setup lifecycle method
    */
-  public setup(): FeatureFlagsSetup {
+  public setup({ injectedMetadata }: FeatureFlagsSetupDeps): FeatureFlagsSetup {
+    const featureFlagsInjectedMetadata = injectedMetadata.getFeatureFlags();
+    if (featureFlagsInjectedMetadata) {
+      this.overrides = featureFlagsInjectedMetadata.overrides;
+    }
     return {
       setProvider: (provider) => {
         this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
@@ -137,9 +151,11 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): T {
-    // TODO: intercept with config overrides
-    // We have to bind the evaluation or the client will lose its internal context
-    const value = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    const value =
+      typeof this.overrides[flagName] !== 'undefined'
+        ? (this.overrides[flagName] as T)
+        : // We have to bind the evaluation or the client will lose its internal context
+          evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName}`]: value });
     // TODO: increment usage counter
     return value;

@@ -327,9 +327,11 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
+    const featureFlagsSetup = this.featureFlags.setup();
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
+      featureFlags: featureFlagsSetup,
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
@@ -342,8 +344,6 @@ export class Server {
       http: httpSetup,
       rendering: renderingSetup,
     });
-
-    const featureFlagsSetup = this.featureFlags.setup();
 
     const loggingSetup = this.logging.setup();
 
