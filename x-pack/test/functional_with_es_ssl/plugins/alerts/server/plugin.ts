@@ -8,6 +8,7 @@
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { AlertingServerSetup, RuleType, RuleTypeParams } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -113,18 +114,24 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       app: [],
       category: { id: 'foo', label: 'foo' },
       alerting: [
-        { ruleTypeId: 'test.always-firing', consumers: ['alerting_fixture'] },
-        { ruleTypeId: 'test.noop', consumers: ['alerting_fixture'] },
-        { ruleTypeId: 'test.failing', consumers: ['alerting_fixture'] },
+        { ruleTypeId: 'test.always-firing', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
+        { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
+        { ruleTypeId: 'test.failing', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
       ],
       privileges: {
         all: {
           alerting: {
             rule: {
               all: [
-                { ruleTypeId: 'test.always-firing', consumers: ['alerting_fixture'] },
-                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture'] },
-                { ruleTypeId: 'test.failing', consumers: ['alerting_fixture'] },
+                {
+                  ruleTypeId: 'test.always-firing',
+                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+                },
+                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
+                {
+                  ruleTypeId: 'test.failing',
+                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+                },
               ],
             },
           },
@@ -138,9 +145,15 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
           alerting: {
             rule: {
               all: [
-                { ruleTypeId: 'test.always-firing', consumers: ['alerting_fixture'] },
-                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture'] },
-                { ruleTypeId: 'test.failing', consumers: ['alerting_fixture'] },
+                {
+                  ruleTypeId: 'test.always-firing',
+                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+                },
+                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
+                {
+                  ruleTypeId: 'test.failing',
+                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+                },
               ],
             },
           },

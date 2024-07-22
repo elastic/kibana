@@ -60,14 +60,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the Alerts page', async () => {
-        await log.debug('Checking for section heading to say Rules.');
+        log.debug('Checking for section heading to say Rules.');
 
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
         expect(headingText).to.be('Rules');
       });
 
       describe('Alerts tab', () => {
+        let createdRule: { name: string; id: string };
+
+        before(async () => {
+          const { body: createdAction } = await supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestActionData())
+            .expect(200);
+
+          objectRemover.add(createdAction.id, 'action', 'actions');
+
+          const resRule = await supertest
+            .post(`/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+
+          createdRule = resRule.body;
+          objectRemover.add(resRule.body.id, 'alert', 'alerts');
+        });
+
+        after(async () => {
+          await objectRemover.removeAll();
+        });
+
         it('renders the alerts tab', async () => {
+          // refresh to see alert
+          await browser.refresh();
+
           // Navigate to the alerts tab
           await pageObjects.triggersActionsUI.changeTabs('rulesTab');
 
@@ -82,20 +110,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('navigates to an alert details page', async () => {
-          const { body: createdAction } = await supertest
-            .post(`/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestActionData())
-            .expect(200);
-          objectRemover.add(createdAction.id, 'action', 'actions');
-
-          const { body: createdAlert } = await supertest
-            .post(`/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
-            .expect(200);
-          objectRemover.add(createdAlert.id, 'alert', 'alerts');
-
           // refresh to see alert
           await browser.refresh();
 
@@ -105,10 +119,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('rulesList');
 
           // click on first alert
-          await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);
+          await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdRule.name);
 
           // Verify url
-          expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdAlert.id}`);
+          expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdRule.id}`);
         });
       });
     });
