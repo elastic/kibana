@@ -18,9 +18,11 @@ import {
 import type { FC } from 'react';
 import React, { useState } from 'react';
 
+import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
@@ -32,14 +34,27 @@ interface Props {
   space: Space;
   features: KibanaFeature[];
   isSolutionNavEnabled: boolean;
+  history: ScopedHistory;
 }
 
-export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, isSolutionNavEnabled }) => {
-  const { capabilities, getUrlForApp } = useViewSpaceServices();
-
+export const ViewSpaceEnabledFeatures: FC<Props> = ({
+  features,
+  space,
+  isSolutionNavEnabled,
+  ...props
+}) => {
   const [spaceNavigation, setSpaceNavigation] = useState<Partial<Space>>(space); // space details as seen in the Solution View UI, possibly with unsaved changes
   const [spaceFeatures, setSpaceFeatures] = useState<Partial<Space>>(space); // space details as seen in the Feature Visibility UI, possibly with unsaved changes
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
+
+  const { capabilities, getUrlForApp, http, overlays, navigateToUrl } = useViewSpaceServices();
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty,
+    http,
+    openConfirm: overlays.openConfirm,
+    navigateToUrl,
+    history: props.history,
+  });
 
   if (!features) {
     return null;

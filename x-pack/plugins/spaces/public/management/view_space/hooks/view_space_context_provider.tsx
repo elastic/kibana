@@ -9,6 +9,8 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
 
 import type { SpacesManager } from '../../../spaces_manager';
@@ -20,6 +22,8 @@ export interface ViewSpaceServices {
   serverBasePath: string;
   spacesManager: SpacesManager;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
+  http: HttpStart;
+  overlays: OverlayStart;
 }
 
 const ViewSpaceContext = createContext<ViewSpaceServices | null>(null);

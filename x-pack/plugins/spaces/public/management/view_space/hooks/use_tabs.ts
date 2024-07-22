@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 
+import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/public';
 
 import type { Space } from '../../../../common';
@@ -16,6 +17,7 @@ type UseTabsProps = Pick<GetTabsProps, 'roles' | 'capabilities'> & {
   space: Space | null;
   features: KibanaFeature[] | null;
   currentSelectedTabId: string;
+  history: ScopedHistory;
   isSolutionNavEnabled: boolean;
 };
 

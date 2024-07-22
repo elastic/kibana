@@ -57,7 +57,7 @@ interface PageProps extends ViewSpaceServices {
   history: ScopedHistory;
   selectedTabId?: string;
   capabilities: Capabilities;
-  allowFeatureVisibility: boolean; // FIXME: handle this
+  allowFeatureVisibility: boolean;
   solutionNavExperiment?: Promise<boolean>;
   getFeatures: FeaturesPluginStart['getFeatures'];
   onLoadSpace: (space: Space) => void;
@@ -79,9 +79,10 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     solutionNavExperiment,
     selectedTabId: _selectedTabId,
     capabilities,
+    allowFeatureVisibility, // FIXME: handle this
     getUrlForApp,
     navigateToUrl,
-    getRolesAPIClient,
+    ...viewSpaceServices
   } = props;
 
   const [space, setSpace] = useState<Space | null>(null);
@@ -98,6 +99,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     features,
     roles,
     capabilities,
+    history,
     currentSelectedTabId: selectedTabId,
     isSolutionNavEnabled,
   });
@@ -205,11 +207,10 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   return (
     <ViewSpaceContextProvider
       capabilities={capabilities}
-      getRolesAPIClient={getRolesAPIClient}
       spacesManager={spacesManager}
-      serverBasePath={props.serverBasePath}
       navigateToUrl={navigateToUrl}
       getUrlForApp={getUrlForApp}
+      {...viewSpaceServices}
     >
       <EuiText>
         <EuiFlexGroup data-test-subj="spaceDetailsHeader" alignItems="flexStart">

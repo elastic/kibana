@@ -66,7 +66,7 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome, http } = coreStart;
+        const { notifications, application, chrome, http, overlays } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -167,6 +167,8 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               selectedTabId={selectedTabId}
               getRolesAPIClient={getRolesAPIClient}
+              http={http}
+              overlays={overlays}
             />
           );
         };

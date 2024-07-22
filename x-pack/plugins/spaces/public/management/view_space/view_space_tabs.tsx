@@ -8,7 +8,7 @@
 import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
-import type { Capabilities } from '@kbn/core/public';
+import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
@@ -33,6 +33,7 @@ export interface GetTabsProps {
   space: Space;
   roles: Role[];
   features: KibanaFeature[];
+  history: ScopedHistory;
   capabilities: Capabilities & {
     roles?: { view: boolean; save: boolean };
   };
@@ -42,6 +43,7 @@ export interface GetTabsProps {
 export const getTabs = ({
   space,
   features,
+  history,
   capabilities,
   roles,
   isSolutionNavEnabled,
@@ -73,6 +75,7 @@ export const getTabs = ({
       content: (
         <ViewSpaceEnabledFeatures
           features={features}
+          history={history}
           space={space}
           isSolutionNavEnabled={isSolutionNavEnabled}
         />
