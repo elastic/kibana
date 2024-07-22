@@ -168,6 +168,7 @@
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-browser",
     "@kbn/core-metrics-server-internal",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",
