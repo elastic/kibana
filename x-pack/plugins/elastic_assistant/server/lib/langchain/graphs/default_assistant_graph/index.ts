@@ -130,7 +130,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         prompt: ChatPromptTemplate.fromMessages([
           [
             'system',
-            "You are a helpful assistant. Use the available tools to answer the user's question",
+            'You are a helpful assistant. ALWAYS use the provided tools.\n\n' +
+              `The final response will be the only output the user sees and should be a complete answer to the user's question.`,
           ],
           ['placeholder', '{chat_history}'],
           ['human', '{input}'],
