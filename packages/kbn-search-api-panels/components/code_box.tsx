@@ -81,8 +81,8 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
     <EuiThemeProvider colorMode="dark">
       <EuiButtonEmpty
         aria-label={i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
-          defaultMessage:
-            'Select a programming language from the list of available languages to show a code snippet in that language',
+          defaultMessage: 'Select a programming language for the {context} code snippet',
+          values: { context: consoleRequest },
         })}
         color="text"
         iconType="arrowDown"
