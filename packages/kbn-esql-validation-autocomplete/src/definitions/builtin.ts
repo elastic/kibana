@@ -7,6 +7,7 @@
  */
 
 import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
+import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { i18n } from '@kbn/i18n';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
@@ -423,14 +424,14 @@ const inFunctions: FunctionDefinition[] = [
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
   signatures: [
-    {
+    ...ESQL_NUMBER_TYPES.map((type) => ({
       params: [
-        { name: 'left', type: 'integer' },
+        { name: 'left', type: type as FunctionParameterType },
 
-        { name: 'right', type: 'any[]' },
+        { name: 'right', type: 'any[]' as FunctionParameterType },
       ],
-      returnType: 'boolean',
-    },
+      returnType: 'boolean' as FunctionReturnType,
+    })),
     {
       params: [
         { name: 'left', type: 'string' },

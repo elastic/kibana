@@ -286,7 +286,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | limit 100', '… | limit 0'],
     signature: {
       multipleParams: false,
-      params: [{ name: 'size', type: 'number', constantOnly: true }],
+      params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
     options: [],
     modes: [],

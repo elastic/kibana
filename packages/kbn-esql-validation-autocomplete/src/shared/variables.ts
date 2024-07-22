@@ -35,7 +35,7 @@ function addToVariables(
   if (isColumnItem(oldArg) && isColumnItem(newArg)) {
     const newVariable: ESQLVariable = {
       name: newArg.name,
-      type: 'number' /* fallback to number */,
+      type: 'double' /* fallback to number */,
       location: newArg.location,
     };
     // Now workout the exact type

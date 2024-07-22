@@ -94,11 +94,11 @@
     },
     {
       "name": "any#Char$Field",
-      "type": "number"
+      "type": "double"
     },
     {
       "name": "kubernetes.something.something",
-      "type": "number"
+      "type": "double"
     },
     {
       "name": "@timestamp",
@@ -116,7 +116,7 @@
     },
     {
       "name": "yetAnotherField",
-      "type": "number"
+      "type": "double"
     },
     {
       "name": "otherStringField",
@@ -485,8 +485,8 @@
     {
       "query": "row var = false > false",
       "error": [
-        "Argument of [>] must be [number], found value [false] type [boolean]",
-        "Argument of [>] must be [number], found value [false] type [boolean]"
+        "Argument of [>] must be [double], found value [false] type [boolean]",
+        "Argument of [>] must be [double], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -535,8 +535,8 @@
     {
       "query": "row var = false >= false",
       "error": [
-        "Argument of [>=] must be [number], found value [false] type [boolean]",
-        "Argument of [>=] must be [number], found value [false] type [boolean]"
+        "Argument of [>=] must be [double], found value [false] type [boolean]",
+        "Argument of [>=] must be [double], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -585,8 +585,8 @@
     {
       "query": "row var = false < false",
       "error": [
-        "Argument of [<] must be [number], found value [false] type [boolean]",
-        "Argument of [<] must be [number], found value [false] type [boolean]"
+        "Argument of [<] must be [double], found value [false] type [boolean]",
+        "Argument of [<] must be [double], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -635,8 +635,8 @@
     {
       "query": "row var = false <= false",
       "error": [
-        "Argument of [<=] must be [number], found value [false] type [boolean]",
-        "Argument of [<=] must be [number], found value [false] type [boolean]"
+        "Argument of [<=] must be [double], found value [false] type [boolean]",
+        "Argument of [<=] must be [double], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -791,8 +791,8 @@
     {
       "query": "row var = now() * now()",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [now()] type [date]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -809,8 +809,8 @@
     {
       "query": "row var = now() / now()",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [now()] type [date]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -827,8 +827,8 @@
     {
       "query": "row var = now() % now()",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [now()] type [date]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -929,13 +929,6 @@
       "warning": []
     },
     {
-      "query": "row var = mv_sort([\"a\", \"b\"], \"bogus\")",
-      "error": [],
-      "warning": [
-        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
-      ]
-    },
-    {
       "query": "row var = mv_sort([\"a\", \"b\"], \"ASC\")",
       "error": [],
       "warning": []
@@ -1010,24 +1003,24 @@
     {
       "query": "row var = now() * 1 year",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 year] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 year",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 year] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 year",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 year] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
     },
@@ -1075,24 +1068,24 @@
     {
       "query": "row var = now() * 1 years",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 years] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 years",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 years] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 years",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 years] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
     },
@@ -1140,24 +1133,24 @@
     {
       "query": "row var = now() * 1 quarter",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 quarter] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 quarter",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 quarter] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 quarter",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 quarter] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
@@ -1205,24 +1198,24 @@
     {
       "query": "row var = now() * 1 quarters",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 quarters] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 quarters",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 quarters] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 quarters",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 quarters] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
@@ -1270,24 +1263,24 @@
     {
       "query": "row var = now() * 1 month",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 month] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 month",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 month] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 month",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 month] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
     },
@@ -1335,24 +1328,24 @@
     {
       "query": "row var = now() * 1 months",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 months] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 months",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 months] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 months",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 months] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
     },
@@ -1400,24 +1393,24 @@
     {
       "query": "row var = now() * 1 week",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 week] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 week",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 week] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 week",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 week] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
     },
@@ -1465,24 +1458,24 @@
     {
       "query": "row var = now() * 1 weeks",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 weeks] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 weeks",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 weeks] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 weeks",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 weeks] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
@@ -1530,24 +1523,24 @@
     {
       "query": "row var = now() * 1 day",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 day] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 day",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 day] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 day",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 day] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
     },
@@ -1595,24 +1588,24 @@
     {
       "query": "row var = now() * 1 days",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 days] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 days",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 days] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 days",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 days] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
     },
@@ -1660,24 +1653,24 @@
     {
       "query": "row var = now() * 1 hour",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 hour] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 hour",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 hour] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 hour",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 hour] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
@@ -1725,24 +1718,24 @@
     {
       "query": "row var = now() * 1 hours",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 hours] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 hours",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 hours] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 hours",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 hours] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
@@ -1790,24 +1783,24 @@
     {
       "query": "row var = now() * 1 minute",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 minute] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 minute",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 minute] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 minute",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 minute] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
@@ -1855,24 +1848,24 @@
     {
       "query": "row var = now() * 1 minutes",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 minutes] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 minutes",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 minutes] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 minutes",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 minutes] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
@@ -1920,24 +1913,24 @@
     {
       "query": "row var = now() * 1 second",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 second] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 second",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 second] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 second",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 second] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
     },
@@ -1985,24 +1978,24 @@
     {
       "query": "row var = now() * 1 seconds",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 seconds] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 seconds",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 seconds] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 seconds",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 seconds] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
@@ -2050,24 +2043,24 @@
     {
       "query": "row var = now() * 1 millisecond",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 millisecond] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 millisecond",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 millisecond] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 millisecond",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 millisecond] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
@@ -2115,24 +2108,24 @@
     {
       "query": "row var = now() * 1 milliseconds",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 milliseconds] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() / 1 milliseconds",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 milliseconds] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() % 1 milliseconds",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 milliseconds] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
@@ -2992,8 +2985,8 @@
     {
       "query": "from a_index | where booleanField > booleanField",
       "error": [
-        "Argument of [>] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [>] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [>] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3045,8 +3038,8 @@
     {
       "query": "from a_index | where booleanField >= booleanField",
       "error": [
-        "Argument of [>=] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [>=] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [>=] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3098,8 +3091,8 @@
     {
       "query": "from a_index | where booleanField < booleanField",
       "error": [
-        "Argument of [<] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [<] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [<] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3151,8 +3144,8 @@
     {
       "query": "from a_index | where booleanField <= booleanField",
       "error": [
-        "Argument of [<=] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [<=] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [<=] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -4654,7 +4647,7 @@
     {
       "query": "from a_index | eval stringField + 1",
       "error": [
-        "Argument of [+] must be [number], found value [stringField] type [string]"
+        "Argument of [+] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6004,8 +5997,8 @@
     {
       "query": "from a_index | eval booleanField > booleanField",
       "error": [
-        "Argument of [>] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [>] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [>] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6017,21 +6010,21 @@
     {
       "query": "from a_index | eval doubleField > stringField",
       "error": [
-        "Argument of [>] must be [number], found value [stringField] type [string]"
+        "Argument of [>] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField > doubleField",
       "error": [
-        "Argument of [>] must be [number], found value [stringField] type [string]"
+        "Argument of [>] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField > \"2022\"",
       "error": [
-        "Argument of [>] must be [number], found value [\"2022\"] type [string]"
+        "Argument of [>] must be [double], found value [\"2022\"] type [string]"
       ],
       "warning": []
     },
@@ -6052,7 +6045,7 @@
     {
       "query": "from a_index | eval stringField > 0",
       "error": [
-        "Argument of [>] must be [number], found value [stringField] type [string]"
+        "Argument of [>] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6150,8 +6143,8 @@
     {
       "query": "from a_index | eval booleanField >= booleanField",
       "error": [
-        "Argument of [>=] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [>=] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [>=] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6163,21 +6156,21 @@
     {
       "query": "from a_index | eval doubleField >= stringField",
       "error": [
-        "Argument of [>=] must be [number], found value [stringField] type [string]"
+        "Argument of [>=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField >= doubleField",
       "error": [
-        "Argument of [>=] must be [number], found value [stringField] type [string]"
+        "Argument of [>=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField >= \"2022\"",
       "error": [
-        "Argument of [>=] must be [number], found value [\"2022\"] type [string]"
+        "Argument of [>=] must be [double], found value [\"2022\"] type [string]"
       ],
       "warning": []
     },
@@ -6198,7 +6191,7 @@
     {
       "query": "from a_index | eval stringField >= 0",
       "error": [
-        "Argument of [>=] must be [number], found value [stringField] type [string]"
+        "Argument of [>=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6296,8 +6289,8 @@
     {
       "query": "from a_index | eval booleanField < booleanField",
       "error": [
-        "Argument of [<] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [<] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [<] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6309,21 +6302,21 @@
     {
       "query": "from a_index | eval doubleField < stringField",
       "error": [
-        "Argument of [<] must be [number], found value [stringField] type [string]"
+        "Argument of [<] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField < doubleField",
       "error": [
-        "Argument of [<] must be [number], found value [stringField] type [string]"
+        "Argument of [<] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField < \"2022\"",
       "error": [
-        "Argument of [<] must be [number], found value [\"2022\"] type [string]"
+        "Argument of [<] must be [double], found value [\"2022\"] type [string]"
       ],
       "warning": []
     },
@@ -6344,7 +6337,7 @@
     {
       "query": "from a_index | eval stringField < 0",
       "error": [
-        "Argument of [<] must be [number], found value [stringField] type [string]"
+        "Argument of [<] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6442,8 +6435,8 @@
     {
       "query": "from a_index | eval booleanField <= booleanField",
       "error": [
-        "Argument of [<=] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [<=] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [<=] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6455,21 +6448,21 @@
     {
       "query": "from a_index | eval doubleField <= stringField",
       "error": [
-        "Argument of [<=] must be [number], found value [stringField] type [string]"
+        "Argument of [<=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField <= doubleField",
       "error": [
-        "Argument of [<=] must be [number], found value [stringField] type [string]"
+        "Argument of [<=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField <= \"2022\"",
       "error": [
-        "Argument of [<=] must be [number], found value [\"2022\"] type [string]"
+        "Argument of [<=] must be [double], found value [\"2022\"] type [string]"
       ],
       "warning": []
     },
@@ -6490,7 +6483,7 @@
     {
       "query": "from a_index | eval stringField <= 0",
       "error": [
-        "Argument of [<=] must be [number], found value [stringField] type [string]"
+        "Argument of [<=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6598,21 +6591,21 @@
     {
       "query": "from a_index | eval doubleField == stringField",
       "error": [
-        "Argument of [==] must be [number], found value [stringField] type [string]"
+        "Argument of [==] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField == doubleField",
       "error": [
-        "Argument of [==] must be [number], found value [stringField] type [string]"
+        "Argument of [==] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField == \"2022\"",
       "error": [
-        "Argument of [==] must be [number], found value [\"2022\"] type [string]"
+        "Argument of [==] must be [double], found value [\"2022\"] type [string]"
       ],
       "warning": []
     },
@@ -6633,7 +6626,7 @@
     {
       "query": "from a_index | eval stringField == 0",
       "error": [
-        "Argument of [==] must be [number], found value [stringField] type [string]"
+        "Argument of [==] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6737,21 +6730,21 @@
     {
       "query": "from a_index | eval doubleField != stringField",
       "error": [
-        "Argument of [!=] must be [number], found value [stringField] type [string]"
+        "Argument of [!=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField != doubleField",
       "error": [
-        "Argument of [!=] must be [number], found value [stringField] type [string]"
+        "Argument of [!=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField != \"2022\"",
       "error": [
-        "Argument of [!=] must be [number], found value [\"2022\"] type [string]"
+        "Argument of [!=] must be [double], found value [\"2022\"] type [string]"
       ],
       "warning": []
     },
@@ -6772,7 +6765,7 @@
     {
       "query": "from a_index | eval stringField != 0",
       "error": [
-        "Argument of [!=] must be [number], found value [stringField] type [string]"
+        "Argument of [!=] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6868,14 +6861,14 @@
     {
       "query": "from a_index | eval 1 + \"1\"",
       "error": [
-        "Argument of [+] must be [number], found value [\"1\"] type [string]"
+        "Argument of [+] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" + 1",
       "error": [
-        "Argument of [+] must be [number], found value [\"1\"] type [string]"
+        "Argument of [+] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
@@ -6904,14 +6897,14 @@
     {
       "query": "from a_index | eval 1 - \"1\"",
       "error": [
-        "Argument of [-] must be [number], found value [\"1\"] type [string]"
+        "Argument of [-] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" - 1",
       "error": [
-        "Argument of [-] must be [number], found value [\"1\"] type [string]"
+        "Argument of [-] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
@@ -6933,22 +6926,22 @@
     {
       "query": "from a_index | eval now() * now()",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [now()] type [date]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 * \"1\"",
       "error": [
-        "Argument of [*] must be [number], found value [\"1\"] type [string]"
+        "Argument of [*] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" * 1",
       "error": [
-        "Argument of [*] must be [number], found value [\"1\"] type [string]"
+        "Argument of [*] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
@@ -6970,22 +6963,22 @@
     {
       "query": "from a_index | eval now() / now()",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [now()] type [date]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 / \"1\"",
       "error": [
-        "Argument of [/] must be [number], found value [\"1\"] type [string]"
+        "Argument of [/] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" / 1",
       "error": [
-        "Argument of [/] must be [number], found value [\"1\"] type [string]"
+        "Argument of [/] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
@@ -7007,22 +7000,22 @@
     {
       "query": "from a_index | eval now() % now()",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [now()] type [date]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 % \"1\"",
       "error": [
-        "Argument of [%] must be [number], found value [\"1\"] type [string]"
+        "Argument of [%] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" % 1",
       "error": [
-        "Argument of [%] must be [number], found value [\"1\"] type [string]"
+        "Argument of [%] must be [double], found value [\"1\"] type [string]"
       ],
       "warning": []
     },
@@ -7282,10 +7275,10 @@
     },
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"bogus\")",
-      "error": [],
-      "warning": [
+      "error": [
         "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
-      ]
+      ],
+      "warning": []
     },
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"ASC\")",
@@ -7387,24 +7380,24 @@
     {
       "query": "from a_index | eval var = now() * 1 year",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 year] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 year",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 year] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 year",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 year] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
     },
@@ -7457,24 +7450,24 @@
     {
       "query": "from a_index | eval var = now() * 1 years",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 years] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 years",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 years] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 years",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 years] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
     },
@@ -7527,24 +7520,24 @@
     {
       "query": "from a_index | eval var = now() * 1 quarter",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 quarter] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 quarter",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 quarter] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 quarter",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 quarter] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
@@ -7597,24 +7590,24 @@
     {
       "query": "from a_index | eval var = now() * 1 quarters",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 quarters] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 quarters",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 quarters] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 quarters",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 quarters] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
@@ -7667,24 +7660,24 @@
     {
       "query": "from a_index | eval var = now() * 1 month",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 month] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 month",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 month] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 month",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 month] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
     },
@@ -7737,24 +7730,24 @@
     {
       "query": "from a_index | eval var = now() * 1 months",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 months] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 months",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 months] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 months",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 months] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
     },
@@ -7807,24 +7800,24 @@
     {
       "query": "from a_index | eval var = now() * 1 week",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 week] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 week",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 week] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 week",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 week] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
     },
@@ -7877,24 +7870,24 @@
     {
       "query": "from a_index | eval var = now() * 1 weeks",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 weeks] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 weeks",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 weeks] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 weeks",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 weeks] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
@@ -7947,24 +7940,24 @@
     {
       "query": "from a_index | eval var = now() * 1 day",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 day] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 day",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 day] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 day",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 day] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
     },
@@ -8017,24 +8010,24 @@
     {
       "query": "from a_index | eval var = now() * 1 days",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 days] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 days",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 days] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 days",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 days] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
     },
@@ -8087,24 +8080,24 @@
     {
       "query": "from a_index | eval var = now() * 1 hour",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 hour] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 hour",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 hour] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 hour",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 hour] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
@@ -8157,24 +8150,24 @@
     {
       "query": "from a_index | eval var = now() * 1 hours",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 hours] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 hours",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 hours] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 hours",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 hours] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
@@ -8227,24 +8220,24 @@
     {
       "query": "from a_index | eval var = now() * 1 minute",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 minute] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 minute",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 minute] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 minute",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 minute] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
@@ -8297,24 +8290,24 @@
     {
       "query": "from a_index | eval var = now() * 1 minutes",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 minutes] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 minutes",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 minutes] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 minutes",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 minutes] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
@@ -8367,24 +8360,24 @@
     {
       "query": "from a_index | eval var = now() * 1 second",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 second] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 second",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 second] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 second",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 second] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
     },
@@ -8437,24 +8430,24 @@
     {
       "query": "from a_index | eval var = now() * 1 seconds",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 seconds] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 seconds",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 seconds] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 seconds",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 seconds] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
@@ -8507,24 +8500,24 @@
     {
       "query": "from a_index | eval var = now() * 1 millisecond",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 millisecond] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 millisecond",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 millisecond] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 millisecond",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 millisecond] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
@@ -8577,24 +8570,24 @@
     {
       "query": "from a_index | eval var = now() * 1 milliseconds",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 milliseconds] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 milliseconds",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 milliseconds] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 milliseconds",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 milliseconds] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
@@ -8647,24 +8640,24 @@
     {
       "query": "from a_index | eval var = now() * 1 ms",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 ms] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 ms",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 ms] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 ms",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 ms] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
@@ -8717,24 +8710,24 @@
     {
       "query": "from a_index | eval var = now() * 1 s",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 s] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 s",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 s] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 s",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 s] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
     },
@@ -8787,24 +8780,24 @@
     {
       "query": "from a_index | eval var = now() * 1 m",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 m] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 m",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 m] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 m",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 m] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
     },
@@ -8857,24 +8850,24 @@
     {
       "query": "from a_index | eval var = now() * 1 h",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 h] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 h",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 h] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 h",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 h] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
     },
@@ -8927,24 +8920,24 @@
     {
       "query": "from a_index | eval var = now() * 1 d",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 d] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 d",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 d] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 d",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 d] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
     },
@@ -8997,24 +8990,24 @@
     {
       "query": "from a_index | eval var = now() * 1 w",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 w] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 w",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 w] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 w",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 w] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
     },
@@ -9067,24 +9060,24 @@
     {
       "query": "from a_index | eval var = now() * 1 mo",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 mo] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 mo",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 mo] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 mo",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 mo] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
@@ -9137,24 +9130,24 @@
     {
       "query": "from a_index | eval var = now() * 1 q",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 q] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 q",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 q] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 q",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 q] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
     },
@@ -9207,24 +9200,24 @@
     {
       "query": "from a_index | eval var = now() * 1 y",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 y] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 y",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 y] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 y",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 y] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
     },
@@ -9277,24 +9270,24 @@
     {
       "query": "from a_index | eval var = now() * 1 yr",
       "error": [
-        "Argument of [*] must be [number], found value [now()] type [date]",
-        "Argument of [*] must be [number], found value [1 yr] type [duration]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() / 1 yr",
       "error": [
-        "Argument of [/] must be [number], found value [now()] type [date]",
-        "Argument of [/] must be [number], found value [1 yr] type [duration]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() % 1 yr",
       "error": [
-        "Argument of [%] must be [number], found value [now()] type [date]",
-        "Argument of [%] must be [number], found value [1 yr] type [duration]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
     },
@@ -9453,14 +9446,14 @@
     {
       "query": "from a_index | sort sin(stringField)",
       "error": [
-        "Argument of [sin] must be [number], found value [stringField] type [string]"
+        "Argument of [sin] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | sort doubleField + stringField",
       "error": [
-        "Argument of [+] must be [number], found value [stringField] type [string]"
+        "Argument of [+] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -9853,7 +9846,7 @@
     {
       "query": "from a_index | eval 1 + \"2\"",
       "error": [
-        "Argument of [+] must be [number], found value [\"2\"] type [string]"
+        "Argument of [+] must be [double], found value [\"2\"] type [string]"
       ],
       "warning": []
     },
@@ -10170,7 +10163,7 @@
     {
       "query": "row var = abs(\"a\")",
       "error": [
-        "Argument of [abs] must be [number], found value [\"a\"] type [string]"
+        "Argument of [abs] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -10182,7 +10175,7 @@
     {
       "query": "from a_index | where abs(stringField) > 0",
       "error": [
-        "Argument of [abs] must be [number], found value [stringField] type [string]"
+        "Argument of [abs] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10204,7 +10197,7 @@
     {
       "query": "from a_index | eval abs(stringField)",
       "error": [
-        "Argument of [abs] must be [number], found value [stringField] type [string]"
+        "Argument of [abs] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10235,14 +10228,14 @@
     {
       "query": "row var = abs(true)",
       "error": [
-        "Argument of [abs] must be [number], found value [true] type [boolean]"
+        "Argument of [abs] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where abs(booleanField) > 0",
       "error": [
-        "Argument of [abs] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [abs] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -10254,7 +10247,7 @@
     {
       "query": "from a_index | eval abs(booleanField)",
       "error": [
-        "Argument of [abs] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [abs] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -10415,7 +10408,7 @@
     {
       "query": "row var = acos(\"a\")",
       "error": [
-        "Argument of [acos] must be [number], found value [\"a\"] type [string]"
+        "Argument of [acos] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -10427,7 +10420,7 @@
     {
       "query": "from a_index | where acos(stringField) > 0",
       "error": [
-        "Argument of [acos] must be [number], found value [stringField] type [string]"
+        "Argument of [acos] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10449,7 +10442,7 @@
     {
       "query": "from a_index | eval acos(stringField)",
       "error": [
-        "Argument of [acos] must be [number], found value [stringField] type [string]"
+        "Argument of [acos] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10480,14 +10473,14 @@
     {
       "query": "row var = acos(true)",
       "error": [
-        "Argument of [acos] must be [number], found value [true] type [boolean]"
+        "Argument of [acos] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where acos(booleanField) > 0",
       "error": [
-        "Argument of [acos] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [acos] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -10499,7 +10492,7 @@
     {
       "query": "from a_index | eval acos(booleanField)",
       "error": [
-        "Argument of [acos] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [acos] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -10660,7 +10653,7 @@
     {
       "query": "row var = asin(\"a\")",
       "error": [
-        "Argument of [asin] must be [number], found value [\"a\"] type [string]"
+        "Argument of [asin] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -10672,7 +10665,7 @@
     {
       "query": "from a_index | where asin(stringField) > 0",
       "error": [
-        "Argument of [asin] must be [number], found value [stringField] type [string]"
+        "Argument of [asin] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10694,7 +10687,7 @@
     {
       "query": "from a_index | eval asin(stringField)",
       "error": [
-        "Argument of [asin] must be [number], found value [stringField] type [string]"
+        "Argument of [asin] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10725,14 +10718,14 @@
     {
       "query": "row var = asin(true)",
       "error": [
-        "Argument of [asin] must be [number], found value [true] type [boolean]"
+        "Argument of [asin] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where asin(booleanField) > 0",
       "error": [
-        "Argument of [asin] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [asin] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -10744,7 +10737,7 @@
     {
       "query": "from a_index | eval asin(booleanField)",
       "error": [
-        "Argument of [asin] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [asin] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -10905,7 +10898,7 @@
     {
       "query": "row var = atan(\"a\")",
       "error": [
-        "Argument of [atan] must be [number], found value [\"a\"] type [string]"
+        "Argument of [atan] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -10917,7 +10910,7 @@
     {
       "query": "from a_index | where atan(stringField) > 0",
       "error": [
-        "Argument of [atan] must be [number], found value [stringField] type [string]"
+        "Argument of [atan] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10939,7 +10932,7 @@
     {
       "query": "from a_index | eval atan(stringField)",
       "error": [
-        "Argument of [atan] must be [number], found value [stringField] type [string]"
+        "Argument of [atan] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -10970,14 +10963,14 @@
     {
       "query": "row var = atan(true)",
       "error": [
-        "Argument of [atan] must be [number], found value [true] type [boolean]"
+        "Argument of [atan] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where atan(booleanField) > 0",
       "error": [
-        "Argument of [atan] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [atan] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -10989,7 +10982,7 @@
     {
       "query": "from a_index | eval atan(booleanField)",
       "error": [
-        "Argument of [atan] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [atan] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -11150,8 +11143,8 @@
     {
       "query": "row var = atan2(\"a\", \"a\")",
       "error": [
-        "Argument of [atan2] must be [number], found value [\"a\"] type [string]",
-        "Argument of [atan2] must be [number], found value [\"a\"] type [string]"
+        "Argument of [atan2] must be [double], found value [\"a\"] type [string]",
+        "Argument of [atan2] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -11163,8 +11156,8 @@
     {
       "query": "from a_index | where atan2(stringField, stringField) > 0",
       "error": [
-        "Argument of [atan2] must be [number], found value [stringField] type [string]",
-        "Argument of [atan2] must be [number], found value [stringField] type [string]"
+        "Argument of [atan2] must be [double], found value [stringField] type [string]",
+        "Argument of [atan2] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -11186,8 +11179,8 @@
     {
       "query": "from a_index | eval atan2(stringField, stringField)",
       "error": [
-        "Argument of [atan2] must be [number], found value [stringField] type [string]",
-        "Argument of [atan2] must be [number], found value [stringField] type [string]"
+        "Argument of [atan2] must be [double], found value [stringField] type [string]",
+        "Argument of [atan2] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -11211,16 +11204,16 @@
     {
       "query": "row var = atan2(true, true)",
       "error": [
-        "Argument of [atan2] must be [number], found value [true] type [boolean]",
-        "Argument of [atan2] must be [number], found value [true] type [boolean]"
+        "Argument of [atan2] must be [double], found value [true] type [boolean]",
+        "Argument of [atan2] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where atan2(booleanField, booleanField) > 0",
       "error": [
-        "Argument of [atan2] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [atan2] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [atan2] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [atan2] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -11232,8 +11225,8 @@
     {
       "query": "from a_index | eval atan2(booleanField, booleanField)",
       "error": [
-        "Argument of [atan2] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [atan2] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [atan2] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [atan2] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -11816,7 +11809,7 @@
     {
       "query": "row var = ceil(\"a\")",
       "error": [
-        "Argument of [ceil] must be [number], found value [\"a\"] type [string]"
+        "Argument of [ceil] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -11828,7 +11821,7 @@
     {
       "query": "from a_index | where ceil(stringField) > 0",
       "error": [
-        "Argument of [ceil] must be [number], found value [stringField] type [string]"
+        "Argument of [ceil] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -11850,7 +11843,7 @@
     {
       "query": "from a_index | eval ceil(stringField)",
       "error": [
-        "Argument of [ceil] must be [number], found value [stringField] type [string]"
+        "Argument of [ceil] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -11881,14 +11874,14 @@
     {
       "query": "row var = ceil(true)",
       "error": [
-        "Argument of [ceil] must be [number], found value [true] type [boolean]"
+        "Argument of [ceil] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where ceil(booleanField) > 0",
       "error": [
-        "Argument of [ceil] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [ceil] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -11900,7 +11893,7 @@
     {
       "query": "from a_index | eval ceil(booleanField)",
       "error": [
-        "Argument of [ceil] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [ceil] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -13304,7 +13297,7 @@
     {
       "query": "row var = cos(\"a\")",
       "error": [
-        "Argument of [cos] must be [number], found value [\"a\"] type [string]"
+        "Argument of [cos] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -13316,7 +13309,7 @@
     {
       "query": "from a_index | where cos(stringField) > 0",
       "error": [
-        "Argument of [cos] must be [number], found value [stringField] type [string]"
+        "Argument of [cos] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -13338,7 +13331,7 @@
     {
       "query": "from a_index | eval cos(stringField)",
       "error": [
-        "Argument of [cos] must be [number], found value [stringField] type [string]"
+        "Argument of [cos] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -13369,14 +13362,14 @@
     {
       "query": "row var = cos(true)",
       "error": [
-        "Argument of [cos] must be [number], found value [true] type [boolean]"
+        "Argument of [cos] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where cos(booleanField) > 0",
       "error": [
-        "Argument of [cos] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [cos] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -13388,7 +13381,7 @@
     {
       "query": "from a_index | eval cos(booleanField)",
       "error": [
-        "Argument of [cos] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [cos] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -13549,7 +13542,7 @@
     {
       "query": "row var = cosh(\"a\")",
       "error": [
-        "Argument of [cosh] must be [number], found value [\"a\"] type [string]"
+        "Argument of [cosh] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -13561,7 +13554,7 @@
     {
       "query": "from a_index | where cosh(stringField) > 0",
       "error": [
-        "Argument of [cosh] must be [number], found value [stringField] type [string]"
+        "Argument of [cosh] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -13583,7 +13576,7 @@
     {
       "query": "from a_index | eval cosh(stringField)",
       "error": [
-        "Argument of [cosh] must be [number], found value [stringField] type [string]"
+        "Argument of [cosh] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -13614,14 +13607,14 @@
     {
       "query": "row var = cosh(true)",
       "error": [
-        "Argument of [cosh] must be [number], found value [true] type [boolean]"
+        "Argument of [cosh] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where cosh(booleanField) > 0",
       "error": [
-        "Argument of [cosh] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [cosh] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -13633,7 +13626,7 @@
     {
       "query": "from a_index | eval cosh(booleanField)",
       "error": [
-        "Argument of [cosh] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [cosh] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -14836,7 +14829,7 @@
     {
       "query": "row var = floor(\"a\")",
       "error": [
-        "Argument of [floor] must be [number], found value [\"a\"] type [string]"
+        "Argument of [floor] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -14848,7 +14841,7 @@
     {
       "query": "from a_index | where floor(stringField) > 0",
       "error": [
-        "Argument of [floor] must be [number], found value [stringField] type [string]"
+        "Argument of [floor] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -14870,7 +14863,7 @@
     {
       "query": "from a_index | eval floor(stringField)",
       "error": [
-        "Argument of [floor] must be [number], found value [stringField] type [string]"
+        "Argument of [floor] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -14901,14 +14894,14 @@
     {
       "query": "row var = floor(true)",
       "error": [
-        "Argument of [floor] must be [number], found value [true] type [boolean]"
+        "Argument of [floor] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where floor(booleanField) > 0",
       "error": [
-        "Argument of [floor] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [floor] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -14920,7 +14913,7 @@
     {
       "query": "from a_index | eval floor(booleanField)",
       "error": [
-        "Argument of [floor] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [floor] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -16128,7 +16121,7 @@
       "query": "row var = left(5, \"a\")",
       "error": [
         "Argument of [left] must be [string], found value [5] type [number]",
-        "Argument of [left] must be [number], found value [\"a\"] type [string]"
+        "Argument of [left] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -16141,7 +16134,7 @@
       "query": "from a_index | where length(left(doubleField, stringField)) > 0",
       "error": [
         "Argument of [left] must be [string], found value [doubleField] type [double]",
-        "Argument of [left] must be [number], found value [stringField] type [string]"
+        "Argument of [left] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -16164,7 +16157,7 @@
       "query": "from a_index | eval left(doubleField, stringField)",
       "error": [
         "Argument of [left] must be [string], found value [doubleField] type [double]",
-        "Argument of [left] must be [number], found value [stringField] type [string]"
+        "Argument of [left] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -16189,7 +16182,7 @@
       "query": "row var = left(true, true)",
       "error": [
         "Argument of [left] must be [string], found value [true] type [boolean]",
-        "Argument of [left] must be [number], found value [true] type [boolean]"
+        "Argument of [left] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -16197,7 +16190,7 @@
       "query": "from a_index | where length(left(booleanField, booleanField)) > 0",
       "error": [
         "Argument of [left] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [left] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [left] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -16210,7 +16203,7 @@
       "query": "from a_index | eval left(booleanField, booleanField)",
       "error": [
         "Argument of [left] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [left] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [left] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -16494,8 +16487,8 @@
     {
       "query": "row var = log(\"a\", \"a\")",
       "error": [
-        "Argument of [log] must be [number], found value [\"a\"] type [string]",
-        "Argument of [log] must be [number], found value [\"a\"] type [string]"
+        "Argument of [log] must be [double], found value [\"a\"] type [string]",
+        "Argument of [log] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -16507,8 +16500,8 @@
     {
       "query": "from a_index | where log(stringField, stringField) > 0",
       "error": [
-        "Argument of [log] must be [number], found value [stringField] type [string]",
-        "Argument of [log] must be [number], found value [stringField] type [string]"
+        "Argument of [log] must be [double], found value [stringField] type [string]",
+        "Argument of [log] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -16530,8 +16523,8 @@
     {
       "query": "from a_index | eval log(stringField, stringField)",
       "error": [
-        "Argument of [log] must be [number], found value [stringField] type [string]",
-        "Argument of [log] must be [number], found value [stringField] type [string]"
+        "Argument of [log] must be [double], found value [stringField] type [string]",
+        "Argument of [log] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -16570,8 +16563,8 @@
     {
       "query": "row var = log(true, true)",
       "error": [
-        "Argument of [log] must be [number], found value [true] type [boolean]",
-        "Argument of [log] must be [number], found value [true] type [boolean]"
+        "Argument of [log] must be [double], found value [true] type [boolean]",
+        "Argument of [log] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -16583,15 +16576,15 @@
     {
       "query": "from a_index | where log(booleanField) > 0",
       "error": [
-        "Argument of [log] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [log] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where log(booleanField, booleanField) > 0",
       "error": [
-        "Argument of [log] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [log] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [log] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [log] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -16613,7 +16606,7 @@
     {
       "query": "from a_index | eval log(booleanField)",
       "error": [
-        "Argument of [log] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [log] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -16632,8 +16625,8 @@
     {
       "query": "from a_index | eval log(booleanField, booleanField)",
       "error": [
-        "Argument of [log] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [log] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [log] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [log] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -17294,7 +17287,7 @@
     {
       "query": "row var = log10(\"a\")",
       "error": [
-        "Argument of [log10] must be [number], found value [\"a\"] type [string]"
+        "Argument of [log10] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -17306,7 +17299,7 @@
     {
       "query": "from a_index | where log10(stringField) > 0",
       "error": [
-        "Argument of [log10] must be [number], found value [stringField] type [string]"
+        "Argument of [log10] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -17328,7 +17321,7 @@
     {
       "query": "from a_index | eval log10(stringField)",
       "error": [
-        "Argument of [log10] must be [number], found value [stringField] type [string]"
+        "Argument of [log10] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -17359,14 +17352,14 @@
     {
       "query": "row var = log10(true)",
       "error": [
-        "Argument of [log10] must be [number], found value [true] type [boolean]"
+        "Argument of [log10] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where log10(booleanField) > 0",
       "error": [
-        "Argument of [log10] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [log10] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -17378,7 +17371,7 @@
     {
       "query": "from a_index | eval log10(booleanField)",
       "error": [
-        "Argument of [log10] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [log10] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -17697,7 +17690,7 @@
     {
       "query": "row var = mv_avg(\"a\")",
       "error": [
-        "Argument of [mv_avg] must be [number], found value [\"a\"] type [string]"
+        "Argument of [mv_avg] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -17709,7 +17702,7 @@
     {
       "query": "from a_index | where mv_avg(stringField) > 0",
       "error": [
-        "Argument of [mv_avg] must be [number], found value [stringField] type [string]"
+        "Argument of [mv_avg] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -17731,7 +17724,7 @@
     {
       "query": "from a_index | eval mv_avg(stringField)",
       "error": [
-        "Argument of [mv_avg] must be [number], found value [stringField] type [string]"
+        "Argument of [mv_avg] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -17762,14 +17755,14 @@
     {
       "query": "row var = mv_avg(true)",
       "error": [
-        "Argument of [mv_avg] must be [number], found value [true] type [boolean]"
+        "Argument of [mv_avg] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where mv_avg(booleanField) > 0",
       "error": [
-        "Argument of [mv_avg] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_avg] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -17781,7 +17774,7 @@
     {
       "query": "from a_index | eval mv_avg(booleanField)",
       "error": [
-        "Argument of [mv_avg] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_avg] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -20888,7 +20881,7 @@
     {
       "query": "row var = mv_median(\"a\")",
       "error": [
-        "Argument of [mv_median] must be [number], found value [\"a\"] type [string]"
+        "Argument of [mv_median] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -20900,7 +20893,7 @@
     {
       "query": "from a_index | where mv_median(stringField) > 0",
       "error": [
-        "Argument of [mv_median] must be [number], found value [stringField] type [string]"
+        "Argument of [mv_median] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -20922,7 +20915,7 @@
     {
       "query": "from a_index | eval mv_median(stringField)",
       "error": [
-        "Argument of [mv_median] must be [number], found value [stringField] type [string]"
+        "Argument of [mv_median] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -20953,14 +20946,14 @@
     {
       "query": "row var = mv_median(true)",
       "error": [
-        "Argument of [mv_median] must be [number], found value [true] type [boolean]"
+        "Argument of [mv_median] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where mv_median(booleanField) > 0",
       "error": [
-        "Argument of [mv_median] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_median] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -20972,7 +20965,7 @@
     {
       "query": "from a_index | eval mv_median(booleanField)",
       "error": [
-        "Argument of [mv_median] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_median] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21700,8 +21693,8 @@
     {
       "query": "row var = mv_slice(to_version(\"1.0.0\"), true, true)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [true] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [true] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [true] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -21713,8 +21706,8 @@
     {
       "query": "from a_index | where mv_slice(doubleField, booleanField, booleanField) > 0",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21726,8 +21719,8 @@
     {
       "query": "from a_index | where length(mv_slice(stringField, booleanField, booleanField)) > 0",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21749,8 +21742,8 @@
     {
       "query": "from a_index | eval mv_slice(booleanField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21772,8 +21765,8 @@
     {
       "query": "from a_index | eval mv_slice(cartesianPointField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21795,8 +21788,8 @@
     {
       "query": "from a_index | eval mv_slice(cartesianShapeField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21818,8 +21811,8 @@
     {
       "query": "from a_index | eval mv_slice(dateField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21841,8 +21834,8 @@
     {
       "query": "from a_index | eval mv_slice(doubleField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21864,8 +21857,8 @@
     {
       "query": "from a_index | eval mv_slice(geoPointField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21887,8 +21880,8 @@
     {
       "query": "from a_index | eval mv_slice(geoShapeField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21910,8 +21903,8 @@
     {
       "query": "from a_index | eval mv_slice(ipField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21923,8 +21916,8 @@
     {
       "query": "from a_index | eval mv_slice(stringField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -21946,8 +21939,8 @@
     {
       "query": "from a_index | eval mv_slice(versionField, booleanField, booleanField)",
       "error": [
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -23174,7 +23167,7 @@
     {
       "query": "row var = mv_sum(\"a\")",
       "error": [
-        "Argument of [mv_sum] must be [number], found value [\"a\"] type [string]"
+        "Argument of [mv_sum] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -23186,7 +23179,7 @@
     {
       "query": "from a_index | where mv_sum(stringField) > 0",
       "error": [
-        "Argument of [mv_sum] must be [number], found value [stringField] type [string]"
+        "Argument of [mv_sum] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -23208,7 +23201,7 @@
     {
       "query": "from a_index | eval mv_sum(stringField)",
       "error": [
-        "Argument of [mv_sum] must be [number], found value [stringField] type [string]"
+        "Argument of [mv_sum] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -23239,14 +23232,14 @@
     {
       "query": "row var = mv_sum(true)",
       "error": [
-        "Argument of [mv_sum] must be [number], found value [true] type [boolean]"
+        "Argument of [mv_sum] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where mv_sum(booleanField) > 0",
       "error": [
-        "Argument of [mv_sum] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_sum] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -23258,7 +23251,7 @@
     {
       "query": "from a_index | eval mv_sum(booleanField)",
       "error": [
-        "Argument of [mv_sum] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [mv_sum] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -23987,8 +23980,8 @@
     {
       "query": "row var = pow(\"a\", \"a\")",
       "error": [
-        "Argument of [pow] must be [number], found value [\"a\"] type [string]",
-        "Argument of [pow] must be [number], found value [\"a\"] type [string]"
+        "Argument of [pow] must be [double], found value [\"a\"] type [string]",
+        "Argument of [pow] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -24000,8 +23993,8 @@
     {
       "query": "from a_index | where pow(stringField, stringField) > 0",
       "error": [
-        "Argument of [pow] must be [number], found value [stringField] type [string]",
-        "Argument of [pow] must be [number], found value [stringField] type [string]"
+        "Argument of [pow] must be [double], found value [stringField] type [string]",
+        "Argument of [pow] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -24023,8 +24016,8 @@
     {
       "query": "from a_index | eval pow(stringField, stringField)",
       "error": [
-        "Argument of [pow] must be [number], found value [stringField] type [string]",
-        "Argument of [pow] must be [number], found value [stringField] type [string]"
+        "Argument of [pow] must be [double], found value [stringField] type [string]",
+        "Argument of [pow] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -24048,16 +24041,16 @@
     {
       "query": "row var = pow(true, true)",
       "error": [
-        "Argument of [pow] must be [number], found value [true] type [boolean]",
-        "Argument of [pow] must be [number], found value [true] type [boolean]"
+        "Argument of [pow] must be [double], found value [true] type [boolean]",
+        "Argument of [pow] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where pow(booleanField, booleanField) > 0",
       "error": [
-        "Argument of [pow] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [pow] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [pow] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [pow] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -24069,8 +24062,8 @@
     {
       "query": "from a_index | eval pow(booleanField, booleanField)",
       "error": [
-        "Argument of [pow] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [pow] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [pow] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [pow] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -24955,7 +24948,7 @@
       "query": "row var = right(5, \"a\")",
       "error": [
         "Argument of [right] must be [string], found value [5] type [number]",
-        "Argument of [right] must be [number], found value [\"a\"] type [string]"
+        "Argument of [right] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -24968,7 +24961,7 @@
       "query": "from a_index | where length(right(doubleField, stringField)) > 0",
       "error": [
         "Argument of [right] must be [string], found value [doubleField] type [double]",
-        "Argument of [right] must be [number], found value [stringField] type [string]"
+        "Argument of [right] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -24991,7 +24984,7 @@
       "query": "from a_index | eval right(doubleField, stringField)",
       "error": [
         "Argument of [right] must be [string], found value [doubleField] type [double]",
-        "Argument of [right] must be [number], found value [stringField] type [string]"
+        "Argument of [right] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -25016,7 +25009,7 @@
       "query": "row var = right(true, true)",
       "error": [
         "Argument of [right] must be [string], found value [true] type [boolean]",
-        "Argument of [right] must be [number], found value [true] type [boolean]"
+        "Argument of [right] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -25024,7 +25017,7 @@
       "query": "from a_index | where length(right(booleanField, booleanField)) > 0",
       "error": [
         "Argument of [right] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [right] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [right] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -25037,7 +25030,7 @@
       "query": "from a_index | eval right(booleanField, booleanField)",
       "error": [
         "Argument of [right] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [right] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [right] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -25163,8 +25156,8 @@
     {
       "query": "row var = round(\"a\", \"a\")",
       "error": [
-        "Argument of [round] must be [number], found value [\"a\"] type [string]",
-        "Argument of [round] must be [number], found value [\"a\"] type [string]"
+        "Argument of [round] must be [double], found value [\"a\"] type [string]",
+        "Argument of [round] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -25176,8 +25169,8 @@
     {
       "query": "from a_index | where round(stringField, stringField) > 0",
       "error": [
-        "Argument of [round] must be [number], found value [stringField] type [string]",
-        "Argument of [round] must be [number], found value [stringField] type [string]"
+        "Argument of [round] must be [double], found value [stringField] type [string]",
+        "Argument of [round] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -25199,8 +25192,8 @@
     {
       "query": "from a_index | eval round(stringField, stringField)",
       "error": [
-        "Argument of [round] must be [number], found value [stringField] type [string]",
-        "Argument of [round] must be [number], found value [stringField] type [string]"
+        "Argument of [round] must be [double], found value [stringField] type [string]",
+        "Argument of [round] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -25239,8 +25232,8 @@
     {
       "query": "row var = round(true, true)",
       "error": [
-        "Argument of [round] must be [number], found value [true] type [boolean]",
-        "Argument of [round] must be [number], found value [true] type [boolean]"
+        "Argument of [round] must be [double], found value [true] type [boolean]",
+        "Argument of [round] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -25252,15 +25245,15 @@
     {
       "query": "from a_index | where round(booleanField) > 0",
       "error": [
-        "Argument of [round] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [round] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where round(booleanField, booleanField) > 0",
       "error": [
-        "Argument of [round] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [round] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [round] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [round] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -25282,7 +25275,7 @@
     {
       "query": "from a_index | eval round(booleanField)",
       "error": [
-        "Argument of [round] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [round] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -25301,8 +25294,8 @@
     {
       "query": "from a_index | eval round(booleanField, booleanField)",
       "error": [
-        "Argument of [round] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [round] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [round] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [round] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -25761,7 +25754,7 @@
     {
       "query": "row var = signum(\"a\")",
       "error": [
-        "Argument of [signum] must be [number], found value [\"a\"] type [string]"
+        "Argument of [signum] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -25773,7 +25766,7 @@
     {
       "query": "from a_index | where signum(stringField) > 0",
       "error": [
-        "Argument of [signum] must be [number], found value [stringField] type [string]"
+        "Argument of [signum] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -25795,7 +25788,7 @@
     {
       "query": "from a_index | eval signum(stringField)",
       "error": [
-        "Argument of [signum] must be [number], found value [stringField] type [string]"
+        "Argument of [signum] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -25826,14 +25819,14 @@
     {
       "query": "row var = signum(true)",
       "error": [
-        "Argument of [signum] must be [number], found value [true] type [boolean]"
+        "Argument of [signum] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where signum(booleanField) > 0",
       "error": [
-        "Argument of [signum] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [signum] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -25845,7 +25838,7 @@
     {
       "query": "from a_index | eval signum(booleanField)",
       "error": [
-        "Argument of [signum] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [signum] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -26006,7 +25999,7 @@
     {
       "query": "row var = sin(\"a\")",
       "error": [
-        "Argument of [sin] must be [number], found value [\"a\"] type [string]"
+        "Argument of [sin] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -26018,7 +26011,7 @@
     {
       "query": "from a_index | where sin(stringField) > 0",
       "error": [
-        "Argument of [sin] must be [number], found value [stringField] type [string]"
+        "Argument of [sin] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -26040,7 +26033,7 @@
     {
       "query": "from a_index | eval sin(stringField)",
       "error": [
-        "Argument of [sin] must be [number], found value [stringField] type [string]"
+        "Argument of [sin] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -26071,14 +26064,14 @@
     {
       "query": "row var = sin(true)",
       "error": [
-        "Argument of [sin] must be [number], found value [true] type [boolean]"
+        "Argument of [sin] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where sin(booleanField) > 0",
       "error": [
-        "Argument of [sin] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [sin] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -26090,7 +26083,7 @@
     {
       "query": "from a_index | eval sin(booleanField)",
       "error": [
-        "Argument of [sin] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [sin] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -26251,7 +26244,7 @@
     {
       "query": "row var = sinh(\"a\")",
       "error": [
-        "Argument of [sinh] must be [number], found value [\"a\"] type [string]"
+        "Argument of [sinh] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -26263,7 +26256,7 @@
     {
       "query": "from a_index | where sinh(stringField) > 0",
       "error": [
-        "Argument of [sinh] must be [number], found value [stringField] type [string]"
+        "Argument of [sinh] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -26285,7 +26278,7 @@
     {
       "query": "from a_index | eval sinh(stringField)",
       "error": [
-        "Argument of [sinh] must be [number], found value [stringField] type [string]"
+        "Argument of [sinh] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -26316,14 +26309,14 @@
     {
       "query": "row var = sinh(true)",
       "error": [
-        "Argument of [sinh] must be [number], found value [true] type [boolean]"
+        "Argument of [sinh] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where sinh(booleanField) > 0",
       "error": [
-        "Argument of [sinh] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [sinh] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -26335,7 +26328,7 @@
     {
       "query": "from a_index | eval sinh(booleanField)",
       "error": [
-        "Argument of [sinh] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [sinh] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -26713,7 +26706,7 @@
     {
       "query": "row var = sqrt(\"a\")",
       "error": [
-        "Argument of [sqrt] must be [number], found value [\"a\"] type [string]"
+        "Argument of [sqrt] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -26725,7 +26718,7 @@
     {
       "query": "from a_index | where sqrt(stringField) > 0",
       "error": [
-        "Argument of [sqrt] must be [number], found value [stringField] type [string]"
+        "Argument of [sqrt] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -26747,7 +26740,7 @@
     {
       "query": "from a_index | eval sqrt(stringField)",
       "error": [
-        "Argument of [sqrt] must be [number], found value [stringField] type [string]"
+        "Argument of [sqrt] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -26778,14 +26771,14 @@
     {
       "query": "row var = sqrt(true)",
       "error": [
-        "Argument of [sqrt] must be [number], found value [true] type [boolean]"
+        "Argument of [sqrt] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where sqrt(booleanField) > 0",
       "error": [
-        "Argument of [sqrt] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [sqrt] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -26797,7 +26790,7 @@
     {
       "query": "from a_index | eval sqrt(booleanField)",
       "error": [
-        "Argument of [sqrt] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [sqrt] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -29495,8 +29488,8 @@
       "query": "row var = substring(5, \"a\", \"a\")",
       "error": [
         "Argument of [substring] must be [string], found value [5] type [number]",
-        "Argument of [substring] must be [number], found value [\"a\"] type [string]",
-        "Argument of [substring] must be [number], found value [\"a\"] type [string]"
+        "Argument of [substring] must be [double], found value [\"a\"] type [string]",
+        "Argument of [substring] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -29509,8 +29502,8 @@
       "query": "from a_index | where length(substring(doubleField, stringField, stringField)) > 0",
       "error": [
         "Argument of [substring] must be [string], found value [doubleField] type [double]",
-        "Argument of [substring] must be [number], found value [stringField] type [string]",
-        "Argument of [substring] must be [number], found value [stringField] type [string]"
+        "Argument of [substring] must be [double], found value [stringField] type [string]",
+        "Argument of [substring] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -29533,8 +29526,8 @@
       "query": "from a_index | eval substring(doubleField, stringField, stringField)",
       "error": [
         "Argument of [substring] must be [string], found value [doubleField] type [double]",
-        "Argument of [substring] must be [number], found value [stringField] type [string]",
-        "Argument of [substring] must be [number], found value [stringField] type [string]"
+        "Argument of [substring] must be [double], found value [stringField] type [string]",
+        "Argument of [substring] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -29564,8 +29557,8 @@
       "query": "row var = substring(true, true, true)",
       "error": [
         "Argument of [substring] must be [string], found value [true] type [boolean]",
-        "Argument of [substring] must be [number], found value [true] type [boolean]",
-        "Argument of [substring] must be [number], found value [true] type [boolean]"
+        "Argument of [substring] must be [double], found value [true] type [boolean]",
+        "Argument of [substring] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -29573,8 +29566,8 @@
       "query": "from a_index | where length(substring(booleanField, booleanField, booleanField)) > 0",
       "error": [
         "Argument of [substring] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [substring] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [substring] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [substring] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [substring] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -29587,8 +29580,8 @@
       "query": "from a_index | eval substring(booleanField, booleanField, booleanField)",
       "error": [
         "Argument of [substring] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [substring] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [substring] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [substring] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [substring] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -29714,7 +29707,7 @@
     {
       "query": "row var = tan(\"a\")",
       "error": [
-        "Argument of [tan] must be [number], found value [\"a\"] type [string]"
+        "Argument of [tan] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -29726,7 +29719,7 @@
     {
       "query": "from a_index | where tan(stringField) > 0",
       "error": [
-        "Argument of [tan] must be [number], found value [stringField] type [string]"
+        "Argument of [tan] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -29748,7 +29741,7 @@
     {
       "query": "from a_index | eval tan(stringField)",
       "error": [
-        "Argument of [tan] must be [number], found value [stringField] type [string]"
+        "Argument of [tan] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -29779,14 +29772,14 @@
     {
       "query": "row var = tan(true)",
       "error": [
-        "Argument of [tan] must be [number], found value [true] type [boolean]"
+        "Argument of [tan] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where tan(booleanField) > 0",
       "error": [
-        "Argument of [tan] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [tan] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -29798,7 +29791,7 @@
     {
       "query": "from a_index | eval tan(booleanField)",
       "error": [
-        "Argument of [tan] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [tan] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -29959,7 +29952,7 @@
     {
       "query": "row var = tanh(\"a\")",
       "error": [
-        "Argument of [tanh] must be [number], found value [\"a\"] type [string]"
+        "Argument of [tanh] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -29971,7 +29964,7 @@
     {
       "query": "from a_index | where tanh(stringField) > 0",
       "error": [
-        "Argument of [tanh] must be [number], found value [stringField] type [string]"
+        "Argument of [tanh] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -29993,7 +29986,7 @@
     {
       "query": "from a_index | eval tanh(stringField)",
       "error": [
-        "Argument of [tanh] must be [number], found value [stringField] type [string]"
+        "Argument of [tanh] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -30024,14 +30017,14 @@
     {
       "query": "row var = tanh(true)",
       "error": [
-        "Argument of [tanh] must be [number], found value [true] type [boolean]"
+        "Argument of [tanh] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where tanh(booleanField) > 0",
       "error": [
-        "Argument of [tanh] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [tanh] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -30043,7 +30036,7 @@
     {
       "query": "from a_index | eval tanh(booleanField)",
       "error": [
-        "Argument of [tanh] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [tanh] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -31302,7 +31295,7 @@
     {
       "query": "row var = to_degrees(\"a\")",
       "error": [
-        "Argument of [to_degrees] must be [number], found value [\"a\"] type [string]"
+        "Argument of [to_degrees] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -31314,7 +31307,7 @@
     {
       "query": "from a_index | where to_degrees(stringField) > 0",
       "error": [
-        "Argument of [to_degrees] must be [number], found value [stringField] type [string]"
+        "Argument of [to_degrees] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -31336,7 +31329,7 @@
     {
       "query": "from a_index | eval to_degrees(stringField)",
       "error": [
-        "Argument of [to_degrees] must be [number], found value [stringField] type [string]"
+        "Argument of [to_degrees] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -31367,14 +31360,14 @@
     {
       "query": "row var = to_degrees(true)",
       "error": [
-        "Argument of [to_degrees] must be [number], found value [true] type [boolean]"
+        "Argument of [to_degrees] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where to_degrees(booleanField) > 0",
       "error": [
-        "Argument of [to_degrees] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [to_degrees] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -31386,7 +31379,7 @@
     {
       "query": "from a_index | eval to_degrees(booleanField)",
       "error": [
-        "Argument of [to_degrees] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [to_degrees] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -33589,7 +33582,7 @@
     {
       "query": "row var = to_radians(\"a\")",
       "error": [
-        "Argument of [to_radians] must be [number], found value [\"a\"] type [string]"
+        "Argument of [to_radians] must be [double], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -33601,7 +33594,7 @@
     {
       "query": "from a_index | where to_radians(stringField) > 0",
       "error": [
-        "Argument of [to_radians] must be [number], found value [stringField] type [string]"
+        "Argument of [to_radians] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -33623,7 +33616,7 @@
     {
       "query": "from a_index | eval to_radians(stringField)",
       "error": [
-        "Argument of [to_radians] must be [number], found value [stringField] type [string]"
+        "Argument of [to_radians] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -33654,14 +33647,14 @@
     {
       "query": "row var = to_radians(true)",
       "error": [
-        "Argument of [to_radians] must be [number], found value [true] type [boolean]"
+        "Argument of [to_radians] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where to_radians(booleanField) > 0",
       "error": [
-        "Argument of [to_radians] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [to_radians] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -33673,7 +33666,7 @@
     {
       "query": "from a_index | eval to_radians(booleanField)",
       "error": [
-        "Argument of [to_radians] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [to_radians] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -35715,7 +35708,7 @@
     {
       "query": "from a_index | stats avg(stringField)",
       "error": [
-        "Argument of [avg] must be [number], found value [stringField] type [string]"
+        "Argument of [avg] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -35778,7 +35771,7 @@
     {
       "query": "from a_index | stats avg(booleanField)",
       "error": [
-        "Argument of [avg] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [avg] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -36183,7 +36176,7 @@
     {
       "query": "from a_index | stats sum(stringField)",
       "error": [
-        "Argument of [sum] must be [number], found value [stringField] type [string]"
+        "Argument of [sum] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -36246,7 +36239,7 @@
     {
       "query": "from a_index | stats sum(booleanField)",
       "error": [
-        "Argument of [sum] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [sum] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -36651,7 +36644,7 @@
     {
       "query": "from a_index | stats median(stringField)",
       "error": [
-        "Argument of [median] must be [number], found value [stringField] type [string]"
+        "Argument of [median] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -36714,7 +36707,7 @@
     {
       "query": "from a_index | stats median(booleanField)",
       "error": [
-        "Argument of [median] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [median] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -37119,7 +37112,7 @@
     {
       "query": "from a_index | stats median_absolute_deviation(stringField)",
       "error": [
-        "Argument of [median_absolute_deviation] must be [number], found value [stringField] type [string]"
+        "Argument of [median_absolute_deviation] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -37182,7 +37175,7 @@
     {
       "query": "from a_index | stats median_absolute_deviation(booleanField)",
       "error": [
-        "Argument of [median_absolute_deviation] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [median_absolute_deviation] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -37594,7 +37587,7 @@
     {
       "query": "from a_index | stats percentile(stringField, 5)",
       "error": [
-        "Argument of [percentile] must be [number], found value [stringField] type [string]"
+        "Argument of [percentile] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -37650,7 +37643,7 @@
     {
       "query": "from a_index | stats percentile(booleanField, 5)",
       "error": [
-        "Argument of [percentile] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [percentile] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -38091,7 +38084,7 @@
     {
       "query": "from a_index | stats max(stringField)",
       "error": [
-        "Argument of [max] must be [number], found value [stringField] type [string]"
+        "Argument of [max] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -38246,14 +38239,14 @@
     {
       "query": "from a_index | stats max(concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [max] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [max] must be [double], found value [concat(\"20\", \"22\")] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats max(cartesianPointField)",
       "error": [
-        "Argument of [max] must be [number], found value [cartesianPointField] type [cartesian_point]"
+        "Argument of [max] must be [double], found value [cartesianPointField] type [cartesian_point]"
       ],
       "warning": []
     },
@@ -38709,7 +38702,7 @@
     {
       "query": "from a_index | stats min(stringField)",
       "error": [
-        "Argument of [min] must be [number], found value [stringField] type [string]"
+        "Argument of [min] must be [double], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -38864,14 +38857,14 @@
     {
       "query": "from a_index | stats min(concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [min] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [min] must be [double], found value [concat(\"20\", \"22\")] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats min(cartesianPointField)",
       "error": [
-        "Argument of [min] must be [number], found value [cartesianPointField] type [cartesian_point]"
+        "Argument of [min] must be [double], found value [cartesianPointField] type [cartesian_point]"
       ],
       "warning": []
     },
@@ -40311,7 +40304,7 @@
     {
       "query": "row var = cbrt(true)",
       "error": [
-        "Argument of [cbrt] must be [number], found value [true] type [boolean]"
+        "Argument of [cbrt] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -40323,7 +40316,7 @@
     {
       "query": "from a_index | where cbrt(booleanField) > 0",
       "error": [
-        "Argument of [cbrt] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [cbrt] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -40345,7 +40338,7 @@
     {
       "query": "from a_index | eval cbrt(booleanField)",
       "error": [
-        "Argument of [cbrt] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [cbrt] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -40679,7 +40672,7 @@
       "error": [
         "Argument of [locate] must be [string], found value [true] type [boolean]",
         "Argument of [locate] must be [string], found value [true] type [boolean]",
-        "Argument of [locate] must be [number], found value [true] type [boolean]"
+        "Argument of [locate] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -40706,7 +40699,7 @@
       "error": [
         "Argument of [locate] must be [string], found value [booleanField] type [boolean]",
         "Argument of [locate] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [locate] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [locate] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -40753,7 +40746,7 @@
       "error": [
         "Argument of [locate] must be [string], found value [booleanField] type [boolean]",
         "Argument of [locate] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [locate] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [locate] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -41164,8 +41157,8 @@
       "query": "row var = ip_prefix(true, true, true)",
       "error": [
         "Argument of [ip_prefix] must be [ip], found value [true] type [boolean]",
-        "Argument of [ip_prefix] must be [number], found value [true] type [boolean]",
-        "Argument of [ip_prefix] must be [number], found value [true] type [boolean]"
+        "Argument of [ip_prefix] must be [double], found value [true] type [boolean]",
+        "Argument of [ip_prefix] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -41188,8 +41181,8 @@
       "query": "from a_index | eval ip_prefix(booleanField, booleanField, booleanField)",
       "error": [
         "Argument of [ip_prefix] must be [ip], found value [booleanField] type [boolean]",
-        "Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [ip_prefix] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [ip_prefix] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -41859,7 +41852,7 @@
       "query": "row var = repeat(true, true)",
       "error": [
         "Argument of [repeat] must be [string], found value [true] type [boolean]",
-        "Argument of [repeat] must be [number], found value [true] type [boolean]"
+        "Argument of [repeat] must be [double], found value [true] type [boolean]"
       ],
       "warning": []
     },
@@ -41872,7 +41865,7 @@
       "query": "from a_index | where length(repeat(booleanField, booleanField)) > 0",
       "error": [
         "Argument of [repeat] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [repeat] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [repeat] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -41895,7 +41888,7 @@
       "query": "from a_index | eval repeat(booleanField, booleanField)",
       "error": [
         "Argument of [repeat] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [repeat] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [repeat] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -42571,8 +42564,8 @@
     {
       "query": "from a_index | stats weighted_avg(booleanField, booleanField)",
       "error": [
-        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]"
+        "Argument of [weighted_avg] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [weighted_avg] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },

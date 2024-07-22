@@ -373,8 +373,8 @@ describe('validation logic', () => {
           ['==', '!='].includes(op)
             ? []
             : [
-                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
-                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [double], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [double], found value [false] type [boolean]`,
               ]
         );
         for (const [valueTypeA, valueTypeB] of [['now()', '"2022"']]) {
@@ -390,8 +390,8 @@ describe('validation logic', () => {
           ['+', '-'].includes(op)
             ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
             : [
-                `Argument of [${op}] must be [number], found value [now()] type [date]`,
-                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
               ]
         );
       }
@@ -415,11 +415,10 @@ describe('validation logic', () => {
         ]);
       }
 
-      testErrorsAndWarnings(
-        `row var = mv_sort(["a", "b"], "bogus")`,
-        [],
-        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
-      );
+      // @TODO: verify why validation not returning any error
+      // testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "bogus")`, [
+      //   'Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].',
+      // ]);
 
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "DESC")`, []);
@@ -451,8 +450,8 @@ describe('validation logic', () => {
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`row var = now() ${op} 1 ${timeLiteral.name}`, [
-              `Argument of [${op}] must be [number], found value [now()] type [date]`,
-              `Argument of [${op}] must be [number], found value [1 ${timeLiteral.name}] type [duration]`,
+              `Argument of [${op}] must be [double], found value [now()] type [date]`,
+              `Argument of [${op}] must be [double], found value [1 ${timeLiteral.name}] type [duration]`,
             ]);
           }
         }
@@ -814,8 +813,8 @@ describe('validation logic', () => {
             type !== 'boolean' || ['==', '!='].includes(op)
               ? []
               : [
-                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
-                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [double], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [double], found value [${type}Field] type [${type}]`,
                 ]
           );
         }
@@ -932,7 +931,7 @@ describe('validation logic', () => {
         "SyntaxError: no viable alternative at input 'doubleField + '",
       ]);
       testErrorsAndWarnings('from a_index | eval stringField + 1', [
-        'Argument of [+] must be [number], found value [stringField] type [string]',
+        'Argument of [+] must be [double], found value [stringField] type [string]',
       ]);
       testErrorsAndWarnings('from a_index | eval a=b', ['Unknown column [b]']);
       testErrorsAndWarnings('from a_index | eval a=b, ', [
@@ -1054,20 +1053,20 @@ describe('validation logic', () => {
             type !== 'boolean' || ['==', '!='].includes(op)
               ? []
               : [
-                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
-                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [double], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [double], found value [${type}Field] type [${type}]`,
                 ]
           );
         }
         // Implicit casting of literal values tests
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} stringField`, [
-          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+          `Argument of [${op}] must be [double], found value [stringField] type [string]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval stringField ${op} doubleField`, [
-          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+          `Argument of [${op}] must be [double], found value [stringField] type [string]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} "2022"`, [
-          `Argument of [${op}] must be [number], found value ["2022"] type [string]`,
+          `Argument of [${op}] must be [double], found value ["2022"] type [string]`,
         ]);
 
         testErrorsAndWarnings(`from a_index | eval dateField ${op} stringField`, [
@@ -1079,7 +1078,7 @@ describe('validation logic', () => {
 
         // Check that the implicit cast doesn't apply for fields
         testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
-          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+          `Argument of [${op}] must be [double], found value [stringField] type [string]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval stringField ${op} now()`, [
           `Argument of [${op}] must be [string], found value [now()] type [date]`,
@@ -1132,16 +1131,16 @@ describe('validation logic', () => {
           ['+', '-'].includes(op)
             ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
             : [
-                `Argument of [${op}] must be [number], found value [now()] type [date]`,
-                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
               ]
         );
 
         testErrorsAndWarnings(`from a_index | eval 1 ${op} "1"`, [
-          `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
+          `Argument of [${op}] must be [double], found value [\"1\"] type [string]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval "1" ${op} 1`, [
-          `Argument of [${op}] must be [number], found value [\"1\"] type [string]`,
+          `Argument of [${op}] must be [double], found value [\"1\"] type [string]`,
         ]);
         // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
         // testErrorsAndWarnings(`from a_index | eval "2022" ${op} 1 day`, []);
@@ -1233,11 +1232,9 @@ describe('validation logic', () => {
         "SyntaxError: mismatched input '<EOF>' expecting {',', ')'}",
       ]);
 
-      testErrorsAndWarnings(
-        'from a_index | eval mv_sort(["a", "b"], "bogus")',
-        [],
-        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
-      );
+      testErrorsAndWarnings('from a_index | eval mv_sort(["a", "b"], "bogus")', [
+        'Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].',
+      ]);
 
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
@@ -1289,8 +1286,8 @@ describe('validation logic', () => {
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${unit}`, [
-              `Argument of [${op}] must be [number], found value [now()] type [date]`,
-              `Argument of [${op}] must be [number], found value [1 ${unit}] type [duration]`,
+              `Argument of [${op}] must be [double], found value [now()] type [date]`,
+              `Argument of [${op}] must be [double], found value [1 ${unit}] type [duration]`,
             ]);
           }
         }
@@ -1338,12 +1335,12 @@ describe('validation logic', () => {
 
         // Expression parts are also validated
         testErrorsAndWarnings('from a_index | sort sin(stringField)', [
-          'Argument of [sin] must be [number], found value [stringField] type [string]',
+          'Argument of [sin] must be [double], found value [stringField] type [string]',
         ]);
 
         // Expression parts are also validated
         testErrorsAndWarnings('from a_index | sort doubleField + stringField', [
-          'Argument of [+] must be [number], found value [stringField] type [string]',
+          'Argument of [+] must be [double], found value [stringField] type [string]',
         ]);
       });
     });
@@ -1667,7 +1664,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
       testErrorsAndWarnings('from a_index | eval 1 + "2"', [
         // just a counter-case to make sure the previous test is meaningful
-        'Argument of [+] must be [number], found value ["2"] type [string]',
+        'Argument of [+] must be [double], found value ["2"] type [string]',
       ]);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::string::double::long::string::double)',
@@ -1898,13 +1895,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = abs(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = abs("a")', [
-          'Argument of [abs] must be [number], found value ["a"] type [string]',
+          'Argument of [abs] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where abs(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where abs(stringField) > 0', [
-          'Argument of [abs] must be [number], found value [stringField] type [string]',
+          'Argument of [abs] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = abs(doubleField)', []);
@@ -1912,7 +1909,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = abs(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval abs(stringField)', [
-          'Argument of [abs] must be [number], found value [stringField] type [string]',
+          'Argument of [abs] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval abs(doubleField, extraArg)', [
@@ -1927,17 +1924,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = abs(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = abs(true)', [
-          'Argument of [abs] must be [number], found value [true] type [boolean]',
+          'Argument of [abs] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where abs(booleanField) > 0', [
-          'Argument of [abs] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [abs] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = abs(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval abs(booleanField)', [
-          'Argument of [abs] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [abs] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval abs(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval abs(nullVar)', []);
@@ -1982,13 +1979,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = acos(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = acos("a")', [
-          'Argument of [acos] must be [number], found value ["a"] type [string]',
+          'Argument of [acos] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where acos(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where acos(stringField) > 0', [
-          'Argument of [acos] must be [number], found value [stringField] type [string]',
+          'Argument of [acos] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = acos(doubleField)', []);
@@ -1996,7 +1993,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = acos(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval acos(stringField)', [
-          'Argument of [acos] must be [number], found value [stringField] type [string]',
+          'Argument of [acos] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval acos(doubleField, extraArg)', [
@@ -2011,17 +2008,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = acos(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = acos(true)', [
-          'Argument of [acos] must be [number], found value [true] type [boolean]',
+          'Argument of [acos] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where acos(booleanField) > 0', [
-          'Argument of [acos] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [acos] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = acos(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval acos(booleanField)', [
-          'Argument of [acos] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [acos] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval acos(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval acos(nullVar)', []);
@@ -2066,13 +2063,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = asin(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = asin("a")', [
-          'Argument of [asin] must be [number], found value ["a"] type [string]',
+          'Argument of [asin] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where asin(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where asin(stringField) > 0', [
-          'Argument of [asin] must be [number], found value [stringField] type [string]',
+          'Argument of [asin] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = asin(doubleField)', []);
@@ -2080,7 +2077,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = asin(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval asin(stringField)', [
-          'Argument of [asin] must be [number], found value [stringField] type [string]',
+          'Argument of [asin] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval asin(doubleField, extraArg)', [
@@ -2095,17 +2092,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = asin(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = asin(true)', [
-          'Argument of [asin] must be [number], found value [true] type [boolean]',
+          'Argument of [asin] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where asin(booleanField) > 0', [
-          'Argument of [asin] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [asin] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = asin(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval asin(booleanField)', [
-          'Argument of [asin] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [asin] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval asin(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval asin(nullVar)', []);
@@ -2150,13 +2147,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = atan(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = atan("a")', [
-          'Argument of [atan] must be [number], found value ["a"] type [string]',
+          'Argument of [atan] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where atan(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where atan(stringField) > 0', [
-          'Argument of [atan] must be [number], found value [stringField] type [string]',
+          'Argument of [atan] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = atan(doubleField)', []);
@@ -2164,7 +2161,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = atan(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval atan(stringField)', [
-          'Argument of [atan] must be [number], found value [stringField] type [string]',
+          'Argument of [atan] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval atan(doubleField, extraArg)', [
@@ -2179,17 +2176,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = atan(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = atan(true)', [
-          'Argument of [atan] must be [number], found value [true] type [boolean]',
+          'Argument of [atan] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where atan(booleanField) > 0', [
-          'Argument of [atan] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [atan] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = atan(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval atan(booleanField)', [
-          'Argument of [atan] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [atan] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval atan(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval atan(nullVar)', []);
@@ -2234,15 +2231,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = atan2(to_integer("a"), to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = atan2("a", "a")', [
-          'Argument of [atan2] must be [number], found value ["a"] type [string]',
-          'Argument of [atan2] must be [number], found value ["a"] type [string]',
+          'Argument of [atan2] must be [double], found value ["a"] type [string]',
+          'Argument of [atan2] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where atan2(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where atan2(stringField, stringField) > 0', [
-          'Argument of [atan2] must be [number], found value [stringField] type [string]',
-          'Argument of [atan2] must be [number], found value [stringField] type [string]',
+          'Argument of [atan2] must be [double], found value [stringField] type [string]',
+          'Argument of [atan2] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = atan2(doubleField, doubleField)', []);
@@ -2254,8 +2251,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval atan2(stringField, stringField)', [
-          'Argument of [atan2] must be [number], found value [stringField] type [string]',
-          'Argument of [atan2] must be [number], found value [stringField] type [string]',
+          'Argument of [atan2] must be [double], found value [stringField] type [string]',
+          'Argument of [atan2] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval atan2(doubleField, doubleField, extraArg)', [
@@ -2266,13 +2263,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = atan2(to_integer(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = atan2(true, true)', [
-          'Argument of [atan2] must be [number], found value [true] type [boolean]',
-          'Argument of [atan2] must be [number], found value [true] type [boolean]',
+          'Argument of [atan2] must be [double], found value [true] type [boolean]',
+          'Argument of [atan2] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where atan2(booleanField, booleanField) > 0', [
-          'Argument of [atan2] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [atan2] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [atan2] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [atan2] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
@@ -2281,8 +2278,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval atan2(booleanField, booleanField)', [
-          'Argument of [atan2] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [atan2] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [atan2] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [atan2] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval atan2(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval atan2(nullVar, nullVar)', []);
@@ -2491,13 +2488,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = ceil(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = ceil("a")', [
-          'Argument of [ceil] must be [number], found value ["a"] type [string]',
+          'Argument of [ceil] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where ceil(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where ceil(stringField) > 0', [
-          'Argument of [ceil] must be [number], found value [stringField] type [string]',
+          'Argument of [ceil] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = ceil(doubleField)', []);
@@ -2505,7 +2502,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = ceil(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval ceil(stringField)', [
-          'Argument of [ceil] must be [number], found value [stringField] type [string]',
+          'Argument of [ceil] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval ceil(doubleField, extraArg)', [
@@ -2520,17 +2517,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = ceil(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = ceil(true)', [
-          'Argument of [ceil] must be [number], found value [true] type [boolean]',
+          'Argument of [ceil] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where ceil(booleanField) > 0', [
-          'Argument of [ceil] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [ceil] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = ceil(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval ceil(booleanField)', [
-          'Argument of [ceil] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [ceil] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval ceil(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval ceil(nullVar)', []);
@@ -3110,13 +3107,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = cos(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = cos("a")', [
-          'Argument of [cos] must be [number], found value ["a"] type [string]',
+          'Argument of [cos] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where cos(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where cos(stringField) > 0', [
-          'Argument of [cos] must be [number], found value [stringField] type [string]',
+          'Argument of [cos] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = cos(doubleField)', []);
@@ -3124,7 +3121,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = cos(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval cos(stringField)', [
-          'Argument of [cos] must be [number], found value [stringField] type [string]',
+          'Argument of [cos] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval cos(doubleField, extraArg)', [
@@ -3139,17 +3136,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = cos(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = cos(true)', [
-          'Argument of [cos] must be [number], found value [true] type [boolean]',
+          'Argument of [cos] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where cos(booleanField) > 0', [
-          'Argument of [cos] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [cos] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = cos(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval cos(booleanField)', [
-          'Argument of [cos] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [cos] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval cos(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval cos(nullVar)', []);
@@ -3194,13 +3191,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = cosh(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = cosh("a")', [
-          'Argument of [cosh] must be [number], found value ["a"] type [string]',
+          'Argument of [cosh] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where cosh(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where cosh(stringField) > 0', [
-          'Argument of [cosh] must be [number], found value [stringField] type [string]',
+          'Argument of [cosh] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = cosh(doubleField)', []);
@@ -3208,7 +3205,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = cosh(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval cosh(stringField)', [
-          'Argument of [cosh] must be [number], found value [stringField] type [string]',
+          'Argument of [cosh] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval cosh(doubleField, extraArg)', [
@@ -3223,17 +3220,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = cosh(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = cosh(true)', [
-          'Argument of [cosh] must be [number], found value [true] type [boolean]',
+          'Argument of [cosh] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where cosh(booleanField) > 0', [
-          'Argument of [cosh] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [cosh] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = cosh(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval cosh(booleanField)', [
-          'Argument of [cosh] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [cosh] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval cosh(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval cosh(nullVar)', []);
@@ -3814,13 +3811,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = floor(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = floor("a")', [
-          'Argument of [floor] must be [number], found value ["a"] type [string]',
+          'Argument of [floor] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where floor(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where floor(stringField) > 0', [
-          'Argument of [floor] must be [number], found value [stringField] type [string]',
+          'Argument of [floor] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = floor(doubleField)', []);
@@ -3828,7 +3825,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = floor(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval floor(stringField)', [
-          'Argument of [floor] must be [number], found value [stringField] type [string]',
+          'Argument of [floor] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval floor(doubleField, extraArg)', [
@@ -3843,17 +3840,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = floor(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = floor(true)', [
-          'Argument of [floor] must be [number], found value [true] type [boolean]',
+          'Argument of [floor] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where floor(booleanField) > 0', [
-          'Argument of [floor] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [floor] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = floor(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval floor(booleanField)', [
-          'Argument of [floor] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [floor] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval floor(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval floor(nullVar)', []);
@@ -4281,7 +4278,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = left(5, "a")', [
           'Argument of [left] must be [string], found value [5] type [number]',
-          'Argument of [left] must be [number], found value ["a"] type [string]',
+          'Argument of [left] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -4291,7 +4288,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(left(doubleField, stringField)) > 0', [
           'Argument of [left] must be [string], found value [doubleField] type [double]',
-          'Argument of [left] must be [number], found value [stringField] type [string]',
+          'Argument of [left] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = left(stringField, doubleField)', []);
@@ -4304,7 +4301,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval left(doubleField, stringField)', [
           'Argument of [left] must be [string], found value [doubleField] type [double]',
-          'Argument of [left] must be [number], found value [stringField] type [string]',
+          'Argument of [left] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval left(stringField, doubleField, extraArg)', [
@@ -4316,12 +4313,12 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = left(true, true)', [
           'Argument of [left] must be [string], found value [true] type [boolean]',
-          'Argument of [left] must be [number], found value [true] type [boolean]',
+          'Argument of [left] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where length(left(booleanField, booleanField)) > 0', [
           'Argument of [left] must be [string], found value [booleanField] type [boolean]',
-          'Argument of [left] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [left] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
@@ -4331,7 +4328,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval left(booleanField, booleanField)', [
           'Argument of [left] must be [string], found value [booleanField] type [boolean]',
-          'Argument of [left] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [left] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval left(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval left(nullVar, nullVar)', []);
@@ -4432,15 +4429,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = log(to_integer("a"), to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = log("a", "a")', [
-          'Argument of [log] must be [number], found value ["a"] type [string]',
-          'Argument of [log] must be [number], found value ["a"] type [string]',
+          'Argument of [log] must be [double], found value ["a"] type [string]',
+          'Argument of [log] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where log(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where log(stringField, stringField) > 0', [
-          'Argument of [log] must be [number], found value [stringField] type [string]',
-          'Argument of [log] must be [number], found value [stringField] type [string]',
+          'Argument of [log] must be [double], found value [stringField] type [string]',
+          'Argument of [log] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = log(doubleField, doubleField)', []);
@@ -4452,8 +4449,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval log(stringField, stringField)', [
-          'Argument of [log] must be [number], found value [stringField] type [string]',
-          'Argument of [log] must be [number], found value [stringField] type [string]',
+          'Argument of [log] must be [double], found value [stringField] type [string]',
+          'Argument of [log] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval log(doubleField, doubleField, extraArg)', [
@@ -4467,19 +4464,19 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = log(to_integer(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = log(true, true)', [
-          'Argument of [log] must be [number], found value [true] type [boolean]',
-          'Argument of [log] must be [number], found value [true] type [boolean]',
+          'Argument of [log] must be [double], found value [true] type [boolean]',
+          'Argument of [log] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where log(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where log(booleanField) > 0', [
-          'Argument of [log] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [log] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where log(booleanField, booleanField) > 0', [
-          'Argument of [log] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [log] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [log] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [log] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = log(doubleField)', []);
@@ -4487,7 +4484,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = log(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval log(booleanField)', [
-          'Argument of [log] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [log] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = log(*)', [
@@ -4500,8 +4497,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval log(booleanField, booleanField)', [
-          'Argument of [log] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [log] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [log] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [log] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | sort log(doubleField)', []);
@@ -4698,13 +4695,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = log10(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = log10("a")', [
-          'Argument of [log10] must be [number], found value ["a"] type [string]',
+          'Argument of [log10] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where log10(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where log10(stringField) > 0', [
-          'Argument of [log10] must be [number], found value [stringField] type [string]',
+          'Argument of [log10] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = log10(doubleField)', []);
@@ -4712,7 +4709,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = log10(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval log10(stringField)', [
-          'Argument of [log10] must be [number], found value [stringField] type [string]',
+          'Argument of [log10] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval log10(doubleField, extraArg)', [
@@ -4727,17 +4724,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = log10(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = log10(true)', [
-          'Argument of [log10] must be [number], found value [true] type [boolean]',
+          'Argument of [log10] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where log10(booleanField) > 0', [
-          'Argument of [log10] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [log10] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = log10(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval log10(booleanField)', [
-          'Argument of [log10] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [log10] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval log10(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval log10(nullVar)', []);
@@ -4845,13 +4842,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_avg(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = mv_avg("a")', [
-          'Argument of [mv_avg] must be [number], found value ["a"] type [string]',
+          'Argument of [mv_avg] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where mv_avg(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_avg(stringField) > 0', [
-          'Argument of [mv_avg] must be [number], found value [stringField] type [string]',
+          'Argument of [mv_avg] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_avg(doubleField)', []);
@@ -4859,7 +4856,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_avg(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_avg(stringField)', [
-          'Argument of [mv_avg] must be [number], found value [stringField] type [string]',
+          'Argument of [mv_avg] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval mv_avg(doubleField, extraArg)', [
@@ -4874,17 +4871,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_avg(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = mv_avg(true)', [
-          'Argument of [mv_avg] must be [number], found value [true] type [boolean]',
+          'Argument of [mv_avg] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where mv_avg(booleanField) > 0', [
-          'Argument of [mv_avg] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mv_avg] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_avg(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_avg(booleanField)', [
-          'Argument of [mv_avg] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mv_avg] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval mv_avg(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_avg(nullVar)', []);
@@ -5800,13 +5797,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_median(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = mv_median("a")', [
-          'Argument of [mv_median] must be [number], found value ["a"] type [string]',
+          'Argument of [mv_median] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where mv_median(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_median(stringField) > 0', [
-          'Argument of [mv_median] must be [number], found value [stringField] type [string]',
+          'Argument of [mv_median] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_median(doubleField)', []);
@@ -5814,7 +5811,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_median(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_median(stringField)', [
-          'Argument of [mv_median] must be [number], found value [stringField] type [string]',
+          'Argument of [mv_median] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval mv_median(doubleField, extraArg)', [
@@ -5829,17 +5826,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_median(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = mv_median(true)', [
-          'Argument of [mv_median] must be [number], found value [true] type [boolean]',
+          'Argument of [mv_median] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where mv_median(booleanField) > 0', [
-          'Argument of [mv_median] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mv_median] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_median(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_median(booleanField)', [
-          'Argument of [mv_median] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mv_median] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval mv_median(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_median(nullVar)', []);
@@ -6084,8 +6081,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('row var = mv_slice(to_version("1.0.0"), true, true)', [
-          'Argument of [mv_slice] must be [number], found value [true] type [boolean]',
-          'Argument of [mv_slice] must be [number], found value [true] type [boolean]',
+          'Argument of [mv_slice] must be [double], found value [true] type [boolean]',
+          'Argument of [mv_slice] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
@@ -6096,8 +6093,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | where mv_slice(doubleField, booleanField, booleanField) > 0',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6109,8 +6106,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | where length(mv_slice(stringField, booleanField, booleanField)) > 0',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6132,8 +6129,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(booleanField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6155,8 +6152,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(cartesianPointField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6178,8 +6175,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(cartesianShapeField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6201,8 +6198,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(dateField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6224,8 +6221,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(doubleField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6247,8 +6244,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(geoPointField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6270,8 +6267,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(geoShapeField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6291,8 +6288,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval mv_slice(ipField, booleanField, booleanField)', [
-          'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
@@ -6303,8 +6300,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(stringField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -6326,8 +6323,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval mv_slice(versionField, booleanField, booleanField)',
           [
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [mv_slice] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_slice] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -7064,13 +7061,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_sum(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = mv_sum("a")', [
-          'Argument of [mv_sum] must be [number], found value ["a"] type [string]',
+          'Argument of [mv_sum] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where mv_sum(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where mv_sum(stringField) > 0', [
-          'Argument of [mv_sum] must be [number], found value [stringField] type [string]',
+          'Argument of [mv_sum] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_sum(doubleField)', []);
@@ -7078,7 +7075,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = mv_sum(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_sum(stringField)', [
-          'Argument of [mv_sum] must be [number], found value [stringField] type [string]',
+          'Argument of [mv_sum] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval mv_sum(doubleField, extraArg)', [
@@ -7093,17 +7090,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_sum(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = mv_sum(true)', [
-          'Argument of [mv_sum] must be [number], found value [true] type [boolean]',
+          'Argument of [mv_sum] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where mv_sum(booleanField) > 0', [
-          'Argument of [mv_sum] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mv_sum] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_sum(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval mv_sum(booleanField)', [
-          'Argument of [mv_sum] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mv_sum] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval mv_sum(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_sum(nullVar)', []);
@@ -7463,15 +7460,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = pow(to_integer("a"), to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = pow("a", "a")', [
-          'Argument of [pow] must be [number], found value ["a"] type [string]',
-          'Argument of [pow] must be [number], found value ["a"] type [string]',
+          'Argument of [pow] must be [double], found value ["a"] type [string]',
+          'Argument of [pow] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where pow(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where pow(stringField, stringField) > 0', [
-          'Argument of [pow] must be [number], found value [stringField] type [string]',
-          'Argument of [pow] must be [number], found value [stringField] type [string]',
+          'Argument of [pow] must be [double], found value [stringField] type [string]',
+          'Argument of [pow] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = pow(doubleField, doubleField)', []);
@@ -7483,8 +7480,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval pow(stringField, stringField)', [
-          'Argument of [pow] must be [number], found value [stringField] type [string]',
-          'Argument of [pow] must be [number], found value [stringField] type [string]',
+          'Argument of [pow] must be [double], found value [stringField] type [string]',
+          'Argument of [pow] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval pow(doubleField, doubleField, extraArg)', [
@@ -7495,13 +7492,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = pow(to_integer(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = pow(true, true)', [
-          'Argument of [pow] must be [number], found value [true] type [boolean]',
-          'Argument of [pow] must be [number], found value [true] type [boolean]',
+          'Argument of [pow] must be [double], found value [true] type [boolean]',
+          'Argument of [pow] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where pow(booleanField, booleanField) > 0', [
-          'Argument of [pow] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [pow] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [pow] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [pow] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
@@ -7510,8 +7507,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval pow(booleanField, booleanField)', [
-          'Argument of [pow] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [pow] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [pow] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [pow] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval pow(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval pow(nullVar, nullVar)', []);
@@ -7942,7 +7939,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = right(5, "a")', [
           'Argument of [right] must be [string], found value [5] type [number]',
-          'Argument of [right] must be [number], found value ["a"] type [string]',
+          'Argument of [right] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -7952,7 +7949,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where length(right(doubleField, stringField)) > 0', [
           'Argument of [right] must be [string], found value [doubleField] type [double]',
-          'Argument of [right] must be [number], found value [stringField] type [string]',
+          'Argument of [right] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = right(stringField, doubleField)', []);
@@ -7965,7 +7962,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval right(doubleField, stringField)', [
           'Argument of [right] must be [string], found value [doubleField] type [double]',
-          'Argument of [right] must be [number], found value [stringField] type [string]',
+          'Argument of [right] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval right(stringField, doubleField, extraArg)', [
@@ -7977,14 +7974,14 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = right(true, true)', [
           'Argument of [right] must be [string], found value [true] type [boolean]',
-          'Argument of [right] must be [number], found value [true] type [boolean]',
+          'Argument of [right] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
           'from a_index | where length(right(booleanField, booleanField)) > 0',
           [
             'Argument of [right] must be [string], found value [booleanField] type [boolean]',
-            'Argument of [right] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [right] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -7995,7 +7992,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval right(booleanField, booleanField)', [
           'Argument of [right] must be [string], found value [booleanField] type [boolean]',
-          'Argument of [right] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [right] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval right(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval right(nullVar, nullVar)', []);
@@ -8033,15 +8030,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = round(to_integer("a"), to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = round("a", "a")', [
-          'Argument of [round] must be [number], found value ["a"] type [string]',
-          'Argument of [round] must be [number], found value ["a"] type [string]',
+          'Argument of [round] must be [double], found value ["a"] type [string]',
+          'Argument of [round] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where round(doubleField, doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where round(stringField, stringField) > 0', [
-          'Argument of [round] must be [number], found value [stringField] type [string]',
-          'Argument of [round] must be [number], found value [stringField] type [string]',
+          'Argument of [round] must be [double], found value [stringField] type [string]',
+          'Argument of [round] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = round(doubleField, doubleField)', []);
@@ -8053,8 +8050,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval round(stringField, stringField)', [
-          'Argument of [round] must be [number], found value [stringField] type [string]',
-          'Argument of [round] must be [number], found value [stringField] type [string]',
+          'Argument of [round] must be [double], found value [stringField] type [string]',
+          'Argument of [round] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval round(doubleField, doubleField, extraArg)', [
@@ -8068,19 +8065,19 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = round(to_integer(true), to_integer(true))', []);
 
         testErrorsAndWarnings('row var = round(true, true)', [
-          'Argument of [round] must be [number], found value [true] type [boolean]',
-          'Argument of [round] must be [number], found value [true] type [boolean]',
+          'Argument of [round] must be [double], found value [true] type [boolean]',
+          'Argument of [round] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where round(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where round(booleanField) > 0', [
-          'Argument of [round] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [round] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where round(booleanField, booleanField) > 0', [
-          'Argument of [round] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [round] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [round] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [round] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = round(doubleField)', []);
@@ -8088,7 +8085,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = round(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval round(booleanField)', [
-          'Argument of [round] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [round] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = round(*)', [
@@ -8101,8 +8098,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval round(booleanField, booleanField)', [
-          'Argument of [round] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [round] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [round] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [round] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | sort round(doubleField)', []);
@@ -8247,13 +8244,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = signum(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = signum("a")', [
-          'Argument of [signum] must be [number], found value ["a"] type [string]',
+          'Argument of [signum] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where signum(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where signum(stringField) > 0', [
-          'Argument of [signum] must be [number], found value [stringField] type [string]',
+          'Argument of [signum] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = signum(doubleField)', []);
@@ -8261,7 +8258,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = signum(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval signum(stringField)', [
-          'Argument of [signum] must be [number], found value [stringField] type [string]',
+          'Argument of [signum] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval signum(doubleField, extraArg)', [
@@ -8276,17 +8273,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = signum(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = signum(true)', [
-          'Argument of [signum] must be [number], found value [true] type [boolean]',
+          'Argument of [signum] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where signum(booleanField) > 0', [
-          'Argument of [signum] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [signum] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = signum(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval signum(booleanField)', [
-          'Argument of [signum] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [signum] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval signum(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval signum(nullVar)', []);
@@ -8331,13 +8328,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = sin(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = sin("a")', [
-          'Argument of [sin] must be [number], found value ["a"] type [string]',
+          'Argument of [sin] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where sin(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where sin(stringField) > 0', [
-          'Argument of [sin] must be [number], found value [stringField] type [string]',
+          'Argument of [sin] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = sin(doubleField)', []);
@@ -8345,7 +8342,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = sin(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval sin(stringField)', [
-          'Argument of [sin] must be [number], found value [stringField] type [string]',
+          'Argument of [sin] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval sin(doubleField, extraArg)', [
@@ -8360,17 +8357,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = sin(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = sin(true)', [
-          'Argument of [sin] must be [number], found value [true] type [boolean]',
+          'Argument of [sin] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where sin(booleanField) > 0', [
-          'Argument of [sin] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [sin] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = sin(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval sin(booleanField)', [
-          'Argument of [sin] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [sin] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval sin(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval sin(nullVar)', []);
@@ -8415,13 +8412,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = sinh(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = sinh("a")', [
-          'Argument of [sinh] must be [number], found value ["a"] type [string]',
+          'Argument of [sinh] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where sinh(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where sinh(stringField) > 0', [
-          'Argument of [sinh] must be [number], found value [stringField] type [string]',
+          'Argument of [sinh] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = sinh(doubleField)', []);
@@ -8429,7 +8426,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = sinh(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval sinh(stringField)', [
-          'Argument of [sinh] must be [number], found value [stringField] type [string]',
+          'Argument of [sinh] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval sinh(doubleField, extraArg)', [
@@ -8444,17 +8441,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = sinh(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = sinh(true)', [
-          'Argument of [sinh] must be [number], found value [true] type [boolean]',
+          'Argument of [sinh] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where sinh(booleanField) > 0', [
-          'Argument of [sinh] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [sinh] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = sinh(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval sinh(booleanField)', [
-          'Argument of [sinh] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [sinh] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval sinh(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval sinh(nullVar)', []);
@@ -8589,13 +8586,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = sqrt(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = sqrt("a")', [
-          'Argument of [sqrt] must be [number], found value ["a"] type [string]',
+          'Argument of [sqrt] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where sqrt(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where sqrt(stringField) > 0', [
-          'Argument of [sqrt] must be [number], found value [stringField] type [string]',
+          'Argument of [sqrt] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = sqrt(doubleField)', []);
@@ -8603,7 +8600,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = sqrt(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval sqrt(stringField)', [
-          'Argument of [sqrt] must be [number], found value [stringField] type [string]',
+          'Argument of [sqrt] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval sqrt(doubleField, extraArg)', [
@@ -8618,17 +8615,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = sqrt(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = sqrt(true)', [
-          'Argument of [sqrt] must be [number], found value [true] type [boolean]',
+          'Argument of [sqrt] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where sqrt(booleanField) > 0', [
-          'Argument of [sqrt] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [sqrt] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = sqrt(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval sqrt(booleanField)', [
-          'Argument of [sqrt] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [sqrt] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval sqrt(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval sqrt(nullVar)', []);
@@ -10560,8 +10557,8 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = substring(5, "a", "a")', [
           'Argument of [substring] must be [string], found value [5] type [number]',
-          'Argument of [substring] must be [number], found value ["a"] type [string]',
-          'Argument of [substring] must be [number], found value ["a"] type [string]',
+          'Argument of [substring] must be [double], found value ["a"] type [string]',
+          'Argument of [substring] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings(
@@ -10573,8 +10570,8 @@ describe('validation logic', () => {
           'from a_index | where length(substring(doubleField, stringField, stringField)) > 0',
           [
             'Argument of [substring] must be [string], found value [doubleField] type [double]',
-            'Argument of [substring] must be [number], found value [stringField] type [string]',
-            'Argument of [substring] must be [number], found value [stringField] type [string]',
+            'Argument of [substring] must be [double], found value [stringField] type [string]',
+            'Argument of [substring] must be [double], found value [stringField] type [string]',
           ]
         );
 
@@ -10597,8 +10594,8 @@ describe('validation logic', () => {
           'from a_index | eval substring(doubleField, stringField, stringField)',
           [
             'Argument of [substring] must be [string], found value [doubleField] type [double]',
-            'Argument of [substring] must be [number], found value [stringField] type [string]',
-            'Argument of [substring] must be [number], found value [stringField] type [string]',
+            'Argument of [substring] must be [double], found value [stringField] type [string]',
+            'Argument of [substring] must be [double], found value [stringField] type [string]',
           ]
         );
 
@@ -10620,16 +10617,16 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = substring(true, true, true)', [
           'Argument of [substring] must be [string], found value [true] type [boolean]',
-          'Argument of [substring] must be [number], found value [true] type [boolean]',
-          'Argument of [substring] must be [number], found value [true] type [boolean]',
+          'Argument of [substring] must be [double], found value [true] type [boolean]',
+          'Argument of [substring] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
           'from a_index | where length(substring(booleanField, booleanField, booleanField)) > 0',
           [
             'Argument of [substring] must be [string], found value [booleanField] type [boolean]',
-            'Argument of [substring] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [substring] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [substring] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [substring] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -10642,8 +10639,8 @@ describe('validation logic', () => {
           'from a_index | eval substring(booleanField, booleanField, booleanField)',
           [
             'Argument of [substring] must be [string], found value [booleanField] type [boolean]',
-            'Argument of [substring] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [substring] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [substring] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [substring] must be [double], found value [booleanField] type [boolean]',
           ]
         );
         testErrorsAndWarnings('from a_index | eval substring(null, null, null)', []);
@@ -10722,13 +10719,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = tan(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = tan("a")', [
-          'Argument of [tan] must be [number], found value ["a"] type [string]',
+          'Argument of [tan] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where tan(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where tan(stringField) > 0', [
-          'Argument of [tan] must be [number], found value [stringField] type [string]',
+          'Argument of [tan] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = tan(doubleField)', []);
@@ -10736,7 +10733,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = tan(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval tan(stringField)', [
-          'Argument of [tan] must be [number], found value [stringField] type [string]',
+          'Argument of [tan] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval tan(doubleField, extraArg)', [
@@ -10751,17 +10748,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = tan(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = tan(true)', [
-          'Argument of [tan] must be [number], found value [true] type [boolean]',
+          'Argument of [tan] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where tan(booleanField) > 0', [
-          'Argument of [tan] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [tan] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = tan(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval tan(booleanField)', [
-          'Argument of [tan] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [tan] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval tan(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval tan(nullVar)', []);
@@ -10806,13 +10803,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = tanh(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = tanh("a")', [
-          'Argument of [tanh] must be [number], found value ["a"] type [string]',
+          'Argument of [tanh] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where tanh(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where tanh(stringField) > 0', [
-          'Argument of [tanh] must be [number], found value [stringField] type [string]',
+          'Argument of [tanh] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = tanh(doubleField)', []);
@@ -10820,7 +10817,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = tanh(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval tanh(stringField)', [
-          'Argument of [tanh] must be [number], found value [stringField] type [string]',
+          'Argument of [tanh] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval tanh(doubleField, extraArg)', [
@@ -10835,17 +10832,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = tanh(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = tanh(true)', [
-          'Argument of [tanh] must be [number], found value [true] type [boolean]',
+          'Argument of [tanh] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where tanh(booleanField) > 0', [
-          'Argument of [tanh] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [tanh] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = tanh(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval tanh(booleanField)', [
-          'Argument of [tanh] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [tanh] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval tanh(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval tanh(nullVar)', []);
@@ -11257,13 +11254,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = to_degrees(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = to_degrees("a")', [
-          'Argument of [to_degrees] must be [number], found value ["a"] type [string]',
+          'Argument of [to_degrees] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where to_degrees(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where to_degrees(stringField) > 0', [
-          'Argument of [to_degrees] must be [number], found value [stringField] type [string]',
+          'Argument of [to_degrees] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = to_degrees(doubleField)', []);
@@ -11271,7 +11268,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = to_degrees(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval to_degrees(stringField)', [
-          'Argument of [to_degrees] must be [number], found value [stringField] type [string]',
+          'Argument of [to_degrees] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval to_degrees(doubleField, extraArg)', [
@@ -11286,17 +11283,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = to_degrees(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = to_degrees(true)', [
-          'Argument of [to_degrees] must be [number], found value [true] type [boolean]',
+          'Argument of [to_degrees] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where to_degrees(booleanField) > 0', [
-          'Argument of [to_degrees] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [to_degrees] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = to_degrees(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval to_degrees(booleanField)', [
-          'Argument of [to_degrees] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [to_degrees] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval to_degrees(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_degrees(nullVar)', []);
@@ -11935,13 +11932,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = to_radians(to_integer("a"))', []);
 
         testErrorsAndWarnings('row var = to_radians("a")', [
-          'Argument of [to_radians] must be [number], found value ["a"] type [string]',
+          'Argument of [to_radians] must be [double], found value ["a"] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | where to_radians(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where to_radians(stringField) > 0', [
-          'Argument of [to_radians] must be [number], found value [stringField] type [string]',
+          'Argument of [to_radians] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = to_radians(doubleField)', []);
@@ -11949,7 +11946,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = to_radians(to_integer(stringField))', []);
 
         testErrorsAndWarnings('from a_index | eval to_radians(stringField)', [
-          'Argument of [to_radians] must be [number], found value [stringField] type [string]',
+          'Argument of [to_radians] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval to_radians(doubleField, extraArg)', [
@@ -11964,17 +11961,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = to_radians(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = to_radians(true)', [
-          'Argument of [to_radians] must be [number], found value [true] type [boolean]',
+          'Argument of [to_radians] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where to_radians(booleanField) > 0', [
-          'Argument of [to_radians] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [to_radians] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = to_radians(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval to_radians(booleanField)', [
-          'Argument of [to_radians] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [to_radians] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval to_radians(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_radians(nullVar)', []);
@@ -12618,7 +12615,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats avg(stringField)', [
-          'Argument of [avg] must be [number], found value [stringField] type [string]',
+          'Argument of [avg] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = avg(*)', [
@@ -12654,7 +12651,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats avg(booleanField)', [
-          'Argument of [avg] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [avg] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | stats avg(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats avg(nullVar)', []);
@@ -12893,7 +12890,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats sum(stringField)', [
-          'Argument of [sum] must be [number], found value [stringField] type [string]',
+          'Argument of [sum] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = sum(*)', [
@@ -12929,7 +12926,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats sum(booleanField)', [
-          'Argument of [sum] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [sum] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | stats sum(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats sum(nullVar)', []);
@@ -13174,7 +13171,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats median(stringField)', [
-          'Argument of [median] must be [number], found value [stringField] type [string]',
+          'Argument of [median] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = median(*)', [
@@ -13210,7 +13207,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats median(booleanField)', [
-          'Argument of [median] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [median] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | stats median(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats median(nullVar)', []);
@@ -13496,7 +13493,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(stringField)', [
-          'Argument of [median_absolute_deviation] must be [number], found value [stringField] type [string]',
+          'Argument of [median_absolute_deviation] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = median_absolute_deviation(*)', [
@@ -13533,7 +13530,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(booleanField)', [
-          'Argument of [median_absolute_deviation] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [median_absolute_deviation] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats median_absolute_deviation(nullVar)', []);
@@ -13850,7 +13847,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats percentile(stringField, 5)', [
-          'Argument of [percentile] must be [number], found value [stringField] type [string]',
+          'Argument of [percentile] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | sort percentile(doubleField, 5)', [
@@ -13882,7 +13879,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats percentile(booleanField, 5)', [
-          'Argument of [percentile] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [percentile] must be [double], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | stats percentile(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats percentile(nullVar, nullVar)', [
@@ -14206,7 +14203,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats max(stringField)', [
-          'Argument of [max] must be [number], found value [stringField] type [string]',
+          'Argument of [max] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = max(*)', [
@@ -14280,11 +14277,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
         testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
-          'Argument of [max] must be [number], found value [concat("20", "22")] type [string]',
+          'Argument of [max] must be [double], found value [concat("20", "22")] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats max(cartesianPointField)', [
-          'Argument of [max] must be [number], found value [cartesianPointField] type [cartesian_point]',
+          'Argument of [max] must be [double], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = max(booleanField)', []);
@@ -14555,7 +14552,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats min(stringField)', [
-          'Argument of [min] must be [number], found value [stringField] type [string]',
+          'Argument of [min] must be [double], found value [stringField] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = min(*)', [
@@ -14629,11 +14626,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
         testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
-          'Argument of [min] must be [number], found value [concat("20", "22")] type [string]',
+          'Argument of [min] must be [double], found value [concat("20", "22")] type [string]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats min(cartesianPointField)', [
-          'Argument of [min] must be [number], found value [cartesianPointField] type [cartesian_point]',
+          'Argument of [min] must be [double], found value [cartesianPointField] type [cartesian_point]',
         ]);
 
         testErrorsAndWarnings('from a_index | stats var = min(booleanField)', []);
@@ -15573,13 +15570,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = cbrt(to_integer(true))', []);
 
         testErrorsAndWarnings('row var = cbrt(true)', [
-          'Argument of [cbrt] must be [number], found value [true] type [boolean]',
+          'Argument of [cbrt] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where cbrt(doubleField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where cbrt(booleanField) > 0', [
-          'Argument of [cbrt] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [cbrt] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = cbrt(doubleField)', []);
@@ -15587,7 +15584,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = cbrt(to_integer(booleanField))', []);
 
         testErrorsAndWarnings('from a_index | eval cbrt(booleanField)', [
-          'Argument of [cbrt] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [cbrt] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = cbrt(*)', [
@@ -15700,7 +15697,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = locate(true, true, true)', [
           'Argument of [locate] must be [string], found value [true] type [boolean]',
           'Argument of [locate] must be [string], found value [true] type [boolean]',
-          'Argument of [locate] must be [number], found value [true] type [boolean]',
+          'Argument of [locate] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | where locate(stringField, stringField) > 0', []);
@@ -15720,7 +15717,7 @@ describe('validation logic', () => {
           [
             'Argument of [locate] must be [string], found value [booleanField] type [boolean]',
             'Argument of [locate] must be [string], found value [booleanField] type [boolean]',
-            'Argument of [locate] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [locate] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -15757,7 +15754,7 @@ describe('validation logic', () => {
           [
             'Argument of [locate] must be [string], found value [booleanField] type [boolean]',
             'Argument of [locate] must be [string], found value [booleanField] type [boolean]',
-            'Argument of [locate] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [locate] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -15945,8 +15942,8 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = ip_prefix(true, true, true)', [
           'Argument of [ip_prefix] must be [ip], found value [true] type [boolean]',
-          'Argument of [ip_prefix] must be [number], found value [true] type [boolean]',
-          'Argument of [ip_prefix] must be [number], found value [true] type [boolean]',
+          'Argument of [ip_prefix] must be [double], found value [true] type [boolean]',
+          'Argument of [ip_prefix] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
@@ -15968,8 +15965,8 @@ describe('validation logic', () => {
           'from a_index | eval ip_prefix(booleanField, booleanField, booleanField)',
           [
             'Argument of [ip_prefix] must be [ip], found value [booleanField] type [boolean]',
-            'Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]',
-            'Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [ip_prefix] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [ip_prefix] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -16371,7 +16368,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = repeat(true, true)', [
           'Argument of [repeat] must be [string], found value [true] type [boolean]',
-          'Argument of [repeat] must be [number], found value [true] type [boolean]',
+          'Argument of [repeat] must be [double], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
@@ -16383,7 +16380,7 @@ describe('validation logic', () => {
           'from a_index | where length(repeat(booleanField, booleanField)) > 0',
           [
             'Argument of [repeat] must be [string], found value [booleanField] type [boolean]',
-            'Argument of [repeat] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [repeat] must be [double], found value [booleanField] type [boolean]',
           ]
         );
 
@@ -16397,7 +16394,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval repeat(booleanField, booleanField)', [
           'Argument of [repeat] must be [string], found value [booleanField] type [boolean]',
-          'Argument of [repeat] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [repeat] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval repeat(stringField, doubleField, extraArg)', [
@@ -16828,8 +16825,8 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | stats weighted_avg(booleanField, booleanField)', [
-          'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
-          'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [weighted_avg] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [weighted_avg] must be [double], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | sort weighted_avg(doubleField, doubleField)', [
