@@ -146,6 +146,7 @@ let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
 let lines = 1;
+let isDatePickerOpen = false;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -309,6 +310,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      isDatePickerOpen = true;
       popoverRef.current?.focus();
     }
   }, []);
@@ -959,11 +961,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
+                      if (isDatePickerOpen) {
+                        setPopoverPosition({});
+                      }
                     });
 
                     editor.onDidFocusEditorText(() => {
                       onEditorFocus();
-                      setPopoverPosition({});
                     });
 
                     editor.onKeyDown(() => {
@@ -1141,9 +1145,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             tabIndex={0}
             style={{
               ...popoverPosition,
-              backgroundColor: 'white',
+              backgroundColor: euiTheme.colors.emptyShade,
+              borderRadius: euiTheme.border.radius.small,
               position: 'absolute',
-              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
               overflow: 'auto',
             }}
             ref={popoverRef}
@@ -1182,6 +1186,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     },
                   ]);
                   setPopoverPosition({});
+                  isDatePickerOpen = false;
                 }
               }}
               inline
