@@ -77,11 +77,9 @@ function logSchemas(schemaFilePaths: string[]): void {
 }
 
 async function resolveDocuments(schemaFilePaths: string[]): Promise<ResolvedDocument[]> {
-  const resolvedDocuments = await Promise.all(
+  return await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) =>
       bundleDocument(schemaFilePath, withComponentsNamespace([], '/info/title'))
     )
   );
-
-  return resolvedDocuments;
 }
