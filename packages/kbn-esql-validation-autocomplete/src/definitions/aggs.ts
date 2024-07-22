@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { i18n } from '@kbn/i18n';
 import type { FunctionDefinition, FunctionParameterType } from './types';
 
@@ -30,9 +31,9 @@ function createNumericAggDefinition({
     description,
     supportedCommands: ['stats', 'metrics'],
     signatures: [
-      {
+      ...ESQL_NUMBER_TYPES.map((numericType) => ({
         params: [
-          { name: 'column', type: 'integer', noNestingFunctions: true },
+          { name: 'column', type: numericType, noNestingFunctions: true },
           ...args.map(({ name: paramName, type, constantOnly }) => ({
             name: paramName,
             type,
@@ -40,8 +41,8 @@ function createNumericAggDefinition({
             constantOnly,
           })),
         ],
-        returnType: 'integer',
-      },
+        returnType: numericType,
+      })),
     ],
     examples: [
       `from index | stats result = ${name}(field${extraParamsExample})`,
@@ -87,7 +88,14 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the n percentile of a field.',
       }
     ),
-    args: [{ name: 'percentile', type: 'integer' as const, value: '90', constantOnly: true }],
+    args: [
+      ...ESQL_NUMBER_TYPES.map((type) => ({
+        name: 'percentile',
+        type,
+        value: '90',
+        constantOnly: true,
+      })),
+    ],
   },
 ]
   .map(createNumericAggDefinition)
@@ -100,10 +108,10 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       type: 'agg',
       supportedCommands: ['stats', 'metrics'],
       signatures: [
-        {
-          params: [{ name: 'column', type: 'integer', noNestingFunctions: true }],
-          returnType: 'integer',
-        },
+        ...ESQL_NUMBER_TYPES.map((type) => ({
+          params: [{ name: 'column', type, noNestingFunctions: true }],
+          returnType: type,
+        })),
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'date',
@@ -123,10 +131,10 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       type: 'agg',
       supportedCommands: ['stats', 'metrics'],
       signatures: [
-        {
-          params: [{ name: 'column', type: 'integer', noNestingFunctions: true }],
-          returnType: 'integer',
-        },
+        ...ESQL_NUMBER_TYPES.map((type) => ({
+          params: [{ name: 'column', type, noNestingFunctions: true }],
+          returnType: type,
+        })),
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'date',
@@ -177,7 +185,12 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [
             { name: 'column', type: 'any', noNestingFunctions: true },
-            { name: 'precision', type: 'integer', noNestingFunctions: true, optional: true },
+            ...ESQL_NUMBER_TYPES.map((type) => ({
+              name: 'precision',
+              type,
+              noNestingFunctions: true,
+              optional: true,
+            })),
           ],
           returnType: 'long',
         },

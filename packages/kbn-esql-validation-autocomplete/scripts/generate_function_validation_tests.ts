@@ -11,6 +11,7 @@ import { join } from 'path';
 import * as recast from 'recast';
 import { camelCase } from 'lodash';
 import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
+import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { getParamAtPosition } from '../src/autocomplete/helper';
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
 import { evalFunctionDefinitions } from '../src/definitions/functions';
@@ -301,8 +302,8 @@ function generateWhereCommandTestsForEvalFunction(
   // TODO: not sure why there's this constraint...
   const supportedFunction = signatures.some(
     ({ returnType, params }) =>
-      ['number', 'string'].includes(returnType) &&
-      params.every(({ type }) => ['number', 'string'].includes(type))
+      [...ESQL_NUMBER_TYPES, 'string'].includes(returnType) &&
+      params.every(({ type }) => [...ESQL_NUMBER_TYPES, 'string'].includes(type))
   );
 
   if (!supportedFunction) {
@@ -312,7 +313,7 @@ function generateWhereCommandTestsForEvalFunction(
   const supportedSignatures = signatures.filter(({ returnType }) =>
     // TODO — not sure why the tests have this limitation... seems like any type
     // that can be part of a boolean expression should be allowed in a where clause
-    ['number', 'string'].includes(returnType)
+    [...ESQL_NUMBER_TYPES, 'string'].includes(returnType)
   );
   for (const { params, returnType, ...restSign } of supportedSignatures) {
     const correctMapping = getFieldMapping(params);
@@ -358,7 +359,7 @@ function generateWhereCommandTestsForAggFunction(
   { name, alias, signatures, ...defRest }: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
-  // statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
+  // statsSignatures.some(({ returnType, params }) => [...ESQL_NUMBER_TYPES].includes(returnType))
   for (const { params, ...signRest } of signatures) {
     const fieldMapping = getFieldMapping(params);
 
@@ -1016,19 +1017,10 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
 }
 
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
-
 const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
 const toDoubleSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_double')!;
-const toLongSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_long')!;
-const toUnsignedLongSignature = evalFunctionDefinitions.find(
-  ({ name }) => name === 'to_unsigned_long'
-)!;
-
 const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
 const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
-const toDatePeriodSignature = evalFunctionDefinitions.find(
-  ({ name }) => name === 'to_date_period'
-)!;
 const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
 const toIpSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
 const toGeoPointSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
@@ -1041,10 +1033,12 @@ const toCartesianShapeSignature = evalFunctionDefinitions.find(
 )!;
 const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
-const nestedFunctions = {
+const nestedFunctions: Record<SupportedFieldType, string> = {
   double: prepareNestedFunction(toDoubleSignature),
   integer: prepareNestedFunction(toInteger),
   string: prepareNestedFunction(toStringSignature),
+  text: prepareNestedFunction(toStringSignature),
+  keyword: prepareNestedFunction(toStringSignature),
   date: prepareNestedFunction(toDateSignature),
   boolean: prepareNestedFunction(toBooleanSignature),
   ip: prepareNestedFunction(toIpSignature),
@@ -1053,10 +1047,7 @@ const nestedFunctions = {
   geo_shape: prepareNestedFunction(toGeoShapeSignature),
   cartesian_point: prepareNestedFunction(toCartesianPointSignature),
   cartesian_shape: prepareNestedFunction(toCartesianShapeSignature),
-  unsigned_long: prepareNestedFunction(toUnsignedLongSignature),
-  long: prepareNestedFunction(toLongSignature),
-  int: prepareNestedFunction(toInteger),
-  date_period: prepareNestedFunction(toDatePeriodSignature),
+  datetime: prepareNestedFunction(toDateSignature),
 };
 
 function getFieldName(
@@ -1113,6 +1104,7 @@ function getFieldMapping(
     number: '5',
     date: 'now()',
   };
+
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
     if (isSupportedFieldType(typeString)) {
