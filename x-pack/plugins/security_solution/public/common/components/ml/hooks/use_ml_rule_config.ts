@@ -22,7 +22,7 @@ export interface UseMlRuleConfigReturn {
   loading: boolean;
   mlFields: DataViewFieldBase[];
   mlSuppressionFields: BrowserField[];
-  someMlJobsStarted: boolean;
+  allJobsStarted: boolean;
 }
 
 /**
@@ -39,7 +39,7 @@ export const useMLRuleConfig = ({
   machineLearningJobId: string[] | undefined;
 }): UseMlRuleConfigReturn => {
   const mlCapabilities = useMlCapabilities();
-  const { loading: validationsLoading, someJobsStarted: someMlJobsStarted } = useMlRuleValidations({
+  const { loading: validationsLoading, allJobsStarted } = useMlRuleValidations({
     machineLearningJobId,
   });
   const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({
@@ -56,6 +56,6 @@ export const useMLRuleConfig = ({
     mlFields,
     loading: validationsLoading || mlFieldsLoading,
     mlSuppressionFields,
-    someMlJobsStarted,
+    allJobsStarted,
   };
 };

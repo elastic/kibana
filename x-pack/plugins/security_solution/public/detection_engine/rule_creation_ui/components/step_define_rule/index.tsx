@@ -203,11 +203,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     watch: ['machineLearningJobId'],
   });
   const {
+    allJobsStarted,
     hasMlAdminPermissions,
     hasMlLicense,
     loading: mlRuleConfigLoading,
     mlSuppressionFields,
-    someMlJobsStarted,
   } = useMLRuleConfig({ machineLearningJobId });
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
@@ -1092,7 +1092,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     disabledText: suppressionGroupByDisabledText,
                   }}
                 />
-                {someMlJobsStarted && (
+                {!allJobsStarted && (
                   <EuiText size="xs" color="warning">
                     {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
                   </EuiText>
