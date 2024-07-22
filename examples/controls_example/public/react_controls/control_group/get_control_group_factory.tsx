@@ -6,10 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  KeyboardSensor,
+  MeasuringStrategy,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -33,7 +49,7 @@ import {
   PublishesDataViews,
   PublishesFilters,
   PublishesTimeslice,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
 import { ControlRenderer } from '../control_renderer';
@@ -47,6 +63,7 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
+import { ControlClone } from '../components/control_clone';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -212,7 +229,31 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const controlsInOrder = useStateFromPublishingSubject(controlsManager.controlsInOrder$);
+          const [controlsInOrder, controlStyle] = useBatchedPublishingSubjects(
+            controlsManager.controlsInOrder$,
+            labelPosition$
+          );
+
+          /** Handle drag and drop */
+          const sensors = useSensors(
+            useSensor(PointerSensor),
+            useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+          );
+          const [draggingId, setDraggingId] = useState<string | null>(null);
+          const onDragEnd = useCallback(
+            ({ over, active }: DragEndEvent) => {
+              const oldIndex = active?.data.current?.sortable.index;
+              const newIndex = over?.data.current?.sortable.index;
+              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+                controlsManager.controlsInOrder$.next(
+                  arrayMove([...controlsInOrder], oldIndex, newIndex)
+                );
+              }
+              (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
+              setDraggingId(null);
+            },
+            [controlsInOrder]
+          );
 
           useEffect(() => {
             return () => {
@@ -223,19 +264,47 @@ export const getControlGroupEmbeddableFactory = (services: {
           }, []);
 
           return (
-            <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
-              {controlsInOrder.map(({ id, type }) => (
-                <ControlRenderer
-                  key={id}
-                  uuid={id}
-                  type={type}
-                  getParentApi={() => api}
-                  onApiAvailable={(controlApi) => {
-                    controlsManager.setControlApi(id, controlApi);
+            <EuiPanel
+              borderRadius="m"
+              paddingSize="none"
+              color={draggingId ? 'success' : 'transparent'}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
+                <DndContext
+                  onDragStart={({ active }) => setDraggingId(`${active.id}`)}
+                  onDragEnd={onDragEnd}
+                  onDragCancel={() => setDraggingId(null)}
+                  sensors={sensors}
+                  measuring={{
+                    droppable: {
+                      strategy: MeasuringStrategy.BeforeDragging,
+                    },
                   }}
-                />
-              ))}
-            </EuiFlexGroup>
+                >
+                  <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
+                    {controlsInOrder.map(({ id, type }) => (
+                      <ControlRenderer
+                        key={id}
+                        uuid={id}
+                        type={type}
+                        getParentApi={() => api}
+                        onApiAvailable={(controlApi) => {
+                          controlsManager.setControlApi(id, controlApi);
+                        }}
+                      />
+                    ))}
+                  </SortableContext>
+                  <DragOverlay>
+                    {draggingId ? (
+                      <ControlClone
+                        controlStyle={controlStyle}
+                        controlApi={controlsManager.getControlApi(draggingId)}
+                      />
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </EuiFlexGroup>
+            </EuiPanel>
           );
         },
       };
