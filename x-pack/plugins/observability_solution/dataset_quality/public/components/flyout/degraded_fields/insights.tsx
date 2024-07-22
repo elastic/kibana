@@ -142,10 +142,16 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
             Always consider the provided Sample Document and check it against the 1st 3 points provided to narrow down the root cause.
 
             At the end when providing "Suggested Remedies:", do not suggest solution which are not related to the context
-            information provided above. Do not suggest checking pipelines in this section here.
+            information provided above. Do not suggest checking pipelines in this section here. If you have identified the root causes successfully,
+            try to provide a Elasticsearch API request with payloads which can be used if possible. Sometimes the solution may not involve a change
+            in Elastic but something which the user must do. In those cases, a normal suggestion should be fine.
 
-            Always add a small section at the end of the result with the following message:
-            Remember, any changes to the mapping will only affect new indices after a rollover. Existing indices will need to be
+            If you decide to provide a solution which involves changing the mapping, make sure to check if the custom component template needs to
+            updated (like for integrations) or direct index template. Sometime the component templates do not contain any settings or mappings.
+            In that case it is always better to recommend using them, but please mention this explicitly.
+
+            Always add a small section at the end of the result with the following message in bold font with a NOTE: prefix
+            Any changes to the mapping will only affect new indices after a rollover. Existing indices will need to be
             re-indexed if you want the changes to apply to them.
           `
           ),
