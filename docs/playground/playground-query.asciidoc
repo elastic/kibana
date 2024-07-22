@@ -26,6 +26,9 @@ Selecting a field adds it to the `fields` array in the query.
 [.screenshot]
 image::images/query-interface.png[View and modify queries]
 
+Certain fields in your documents may be hidden.
+Learn more about <<playground-hidden-fields, hidden fields>>.
+
 [float]
 [[playground-query-relevance]]
 === Improving relevance

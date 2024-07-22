@@ -152,7 +152,6 @@ POST /_bulk
 We've also provided some Jupyter notebooks to easily ingest sample data into {es}. 
 Find these in the https://github.com/elastic/elasticsearch-labs/blob/main/notebooks/ingestion-and-chunking[elasticsearch-labs] repository.
 These notebooks use the official {es} Python client.
-// TODO: [The above link will be broken until https://github.com/elastic/elasticsearch-labs/pull/232 is merged]
 
 [float]
 [[playground-getting-started-index]]
@@ -160,7 +159,7 @@ These notebooks use the official {es} Python client.
 
 Once you've connected to your LLM provider, it's time to choose the data you want to search.
 
-. Click *Add data sources*:
+. Click *Add data sources*.
 . Select one or more {es} indices.
 . Click *Save and continue* to launch the chat interface.
 
