@@ -17,11 +17,11 @@ import type {
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetRemoteScriptResultsApiResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
-  SentinelOneGetRemoteScriptResultsApiResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -615,8 +615,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
+    await this.ensureValidActionId(actionId);
+    const actionDetails = await this.fetchActionDetails(actionId);
+
+    const {
+      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
+      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
+    } = this.options.endpointService.experimentalFeatures;
+
     if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+      (actionDetails.command === 'get-file' && !isGetFileEnabled) ||
+      (actionDetails.command === 'running-processes' && !isRunningProcessesEnabled)
     ) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
@@ -624,38 +633,94 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    await this.ensureValidActionId(actionId);
+    let downloadStream: Readable | undefined;
+    let fileName: string | undefined;
 
-    const agentResponse = await this.fetchEsResponseDocForAgentId<
-      ResponseActionGetFileOutputContent,
-      SentinelOneGetFileResponseMeta
-    >(actionId, agentId);
+    try {
+      switch (actionDetails.command) {
+        case 'get-file':
+          {
+            const getFileAgentResponse = await this.fetchEsResponseDocForAgentId<
+              ResponseActionGetFileOutputContent,
+              SentinelOneGetFileResponseMeta
+            >(actionId, agentId);
 
-    if (!agentResponse.meta?.activityLogEntryId) {
-      throw new ResponseActionsClientError(
-        `Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]`
+            if (!getFileAgentResponse.meta?.activityLogEntryId) {
+              throw new ResponseActionsClientError(
+                `Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]`
+              );
+            }
+
+            const downloadAgentFileMethodOptions: SentinelOneDownloadAgentFileParams = {
+              agentUUID: agentId,
+              activityId: getFileAgentResponse.meta?.activityLogEntryId,
+            };
+            const { data } = await this.sendAction<Readable>(
+              SUB_ACTION.DOWNLOAD_AGENT_FILE,
+              downloadAgentFileMethodOptions
+            );
+
+            if (data) {
+              downloadStream = data;
+              fileName = getFileAgentResponse.meta.filename;
+            }
+          }
+          break;
+
+        case 'running-processes':
+          {
+            const processesAgentResponse = await this.fetchEsResponseDocForAgentId<
+              undefined,
+              SentinelOneProcessesResponseMeta
+            >(actionId, agentId);
+
+            if (!processesAgentResponse.meta?.taskId) {
+              throw new ResponseActionsClientError(
+                `Unable to retrieve file from SentinelOne for Response Action [${actionDetails.id}]. Response ES document is missing [meta.taskId]`
+              );
+            }
+
+            const { data } = await this.sendAction<Readable>(
+              SUB_ACTION.DOWNLOAD_REMOTE_SCRIPT_RESULTS,
+              {
+                taskId: processesAgentResponse.meta?.taskId,
+              }
+            );
+
+            if (data) {
+              downloadStream = data;
+              fileName = `${actionId}_${agentId}.zip`;
+            }
+          }
+          break;
+
+        default:
+          throw new ResponseActionsClientError(
+            `${actionDetails.command} does not support file downloads`,
+            400
+          );
+      }
+
+      if (!downloadStream) {
+        throw new ResponseActionsClientError(
+          `Unable to establish a file download Readable stream with SentinelOne for response action [${actionDetails.command}] [${actionDetails.id}]`
+        );
+      }
+    } catch (e) {
+      this.log.debug(
+        () =>
+          `Attempt to get file download stream from SentinelOne for response action failed with:\n${stringify(
+            e
+          )}`
       );
-    }
 
-    const downloadAgentFileMethodOptions: SentinelOneDownloadAgentFileParams = {
-      agentUUID: agentId,
-      activityId: agentResponse.meta?.activityLogEntryId,
-    };
-    const { data } = await this.sendAction<Readable>(
-      SUB_ACTION.DOWNLOAD_AGENT_FILE,
-      downloadAgentFileMethodOptions
-    );
-
-    if (!data) {
-      throw new ResponseActionsClientError(
-        `Unable to establish a readable stream for file with SentinelOne`
-      );
+      throw e;
     }
 
     return {
-      stream: data,
-      fileName: agentResponse.meta.filename,
+      stream: downloadStream,
       mimeType: undefined,
+      fileName,
     };
   }
 
