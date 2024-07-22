@@ -151,7 +151,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentDocumentStatsHash]
+    [currentDocumentStatsHash, searchQuery]
   );
 
   const onAddFilter = useCallback(
