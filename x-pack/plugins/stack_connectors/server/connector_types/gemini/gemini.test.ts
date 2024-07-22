@@ -161,6 +161,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            ],
           }),
           headers: {
             Authorization: 'Bearer mock_access_token',
@@ -190,6 +193,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            ],
           }),
           headers: {
             Authorization: 'Bearer mock_access_token',
@@ -237,6 +243,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            ],
           }),
           responseType: 'stream',
           headers: {
@@ -267,6 +276,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            ],
           }),
           responseType: 'stream',
           headers: {
