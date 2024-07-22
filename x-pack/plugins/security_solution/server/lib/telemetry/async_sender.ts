@@ -233,8 +233,11 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
       // exclude empty buffers
       rx.filter((n: Event[]) => n.length > 0),
 
+      // enrich the events
+      rx.map((events) => events.map((e) => this.enrich(e))),
+
       // serialize the payloads
-      rx.map((events) => events.map((e) => JSON.stringify(e.payload))),
+      rx.map((events) => events.map((e) => this.serialize(e))),
 
       // chunk by size
       rx.map((values) =>
@@ -260,6 +263,47 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         inflightEvents$.next(-result.events);
       })
     ) as rx.Observable<Result>;
+  }
+
+  private enrich(event: Event): Event {
+    const clusterInfo = this.telemetryReceiver?.getClusterInfo();
+
+    // TODO(szaffarano): generalize the enrichment at channel level to not hardcode the logic here
+    if (typeof event.payload === 'object') {
+      let additional = {};
+
+      if (event.channel !== TelemetryChannel.TASK_METRICS) {
+        additional = {
+          cluster_name: clusterInfo?.cluster_name,
+          cluster_uuid: clusterInfo?.cluster_uuid,
+        };
+      } else {
+        additional = {
+          cluster_uuid: clusterInfo?.cluster_uuid,
+        };
+      }
+
+      if (event.channel === TelemetryChannel.ENDPOINT_ALERTS) {
+        const licenseInfo = this.telemetryReceiver?.getLicenseInfo();
+        additional = {
+          ...additional,
+          ...(licenseInfo
+            ? { license: this.telemetryReceiver?.copyLicenseFields(licenseInfo) }
+            : {}),
+        };
+      }
+
+      event.payload = {
+        ...event.payload,
+        ...additional,
+      };
+    }
+
+    return event;
+  }
+
+  private serialize(event: Event): string {
+    return JSON.stringify(event.payload);
   }
 
   private async sendEvents(channel: TelemetryChannel, events: string[]): Promise<Result> {

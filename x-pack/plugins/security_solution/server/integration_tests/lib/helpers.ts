@@ -20,8 +20,8 @@ const asyncUnlink = Util.promisify(Fs.unlink);
  */
 export async function eventually<T>(
   cb: () => Promise<T>,
-  duration: number = 10000,
-  interval: number = 200
+  duration: number = 120000,
+  interval: number = 3000
 ) {
   let elapsed = 0;
 

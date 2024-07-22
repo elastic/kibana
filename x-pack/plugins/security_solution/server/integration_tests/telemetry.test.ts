@@ -225,7 +225,7 @@ describe('telemetry tasks', () => {
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
         const found = mockedAxiosPost.mock.calls.find(([url]) => {
-          return url.startsWith(ENDPOINT_STAGING) && url.endsWith('alerts-endpoint');
+          return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
         });
 
         expect(found).not.toBeFalsy();
@@ -236,7 +236,70 @@ describe('telemetry tasks', () => {
       expect(body).not.toBeFalsy();
       expect(body.Endpoint).not.toBeFalsy();
     });
+
+    it('should enrich with license info', async () => {
+      await mockAndScheduleEndpointDiagnosticsTask();
+
+      // wait until the events are sent to the telemetry server
+      const body = await eventually(async () => {
+        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+          return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
+        });
+
+        expect(found).not.toBeFalsy();
+
+        return JSON.parse((found ? found[1] : '{}') as string);
+      });
+
+      expect(body).not.toBeFalsy();
+      expect(body.license).not.toBeFalsy();
+      expect(body.license.status).not.toBeFalsy();
+    });
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function getEndpointMetaRequests(atLeast: number = 1): Promise<any[]> {
+    return eventually(async () => {
+      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+        return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_ENDPOINT_META);
+      });
+
+      expect(found).not.toBeFalsy();
+      expect(found.length).toBeGreaterThanOrEqual(atLeast);
+
+      return (found ?? []).flatMap((req) => {
+        const ndjson = req[1] as string;
+        return ndjson
+          .split('\n')
+          .filter((l) => l.trim().length > 0)
+          .map((l) => {
+            return JSON.parse(l);
+          });
+      });
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function getAlertsDetectionsRequests(atLeast: number = 1): Promise<any[]> {
+    return eventually(async () => {
+      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+        return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_DETECTION_ALERTS);
+      });
+
+      expect(found).not.toBeFalsy();
+      expect(found.length).toBeGreaterThanOrEqual(atLeast);
+
+      return (found ?? []).flatMap((req) => {
+        const ndjson = req[1] as string;
+        return ndjson
+          .split('\n')
+          .filter((l) => l.trim().length > 0)
+          .map((l) => {
+            return JSON.parse(l);
+          });
+      });
+    });
+  }
 
   async function mockAndScheduleDetectionRulesTask(): Promise<SecurityTelemetryTask> {
     const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
