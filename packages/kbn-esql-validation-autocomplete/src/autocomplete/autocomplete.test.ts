@@ -23,7 +23,7 @@ import {
   getLiteralsByType,
   getDateLiteralsByFieldType,
   createCustomCallbackMocks,
-  createSuggestContext,
+  createCompletionContext,
   getPolicyFields,
 } from './__tests__/helpers';
 
@@ -31,31 +31,30 @@ describe('autocomplete', () => {
   type TestArgs = [
     string,
     string[],
-    (string | number)?,
+    string?,
+    number?,
     Parameters<typeof createCustomCallbackMocks>?
   ];
 
-  const testSuggestionsFn = (
+  const _testSuggestionsFn = (
+    { only, skip }: { only?: boolean; skip?: boolean } = {},
     statement: string,
     expected: string[],
-    triggerCharacter: string | number = '',
+    triggerCharacter?: string,
+    _offset?: number,
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
       undefined,
       undefined,
-    ],
-    { only, skip }: { only?: boolean; skip?: boolean } = {}
+    ]
   ) => {
-    const triggerCharacterString =
-      triggerCharacter == null || typeof triggerCharacter === 'string'
-        ? triggerCharacter
-        : statement[triggerCharacter + 1];
-    const context = createSuggestContext(statement, triggerCharacterString);
-    const offset =
-      typeof triggerCharacter === 'string'
-        ? statement.lastIndexOf(context.triggerCharacter) + 1
-        : triggerCharacter;
+    const context = createCompletionContext(triggerCharacter);
     const testFn = only ? test.only : skip ? test.skip : test;
+    const offset = _offset
+      ? _offset
+      : triggerCharacter
+      ? statement.lastIndexOf(triggerCharacter) + 1
+      : statement.length;
 
     testFn(statement, async () => {
       const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
@@ -79,24 +78,12 @@ describe('autocomplete', () => {
   // DO NOT CHANGE THE NAME OF THIS FUNCTION WITHOUT ALSO CHANGING
   // THE LINTER RULE IN packages/kbn-eslint-config/typescript.js
   //
-  const testSuggestions = Object.assign(testSuggestionsFn, {
+  const testSuggestions = Object.assign(_testSuggestionsFn.bind(null, {}), {
     skip: (...args: TestArgs) => {
-      const paddingArgs = ['', [undefined, undefined, undefined]].slice(args.length - 2);
-      return testSuggestionsFn(
-        ...((args.length > 1 ? [...args, ...paddingArgs] : args) as TestArgs),
-        {
-          skip: true,
-        }
-      );
+      return _testSuggestionsFn({ skip: true }, ...args);
     },
     only: (...args: TestArgs) => {
-      const paddingArgs = ['', [undefined, undefined, undefined]].slice(args.length - 2);
-      return testSuggestionsFn(
-        ...((args.length > 1 ? [...args, ...paddingArgs] : args) as TestArgs),
-        {
-          only: true,
-        }
-      );
+      return _testSuggestionsFn({ only: true }, ...args);
     },
   });
 
@@ -223,7 +210,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats a=avg(numberField) | where numberField ',
       [],
-      '',
+      undefined,
+      undefined,
       // make the fields suggest aware of the previous STATS, leave the other callbacks untouched
       [[{ name: 'a', type: 'number' }], undefined, undefined]
     );
@@ -277,6 +265,7 @@ describe('autocomplete', () => {
         ),
         ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
       ],
+      undefined,
       54 // after the first suggestions
     );
     testSuggestions(
@@ -287,42 +276,53 @@ describe('autocomplete', () => {
         ),
         ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
       ],
+      undefined,
       58 // after the first suggestions
     );
   });
 
-  for (const command of ['grok', 'dissect']) {
-    describe(command, () => {
-      const constantPattern = command === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"';
-      const subExpressions = [
-        '',
-        `${command} stringField |`,
-        `${command} stringField ${constantPattern} |`,
-        `dissect stringField ${constantPattern} append_separator = ":" |`,
-      ];
-      if (command === 'grok') {
-        subExpressions.push(`dissect stringField ${constantPattern} |`);
-      }
-      for (const subExpression of subExpressions) {
-        testSuggestions(`from a | ${subExpression} ${command} `, getFieldNamesByType('string'));
-        testSuggestions(`from a | ${subExpression} ${command} stringField `, [constantPattern]);
-        testSuggestions(
-          `from a | ${subExpression} ${command} stringField ${constantPattern} `,
-          (command === 'dissect' ? ['APPEND_SEPARATOR = $0'] : []).concat(['|'])
-        );
-        if (command === 'dissect') {
-          testSuggestions(
-            `from a | ${subExpression} ${command} stringField ${constantPattern} append_separator = `,
-            ['":"', '";"']
-          );
-          testSuggestions(
-            `from a | ${subExpression} ${command} stringField ${constantPattern} append_separator = ":" `,
-            ['|']
-          );
-        }
-      }
-    });
-  }
+  describe('grok', () => {
+    const constantPattern = '"%{WORD:firstWord}"';
+    const subExpressions = [
+      '',
+      `grok stringField |`,
+      `grok stringField ${constantPattern} |`,
+      `dissect stringField ${constantPattern} append_separator = ":" |`,
+      `dissect stringField ${constantPattern} |`,
+    ];
+    for (const subExpression of subExpressions) {
+      testSuggestions(`from a | ${subExpression} grok `, getFieldNamesByType('string'));
+      testSuggestions(`from a | ${subExpression} grok stringField `, [constantPattern], ' ');
+      testSuggestions(`from a | ${subExpression} grok stringField ${constantPattern} `, ['|']);
+    }
+  });
+
+  describe('dissect', () => {
+    const constantPattern = '"%{firstWord}"';
+    const subExpressions = [
+      '',
+      `dissect stringField |`,
+      `dissect stringField ${constantPattern} |`,
+      `dissect stringField ${constantPattern} append_separator = ":" |`,
+    ];
+    for (const subExpression of subExpressions) {
+      testSuggestions(`from a | ${subExpression} dissect `, getFieldNamesByType('string'));
+      testSuggestions(`from a | ${subExpression} dissect stringField `, [constantPattern], ' ');
+      testSuggestions(
+        `from a | ${subExpression} dissect stringField ${constantPattern} `,
+        ['APPEND_SEPARATOR = $0', '|'],
+        ' '
+      );
+      testSuggestions(
+        `from a | ${subExpression} dissect stringField ${constantPattern} append_separator = `,
+        ['":"', '";"']
+      );
+      testSuggestions(
+        `from a | ${subExpression} dissect stringField ${constantPattern} append_separator = ":" `,
+        ['|']
+      );
+    }
+  });
 
   describe('sort', () => {
     testSuggestions('from a | sort ', [
@@ -347,7 +347,7 @@ describe('autocomplete', () => {
 
   describe('rename', () => {
     testSuggestions('from a | rename ', getFieldNamesByType('any'));
-    testSuggestions('from a | rename stringField ', ['AS $0']);
+    testSuggestions('from a | rename stringField ', ['AS $0'], ' ');
     testSuggestions('from a | rename stringField as ', ['var0']);
   });
 
@@ -408,10 +408,11 @@ describe('autocomplete', () => {
         'kubernetes.something.something',
       ]);
       testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['WITH $0', ',', '|']);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with `, [
-        'var0 =',
-        ...getPolicyFields('policy'),
-      ]);
+      testSuggestions(
+        `from a ${prevCommand}| enrich policy on b with `,
+        ['var0 =', ...getPolicyFields('policy')],
+        ' '
+      );
       testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 `, ['= $0', ',', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = `, [
         ...getPolicyFields('policy'),
@@ -433,10 +434,11 @@ describe('autocomplete', () => {
         `from a ${prevCommand}| enrich policy on b with var0 = stringField, var1 = `,
         [...getPolicyFields('policy')]
       );
-      testSuggestions(`from a ${prevCommand}| enrich policy with `, [
-        'var0 =',
-        ...getPolicyFields('policy'),
-      ]);
+      testSuggestions(
+        `from a ${prevCommand}| enrich policy with `,
+        ['var0 =', ...getPolicyFields('policy')],
+        ' '
+      );
       testSuggestions(`from a ${prevCommand}| enrich policy with stringField `, ['= $0', ',', '|']);
     }
   });
@@ -512,11 +514,13 @@ describe('autocomplete', () => {
     );
     testSuggestions(
       'from a | eval raund(5, ', // note the typo in round
-      []
+      [],
+      ' '
     );
     testSuggestions(
       'from a | eval var0 = raund(5, ', // note the typo in round
-      []
+      [],
+      ' '
     );
     testSuggestions('from a | eval a=round(numberField) ', [
       ',',
@@ -525,18 +529,26 @@ describe('autocomplete', () => {
         'number',
       ]),
     ]);
-    testSuggestions('from a | eval a=round(numberField, ', [
-      ...getFieldNamesByType('number'),
-      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
-        'round',
-      ]),
-    ]);
-    testSuggestions('from a | eval round(numberField, ', [
-      ...getFieldNamesByType('number'),
-      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
-        'round',
-      ]),
-    ]);
+    testSuggestions(
+      'from a | eval a=round(numberField, ',
+      [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          'round',
+        ]),
+      ],
+      ' '
+    );
+    testSuggestions(
+      'from a | eval round(numberField, ',
+      [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          'round',
+        ]),
+      ],
+      ' '
+    );
     testSuggestions('from a | eval a=round(numberField),', [
       'var0 =',
       ...getFieldNamesByType('any'),
@@ -571,6 +583,7 @@ describe('autocomplete', () => {
         ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       ],
       ' ',
+      undefined,
       // make aware EVAL of the previous STATS command
       [[], undefined, undefined]
     );
@@ -592,6 +605,7 @@ describe('autocomplete', () => {
         ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       ],
       ' ',
+      undefined,
       // make aware EVAL of the previous STATS command with the buggy field name from expression
       [[{ name: 'avg_numberField_', type: 'number' }], undefined, undefined]
     );
@@ -604,6 +618,7 @@ describe('autocomplete', () => {
         ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       ],
       ' ',
+      undefined,
       // make aware EVAL of the previous STATS command with the buggy field name from expression
       [
         [
@@ -631,19 +646,27 @@ describe('autocomplete', () => {
         'concat',
       ]).map((v) => `${v},`),
     ]);
-    testSuggestions('from a | eval a=concat(stringField, ', [
-      ...getFieldNamesByType('string'),
-      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
-        'concat',
-      ]),
-    ]);
+    testSuggestions(
+      'from a | eval a=concat(stringField, ',
+      [
+        ...getFieldNamesByType('string'),
+        ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+          'concat',
+        ]),
+      ],
+      ' '
+    );
     // test that the arg type is correct after minParams
-    testSuggestions('from a | eval a=cidr_match(ipField, stringField,', [
-      ...getFieldNamesByType('string'),
-      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
-        'cidr_match',
-      ]),
-    ]);
+    testSuggestions(
+      'from a | eval a=cidr_match(ipField, stringField, ',
+      [
+        ...getFieldNamesByType('string'),
+        ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+          'cidr_match',
+        ]),
+      ],
+      ' '
+    );
     // test that comma is correctly added to the suggestions if minParams is not reached yet
     testSuggestions('from a | eval a=cidr_match( ', [
       ...getFieldNamesByType('ip').map((v) => `${v},`),
@@ -651,12 +674,16 @@ describe('autocomplete', () => {
         'cidr_match',
       ]).map((v) => `${v},`),
     ]);
-    testSuggestions('from a | eval a=cidr_match(ipField, ', [
-      ...getFieldNamesByType('string'),
-      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
-        'cidr_match',
-      ]),
-    ]);
+    testSuggestions(
+      'from a | eval a=cidr_match(ipField, ',
+      [
+        ...getFieldNamesByType('string'),
+        ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
+          'cidr_match',
+        ]),
+      ],
+      ' '
+    );
     // test deep function nesting suggestions (and check that the same function is not suggested)
     // round(round(
     // round(round(round(
@@ -684,6 +711,7 @@ describe('autocomplete', () => {
           'number',
         ]),
       ],
+      undefined,
       38 /* " " after abs(b) */
     );
     testSuggestions(
@@ -694,6 +722,7 @@ describe('autocomplete', () => {
           'abs',
         ]),
       ],
+      undefined,
       26 /* b column in abs */
     );
 
@@ -747,7 +776,8 @@ describe('autocomplete', () => {
                       ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
                         requiresMoreArgs ? `${d},` : d
                       ),
-                    ]
+                    ],
+                ' '
               );
               testSuggestions(
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
@@ -772,7 +802,8 @@ describe('autocomplete', () => {
                       ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
                         requiresMoreArgs ? `${d},` : d
                       ),
-                    ]
+                    ],
+                ' '
               );
             }
           });
@@ -780,19 +811,23 @@ describe('autocomplete', () => {
       }
     }
 
-    testSuggestions('from a | eval var0 = bucket(@timestamp,', getUnitDuration(1));
+    testSuggestions('from a | eval var0 = bucket(@timestamp, ', getUnitDuration(1), ' ');
 
     describe('date math', () => {
       const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
       // If a literal number is detected then suggest also date period keywords
-      testSuggestions('from a | eval a = 1 ', [
-        ...dateSuggestions,
-        ',',
-        '|',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-          'number',
-        ]),
-      ]);
+      testSuggestions(
+        'from a | eval a = 1 ',
+        [
+          ...dateSuggestions,
+          ',',
+          '|',
+          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+            'number',
+          ]),
+        ],
+        ' '
+      );
       testSuggestions('from a | eval a = 1 year ', [
         ',',
         '|',
@@ -800,20 +835,28 @@ describe('autocomplete', () => {
           'time_interval',
         ]),
       ]);
-      testSuggestions('from a | eval a = 1 day + 2 ', [
-        ...dateSuggestions,
-        ',',
-        '|',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-          'number',
-        ]),
-      ]);
-      testSuggestions('from a | eval 1 day + 2 ', [
-        ...dateSuggestions,
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-          'number',
-        ]),
-      ]);
+      testSuggestions(
+        'from a | eval a = 1 day + 2 ',
+        [
+          ...dateSuggestions,
+          ',',
+          '|',
+          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+            'number',
+          ]),
+        ],
+        ' '
+      );
+      testSuggestions(
+        'from a | eval 1 day + 2 ',
+        [
+          ...dateSuggestions,
+          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+            'number',
+          ]),
+        ],
+        ' '
+      );
       testSuggestions(
         'from a | eval var0=date_trunc()',
         [
@@ -826,10 +869,11 @@ describe('autocomplete', () => {
         ],
         '('
       );
-      testSuggestions('from a | eval var0=date_trunc(2 )', [
-        ...dateSuggestions.map((t) => `${t},`),
-        ',',
-      ]);
+      testSuggestions(
+        'from a | eval var0=date_trunc(2 )',
+        [...dateSuggestions.map((t) => `${t},`), ','],
+        ' '
+      );
     });
   });
 
@@ -838,7 +882,7 @@ describe('autocomplete', () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
       const statement = 'from a | drop stringField | eval var0 = abs(numberField) ';
       const triggerOffset = statement.lastIndexOf(' ');
-      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const context = createCompletionContext(statement[triggerOffset]);
       await suggest(
         statement,
         triggerOffset + 1,
@@ -854,7 +898,7 @@ describe('autocomplete', () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
       const statement = 'from a | drop | eval var0 = abs(numberField) ';
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
-      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const context = createCompletionContext(statement[triggerOffset]);
       await suggest(
         statement,
         triggerOffset + 1,
@@ -870,7 +914,7 @@ describe('autocomplete', () => {
     function getSuggestionsFor(statement: string) {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
       const triggerOffset = statement.lastIndexOf(' ') + 1; // drop <here>
-      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const context = createCompletionContext(statement[triggerOffset]);
       return suggest(
         statement,
         triggerOffset + 1,
