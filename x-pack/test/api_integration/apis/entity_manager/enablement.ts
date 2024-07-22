@@ -44,8 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const entityDiscoveryState = enablementRequest('get');
   const enableEntityDiscovery = enablementRequest('put');
-  const disableEntityDiscovery = (auth: Auth, query: { deleteData: boolean }) =>
-    enablementRequest('delete')(auth, query);
+  const disableEntityDiscovery = enablementRequest('delete');
 
   describe('Entity discovery enablement', () => {
     describe('with unauthorized user', () => {
