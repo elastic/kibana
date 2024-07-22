@@ -119,9 +119,11 @@ export const registerStatusRoute = ({
         },
         response: {
           200: {
+            description: 'Overall status is OK and Kibana should be functioning normally.',
             body: statusResponse,
           },
           503: {
+            description: `Kibana or some of it's essential services are unavailable. Kibana may be degraded or unavailable.`,
             body: statusResponse,
           },
         },
