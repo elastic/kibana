@@ -92,8 +92,8 @@ const setupCdrDataView = async (
       //       title: indexPattern,
       //       name: `${dataViewName} - ${currentSpaceId} `,
       //       timeFieldName: '@timestamp',
-      //       type: 'index-pattern',
       //       namespace: currentSpaceId,
+      //       allowNoIndex: true,
       //     },
       //   },
       //   {
@@ -102,6 +102,17 @@ const setupCdrDataView = async (
       //   }
       // );
 
+      // const dv = await dataViewsClient.create(
+      //   {
+      //     id: currentSpaceDataViewId,
+      //     title: indexPattern,
+      //     name: `${dataViewName} - ${currentSpaceId} `,
+      //     namespaces: [currentSpaceId],
+      //     allowNoIndex: true,
+      //     timeFieldName: '@timestamp',
+      //   },
+      //   true
+      // );
       await dataViewsClient.createAndSave(
         {
           id: currentSpaceDataViewId,
@@ -167,7 +178,6 @@ export function setupRoutes({
         CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
         logger
       );
-
       setupCdrDataView(
         core,
         request,
@@ -177,7 +187,6 @@ export function setupRoutes({
         logger
       );
     }
-
     return toolkit.next();
   });
 

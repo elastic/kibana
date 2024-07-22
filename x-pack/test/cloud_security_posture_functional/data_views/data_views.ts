@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
 import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_SPACE = 'space-1';
 
@@ -17,9 +17,9 @@ const getDataViewSafe = async (
   soClient: KbnClientSavedObjects,
   dataViewId: string,
   currentSpaceId: string
-): Promise<Boolean> => {
+): Promise<boolean> => {
   try {
-    const dataView = await soClient.get<DataViewAttributes>({
+    await soClient.get<DataViewAttributes>({
       type: 'index-pattern',
       id: dataViewId,
       space: currentSpaceId,
@@ -45,7 +45,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   describe('Data Views', function () {
     this.tags(['cloud_security_posture_data_views', 'cloud_security_posture_spaces']);
-    let cspSecurity = pageObjects.cspSecurity;
+    const cspSecurity = pageObjects.cspSecurity;
 
     before(async () => {
       await cspSecurity.createRoles();
@@ -86,8 +86,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
       expect(idDataViewExists).to.be(false);
 
-      let findings: typeof pageObjects.findings;
-      findings = pageObjects.findings;
+      const findings = pageObjects.findings;
       await findings.navigateToLatestVulnerabilitiesPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -107,8 +106,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
       expect(idDataViewExists).to.be(false);
 
-      let cspDashboard: typeof pageObjects.cloudPostureDashboard;
-      cspDashboard = pageObjects.cloudPostureDashboard;
+      const cspDashboard = pageObjects.cloudPostureDashboard;
       await cspDashboard.navigateToComplianceDashboardPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -134,8 +132,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
       expect(idDataViewExists).to.be(false);
 
-      let findings: typeof pageObjects.findings;
-      findings = pageObjects.findings;
+      const findings = pageObjects.findings;
       await findings.navigateToLatestFindingsPage(TEST_SPACE);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -161,9 +158,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
       expect(idDataViewExists).to.be(false);
 
-      let cspDashboard: typeof pageObjects.cloudPostureDashboard;
-      cspDashboard = pageObjects.cloudPostureDashboard;
-      await cspDashboard.navigateToComplianceDashboardPage();
+      const cspDashboard = pageObjects.cloudPostureDashboard;
+      await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
@@ -175,7 +171,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('Verify data view is created once user with read permissions reach the dashboard page with', async () => {
-      await cspSecurity.logout();
+      // await cspSecurity.logout();
       await cspSecurity.login('csp_read_user');
 
       await pageObjects.common.navigateToApp('home');
@@ -185,8 +181,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
       expect(idDataViewExists).to.be(false);
 
-      let cspDashboard: typeof pageObjects.cloudPostureDashboard;
-      cspDashboard = pageObjects.cloudPostureDashboard;
+      const cspDashboard = pageObjects.cloudPostureDashboard;
       await cspDashboard.navigateToComplianceDashboardPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
