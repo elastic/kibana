@@ -17,14 +17,16 @@ Previous versions: {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}
 You can now see who created and who last updated a dashboard. 
 
 You can find the creator information right from the dashboard list. 
+
 image::images/dashboard-creator.png[Dashboard creator column in dashboard list]
 
 Quickly find all dashboards created by the same user with a simple filter. 
+
 image::images/dashboard-creator-filter.png[Filtering dashboards by creator]
 
-Note that the creator information will be visible only for dashboards created from version 8.14. 
+Note that the creator information will be visible only for dashboards created on or after version 8.14. 
 
-You can also see who last updated a dashboard by clicking the dashboard info icon from the dashboard list. The creator is also visible next to it. This information is immutable and cannot be changed.
+You can also see who last updated a dashboard by clicking the dashboard information icon from the dashboard list. The creator is also visible next to it. This information is immutable and cannot be changed.
 
 image::images/dashboard-last-editor.png[Dashboard details panel with the name of the last editor]
 
@@ -38,13 +40,13 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt9bc52ff78
 [discrete]
 ==== Statistics in legends
 
-Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for Lens and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. For example, the following chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
+Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for **Lens** and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. For example, the following chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
 
 image::images/statistics-in-legends.png[Statistics in legends]
 
 You can find the option to select statistics for your legends along with an explanation for each calculation when editing your visualization, as shown in the following image.
 
-image::images/statistics-in-legends.png[Select statistics in legends]
+image::images/statistics-in-legends2.png[Select statistics in legends]
 
 [discrete]
 ==== Array of values for Metrics
@@ -56,7 +58,7 @@ image::images/array-in-metrics.png[A metric showing an array of values, width=35
 [discrete]
 ==== Push flyout for Discover document viewer
 
-You can now seamlessly view document details and the table simultaneously in **Discover** with the new _push_ flyout. You can adjust the width of the flyout to suit your needs and explore your data much more easily.
+You can now seamlessly view document details and the main table simultaneously in **Discover** with the new _push_ flyout. You can adjust the width of the flyout to suit your needs and explore your data much more easily.
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb40a408acf4ab688/669a58ea9fecd85219d58ed2/discover-push-flyout.gif[Resizable push flyout in Discover]
 
@@ -77,15 +79,15 @@ image::images/field-statistics-esql.png[Field statistics in ES|QL]
 [discrete]
 ==== Filter UX improvements in ES|QL
 
-We're thrilled to unveil a complete overhaul of filtering in the ES|QL UX. Now, you can seamlessly filter data by bruising a time series chart, allowing for quick and intuitive time-based filtering. Interactive chart filtering lets you refine your data directly by clicking on any chart, while creating 'where clause' filters from the Discover table or sidebar has never been easier. These enhancements streamline data exploration and analysis, making your ES|QL experience more efficient and user-friendly than ever.
+We're thrilled to unveil a complete overhaul of filtering in the ES|QL UX. Now, you can seamlessly filter data by browsing a time series chart, allowing for quick and intuitive time-based filtering. Interactive chart filtering lets you refine your data directly by clicking on any chart, while creating 'where clause' filters from the Discover table or sidebar has never been easier. These enhancements streamline data exploration and analysis, making your ES|QL experience more efficient and user-friendly than ever.
 
 *Filter by clicking a chart:*
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt965a5190f246f7c8/669a7d41e5f7c84793b031cb/filter-by-clicking-chart.gif[Filter by clicking a chart]
 
-*Filter by bruising a time series chart:*
+*Filter by browsing a time series chart:*
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta20c9a93dded707c/669a7d40843f93a02fe51013/filter-by-brushing-time-series.gif[Filter by bruising a time series chart]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta20c9a93dded707c/669a7d40843f93a02fe51013/filter-by-brushing-time-series.gif[Filter by browsing a time series chart]
 
 *Create WHERE clause filters from Discover table or sidebar:*
 
@@ -109,7 +111,7 @@ Learn more about custom fields and templates in <<manage-cases-settings>>.
 [discrete]
 ==== Connector improvements 
 
-*ServiceNow additional field* - You can now create enriched ServiceNow tickets based on detected alerts with a more comprehensive structure that matches the ServiceNow ticket scheme.  A new JSON field is now available as part of the ServiceNow action that lets you define any field to be sent from Kibana Alerts to ServiceNow tickets. 
+*ServiceNow additional field* - You can now create enriched ServiceNow tickets based on detected alerts with a more comprehensive structure that matches the ServiceNow ticket scheme.  A new JSON field is now available as part of the ServiceNow action and lets you define any field to be sent from Kibana Alerts to ServiceNow tickets. 
 
 *Case Webhook SSL auth support* - It's common for organizations to integrate with 3rd parties using secured authentication. Currently, most of the available case connectors use basic authentication (user and passwords or tokens), which might not be sufficient to meet organization security policies.  With this release, the Webhook Case connector now supports client certification to let you leverage the webhook connector for secured integration with 3rd parties. 
 
@@ -119,14 +121,14 @@ Learn more about custom fields and templates in <<manage-cases-settings>>.
 [discrete]
 ==== Improved UX for Log Pattern Analysis in Discover 
 
-Analyze large volumes of logs efficiently, in very short times with Log Pattern Analysis in Discover. In 8.15, we redesigned the Log Pattern Analysis user flow in Discover to make it easier to use. Discover log patterns with one click for the message field (and other applicable text fields) and easily filter for and out logs to drastically reduce MTTR.
+Analyze large volumes of logs efficiently, in very short times with Log Pattern Analysis in **Discover**. In 8.15, we redesigned the Log Pattern Analysis user flow in **Discover** to make it easier to use. Discover log patterns with one click for the message field (and other applicable text fields) and easily filter in and out logs to drastically reduce MTTR.
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt7e63d7e764ab183e/669a807bd316c7015db35458/ml-log-pattern-analysis.gif[New log pattern analysis interface]
 
 [discrete]
 ==== ES|QL support for field statistics in Discover
 
-The Field statistics functionality now supports ES|QL Elastic's primary query language.
+The Field statistics functionality now supports ES|QL, Elastic's primary query language.
 
 image::images/esql-field-statistics.png[Field statistics in ES|QL]
 
@@ -152,7 +154,7 @@ The inference API provides a seamless, intuitive interface to perform inference 
 [discrete]
 ==== Support for reranking with the Inference API
 
-In 8.15, we're also extending the inference API to add the ability to host cross encoder models in Elastic and perform the reranking task.
+In 8.15, we're also extending the inference API with the ability to host cross encoder models in Elastic and perform the reranking task.
 
 [discrete]
 === Global Experience
@@ -169,12 +171,12 @@ image::images/share-modal.png[New object share modal, width=50%]
 
 The days of manually scrolling through an endless list of dashboards are behind you. You can now filter by creator to go directly to the dashboards created by a specific teammate.
 
-NOTE: only dashboards created on or after 8.14 will have a creator.
+NOTE: Only dashboards created on or after 8.14 will have a creator.
 
 [discrete]
 ==== Quick API keys
 
-Many API keys don’t require custom settings, so we made it simple to generate a standard key. From the **Endpoints & API keys** top menu in Search, you can create a new key in seconds. 
+Many API keys don’t require custom settings, so we made it simple to generate a standard key. From the **Endpoints & API keys** top menu in Search, you can create a key in seconds. 
 
 image::images/create-simple-api-key.png[Shortcut to create an API key, width=60%]
 
@@ -184,4 +186,4 @@ image::images/create-simple-api-key.png[Shortcut to create an API key, width=60%
 [discrete]
 ==== Filtering by User in Kibana Audit Logs
 
-We are pleased to share that ignoring events by user in Kibana audit logs is now possible. This enhancement will give you more flexibility to reduce the overall number of events logged by the Kibana audit logs service and to control the volume of data being generated in audit logs. While we currently offer a number of ways to do this using the `xpack.security.audit.ignore_filters.[]` configuration setting, there wasn't an option to filter by user. With this addition, you can configure Kibana audit logs to ignore events based on values from the following fields: users, spaces, outcomes, categories, types and actions. 
+We are pleased to share that ignoring events by user in Kibana audit logs is now possible. This enhancement will give you more flexibility to reduce the overall number of events logged by the Kibana audit logs service and to control the volume of data being generated in audit logs. While we currently offer a number of ways to do this using the `xpack.security.audit.ignore_filters.[]` configuration setting, there wasn't an easy option to filter by user. With this addition, you can configure Kibana audit logs to ignore events based on values from the following fields: users, spaces, outcomes, categories, types and actions. 
