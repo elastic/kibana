@@ -96,7 +96,7 @@ const mockReq = (
     headers: {},
     getKibanaStatsCollector: () => null,
     getUiSettingsService: () => null,
-    getActionTypeRegistry: () => null,
+    getActionTypeRegistry: () => [],
     getRulesClient: () => null,
     getActionsClient: () => null,
   };

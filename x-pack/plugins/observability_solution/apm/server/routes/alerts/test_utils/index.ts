@@ -11,7 +11,7 @@ import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
@@ -30,7 +30,7 @@ export const createRuleTypeMocks = () => {
     registerType: ({ executor }) => {
       alertExecutor = executor;
     },
-  } as AlertingPluginSetupContract;
+  } as AlertingServerSetup;
 
   const scheduleActions = jest.fn();
   const getUuid = jest.fn();

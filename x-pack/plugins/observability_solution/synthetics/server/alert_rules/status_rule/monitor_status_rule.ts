@@ -8,7 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import {
   GetViewInAppRelativeUrlFnOpts,
   AlertInstanceContext as AlertContext,
@@ -56,7 +56,7 @@ export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
   syntheticsMonitorClient: SyntheticsMonitorClient,
-  alerting: PluginSetupContract
+  alerting: AlertingServerSetup
 ) => {
   if (!alerting) {
     throw new Error(

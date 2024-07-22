@@ -15,7 +15,7 @@ import {
   Logger,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
@@ -47,7 +47,7 @@ import { sloSettings, SO_SLO_SETTINGS_TYPE } from './saved_objects/slo_settings'
 export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
 
 export interface PluginSetup {
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
@@ -58,7 +58,7 @@ export interface PluginSetup {
 }
 
 export interface PluginStart {
-  alerting: PluginStartContract;
+  alerting: AlertingServerStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
