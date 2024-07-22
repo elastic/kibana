@@ -47,7 +47,6 @@ export const registerActionFileDownloadRoutes = (
         },
       },
       withEndpointAuthz(
-        // FIXME:PT this code shows a bug for any aciton that supports a download, but role does not have File Operations (ex. execute)
         { all: ['canWriteFileOperations'] },
         logger,
         getActionFileDownloadRouteHandler(endpointContext)
