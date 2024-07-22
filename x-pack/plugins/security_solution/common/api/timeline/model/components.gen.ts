@@ -21,7 +21,7 @@ import { z } from 'zod';
  * The type of timeline to create. Valid values are `default` and `template`.
  */
 export type TimelineType = z.infer<typeof TimelineType>;
-export const TimelineType = z.enum(['default', 'template']).default('default');
+export const TimelineType = z.enum(['default', 'template']);
 export type TimelineTypeEnum = typeof TimelineType.enum;
 export const TimelineTypeEnum = TimelineType.enum;
 
@@ -29,7 +29,7 @@ export const TimelineTypeEnum = TimelineType.enum;
  * The type of data provider to create. Valid values are `default` and `template`.
  */
 export type DataProviderType = z.infer<typeof DataProviderType>;
-export const DataProviderType = z.enum(['default', 'template']).default('default');
+export const DataProviderType = z.enum(['default', 'template']);
 export type DataProviderTypeEnum = typeof DataProviderType.enum;
 export const DataProviderTypeEnum = DataProviderType.enum;
 
@@ -291,7 +291,7 @@ export const SortFieldTimeline = z.object({
  * The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
  */
 export type TimelineStatus = z.infer<typeof TimelineStatus>;
-export const TimelineStatus = z.enum(['active', 'draft', 'immutable']).default('draft');
+export const TimelineStatus = z.enum(['active', 'draft', 'immutable']);
 export type TimelineStatusEnum = typeof TimelineStatus.enum;
 export const TimelineStatusEnum = TimelineStatus.enum;
 
