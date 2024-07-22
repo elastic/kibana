@@ -48,8 +48,19 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { entitiesIndexPattern, searchEntity, esClient, langChainTimeout, llm, size, logger } =
-      params as EntityResolutionToolParams;
+    const {
+      entitiesIndexPattern,
+      searchEntity,
+      langChainTimeout,
+      llm,
+      size,
+      logger,
+      entityResolutionClient,
+    } = params as EntityResolutionToolParams;
+
+    if (!entityResolutionClient) {
+      throw new Error('Entity Resolution Data Client is required for entity resolution tool');
+    }
 
     return new DynamicTool({
       name: 'EntityResolutionTool',
@@ -65,11 +76,9 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
 
         const candidateEntities = await getCandidateEntities({
           searchEntity,
-          namespace: 'default', // TODO: get namespace from request
           entitiesIndexPattern,
-          esClient,
+          entityResolutionClient,
           size,
-          logger,
         });
 
         const outputParser = getEntityResolutionOutputParser();
@@ -92,11 +101,15 @@ export const ENTITY_RESOLUTION_TOOL: AssistantTool = {
 
         const llmStart = new Date().getTime();
 
+        const query = getEntityResolutionPrompt({
+          searchEntity,
+          candidateEntities: candidateEntities.map((e) => e.entity),
+        });
+
+        logger.debug(`Entity Resolution LLM prompt: ${query}`);
+
         const { result } = await answerFormattingChain.call({
-          query: getEntityResolutionPrompt({
-            searchEntity,
-            candidateEntities: candidateEntities.map((e) => e.entity),
-          }),
+          query,
           timeout: langChainTimeout,
         });
 

@@ -7,7 +7,12 @@
 
 import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  Logger,
+  ScopeableRequest,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
@@ -29,6 +34,7 @@ import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
+import { EntityResolutionDataClient } from '../ai_assistant_data_clients/entity_resolution';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -41,6 +47,7 @@ export interface AIAssistantServiceOpts {
   logger: Logger;
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  getScopedElasticSearchClient: (r: ScopeableRequest) => Promise<ElasticsearchClient>;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
@@ -376,6 +383,22 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
+    });
+  }
+
+  public async createEntityResolutionDataClient({
+    spaceId,
+    request,
+  }: {
+    spaceId?: string;
+    request: ScopeableRequest;
+  }): Promise<EntityResolutionDataClient | null> {
+    const esClient = await this.options.getScopedElasticSearchClient(request);
+
+    return new EntityResolutionDataClient({
+      logger: this.options.logger.get('entityResolution'),
+      esClient,
+      namespace: spaceId ?? DEFAULT_NAMESPACE_STRING,
     });
   }
 

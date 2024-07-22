@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import {
+  PluginInitializerContext,
+  CoreStart,
+  Plugin,
+  Logger,
+  ScopeableRequest,
+} from '@kbn/core/server';
 
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
@@ -60,6 +66,10 @@ export class ElasticAssistantPlugin
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      getScopedElasticSearchClient: (r: ScopeableRequest) =>
+        core
+          .getStartServices()
+          .then(([{ elasticsearch }]) => elasticsearch.client.asScoped(r).asCurrentUser),
       pluginStop$: this.pluginStop$,
     });
 

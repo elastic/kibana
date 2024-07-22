@@ -14,7 +14,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 const MODEL = '.multilingual-e5-small';
 
 const searchEntityToModelText = (searchEntity: SearchEntity): string => {
-  return `${searchEntity.name} ${searchEntity.email}`;
+  return `${searchEntity.name}${searchEntity.email ? ` ${searchEntity.email}` : ''}`;
 };
 
 const searchHitsToMatches = (hits: Array<SearchHit<EntityLatestDocument>>): MatchEntity[] => {
@@ -117,46 +117,42 @@ export class EntityResolutionDataClient {
     entitiesIndexPattern,
     searchEntity,
     size,
-    k = 3,
   }: {
     entitiesIndexPattern: string;
     searchEntity: SearchEntity;
     size: number;
     k?: number;
-  }): Promise<{ total: number; matches: MatchEntity[] }> {
+  }): Promise<{ total: number; candidates: MatchEntity[] }> {
     const { esClient, logger } = this.options;
-    const identityField = searchEntity.type === 'user' ? 'user.name' : 'host.name';
-    const embeddingField = `test_${searchEntity.type}_name_embeddings.inference.chunks.embeddings`;
     const searchQuery = {
       index: entitiesIndexPattern,
       body: {
         _source: {
-          excludes: ['test_user_name_embeddings'],
+          excludes: [`test_${searchEntity.type}_name_embeddings`],
         },
         knn: [
           {
-            field: embeddingField,
+            field: `test_${searchEntity.type}_name_embeddings.inference.chunks.embeddings`,
             query_vector_builder: {
               text_embedding: {
                 model_id: MODEL,
                 model_text: searchEntityToModelText(searchEntity),
               },
             },
-            k,
+            k: size,
             num_candidates: size,
           },
         ],
-        fields: [identityField],
       },
     };
 
-    logger.debug(`Searching for entity with query: ${JSON.stringify(searchQuery)}`);
+    logger.info(`Searching for entity with query: ${JSON.stringify(searchQuery)}`);
 
     const response = await esClient.search<EntityLatestDocument>(searchQuery);
 
     return {
       total: searchTotalToNumber(response.hits.total),
-      matches: searchHitsToMatches(response.hits.hits),
+      candidates: searchHitsToMatches(response.hits.hits),
     };
   }
 }

@@ -19,6 +19,7 @@ export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/canc
 
 // Entity Resolution
 export const ENTITY_RESOLUTION = `${BASE_PATH}/entity_resolution`;
+export const ENTITY_RESOLUTION_CANDIDATES = `${BASE_PATH}/entity_resolution/candidates`;
 // Model Evaluation
 export const EVALUATE = `${BASE_PATH}/evaluate`;
 

@@ -34,6 +34,7 @@ import { bulkActionKnowledgeBaseEntriesRoute } from './knowledge_base/entries/bu
 import { createKnowledgeBaseEntryRoute } from './knowledge_base/entries/create_route';
 import { findKnowledgeBaseEntriesRoute } from './knowledge_base/entries/find_route';
 import { postEntityResolutionRoute } from './entity_resolution/post_entity_resolution';
+import { postEntityResolutionCandidatesRoute } from './entity_resolution/post_entity_resolution_candidates';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
@@ -92,4 +93,5 @@ export const registerRoutes = (
 
   // Entity Resolution
   postEntityResolutionRoute(router);
+  postEntityResolutionCandidatesRoute(router);
 };

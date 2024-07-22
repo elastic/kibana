@@ -49,7 +49,7 @@ export class RequestContextFactory implements IRequestContextFactory {
   ): Promise<ElasticAssistantApiRequestHandlerContext> {
     const { options } = this;
     const { core } = options;
-
+    // TODO: could we get a scoped elasticsearch client here? instead of needing getScopedElasticsearchClient in contex
     const [, startPlugins] = await core.getStartServices();
     const coreContext = await context.core;
 
@@ -99,6 +99,13 @@ export class RequestContextFactory implements IRequestContextFactory {
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
+        });
+      }),
+
+      getEntityResolutionDataClient: memoize(() => {
+        return this.assistantService.createEntityResolutionDataClient({
+          spaceId: getSpaceId(),
+          request,
         });
       }),
 

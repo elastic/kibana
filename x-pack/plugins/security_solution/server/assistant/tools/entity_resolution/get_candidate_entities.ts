@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchEntity } from '@kbn/elastic-assistant-common';
-import type { MatchEntity } from '../../../lib/entity_analytics/entity_resolution/entity_resolution_data_client';
-import { EntityResolutionDataClient } from '../../../lib/entity_analytics/entity_resolution/entity_resolution_data_client';
+import type {
+  EntityResolutionDataClient,
+  MatchEntity,
+} from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/entity_resolution';
 
 export interface CandidateEntity {
   id: string;
@@ -42,28 +43,25 @@ interface CandidateEntityElement {
 export const getCandidateEntities = async ({
   entitiesIndexPattern,
   searchEntity,
-  esClient,
   size,
-  namespace,
-  logger,
+  entityResolutionClient,
 }: {
   searchEntity?: SearchEntity;
   entitiesIndexPattern?: string;
-  esClient: ElasticsearchClient;
   size?: number;
-  namespace: string;
-  logger: Logger;
+  entityResolutionClient: EntityResolutionDataClient;
 }): Promise<CandidateEntityElement[]> => {
   if (entitiesIndexPattern == null || size == null || searchEntity == null) {
     return [];
   }
-  const erClient = new EntityResolutionDataClient({ esClient, namespace, logger });
-
-  const { matches } = await erClient.findMatches({
+  const { candidates } = await entityResolutionClient.findMatches({
     searchEntity,
     entitiesIndexPattern,
     size,
   });
 
-  return matches.map((match) => ({ entity: matchEntityToCandidateEntity(match), document: match }));
+  return candidates.map((match) => ({
+    entity: matchEntityToCandidateEntity(match),
+    document: match,
+  }));
 };

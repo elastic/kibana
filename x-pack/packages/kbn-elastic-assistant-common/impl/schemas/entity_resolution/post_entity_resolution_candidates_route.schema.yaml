@@ -3,12 +3,12 @@ info:
   title: Post Entity Search discovery API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/entity_resolution:
+  /internal/elastic_assistant/entity_resolution/candidates:
     post:
-      operationId: EntityResolutionPost
+      operationId: EntityResolutionCandidatesPost
       x-codegen-enabled: true
-      description: Find matching entity suggestions
-      summary: Generate matching entity suggestions for the given entity via the Elastic Assistant
+      description: Find candidates for entity resolution
+      summary: Find candidates which AI based entity resolution can be applied to
       tags:
         - entity_analytics
       requestBody:
@@ -22,23 +22,13 @@ paths:
                 - entitiesIndexPattern
                 - size
                 - subAction
+                - entity
               properties:
                 entity:
                   $ref: './common.schema.yaml#/components/schemas/SearchEntity'
                 filter:
                   type: object
                 entitiesIndexPattern:
-                  type: string
-                apiConfig:
-                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
-                  description: LLM API configuration.
-                langSmithProject:
-                  description: used for development
-                  type: string
-                langSmithApiKey:
-                  description: used for development
-                  type: string
-                model:
                   type: string
                 size:
                   type: number
@@ -54,12 +44,10 @@ paths:
                 properties:
                   entity:
                     $ref: './common.schema.yaml#/components/schemas/SearchEntity'
-                  foundSuggestion:
-                    type: boolean
-                  suggestions:
+                  candidates:
                     type: array
                     items:
-                      $ref: '#/components/schemas/EntityResolutionSuggestion'
+                      $ref: '#/components/schemas/EntityResolutionCandidate'
         '400':
           description: Bad request
           content:
@@ -75,20 +63,13 @@ paths:
                     type: string
 components:
   schemas:
-    EntityResolutionSuggestion:
+    EntityResolutionCandidate:
       type: object
       properties:
         index:
           type: string
         id:
           type: string
-        reason:
-          type: string
-        confidence:
-          enum:
-            - high
-            - medium
-            - low
         document:
           type: object
         entity:

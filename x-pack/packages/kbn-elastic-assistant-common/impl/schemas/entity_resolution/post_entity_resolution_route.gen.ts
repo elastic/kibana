@@ -16,14 +16,8 @@
 
 import { z } from 'zod';
 
+import { SearchEntity } from './common.gen';
 import { ApiConfig } from '../conversations/common_attributes.gen';
-
-export type SearchEntity = z.infer<typeof SearchEntity>;
-export const SearchEntity = z.object({
-  type: z.enum(['user', 'host']),
-  name: z.string(),
-  email: z.string().optional(),
-});
 
 export type EntityResolutionSuggestion = z.infer<typeof EntityResolutionSuggestion>;
 export const EntityResolutionSuggestion = z.object({
@@ -32,6 +26,7 @@ export const EntityResolutionSuggestion = z.object({
   reason: z.string().optional(),
   confidence: z.unknown(),
   document: z.object({}).optional(),
+  entity: z.object({}).optional(),
 });
 
 export type EntityResolutionPostRequestBody = z.infer<typeof EntityResolutionPostRequestBody>;

@@ -62,7 +62,6 @@ export const postEntityResolutionRoute = (
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
-        // const telemetry = assistantContext.telemetry;
 
         try {
           // get the actions plugin start contract from the request context:
@@ -100,6 +99,14 @@ export const postEntityResolutionRoute = (
 
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const entityResolutionClient = await assistantContext.getEntityResolutionDataClient();
+
+          if (!entityResolutionClient) {
+            return resp.error({
+              body: `Entity resolution data client not initialized`,
+              statusCode: 500,
+            });
+          }
 
           const assistantTool = getAssistantTool(
             (await context.elasticAssistant).getRegisteredTools,
@@ -113,6 +120,7 @@ export const postEntityResolutionRoute = (
           const assistantToolParams = getAssistantToolParams({
             searchEntity,
             actionsClient,
+            entityResolutionClient,
             entitiesIndexPattern,
             apiConfig,
             esClient,

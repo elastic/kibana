@@ -20,9 +20,11 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
 import { AssistantToolParams } from '../../types';
+import { EntityResolutionDataClient } from '../../ai_assistant_data_clients/entity_resolution';
 export const getAssistantToolParams = ({
   searchEntity,
   actionsClient,
+  entityResolutionClient,
   entitiesIndexPattern,
   apiConfig,
   esClient,
@@ -36,6 +38,7 @@ export const getAssistantToolParams = ({
 }: {
   searchEntity: SearchEntity;
   actionsClient: PublicMethodsOf<ActionsClient>;
+  entityResolutionClient: EntityResolutionDataClient;
   entitiesIndexPattern: string;
   apiConfig: ApiConfig;
   esClient: ElasticsearchClient;
@@ -69,6 +72,7 @@ export const getAssistantToolParams = ({
   });
 
   return formatAssistantToolParams({
+    entityResolutionClient,
     searchEntity,
     entitiesIndexPattern,
     esClient,
@@ -81,6 +85,7 @@ export const getAssistantToolParams = ({
 };
 
 const formatAssistantToolParams = ({
+  entityResolutionClient,
   entitiesIndexPattern,
   esClient,
   langChainTimeout,
@@ -90,6 +95,7 @@ const formatAssistantToolParams = ({
   size,
   searchEntity,
 }: {
+  entityResolutionClient: EntityResolutionDataClient;
   entitiesIndexPattern: string;
   esClient: ElasticsearchClient;
   langChainTimeout: number;
@@ -99,6 +105,7 @@ const formatAssistantToolParams = ({
   size: number;
   searchEntity: SearchEntity;
 }): AssistantToolParams => ({
+  entityResolutionClient,
   searchEntity,
   entitiesIndexPattern,
   isEnabledKnowledgeBase: false, // not required

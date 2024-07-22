@@ -47,6 +47,7 @@ import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
+import { EntityResolutionDataClient } from './ai_assistant_data_clients/entity_resolution';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -119,6 +120,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
     initializeKnowledgeBase: boolean
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
+  getEntityResolutionDataClient: () => Promise<EntityResolutionDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
@@ -216,6 +218,7 @@ export interface AssistantTool {
 }
 
 export interface AssistantToolParams {
+  entityResolutionClient?: EntityResolutionDataClient;
   alertsIndexPattern?: string;
   entitiesIndexPattern?: string;
   searchEntity?: SearchEntity;
