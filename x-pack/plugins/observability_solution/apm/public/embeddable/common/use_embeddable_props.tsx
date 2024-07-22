@@ -18,7 +18,7 @@ import { getTimeZone } from '../../components/shared/charts/helper/timezone';
 import { ApmDocumentType } from '../../../common/document_type';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 
-export function useAlertingProps({
+export function useEmbeddableProps({
   rule,
   serviceName,
   kuery = '',
@@ -26,7 +26,7 @@ export function useAlertingProps({
   rangeTo,
   defaultTransactionType,
 }: {
-  rule: Rule<{ aggregationType: LatencyAggregationType }>;
+  rule?: Rule<{ aggregationType: LatencyAggregationType }>;
   serviceName: string;
   kuery?: string;
   rangeFrom: string;
@@ -64,11 +64,11 @@ export function useAlertingProps({
     agentName,
   });
 
-  const params = rule.params;
+  const aggregationType = rule?.params?.aggregationType || '';
   const comparisonChartTheme = getComparisonChartTheme();
 
   const [latencyAggregationType, setLatencyAggregationType] = useState(
-    getAggsTypeFromRule(params.aggregationType)
+    getAggsTypeFromRule(aggregationType)
   );
   const [transactionType, setTransactionType] = useState(currentTransactionType);
 

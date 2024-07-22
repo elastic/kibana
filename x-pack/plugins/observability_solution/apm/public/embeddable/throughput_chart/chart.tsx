@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import ThroughputChart from '../../../components/alerting/ui_components/alert_details_app_section/throughput_chart';
-import { EmbeddableApmAlertingVizProps } from '../types';
-import { useAlertingProps } from '../use_alerting_props';
-import { TimeRangeCallout } from '../time_range_callout';
-import { ServiceNameCallout } from '../service_name_callout';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import ThroughputChart from '../../components/alerting/ui_components/alert_details_app_section/throughput_chart';
+import { EmbeddableApmVizProps } from '../types';
+import { useEmbeddableProps } from '../common/use_embeddable_props';
+import { TimeRangeCallout } from '../common/time_range_callout';
+import { ServiceNameCallout } from '../common/service_name_callout';
 
-export function APMAlertingThroughputChart({
+export function APMThroughputChart({
   rule,
   rangeFrom = 'now-15m',
   rangeTo = 'now',
@@ -23,14 +23,14 @@ export function APMAlertingThroughputChart({
   serviceName,
   transactionType,
   environment = ENVIRONMENT_ALL.value,
-}: EmbeddableApmAlertingVizProps) {
+}: EmbeddableApmVizProps) {
   const {
     comparisonChartTheme,
     setTransactionType,
     transactionType: currentTransactionType,
     transactionTypes,
     timeZone,
-  } = useAlertingProps({
+  } = useEmbeddableProps({
     rule,
     rangeTo,
     rangeFrom,

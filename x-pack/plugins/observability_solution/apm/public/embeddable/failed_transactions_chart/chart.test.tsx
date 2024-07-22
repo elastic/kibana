@@ -6,30 +6,30 @@
  */
 
 import React from 'react';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { render, waitFor } from '@testing-library/react';
-import { APMAlertingLatencyChart } from './chart';
-import { ApmEmbeddableContext } from '../../embeddable_context';
+import { APMFailedTransactionsChart } from './chart';
+import { ApmEmbeddableContext } from '../embeddable_context';
 import { MOCK_ALERT, MOCK_RULE, MOCK_DEPS } from '../testing/fixtures';
-import * as transactionFetcher from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import * as transactionFetcher from '../../context/apm_service/use_service_transaction_types_fetcher';
 
-jest.mock('../../../context/apm_service/use_service_agent_fetcher', () => ({
+jest.mock('../../context/apm_service/use_service_agent_fetcher', () => ({
   useServiceAgentFetcher: jest.fn(() => ({
     agentName: 'mockAgent',
   })),
 }));
 
 describe('renders chart', () => {
+  const serviceName = 'ops-bean';
   beforeEach(() => {
     jest
       .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
       .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
   });
-  const serviceName = 'ops-bean';
   it('renders error when serviceName is not defined', async () => {
     const { getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
-        <APMAlertingLatencyChart
+        <APMFailedTransactionsChart
           rule={MOCK_RULE}
           rangeFrom="now-15m"
           rangeTo="now"
@@ -47,7 +47,7 @@ describe('renders chart', () => {
   it('renders when serviceName is defined', async () => {
     const { getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
-        <APMAlertingLatencyChart
+        <APMFailedTransactionsChart
           rule={MOCK_RULE}
           rangeFrom="now-15m"
           rangeTo="now"
@@ -57,7 +57,7 @@ describe('renders chart', () => {
       </ApmEmbeddableContext>
     );
     await waitFor(() => {
-      expect(getByText('Latency')).toBeInTheDocument();
+      expect(getByText('Failed transaction rate')).toBeInTheDocument();
     });
   });
 
@@ -67,7 +67,7 @@ describe('renders chart', () => {
       .mockReturnValue({ transactionTypes: ['request', 'custom'], status: FETCH_STATUS.SUCCESS });
     const { getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
-        <APMAlertingLatencyChart
+        <APMFailedTransactionsChart
           rule={MOCK_RULE}
           rangeFrom="now-15m"
           rangeTo="now"
@@ -88,7 +88,7 @@ describe('renders chart', () => {
       .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
     const { queryByText, getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
-        <APMAlertingLatencyChart
+        <APMFailedTransactionsChart
           rule={MOCK_RULE}
           rangeFrom="now-15m"
           rangeTo="now"
@@ -101,30 +101,6 @@ describe('renders chart', () => {
     await waitFor(() => {
       expect(queryByText('custom')).not.toBeInTheDocument();
       expect(getByText('request')).toBeInTheDocument();
-    });
-  });
-
-  it('shows latency aggregation type select', async () => {
-    jest
-      .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
-      .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
-    const { getByText } = render(
-      <ApmEmbeddableContext deps={MOCK_DEPS}>
-        <APMAlertingLatencyChart
-          rule={MOCK_RULE}
-          rangeFrom="now-15m"
-          rangeTo="now"
-          serviceName={serviceName}
-          alert={MOCK_ALERT}
-          transactionType="custom"
-        />
-      </ApmEmbeddableContext>
-    );
-    await waitFor(() => {
-      expect(getByText('Metric')).toBeInTheDocument();
-      expect(getByText('Average')).toBeInTheDocument();
-      expect(getByText('95th percentile')).toBeInTheDocument();
-      expect(getByText('99th percentile')).toBeInTheDocument();
     });
   });
 });

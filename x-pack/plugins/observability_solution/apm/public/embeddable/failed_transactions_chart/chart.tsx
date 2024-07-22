@@ -8,14 +8,14 @@
 import React from 'react';
 import moment from 'moment';
 import { ALERT_END } from '@kbn/rule-data-utils';
-import FailedTransactionChart from '../../../components/alerting/ui_components/alert_details_app_section/failed_transaction_chart';
-import { useAlertingProps } from '../use_alerting_props';
-import { TimeRangeCallout } from '../time_range_callout';
-import { ServiceNameCallout } from '../service_name_callout';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import type { EmbeddableApmAlertingVizProps } from '../types';
+import FailedTransactionChart from '../../components/alerting/ui_components/alert_details_app_section/failed_transaction_chart';
+import { useEmbeddableProps } from '../common/use_embeddable_props';
+import { TimeRangeCallout } from '../common/time_range_callout';
+import { ServiceNameCallout } from '../common/service_name_callout';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { EmbeddableApmVizProps } from '../types';
 
-export function APMAlertingFailedTransactionsChart({
+export function APMFailedTransactionsChart({
   rule,
   alert,
   serviceName,
@@ -26,15 +26,16 @@ export function APMAlertingFailedTransactionsChart({
   transactionName,
   kuery = '',
   filters,
-}: EmbeddableApmAlertingVizProps) {
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+}: EmbeddableApmVizProps) {
+  const alertEnd =
+    alert && alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const {
     transactionType: currentTransactionType,
     transactionTypes,
     setTransactionType,
     comparisonChartTheme,
     timeZone,
-  } = useAlertingProps({
+  } = useEmbeddableProps({
     rule,
     serviceName,
     rangeFrom,
@@ -65,7 +66,7 @@ export function APMAlertingFailedTransactionsChart({
       timeZone={timeZone}
       kuery={kuery}
       filters={filters}
-      alertStart={alert.start}
+      alertStart={alert?.start}
       alertEnd={alertEnd}
     />
   );

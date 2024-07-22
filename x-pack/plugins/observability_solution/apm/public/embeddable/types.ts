@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { TopAlert } from '@kbn/observability-plugin/public';
+import { SerializedTitles } from '@kbn/presentation-publishing';
+import type { BoolQuery } from '@kbn/es-query';
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
@@ -27,3 +31,20 @@ export interface APMEmbeddableProps {
 }
 
 export type APMEmbeddableInput = EmbeddableInput & APMEmbeddableProps;
+
+export interface EmbeddableApmVizProps extends SerializedTitles {
+  rule?: Rule;
+  alert?: TopAlert;
+  transactionName?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  kuery?: string;
+  filters?: BoolQuery;
+  serviceName: string;
+  environment?: string;
+  transactionType?: string;
+}
+
+export interface EmbeddableApmLatencyVizProps extends EmbeddableApmVizProps {
+  latencyThresholdInMicroseconds?: number;
+}

@@ -9,23 +9,21 @@ import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { EmbeddableApmAlertingVizProps } from '../types';
-import type { EmbeddableDeps } from '../../types';
-import { ApmEmbeddableContext } from '../../embeddable_context';
-import { APMAlertingFailedTransactionsChart } from './chart';
+import type { EmbeddableApmVizProps, EmbeddableDeps } from '../types';
+import { ApmEmbeddableContext } from '../embeddable_context';
+import { APMThroughputChart } from './chart';
 
-export const APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE =
-  'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE';
+export const APM_THROUGHPUT_CHART_EMBEDDABLE = 'APM_THROUGHPUT_CHART_EMBEDDABLE';
 
-export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
+export const getApmThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
-    EmbeddableApmAlertingVizProps,
-    EmbeddableApmAlertingVizProps,
-    DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
+    EmbeddableApmVizProps,
+    EmbeddableApmVizProps,
+    DefaultEmbeddableApi<EmbeddableApmVizProps>
   > = {
-    type: APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
+    type: APM_THROUGHPUT_CHART_EMBEDDABLE,
     deserializeState: (state) => {
-      return state.rawState as EmbeddableApmAlertingVizProps;
+      return state.rawState as EmbeddableApmVizProps;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
@@ -105,7 +103,7 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
 
           return (
             <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
-              <APMAlertingFailedTransactionsChart
+              <APMThroughputChart
                 rule={rule}
                 alert={alert}
                 serviceName={serviceName}
