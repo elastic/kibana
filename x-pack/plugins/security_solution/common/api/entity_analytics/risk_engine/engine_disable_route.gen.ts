@@ -16,13 +16,13 @@
 
 import { z } from 'zod';
 
-export type RiskEngineDisableResponse = z.infer<typeof RiskEngineDisableResponse>;
-export const RiskEngineDisableResponse = z.object({
-  success: z.boolean().optional(),
-});
-
 export type RiskEngineDisableErrorResponse = z.infer<typeof RiskEngineDisableErrorResponse>;
 export const RiskEngineDisableErrorResponse = z.object({
   message: z.string(),
   full_error: z.string(),
+});
+
+export type DisableRiskEngineResponse = z.infer<typeof DisableRiskEngineResponse>;
+export const DisableRiskEngineResponse = z.object({
+  success: z.boolean().optional(),
 });
