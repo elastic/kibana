@@ -277,12 +277,10 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      if (isLoading === false) {
-        if (event.shiftKey) {
-          window.open(url);
-        } else if (event.ctrlKey || event.metaKey) {
-          window.open(url, '_blank');
-        }
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
+        window.open(url, '_blank');
       } else {
         navigateToUrl(url);
       }
@@ -293,7 +291,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue, isLoading]
+    [reportEvent, navigateToUrl, searchRef, searchValue]
   );
 
   const onKeyDown = useCallback(
