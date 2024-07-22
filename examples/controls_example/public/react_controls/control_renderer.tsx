@@ -8,7 +8,6 @@
 
 import React, { useImperativeHandle, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { v4 as generateId } from 'uuid';
 
 import { StateComparators } from '@kbn/presentation-publishing';
 
@@ -25,12 +24,12 @@ export const ControlRenderer = <
   ApiType extends DefaultControlApi = DefaultControlApi
 >({
   type,
-  maybeId,
+  uuid,
   getParentApi,
   onApiAvailable,
 }: {
   type: string;
-  maybeId?: string;
+  uuid: string;
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
@@ -38,7 +37,6 @@ export const ControlRenderer = <
     () =>
       (() => {
         const parentApi = getParentApi();
-        const uuid = maybeId ?? generateId();
         const factory = getControlFactory<StateType, ApiType>(type);
 
         const buildApi = (
