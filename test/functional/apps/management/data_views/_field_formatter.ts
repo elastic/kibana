@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
-  const retry = getService('retry');
 
   describe('field formatter', function () {
     this.tags(['skipFirefox']);
@@ -535,23 +534,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.settings.toggleRow('formatRow');
 
           if (spec.expectFormatterTypes) {
-            await retry.try(async () => {
-              expect(
-                (
-                  await Promise.all(
-                    (
-                      await (
-                        await testSubjects.find('editorSelectedFormatId')
-                      ).findAllByTagName('option')
-                    ).map((option) => option.getAttribute('value'))
-                  )
-                ).filter(Boolean)
-              ).to.eql(spec.expectFormatterTypes);
-            });
+            expect(
+              (
+                await Promise.all(
+                  (
+                    await (
+                      await testSubjects.find('editorSelectedFormatId')
+                    ).findAllByTagName('option')
+                  ).map((option) => option.getAttribute('value'))
+                )
+              ).filter(Boolean)
+            ).to.eql(spec.expectFormatterTypes);
           }
 
           await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
           if (spec.beforeSave) {
+            // todo I don't think this is used
             await spec.beforeSave(await testSubjects.find('formatRow'));
           }
         });

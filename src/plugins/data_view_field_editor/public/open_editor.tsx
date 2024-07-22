@@ -135,7 +135,8 @@ export const getFieldEditorOpener =
           : await dataViews.toDataViewLazy(dataViewLazyOrNot);
 
       const dataViewField = fieldNameToEdit
-        ? (await dataViewLazy.getFieldByName(fieldNameToEdit)) || getRuntimeField(fieldNameToEdit)
+        ? (await dataViewLazy.getFieldByName(fieldNameToEdit, true)) ||
+          getRuntimeField(fieldNameToEdit)
         : undefined;
 
       if (fieldNameToEdit && !dataViewField) {
