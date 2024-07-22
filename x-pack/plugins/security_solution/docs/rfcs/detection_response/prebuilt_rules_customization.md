@@ -2767,7 +2767,7 @@ const reviewUpgradeResponse: ReviewRuleUpgradeResponseBody = await fetch(
 const performUpgradePayload = {
   mode: 'SPECIFIC_RULES',
   rules: reviewUpgradeResponse.rules
-    .filter((rule) => rule.diff.num_fields_with_conflicts === 0)
+    .filter((rule) => !rule.diff.has_conflict)
     .map((rule) => ({
       rule_id: rule.rule_id,
       revision: rule.revision,
