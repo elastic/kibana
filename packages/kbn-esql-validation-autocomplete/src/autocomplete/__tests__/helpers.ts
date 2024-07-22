@@ -16,6 +16,7 @@ import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext } from '../types';
+import { TIME_SYSTEM_PARAMS } from '../factories';
 
 export interface Integration {
   name: string;
@@ -221,6 +222,11 @@ export function getLiteralsByType(_type: string | string[]) {
   return [];
 }
 
+export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
+  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
+  return requestedType.includes('date') ? TIME_SYSTEM_PARAMS : [];
+}
+
 export function createCustomCallbackMocks(
   customFields?: Array<{ name: string; type: string }>,
   customSources?: Array<{ name: string; hidden: boolean }>,
@@ -241,15 +247,12 @@ export function createCustomCallbackMocks(
   };
 }
 
-export function createSuggestContext(text: string, triggerCharacter?: string) {
+export function createCompletionContext(triggerCharacter?: string) {
   if (triggerCharacter) {
     return { triggerCharacter, triggerKind: 1 }; // any number is fine here
   }
-  const foundTriggerCharIndexes = triggerCharacters.map((char) => text.lastIndexOf(char));
-  const maxIndex = Math.max(...foundTriggerCharIndexes);
   return {
-    triggerCharacter: text[maxIndex],
-    triggerKind: 1,
+    triggerKind: 0,
   };
 }
 
