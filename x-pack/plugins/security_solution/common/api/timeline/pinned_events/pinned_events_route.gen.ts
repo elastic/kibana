@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Elastic Security - Timeline - Pinned Event API
- *   version: 8.14.0
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';

@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Elastic Security - Timeline - Resolve Timeline API
- *   version: 8.9.0
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';
