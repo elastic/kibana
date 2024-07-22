@@ -478,7 +478,7 @@ export function LensEditConfigurationFlyout({
                 }}
                 expandCodeEditor={(status: boolean) => {}}
                 isCodeEditorExpanded
-                detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
+                detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
                 errors={errors}
                 warning={

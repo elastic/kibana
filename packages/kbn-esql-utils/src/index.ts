@@ -15,6 +15,7 @@ export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
+  getTimeFieldFromESQLQuery,
 } from './utils/query_parsing_helpers';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
 export {
@@ -22,4 +23,6 @@ export {
   getESQLQueryColumnsRaw,
   getESQLResults,
   formatESQLColumns,
+  getEarliestLatestParams,
+  hasEarliestLatestParams,
 } from './utils/run_query';

@@ -21,6 +21,9 @@ export {
   getESQLQueryColumnsRaw,
   getESQLResults,
   formatESQLColumns,
+  getTimeFieldFromESQLQuery,
+  getEarliestLatestParams,
+  hasEarliestLatestParams,
   TextBasedLanguages,
 } from './src';
 
