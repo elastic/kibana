@@ -44,7 +44,6 @@ const saveBtnWrapperCSS = css`
 `;
 
 interface Context {
-  enabled: boolean;
   clearTagSelection: () => void;
   closePopover: () => void;
   isPopoverOpen: boolean;
@@ -58,12 +57,9 @@ interface Context {
 const TagFilterContext = React.createContext<Context | null>(null);
 
 export const TagFilterContextProvider: FC<Context> = ({ children, ...props }) => {
-  if (!props.enabled) {
-    return <>{children}</>;
-  }
-
   return <TagFilterContext.Provider value={props}>{children}</TagFilterContext.Provider>;
 };
+
 export const TagFilterPanel: FC<{}> = ({}) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();

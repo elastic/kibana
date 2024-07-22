@@ -273,7 +273,6 @@ export function Table<T extends UserContentCommonSchema>({
       showNoUserOption={showNoUserOption}
     >
       <TagFilterContextProvider
-        enabled={isTaggingEnabled()}
         isPopoverOpen={isPopoverOpen}
         isInUse={isInUse}
         closePopover={closePopover}
