@@ -78,14 +78,13 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'as',
         'expr_ws',
         'limit',
-        'nulls_ordering_direction',
-        'nulls_ordering',
         'null',
         'enrich',
         'on',
         'with',
         'asc',
         'desc',
+        'nulls_order',
       ],
       euiThemeVars.euiColorAccentText,
       true // isBold
@@ -132,7 +131,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
 
     // values
     ...buildRuleGroup(
-      ['quoted_string', 'integer_literal', 'decimal_literal'],
+      ['quoted_string', 'integer_literal', 'decimal_literal', 'named_or_positional_param'],
       euiThemeVars.euiColorSuccessText
     ),
   ],
