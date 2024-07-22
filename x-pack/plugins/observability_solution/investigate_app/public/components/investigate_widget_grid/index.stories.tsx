@@ -11,7 +11,6 @@ import { v4 } from 'uuid';
 import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { InvestigateWidgetGrid as Component, InvestigateWidgetGridItem } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
-import { MiniMapContextProvider } from '../../hooks/use_mini_map';
 import { TimelineUserPrompt, TimelineAssistantResponse } from '../timeline_message';
 
 const meta: ComponentMeta<typeof Component> = {
@@ -26,26 +25,24 @@ function WithPersistedChanges(props: React.ComponentProps<typeof Component>) {
   const [items, setItems] = useState(props.items);
 
   return (
-    <MiniMapContextProvider container={null}>
-      <Component
-        {...props}
-        onItemsChange={async (nextItems) => {
-          setItems(() => nextItems);
-        }}
-        onItemCopy={async (item) => {
-          setItems((prevItems) =>
-            prevItems.concat({
-              ...item,
-              id: v4(),
-            })
-          );
-        }}
-        onItemDelete={async (item) => {
-          setItems((prevItems) => prevItems.filter((currentItem) => currentItem.id !== item.id));
-        }}
-        items={items}
-      />
-    </MiniMapContextProvider>
+    <Component
+      {...props}
+      onItemsChange={async (nextItems) => {
+        setItems(() => nextItems);
+      }}
+      onItemCopy={async (item) => {
+        setItems((prevItems) =>
+          prevItems.concat({
+            ...item,
+            id: v4(),
+          })
+        );
+      }}
+      onItemDelete={async (item) => {
+        setItems((prevItems) => prevItems.filter((currentItem) => currentItem.id !== item.id));
+      }}
+      items={items}
+    />
   );
 }
 

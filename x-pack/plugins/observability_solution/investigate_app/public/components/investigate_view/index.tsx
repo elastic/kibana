@@ -4,23 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, omit, pick } from 'lodash';
-import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AddWidgetMode } from '../../constants/add_widget_mode';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
-import { useTheme } from '../../hooks/use_theme';
 import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
 import { AddWidgetUI } from '../add_widget_ui';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
-import { AddWidgetMode } from '../../constants/add_widget_mode';
 
 const containerClassName = css`
   overflow: auto;
@@ -50,12 +48,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     },
   } = useKibana();
 
-  const theme = useTheme();
-
-  const [displayedKuery, setDisplayedKuery] = useState('');
-
-  const backgroundColorOpaque = rgba(theme.colors.emptyShade, 1);
-  const backgroundColorTransparent = rgba(theme.colors.emptyShade, 0);
+  const [_displayedKuery, setDisplayedKuery] = useState('');
 
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
 
@@ -79,7 +72,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     to: range.end.toISOString(),
   });
 
-  const [editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
+  const [_editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
 
   const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
     return addItem(widgetCreate);
