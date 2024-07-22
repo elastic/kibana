@@ -38,8 +38,8 @@ export const getRangesliderControlFactory = (
     isFieldCompatible: (field) => {
       return field.aggregatable && field.type === 'number';
     },
-    CustomOptionsComponent: ({ initialState, updateState, setControlEditorValid }) => {
-      const step = initialState.step ?? 1;
+    CustomOptionsComponent: ({ currentState, updateState, setControlEditorValid }) => {
+      const step = currentState.step ?? 1;
       return (
         <>
           <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>

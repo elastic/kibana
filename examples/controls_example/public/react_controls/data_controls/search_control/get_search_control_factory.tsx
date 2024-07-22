@@ -65,8 +65,8 @@ export const getSearchControlFactory = ({
         (field.spec.esTypes ?? []).includes('text')
       );
     },
-    CustomOptionsComponent: ({ initialState, updateState }) => {
-      const searchTechnique = initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE;
+    CustomOptionsComponent: ({ currentState, updateState }) => {
+      const searchTechnique = currentState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE;
       return (
         <EuiFormRow label={'Searching'} data-test-subj="searchControl__searchOptionsRadioGroup">
           <EuiRadioGroup

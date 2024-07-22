@@ -210,7 +210,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         data-test-subj="control-editor-custom-settings"
       >
         <CustomSettings
-          initialState={editorState}
+          currentState={editorState}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlEditorValid}
         />
