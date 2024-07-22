@@ -388,10 +388,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `row var = now() ${op} now()`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [datetime]`]
             : [
-                `Argument of [${op}] must be [double], found value [now()] type [date]`,
-                `Argument of [${op}] must be [double], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
+                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
               ]
         );
       }
@@ -450,7 +450,7 @@ describe('validation logic', () => {
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`row var = now() ${op} 1 ${timeLiteral.name}`, [
-              `Argument of [${op}] must be [double], found value [now()] type [date]`,
+              `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
               `Argument of [${op}] must be [double], found value [1 ${timeLiteral.name}] type [duration]`,
             ]);
           }
@@ -1047,7 +1047,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval (doubleField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | eval (NOT (doubleField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 0`, []);
-        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+        for (const type of ['string', 'double', 'date', 'boolean', 'ip']) {
           testErrorsAndWarnings(
             `from a_index | eval ${type}Field ${op} ${type}Field`,
             type !== 'boolean' || ['==', '!='].includes(op)
@@ -1081,7 +1081,7 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [double], found value [stringField] type [string]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval stringField ${op} now()`, [
-          `Argument of [${op}] must be [string], found value [now()] type [date]`,
+          `Argument of [${op}] must be [string], found value [now()] type [datetime]`,
         ]);
 
         testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
@@ -1129,10 +1129,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from a_index | eval now() ${op} now()`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [datetime]`]
             : [
-                `Argument of [${op}] must be [double], found value [now()] type [date]`,
-                `Argument of [${op}] must be [double], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
+                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
               ]
         );
 
@@ -1286,7 +1286,7 @@ describe('validation logic', () => {
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${unit}`, [
-              `Argument of [${op}] must be [double], found value [now()] type [date]`,
+              `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
               `Argument of [${op}] must be [double], found value [1 ${unit}] type [duration]`,
             ]);
           }
@@ -6393,7 +6393,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_slice(to_version("a"), "a", "a")', []);
 
         testErrorsAndWarnings('row var = mv_slice(now(), true, true)', [
-          'Argument of [mv_slice] must be [boolean], found value [now()] type [date]',
+          'Argument of [mv_slice] must be [boolean], found value [now()] type [datetime]',
           'Argument of [mv_slice] must be [integer], found value [true] type [boolean]',
           'Argument of [mv_slice] must be [integer], found value [true] type [boolean]',
         ]);

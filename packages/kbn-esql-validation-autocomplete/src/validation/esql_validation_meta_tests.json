@@ -757,7 +757,7 @@
     {
       "query": "row var = now() + now()",
       "error": [
-        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+        "Argument of [+] must be [time_literal], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -774,7 +774,7 @@
     {
       "query": "row var = now() - now()",
       "error": [
-        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+        "Argument of [-] must be [time_literal], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -791,8 +791,8 @@
     {
       "query": "row var = now() * now()",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
-        "Argument of [*] must be [double], found value [now()] type [date]"
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -809,8 +809,8 @@
     {
       "query": "row var = now() / now()",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
-        "Argument of [/] must be [double], found value [now()] type [date]"
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -827,8 +827,8 @@
     {
       "query": "row var = now() % now()",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
-        "Argument of [%] must be [double], found value [now()] type [date]"
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -1003,7 +1003,7 @@
     {
       "query": "row var = now() * 1 year",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -1011,7 +1011,7 @@
     {
       "query": "row var = now() / 1 year",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -1019,7 +1019,7 @@
     {
       "query": "row var = now() % 1 year",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -1068,7 +1068,7 @@
     {
       "query": "row var = now() * 1 years",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -1076,7 +1076,7 @@
     {
       "query": "row var = now() / 1 years",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -1084,7 +1084,7 @@
     {
       "query": "row var = now() % 1 years",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -1133,7 +1133,7 @@
     {
       "query": "row var = now() * 1 quarter",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -1141,7 +1141,7 @@
     {
       "query": "row var = now() / 1 quarter",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -1149,7 +1149,7 @@
     {
       "query": "row var = now() % 1 quarter",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -1198,7 +1198,7 @@
     {
       "query": "row var = now() * 1 quarters",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -1206,7 +1206,7 @@
     {
       "query": "row var = now() / 1 quarters",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -1214,7 +1214,7 @@
     {
       "query": "row var = now() % 1 quarters",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -1263,7 +1263,7 @@
     {
       "query": "row var = now() * 1 month",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -1271,7 +1271,7 @@
     {
       "query": "row var = now() / 1 month",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -1279,7 +1279,7 @@
     {
       "query": "row var = now() % 1 month",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -1328,7 +1328,7 @@
     {
       "query": "row var = now() * 1 months",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -1336,7 +1336,7 @@
     {
       "query": "row var = now() / 1 months",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -1344,7 +1344,7 @@
     {
       "query": "row var = now() % 1 months",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -1393,7 +1393,7 @@
     {
       "query": "row var = now() * 1 week",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -1401,7 +1401,7 @@
     {
       "query": "row var = now() / 1 week",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -1409,7 +1409,7 @@
     {
       "query": "row var = now() % 1 week",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -1458,7 +1458,7 @@
     {
       "query": "row var = now() * 1 weeks",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -1466,7 +1466,7 @@
     {
       "query": "row var = now() / 1 weeks",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -1474,7 +1474,7 @@
     {
       "query": "row var = now() % 1 weeks",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -1523,7 +1523,7 @@
     {
       "query": "row var = now() * 1 day",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -1531,7 +1531,7 @@
     {
       "query": "row var = now() / 1 day",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -1539,7 +1539,7 @@
     {
       "query": "row var = now() % 1 day",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -1588,7 +1588,7 @@
     {
       "query": "row var = now() * 1 days",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -1596,7 +1596,7 @@
     {
       "query": "row var = now() / 1 days",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -1604,7 +1604,7 @@
     {
       "query": "row var = now() % 1 days",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -1653,7 +1653,7 @@
     {
       "query": "row var = now() * 1 hour",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -1661,7 +1661,7 @@
     {
       "query": "row var = now() / 1 hour",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -1669,7 +1669,7 @@
     {
       "query": "row var = now() % 1 hour",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -1718,7 +1718,7 @@
     {
       "query": "row var = now() * 1 hours",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -1726,7 +1726,7 @@
     {
       "query": "row var = now() / 1 hours",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -1734,7 +1734,7 @@
     {
       "query": "row var = now() % 1 hours",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -1783,7 +1783,7 @@
     {
       "query": "row var = now() * 1 minute",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -1791,7 +1791,7 @@
     {
       "query": "row var = now() / 1 minute",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -1799,7 +1799,7 @@
     {
       "query": "row var = now() % 1 minute",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -1848,7 +1848,7 @@
     {
       "query": "row var = now() * 1 minutes",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -1856,7 +1856,7 @@
     {
       "query": "row var = now() / 1 minutes",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -1864,7 +1864,7 @@
     {
       "query": "row var = now() % 1 minutes",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -1913,7 +1913,7 @@
     {
       "query": "row var = now() * 1 second",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -1921,7 +1921,7 @@
     {
       "query": "row var = now() / 1 second",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -1929,7 +1929,7 @@
     {
       "query": "row var = now() % 1 second",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -1978,7 +1978,7 @@
     {
       "query": "row var = now() * 1 seconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -1986,7 +1986,7 @@
     {
       "query": "row var = now() / 1 seconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -1994,7 +1994,7 @@
     {
       "query": "row var = now() % 1 seconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -2043,7 +2043,7 @@
     {
       "query": "row var = now() * 1 millisecond",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -2051,7 +2051,7 @@
     {
       "query": "row var = now() / 1 millisecond",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -2059,7 +2059,7 @@
     {
       "query": "row var = now() % 1 millisecond",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -2108,7 +2108,7 @@
     {
       "query": "row var = now() * 1 milliseconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -2116,7 +2116,7 @@
     {
       "query": "row var = now() / 1 milliseconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -2124,7 +2124,7 @@
     {
       "query": "row var = now() % 1 milliseconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -5985,7 +5985,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval numberField > numberField",
+      "query": "from a_index | eval doubleField > doubleField",
       "error": [],
       "warning": []
     },
@@ -6052,7 +6052,7 @@
     {
       "query": "from a_index | eval stringField > now()",
       "error": [
-        "Argument of [>] must be [string], found value [now()] type [date]"
+        "Argument of [>] must be [string], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6131,7 +6131,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval numberField >= numberField",
+      "query": "from a_index | eval doubleField >= doubleField",
       "error": [],
       "warning": []
     },
@@ -6198,7 +6198,7 @@
     {
       "query": "from a_index | eval stringField >= now()",
       "error": [
-        "Argument of [>=] must be [string], found value [now()] type [date]"
+        "Argument of [>=] must be [string], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6277,7 +6277,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval numberField < numberField",
+      "query": "from a_index | eval doubleField < doubleField",
       "error": [],
       "warning": []
     },
@@ -6344,7 +6344,7 @@
     {
       "query": "from a_index | eval stringField < now()",
       "error": [
-        "Argument of [<] must be [string], found value [now()] type [date]"
+        "Argument of [<] must be [string], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6423,7 +6423,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval numberField <= numberField",
+      "query": "from a_index | eval doubleField <= doubleField",
       "error": [],
       "warning": []
     },
@@ -6490,7 +6490,7 @@
     {
       "query": "from a_index | eval stringField <= now()",
       "error": [
-        "Argument of [<=] must be [string], found value [now()] type [date]"
+        "Argument of [<=] must be [string], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6569,7 +6569,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval numberField == numberField",
+      "query": "from a_index | eval doubleField == doubleField",
       "error": [],
       "warning": []
     },
@@ -6633,7 +6633,7 @@
     {
       "query": "from a_index | eval stringField == now()",
       "error": [
-        "Argument of [==] must be [string], found value [now()] type [date]"
+        "Argument of [==] must be [string], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6708,7 +6708,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval numberField != numberField",
+      "query": "from a_index | eval doubleField != doubleField",
       "error": [],
       "warning": []
     },
@@ -6772,7 +6772,7 @@
     {
       "query": "from a_index | eval stringField != now()",
       "error": [
-        "Argument of [!=] must be [string], found value [now()] type [date]"
+        "Argument of [!=] must be [string], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6854,7 +6854,7 @@
     {
       "query": "from a_index | eval now() + now()",
       "error": [
-        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+        "Argument of [+] must be [time_literal], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6890,7 +6890,7 @@
     {
       "query": "from a_index | eval now() - now()",
       "error": [
-        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+        "Argument of [-] must be [time_literal], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6926,8 +6926,8 @@
     {
       "query": "from a_index | eval now() * now()",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
-        "Argument of [*] must be [double], found value [now()] type [date]"
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6963,8 +6963,8 @@
     {
       "query": "from a_index | eval now() / now()",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
-        "Argument of [/] must be [double], found value [now()] type [date]"
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -7000,8 +7000,8 @@
     {
       "query": "from a_index | eval now() % now()",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
-        "Argument of [%] must be [double], found value [now()] type [date]"
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -7380,7 +7380,7 @@
     {
       "query": "from a_index | eval var = now() * 1 year",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -7388,7 +7388,7 @@
     {
       "query": "from a_index | eval var = now() / 1 year",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -7396,7 +7396,7 @@
     {
       "query": "from a_index | eval var = now() % 1 year",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -7450,7 +7450,7 @@
     {
       "query": "from a_index | eval var = now() * 1 years",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -7458,7 +7458,7 @@
     {
       "query": "from a_index | eval var = now() / 1 years",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -7466,7 +7466,7 @@
     {
       "query": "from a_index | eval var = now() % 1 years",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -7520,7 +7520,7 @@
     {
       "query": "from a_index | eval var = now() * 1 quarter",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -7528,7 +7528,7 @@
     {
       "query": "from a_index | eval var = now() / 1 quarter",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -7536,7 +7536,7 @@
     {
       "query": "from a_index | eval var = now() % 1 quarter",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -7590,7 +7590,7 @@
     {
       "query": "from a_index | eval var = now() * 1 quarters",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -7598,7 +7598,7 @@
     {
       "query": "from a_index | eval var = now() / 1 quarters",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -7606,7 +7606,7 @@
     {
       "query": "from a_index | eval var = now() % 1 quarters",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -7660,7 +7660,7 @@
     {
       "query": "from a_index | eval var = now() * 1 month",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -7668,7 +7668,7 @@
     {
       "query": "from a_index | eval var = now() / 1 month",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -7676,7 +7676,7 @@
     {
       "query": "from a_index | eval var = now() % 1 month",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -7730,7 +7730,7 @@
     {
       "query": "from a_index | eval var = now() * 1 months",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -7738,7 +7738,7 @@
     {
       "query": "from a_index | eval var = now() / 1 months",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -7746,7 +7746,7 @@
     {
       "query": "from a_index | eval var = now() % 1 months",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -7800,7 +7800,7 @@
     {
       "query": "from a_index | eval var = now() * 1 week",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -7808,7 +7808,7 @@
     {
       "query": "from a_index | eval var = now() / 1 week",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -7816,7 +7816,7 @@
     {
       "query": "from a_index | eval var = now() % 1 week",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -7870,7 +7870,7 @@
     {
       "query": "from a_index | eval var = now() * 1 weeks",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -7878,7 +7878,7 @@
     {
       "query": "from a_index | eval var = now() / 1 weeks",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -7886,7 +7886,7 @@
     {
       "query": "from a_index | eval var = now() % 1 weeks",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -7940,7 +7940,7 @@
     {
       "query": "from a_index | eval var = now() * 1 day",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -7948,7 +7948,7 @@
     {
       "query": "from a_index | eval var = now() / 1 day",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -7956,7 +7956,7 @@
     {
       "query": "from a_index | eval var = now() % 1 day",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -8010,7 +8010,7 @@
     {
       "query": "from a_index | eval var = now() * 1 days",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -8018,7 +8018,7 @@
     {
       "query": "from a_index | eval var = now() / 1 days",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -8026,7 +8026,7 @@
     {
       "query": "from a_index | eval var = now() % 1 days",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -8080,7 +8080,7 @@
     {
       "query": "from a_index | eval var = now() * 1 hour",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -8088,7 +8088,7 @@
     {
       "query": "from a_index | eval var = now() / 1 hour",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -8096,7 +8096,7 @@
     {
       "query": "from a_index | eval var = now() % 1 hour",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -8150,7 +8150,7 @@
     {
       "query": "from a_index | eval var = now() * 1 hours",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -8158,7 +8158,7 @@
     {
       "query": "from a_index | eval var = now() / 1 hours",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -8166,7 +8166,7 @@
     {
       "query": "from a_index | eval var = now() % 1 hours",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -8220,7 +8220,7 @@
     {
       "query": "from a_index | eval var = now() * 1 minute",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -8228,7 +8228,7 @@
     {
       "query": "from a_index | eval var = now() / 1 minute",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -8236,7 +8236,7 @@
     {
       "query": "from a_index | eval var = now() % 1 minute",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -8290,7 +8290,7 @@
     {
       "query": "from a_index | eval var = now() * 1 minutes",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -8298,7 +8298,7 @@
     {
       "query": "from a_index | eval var = now() / 1 minutes",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -8306,7 +8306,7 @@
     {
       "query": "from a_index | eval var = now() % 1 minutes",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -8360,7 +8360,7 @@
     {
       "query": "from a_index | eval var = now() * 1 second",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -8368,7 +8368,7 @@
     {
       "query": "from a_index | eval var = now() / 1 second",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -8376,7 +8376,7 @@
     {
       "query": "from a_index | eval var = now() % 1 second",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -8430,7 +8430,7 @@
     {
       "query": "from a_index | eval var = now() * 1 seconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -8438,7 +8438,7 @@
     {
       "query": "from a_index | eval var = now() / 1 seconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -8446,7 +8446,7 @@
     {
       "query": "from a_index | eval var = now() % 1 seconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -8500,7 +8500,7 @@
     {
       "query": "from a_index | eval var = now() * 1 millisecond",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -8508,7 +8508,7 @@
     {
       "query": "from a_index | eval var = now() / 1 millisecond",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -8516,7 +8516,7 @@
     {
       "query": "from a_index | eval var = now() % 1 millisecond",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -8570,7 +8570,7 @@
     {
       "query": "from a_index | eval var = now() * 1 milliseconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -8578,7 +8578,7 @@
     {
       "query": "from a_index | eval var = now() / 1 milliseconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -8586,7 +8586,7 @@
     {
       "query": "from a_index | eval var = now() % 1 milliseconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -8640,7 +8640,7 @@
     {
       "query": "from a_index | eval var = now() * 1 ms",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
@@ -8648,7 +8648,7 @@
     {
       "query": "from a_index | eval var = now() / 1 ms",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
@@ -8656,7 +8656,7 @@
     {
       "query": "from a_index | eval var = now() % 1 ms",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
@@ -8710,7 +8710,7 @@
     {
       "query": "from a_index | eval var = now() * 1 s",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
@@ -8718,7 +8718,7 @@
     {
       "query": "from a_index | eval var = now() / 1 s",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
@@ -8726,7 +8726,7 @@
     {
       "query": "from a_index | eval var = now() % 1 s",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
@@ -8780,7 +8780,7 @@
     {
       "query": "from a_index | eval var = now() * 1 m",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
@@ -8788,7 +8788,7 @@
     {
       "query": "from a_index | eval var = now() / 1 m",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
@@ -8796,7 +8796,7 @@
     {
       "query": "from a_index | eval var = now() % 1 m",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
@@ -8850,7 +8850,7 @@
     {
       "query": "from a_index | eval var = now() * 1 h",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
@@ -8858,7 +8858,7 @@
     {
       "query": "from a_index | eval var = now() / 1 h",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
@@ -8866,7 +8866,7 @@
     {
       "query": "from a_index | eval var = now() % 1 h",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
@@ -8920,7 +8920,7 @@
     {
       "query": "from a_index | eval var = now() * 1 d",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
@@ -8928,7 +8928,7 @@
     {
       "query": "from a_index | eval var = now() / 1 d",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
@@ -8936,7 +8936,7 @@
     {
       "query": "from a_index | eval var = now() % 1 d",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
@@ -8990,7 +8990,7 @@
     {
       "query": "from a_index | eval var = now() * 1 w",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
@@ -8998,7 +8998,7 @@
     {
       "query": "from a_index | eval var = now() / 1 w",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
@@ -9006,7 +9006,7 @@
     {
       "query": "from a_index | eval var = now() % 1 w",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
@@ -9060,7 +9060,7 @@
     {
       "query": "from a_index | eval var = now() * 1 mo",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
@@ -9068,7 +9068,7 @@
     {
       "query": "from a_index | eval var = now() / 1 mo",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
@@ -9076,7 +9076,7 @@
     {
       "query": "from a_index | eval var = now() % 1 mo",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
@@ -9130,7 +9130,7 @@
     {
       "query": "from a_index | eval var = now() * 1 q",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
@@ -9138,7 +9138,7 @@
     {
       "query": "from a_index | eval var = now() / 1 q",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
@@ -9146,7 +9146,7 @@
     {
       "query": "from a_index | eval var = now() % 1 q",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
@@ -9200,7 +9200,7 @@
     {
       "query": "from a_index | eval var = now() * 1 y",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
@@ -9208,7 +9208,7 @@
     {
       "query": "from a_index | eval var = now() / 1 y",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
@@ -9216,7 +9216,7 @@
     {
       "query": "from a_index | eval var = now() % 1 y",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
@@ -9270,7 +9270,7 @@
     {
       "query": "from a_index | eval var = now() * 1 yr",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [datetime]",
         "Argument of [*] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
@@ -9278,7 +9278,7 @@
     {
       "query": "from a_index | eval var = now() / 1 yr",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [datetime]",
         "Argument of [/] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
@@ -9286,7 +9286,7 @@
     {
       "query": "from a_index | eval var = now() % 1 yr",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [datetime]",
         "Argument of [%] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
@@ -22084,7 +22084,7 @@
     {
       "query": "row var = mv_slice(now(), true, true)",
       "error": [
-        "Argument of [mv_slice] must be [boolean], found value [now()] type [date]",
+        "Argument of [mv_slice] must be [boolean], found value [now()] type [datetime]",
         "Argument of [mv_slice] must be [integer], found value [true] type [boolean]",
         "Argument of [mv_slice] must be [integer], found value [true] type [boolean]"
       ],

@@ -17,6 +17,7 @@ import type {
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
 import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
+import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   lookupColumn,
@@ -129,7 +130,7 @@ function appendEnrichFields(
   // @TODO: improve this
   const newMap: Map<string, ESQLRealField> = new Map(fieldsMap);
   for (const field of policyMetadata.enrichFields) {
-    newMap.set(field, { name: field, type: 'number' });
+    newMap.set(field, { name: field, type: 'double' });
   }
   return newMap;
 }
@@ -709,7 +710,7 @@ async function getExpressionSuggestionsByType(
               workoutBuiltinOptions(rightArg, references)
             )
           );
-          if (nodeArgType === 'number' && isLiteralItem(rightArg)) {
+          if (isNumericType(nodeArgType) && isLiteralItem(rightArg)) {
             // ... EVAL var = 1 <suggest>
             suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
           }
@@ -717,7 +718,7 @@ async function getExpressionSuggestionsByType(
             if (rightArg.args.some(isTimeIntervalItem)) {
               const lastFnArg = rightArg.args[rightArg.args.length - 1];
               const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
-              if (lastFnArgType === 'number' && isLiteralItem(lastFnArg))
+              if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                 // ... EVAL var = 1 year + 2 <suggest>
                 suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
             }
@@ -754,7 +755,7 @@ async function getExpressionSuggestionsByType(
               if (nodeArg.args.some(isTimeIntervalItem)) {
                 const lastFnArg = nodeArg.args[nodeArg.args.length - 1];
                 const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
-                if (lastFnArgType === 'number' && isLiteralItem(lastFnArg))
+                if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                   // ... EVAL var = 1 year + 2 <suggest>
                   suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
               }
@@ -770,7 +771,7 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...buildConstantsDefinitions(argDef.values));
     }
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
-    if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
+    if (['string', 'boolean', ...ESQL_NUMBER_TYPES].includes(argDef.type) && !argDef.values) {
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>

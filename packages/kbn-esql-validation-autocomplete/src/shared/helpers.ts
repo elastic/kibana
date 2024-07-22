@@ -450,8 +450,6 @@ export function checkFunctionArgMatchesDefinition(
   }
   if (arg.type === 'inlineCast') {
     return argType === arg.castType;
-    // TODO - remove with https://github.com/elastic/kibana/issues/174710
-    // @TODO @Q  return argType === esqlToKibanaType(arg.castType);
   }
 }
 
