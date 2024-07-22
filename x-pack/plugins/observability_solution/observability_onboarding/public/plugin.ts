@@ -75,6 +75,7 @@ export class ObservabilityOnboardingPlugin
   constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
+    const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
@@ -109,6 +110,10 @@ export class ObservabilityOnboardingPlugin
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
+            context: {
+              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              stackVersion,
+            },
           });
         },
         visibleIn: [],

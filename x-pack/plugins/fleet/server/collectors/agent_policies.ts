@@ -49,9 +49,11 @@ export const getAgentPoliciesUsage = async (
   });
 
   const uniqueOutputTypes = new Set(
-    Array.from(uniqueOutputIds).map((outputId) => {
-      return outputsById[outputId]?.attributes.type;
-    })
+    Array.from(uniqueOutputIds)
+      .map((outputId) => {
+        return outputsById[outputId]?.attributes.type;
+      })
+      .filter((outputType) => outputType)
   );
 
   const [policiesWithGlobalDataTag, totalNumberOfGlobalDataTagFields] = agentPolicies.reduce(

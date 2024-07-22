@@ -9,7 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { getJobId } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import { JobSummary } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';

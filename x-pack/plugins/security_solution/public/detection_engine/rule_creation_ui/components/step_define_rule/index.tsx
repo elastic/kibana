@@ -26,7 +26,6 @@ import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -36,9 +35,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type {
@@ -105,6 +101,7 @@ import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
+import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -120,7 +117,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
-  browserFields: BrowserFields;
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
   setIsThreatQueryBarValid: (valid: boolean) => void;
@@ -169,40 +165,51 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
 
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+  dataSourceType,
+  defaultSavedQuery,
+  enableThresholdSuppression,
+  form,
+  groupByFields,
+  index,
+  indexPattern,
+  indicesConfig,
+  isIndexPatternLoading,
   isLoading,
+  isQueryBarValid,
   isUpdateView = false,
   kibanaDataViews,
-  indicesConfig,
-  threatIndicesConfig,
-  defaultSavedQuery,
-  form,
   optionsSelected,
-  setOptionsSelected,
-  indexPattern,
-  isIndexPatternLoading,
-  browserFields,
-  isQueryBarValid,
+  queryBarSavedId,
+  queryBarTitle,
+  ruleType,
   setIsQueryBarValid,
   setIsThreatQueryBarValid,
-  ruleType,
-  index,
-  threatIndex,
-  groupByFields,
-  dataSourceType,
+  setOptionsSelected,
   shouldLoadQueryDynamically,
-  queryBarTitle,
-  queryBarSavedId,
+  threatIndex,
+  threatIndicesConfig,
   thresholdFields,
-  enableThresholdSuppression,
 }) => {
   const queryClient = useQueryClient();
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
-  const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
+
+  const [{ machineLearningJobId }] = useFormData<DefineStepRule>({
+    form,
+    watch: ['machineLearningJobId'],
+  });
+  const {
+    hasMlAdminPermissions,
+    hasMlLicense,
+    mlFieldsLoading,
+    mlSuppressionFields,
+    noMlJobsStarted,
+    someMlJobsStarted,
+  } = useMLRuleConfig({ machineLearningJobId });
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
@@ -283,10 +290,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [aggFields]
   );
 
-  const [
-    threatIndexPatternsLoading,
-    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
-  ] = useFetchIndex(threatIndex);
+  const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
+    useFetchIndex(threatIndex);
 
   // reset form when rule type changes
   useEffect(() => {
@@ -442,7 +447,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPattern}
-        threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
@@ -454,7 +458,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       handleResetThreatIndices,
       indexPattern,
       setIsThreatQueryBarValid,
-      threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
       threatIndexPatternsLoading,
@@ -473,6 +476,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
     groupByFields.length === 0;
+
+  const isSuppressionGroupByDisabled =
+    !isAlertSuppressionLicenseValid ||
+    areSuppressionFieldsDisabledBySequence ||
+    isEsqlSuppressionLoading ||
+    (isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length));
+
+  const suppressionGroupByDisabledText = areSuppressionFieldsDisabledBySequence
+    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
+    : isMlRule(ruleType) && noMlJobsStarted
+    ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
+    : alertSuppressionUpsellingMessage;
+
+  const suppressionGroupByFields = isEsqlRule(ruleType)
+    ? esqlSuppressionFields
+    : isMlRule(ruleType)
+    ? mlSuppressionFields
+    : termsAggregationFields;
 
   /**
    * Component that allows selection of suppression intervals disabled:
@@ -793,7 +814,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         component={QueryBarDefineRule}
         componentProps={
           {
-            browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
             isDisabled: isLoading || shouldLoadQueryDynamically || timelineQueryLoading,
@@ -813,7 +833,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [
       handleOpenTimelineSearch,
       shouldLoadQueryDynamically,
-      browserFields,
       indexPattern,
       isLoading,
       timelineQueryLoading,
@@ -868,10 +887,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () => ({
       describedByIds: ['detectionEngineStepDefineRuleType'],
       isUpdateView,
-      hasValidLicense: hasMlLicense(mlCapabilities),
-      isMlAdmin: hasMlAdminPermissions(mlCapabilities),
+      hasValidLicense: hasMlLicense,
+      isMlAdmin: hasMlAdminPermissions,
     }),
-    [isUpdateView, mlCapabilities]
+    [hasMlAdminPermissions, hasMlLicense, isUpdateView]
   );
 
   return (
@@ -1078,22 +1097,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 </EuiText>
               }
             >
-              <UseField
-                path="groupByFields"
-                component={MultiSelectFieldsAutocomplete}
-                componentProps={{
-                  browserFields: isEsqlRule(ruleType)
-                    ? esqlSuppressionFields
-                    : termsAggregationFields,
-                  isDisabled:
-                    !isAlertSuppressionLicenseValid ||
-                    areSuppressionFieldsDisabledBySequence ||
-                    isEsqlSuppressionLoading,
-                  disabledText: areSuppressionFieldsDisabledBySequence
-                    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-                    : alertSuppressionUpsellingMessage,
-                }}
-              />
+              <>
+                <UseField
+                  path="groupByFields"
+                  component={MultiSelectFieldsAutocomplete}
+                  componentProps={{
+                    browserFields: suppressionGroupByFields,
+                    isDisabled: isSuppressionGroupByDisabled,
+                    disabledText: suppressionGroupByDisabledText,
+                  }}
+                />
+                {someMlJobsStarted && (
+                  <EuiText size="xs" color="warning">
+                    {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
+                  </EuiText>
+                )}
+              </>
             </RuleTypeEuiFormRow>
 
             <IntendedRuleTypeEuiFormRow

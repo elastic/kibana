@@ -260,7 +260,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           })
         : undefined;
     this.options.logger.debug(`created: ${created?.data.hits.hits.length ?? '0'}`);
-    this.options.logger.debug(`errors: ${JSON.stringify(errors, null, 2)}`);
+    this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
   };
@@ -314,12 +314,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
 
       this.options.logger.debug(
-        `getKnowledgeBaseDocuments() - Similarity Search Query:\n ${JSON.stringify(
-          vectorSearchQuery
-        )}`
+        () =>
+          `getKnowledgeBaseDocuments() - Similarity Search Query:\n ${JSON.stringify(
+            vectorSearchQuery
+          )}`
       );
       this.options.logger.debug(
-        `getKnowledgeBaseDocuments() - Similarity Search Results:\n ${JSON.stringify(results)}`
+        () =>
+          `getKnowledgeBaseDocuments() - Similarity Search Results:\n ${JSON.stringify(results)}`
       );
 
       return results;
@@ -347,7 +349,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     this.options.logger.debug(
-      `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
+      () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );
     this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
     const esClient = await this.options.elasticsearchClientPromise;

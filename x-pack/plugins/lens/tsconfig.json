@@ -86,7 +86,7 @@
     "@kbn/search-response-warnings",
     "@kbn/logging",
     "@kbn/core-plugins-server",
-    "@kbn/text-based-languages",
+    "@kbn/esql",
     "@kbn/field-utils",
     "@kbn/panel-loader",
     "@kbn/shared-ux-button-toolbar",

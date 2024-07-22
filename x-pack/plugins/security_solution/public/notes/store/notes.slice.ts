@@ -127,11 +127,25 @@ export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareN
   }
 );
 
-export const deleteNotes = createAsyncThunk<string[], { ids: string[] }, {}>(
+export const deleteNotes = createAsyncThunk<string[], { ids: string[]; refetch?: boolean }, {}>(
   'notes/deleteNotes',
-  async (args) => {
-    const { ids } = args;
+  async (args, { dispatch, getState }) => {
+    const { ids, refetch } = args;
     await deleteNotesApi(ids);
+    if (refetch) {
+      const state = getState() as State;
+      const { search, pagination, sort } = state.notes;
+      dispatch(
+        fetchNotes({
+          page: pagination.page,
+          perPage: pagination.perPage,
+          sortField: sort.field,
+          sortOrder: sort.direction,
+          filter: '',
+          search,
+        })
+      );
+    }
     return ids;
   }
 );
@@ -262,8 +276,33 @@ export const selectFetchNotesError = (state: State) => state.notes.error.fetchNo
 export const selectFetchNotesStatus = (state: State) => state.notes.status.fetchNotes;
 
 export const selectNotesByDocumentId = createSelector(
-  [selectAllNotes, (state, documentId) => documentId],
+  [selectAllNotes, (state: State, documentId: string) => documentId],
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
+);
+
+export const selectSortedNotesByDocumentId = createSelector(
+  [
+    selectAllNotes,
+    (
+      state: State,
+      {
+        documentId,
+        sort,
+      }: { documentId: string; sort: { field: keyof Note; direction: 'asc' | 'desc' } }
+    ) => ({ documentId, sort }),
+  ],
+  (notes, { documentId, sort }) => {
+    const { field, direction } = sort;
+    return notes
+      .filter((note: Note) => note.eventId === documentId)
+      .sort((first: Note, second: Note) => {
+        const a = first[field];
+        const b = second[field];
+        if (a == null) return 1;
+        if (b == null) return -1;
+        return direction === 'asc' ? (a > b ? 1 : -1) : a > b ? -1 : 1;
+      });
+  }
 );
 
 export const {

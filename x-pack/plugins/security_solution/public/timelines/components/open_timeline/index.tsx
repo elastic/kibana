@@ -57,6 +57,7 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { timelineDefaults } from '../../store/defaults';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -160,8 +161,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-      'unifiedComponentsInTimelineEnabled'
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
     );
 
     const {
@@ -251,10 +252,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+              columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
+              excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
+                ? timelineDefaults.excludedRowRendererIds
+                : [],
             })
           );
         }
@@ -269,7 +273,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         dispatch,
         dataViewId,
         selectedPatterns,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       ]
     );
 
@@ -371,7 +375,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
-          unifiedComponentsInTimelineEnabled,
+          unifiedComponentsInTimelineDisabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

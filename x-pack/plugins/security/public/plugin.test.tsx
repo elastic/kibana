@@ -43,6 +43,7 @@ describe('Security Plugin', () => {
         authz: { isRoleManagementEnabled: expect.any(Function), roles: expect.any(Object) },
         license: {
           isLicenseAvailable: expect.any(Function),
+          getLicenseType: expect.any(Function),
           isEnabled: expect.any(Function),
           getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
@@ -71,6 +72,7 @@ describe('Security Plugin', () => {
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isLicenseAvailable: expect.any(Function),
+          getLicenseType: expect.any(Function),
           isEnabled: expect.any(Function),
           getUnavailableReason: expect.any(Function),
           getFeatures: expect.any(Function),
