@@ -206,7 +206,7 @@ const bulkEnableRulesWithOCC = async (
       }
 
       await pMap(
-        rulesFinderRules,
+        rulesFinderRules.filter((rule) => !rule.attributes.enabled),
         async (rule) => {
           try {
             if (scheduleValidationError) {
@@ -366,10 +366,31 @@ const bulkEnableRulesWithOCC = async (
       });
     }
   });
+
+  const updatedRules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> =
+    rules.length < rulesFinderRules.length
+      ? rulesFinderRules.reduce(
+          (
+            acc: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
+            originalRule: SavedObjectsBulkUpdateObject<RuleAttributes>
+          ) => {
+            const enabledRule = rules.find((item) => item.id === originalRule.id);
+            if (enabledRule) {
+              acc.push(enabledRule);
+            } else if (!errors.find((error) => error.rule.id === originalRule.id)) {
+              acc.push(originalRule);
+            }
+
+            return acc;
+          },
+          []
+        )
+      : rules;
+
   return {
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api
-    rules: rules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
+    rules: updatedRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
     accListSpecificForBulkOperation: [taskIdsToEnable],
   };
 };
