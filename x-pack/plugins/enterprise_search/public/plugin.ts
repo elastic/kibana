@@ -62,6 +62,10 @@ import {
   CreatIndexLocatorDefinition,
   CreatIndexLocatorParams,
 } from '../common/locators/create_index_locator';
+import {
+  IndexDetailsLocatorDefinition,
+  IndexDetailsLocatorParams,
+} from '../common/locators/index_details_locator';
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
@@ -527,6 +531,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     share?.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
+    share?.url.locators.create<IndexDetailsLocatorParams>(new IndexDetailsLocatorDefinition());
 
     if (config.canDeployEntSearch) {
       core.application.register({

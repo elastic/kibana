@@ -21,6 +21,10 @@ import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from
 import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
 import { docLinks } from '../common/doc_links';
 import {
+  IndexDetailsLocatorDefinition,
+  IndexDetailsLocatorParams,
+} from '../common/locators/index_details_locator';
+import {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
   ServerlessSearchPluginStart,
@@ -43,7 +47,7 @@ export class ServerlessSearchPlugin
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
-    const { searchHomepage } = setupDeps;
+    const { searchHomepage, share } = setupDeps;
     const useSearchHomepage = searchHomepage && searchHomepage.isHomepageFeatureEnabled();
 
     const queryClient = new QueryClient({
@@ -133,6 +137,9 @@ export class ServerlessSearchPlugin
     });
 
     setupDeps.discover.showInlineTopNav();
+
+    // Locators
+    share?.url.locators.create<IndexDetailsLocatorParams>(new IndexDetailsLocatorDefinition());
 
     return {};
   }

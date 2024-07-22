@@ -12,7 +12,7 @@ import type { SearchPlaygroundPluginStart } from '@kbn/search-playground/public'
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type {
@@ -32,6 +32,7 @@ export interface ServerlessSearchPluginSetupDependencies {
   serverless: ServerlessPluginSetup;
   discover: DiscoverSetup;
   searchHomepage?: SearchHomepagePluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface ServerlessSearchPluginStartDependencies {

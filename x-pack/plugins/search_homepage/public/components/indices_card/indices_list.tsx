@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GetIndicesIndexData } from '../../../common/types';
 
+import { useKibana } from '../../hooks/use_kibana';
 import { IndexListLabel } from './index_list_label';
 
 export interface IndicesListProps {
@@ -25,7 +26,17 @@ export interface IndicesListProps {
 }
 export const IndicesList = ({ indices }: IndicesListProps) => {
   const { euiTheme } = useEuiTheme();
-  const onClickIndex = useCallback((index: GetIndicesIndexData) => () => {}, []);
+  const { application, share } = useKibana().services;
+  const onClickIndex = useCallback(
+    (index: GetIndicesIndexData) => async () => {
+      const indexDetailsLocator = share?.url.locators.get('INDEX_DETAILS_LOCATOR_ID');
+      if (indexDetailsLocator) {
+        const indexDetailsUrl = await indexDetailsLocator.getUrl({ indexId: index.name });
+        application.navigateToUrl(indexDetailsUrl);
+      }
+    },
+    [application, share]
+  );
   if (indices.length === 0) {
     // Handle empty filter result
     return (
