@@ -18,6 +18,7 @@ import { createBlankOpenApiDocument } from './bundler/merge_documents/create_bla
 import { writeDocuments } from './utils/write_documents';
 import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { resolveGlobs } from './utils/resolve_globs';
+import { DEFAULT_BUNDLING_PROCESSORS, withLabels } from './bundler/processor_sets';
 
 export interface BundlerConfig {
   sourceGlob: string;
@@ -89,9 +90,12 @@ async function resolveDocuments(
   const resolvedDocuments = await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
-        const resolvedDocument = await bundleDocument(schemaFilePath, {
-          includeLabels: options?.includeLabels,
-        });
+        const resolvedDocument = await bundleDocument(
+          schemaFilePath,
+          options?.includeLabels
+            ? withLabels(DEFAULT_BUNDLING_PROCESSORS, options.includeLabels)
+            : DEFAULT_BUNDLING_PROCESSORS
+        );
 
         logger.debug(`Processed ${chalk.bold(basename(schemaFilePath))}`);
 
