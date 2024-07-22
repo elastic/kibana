@@ -16,8 +16,7 @@ delete:
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
   responses:
     '204':
       description: Indicates a successful call.
@@ -43,8 +42,7 @@ get:
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
   responses:
     '200':
       description: Indicates a successful call.
@@ -74,8 +72,7 @@ post:
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
@@ -149,8 +146,7 @@ post:
                 interval:
                   type: string
                   description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-                  examples:
-                    - "10s"
+                  example: "10s"
             tags:
               type: array
               items:
@@ -193,8 +189,7 @@ put:
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
   requestBody:
     required: true
     content:
@@ -256,8 +251,7 @@ put:
                 interval:
                   type: string
                   description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-                  examples:
-                    - "1d"
+                  example: "1d"
             tags:
               type: array
               items:
