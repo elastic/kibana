@@ -9,6 +9,8 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
   EuiFlexItem,
   EuiFormControlLayout,
@@ -26,18 +28,16 @@ import {
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
-import { ControlError } from './control_error_component';
-import { ControlPanelProps, DefaultControlApi } from './types';
+import { ControlPanelProps, DefaultControlApi } from '../types';
+import { ControlError } from './control_error';
 
 import './control_panel.scss';
 
-/**
- * TODO: Handle dragging
- */
 const DragHandle = ({
   isEditable,
   controlTitle,
   hideEmptyDragHandle,
+  ...rest // drag info is contained here
 }: {
   isEditable: boolean;
   controlTitle?: string;
@@ -45,6 +45,7 @@ const DragHandle = ({
 }) =>
   isEditable ? (
     <button
+      {...rest}
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle: controlTitle ?? '' },
@@ -59,8 +60,27 @@ const DragHandle = ({
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
+  uuid,
 }: ControlPanelProps<ApiType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isOver,
+    isDragging,
+    index,
+    isSorting,
+    activeIndex,
+  } = useSortable({
+    id: uuid,
+  });
+  const style = {
+    transition,
+    transform: isSorting ? undefined : CSS.Translate.toString(transform),
+  };
 
   const viewModeSubject = (() => {
     if (
@@ -102,8 +122,10 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   return (
     <EuiFlexItem
+      ref={setNodeRef}
+      style={style}
       grow={grow}
-      data-control-id={api?.uuid}
+      data-control-id={uuid}
       data-test-subj={`control-frame`}
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
@@ -111,10 +133,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         'controlFrameWrapper--small': width === 'small',
         'controlFrameWrapper--medium': width === 'medium',
         'controlFrameWrapper--large': width === 'large',
-        // TODO: Add the following classes back once drag and drop logic is added
-        // 'controlFrameWrapper-isDragging': isDragging,
-        // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-        // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+        'controlFrameWrapper-isDragging': isDragging,
+        'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (activeIndex ?? -1),
+        'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (activeIndex ?? -1),
       })}
     >
       <FloatingActions
@@ -135,12 +156,15 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           <EuiFormControlLayout
             fullWidth
             isLoading={Boolean(dataLoading)}
+            className="controlFrame__formControlLayout"
             prepend={
               <>
                 <DragHandle
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
                   hideEmptyDragHandle={usingTwoLineLayout || Boolean(api?.CustomPrependComponent)}
+                  {...attributes}
+                  {...listeners}
                 />
 
                 {api?.CustomPrependComponent ? (
