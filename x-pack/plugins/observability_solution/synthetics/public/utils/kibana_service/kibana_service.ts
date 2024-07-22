@@ -45,7 +45,7 @@ class KibanaService {
   }
 
   public get toasts() {
-    return this.coreSetup.notifications.toasts;
+    return this.coreStart.notifications.toasts;
   }
 
   private constructor() {}
