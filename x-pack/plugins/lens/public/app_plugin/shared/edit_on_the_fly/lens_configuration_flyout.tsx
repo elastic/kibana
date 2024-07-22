@@ -504,9 +504,10 @@ export function LensEditConfigurationFlyout({
               />
             </EuiFlexItem>
           )}
-          {isOfAggregateQueryType(query) && dataGridAttrs && (
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && dataGridAttrs && (
             <EuiFlexItem
               grow={isESQLResultsAccordionOpen ? 1 : false}
+              data-test-subj="ESQLQueryResults"
               css={css`
                 .euiAccordion__childWrapper {
                   flex: ${isESQLResultsAccordionOpen ? 1 : 'none'};
