@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // open the share menu and check that reporting is disabled
           await PageObjects.lens.clickShareModal();
 
-          expect(await PageObjects.lens.isShareActionEnabled(`export`));
+          expect(await testSubjects.exists('export')).to.be(false);
           await PageObjects.lens.closeShareModal();
         });
 
