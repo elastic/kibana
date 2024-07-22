@@ -13,6 +13,7 @@ import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_fr
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 
+import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import {
   RunActionParamsSchema,
   RunApiResponseSchema,
@@ -60,6 +61,7 @@ interface Payload {
     temperature: number;
     maxOutputTokens: number;
   };
+  safety_settings: Array<{ category: string; threshold: string }>;
 }
 
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
@@ -289,7 +291,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     timeout,
   }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify(messages),
+      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
       model,
       signal,
       timeout,
@@ -337,6 +339,13 @@ const formatGeminiPayload = (
       temperature,
       maxOutputTokens: DEFAULT_TOKEN_LIMIT,
     },
+    safety_settings: [
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        // when block high, the model will block responses about suspicious alerts
+        threshold: HarmBlockThreshold.BLOCK_NONE,
+      },
+    ],
   };
   let previousRole: string | null = null;
 
