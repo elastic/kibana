@@ -10,7 +10,7 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
-import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND, TIME_SYSTEM_PARAMS } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { FunctionParameter } from '../definitions/types';
@@ -21,6 +21,7 @@ import {
   getFunctionSignaturesByReturnType,
   getFieldNamesByType,
   getLiteralsByType,
+  getDateLiteralsByFieldType,
   createCustomCallbackMocks,
   createSuggestContext,
   getPolicyFields,
@@ -730,6 +731,9 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs)
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
@@ -752,6 +756,9 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs)
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
@@ -810,6 +817,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'from a | eval var0=date_trunc()',
         [
+          ...TIME_SYSTEM_PARAMS.map((t) => `${t},`),
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
           ...getFunctionSignaturesByReturnType('eval', 'date', { evalMath: true }, undefined, [
             'date_trunc',
