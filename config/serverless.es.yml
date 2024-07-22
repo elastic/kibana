@@ -72,3 +72,6 @@ xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east
 
 # Search Homepage
 xpack.search.homepage.ui.enabled: true
+
+# Semantic text UI
+xpack.index_management.dev.enableSemanticText: false

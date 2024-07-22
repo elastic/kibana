@@ -71,7 +71,7 @@ export interface InjectedMetadata {
     warnLegacyBrowsers: boolean;
   };
   externalUrl: { policy: InjectedMetadataExternalUrlPolicy[] };
-  vars: Record<string, any>;
+  apmConfig: Record<string, unknown> | null;
   uiPlugins: InjectedMetadataPlugin[];
   legacyMetadata: {
     uiSettings: {

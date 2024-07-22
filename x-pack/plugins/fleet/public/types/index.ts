@@ -144,6 +144,7 @@ export type {
   EnrollmentSettingsFleetServerPolicy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
+  GetSpaceSettingsResponse,
 } from '../../common/types';
 export {
   entries,
