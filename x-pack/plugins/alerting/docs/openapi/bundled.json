@@ -34,7 +34,7 @@
   "paths": {
     "/s/{spaceId}/api/alerting/rule": {
       "post": {
-        "summary": "Creates a rule with a randomly generated rule identifier.",
+        "summary": "Create a rule with a random identifier",
         "operationId": "createRule",
         "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
@@ -128,7 +128,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}": {
       "get": {
-        "summary": "Retrieves a rule by its identifier.",
+        "summary": "Get rule details",
         "operationId": "getRule",
         "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To get rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
         "tags": [
@@ -181,7 +181,7 @@
         }
       },
       "delete": {
-        "summary": "Deletes a rule.",
+        "summary": "Delete a rule",
         "operationId": "deleteRule",
         "description": "To delete a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it. If the API key that is used by the rule was created automatically, it is deleted.\n",
         "tags": [
@@ -225,9 +225,9 @@
         }
       },
       "post": {
-        "summary": "Creates a rule with a specific rule identifier.",
+        "summary": "Create a rule",
         "operationId": "createRuleId",
-        "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
+        "description": "This API creates a rule with a specific rule identifier. If you omit the identifer, it is automatically generated. To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
           "alerting"
         ],
@@ -321,7 +321,7 @@
         }
       },
       "put": {
-        "summary": "Updates the attributes for a rule.",
+        "summary": "Update a rule",
         "operationId": "updateRule",
         "description": "To update a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs. NOTE: If the API key has different privileges than the key that created or most recently updated the rule, the rule behavior might change. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.\n",
         "tags": [
@@ -394,7 +394,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_disable": {
       "post": {
-        "summary": "Disables a rule.",
+        "summary": "Disable a rule",
         "operationId": "disableRule",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.\n",
         "tags": [
@@ -440,7 +440,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_enable": {
       "post": {
-        "summary": "Enables a rule.",
+        "summary": "Enable a rule",
         "operationId": "enableRule",
         "description": "To enable a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
@@ -486,7 +486,7 @@
     },
     "/s/{spaceId}/api/alerting/rules/_find": {
       "get": {
-        "summary": "Retrieves information about rules.",
+        "summary": "Find rule information",
         "operationId": "findRules",
         "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To find rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
         "tags": [
@@ -663,7 +663,7 @@
     },
     "/s/{spaceId}/api/alerting/_health": {
       "get": {
-        "summary": "Retrieves the health status of the alerting framework.",
+        "summary": "Get the alerting framework health status",
         "operationId": "getAlertingHealth",
         "description": "You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.\n",
         "tags": [
@@ -783,7 +783,7 @@
     },
     "/s/{spaceId}/api/alerting/rule_types": {
       "get": {
-        "summary": "Retrieves a list of rule types.",
+        "summary": "Get the rule types",
         "operationId": "getRuleTypes",
         "description": "If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
         "tags": [
@@ -1153,7 +1153,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all": {
       "post": {
-        "summary": "Mutes all alerts.",
+        "summary": "Mute all alerts",
         "operationId": "muteAllAlerts",
         "description": "This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1189,7 +1189,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all": {
       "post": {
-        "summary": "Unmutes all alerts.",
+        "summary": "Unmute all alerts",
         "operationId": "unmuteAllAlerts",
         "description": "If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1225,7 +1225,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key": {
       "post": {
-        "summary": "Updates the API key for a rule.",
+        "summary": "Update the API key for a rule",
         "operationId": "updateRuleAPIKey",
         "description": "The new API key has the credentials of the user that submits the request.",
         "tags": [
@@ -1261,7 +1261,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute": {
       "post": {
-        "summary": "Mutes an alert.",
+        "summary": "Mute an alert",
         "operationId": "muteAlert",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1300,7 +1300,7 @@
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute": {
       "post": {
-        "summary": "Unmutes an alert.",
+        "summary": "Unmute an alert",
         "operationId": "unmuteAlert",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
@@ -1339,7 +1339,7 @@
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}": {
       "delete": {
-        "summary": "Permanently removes an alert.",
+        "summary": "Delete an alert",
         "operationId": "legaryDeleteAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the delete rule API instead. WARNING: After you delete an alert, you cannot recover it.\n",
@@ -1381,7 +1381,7 @@
         }
       },
       "get": {
-        "summary": "Retrieves an alert by its identifier.",
+        "summary": "Get an alert by identifier",
         "operationId": "legacyGetAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get rule API instead.",
@@ -1427,7 +1427,7 @@
         }
       },
       "post": {
-        "summary": "Create an alert.",
+        "summary": "Create an alert",
         "operationId": "legacyCreateAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the create rule API instead.",
@@ -1489,7 +1489,7 @@
                         },
                         "id": {
                           "type": "string",
-                          "description": "The ID of the action saved object to execute."
+                          "description": "The ID of the action saved object."
                         },
                         "params": {
                           "type": "object",
@@ -1533,7 +1533,7 @@
                     "properties": {
                       "interval": {
                         "type": "string",
-                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.",
                         "example": "10s"
                       }
                     }
@@ -1578,7 +1578,7 @@
         }
       },
       "put": {
-        "summary": "Updates the attributes for an alert.",
+        "summary": "Update an alert",
         "operationId": "legacyUpdateAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the update rule API instead.",
@@ -1638,7 +1638,7 @@
                         },
                         "id": {
                           "type": "string",
-                          "description": "The ID of the action saved object to execute."
+                          "description": "The ID of the action saved object."
                         },
                         "params": {
                           "type": "object",
@@ -1670,7 +1670,7 @@
                     "properties": {
                       "interval": {
                         "type": "string",
-                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.",
                         "example": "1d"
                       }
                     }
@@ -1717,7 +1717,7 @@
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_disable": {
       "post": {
-        "summary": "Disables an alert.",
+        "summary": "Disable an alert",
         "operationId": "legacyDisableAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the disable rule API instead.",
@@ -1761,7 +1761,7 @@
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_enable": {
       "post": {
-        "summary": "Enables an alert.",
+        "summary": "Enable an alert",
         "operationId": "legacyEnableAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the enable rule API instead.",
@@ -1805,7 +1805,7 @@
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all": {
       "post": {
-        "summary": "Mutes all alert instances.",
+        "summary": "Mute all alert instances",
         "operationId": "legacyMuteAllAlertInstances",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the mute all alerts API instead.",
@@ -1849,7 +1849,7 @@
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all": {
       "post": {
-        "summary": "Unmutes all alert instances.",
+        "summary": "Unmute all alert instances",
         "operationId": "legacyUnmuteAllAlertInstances",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the unmute all alerts API instead.",
@@ -1893,7 +1893,7 @@
     },
     "/s/{spaceId}/api/alerts/alerts/_find": {
       "get": {
-        "summary": "Retrieves a paginated set of alerts.",
+        "summary": "Get a paginated set of alerts",
         "operationId": "legacyFindAlerts",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the find rules API instead. NOTE: Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.\n",
@@ -2061,7 +2061,7 @@
     },
     "/s/{spaceId}/api/alerts/alerts/_health": {
       "get": {
-        "summary": "Retrieves the health status of the alerting framework.",
+        "summary": "Get the alerting framework health status",
         "operationId": "legacyGetAlertingHealth",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get alerting framework health API instead.",
@@ -2177,7 +2177,7 @@
     },
     "/s/{spaceId}/api/alerts/alerts/list_alert_types": {
       "get": {
-        "summary": "Retrieves a list of alert types.",
+        "summary": "Get the alert types",
         "operationId": "legacyGetAlertTypes",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get rule types API instead.",
@@ -2327,7 +2327,7 @@
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute": {
       "post": {
-        "summary": "Mutes an alert instance.",
+        "summary": "Mute an alert instance",
         "operationId": "legacyMuteAlertInstance",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the mute alert API instead.",
@@ -2381,7 +2381,7 @@
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute": {
       "post": {
-        "summary": "Unmutes an alert instance.",
+        "summary": "Unmute an alert instance",
         "operationId": "legacyUnmuteAlertInstance",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the unmute alert API instead.",

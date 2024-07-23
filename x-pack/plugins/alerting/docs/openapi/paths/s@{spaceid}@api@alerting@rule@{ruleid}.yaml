@@ -1,5 +1,5 @@
 get:
-  summary: Get a rule by identifier
+  summary: Get rule details
   operationId: getRule
   description: >
     You must have `read` privileges for the appropriate Kibana features,

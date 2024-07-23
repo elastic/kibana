@@ -109,7 +109,7 @@ post:
                       If you don't need this functionality, set it to `default`.
                   id:
                     type: string
-                    description: The ID of the action saved object to execute.
+                    description: The ID of the action saved object.
                   params:
                     type: object
                     description: >
@@ -145,7 +145,7 @@ post:
               properties:
                 interval:
                   type: string
-                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.
                   example: "10s"
             tags:
               type: array
@@ -223,7 +223,7 @@ put:
                       If you don't need this functionality, set it to `default`.
                   id:
                     type: string
-                    description: The ID of the action saved object to execute.
+                    description: The ID of the action saved object.
                   params:
                     type: object
                     description: >
@@ -250,7 +250,7 @@ put:
               properties:
                 interval:
                   type: string
-                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.
                   example: "1d"
             tags:
               type: array
