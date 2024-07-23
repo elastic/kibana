@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/devcontainers/base:focal
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 ENV HOME=/home/vscode
 ENV NVM_DIR=${HOME}/nvm
+ENV NVM_VERSION=v0.39.1
 ENV KBN_DIR=/workspaces/kibana
 ENV OPENSSL_PATH=${HOME}/openssl
 # Only specific versions are FIPS certified.
@@ -15,20 +16,6 @@ ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
 RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl make gcc
 
 RUN locale-gen en_US.UTF-8
-
-# Install and setup NVM and Nodejs
-COPY .node-version /tmp/
-RUN mkdir -p $NVM_DIR && \ 
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
-  . "$NVM_DIR/nvm.sh" && \
-  NODE_VERSION=$(cat /tmp/.node-version) && \
-  nvm install ${NODE_VERSION} && \
-  nvm use ${NODE_VERSION} && \
-  nvm alias default ${NODE_VERSION} && \
-  npm install -g yarn && \
-  echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.bashrc && \
-  echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.zshrc  && \
-  chown -R 1000:1000 "${HOME}/.npm"
 
 # Install Oh My Zsh and plugins
 RUN if [ ! -d "$HOME/.oh-my-zsh" ]; then \
@@ -63,6 +50,20 @@ RUN set -e ; \
   chown -R 1000:0 "${OPENSSL_PATH}";
 
 WORKDIR ${KBN_DIR}
+
+# Install and setup NVM and Nodejs
+COPY .node-version /tmp/
+RUN mkdir -p $NVM_DIR && \ 
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
+  . "$NVM_DIR/nvm.sh" && \
+  NODE_VERSION=$(cat /tmp/.node-version) && \
+  nvm install ${NODE_VERSION} && \
+  nvm use ${NODE_VERSION} && \
+  nvm alias default ${NODE_VERSION} && \
+  npm install -g yarn && \
+  echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.bashrc && \
+  echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.zshrc  && \
+  chown -R 1000:1000 "${HOME}/.npm"
 
 # This is for documentation. Ports are exposed via devcontainer.json
 EXPOSE 9200 5601
