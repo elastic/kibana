@@ -179,9 +179,8 @@ export async function suggest(
   const charThatNeedMarkers = [',', ':'];
   if (
     (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    (context.triggerKind === 0 &&
-      unclosedRoundBrackets === 0 &&
-      getLastCharFromTrimmed(innerText) !== '_') ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
     (context.triggerCharacter === ' ' &&
       (isMathFunction(innerText, offset) ||
         isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
