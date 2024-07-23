@@ -21,6 +21,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
@@ -34,6 +35,7 @@ export function EntityEnablement() {
 
   const {
     services: { entityManager },
+    notifications,
   } = useKibana<ApmPluginStartDeps>();
 
   const {
@@ -59,15 +61,24 @@ export function EntityEnablement() {
         setIsLoading(false);
         setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
         refetch();
-      }
+      } else {
+        if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
+          setIsLoading(false);
+          setsIsUnauthorizedModalVisible(true);
+          return;
+        }
 
-      if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
-        setIsLoading(false);
-        setsIsUnauthorizedModalVisible(true);
+        throw new Error(response.message);
       }
     } catch (error) {
       setIsLoading(false);
-      console.error(error);
+      const err = error as Error | IHttpFetchError<ResponseErrorBody>;
+      notifications.toasts.danger({
+        title: i18n.translate('xpack.apm.eemEnablement.errorTitle', {
+          defaultMessage: 'Error while enabling the new experience',
+        }),
+        body: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
+      });
     }
   };
 
