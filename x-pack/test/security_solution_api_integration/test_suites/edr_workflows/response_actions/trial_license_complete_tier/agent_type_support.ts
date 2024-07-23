@@ -6,15 +6,22 @@
  */
 
 import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  // const supertest = getService('supertest');
 
   describe('@ess @serverless Response Actions support for sentinelOne agentType', function () {
+    let adminSupertest: TestAgent;
+    before(async () => {
+      const { supertest } = getService('edrWorkflowsSupertest');
+      adminSupertest = await supertest();
+    });
+
     describe('and the "responseActionsSentinelOneV1Enabled" feature flag is enabled', () => {
       it('should not return feature disabled error, but a connector not found error', async () => {
-        await supertest
+        await adminSupertest
           .post(ISOLATE_HOST_ROUTE_V2)
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')

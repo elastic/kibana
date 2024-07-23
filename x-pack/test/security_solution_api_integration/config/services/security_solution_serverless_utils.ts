@@ -26,7 +26,6 @@ export function SecuritySolutionServerlessUtils({
     ...config.get('servers.kibana'),
     auth: false,
   });
-  const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
 
   async function invalidateApiKey(credentials: RoleCredentials) {
     await svlUserManager.invalidateM2mApiKeyWithRoleScope(credentials);
@@ -62,6 +61,7 @@ export function SecuritySolutionServerlessUtils({
       const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
       rolesCredentials.set(role, credentials);
 
+      const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
       return agentWithCommonHeaders.set(credentials.apiKeyHeader);
     },
   };
