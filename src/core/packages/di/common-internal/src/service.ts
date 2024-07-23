@@ -75,31 +75,24 @@ export class CoreInjectionService {
     this.dispose = this.dispose.bind(this);
     this.fork = this.fork.bind(this);
     this.getContainer = this.getContainer.bind(this);
-    this.load = this.load.bind(this);
   }
 
   protected getContainer(
     id?: PluginOpaqueId,
     container: interfaces.Container = this.root
-  ): interfaces.Container | undefined {
+  ): interfaces.Container {
     if (!id) {
       return container;
     }
 
-    return container.isBoundNamed(CoreInjectionService.Scope, id)
-      ? container.getNamed(CoreInjectionService.Scope, id)
-      : undefined;
-  }
-
-  protected load(id: PluginOpaqueId, module: interfaces.ContainerModule): void {
-    if (!this.root.isBoundNamed(CoreInjectionService.Scope, id)) {
-      const scope = this.root.createChild();
+    if (!container.isBoundNamed(CoreInjectionService.Scope, id)) {
+      const scope = container.createChild();
 
       scope.bind(CoreInjectionService.Id).toConstantValue(id);
-      this.root.bind(CoreInjectionService.Scope).toConstantValue(scope).whenTargetNamed(id);
+      container.bind(CoreInjectionService.Scope).toConstantValue(scope).whenTargetNamed(id);
     }
 
-    this.getContainer(id)!.load(module);
+    return container.getNamed(CoreInjectionService.Scope, id)!;
   }
 
   protected dispose(container: interfaces.Container): void {
@@ -155,7 +148,7 @@ export class CoreInjectionService {
 
   public setup(): InternalCoreDiServiceSetup {
     const contract = {
-      load: this.load,
+      getContainer: this.getContainer,
     };
     this.root.bind(InternalDiSetupService).toConstantValue(contract);
 
@@ -167,7 +160,6 @@ export class CoreInjectionService {
       dispose: this.dispose,
       fork: this.fork,
       getContainer: this.getContainer,
-      root: this.root,
     };
 
     this.root.bind(InternalDiService).toConstantValue(contract);
