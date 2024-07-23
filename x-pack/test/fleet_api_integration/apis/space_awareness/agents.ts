@@ -136,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('PUT /agents/{id}', () => {
       it('should allow to update an agent in the same space', async () => {
         await apiClient.updateAgent(testSpaceAgent1, { tags: ['foo'] }, TEST_SPACE_1);
+        await apiClient.updateAgent(testSpaceAgent1, { tags: ['tag1'] }, TEST_SPACE_1);
       });
 
       it('should not allow to update an agent from a different space from the default space', async () => {
@@ -153,7 +154,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('DELETE /agents/{id}', () => {
       it('should allow to delete an agent in the same space', async () => {
-        await apiClient.deleteAgent(testSpaceAgent1, TEST_SPACE_1);
+        const testSpaceAgent3 = await createFleetAgent(spaceTest1Policy2.item.id, TEST_SPACE_1);
+        await apiClient.deleteAgent(testSpaceAgent3, TEST_SPACE_1);
       });
 
       it('should not allow to delete an agent from a different space from the default space', async () => {
