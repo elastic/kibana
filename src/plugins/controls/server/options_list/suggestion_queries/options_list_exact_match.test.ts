@@ -196,7 +196,7 @@ describe('options list exact match search query', () => {
       },
     };
     expect(aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock)).toMatchObject({
-      suggestions: [{ docCount: 5, value: '12345' }],
+      suggestions: [{ docCount: 5, value: 12345 }],
       totalCardinality: 1,
     });
   });

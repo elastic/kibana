@@ -133,9 +133,9 @@ describe('options list fetch all suggestions query', () => {
       const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
-          { value: '1', docCount: 5 },
-          { value: '2', docCount: 4 },
-          { value: '3', docCount: 3 },
+          { value: 1, docCount: 5 },
+          { value: 2, docCount: 4 },
+          { value: 3, docCount: 3 },
         ],
         totalCardinality: 3,
       });
@@ -237,9 +237,9 @@ describe('options list fetch all suggestions query', () => {
       const parsed = aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock);
       expect(parsed).toMatchObject({
         suggestions: [
-          { value: '1707810859000', docCount: 5 },
-          { value: '1707728532000', docCount: 4 },
-          { value: '1707216874000', docCount: 2 },
+          { value: 1707810859000, docCount: 5 },
+          { value: 1707728532000, docCount: 4 },
+          { value: 1707216874000, docCount: 2 },
         ],
         totalCardinality: 3,
       });
