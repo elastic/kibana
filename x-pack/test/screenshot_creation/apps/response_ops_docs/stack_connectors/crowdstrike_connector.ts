@@ -22,10 +22,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let simulatorUrl: string;
   let editSimulatorUrl: string;
 
-  describe('sentinelone connector', function () {
+  describe('crowdstrike connector', function () {
     before(async () => {
       simulatorUrl = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SENTINELONE)
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.CROWDSTRIKE)
       );
       editSimulatorUrl = simulatorUrl.replace('/elastic:changeme@', '/');
     });
@@ -35,17 +35,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('sentinelone connector screenshots', async () => {
+    it('crowdstrike connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await actions.common.openNewConnectorForm('sentinelone');
-      await testSubjects.setValue('nameInput', 'Sentinelone test connector');
+      await actions.common.openNewConnectorForm('crowdstrike');
+      await testSubjects.setValue('nameInput', 'Crowdstrike test connector');
       await testSubjects.setValue('config.url-input', editSimulatorUrl);
-      await testSubjects.setValue('secrets.token-input', 'tester');
-      await commonScreenshots.takeScreenshot('sentinelone-connector', screenshotDirectories);
+      await testSubjects.setValue('secrets.clientId-input', 'test');
+      await testSubjects.setValue('secrets.clientSecret-input', 'secret');
+      await commonScreenshots.takeScreenshot('crowdstrike-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
       await toasts.dismissAll();
-      await commonScreenshots.takeScreenshot('sentinelone-params-test', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('crowdstrike-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
