@@ -23,10 +23,10 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   }
 
   let color = 'primary';
-  const icon = 'warning';
+  let icon = 'warning';
 
   if (message.level === INFO) {
-    color = 'primary';
+    icon = 'iInCircle';
   } else if (message.level === WARNING) {
     color = 'warning';
   } else if (message.level === ERROR) {

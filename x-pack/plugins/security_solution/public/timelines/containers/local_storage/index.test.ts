@@ -872,12 +872,7 @@ describe('SiemLocalStorage', () => {
         ],
         dataViewId: null,
         deletedEventIds: [],
-        expandedDetail: {
-          query: {
-            params: { hostName: 'Host-riizqhdnoy' },
-            panelView: 'hostDetail',
-          },
-        },
+        expandedDetail: {},
         filters: [],
         indexNames: [],
         isSelectAllChecked: false,
