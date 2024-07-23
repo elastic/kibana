@@ -8,15 +8,18 @@
 
 import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
+
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import {
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
+import { RangeSliderControl } from './components/range_slider_control';
+import { hasNoResults$ } from './has_no_results';
+import { minMax$ } from './min_max';
+import { RangeSliderStrings } from './range_slider_strings';
 import {
   RangesliderControlApi,
   RangesliderControlState,
@@ -24,10 +27,6 @@ import {
   RANGE_SLIDER_CONTROL_TYPE,
   Services,
 } from './types';
-import { RangeSliderStrings } from './range_slider_strings';
-import { RangeSliderControl } from './components/range_slider_control';
-import { minMax$ } from './min_max';
-import { hasNoResults$ } from './has_no_results';
 
 export const getRangesliderControlFactory = (
   services: Services
@@ -39,9 +38,8 @@ export const getRangesliderControlFactory = (
     isFieldCompatible: (field) => {
       return field.aggregatable && field.type === 'number';
     },
-    CustomOptionsComponent: ({ stateManager, setControlEditorValid }) => {
-      const step = useStateFromPublishingSubject(stateManager.step);
-
+    CustomOptionsComponent: ({ currentState, updateState, setControlEditorValid }) => {
+      const step = currentState.step ?? 1;
       return (
         <>
           <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
@@ -49,7 +47,7 @@ export const getRangesliderControlFactory = (
               value={step}
               onChange={(event) => {
                 const newStep = event.target.valueAsNumber;
-                stateManager.step.next(newStep);
+                updateState({ step: newStep });
                 setControlEditorValid(newStep > 0);
               }}
               min={0}
@@ -61,6 +59,7 @@ export const getRangesliderControlFactory = (
       );
     },
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+      const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -138,8 +137,8 @@ export const getRangesliderControlFactory = (
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
+        controlFetch$,
         data: services.data,
-        dataControlFetch$: controlGroupApi.dataControlFetch$,
         dataViews$: dataControl.api.dataViews,
         fieldName$: dataControl.stateManager.fieldName,
         setIsLoading: (isLoading: boolean) => {
@@ -195,11 +194,11 @@ export const getRangesliderControlFactory = (
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
+        controlFetch$,
         data: services.data,
         dataViews$: dataControl.api.dataViews,
-        filters$: dataControl.api.filters$,
+        rangeFilters$: dataControl.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
-        dataControlFetch$: controlGroupApi.dataControlFetch$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNoResults$.next(isLoading);
         },
@@ -209,7 +208,7 @@ export const getRangesliderControlFactory = (
 
       return {
         api,
-        Component: (controlPanelClassNames) => {
+        Component: ({ className: controlPanelClassName }) => {
           const [dataLoading, dataViews, fieldName, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
@@ -245,7 +244,7 @@ export const getRangesliderControlFactory = (
 
           return (
             <RangeSliderControl
-              {...controlPanelClassNames}
+              controlPanelClassName={controlPanelClassName}
               fieldFormatter={fieldFormatter}
               isInvalid={selectionHasNotResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

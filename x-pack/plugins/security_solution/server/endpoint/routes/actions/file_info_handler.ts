@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { stringify } from '../../utils/stringify';
 import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../services';
@@ -35,6 +36,8 @@ export const getActionFileInfoRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileInfo');
 
   return async (context, req, res) => {
+    logger.debug(() => `Get response action file info:\n${stringify(req.params)}`);
+
     const { action_id: requestActionId, file_id: fileId } = req.params;
     const coreContext = await context.core;
 
@@ -80,7 +83,7 @@ export const registerActionFileInfoRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
+        { any: ['canWriteFileOperations', 'canWriteExecuteOperations'] },
         endpointContext.logFactory.get('actionFileInfo'),
         getActionFileInfoRouteHandler(endpointContext)
       )
