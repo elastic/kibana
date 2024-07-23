@@ -18,8 +18,6 @@ import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'react-use';
 
-import { useProductTypes } from '../../common/components/landing_page/onboarding/hooks/use_product_types';
-import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useSpaceId } from '../../common/hooks/use_space_id';
@@ -27,28 +25,21 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Header } from './header';
 import {
   CONNECTOR_ID_LOCAL_STORAGE_KEY,
-  getProductTier,
   getInitialIsOpen,
   showLoading,
   showSummary,
-  showUpgradeProductTier,
 } from './helpers';
 import { AttackDiscoveryPanel } from '../attack_discovery_panel';
 import { EmptyStates } from './empty_states';
 import { LoadingCallout } from './loading_callout';
 import { PageTitle } from './page_title';
 import { Summary } from './summary';
-import { Upgrade } from './upgrade';
 import { useAttackDiscovery } from '../use_attack_discovery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const spaceId = useSpaceId() ?? 'default';
 
-  const {
-    assistantAvailability: { isAssistantEnabled },
-    http,
-    knowledgeBase,
-  } = useAssistantContext();
+  const { http, knowledgeBase } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
   });
@@ -148,20 +139,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const animatedLogo = useMemo(() => <EuiLoadingLogo logo="logoSecurity" size="xl" />, []);
 
-  const productTypes = useProductTypes();
-  const productTier = useMemo(() => getProductTier(productTypes), [productTypes]);
-
   const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
   const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
-
-  if (!isAssistantEnabled || showUpgradeProductTier(productTier)) {
-    return (
-      <>
-        <EuiSpacer size="xxl" />
-        <Upgrade productTier={productTier} />
-      </>
-    );
-  }
 
   return (
     <div
@@ -172,10 +151,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       `}
       data-test-subj="fullHeightContainer"
     >
-      <SecurityRoutePageWrapper
-        data-test-subj="attackDiscoveryPage"
-        pageName={SecurityPageName.attackDiscovery}
-      >
+      <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
           <Header
             connectorId={connectorId}
@@ -259,7 +235,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           </>
         )}
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
-      </SecurityRoutePageWrapper>
+      </div>
     </div>
   );
 };

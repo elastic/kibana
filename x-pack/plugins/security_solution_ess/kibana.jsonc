@@ -9,7 +9,10 @@
     "browser": true,
     "configPath": ["xpack", "securitySolutionEss"],
     "requiredPlugins": [
+      "actions",
       "securitySolution",
+      "stackConnectors",
+      "triggersActionsUi",
       "management",
       "navigation",
       "licensing",

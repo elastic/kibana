@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityProductTypes } from '../../common/components/landing_page/onboarding/configs';
-import { ProductLine, ProductTier } from '../../common/components/landing_page/onboarding/configs';
-
 export const getInitialIsOpen = (index: number) => index < 3;
 
 export const getFallbackActionTypeId = (actionTypeId: string | undefined): string =>
@@ -123,11 +120,3 @@ export const showSummary = ({
   attackDiscoveriesCount: number;
   loadingConnectorId: string | null;
 }): boolean => loadingConnectorId !== connectorId && attackDiscoveriesCount > 0;
-
-export const showUpgradeProductTier = (productTier: ProductTier | undefined): boolean =>
-  productTier != null && productTier !== ProductTier.complete;
-
-export const getProductTier = (
-  productTypes: SecurityProductTypes | undefined
-): ProductTier | undefined =>
-  productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier;

@@ -9,7 +9,6 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
@@ -17,7 +16,6 @@ import React from 'react';
 import { useLocalStorage } from 'react-use';
 
 import { TestProviders } from '../../common/mock';
-import { MockAssistantProvider } from '../../common/mock/mock_assistant_provider';
 import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
@@ -31,7 +29,6 @@ import {
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from '../use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
-import { useProductTypes } from '../../common/components/landing_page/onboarding/hooks/use_product_types';
 
 const mockConnectors: unknown[] = [
   {
@@ -546,165 +543,6 @@ describe('AttackDiscovery', () => {
 
     it('does NOT render attack discoveries', () => {
       expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the empty prompt', () => {
-      expect(screen.queryByTestId('emptyPrompt')).toBeNull();
-    });
-
-    it('does NOT render the upgrade call to action', () => {
-      expect(screen.queryByTestId('upgrade')).toBeNull();
-    });
-  });
-
-  describe('when the user does not have an Enterprise license', () => {
-    const assistantUnavailable: AssistantAvailability = {
-      hasAssistantPrivilege: false,
-      hasConnectorsAllPrivilege: true,
-      hasConnectorsReadPrivilege: true,
-      hasUpdateAIAssistantAnonymization: false,
-      isAssistantEnabled: false, // <-- non-Enterprise license
-    };
-
-    beforeEach(() => {
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <MockAssistantProvider assistantAvailability={assistantUnavailable}>
-                <AttackDiscoveryPage />
-              </MockAssistantProvider>
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('does NOT render the animated logo', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('does NOT render the header', () => {
-      expect(screen.queryByTestId('header')).toBeNull();
-    });
-
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('renders the upgrade call to action', () => {
-      expect(screen.getByTestId('upgrade')).toBeInTheDocument();
-    });
-  });
-
-  describe('when serverless projects do NOT have the complete product tier', () => {
-    const mockUseAttackDiscoveriesResults = getMockUseAttackDiscoveriesWithCachedAttackDiscoveries(
-      jest.fn()
-    );
-
-    beforeEach(() => {
-      (useProductTypes as jest.Mock).mockReturnValue([
-        {
-          product_line: 'security',
-          product_tier: 'essentials', // <-- essentials product tier
-        },
-      ]);
-
-      (useAttackDiscovery as jest.Mock).mockReturnValue(mockUseAttackDiscoveriesResults);
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    afterEach(() => {
-      (useProductTypes as jest.Mock).mockReturnValue(undefined);
-    });
-
-    it('does NOT render the animated logo', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('does NOT render the header', () => {
-      expect(screen.queryByTestId('header')).toBeNull();
-    });
-
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('renders the upgrade call to action', () => {
-      expect(screen.getByTestId('upgrade')).toBeInTheDocument();
-    });
-  });
-
-  describe('when serverless projects have the complete product tier', () => {
-    const mockUseAttackDiscoveriesResults = getMockUseAttackDiscoveriesWithCachedAttackDiscoveries(
-      jest.fn()
-    );
-    const { attackDiscoveries } = mockUseAttackDiscoveriesResults;
-
-    beforeEach(() => {
-      (useProductTypes as jest.Mock).mockReturnValue([
-        {
-          product_line: 'security',
-          product_tier: 'complete', // <-- complete product tier
-        },
-      ]);
-
-      (useAttackDiscovery as jest.Mock).mockReturnValue(mockUseAttackDiscoveriesResults);
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    afterEach(() => {
-      (useProductTypes as jest.Mock).mockReturnValue(undefined);
-    });
-
-    it('does NOT render the animated logo', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('renders the summary', () => {
-      expect(screen.getByTestId('summary')).toBeInTheDocument();
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('renders the expected number of attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(attackDiscoveries.length);
     });
 
     it('does NOT render the empty prompt', () => {
