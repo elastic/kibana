@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       let trustedAppData: ArtifactTestData;
 
       type TrustedAppApiCallsInterface<BodyReturnType = unknown> = Array<{
-        method: keyof Pick<typeof TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+        method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         info?: string;
         path: string;
         // The body just needs to have the properties we care about in the tests. This should cover most
