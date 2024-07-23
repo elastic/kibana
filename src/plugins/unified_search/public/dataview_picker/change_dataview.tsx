@@ -23,7 +23,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiToolTip,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -37,6 +36,7 @@ import type { TextBasedLanguagesTransitionModalProps } from './text_languages_tr
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
+import { ESQLMenuPopover } from './esql_menu_popover';
 
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
@@ -118,7 +118,7 @@ export function ChangeDataView({
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   useEffect(() => {
     if (textBasedLanguage) {
@@ -157,8 +157,7 @@ export function ChangeDataView({
         {...rest}
       >
         <>
-          {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && !isTextBasedLangSelected && (
+          {isAdHocSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"
@@ -175,7 +174,7 @@ export function ChangeDataView({
 
   const getPanelItems = () => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
-    if (onAddField && !isTextBasedLangSelected) {
+    if (onAddField) {
       panelItems.push(
         <EuiContextMenuItem
           key="add"
@@ -238,29 +237,6 @@ export function ChangeDataView({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {isTextBasedLangSelected && shouldShowTextBasedLanguageTransitionModal ? (
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'unifiedSearch.query.queryBar.indexPattern.textBasedLangSwitchWarning',
-                        {
-                          defaultMessage:
-                            "Switching data views removes the current {textBasedLanguage} query. Save this search to ensure you don't lose work.",
-                          values: {
-                            textBasedLanguage: getLanguageDisplayName(textBasedLanguage),
-                          },
-                        }
-                      )}
-                    >
-                      <EuiIcon
-                        type="warning"
-                        color="warning"
-                        data-test-subj="textBasedLang-warning"
-                      />
-                    </EuiToolTip>
-                  ) : null}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
                   <EuiText size="s">
                     <h5>
                       {i18n.translate('unifiedSearch.query.queryBar.indexPattern.dataViewsLabel', {
@@ -276,16 +252,6 @@ export function ChangeDataView({
                 onClick={() => {
                   setPopoverIsOpen(false);
                   onDataViewCreated();
-                  // go to dataview mode
-                  if (isTextBasedLangSelected) {
-                    setIsTextBasedLangSelected(false);
-                    // clean up the Text based language query
-                    onTextLangQuerySubmit?.({
-                      language: 'kuery',
-                      query: '',
-                    });
-                    setTriggerLabel(trigger.label);
-                  }
                 }}
                 size="xs"
                 iconType="plusInCircleFilled"
@@ -304,31 +270,11 @@ export function ChangeDataView({
           searchListInputId={searchListInputId}
           dataViewsList={dataViewsList}
           selectableProps={selectableProps}
-          isTextBasedLangSelected={isTextBasedLangSelected}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
-
-            if (isTextBasedLangSelected) {
-              const showTransitionModal =
-                !isTextLangTransitionModalDismissed && shouldShowTextBasedLanguageTransitionModal;
-
-              if (showTransitionModal) {
-                setIsTextLangTransitionModalVisible(true);
-              } else {
-                setIsTextBasedLangSelected(false);
-                // clean up the Text based language query
-                onTextLangQuerySubmit?.({
-                  language: 'kuery',
-                  query: '',
-                });
-                onChangeDataView(newId);
-                setTriggerLabel(trigger.label);
-              }
-            } else {
-              onChangeDataView(newId);
-            }
+            onChangeDataView(newId);
           }}
           onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
         />
@@ -412,39 +358,68 @@ export function ChangeDataView({
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        {textBasedLanguages?.length && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="editorRedo"
-              color="text"
-              onClick={() => onTextBasedSubmit({ esql: getInitialESQLQuery(trigger.title!) })}
-              data-test-subj="select-text-based-language-btn"
-            >
-              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-                defaultMessage: 'Try ES|QL',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+        {!isTextBasedLangSelected && (
+          <>
+            {textBasedLanguages?.length && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="editorRedo"
+                  color="text"
+                  onClick={() => {
+                    onTextBasedSubmit({ esql: getInitialESQLQuery(trigger.title!) });
+                  }}
+                  data-test-subj="select-text-based-language-btn"
+                >
+                  {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
+                    defaultMessage: 'Try ES|QL',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelClassName="changeDataViewPopover"
+                button={createTrigger()}
+                panelProps={{
+                  ['data-test-subj']: 'changeDataViewPopover',
+                }}
+                isOpen={isPopoverOpen}
+                closePopover={() => setPopoverIsOpen(false)}
+                panelPaddingSize="none"
+                initialFocus={`#${searchListInputId}`}
+                display="block"
+                buffer={8}
+              >
+                <div css={styles.popoverContent}>
+                  <EuiContextMenuPanel size="s" items={getPanelItems()} />
+                </div>
+              </EuiPopover>
+            </EuiFlexItem>
+          </>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            panelClassName="changeDataViewPopover"
-            button={createTrigger()}
-            panelProps={{
-              ['data-test-subj']: 'changeDataViewPopover',
+        {isTextBasedLangSelected && (
+          <ESQLMenuPopover
+            onDataViewSwitch={() => {
+              const showTransitionModal =
+                !isTextLangTransitionModalDismissed && shouldShowTextBasedLanguageTransitionModal;
+
+              if (showTransitionModal) {
+                setIsTextLangTransitionModalVisible(true);
+              } else {
+                setIsTextBasedLangSelected(false);
+                // clean up the Text based language query
+                onTextLangQuerySubmit?.({
+                  language: 'kuery',
+                  query: '',
+                });
+                if (selectedDataViewId) {
+                  onChangeDataView(selectedDataViewId);
+                }
+                setTriggerLabel(trigger.label);
+              }
             }}
-            isOpen={isPopoverOpen}
-            closePopover={() => setPopoverIsOpen(false)}
-            panelPaddingSize="none"
-            initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : undefined}
-            display="block"
-            buffer={8}
-          >
-            <div css={styles.popoverContent}>
-              <EuiContextMenuPanel size="s" items={getPanelItems()} />
-            </div>
-          </EuiPopover>
-        </EuiFlexItem>
+          />
+        )}
       </EuiFlexGroup>
 
       {modal}

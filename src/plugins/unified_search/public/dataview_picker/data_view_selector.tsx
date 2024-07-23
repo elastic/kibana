@@ -19,7 +19,6 @@ export interface DataViewSelectorProps {
   searchListInputId?: string;
   dataViewsList: DataViewListItem[];
   selectableProps?: EuiSelectableProps;
-  isTextBasedLangSelected: boolean;
   setPopoverIsOpen: (isOpen: boolean) => void;
   onChangeDataView: (dataViewId: string) => void;
   onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
@@ -30,7 +29,6 @@ export const DataViewSelector = ({
   searchListInputId,
   dataViewsList,
   selectableProps,
-  isTextBasedLangSelected,
   setPopoverIsOpen,
   onChangeDataView,
   onCreateDefaultAdHocDataView,
@@ -83,7 +81,6 @@ export const DataViewSelector = ({
           },
         }}
         searchListInputId={searchListInputId}
-        isTextBasedLangSelected={isTextBasedLangSelected}
       />
       <ExploreMatchingButton
         noDataViewMatches={noDataViewMatches}
