@@ -381,7 +381,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     if (submitNewExceptionItems == null) return;
 
     try {
-      const { sharedLists, addToSharedLists, addToRules, items } = prepareNewItemsForSubmition({
+      const { listsToAddTo, addToLists, addToRules, items } = prepareNewItemsForSubmition({
         sharedListToAddTo,
         addExceptionToRadioSelection,
         exceptionListsToAddTo,
@@ -398,8 +398,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         selectedRulesToAddTo,
         listType,
         addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
-        addToSharedLists,
-        sharedLists,
+        addToSharedLists: addToLists,
+        sharedLists: listsToAddTo,
       });
 
       const { shouldCloseAlerts, alertIdToClose, ruleStaticIds } = prepareToCloseAlerts({
