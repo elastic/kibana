@@ -26,7 +26,6 @@ import {
 } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { DiService, Global } from '@kbn/core-di-common';
-import { InternalDiService } from '@kbn/core-di-common-internal';
 
 export function createCoreModule() {
   return new ContainerModule(() => {});
@@ -57,7 +56,7 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
         >;
 
         register(route, async (_context, request, response) => {
-          const injection = container.get(InternalDiService);
+          const injection = container.get(DiService);
           const scope = injection.fork();
 
           scope.bind(RequestToken).toConstantValue(request);
@@ -66,11 +65,7 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
           scope.bind(Global).toConstantValue(ResponseToken);
 
           try {
-            return await container
-              .get(DiService)
-              .getContainer(scope)!
-              .get<IRouteHandler>(route)
-              .handle();
+            return await scope.get<IRouteHandler>(route).handle();
           } finally {
             injection.dispose(scope);
           }
