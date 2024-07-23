@@ -96,5 +96,6 @@ export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
   PropsType extends {} = { className: string }
 > {
+  uuid: string;
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }

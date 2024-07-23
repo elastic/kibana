@@ -10,6 +10,9 @@ disabled:
   - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_runner.ts
   - x-pack/plugins/observability_solution/profiling/e2e/ftr_config.ts
 
+  #FTR configs
+  - x-pack/plugins/observability_solution/uptime/e2e/config.ts
+
   # Elastic Synthetics configs
   - x-pack/plugins/observability_solution/uptime/e2e/uptime/synthetics_run.ts
   - x-pack/plugins/observability_solution/synthetics/e2e/config.ts

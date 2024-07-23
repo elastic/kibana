@@ -49,7 +49,7 @@ const renderCorrelationsTable = (panelContext: DocumentDetailsContext) =>
 describe('CorrelationsDetailsAlertsTable', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     jest.mocked(usePaginatedAlerts).mockReturnValue({
       setPagination: jest.fn(),
       setSorting: jest.fn(),
@@ -106,7 +106,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('renders open preview button when feature flag is on', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId, getAllByTestId } = renderCorrelationsTable({
       ...mockContextValue,
       isPreviewMode: true,
