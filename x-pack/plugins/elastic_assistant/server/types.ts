@@ -38,7 +38,9 @@ import {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import {
+  ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
+  ActionsClientGeminiChatModel,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
@@ -215,6 +217,12 @@ export interface AssistantTool {
   getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
 }
 
+export type AssistantToolLlm =
+  | ActionsClientBedrockChatModel
+  | ActionsClientChatOpenAI
+  | ActionsClientGeminiChatModel
+  | ActionsClientSimpleChatModel;
+
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
@@ -223,7 +231,7 @@ export interface AssistantToolParams {
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  llm?: ActionsClientLlm | AssistantToolLlm;
   logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;

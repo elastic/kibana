@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as fs from 'fs';
+import { readFile } from 'fs/promises';
 import * as path from 'path';
-import { promisify } from 'util';
 import { TranslationInput } from './translation';
 
 const TRANSLATION_FILE_EXTENSION = '.json';
@@ -54,8 +53,7 @@ function getLocaleFromFileName(fullFileName: string) {
  * @returns
  */
 async function loadFile(pathToFile: string): Promise<TranslationInput> {
-  // doing this at the moment because fs is mocked in a lot of places where this would otherwise fail
-  return JSON.parse(await promisify(fs.readFile)(pathToFile, 'utf8'));
+  return JSON.parse(await readFile(pathToFile, 'utf8'));
 }
 
 /**
@@ -123,10 +121,10 @@ export async function getTranslationsByLocale(locale: string): Promise<Translati
     return { locale, messages: {} };
   }
 
-  const fileTrasnlationDetails = files.map((file) => loadedFiles[file]);
+  const fileTranslationDetails = files.map((file) => loadedFiles[file]);
 
-  const filesLocale = fileTrasnlationDetails[0].locale || locale;
-  const translationInput = fileTrasnlationDetails.reduce((acc, translation) => ({
+  const filesLocale = fileTranslationDetails[0].locale || locale;
+  const translationInput = fileTranslationDetails.reduce((acc, translation) => ({
     locale,
     formats: translation.formats
       ? Object.assign(acc.formats || {}, translation.formats)
