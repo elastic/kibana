@@ -96,7 +96,7 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
-          disabled={isEntityCentricExperienceViewEnabled}
+          disabled={isEntityCentricExperienceViewEnabled || isLoading}
           data-test-subj="tryOutEEMLink"
           onClick={handleEnablement}
         >
