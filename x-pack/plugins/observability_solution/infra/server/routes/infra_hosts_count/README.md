@@ -2,7 +2,7 @@
 
 This API returns the count of the hosts monitored with the system integration.
 
-**POST /api/metrics/infra/hosts_count**
+**POST /api/infra/{asset}/count**
 parameters:
 
 - type: asset type. 'host' is the only one supported now
@@ -20,11 +20,10 @@ The response includes:
 Request
 
 ```bash
-curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra/hosts_count' \
+curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/infra/host/count' \
 --header 'kbn-xsrf: xxxx' \
 --header 'Content-Type: application/json' \
 --data '{
-   "type": "host",
    "query": {
       "bool": {
          "must": [],

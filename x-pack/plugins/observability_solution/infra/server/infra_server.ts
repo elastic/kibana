@@ -37,7 +37,7 @@ import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
 import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
 import { type InfraServerPluginStartDeps } from './lib/adapters/framework';
-import { initInfraHostsCountRoute } from './routes/infra_hosts_count';
+import { initInfraAssetCountRoute } from './routes/infra_hosts_count';
 
 export const initInfraServer = (
   libs: InfraBackendLibs,
@@ -69,7 +69,7 @@ export const initInfraServer = (
   initProcessListRoute(libs);
   initOverviewRoute(libs);
   initInfraMetricsRoute(libs);
-  initInfraHostsCountRoute(libs);
+  initInfraAssetCountRoute(libs);
   initProfilingRoutes(libs);
   initServicesRoute(libs);
   initCustomDashboardsRoutes(libs.framework);

@@ -8,28 +8,36 @@
 import { dateRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
-export const GetInfraHostsCountRequestBodyPayloadRT = rt.intersection([
+const AssetTypeRT = rt.type({
+  assetType: rt.literal('host'),
+});
+
+export const GetInfraAssetCountRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
   }),
   rt.type({
-    type: rt.literal('host'),
     sourceId: rt.string,
     from: dateRt,
     to: dateRt,
   }),
 ]);
 
-export const GetInfraHostsCountResponsePayloadRT = rt.type({
-  type: rt.literal('host'),
-  count: rt.number,
-});
+export const GetInfraAssetCountRequestParamsPayloadRT = AssetTypeRT;
 
-export type InfraAssetMetricType = rt.TypeOf<typeof InfraMetricTypeRT>;
+export const GetInfraAssetCountResponsePayloadRT = rt.intersection([
+  AssetTypeRT,
+  rt.type({
+    count: rt.number,
+  }),
+]);
 
-export type GetInfraHostsCountRequestBodyPayload = rt.TypeOf<
-  typeof GetInfraHostsCountRequestBodyPayloadRT
+export type GetInfraAssetCountRequestParamsPayload = rt.TypeOf<
+  typeof GetInfraAssetCountRequestParamsPayloadRT
 >;
-export type GetInfraHostsCountResponsePayload = rt.TypeOf<
-  typeof GetInfraHostsCountResponsePayloadRT
+export type GetInfraAssetCountRequestBodyPayload = rt.TypeOf<
+  typeof GetInfraAssetCountRequestBodyPayloadRT
+>;
+export type GetInfraAssetCountResponsePayload = rt.TypeOf<
+  typeof GetInfraAssetCountResponsePayloadRT
 >;

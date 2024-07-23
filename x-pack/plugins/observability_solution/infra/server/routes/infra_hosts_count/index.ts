@@ -9,31 +9,34 @@ import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 
 import {
-  GetInfraHostsCountRequestBodyPayload,
-  GetInfraHostsCountRequestBodyPayloadRT,
-  GetInfraHostsCountResponsePayloadRT,
+  GetInfraAssetCountRequestBodyPayload,
+  GetInfraAssetCountRequestBodyPayloadRT,
+  GetInfraAssetCountResponsePayloadRT,
+  GetInfraAssetCountRequestParamsPayload,
 } from '../../../common/http_api/get_hosts_count_api';
 
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getHostsCount } from './lib/host/get_hosts_count';
 
-export const initInfraHostsCountRoute = (libs: InfraBackendLibs) => {
-  const validateBody = createRouteValidationFunction(GetInfraHostsCountRequestBodyPayloadRT);
+export const initInfraAssetCountRoute = (libs: InfraBackendLibs) => {
+  const validateBody = createRouteValidationFunction(GetInfraAssetCountRequestBodyPayloadRT);
 
   const { framework } = libs;
 
   framework.registerRoute(
     {
       method: 'post',
-      path: '/api/metrics/infra/hosts_count',
+      path: '/api/infra/{assetType}/count',
       validate: {
         body: validateBody,
       },
     },
     async (requestContext, request, response) => {
-      const params: GetInfraHostsCountRequestBodyPayload = request.body;
-      const { query, from, to } = request.body;
+      const body: GetInfraAssetCountRequestBodyPayload = request.body;
+      const params: GetInfraAssetCountRequestParamsPayload = request.params;
+      const { assetType } = params;
+      const { query, from, to, sourceId } = body;
 
       try {
         const infraMetricsClient = await getInfraMetricsClient({
@@ -41,10 +44,10 @@ export const initInfraHostsCountRoute = (libs: InfraBackendLibs) => {
           request,
           infraSources: libs.sources,
           requestContext,
-          sourceId: params.sourceId,
+          sourceId,
         });
 
-        const hostsCount = await getHostsCount({
+        const assetCount = await getHostsCount({
           infraMetricsClient,
           query: (query?.bool as Record<string, string>) ?? undefined,
           from,
@@ -52,9 +55,9 @@ export const initInfraHostsCountRoute = (libs: InfraBackendLibs) => {
         });
 
         return response.ok({
-          body: GetInfraHostsCountResponsePayloadRT.encode({
-            type: params.type,
-            count: hostsCount,
+          body: GetInfraAssetCountResponsePayloadRT.encode({
+            assetType,
+            count: assetCount,
           }),
         });
       } catch (err) {
