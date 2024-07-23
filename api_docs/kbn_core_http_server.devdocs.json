@@ -14062,7 +14062,7 @@
         "tags": [],
         "label": "VersionedRouter",
         "description": [
-          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead.\n"
+          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead\n"
         ],
         "signature": [
           {
@@ -17960,6 +17960,14 @@
             "section": "def-common.Type",
             "text": "Type"
           },
+          "<unknown> | ",
+          {
+            "pluginId": "@kbn/zod",
+            "scope": "common",
+            "docId": "kibKbnZodPluginApi",
+            "section": "def-common.ZodEsque",
+            "text": "ZodEsque"
+          },
           "<unknown>"
         ],
         "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
@@ -19383,6 +19391,14 @@
             "docId": "kibKbnConfigSchemaPluginApi",
             "section": "def-common.Type",
             "text": "Type"
+          },
+          "<T> | ",
+          {
+            "pluginId": "@kbn/zod",
+            "scope": "common",
+            "docId": "kibKbnZodPluginApi",
+            "section": "def-common.ZodEsque",
+            "text": "ZodEsque"
           },
           "<T> | ",
           {
