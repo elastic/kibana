@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import { appContextService } from '..';
 
 import type { PreconfiguredOutput } from '../../../common/types';
@@ -59,6 +60,9 @@ describe('output preconfiguration', () => {
       page: 0,
       per_page: 0,
       total: 0,
+    });
+    internalSoClientWithoutSpaceExtension.bulkGet.mockResolvedValue({
+      saved_objects: [],
     });
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();
