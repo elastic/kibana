@@ -27,9 +27,7 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../notes/hooks/use_fetch_notes');
-const onLoadMock = jest.fn(() => {
-  'onLoad called';
-});
+const onLoadMock = jest.fn();
 const useFetchNotesMock = useFetchNotes as jest.Mock;
 
 const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
