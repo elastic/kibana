@@ -571,8 +571,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.testSubjects.click('select-text-based-language-panel');
+    await this.testSubjects.click('select-text-based-language-btn');
     await this.header.waitUntilLoadingHasFinished();
   }
 

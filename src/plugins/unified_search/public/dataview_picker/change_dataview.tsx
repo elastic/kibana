@@ -11,7 +11,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPopover,
-  EuiPanel,
   EuiHorizontalRule,
   EuiButton,
   EuiContextMenuPanel,
@@ -336,35 +335,6 @@ export function ChangeDataView({
       </React.Fragment>
     );
 
-    if (textBasedLanguages?.length) {
-      panelItems.push(
-        <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
-        <EuiPanel color="transparent" paddingSize="none" key="try-esql">
-          <EuiButton
-            css={css`
-              border-top-right-radius: unset;
-              border-top-left-radius: unset;
-            `}
-            color="success"
-            size="s"
-            fullWidth
-            onClick={() => onTextBasedSubmit({ esql: getInitialESQLQuery(trigger.title!) })}
-            data-test-subj="select-text-based-language-panel"
-            contentProps={{
-              css: {
-                justifyContent: 'flex-start',
-                paddingLeft: '26px',
-              },
-            }}
-          >
-            {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-              defaultMessage: 'Language: ES|QL',
-            })}
-          </EuiButton>
-        </EuiPanel>
-      );
-    }
-
     return panelItems;
   };
 
@@ -441,23 +411,42 @@ export function ChangeDataView({
 
   return (
     <>
-      <EuiPopover
-        panelClassName="changeDataViewPopover"
-        button={createTrigger()}
-        panelProps={{
-          ['data-test-subj']: 'changeDataViewPopover',
-        }}
-        isOpen={isPopoverOpen}
-        closePopover={() => setPopoverIsOpen(false)}
-        panelPaddingSize="none"
-        initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : undefined}
-        display="block"
-        buffer={8}
-      >
-        <div css={styles.popoverContent}>
-          <EuiContextMenuPanel size="s" items={getPanelItems()} />
-        </div>
-      </EuiPopover>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        {textBasedLanguages?.length && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="editorRedo"
+              color="text"
+              onClick={() => onTextBasedSubmit({ esql: getInitialESQLQuery(trigger.title!) })}
+              data-test-subj="select-text-based-language-btn"
+            >
+              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
+                defaultMessage: 'Try ES|QL',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            panelClassName="changeDataViewPopover"
+            button={createTrigger()}
+            panelProps={{
+              ['data-test-subj']: 'changeDataViewPopover',
+            }}
+            isOpen={isPopoverOpen}
+            closePopover={() => setPopoverIsOpen(false)}
+            panelPaddingSize="none"
+            initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : undefined}
+            display="block"
+            buffer={8}
+          >
+            <div css={styles.popoverContent}>
+              <EuiContextMenuPanel size="s" items={getPanelItems()} />
+            </div>
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       {modal}
     </>
   );

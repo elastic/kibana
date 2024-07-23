@@ -135,7 +135,7 @@ describe('DataView component', () => {
     expect(addDataViewSpy).toHaveBeenCalled();
   });
 
-  it('should render the text based languages panels if languages are given', async () => {
+  it('should render the text based languages button if languages are given', async () => {
     const component = mount(
       wrapDataViewComponentInContext(
         {
@@ -146,8 +146,7 @@ describe('DataView component', () => {
         false
       )
     );
-    findTestSubject(component, 'dataview-trigger').simulate('click');
-    const text = component.find('[data-test-subj="select-text-based-language-panel"]');
+    const text = component.find('[data-test-subj="select-text-based-language-btn"]');
     expect(text.length).not.toBe(0);
   });
 

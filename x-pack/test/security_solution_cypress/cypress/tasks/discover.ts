@@ -28,8 +28,7 @@ export const switchDataViewTo = (dataviewName: string) => {
 };
 
 export const switchDataViewToESQL = () => {
-  openDataViewSwitcher();
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.TEXT_BASE_LANG_SWICTHER).trigger('click');
+  cy.get(DISCOVER_DATA_VIEW_SWITCHER.TEXT_BASE_LANG_SWITCHER).trigger('click');
   cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
 };
 
