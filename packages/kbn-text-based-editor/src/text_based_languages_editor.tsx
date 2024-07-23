@@ -6,28 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector, useEuiTheme } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
+import { getAggregateQueryMode } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { IndexManagementPluginSetup } from '@kbn/index-management';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  LanguageDocumentationPopover,
-  type LanguageDocumentationSections,
-} from '@kbn/language-documentation-popover';
 import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -36,9 +22,7 @@ import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
   clearCacheWhenOld,
-  getDocumentationSections,
   getESQLSources,
-  getWrappedInPipesCode,
   parseErrors,
   parseWarning,
   useDebounceWithOptions,
@@ -53,67 +37,9 @@ import {
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
 import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
+import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
 
 import './overwrite.scss';
-
-export interface TextBasedLanguagesEditorProps {
-  /** The aggregate type query */
-  query: AggregateQuery;
-  /** Callback running everytime the query changes */
-  onTextLangQueryChange: (query: AggregateQuery) => void;
-  /** Callback running when the user submits the query */
-  onTextLangQuerySubmit: (
-    query?: AggregateQuery,
-    abortController?: AbortController
-  ) => Promise<void>;
-  /** If it is true, the editor displays the message @timestamp found
-   * The text based queries are relying on adhoc dataviews which
-   * can have an @timestamp timefield or nothing
-   */
-  detectedTimestamp?: string;
-  /** Array of errors */
-  errors?: Error[];
-  /** Warning string as it comes from ES */
-  warning?: string;
-  /** Disables the editor and displays loading icon in run button
-   * It is also used for hiding the history component if it is not defined
-   */
-  isLoading?: boolean;
-  /** Disables the editor */
-  isDisabled?: boolean;
-  /** Indicator if the editor is on dark mode */
-  isDarkMode?: boolean;
-  dataTestSubj?: string;
-  /** Hide the Run query information which appears on the footer*/
-  hideRunQueryText?: boolean;
-  /** This is used for applications (such as the inline editing flyout in dashboards)
-   * which want to add the editor without being part of the Unified search component
-   * It renders a submit query button inside the editor
-   */
-  editorIsInline?: boolean;
-  /** Disables the submit query action*/
-  disableSubmitAction?: boolean;
-
-  /** when set to true enables query cancellation **/
-  allowQueryCancellation?: boolean;
-
-  /** hide @timestamp info **/
-  hideTimeFilterInfo?: boolean;
-
-  /** hide query history **/
-  hideQueryHistory?: boolean;
-
-  /** hide header buttons when editor is expanded */
-  hideHeaderWhenExpanded?: boolean;
-}
-
-interface TextBasedEditorDeps {
-  core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
-  expressions: ExpressionsStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
-  fieldsMetadata?: FieldsMetadataPublicStart;
-}
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
@@ -140,21 +66,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   allowQueryCancellation,
   hideTimeFilterInfo,
   hideQueryHistory,
-  hideHeaderWhenExpanded,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const {
-    dataViews,
-    expressions,
-    indexManagementApiService,
-    application,
-    docLinks,
-    core,
-    fieldsMetadata,
-  } = kibana.services;
+  const { dataViews, expressions, indexManagementApiService, application, core, fieldsMetadata } =
+    kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const [code, setCode] = useState<string>(queryString ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -256,9 +174,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
 
-  const [documentationSections, setDocumentationSections] =
-    useState<LanguageDocumentationSections>();
-
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
   }, []);
@@ -278,10 +193,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(editorMessages.errors.length),
     Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
-    Boolean(documentationSections),
     Boolean(editorIsInline),
-    isHistoryOpen,
-    !!hideHeaderWhenExpanded
+    isHistoryOpen
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -564,22 +477,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   onLayoutChangeRef.current = onLayoutChange;
 
-  const isWrappedInPipes = useMemo(() => {
-    const pipes = code?.split('|');
-    const pipesWithNewLine = code?.split('\n|');
-    return pipes?.length === pipesWithNewLine?.length;
-  }, [code]);
-
-  useEffect(() => {
-    async function getDocumentation() {
-      const sections = await getDocumentationSections(language);
-      setDocumentationSections(sections);
-    }
-    if (!documentationSections) {
-      getDocumentation();
-    }
-  }, [language, documentationSections]);
-
   const codeEditorOptions: CodeEditorProps['options'] = {
     accessibilitySupport: 'off',
     autoIndent: 'none',
@@ -623,97 +520,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const editorPanel = (
     <>
-      {!hideHeaderWhenExpanded && (
-        <EuiFlexGroup
-          gutterSize="s"
-          justifyContent="spaceBetween"
-          css={styles.topContainer}
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    isWrappedInPipes
-                      ? i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                          {
-                            defaultMessage: 'Remove line breaks on pipes',
-                          }
-                        )
-                      : i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                          {
-                            defaultMessage: 'Add line breaks on pipes',
-                          }
-                        )
-                  }
-                >
-                  <EuiButtonIcon
-                    iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
-                    color="text"
-                    size="xs"
-                    data-test-subj="TextBasedLangEditor-toggleWordWrap"
-                    aria-label={
-                      isWrappedInPipes
-                        ? i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                            {
-                              defaultMessage: 'Remove line breaks on pipes',
-                            }
-                          )
-                        : i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                            {
-                              defaultMessage: 'Add line breaks on pipes',
-                            }
-                          )
-                    }
-                    onClick={() => {
-                      const updatedCode = getWrappedInPipesCode(code, isWrappedInPipes);
-                      if (code !== updatedCode) {
-                        setCode(updatedCode);
-                        onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
-                      }
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                {documentationSections && (
-                  <EuiFlexItem grow={false}>
-                    <LanguageDocumentationPopover
-                      language={getLanguageDisplayName(String(language))}
-                      sections={documentationSections}
-                      searchInDescription
-                      linkToDocumentation={
-                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
-                      }
-                      buttonProps={{
-                        color: 'text',
-                        size: 'xs',
-                        'data-test-subj': 'TextBasedLangEditor-documentation',
-                        'aria-label': i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                          {
-                            defaultMessage: 'Documentation',
-                          }
-                        ),
-                      }}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
       <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
         <EuiOutsideClickDetector
           onOutsideClick={() => {
@@ -806,6 +612,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
         }}
+        code={code}
         onErrorClick={onErrorClick}
         runQuery={onQuerySubmit}
         updateQuery={onQueryUpdate}

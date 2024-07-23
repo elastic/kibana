@@ -12,10 +12,8 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  TextBasedLanguagesEditor,
-  TextBasedLanguagesEditorProps,
-} from './text_based_languages_editor';
+import { TextBasedLanguagesEditor } from './text_based_languages_editor';
+import type { TextBasedLanguagesEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
 
 jest.mock('./helpers', () => {

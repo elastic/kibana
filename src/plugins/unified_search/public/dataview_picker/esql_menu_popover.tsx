@@ -78,6 +78,7 @@ export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
         <EuiButtonIcon
           iconType={isESQLMenuPopoverOpen ? 'cross' : 'arrowRight'}
           color="text"
+          display="base"
           onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
         />
       }

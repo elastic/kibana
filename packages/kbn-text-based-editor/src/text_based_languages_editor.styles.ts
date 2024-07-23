@@ -7,8 +7,7 @@
  */
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const EDITOR_INITIAL_HEIGHT = 38;
-export const EDITOR_INITIAL_HEIGHT_EXPANDED = 140;
+export const EDITOR_INITIAL_HEIGHT_EXPANDED = 80;
 export const EDITOR_MIN_HEIGHT = 40;
 export const EDITOR_MAX_HEIGHT = 400;
 
@@ -18,10 +17,8 @@ export const textBasedLanguageEditorStyles = (
   hasErrors: boolean,
   hasWarning: boolean,
   isCodeEditorExpandedFocused: boolean,
-  hasReference: boolean,
   editorIsInline: boolean,
-  historyIsOpen: boolean,
-  hideHeaderWhenExpanded: boolean
+  historyIsOpen: boolean
 ) => {
   const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
 
@@ -32,11 +29,6 @@ export const textBasedLanguageEditorStyles = (
       right: 0,
       zIndex: 4,
       height: `${editorHeight}px`,
-      border: euiTheme.border.thin,
-      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
-      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
-      borderTopLeftRadius: 0,
-      borderBottom: euiTheme.border.thin,
     },
     resizableContainer: {
       display: 'flex',
@@ -65,14 +57,11 @@ export const textBasedLanguageEditorStyles = (
       transform: 'translate(0, -50%)',
     },
     bottomContainer: {
-      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
-      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
       borderTop: !isCodeEditorExpandedFocused
         ? hasErrors
           ? `2px solid ${euiTheme.colors.danger}`
-          : euiTheme.border.thin
+          : 'none'
         : `2px solid ${bottomContainerBorderColor}`,
-      borderBottom: editorIsInline ? 'none' : euiTheme.border.thin,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
@@ -83,32 +72,29 @@ export const textBasedLanguageEditorStyles = (
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
-      borderBottomLeftRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
-      borderBottomRightRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
     },
     historyContainer: {
-      border: euiTheme.border.thin,
-      borderTop: 'none',
-      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
-      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
+      border: 'none',
       backgroundColor: euiTheme.colors.lightestShade,
       width: '100%',
       position: 'relative' as const,
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
-      borderBottomLeftRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
-      borderBottomRightRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
     },
     topContainer: {
-      border: editorIsInline ? 'none' : euiTheme.border.thin,
-      borderTopLeftRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
-      borderTopRightRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
+      border: 'none',
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.s,
       paddingRight: euiTheme.size.s,
-      paddingTop: hideHeaderWhenExpanded ? euiTheme.size.s : euiTheme.size.xs,
-      paddingBottom: hideHeaderWhenExpanded ? euiTheme.size.s : euiTheme.size.xs,
+      paddingTop: euiTheme.size.s,
+      paddingBottom: euiTheme.size.s,
       width: '100%',
       position: 'relative' as const,
       marginLeft: 0,

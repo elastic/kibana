@@ -62,7 +62,7 @@ function DocumentationPopover({
             })}
           >
             <EuiButtonIcon
-              iconType="iInCircle"
+              iconType="documentation"
               onClick={toggleDocumentationPopover}
               {...buttonProps}
             />

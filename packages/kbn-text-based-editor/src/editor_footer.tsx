@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useMemo, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -21,9 +21,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
-import type { MonacoMessage } from './helpers';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  LanguageDocumentationPopover,
+  type LanguageDocumentationSections,
+} from '@kbn/language-documentation-popover';
+import { type MonacoMessage, getWrappedInPipesCode, getDocumentationSections } from './helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
+import type { TextBasedEditorDeps } from './types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -99,6 +105,7 @@ interface EditorFooterProps {
     bottomContainer: Interpolation<Theme>;
     historyContainer: Interpolation<Theme>;
   };
+  code: string;
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
   detectedTimestamp?: string;
@@ -144,9 +151,16 @@ export const EditorFooter = memo(function EditorFooter({
   isInCompactMode,
   queryHasChanged,
   measuredContainerWidth,
+  code,
 }: EditorFooterProps) {
+  const kibana = useKibana<TextBasedEditorDeps>();
+  const { docLinks } = kibana.services;
+
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
+  const [documentationSections, setDocumentationSections] =
+    useState<LanguageDocumentationSections>();
+
   const onUpdateAndSubmit = useCallback(
     (qs: string) => {
       // update the query first
@@ -160,6 +174,22 @@ export const EditorFooter = memo(function EditorFooter({
     },
     [runQuery, updateQuery]
   );
+
+  const isWrappedInPipes = useMemo(() => {
+    const pipes = code?.split('|');
+    const pipesWithNewLine = code?.split('\n|');
+    return pipes?.length === pipesWithNewLine?.length;
+  }, [code]);
+
+  useEffect(() => {
+    async function getDocumentation() {
+      const sections = await getDocumentationSections('esql');
+      setDocumentationSections(sections);
+    }
+    if (!documentationSections) {
+      getDocumentation();
+    }
+  }, [documentationSections]);
 
   return (
     <EuiFlexGroup
@@ -180,6 +210,54 @@ export const EditorFooter = memo(function EditorFooter({
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={
+                    isWrappedInPipes
+                      ? i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                          {
+                            defaultMessage: 'Remove line breaks on pipes',
+                          }
+                        )
+                      : i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                          {
+                            defaultMessage: 'Add line breaks on pipes',
+                          }
+                        )
+                  }
+                >
+                  <EuiButtonIcon
+                    iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
+                    color="text"
+                    size="xs"
+                    data-test-subj="TextBasedLangEditor-toggleWordWrap"
+                    aria-label={
+                      isWrappedInPipes
+                        ? i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                            {
+                              defaultMessage: 'Remove line breaks on pipes',
+                            }
+                          )
+                        : i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                            {
+                              defaultMessage: 'Add line breaks on pipes',
+                            }
+                          )
+                    }
+                    onClick={() => {
+                      const updatedCode = getWrappedInPipesCode(code, isWrappedInPipes);
+                      if (code !== updatedCode) {
+                        updateQuery(updatedCode);
+                      }
+                    }}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
                 <EuiText
                   size="xs"
@@ -300,6 +378,27 @@ export const EditorFooter = memo(function EditorFooter({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
+              {documentationSections && !editorIsInline && (
+                <EuiFlexItem grow={false}>
+                  <LanguageDocumentationPopover
+                    language="ES|QL"
+                    sections={documentationSections}
+                    searchInDescription
+                    linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+                    buttonProps={{
+                      color: 'text',
+                      size: 'xs',
+                      'data-test-subj': 'TextBasedLangEditor-documentation',
+                      'aria-label': i18n.translate(
+                        'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                        {
+                          defaultMessage: 'Documentation',
+                        }
+                      ),
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           {Boolean(editorIsInline) && (
@@ -357,6 +456,27 @@ export const EditorFooter = memo(function EditorFooter({
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
+                  {documentationSections && (
+                    <EuiFlexItem grow={false}>
+                      <LanguageDocumentationPopover
+                        language="ES|QL"
+                        sections={documentationSections}
+                        searchInDescription
+                        linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+                        buttonProps={{
+                          color: 'text',
+                          size: 'xs',
+                          'data-test-subj': 'TextBasedLangEditor-documentation',
+                          'aria-label': i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                            {
+                              defaultMessage: 'Documentation',
+                            }
+                          ),
+                        }}
+                      />
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </>
