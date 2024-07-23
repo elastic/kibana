@@ -465,7 +465,10 @@ export const QueryBarTopRow = React.memo(
     }
 
     function shouldShowDatePickerAsBadge(): boolean {
-      return Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput();
+      return (
+        (Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput()) ||
+        Boolean(isQueryLangSelected && props.query && isOfAggregateQueryType(props.query))
+      );
     }
 
     function renderDatePicker() {
