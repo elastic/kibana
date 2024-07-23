@@ -41,7 +41,7 @@ export const alertsFilterQuerySchema = schema.object({
             {
               meta: {
                 description:
-                  'A filter is specific to an application context or whether it should be applied globally.',
+                  'A filter can be either specific to an application context or applied globally.',
               },
             }
           ),

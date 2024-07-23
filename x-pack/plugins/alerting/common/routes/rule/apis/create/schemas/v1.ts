@@ -117,7 +117,7 @@ export const actionSchema = schema.object(
     use_alert_data_for_template: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Indicates whether to use alert data as template or not.',
+          description: 'Indicates whether to use alert data as a template.',
         },
       })
     ),

@@ -43,7 +43,7 @@ const buildFindRulesRoute = ({
       path,
       options: {
         access: 'public',
-        summary: `Retrieves information about rules.`,
+        summary: `Get information about rules.`,
       },
       validate: {
         request: {

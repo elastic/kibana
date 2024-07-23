@@ -10,12 +10,12 @@ import { schema } from '@kbn/config-schema';
 export const rRuleResponseSchema = schema.object({
   dtstart: schema.string({
     meta: {
-      description: 'Rule start date as per UTC.',
+      description: 'Rule start date in Coordinated Universal Time (UTC).',
     },
   }),
   tzid: schema.string({
     meta: {
-      description: 'Indicates timezone.',
+      description: 'Indicates timezone abbreviation.',
     },
   }),
   freq: schema.maybe(
@@ -55,7 +55,7 @@ export const rRuleResponseSchema = schema.object({
     schema.number({
       meta: {
         description:
-          'Indicates the interval of frequency, e.g. 1 and YEARLY is every 1 year, 2 and WEEKLY is every 2 weeks.',
+          'Indicates the interval of frequency. For example, 1 and YEARLY is every 1 year, 2 and WEEKLY is every 2 weeks.',
       },
     })
   ),
@@ -72,8 +72,7 @@ export const rRuleResponseSchema = schema.object({
       ],
       {
         meta: {
-          description:
-            'Indicates the start of week, defaults to Monday. The following, if not provided, will be automatically derived from the dtstart.',
+          description: 'Indicates the start of week, defaults to Monday.',
         },
       }
     )
@@ -83,7 +82,7 @@ export const rRuleResponseSchema = schema.object({
       schema.oneOf([schema.string(), schema.number()], {
         meta: {
           description:
-            'Indicates day(s) of the week to recur, OR nth-day-of-month strings, e.g. "+2TU" second Tuesday of month, "-1FR" last Friday of the month, which will get internally converted to a byweekday/bysetpos combination.',
+            'Indicates the days of the week to recur or else nth-day-of-month strings. For example, "+2TU" second Tuesday of month, "-1FR" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination.',
         },
       })
     )
@@ -92,7 +91,7 @@ export const rRuleResponseSchema = schema.object({
     schema.arrayOf(
       schema.number({
         meta: {
-          description: 'Indicates month(s) of the year that this rule should recur.',
+          description: 'Indicates months of the year that this rule should recur.',
         },
       })
     )
@@ -102,7 +101,7 @@ export const rRuleResponseSchema = schema.object({
       schema.number({
         meta: {
           description:
-            'Indicates positive or negative integer affecting nth day of the month, eg -2 combined with byweekday of FR is 2nd to last Friday of the month. Best not to set this manually and just use byweekday.',
+            'A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.',
         },
       })
     )
@@ -111,7 +110,7 @@ export const rRuleResponseSchema = schema.object({
     schema.arrayOf(
       schema.number({
         meta: {
-          description: 'Indicates day(s) of the month to recur.',
+          description: 'Indicates the days of the month to recur.',
         },
       })
     )
@@ -120,7 +119,7 @@ export const rRuleResponseSchema = schema.object({
     schema.arrayOf(
       schema.number({
         meta: {
-          description: 'Indicates day(s) of the year that this rule should recur.',
+          description: 'Indicates the days of the year that this rule should recur.',
         },
       })
     )
@@ -129,7 +128,7 @@ export const rRuleResponseSchema = schema.object({
     schema.arrayOf(
       schema.number({
         meta: {
-          description: 'Indicates number of the week hour(s) to recur.',
+          description: 'Indicates number of the week hours to recur.',
         },
       })
     )
@@ -138,7 +137,7 @@ export const rRuleResponseSchema = schema.object({
     schema.arrayOf(
       schema.number({
         meta: {
-          description: 'Indicates hour(s) of the day to recur.',
+          description: 'Indicates hours of the day to recur.',
         },
       })
     )
@@ -147,7 +146,7 @@ export const rRuleResponseSchema = schema.object({
     schema.arrayOf(
       schema.number({
         meta: {
-          description: 'Indicates Minute(s) of the hour to recur.',
+          description: 'Indicates minutes of the hour to recur.',
         },
       })
     )
@@ -156,7 +155,7 @@ export const rRuleResponseSchema = schema.object({
     schema.arrayOf(
       schema.number({
         meta: {
-          description: 'Indicates seconds(s) of the day to recur.',
+          description: 'Indicates seconds of the day to recur.',
         },
       })
     )

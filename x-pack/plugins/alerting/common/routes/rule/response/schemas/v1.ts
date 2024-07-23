@@ -142,7 +142,7 @@ const actionSchema = schema.object({
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
   use_alert_data_for_template: schema.maybe(
     schema.boolean({
-      meta: { description: 'Indicates whether to use alert data as template or not.' },
+      meta: { description: 'Indicates whether to use alert data as a template.' },
     })
   ),
 });
@@ -312,7 +312,7 @@ export const ruleLastRunSchema = schema.object({
       schema.nullable(
         schema.number({
           meta: {
-            description: 'Number of ignore alerts during last run.',
+            description: 'Number of ignored alerts during last run.',
           },
         })
       )
@@ -327,7 +327,7 @@ export const monitoringSchema = schema.object(
         history: schema.arrayOf(
           schema.object({
             success: schema.boolean({
-              meta: { description: 'Indicates whether the rule run was success or not.' },
+              meta: { description: 'Indicates whether the rule run was successful.' },
             }),
             timestamp: schema.number({ meta: { description: 'Time of rule run.' } }),
             duration: schema.maybe(
@@ -352,12 +352,12 @@ export const monitoringSchema = schema.object(
         ),
         last_run: schema.object({
           timestamp: schema.string({
-            meta: { description: 'Time when the rule was run last.' },
+            meta: { description: 'Time of the most recent rule run.' },
           }),
           metrics: schema.object({
             duration: schema.maybe(
               schema.number({
-                meta: { description: 'Duration of last rule run.' },
+                meta: { description: 'Duration of most recent rule run.' },
               })
             ),
             total_search_duration_ms: schema.maybe(
@@ -365,7 +365,7 @@ export const monitoringSchema = schema.object(
                 schema.number({
                   meta: {
                     description:
-                      'Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response.',
+                      'Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.',
                   },
                 })
               )
@@ -551,13 +551,14 @@ export const ruleResponseSchema = schema.object({
         meta: {
           description:
             'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+          deprecated: true,
         },
       })
     )
   ),
   mute_all: schema.boolean({
     meta: {
-      description: 'Indicates whether all alerts are muted or not.',
+      description: 'Indicates whether all alerts are muted.',
     },
   }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
@@ -575,7 +576,7 @@ export const ruleResponseSchema = schema.object({
     schema.arrayOf(
       schema.string({
         meta: {
-          description: `List of rule's active snoozes.`,
+          description: `List of active snoozes for the rule.`,
         },
       })
     )
@@ -584,7 +585,7 @@ export const ruleResponseSchema = schema.object({
     schema.nullable(
       schema.string({
         meta: {
-          description: 'Date until when rule is snoozed.',
+          description: 'The date when the rule will no longer be snoozed.',
         },
       })
     )
