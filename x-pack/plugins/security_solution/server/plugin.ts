@@ -198,7 +198,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     productFeaturesService.init(plugins.features);
 
     events.forEach((eventConfig) => {
-      console.log('eventConfig', eventConfig);
       core.analytics.registerEventType(eventConfig);
     });
 
