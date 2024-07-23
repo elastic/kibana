@@ -96,6 +96,9 @@ disabled:
   - x-pack/test/security_functional/saml.http2.config.ts
   - x-pack/test/security_functional/oidc.http2.config.ts
 
+  # FIPS
+  - x-pack/test/fips/config.fips.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
