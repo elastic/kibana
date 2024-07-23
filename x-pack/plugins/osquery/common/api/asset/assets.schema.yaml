@@ -5,6 +5,7 @@ info:
 paths:
   /internal/osquery/assets:
     get:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ReadAssetsStatus
       summary: Get assets
@@ -25,6 +26,7 @@ paths:
                 # Define properties for the success response if needed
   /internal/osquery/assets/update:
     post:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: UpdateAssetsStatus
       summary: Update assets

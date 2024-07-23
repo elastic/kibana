@@ -5,6 +5,7 @@ info:
 paths:
   /internal/osquery/privileges_check:
     get:
+      x-labels: [serverless, ess]
       operationId: ReadPrivilegesCheck
       summary: Get Osquery privileges check
       responses:
