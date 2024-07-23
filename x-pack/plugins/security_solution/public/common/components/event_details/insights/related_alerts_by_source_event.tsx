@@ -25,6 +25,7 @@ import {
   SOURCE_EVENT_ERROR,
   SOURCE_EVENT_COUNT,
 } from './translations';
+import { getFieldFormat } from '../get_field_format';
 
 interface Props {
   browserFields: BrowserFields;
@@ -66,7 +67,7 @@ export const RelatedAlertsBySourceEvent = React.memo<Props>(
       contextId: scopeId,
       eventId,
       fieldFromBrowserField,
-      fieldFormat: fieldFromBrowserField?.format,
+      fieldFormat: getFieldFormat(fieldFromBrowserField),
       fieldType: fieldFromBrowserField?.type,
     });
 
