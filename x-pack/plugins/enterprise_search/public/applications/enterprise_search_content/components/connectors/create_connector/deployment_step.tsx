@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-// import { ConnectorDeployment } from '../../connector_detail/deployment';
+import { ConnectorDeployment } from '../../connector_detail/deployment';
 
 interface DeploymentStepProps {
   currentStep: number;
@@ -37,7 +37,7 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
-      {/* <ConnectorDeployment /> */}
+      <ConnectorDeployment />
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder paddingSize="l">
           <EuiTitle size="m">

@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 // import { useValues } from 'kea';
 
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   EuiBadge,
@@ -35,6 +35,7 @@ import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaLogic } from '../../../../shared/kibana';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { connectorsBreadcrumbs } from '../connectors';
 
@@ -50,6 +51,10 @@ export const CreateConnector: React.FC = () => {
   const [selfManaged, setSelfManaged] = useState(false);
   const { connectorTypes } = useValues(KibanaLogic);
   const allConnectors = connectorTypes.sort((a, b) => a.name.localeCompare(b.name)); // alphabetically ordered
+  const { fetchConnector } = useActions(ConnectorViewLogic);
+  useEffect(() => {
+    fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
+  }, []);
   const [startStepStatus, setStartStepStatus] = useState<
     | 'current'
     | 'incomplete'
