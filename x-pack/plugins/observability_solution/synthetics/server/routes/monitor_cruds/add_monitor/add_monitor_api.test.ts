@@ -22,32 +22,26 @@ describe('AddNewMonitorsPublicAPI', () => {
         body: {},
       },
     } as any);
-    let result = await api.normalizeMonitor({ schedule: '3' } as any, {} as any);
+    let result = await api.normalizeMonitor({ schedule: '3' } as any);
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
-    result = await api.normalizeMonitor({ schedule: 3 } as any, {} as any);
+    result = await api.normalizeMonitor({ schedule: 3 } as any);
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
-    result = await api.normalizeMonitor(
-      {
-        schedule: {
-          number: '3',
-          unit: 'm',
-        },
-      } as any,
-      {} as any
-    );
+    result = await api.normalizeMonitor({
+      schedule: {
+        number: '3',
+        unit: 'm',
+      },
+    } as any);
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
-    result = await api.normalizeMonitor(
-      {
-        schedule: {
-          number: 3,
-          unit: 'm',
-        },
-      } as any,
-      {} as any
-    );
+    result = await api.normalizeMonitor({
+      schedule: {
+        number: 3,
+        unit: 'm',
+      },
+    } as any);
     expect(result.schedule).toEqual({ number: 3, unit: 'm' });
   });
 
@@ -67,7 +61,6 @@ describe('AddNewMonitorsPublicAPI', () => {
           {
             type: 'tcp',
           } as any,
-          {} as any,
           []
         )
       ).toEqual({
@@ -115,7 +108,6 @@ describe('AddNewMonitorsPublicAPI', () => {
           {
             type: 'icmp',
           } as any,
-          {} as any,
           []
         )
       ).toEqual({
@@ -147,12 +139,9 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
     it('should normalize http', async () => {
       expect(
-        await api.normalizeMonitor(
-          {
-            type: 'http',
-          } as any,
-          {} as any
-        )
+        await api.normalizeMonitor({
+          type: 'http',
+        } as any)
       ).toEqual({
         __ui: { is_tls_enabled: false },
         alert: { status: { enabled: true }, tls: { enabled: true } },
@@ -205,12 +194,9 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
     it('should normalize browser', async () => {
       expect(
-        await api.normalizeMonitor(
-          {
-            type: 'browser',
-          } as any,
-          {} as any
-        )
+        await api.normalizeMonitor({
+          type: 'browser',
+        } as any)
       ).toEqual({
         __ui: { script_source: { file_name: '', is_generated_script: false } },
         alert: { status: { enabled: true }, tls: { enabled: true } },

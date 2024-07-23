@@ -67,10 +67,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         });
       }
 
-      const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(
-        formattedConfig!,
-        request.body as CreateMonitorPayLoad
-      );
+      const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(formattedConfig!);
 
       const validationResult = validateMonitor(monitorWithDefaults);
 

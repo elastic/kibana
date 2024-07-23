@@ -111,7 +111,6 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       editedMonitor = await editMonitorAPI.normalizeMonitor(
         formattedConfig as CreateMonitorPayLoad,
-        monitor as CreateMonitorPayLoad,
         previousMonitor.attributes.locations
       );
 

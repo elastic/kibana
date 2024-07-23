@@ -185,7 +185,6 @@ export class AddEditMonitorAPI {
 
   async normalizeMonitor(
     requestPayload: CreateMonitorPayLoad,
-    monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations']
   ) {
     const { savedObjectsClient, syntheticsMonitorClient, request } = this.routeContext;
@@ -213,7 +212,7 @@ export class AddEditMonitorAPI {
     if (!locations && !privateLocations && prevLocations) {
       locationsVal = prevLocations;
     } else {
-      const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, ui);
+      const monitorLocations = parseMonitorLocations(requestPayload, prevLocations, ui);
 
       if (monitorLocations.privateLocations.length > 0) {
         this.allPrivateLocations = await getPrivateLocations(savedObjectsClient);
@@ -232,7 +231,7 @@ export class AddEditMonitorAPI {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
-      [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure),
+      [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure, monitor[ConfigKey.MAX_ATTEMPTS]),
       [ConfigKey.LOCATIONS]: locationsVal,
     } as MonitorFields;
   }
