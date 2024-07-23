@@ -182,7 +182,7 @@ export const bulkActionConversationsRoute = (
               perPage: 100,
               page: 1,
               filter: `users:{ ${userFilter} } AND (${body.create
-                .map((c) => `title:${c.title}`)
+                .map((c) => `title:${JSON.stringify(c.title)}`)
                 .join(' OR ')})`,
               fields: ['title'],
             });
