@@ -215,7 +215,7 @@ describe('bulkEnableRules', () => {
       saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
     });
 
-    const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -223,13 +223,13 @@ describe('bulkEnableRules', () => {
         expect.objectContaining({
           id: 'id1',
           attributes: expect.objectContaining({
-            enabled: false,
+            enabled: true,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
-            enabled: false,
+            enabled: true,
           }),
         }),
       ]),
@@ -239,6 +239,7 @@ describe('bulkEnableRules', () => {
     expect(result).toStrictEqual({
       errors: [],
       rules: [returnedRuleForBulkEnableWithActions1, returnedRuleForBulkEnableWithActions2],
+      taskIdsFailedToBeEnabled: [],
       total: 2,
     });
   });
@@ -432,7 +433,7 @@ describe('bulkEnableRules', () => {
     });
   });
 
-  test('should skip rule if it is already enabled', async () => {
+  test('should return both rules if one is already enabled and one is disabled when bulk enable is based on ids', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [disabledRule1, enabledRuleForBulkOps2],
     });
@@ -440,7 +441,9 @@ describe('bulkEnableRules', () => {
       saved_objects: [enabledRuleForBulkOps1],
     });
 
-    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+    const result = await rulesClient.bulkEnableRules({
+      ids: ['id1', 'id2'],
+    });
 
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -457,7 +460,40 @@ describe('bulkEnableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedRuleForBulkOps1],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
+      total: 2,
+      taskIdsFailedToBeEnabled: [],
+    });
+  });
+
+  test('should return both rules if one is already enabled and one is disabled when bulk enable is based on filters', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRule1, enabledRuleForBulkOps2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1],
+    });
+
+    const result = await rulesClient.bulkEnableRules({
+      filter: 'fake_filter',
+    });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: true,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(result).toStrictEqual({
+      errors: [],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
