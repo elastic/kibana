@@ -8,7 +8,12 @@
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
+import {
+  HasEditCapabilities,
+  PublishesDataLoading,
+  PublishesDataViews,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import { DeepPartial } from '@kbn/utility-types';
 import { HasVisualizeConfig } from '../embeddable';
 import type { Vis, VisParams, VisSavedObject } from '../types';
@@ -62,6 +67,8 @@ export const isVisualizeSavedObjectState = (
 };
 
 export type VisualizeApi = HasEditCapabilities &
+  PublishesDataViews &
+  PublishesDataLoading &
   HasVisualizeConfig &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
