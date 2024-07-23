@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  SecurityHasPrivilegesApplicationPrivilegesCheck,
-  SecurityHasPrivilegesApplicationsPrivileges,
-} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ENTITY_INDICES_PATTERN } from '../../../common/constants_entities';
 import { SO_ENTITY_DEFINITION_TYPE, SO_ENTITY_DISCOVERY_API_KEY_TYPE } from '../../saved_objects';
@@ -31,29 +27,19 @@ const canDeleteEntityDefinition = async (client: ElasticsearchClient) => {
 };
 
 const canManageAPIKey = async (client: ElasticsearchClient) => {
-  const { cluster, application } = await client.security.hasPrivileges({
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
     body: apiKeyCreationPrivileges,
   });
 
-  const hasClusterPrivileges = apiKeyCreationPrivileges.cluster.some((k) => cluster[k] === true);
-  const hasApplicationPrivileges = hasAllApplicationPrivileges(
-    apiKeyCreationPrivileges.application,
-    application
-  );
-  return hasClusterPrivileges && hasApplicationPrivileges;
+  return hasAllRequested;
 };
 
 const canDeleteAPIKey = async (client: ElasticsearchClient) => {
-  const { cluster, application } = await client.security.hasPrivileges({
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
     body: apiKeyDeletionPrivileges,
   });
 
-  const hasClusterPrivileges = apiKeyDeletionPrivileges.cluster.some((k) => cluster[k] === true);
-  const hasApplicationPrivileges = hasAllApplicationPrivileges(
-    apiKeyDeletionPrivileges.application,
-    application
-  );
-  return hasClusterPrivileges && hasApplicationPrivileges;
+  return hasAllRequested;
 };
 
 export const canEnableEntityDiscovery = async (client: ElasticsearchClient) => {
@@ -66,19 +52,6 @@ export const canDisableEntityDiscovery = async (client: ElasticsearchClient) => 
   return Promise.all([canDeleteAPIKey(client), canDeleteEntityDefinition(client)]).then((results) =>
     results.every(Boolean)
   );
-};
-
-const hasAllApplicationPrivileges = (
-  requiredPrivileges: SecurityHasPrivilegesApplicationPrivilegesCheck[],
-  userPrivileges: SecurityHasPrivilegesApplicationsPrivileges
-) => {
-  return requiredPrivileges.every(({ application, privileges, resources }) => {
-    return resources.every((resource) => {
-      return privileges.every((privilege) => {
-        return userPrivileges[application][resource][privilege] === true;
-      });
-    });
-  });
 };
 
 export const entityDefinitionRuntimePrivileges = {
@@ -120,8 +93,6 @@ export const entityDefinitionDeletionPrivileges = {
 };
 
 export const apiKeyCreationPrivileges = {
-  // any one of
-  cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
   application: [
     {
       application: 'kibana-.kibana',
@@ -132,8 +103,6 @@ export const apiKeyCreationPrivileges = {
 };
 
 const apiKeyDeletionPrivileges = {
-  // any one of
-  cluster: ['manage_security', 'manage_api_key'],
   application: [
     {
       application: 'kibana-.kibana',
