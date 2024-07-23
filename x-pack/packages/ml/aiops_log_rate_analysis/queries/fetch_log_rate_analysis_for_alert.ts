@@ -65,8 +65,6 @@ export interface SimpleSignificantItem {
  * @param {string} params.arguments.start - The start time for the query range.
  * @param {string} params.arguments.end - The end time for the query range.
  * @param {string} params.arguments.timefield - The field used to filter documents by time.
- * @param {string[]} [params.arguments.keywordFieldCandidates] - Optional list of fields to be considered as keyword fields.
- * @param {string[]} [params.arguments.textFieldCandidates] - Optional list of fields to be considered as text fields.
  *
  * @returns {Promise<void>} A promise that resolves when the operation is complete.
  */
@@ -84,8 +82,6 @@ export const fetchLogRateAnalysisForAlert = async ({
     alertRuleParameterTimeUnit?: string;
     timefield?: string;
     searchQuery?: estypes.QueryDslQueryContainer;
-    keywordFieldCandidates?: string[];
-    textFieldCandidates?: string[];
   };
 }) => {
   const debugStartTime = Date.now();
@@ -110,7 +106,7 @@ export const fetchLogRateAnalysisForAlert = async ({
     },
   };
 
-  const { keywordFieldCandidates = [], textFieldCandidates = [], searchQuery = rangeQuery } = args;
+  const { searchQuery = rangeQuery } = args;
 
   if (searchQuery.bool && Array.isArray(searchQuery.bool.filter)) {
     searchQuery.bool.filter.push(rangeQuery);
@@ -118,8 +114,8 @@ export const fetchLogRateAnalysisForAlert = async ({
 
   // FIELD CANDIDATES
 
-  const includeFieldCandidates =
-    keywordFieldCandidates.length === 0 && textFieldCandidates.length === 0;
+  const keywordFieldCandidates: string[] = [];
+  const textFieldCandidates: string[] = [];
 
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
     index: args.index,
@@ -136,7 +132,6 @@ export const fetchLogRateAnalysisForAlert = async ({
     arguments: {
       ...indexInfoParams,
       textFieldCandidatesOverrides: ['message', 'error.message'],
-      skipFieldCandidates: !includeFieldCandidates,
     },
   });
 
