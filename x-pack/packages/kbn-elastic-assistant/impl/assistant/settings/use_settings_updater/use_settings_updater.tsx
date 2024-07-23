@@ -199,19 +199,20 @@ export const useSettingsUpdater = (
       (bulkPromptsResult?.success ?? true)
     );
   }, [
-    hasBulkConversations,
+    hasBulkPrompts,
     http,
-    conversationsSettingsBulkActions,
+    promptsBulkActions,
     toasts,
-    updatedKnowledgeBaseSettings,
+    hasBulkConversations,
+    conversationsSettingsBulkActions,
     assistantStreamingEnabled,
     updatedAssistantStreamingEnabled,
+    knowledgeBase.latestAlerts,
+    updatedKnowledgeBaseSettings,
     setAssistantStreamingEnabled,
     setKnowledgeBase,
     hasBulkAnonymizationFields,
     anonymizationFieldsBulkActions,
-    hasBulkPrompts,
-    promptsBulkActions,
     assistantTelemetry,
   ]);
 

@@ -43,7 +43,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
   ({ setInput, setIsSettingsModalVisible, trackPrompt, allPrompts }) => {
     const [quickPromptsContainerRef, { width }] = useMeasure();
 
-    const { knowledgeBase, promptContexts, setSelectedSettingsTab } = useAssistantContext();
+    const { promptContexts, setSelectedSettingsTab } = useAssistantContext();
 
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
