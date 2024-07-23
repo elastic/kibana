@@ -30,3 +30,8 @@ echo -e "\n[Security Solution OpenAPI Bundling] Elastic Assistant API\n"
 
 (cd x-pack/packages/kbn-elastic-assistant-common && yarn openapi:bundle)
 check_for_changed_files "yarn openapi:bundle" true
+
+echo -e "\n[Security Solution OpenAPI Bundling] Osquery API\n"
+
+(cd x-pack/plugins/osquery && yarn openapi:bundle)
+check_for_changed_files "yarn openapi:bundle" true
