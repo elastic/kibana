@@ -113,8 +113,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       onTabClick={() => {}}
       expand={false}
       css={css`
-        margin-left: -${euiTheme.size.xl};
-        width: calce(100% + ${euiTheme.size.xl});
+        width: 100%;
 
         .euiTable {
           background-color: transparent;
