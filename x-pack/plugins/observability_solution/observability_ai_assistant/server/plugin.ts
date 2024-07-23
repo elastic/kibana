@@ -145,7 +145,6 @@ export class ObservabilityAIAssistantPlugin
           .getELSER();
 
         return elserModelDefinition.model_id;
-        // return 'pt_tiny_elser';
       } catch (error) {
         this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
         return defaultModelId;
