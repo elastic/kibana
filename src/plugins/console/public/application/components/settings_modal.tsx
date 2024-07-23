@@ -160,8 +160,9 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
     (isEnabled: boolean) => {
       if (props.editorInstance) {
         unregisterCommands(props.editorInstance);
-        setIsKeyboardShortcutsEnabled(isEnabled);
       }
+
+      setIsKeyboardShortcutsEnabled(isEnabled);
     },
     [props.editorInstance]
   );
