@@ -20,7 +20,7 @@ import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
 import { ClaimAndFillPoolResult } from '../lib/fill_pool';
 import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
-import { TaskCost } from '../task';
+import { getCapacityInWorkers } from '../task_pool';
 
 /**
  * Emits a delay amount in ms to apply to polling whenever the task store exceeds a threshold of claim claimClashes
@@ -54,7 +54,7 @@ export function delayOnClaimConflicts(
     ]).pipe(
       map(([capacity, pollInterval, latestClaimConflicts]) => {
         // convert capacity to maxWorkers
-        const maxWorkers = Math.floor(capacity / TaskCost.Normal);
+        const maxWorkers = getCapacityInWorkers(capacity);
 
         // add latest claimConflict count to queue
         claimConflictQueue(latestClaimConflicts);

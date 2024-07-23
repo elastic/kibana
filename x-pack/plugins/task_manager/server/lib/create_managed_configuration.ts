@@ -75,7 +75,6 @@ export function createManagedConfiguration({
 function createCapacityScan(config: TaskManagerConfig, logger: Logger, startingCapacity: number) {
   return scan((previousCapacity: number, errorCount: number) => {
     let newCapacity: number;
-    // console.log(`errorCount: ${errorCount}`);
     if (errorCount > 0) {
       const minCapacity = getMinCapacity(config);
       // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
@@ -94,8 +93,6 @@ function createCapacityScan(config: TaskManagerConfig, logger: Logger, startingC
       );
     }
 
-    // console.log(`newCapacity: ${newCapacity}`);
-    // console.log(`previousCapacity: ${previousCapacity}`);
     if (newCapacity !== previousCapacity) {
       logger.debug(
         `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`

@@ -9,8 +9,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_CAPACITY = 10;
-export const MAX_CAPACITY = 100;
-export const MIN_CAPACITY = 10;
+export const MAX_CAPACITY = 50;
+export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;

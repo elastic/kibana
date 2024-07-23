@@ -83,7 +83,7 @@ describe('createManagedConfiguration()', () => {
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
     expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 100);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 50);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
   });
