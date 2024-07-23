@@ -42,7 +42,6 @@ function createMathDefinition(
 // https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-functions-operators.html#_less_than
 const baseComparisonTypeTable: MathFunctionSignature[] = [
   // Verify what's the different between date and datetime
-  ['date', 'date', 'boolean'],
   ['datetime', 'datetime', 'boolean'],
   ['double', 'double', 'boolean'],
   ['double', 'integer', 'boolean'],
@@ -317,7 +316,7 @@ const comparisonFunctions: FunctionDefinition[] = [
       },
       {
         params: [
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'string' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,
@@ -347,7 +346,7 @@ const comparisonFunctions: FunctionDefinition[] = [
       },
       {
         params: [
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'string' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,

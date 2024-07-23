@@ -17,7 +17,7 @@ export const fields = [
 ];
 
 export const enrichFields = [
-  { name: 'otherField', type: 'string' },
+  { name: 'otherField', type: 'text' },
   { name: 'yetAnotherField', type: 'double' },
 ];
 
@@ -58,7 +58,7 @@ export function getCallbackMocks() {
         return unsupported_field;
       }
       if (/dissect|grok/.test(query)) {
-        return [{ name: 'firstWord', type: 'string' }];
+        return [{ name: 'firstWord', type: 'text' }];
       }
       return fields;
     }),

@@ -34,7 +34,7 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import type {
+import {
   CommandDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
@@ -242,7 +242,7 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date'].includes(argType);
+  return ['string', 'datetime', 'date_period'].includes(argType);
 }
 
 /**
@@ -274,7 +274,8 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
   ['string[]', 'string'],
   ['keyword[]', 'keyword'],
   ['text[]', 'text'],
-  ['date[]', 'date'],
+  ['datetime[]', 'datetime'],
+  ['date_period[]', 'date_period'],
   ['boolean[]', 'boolean'],
   ['any[]', 'any'],
 ]);
@@ -425,7 +426,8 @@ export function checkFunctionArgMatchesDefinition(
     return true;
   }
   if (arg.type === 'literal') {
-    return compareLiteralType(argType, arg);
+    const matched = compareLiteralType(argType, arg);
+    return matched;
   }
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
@@ -446,10 +448,19 @@ export function checkFunctionArgMatchesDefinition(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
+    return wrappedTypes.some(
+      (ct) =>
+        ['any', 'null'].includes(ct) ||
+        argType === ct ||
+        (ct === 'string' && ['text', 'keyword'].includes(argType))
+    );
   }
   if (arg.type === 'inlineCast') {
-    return argType === arg.castType;
+    return (
+      argType === arg.castType ||
+      // for valid shorthand casts like 321.12::int or "false"::bool
+      (['int', 'bool'].includes(arg.castType) && argType.startsWith(arg.castType))
+    );
   }
 }
 

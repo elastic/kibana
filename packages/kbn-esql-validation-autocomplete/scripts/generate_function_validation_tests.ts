@@ -716,7 +716,7 @@ function generateStatsCommandTestsForAggFunction(
 
     // test only numeric functions for now
     if (isNumericType(params[0].type)) {
-      const nestedBuiltin = 'numberField / 2';
+      const nestedBuiltin = 'doubleField / 2';
       const fieldMappingWithNestedBuiltinFunctions = getFieldMapping(params);
       fieldMappingWithNestedBuiltinFunctions[0].name = nestedBuiltin;
 
@@ -728,16 +728,16 @@ function generateStatsCommandTestsForAggFunction(
         },
         { withTypes: false }
       )[0].declaration;
-      // from a_index | STATS aggFn( numberField / 2 )
+      // from a_index | STATS aggFn( doubleField / 2 )
       testCases.set(`from a_index | stats ${fnSignatureWithBuiltinString}`, []);
       testCases.set(`from a_index | stats var0 = ${fnSignatureWithBuiltinString}`, []);
-      testCases.set(`from a_index | stats avg(numberField), ${fnSignatureWithBuiltinString}`, []);
+      testCases.set(`from a_index | stats avg(doubleField), ${fnSignatureWithBuiltinString}`, []);
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithBuiltinString}`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithBuiltinString}`,
         []
       );
 
-      const nestedEvalAndBuiltin = 'round(numberField / 2)';
+      const nestedEvalAndBuiltin = 'round(doubleField / 2)';
       const fieldMappingWithNestedEvalAndBuiltinFunctions = getFieldMapping(params);
       fieldMappingWithNestedBuiltinFunctions[0].name = nestedEvalAndBuiltin;
 
@@ -749,18 +749,18 @@ function generateStatsCommandTestsForAggFunction(
         },
         { withTypes: false }
       )[0].declaration;
-      // from a_index | STATS aggFn( round(numberField / 2) )
+      // from a_index | STATS aggFn( round(doubleField / 2) )
       testCases.set(`from a_index | stats ${fnSignatureWithEvalAndBuiltinString}`, []);
       testCases.set(`from a_index | stats var0 = ${fnSignatureWithEvalAndBuiltinString}`, []);
       testCases.set(
-        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString}`,
+        `from a_index | stats avg(doubleField), ${fnSignatureWithEvalAndBuiltinString}`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString}`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithEvalAndBuiltinString}`,
         []
       );
-      // from a_index | STATS aggFn(round(numberField / 2) ) BY round(numberField / 2)
+      // from a_index | STATS aggFn(round(doubleField / 2) ) BY round(doubleField / 2)
       testCases.set(
         `from a_index | stats ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}`,
         []
@@ -770,19 +770,19 @@ function generateStatsCommandTestsForAggFunction(
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ipField`,
+        `from a_index | stats avg(doubleField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ipField`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ipField`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ipField`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+        `from a_index | stats avg(doubleField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
         []
       );
     }
@@ -800,7 +800,7 @@ function generateStatsCommandTestsForAggFunction(
         .filter(({ constantOnly }) => !constantOnly)
         .map(
           (_) =>
-            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
+            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]`
         );
       testCases.set(
         `from a_index | stats var = ${
@@ -1143,7 +1143,7 @@ function getFieldMapping(
         ...rest,
       };
     }
-    return { name: 'stringField', type, ...rest };
+    return { name: 'textField', type, ...rest };
   });
 }
 
@@ -1244,7 +1244,7 @@ function generateIncorrectlyTypedParameters(
       }
       const fieldName = wrongFieldMapping[i].name;
       if (
-        fieldName === 'numberField' &&
+        fieldName === 'doubleField' &&
         signatures.every((signature) => getParamAtPosition(signature, i)?.type !== 'string')
       ) {
         return;

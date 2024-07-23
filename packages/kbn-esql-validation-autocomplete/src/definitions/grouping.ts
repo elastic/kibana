@@ -23,10 +23,10 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'field', type: 'date' },
+          { name: 'field', type: 'datetime' },
           { name: 'buckets', type: 'time_literal', constantOnly: true },
         ],
-        returnType: 'date',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -37,39 +37,43 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       },
       {
         params: [
-          { name: 'field', type: 'date' },
+          // @TODO: check for support for date_period, 'keyword',
+          { name: 'field', type: 'datetime' },
+          { name: 'buckets', type: 'integer', constantOnly: true },
+          { name: 'startDate', type: 'text', constantOnly: true },
+          { name: 'endDate', type: 'text', constantOnly: true },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          // @TODO: check for support for date_period
+          { name: 'field', type: 'datetime' },
+          { name: 'buckets', type: 'integer', constantOnly: true },
+          { name: 'startDate', type: 'datetime', constantOnly: true },
+          { name: 'endDate', type: 'datetime', constantOnly: true },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          // @TODO: check for support for date_period
+          { name: 'field', type: 'datetime' },
           { name: 'buckets', type: 'integer', constantOnly: true },
           { name: 'startDate', type: 'string', constantOnly: true },
+          { name: 'endDate', type: 'datetime', constantOnly: true },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          // @TODO: check for support for date_period
+          { name: 'field', type: 'datetime' },
+          { name: 'buckets', type: 'integer', constantOnly: true },
+          { name: 'startDate', type: 'datetime', constantOnly: true },
           { name: 'endDate', type: 'string', constantOnly: true },
         ],
-        returnType: 'date',
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startDate', type: 'date', constantOnly: true },
-          { name: 'endDate', type: 'date', constantOnly: true },
-        ],
-        returnType: 'date',
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startDate', type: 'string', constantOnly: true },
-          { name: 'endDate', type: 'date', constantOnly: true },
-        ],
-        returnType: 'date',
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startDate', type: 'date', constantOnly: true },
-          { name: 'endDate', type: 'string', constantOnly: true },
-        ],
-        returnType: 'date',
+        returnType: 'datetime',
       },
       {
         params: [

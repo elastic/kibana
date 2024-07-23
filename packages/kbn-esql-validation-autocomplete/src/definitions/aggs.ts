@@ -113,8 +113,12 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           returnType: type,
         })),
         {
-          params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
-          returnType: 'date',
+          params: [{ name: 'column', type: 'datetime', noNestingFunctions: true }],
+          returnType: 'datetime',
+        },
+        {
+          params: [{ name: 'column', type: 'date_period', noNestingFunctions: true }],
+          returnType: 'date_period',
         },
         {
           params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
@@ -140,8 +144,12 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           returnType: type,
         })),
         {
-          params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
-          returnType: 'date',
+          params: [{ name: 'column', type: 'datetime', noNestingFunctions: true }],
+          returnType: 'datetime',
+        },
+        {
+          params: [{ name: 'column', type: 'date_period', noNestingFunctions: true }],
+          returnType: 'date_period',
         },
         {
           params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],

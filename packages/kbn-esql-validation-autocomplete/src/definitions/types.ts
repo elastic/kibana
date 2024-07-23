@@ -23,7 +23,6 @@ export const supportedFieldTypes = [
   'date_period',
   'text',
   'keyword',
-  'string',
   'boolean',
   'ip',
   'cartesian_point',
@@ -69,7 +68,6 @@ export type FunctionReturnType =
   | 'counter_integer'
   | 'counter_long'
   | 'counter_double'
-  | 'date'
   | 'datetime'
   | 'date_period'
   | 'time_duration'

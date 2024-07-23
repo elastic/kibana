@@ -771,7 +771,10 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...buildConstantsDefinitions(argDef.values));
     }
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
-    if (['string', 'boolean', ...ESQL_NUMBER_TYPES].includes(argDef.type) && !argDef.values) {
+    if (
+      ['string', 'text', 'keyword', 'boolean', ...ESQL_NUMBER_TYPES].includes(argDef.type) &&
+      !argDef.values
+    ) {
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
