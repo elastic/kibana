@@ -15,14 +15,7 @@ import type { HostsUncommonProcessesEdges } from '../../../../../common/search_s
 import { HostsType } from '../../store/model';
 import * as i18n from './translations';
 
-export type UncommonProcessTableColumns = [
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>
-];
+export type UncommonProcessTableColumns = Array<Columns<HostsUncommonProcessesEdges>>;
 
 export const getHostNames = (hosts: HostEcs[]): string[] => {
   if (hosts != null) {
@@ -34,7 +27,7 @@ export const getHostNames = (hosts: HostEcs[]): string[] => {
   }
 };
 
-const uncommonProcessColumns: UncommonProcessTableColumns = [
+export const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
     name: i18n.NAME,
     truncateText: false,
@@ -103,16 +96,14 @@ const uncommonProcessColumns: UncommonProcessTableColumns = [
 ];
 
 export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessTableColumns => {
-  const columns: UncommonProcessTableColumns = [...uncommonProcessColumns];
+  const columns: UncommonProcessTableColumns = getUncommonColumns();
+
   if (pageType === HostsType.details) {
-    return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce<UncommonProcessTableColumns>((acc, name) => {
-      acc.splice(
-        acc.findIndex((column) => column.name === name),
-        1
-      );
-      return acc;
-    }, columns);
-  } else {
-    return columns;
+    const columnsToRemove = new Set([i18n.HOSTS, i18n.NUMBER_OF_HOSTS]);
+    return columns.filter(
+      (column) => typeof column.name === 'string' && !columnsToRemove.has(column.name)
+    );
   }
+
+  return columns;
 };
