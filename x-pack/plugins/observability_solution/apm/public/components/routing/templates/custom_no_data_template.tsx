@@ -111,7 +111,9 @@ export function CustomNoDataTemplate({
                   background: 'aliceblue',
                 }}
                 url={imageUrl}
-                alt=""
+                alt={i18n.translate('xpack.apm.customEmtpyState.img.alt', {
+                  defaultMessage: 'Image of the Elastic Agent card',
+                })}
               />
             }
           />
