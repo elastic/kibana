@@ -21,8 +21,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlObltNavigation.navigateToLandingPage();
     });
 
-    after(async () => {});
-
     it('navigate observability sidenav & breadcrumbs', async () => {
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
