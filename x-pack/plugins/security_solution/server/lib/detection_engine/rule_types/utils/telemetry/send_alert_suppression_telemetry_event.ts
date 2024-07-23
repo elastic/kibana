@@ -34,21 +34,21 @@ interface SendAlertSuppressionEventArgs {
   ruleAttributes: SanitizedRuleConfig;
 }
 
-export const sendAlertSuppressionEvent = ({
+export const sendAlertSuppressionTelemetryEvent = ({
   telemetry,
   suppressedAlertsCount,
   createdAlertsCount,
   ruleParams,
   ruleAttributes,
-}: SendAlertSuppressionEventArgs) => {
+}: SendAlertSuppressionEventArgs): void => {
   // do not send any telemetry event if suppression is not configured
   if (ruleParams.alertSuppression == null) {
-    return undefined;
+    return;
   }
 
   // do not send any telemetry if no alerts were suppressed or created
   if (suppressedAlertsCount + createdAlertsCount === 0) {
-    return undefined;
+    return;
   }
 
   const suppressionFieldsNumber = isThresholdParams(ruleParams)
@@ -69,5 +69,6 @@ export const sendAlertSuppressionEvent = ({
     suppressionMissingFields,
   };
 
+  console.log('..... telemetryEvent', telemetryEvent);
   telemetry.reportEvent(ALERT_SUPPRESSION_EVENT.eventType, telemetryEvent);
 };

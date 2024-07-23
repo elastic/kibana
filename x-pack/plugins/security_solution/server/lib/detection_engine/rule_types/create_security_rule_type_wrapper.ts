@@ -49,7 +49,7 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
-import { sendAlertSuppressionEvent } from './utils/telemetry/send_alert_suppression_event';
+import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -529,7 +529,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     : ''
                 }`
               );
-
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.succeeded,
                 message: 'Rule execution completed successfully',
@@ -538,16 +537,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                 },
-              });
-            }
-            
-            if (!isPreview) {
-              sendAlertSuppressionEvent({
-                telemetry,
-                suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
-                createdAlertsCount: result.createdSignalsCount,
-                ruleAttributes: rule,
-                ruleParams: params,
               });
             }
           } catch (error) {
@@ -561,6 +550,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 indexingDurations: result.bulkCreateTimes,
                 enrichmentDurations: result.enrichmentTimes,
               },
+            });
+          }
+
+          if (!isPreview) {
+            sendAlertSuppressionTelemetryEvent({
+              telemetry,
+              suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
+              createdAlertsCount: result.createdSignalsCount,
+              ruleAttributes: rule,
+              ruleParams: params,
             });
           }
 
