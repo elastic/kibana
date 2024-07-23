@@ -265,6 +265,7 @@ export class ManageSpacePage extends Component<Props, State> {
           title={i18n.translate('xpack.spaces.management.manageSpacePage.userImpactWarningTitle', {
             defaultMessage: 'Warning',
           })}
+          data-test-subj="userImpactWarning"
         >
           <FormattedMessage
             id="xpack.spaces.management.manageSpacePage.userImpactWarningDescription"
