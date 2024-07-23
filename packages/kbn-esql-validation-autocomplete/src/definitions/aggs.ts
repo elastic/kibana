@@ -80,26 +80,80 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       }
     ),
   },
-  {
-    name: 'percentile',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.percentiletDoc',
-      {
-        defaultMessage: 'Returns the n percentile of a field.',
-      }
-    ),
-    args: [
-      ...ESQL_NUMBER_TYPES.map((type) => ({
-        name: 'percentile',
-        type,
-        value: '90',
-        constantOnly: true,
-      })),
-    ],
-  },
+  // {
+  //   name: 'percentile',
+  //   description: i18n.translate(
+  //     'kbn-esql-validation-autocomplete.esql.definitions.percentiletDoc',
+  //     {
+  //       defaultMessage: 'Returns the n percentile of a field.',
+  //     }
+  //   ),
+  //   args: [{ name: 'percentile', type: 'integer' as const, value: '90', constantOnly: true }],
+  // },
 ]
   .map(createNumericAggDefinition)
   .concat([
+    {
+      name: 'percentile',
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definitions.percentiletDoc',
+        {
+          defaultMessage: 'Returns the n percentile of a field.',
+        }
+      ),
+      type: 'agg',
+      supportedCommands: ['stats', 'metrics'],
+      signatures: [
+        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType) => ({
+          params: [
+            {
+              name: 'column',
+              type: numericType as FunctionParameterType,
+              noNestingFunctions: true,
+            },
+            {
+              name: 'percentile',
+              type: 'integer',
+              noNestingFunctions: true,
+              constantOnly: true,
+            },
+          ],
+          returnType: 'double',
+        })),
+        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType) => ({
+          params: [
+            {
+              name: 'number',
+              type: numericType as FunctionParameterType,
+              noNestingFunctions: true,
+            },
+            {
+              name: 'percentile',
+              type: 'double',
+              noNestingFunctions: true,
+              constantOnly: true,
+            },
+          ],
+          returnType: 'double',
+        })),
+        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType) => ({
+          params: [
+            {
+              name: 'number',
+              type: numericType as FunctionParameterType,
+              noNestingFunctions: true,
+            },
+            {
+              name: 'percentile',
+              type: 'long',
+              noNestingFunctions: true,
+              constantOnly: true,
+            },
+          ],
+          returnType: 'double',
+        })),
+      ],
+    },
     {
       name: 'max',
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.maxDoc', {

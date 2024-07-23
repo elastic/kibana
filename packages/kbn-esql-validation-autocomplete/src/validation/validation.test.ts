@@ -13379,7 +13379,9 @@ describe('validation logic', () => {
           'Argument of [bucket] must be a constant, received [integerField]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats by bin(integerField, integerField)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(integerField, integerField)', [
+          'Argument of [bin] must be a constant, received [integerField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats by bucket(datetimeField, integerField, textField, textField)',
@@ -13392,7 +13394,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(datetimeField, integerField, textField, textField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [textField]',
+            'Argument of [bin] must be a constant, received [textField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -13406,7 +13412,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(datetimeField, integerField, datetimeField, datetimeField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [datetimeField]',
+            'Argument of [bin] must be a constant, received [datetimeField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -13420,7 +13430,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(datetimeField, integerField, textField, datetimeField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [textField]',
+            'Argument of [bin] must be a constant, received [datetimeField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -13434,7 +13448,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(datetimeField, integerField, datetimeField, textField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [datetimeField]',
+            'Argument of [bin] must be a constant, received [textField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -13448,7 +13466,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, integerField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings('from a_index | sort bucket(datetimeField, 1 year)', [
@@ -13459,7 +13481,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row nullVar = null | stats bucket(nullVar, nullVar, nullVar, nullVar)',
-          []
+          [
+            'Argument of [bucket] must be a constant, received [nullVar]',
+            'Argument of [bucket] must be a constant, received [nullVar]',
+            'Argument of [bucket] must be a constant, received [nullVar]',
+          ]
         );
       });
     });

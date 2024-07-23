@@ -57,7 +57,8 @@ export type FunctionParameterType =
   | 'text[]'
   | 'boolean[]'
   | 'any[]'
-  | 'date[]';
+  | 'datetime[]'
+  | 'date_period[]';
 
 export type FunctionReturnType =
   | 'double'
