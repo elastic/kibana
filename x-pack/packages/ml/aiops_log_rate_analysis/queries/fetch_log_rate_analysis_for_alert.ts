@@ -13,19 +13,20 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
+
 import {
   isKeywordFieldCandidates,
   isTextFieldCandidates,
   type QueueFieldCandidate,
   QUEUE_CHUNKING_SIZE,
 } from '../queue_field_candidates';
-
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 import { getLogRateAnalysisParametersFromAlert } from '../get_log_rate_analysis_parameters_from_alert';
 import { getSwappedWindowParameters } from '../get_swapped_window_parameters';
 import { getLogRateChange } from '../get_log_rate_change';
 import { getBaselineAndDeviationRates } from '../get_baseline_and_deviation_rates';
 import { getLogRateAnalysisTypeForCounts } from '../get_log_rate_analysis_type_for_counts';
+import { LOG_RATE_ANALYSIS_TYPE } from '../log_rate_analysis_type';
 
 import { fetchIndexInfo } from './fetch_index_info';
 import { fetchSignificantCategories } from './fetch_significant_categories';
@@ -142,7 +143,7 @@ export const fetchLogRateAnalysisForAlert = async ({
   });
 
   const analysisWindowParameters =
-    logRateAnalysisType === 'spike'
+    logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
       ? windowParameters
       : getSwappedWindowParameters(windowParameters);
 
