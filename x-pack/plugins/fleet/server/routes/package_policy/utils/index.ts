@@ -89,7 +89,7 @@ export async function canUseOutputForIntegration(
   if (!allowedOutputTypes.includes(output.type)) {
     return {
       canUseOutputForIntegrationResult: false,
-      errorMessage: `Output type "${output.type}" is not usable with package "${packageName}".`,
+      errorMessage: `Output type "${output.type}" is not usable with package "${packageName}"`,
     };
   }
 

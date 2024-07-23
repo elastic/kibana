@@ -371,26 +371,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     }
   }
 
-  if (
-    !request.body.policy_id &&
-    (!request.body.policy_ids || request.body.policy_ids.length === 0)
-  ) {
-    throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
-  }
-
-  const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-  if ((request.body.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-    throw new PackagePolicyRequestError(errorMessage);
-  }
-
-  if (request.body.output_id && request.body.package) {
-    const { canUseOutputForIntegrationResult, errorMessage: outputForIntegrationErrorMessage } =
-      await canUseOutputForIntegration(soClient, request.body.package.name, request.body.output_id);
-    if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
-      throw new PackagePolicyRequestError(outputForIntegrationErrorMessage);
-    }
-  }
-
   try {
     const { force, package: pkg, ...body } = request.body;
     let newData: NewPackagePolicy;
@@ -436,6 +416,23 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
       if (overrides) {
         newData.overrides = overrides;
+      }
+    }
+
+    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+      throw new PackagePolicyRequestError(errorMessage);
+    }
+
+    if (newData.policy_ids && newData.policy_ids.length === 0) {
+      throw new PackagePolicyRequestError('At least one agent policy id must be provided');
+    }
+
+    if (newData.output_id && newData.package) {
+      const { canUseOutputForIntegrationResult, errorMessage: outputForIntegrationErrorMessage } =
+        await canUseOutputForIntegration(soClient, newData.package.name, newData.output_id);
+      if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
+        throw new PackagePolicyRequestError(outputForIntegrationErrorMessage);
       }
     }
 

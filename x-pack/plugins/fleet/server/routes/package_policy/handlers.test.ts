@@ -16,6 +16,7 @@ import {
   agentPolicyService,
   appContextService,
   licenseService,
+  outputService,
   packagePolicyService,
 } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
@@ -28,7 +29,6 @@ import type { AgentPolicy, FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
 import { createPackagePolicyHandler, getPackagePoliciesHandler } from './handlers';
-
 import { registerRoutes } from '.';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
@@ -147,6 +147,19 @@ jest.mock('../../services/epm/packages', () => {
   };
 });
 
+jest.mock('../../services/output', () => {
+  return {
+    outputService: {
+      get: jest.fn(() =>
+        Promise.resolve({
+          id: 'some-output',
+          type: 'elasticsearch',
+        })
+      ),
+    },
+  };
+});
+
 describe('When calling package policy', () => {
   let routerMock: jest.Mocked<FleetAuthzRouter>;
   let routeHandler: FleetRequestHandler<any, any, any>;
@@ -202,6 +215,7 @@ describe('When calling package policy', () => {
     };
 
     beforeEach(() => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockClear();
       // @ts-ignore
       const postMock = routerMock.versioned.post.mock;
       // @ts-ignore
@@ -243,6 +257,53 @@ describe('When calling package policy', () => {
           message: 'Reusable integration policies are only available with an Enterprise license',
         },
       });
+    });
+
+    it('should throw if no enterprise license and output_id is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      const request = getCreateKibanaRequest({
+        ...newPolicy,
+        policy_id: '1',
+        output_id: 'some-output',
+      } as any);
+      await createPackagePolicyHandler(context, request as any, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Output per integration is only available with an Enterprise license',
+        },
+      });
+    });
+
+    it('should throw if enterprise license and an incompatible output_id for the package is given', async () => {
+      jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValueOnce({ id: 'non-es-output', type: 'kafka' } as any);
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const request = getCreateKibanaRequest({
+        ...newPolicy,
+        policy_id: '1',
+        package: { name: 'apm', version: '1.0.0', title: 'APM' },
+        output_id: 'non-es-output',
+      } as any);
+      await createPackagePolicyHandler(context, request as any, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Output type "kafka" is not usable with package "apm"',
+        },
+      });
+    });
+
+    it('should not throw if enterprise license and output_id is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const request = getCreateKibanaRequest({
+        ...newPolicy,
+        policy_id: '1',
+        output_id: 'some-output',
+      } as any);
+      await createPackagePolicyHandler(context, request as any, response);
+      expect(response.customError).not.toHaveBeenCalledWith();
     });
   });
 
@@ -308,6 +369,7 @@ describe('When calling package policy', () => {
     });
 
     beforeEach(() => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockClear();
       packagePolicyServiceMock.update.mockImplementation((soClient, esClient, policyId, newData) =>
         Promise.resolve(newData as PackagePolicy)
       );
@@ -443,6 +505,47 @@ describe('When calling package policy', () => {
           message: 'At least one agent policy id must be provided',
         },
       });
+    });
+
+    it('should throw if no enterprise license and output_id is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      const request = getUpdateKibanaRequest({
+        output_id: 'some-output',
+      } as any);
+      await routeHandler(context, request, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Output per integration is only available with an Enterprise license',
+        },
+      });
+    });
+
+    it('should throw if enterprise license and an incompatible output_id for the package is given', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValueOnce({ id: 'non-es-output', type: 'kafka' } as any);
+      const request = getUpdateKibanaRequest({
+        package: { name: 'apm', version: '1.0.0', title: 'APM' },
+        output_id: 'non-es-output',
+      } as any);
+      await routeHandler(context, request as any, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Output type "kafka" is not usable with package "apm"',
+        },
+      });
+    });
+
+    it('should not throw if enterprise license and output_id is provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const request = getUpdateKibanaRequest({
+        output_id: 'some-output',
+      } as any);
+      await routeHandler(context, request as any, response);
+      expect(response.customError).not.toHaveBeenCalledWith();
     });
 
     it('should rename the agentless agent policy to sync with the package policy name if agentless is enabled', async () => {
