@@ -22,6 +22,7 @@ import {
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
+import { getSelectionAsFieldType } from '../options_list_reducers';
 
 export const OptionsListPopoverInvalidSelections = () => {
   const optionsList = useOptionsList();
@@ -91,8 +92,13 @@ export const OptionsListPopoverInvalidSelections = () => {
         options={selectableOptions}
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
+          if (!fieldSpec || !changedOption.key) {
+            throw new Error(OptionsListStrings.popover.getInvalidSelectionMessage());
+          }
+
           setSelectableOptions(newSuggestions);
-          optionsList.dispatch.deselectOption(changedOption.key!);
+          const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
+          optionsList.dispatch.deselectOption(key);
         }}
       >
         {(list) => list}

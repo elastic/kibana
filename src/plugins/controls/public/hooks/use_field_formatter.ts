@@ -5,8 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useEffect, useState } from 'react';
+
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+
+import { OptionsListSelection } from '../../common/options_list/types';
 import { pluginServices } from '../services';
 
 export const useFieldFormatter = ({
@@ -19,8 +22,8 @@ export const useFieldFormatter = ({
   const {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
-  const [fieldFormatter, setFieldFormatter] = useState<(toFormat: any) => string>(
-    () => (toFormat: string) => toFormat
+  const [fieldFormatter, setFieldFormatter] = useState(
+    () => (toFormat: OptionsListSelection) => toFormat
   );
 
   /**
@@ -31,10 +34,11 @@ export const useFieldFormatter = ({
       if (!dataViewId || !fieldSpec) return;
       // dataViews are cached, and should always be available without having to hit ES.
       const dataView = await getDataViewById(dataViewId);
-      const formatterForField =
-        dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-        ((toFormat: string) => toFormat);
-      setFieldFormatter(() => formatterForField);
+      setFieldFormatter(
+        () =>
+          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
+          ((toFormat: OptionsListSelection) => toFormat)
+      );
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);
 

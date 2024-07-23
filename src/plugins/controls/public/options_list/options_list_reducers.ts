@@ -31,11 +31,13 @@ export const getSelectionAsFieldType = (field: FieldSpec, key: string): OptionsL
 };
 
 export const optionsListReducers = {
-  deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+  deselectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSelection>
+  ) => {
     if (!state.explicitInput.selectedOptions || !state.componentState.field) return;
 
-    const key = getSelectionAsFieldType(state.componentState.field, action.payload);
-    const itemIndex = state.explicitInput.selectedOptions.indexOf(key);
+    const itemIndex = state.explicitInput.selectedOptions.indexOf(action.payload);
     if (itemIndex !== -1) {
       const newSelections = [...state.explicitInput.selectedOptions];
       newSelections.splice(itemIndex, 1);
@@ -84,23 +86,20 @@ export const optionsListReducers = {
       state.explicitInput.existsSelected = false;
     }
   },
-  selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.componentState.field) return;
-
+  selectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSelection>
+  ) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
 
-    const key = getSelectionAsFieldType(state.componentState.field, action.payload);
-    state.explicitInput.selectedOptions?.push(key);
+    state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<string>
+    action: PayloadAction<OptionsListSelection>
   ) => {
-    if (!state.componentState.field) return;
-
-    const key = getSelectionAsFieldType(state.componentState.field, action.payload);
-    state.explicitInput.selectedOptions = [key];
+    state.explicitInput.selectedOptions = [action.payload];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {

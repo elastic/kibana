@@ -8,16 +8,18 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
-import { OptionsListStrings } from './options_list_strings';
+import { OptionsListSelection } from '../../../common/options_list/types';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
-import { useFieldFormatter } from '../../hooks/use_field_formatter';
+import { OptionsListStrings } from './options_list_strings';
+import { getSelectionAsFieldType } from '../options_list_reducers';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -65,11 +67,11 @@ export const OptionsListPopoverSuggestions = ({
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(
-    () => new Set<string>(selectedOptions?.map((value) => String(value))),
+    () => new Set<OptionsListSelection>(selectedOptions),
     [selectedOptions]
   );
   const invalidSelectionsSet = useMemo(
-    () => new Set<string>(invalidSelections?.map((value) => String(value))),
+    () => new Set<OptionsListSelection>(invalidSelections),
     [invalidSelections]
   );
   const suggestions = useMemo(() => {
@@ -100,10 +102,10 @@ export const OptionsListPopoverSuggestions = ({
       return {
         key: String(suggestion.value),
         label: String(fieldFormatter(suggestion.value) ?? suggestion.value),
-        checked: selectedOptionsSet?.has(String(suggestion.value)) ? 'on' : undefined,
+        checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelectionsSet.has(String(suggestion.value))
+          showOnlySelected && invalidSelectionsSet.has(suggestion.value)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
@@ -194,8 +196,12 @@ export const OptionsListPopoverSuggestions = ({
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, _, changedOption) => {
-            const key = changedOption.key!;
+            if (!fieldSpec || !changedOption.key) {
+              throw new Error(OptionsListStrings.popover.getInvalidSelectionMessage());
+            }
+
             setSelectableOptions(newSuggestions);
+            const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
             // the order of these checks matters, so be careful if rearranging them
             if (key === 'exists-option') {
               optionsList.dispatch.selectExists(!Boolean(existsSelected));
