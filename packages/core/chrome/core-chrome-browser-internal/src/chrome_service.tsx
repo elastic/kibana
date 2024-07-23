@@ -187,7 +187,7 @@ export class ChromeService {
         notifications.toasts.addDanger({
           title: '`EuiProvider` is missing',
           text: mountReactNode(
-            <p data-test-sub="core-chrome-euiDevProviderWarning-toast">
+            <p>
               <FormattedMessage
                 id="core.chrome.euiDevProviderWarning"
                 defaultMessage="Kibana components must be wrapped in a React Context provider for full functionality and proper theming support. See {link}."
@@ -201,6 +201,7 @@ export class ChromeService {
               />
             </p>
           ),
+          'data-test-subj': 'core-chrome-euiDevProviderWarning-toast',
           toastLifeTimeMs: 60 * 60 * 1000, // keep message visible for up to an hour
         });
       });

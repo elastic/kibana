@@ -106,6 +106,17 @@ export class CommonPageObject extends FtrService {
     return currentUrl;
   }
 
+  private checkForEuiProviderWarning() {
+    // throw unhandled error if the current page is not in compliance with EuiProvider
+    this.testSubjects
+      .exists('core-chrome-euiDevProviderWarning-toast', { timeout: this.defaultFindTimeout })
+      .then((euiDevProviderWarningExists) => {
+        if (euiDevProviderWarningExists) {
+          throw new Error('EuiProvider Warning Toast detected on current URL!');
+        }
+      });
+  }
+
   private async navigate(navigateProps: NavigateProps) {
     const {
       appConfig,
@@ -155,6 +166,8 @@ export class CommonPageObject extends FtrService {
         }
       }
     });
+
+    this.checkForEuiProviderWarning();
   }
 
   /**
@@ -369,6 +382,8 @@ export class CommonPageObject extends FtrService {
         }
       });
     });
+
+    this.checkForEuiProviderWarning();
   }
 
   async waitUntilUrlIncludes(path: string) {
