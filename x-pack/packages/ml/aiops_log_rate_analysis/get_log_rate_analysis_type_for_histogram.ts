@@ -19,7 +19,7 @@ import type { WindowParameters } from './window_parameters';
  * @param windowParameters The window parameters with baseline and deviation time range.
  * @returns The log rate analysis type.
  */
-export function getLogRateAnalysisType(
+export function getLogRateAnalysisTypeForHistogram(
   logRateHistogram: LogRateHistogramItem[],
   windowParameters: WindowParameters
 ): LogRateAnalysisType {
