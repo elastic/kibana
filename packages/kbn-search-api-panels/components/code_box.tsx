@@ -62,6 +62,26 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
+  const getAriaLabel = () =>
+    consoleTitle
+      ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
+          defaultMessage: 'Select a programming language for the {context} code snippet',
+          values: { context: consoleTitle },
+        })
+      : i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectLabel', {
+          defaultMessage: 'Select a programming language for the code snippet',
+        });
+
+  const getCopyButtonAriaLabel = () =>
+    consoleTitle
+      ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyAriaLabel', {
+          defaultMessage: 'Copy the {context} code snippet',
+          values: { context: consoleTitle },
+        })
+      : i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyLabel', {
+          defaultMessage: 'Copy the code snippet',
+        });
+
   const items = languages
     ? languages.map((language) => (
         <EuiContextMenuItem
@@ -82,10 +102,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   const button = selectedLanguage ? (
     <EuiThemeProvider colorMode="dark">
       <EuiButtonEmpty
-        aria-label={i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
-          defaultMessage: 'Select a programming language for the {context} code snippet',
-          values: { context: consoleTitle },
-        })}
+        aria-label={getAriaLabel()}
         color="text"
         iconType="arrowDown"
         iconSide="left"
@@ -125,7 +142,13 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={codeSnippet}>
                   {(copy) => (
-                    <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
+                    <EuiButtonEmpty
+                      color="text"
+                      iconType="copyClipboard"
+                      size="s"
+                      onClick={copy}
+                      aria-label={getCopyButtonAriaLabel()}
+                    >
                       {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
                         defaultMessage: 'Copy',
                       })}
