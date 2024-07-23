@@ -54,6 +54,11 @@ export function useMinimumTimeRange() {
         signal: abortController.current.signal,
       });
 
+      if (resp.end.epoch === null || resp.start.epoch === null) {
+        // epoch can be null if no data can be found.
+        return { ...timeRange, useSubAgg: false };
+      }
+
       // the index isn't big enough to get a wider time range
       const indexTimeRangeMs = resp.end.epoch - resp.start.epoch;
       if (indexTimeRangeMs < minimumTimeRangeMs) {
