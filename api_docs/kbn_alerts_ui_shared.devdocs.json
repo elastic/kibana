@@ -3115,7 +3115,7 @@
             "section": "def-common.ControlGroupInput",
             "text": "ControlGroupInput"
           },
-          ", \"query\" | \"filters\" | \"timeRange\" | \"chainingSystem\">"
+          ", \"timeRange\" | \"query\" | \"filters\" | \"chainingSystem\">"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "deprecated": false,

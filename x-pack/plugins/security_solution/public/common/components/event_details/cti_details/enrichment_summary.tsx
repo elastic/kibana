@@ -27,6 +27,7 @@ import type {
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { getSourcererScopeId } from '../../../../helpers';
+import { getFieldFormat } from '../get_field_format';
 
 export interface ThreatSummaryDescription {
   data: FieldsData | undefined;
@@ -134,7 +135,7 @@ const EnrichmentSummaryComponent: React.FC<{
 
     const fieldsData: FieldsData = {
       field: field ?? '',
-      format: browserField?.format ?? '',
+      format: getFieldFormat(browserField) ?? '',
       type: browserField?.type ?? '',
       isObjectArray: eventData?.isObjectArray ?? false,
     };
