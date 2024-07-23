@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { metadataSchema } from './common';
+import { SafeParseSuccess } from 'zod';
+import { durationSchema, metadataSchema, semVerSchema } from './common';
+import moment from 'moment';
 
 describe('schemas', () => {
   describe('metadataSchema', () => {
@@ -55,6 +57,49 @@ describe('schemas', () => {
         size: 1,
       });
       expect(result.success).toBeTruthy();
+      expect(result).toMatchSnapshot();
+    });
+  });
+  describe('durationSchema', () => {
+    it('should work with 1m', () => {
+      const result = durationSchema.safeParse('1m');
+      expect(result.success).toBeTruthy();
+      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('1m');
+      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(60);
+    });
+    it('should work with 10s', () => {
+      const result = durationSchema.safeParse('10s');
+      expect(result.success).toBeTruthy();
+      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('10s');
+      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(10);
+    });
+    it('should work with 999h', () => {
+      const result = durationSchema.safeParse('999h');
+      expect(result.success).toBeTruthy();
+      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('999h');
+      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(999 * 60 * 60);
+    });
+    it('should work with 90d', () => {
+      const result = durationSchema.safeParse('90d');
+      expect(result.success).toBeTruthy();
+      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('90d');
+      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(
+        90 * 24 * 60 * 60
+      );
+    });
+    it('should not work with 1ms', () => {
+      const result = durationSchema.safeParse('1ms');
+      expect(result.success).toBeFalsy();
+    });
+  });
+  describe('semVerSchema', () => {
+    it('should validate with 999.999.999', () => {
+      const result = semVerSchema.safeParse('999.999.999');
+      expect(result.success).toBeTruthy();
+    });
+    it('should not validate with 0.9', () => {
+      const result = semVerSchema.safeParse('0.9');
+      expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
     });
   });

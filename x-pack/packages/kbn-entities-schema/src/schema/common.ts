@@ -45,7 +45,7 @@ export const docCountMetricSchema = z.object({
 
 export const durationSchema = z
   .string()
-  .regex(/\d+[m|d|s|h]/)
+  .regex(/^\d+[m|d|s|h]$/)
   .transform((val: string) => {
     const parts = val.match(/(\d+)([m|s|h|d])/);
     if (parts === null) {

@@ -117,3 +117,16 @@ Object {
   "success": true,
 }
 `;
+
+exports[`schemas semVerSchema should not validate with 0.9 1`] = `
+Object {
+  "error": [ZodError: [
+  {
+    "code": "custom",
+    "message": "The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits.",
+    "path": []
+  }
+]],
+  "success": false,
+}
+`;
