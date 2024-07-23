@@ -18,7 +18,6 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getEnvironmentKuery } from '../../../../common/environment_filter_values';
 import { push } from '../../shared/links/url_helpers';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export const ALERT_STATUS_ALL = 'all';
 
@@ -51,9 +50,8 @@ export function AlertsOverview() {
       },
     },
     uiSettings,
+    observability: { observabilityRuleTypeRegistry },
   } = services;
-
-  const { observabilityRuleTypeRegistry } = useApmPluginContext();
 
   const useToasts = () => notifications!.toasts;
 
