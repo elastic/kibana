@@ -953,6 +953,17 @@ describe('autocomplete', () => {
     });
   });
 
+  /**
+   * Monaco asks for suggestions in at least two different scenarios.
+   * 1. When the user types a non-whitespace character (e.g. 'FROM k') - this is the Invoke trigger kind
+   * 2. When the user types a character we've registered as a trigger character (e.g. ',') - this is the Trigger character trigger kind
+   *
+   * Historically we had good support for the trigger character trigger kind, but not for the Invoke trigger kind. That led
+   * to bad experiences like a list of sources not showing up when the user types 'FROM kib'. There they had to delete "kib"
+   * and press <space> to trigger suggestions via a trigger character.
+   *
+   * See https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html for more details
+   */
   describe('Invoke trigger kind (all commands)', () => {
     // source command
     testSuggestions(
@@ -1015,10 +1026,6 @@ describe('autocomplete', () => {
     // DISSECT field
     testSuggestions('FROM index1 | DISSECT b', getFieldNamesByType('string'), undefined, 23);
 
-    // DISSECT field pattern
-    // TODO - should this work? It's failing because Monaco adds an extra quote and does not trigger suggestions.
-    // testSuggestions('FROM index1 | DISSECT field ""', getFieldNamesByType('string'), undefined, 23);
-
     // DROP (first field)
     testSuggestions('FROM index1 | DROP f', getFieldNamesByType('any'), undefined, 20);
 
@@ -1057,10 +1064,6 @@ describe('autocomplete', () => {
     // GROK field
     testSuggestions('FROM index1 | GROK f', getFieldNamesByType('string'), undefined, 20);
 
-    // GROK field "pattern"
-    // TODO - should this work? It's failing because Monaco adds an extra quote and does not trigger suggestions.
-    // testSuggestions('FROM index1 | GROK field ""', getFieldNamesByType('string'), undefined, 20);
-
     // KEEP (first field)
     testSuggestions('FROM index1 | KEEP f', getFieldNamesByType('any'), undefined, 20);
 
@@ -1071,6 +1074,11 @@ describe('autocomplete', () => {
       undefined,
       34
     );
+
+    // LIMIT argument
+    // Here we actually test that the invoke trigger kind does not work
+    // because it isn't very useful to see literal suggestions when typing a number
+    testSuggestions('FROM a | LIMIT 1', ['|'], undefined, 16);
 
     // MV_EXPAND field
     testSuggestions('FROM index1 | MV_EXPAND f', getFieldNamesByType('any'), undefined, 25);
