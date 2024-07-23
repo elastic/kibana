@@ -10,7 +10,12 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
-import { getSafeInsertText, getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import {
+  getSafeInsertText,
+  getUnitDuration,
+  TRIGGER_SUGGESTION_COMMAND,
+  TIME_SYSTEM_PARAMS,
+} from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { FunctionParameter } from '../definitions/types';
@@ -21,6 +26,7 @@ import {
   getFunctionSignaturesByReturnType,
   getFieldNamesByType,
   getLiteralsByType,
+  getDateLiteralsByFieldType,
   createCustomCallbackMocks,
   createCompletionContext,
   getPolicyFields,
@@ -329,8 +335,8 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
     ]);
-    testSuggestions('from a | sort stringField ', ['asc', 'desc', ',', '|']);
-    testSuggestions('from a | sort stringField desc ', ['nulls first', 'nulls last', ',', '|']);
+    testSuggestions('from a | sort stringField ', ['ASC', 'DESC', ',', '|']);
+    testSuggestions('from a | sort stringField desc ', ['NULLS FIRST', 'NULLS LAST', ',', '|']);
     // @TODO: improve here
     // testSuggestions('from a | sort stringField desc ', ['first', 'last']);
   });
@@ -766,6 +772,9 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs)
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
@@ -789,6 +798,9 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs)
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
@@ -860,6 +872,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'from a | eval var0=date_trunc()',
         [
+          ...TIME_SYSTEM_PARAMS.map((t) => `${t},`),
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
           ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }, undefined, [
             'date_trunc',

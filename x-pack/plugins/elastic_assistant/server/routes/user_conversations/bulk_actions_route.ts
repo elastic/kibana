@@ -175,10 +175,13 @@ export const bulkActionConversationsRoute = (
           }
 
           if (body.create && body.create.length > 0) {
+            const userFilter = authenticatedUser?.username
+              ? `name: "${authenticatedUser?.username}"`
+              : `id: "${authenticatedUser?.profile_uid}"`;
             const result = await dataClient?.findDocuments<EsConversationSchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
+              filter: `users:{ ${userFilter} } AND (${body.create
                 .map((c) => `title:${c.title}`)
                 .join(' OR ')})`,
               fields: ['title'],
