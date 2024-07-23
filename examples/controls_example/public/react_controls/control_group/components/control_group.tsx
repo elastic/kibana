@@ -111,6 +111,7 @@ export function ControlGroup({ controlGroupApi, controlsManager, labelPosition }
           <DragOverlay>
             {draggingId ? (
               <ControlClone
+                key={draggingId}
                 labelPosition={labelPosition}
                 controlApi={controlsManager.getControlApi(draggingId)}
               />

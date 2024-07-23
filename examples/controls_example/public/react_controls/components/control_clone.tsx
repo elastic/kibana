@@ -11,6 +11,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiIcon } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DEFAULT_CONTROL_GROW } from '@kbn/controls-plugin/common';
 
 import { BehaviorSubject } from 'rxjs';
 import { DefaultControlApi } from '../types';
@@ -28,7 +29,7 @@ export const ControlClone = ({
   controlApi: DefaultControlApi | undefined;
 }) => {
   const [width, panelTitle, defaultPanelTitle] = useBatchedPublishingSubjects(
-    controlApi ? controlApi.width : new BehaviorSubject('medium'),
+    controlApi ? controlApi.width : new BehaviorSubject(DEFAULT_CONTROL_GROW),
     controlApi?.panelTitle ? controlApi.panelTitle : new BehaviorSubject(undefined),
     controlApi?.defaultPanelTitle ? controlApi.defaultPanelTitle : new BehaviorSubject('')
   );

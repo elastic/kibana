@@ -61,7 +61,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialChildControlState,
         defaultControlGrow,
         defaultControlWidth,
-        initialLabelPosition,
+        labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
         ignoreParentSettings,
