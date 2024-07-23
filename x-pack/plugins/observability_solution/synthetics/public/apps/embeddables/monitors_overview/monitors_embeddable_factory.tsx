@@ -15,9 +15,11 @@ import {
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
   SerializedTitles,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import { MonitorFilters } from './types';
 import { StatusGridComponent } from './status_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
@@ -27,11 +29,14 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'Synthetics Monitors',
   });
 
-export type OverviewEmbeddableState = SerializedTitles;
+export type OverviewEmbeddableState = SerializedTitles & {
+  filters: MonitorFilters;
+};
 
 export type StatusOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritablePanelTitle &
-  PublishesPanelTitle;
+  PublishesPanelTitle &
+  HasEditCapabilities;
 
 export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
@@ -46,24 +51,48 @@ export const getMonitorsEmbeddableFactory = (
       return state.rawState as OverviewEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      const [coreStart, pluginStart] = await getStartServices();
+
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
+      const filters$ = new BehaviorSubject(state.filters);
 
       const api = buildApi(
         {
           ...titlesApi,
           defaultPanelTitle: defaultTitle$,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
+              defaultMessage: 'filters',
+            }),
+          isEditingEnabled: () => true,
           serializeState: () => {
             return {
               rawState: {
                 ...serializeTitles(),
+                filters: filters$.getValue(),
               },
             };
+          },
+          onEdit: async () => {
+            try {
+              const { openMonitorConfiguration } = await import(
+                './monitors_overview_open_configuration'
+              );
+
+              const result = await openMonitorConfiguration(coreStart, pluginStart, {
+                filters: filters$.getValue(),
+              });
+              filters$.next(result.filters);
+            } catch (e) {
+              return Promise.reject();
+            }
           },
         },
         {
           ...titleComparators,
+          filters: [filters$, (value) => filters$.next(value)],
         }
       );
 
@@ -76,7 +105,7 @@ export const getMonitorsEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const [] = useBatchedPublishingSubjects();
+          const [filters] = useBatchedPublishingSubjects(filters$);
 
           useEffect(() => {
             return () => {
@@ -92,7 +121,7 @@ export const getMonitorsEmbeddableFactory = (
               }}
               data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
-              <StatusGridComponent reload$={reload$} />
+              <StatusGridComponent reload$={reload$} filters={filters} />
             </div>
           );
         },

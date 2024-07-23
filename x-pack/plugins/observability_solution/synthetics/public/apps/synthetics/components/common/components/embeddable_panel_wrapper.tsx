@@ -32,7 +32,8 @@ const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashb
 export const EmbeddablePanelWrapper: FC<{
   title: string;
   loading?: boolean;
-}> = ({ children, title, loading }) => {
+  titleAppend?: React.ReactNode;
+}> = ({ children, title, loading, titleAppend }) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = React.useState(false);
@@ -110,6 +111,7 @@ export const EmbeddablePanelWrapper: FC<{
               </EuiPopover>
             </EuiFlexItem>
           )}
+          {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
         </EuiFlexGroup>
 
         {children}

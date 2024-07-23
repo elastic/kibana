@@ -22,3 +22,5 @@ export const COMMON_SYNTHETICS_GROUPING = [
     },
   },
 ];
+
+export const ALL_VALUE = '*';

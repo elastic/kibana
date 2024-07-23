@@ -10,13 +10,15 @@ import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
+import { MonitorFilters } from './types';
+import { ClientPluginsStart } from '../../../plugin';
 import { MonitorConfiguration } from './monitor_configuration';
+
 export async function openMonitorConfiguration(
   coreStart: CoreStart,
-  pluginStart: SloPublicPluginsStart,
-  initialState?: GroupSloCustomInput
-): Promise<GroupSloCustomInput | SingleSloCustomInput> {
+  pluginStart: ClientPluginsStart,
+  initialState?: { filters: MonitorFilters }
+): Promise<{ filters: MonitorFilters }> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {
@@ -32,7 +34,7 @@ export async function openMonitorConfiguration(
             <QueryClientProvider client={queryClient}>
               <MonitorConfiguration
                 initialInput={initialState}
-                onCreate={(update: GroupSloCustomInput | SingleSloCustomInput) => {
+                onCreate={(update: { filters: MonitorFilters }) => {
                   flyoutSession.close();
                   resolve(update);
                 }}
