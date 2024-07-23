@@ -24,6 +24,8 @@ export const SLO_APP_ID = 'slo';
 
 export const AI_ASSISTANT_APP_ID = 'observabilityAIAssistant';
 
+export const INVESTIGATE_APP_ID = 'investigate';
+
 export const OBLT_UX_APP_ID = 'ux';
 
 export const OBLT_PROFILING_APP_ID = 'profiling';
