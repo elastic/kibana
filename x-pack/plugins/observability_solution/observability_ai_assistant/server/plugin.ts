@@ -47,10 +47,12 @@ export class ObservabilityAIAssistantPlugin
     >
 {
   logger: Logger;
+  config: ObservabilityAIAssistantConfig;
   service: ObservabilityAIAssistantService | undefined;
 
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
+    this.config = context.config.get<ObservabilityAIAssistantConfig>();
     initLangtrace();
   }
   public setup(
@@ -112,12 +114,15 @@ export class ObservabilityAIAssistantPlugin
 
     // Using once to make sure the same model ID is used during service init and Knowledge base setup
     const getModelId = once(async () => {
+      const configModelId = this.config.modelId;
       const defaultModelId = '.elser_model_2';
       const [_, pluginsStart] = await core.getStartServices();
       const license = await firstValueFrom(pluginsStart.licensing.license$);
-
       if (!license.hasAtLeast('enterprise')) {
         return defaultModelId;
+      }
+      if (configModelId) {
+        return configModelId;
       }
 
       try {
@@ -140,6 +145,7 @@ export class ObservabilityAIAssistantPlugin
           .getELSER();
 
         return elserModelDefinition.model_id;
+        // return 'pt_tiny_elser';
       } catch (error) {
         this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
         return defaultModelId;

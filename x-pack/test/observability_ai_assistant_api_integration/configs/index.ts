@@ -30,6 +30,7 @@ export const observabilityAIAssistantFtrConfigs = {
         __dirname,
         '../../../../test/analytics/plugins/analytics_ftr_helpers'
       ),
+      'xpack.observabilityAIAssistant.modelId': 'pt_tiny_elser',
     },
   },
 };
