@@ -49,6 +49,7 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
+import { sendAlertSuppressionEvent } from './utils/telemetry/send_alert_suppression_event';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -80,6 +81,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     isPreview,
     experimentalFeatures,
     alerting,
+    telemetry,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -455,6 +457,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
+                  suppressedAlertsCount: runResult.suppressedAlertsCount,
                   errors: result.errors.concat(runResult.errors),
                   lastLookbackDate: runResult.lastLookBackDate,
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
@@ -472,6 +475,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 enrichmentTimes: [],
                 createdSignals: [],
                 createdSignalsCount: 0,
+                suppressedAlertsCount: 0,
                 errors: [],
                 searchAfterTimes: [],
                 state,
@@ -546,6 +550,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     indexingDurations: result.bulkCreateTimes,
                     enrichmentDurations: result.enrichmentTimes,
                   },
+                });
+              }
+
+              if (!isPreview) {
+                sendAlertSuppressionEvent({
+                  telemetry,
+                  suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
+                  createdAlertsCount: result.createdSignalsCount,
+                  ruleAttributes: rule,
+                  ruleParams: params,
                 });
               }
             } else {

@@ -202,7 +202,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 
-    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    events.forEach((eventConfig) => {
+      console.log('eventConfig', eventConfig);
+      core.analytics.registerEventType(eventConfig);
+    });
 
     this.ruleMonitoringService.setup(core, plugins);
 
@@ -310,6 +313,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
+      telemetry: core.analytics,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
