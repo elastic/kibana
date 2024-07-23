@@ -15,6 +15,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/elastic-assistant",
     "@kbn/security-solution-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/security-solution-features",
