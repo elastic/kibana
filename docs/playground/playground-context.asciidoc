@@ -58,7 +58,7 @@ Refer to the following Python notebooks for examples of how to chunk your docume
 [[playground-context-balance]]
 === Balancing cost/latency and result quality
 
-Here are some general recommendations for balancing cost and latency with different context sizes:
+Here are some general recommendations for balancing cost/latency and result quality with different context sizes:
 
 Optimize context length::
 Determine the optimal context length through empirical testing.
