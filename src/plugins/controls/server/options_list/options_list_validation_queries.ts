@@ -9,7 +9,7 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get, isEmpty } from 'lodash';
 
-import { OptionsListRequestBody } from '../../common/options_list/types';
+import { OptionsListRequestBody, OptionsListSelection } from '../../common/options_list/types';
 import { OptionsListValidationAggregationBuilder } from './types';
 
 /**
@@ -23,7 +23,7 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
         selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
           acc[currentOption] = { match: { [fieldName]: currentOption } };
           return acc;
-        }, {} as { [key: string]: { match: { [key: string]: string | number } } });
+        }, {} as { [key: string]: { match: { [key: string]: OptionsListSelection } } });
       }
 
       if (isEmpty(selectedOptionsFilters ?? [])) {
@@ -66,7 +66,7 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
       return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
         ? Object.keys(rawInvalidSuggestions)
             .filter((key) => rawInvalidSuggestions[key].doc_count === 0)
-            .map((key: string): string | number => (storeAsNumber ? +key : key))
+            .map((key: string): OptionsListSelection => (storeAsNumber ? +key : key))
         : [];
     },
   });

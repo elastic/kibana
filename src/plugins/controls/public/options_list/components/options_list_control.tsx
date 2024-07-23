@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Subject } from 'rxjs';
 
 import {
   EuiFilterButton,
@@ -22,15 +22,16 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
-import { OptionsListStrings } from './options_list_strings';
-import { OptionsListPopover } from './options_list_popover';
+import { OptionsListSelection } from '../../../common/options_list/types';
+import { MIN_POPOVER_WIDTH } from '../../constants';
+import { ControlError } from '../../control_group/component/control_error_component';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
+import { OptionsListPopover } from './options_list_popover';
+import { OptionsListStrings } from './options_list_strings';
 
 import './options_list.scss';
-import { ControlError } from '../../control_group/component/control_error_component';
-import { MIN_POPOVER_WIDTH } from '../../constants';
-import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -80,7 +81,7 @@ export const OptionsListControl = ({
   // remove all other selections if this control is single select
   useEffect(() => {
     if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
-      optionsList.dispatch.replaceSelection(selectedOptions[0]);
+      optionsList.dispatch.replaceSelection(String(selectedOptions[0]));
     }
   }, [selectedOptions, singleSelect, optionsList.dispatch]);
 
@@ -128,7 +129,7 @@ export const OptionsListControl = ({
               ) : (
                 <>
                   {selectedOptions?.length
-                    ? selectedOptions.map((value: string | number, i, { length }) => {
+                    ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
                         const text = `${fieldFormatter(value)}${
                           i + 1 === length ? '' : delimiter
                         } `;

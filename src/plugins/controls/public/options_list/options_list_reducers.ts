@@ -16,6 +16,7 @@ import {
   OptionsListSortingType,
   OPTIONS_LIST_DEFAULT_SORT,
 } from '../../common/options_list/suggestions_sorting';
+import { OptionsListSelection } from '../../common/options_list/types';
 import { OptionsListComponentState, OptionsListReduxState } from './types';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
@@ -24,7 +25,7 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
   searchString: { value: '', valid: true },
 });
 
-export const getSelectionAsFieldType = (field: FieldSpec, key: string): string | number => {
+export const getSelectionAsFieldType = (field: FieldSpec, key: string): OptionsListSelection => {
   const storeAsNumber = field.type === 'number' || field.type === 'date';
   return storeAsNumber ? +key : key;
 };

@@ -15,10 +15,12 @@ import type { OptionsListSortingType } from './suggestions_sorting';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with OPTIONS_LIST_CONTROL_TYPE
 
+export type OptionsListSelection = string | number;
+
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
-  selectedOptions?: Array<string | number>;
+  selectedOptions?: OptionsListSelection[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
@@ -30,7 +32,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   exclude?: boolean;
 }
 
-export type OptionsListSuggestions = Array<{ value: string | number; docCount?: number }>;
+export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -38,7 +40,7 @@ export type OptionsListSuggestions = Array<{ value: string | number; docCount?: 
 export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
   totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
-  invalidSelections?: Array<string | number>;
+  invalidSelections?: OptionsListSelection[];
 }
 
 /**
