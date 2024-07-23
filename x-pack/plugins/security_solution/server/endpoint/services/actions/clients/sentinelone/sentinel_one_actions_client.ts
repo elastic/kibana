@@ -596,7 +596,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               fileInfo.status = 'DELETED';
             } else {
               fileInfo.status = 'READY';
-              fileInfo.name = fileDownloadLink.fileName ?? `${actionRequestDoc.id}-${agentId}.zip`;
+              fileInfo.name = fileDownloadLink.fileName ?? `${actionId}-${agentId}.zip`;
               fileInfo.mimeType = 'application/octet-stream';
             }
           }
@@ -639,7 +639,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     let downloadStream: Readable | undefined;
-    let fileName: string | undefined;
+    let fileName: string = 'download.zip';
 
     try {
       switch (command) {
@@ -675,7 +675,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         case 'running-processes':
           {
             const processesAgentResponse = await this.fetchEsResponseDocForAgentId<
-              undefined,
+              {},
               SentinelOneProcessesResponseMeta
             >(actionId, agentId);
 
