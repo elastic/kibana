@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.13.1",
+    "node": "20.15.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -104,11 +104,11 @@
     "@elastic/apm-rum": "^5.16.1",
     "@elastic/apm-rum-core": "^5.21.0",
     "@elastic/apm-rum-react": "^2.0.3",
-    "@elastic/charts": "66.0.5",
+    "@elastic/charts": "66.0.6",
     "@elastic/datemath": "5.0.3",
     "@elastic/ecs": "^8.11.1",
     "@elastic/elasticsearch": "^8.14.0",
-    "@elastic/ems-client": "8.5.1",
+    "@elastic/ems-client": "8.5.3",
     "@elastic/eui": "95.2.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
@@ -178,6 +178,7 @@
     "@kbn/application-usage-test-plugin": "link:x-pack/test/usage_collection/plugins/application_usage_test",
     "@kbn/assets-data-access-plugin": "link:x-pack/plugins/observability_solution/assets_data_access",
     "@kbn/audit-log-plugin": "link:x-pack/test/security_api_integration/plugins/audit_log",
+    "@kbn/avc-banner": "link:packages/kbn-avc-banner",
     "@kbn/banners-plugin": "link:x-pack/plugins/banners",
     "@kbn/bfetch-error": "link:packages/kbn-bfetch-error",
     "@kbn/bfetch-explorer-plugin": "link:examples/bfetch_explorer",
@@ -1122,7 +1123,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
-    "re2": "1.20.9",
+    "re2js": "0.4.1",
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
     "react-diff-view": "^3.2.0",
@@ -1715,7 +1716,7 @@
     "regenerate": "^1.4.0",
     "resolve": "^1.22.0",
     "rxjs-marbles": "^7.0.1",
-    "sass-embedded": "^1.77.5",
+    "sass-embedded": "^1.77.8",
     "sass-loader": "^10.5.1",
     "selenium-webdriver": "^4.22.0",
     "sharp": "0.32.6",

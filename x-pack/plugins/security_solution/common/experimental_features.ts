@@ -90,7 +90,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables scan response action on Endpoint
    */
-  responseActionScanEnabled: false,
+  responseActionScanEnabled: true,
 
   /**
    * Enables top charts on Alerts Page
@@ -123,7 +123,7 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: false,
 
@@ -154,31 +154,16 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables AI assistant on rule creation form when query has error
-   */
-  AIAssistantOnRuleCreationFormEnabled: false,
-
-  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
 
   /**
-   * Enables alerts suppression for ES|QL rules
-   */
-  alertSuppressionForEsqlRuleEnabled: false,
-
-  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables alerts suppression for machine learning rules
-   */
-  alertSuppressionForMachineLearningRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -208,9 +193,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   timelineEsqlTabDisabled: false,
   /*
-   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
    */
-  unifiedComponentsInTimelineEnabled: false,
+  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
@@ -240,24 +225,14 @@ export const allowedExperimentalValues = Object.freeze({
   unifiedManifestEnabled: true,
 
   /**
-   *  Enables Security AI Assistant's Flyout mode
-   */
-  aiAssistantFlyoutMode: true,
-
-  /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
-
-  /**
    * Enables the manual rule run
    */
-  manualRuleRunEnabled: false,
+  manualRuleRunEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
