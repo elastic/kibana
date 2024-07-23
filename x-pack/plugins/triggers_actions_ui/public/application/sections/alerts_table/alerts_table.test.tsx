@@ -30,7 +30,7 @@ import {
 } from '../../../types';
 import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserFields } from '@kbn/alerting-types';
 import { getCasesMockMap } from './cases/index.mock';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';

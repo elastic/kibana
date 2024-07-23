@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
@@ -15,7 +16,7 @@ export interface BrowserField {
   description?: string | null;
   example?: string | number | null;
   fields: Readonly<Record<string, Partial<BrowserField>>>;
-  format?: string;
+  format?: SerializedFieldFormat;
   indexes: string[];
   name: string;
   searchable: boolean;

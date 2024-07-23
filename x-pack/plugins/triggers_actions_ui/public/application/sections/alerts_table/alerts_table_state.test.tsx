@@ -31,7 +31,7 @@ import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserFields } from '@kbn/alerting-types';
 import { getCasesMockMap } from './cases/index.mock';
 import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';

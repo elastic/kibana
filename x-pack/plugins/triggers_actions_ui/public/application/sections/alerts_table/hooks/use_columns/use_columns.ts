@@ -7,7 +7,7 @@
 
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserField, BrowserFields } from '@kbn/alerting-types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';

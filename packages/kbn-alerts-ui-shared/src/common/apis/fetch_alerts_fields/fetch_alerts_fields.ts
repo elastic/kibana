@@ -7,7 +7,7 @@
  */
 
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import type { BrowserFields } from '../../types/alerts_fields_types';
+import type { BrowserFields } from '@kbn/alerting-types';
 import type { FetchAlertsFieldsParams } from './types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
 

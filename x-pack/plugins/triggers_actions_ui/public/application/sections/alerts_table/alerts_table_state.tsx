@@ -23,10 +23,8 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type {
-  BrowserFields,
-  RuleRegistrySearchRequestPagination,
-} from '@kbn/rule-registry-plugin/common';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/alerting-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
