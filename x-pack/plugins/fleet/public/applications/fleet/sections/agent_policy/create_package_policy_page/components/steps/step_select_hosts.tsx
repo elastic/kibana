@@ -80,8 +80,6 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (existingAgentPolicies.length > 0) {
-      console.log('existingAgentPolicies', existingAgentPolicies);
-      console.log('newAgentPolicy', newAgentPolicy);
       updateNewAgentPolicy({
         ...newAgentPolicy,
         name: incrementPolicyName(existingAgentPolicies),
