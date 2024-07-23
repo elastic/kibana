@@ -418,52 +418,11 @@ export const CreateConnector: React.FC = () => {
                       href={connectorSelected.docsUrl}
                       target="_blank"
                     >
-                      {/* {connectorSelected.name}{' '} */}
+                      {'Elastic '}
+                      {connectorSelected.name}
                       {i18n.translate(
                         'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
-                        { defaultMessage: 'Connector docs' }
-                      )}
-                    </EuiLink>
-                  </p>
-                </EuiText>
-                <EuiSpacer size="s" />
-              </>
-            )}
-            {connectorSelected.externalAuthDocsUrl && connectorSelected.externalAuthDocsUrl !== '' && (
-              <>
-                <EuiText size="s">
-                  <p>
-                    <EuiLink
-                      external
-                      data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
-                      href={connectorSelected.externalAuthDocsUrl}
-                      target="_blank"
-                    >
-                      {/* {connectorSelected.name}{' '} */}
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
-                        { defaultMessage: 'External author docs' }
-                      )}
-                    </EuiLink>
-                  </p>
-                </EuiText>
-                <EuiSpacer size="s" />
-              </>
-            )}
-            {connectorSelected.externalDocsUrl && connectorSelected.externalDocsUrl !== '' && (
-              <>
-                <EuiText size="s">
-                  <p>
-                    <EuiLink
-                      external
-                      data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
-                      href={connectorSelected.externalDocsUrl}
-                      target="_blank"
-                    >
-                      {/* {connectorSelected.name}{' '} */}
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
-                        { defaultMessage: 'External docs' }
+                        { defaultMessage: ' connector reference' }
                       )}
                     </EuiLink>
                   </p>
