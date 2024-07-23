@@ -228,6 +228,7 @@ export default function (ctx: FtrProviderContext) {
             value: 60000,
             pause: true,
           },
+          rowHeight: 0,
         });
         await PageObjects.share.closeShareModal();
       });
