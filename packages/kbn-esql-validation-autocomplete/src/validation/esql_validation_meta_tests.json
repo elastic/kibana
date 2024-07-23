@@ -34096,668 +34096,938 @@
     },
     {
       "query": "from a_index | stats var = percentile(doubleField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(doubleField, doubleField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(doubleField,doubleField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(doubleField, doubleField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(doubleField,doubleField))+percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(doubleField,doubleField))]",
+        "Argument of [+] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField / 2, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField / 2, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField/2,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField / 2, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField/2,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField, doubleField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(avg(integerField), avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+        "Argument of [=] must be a constant, received [percentile(avg(integerField),avg(integerField))]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(avg(integerField), avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
+        "Argument of [percentile] must be a constant, received [avg(integerField)]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(booleanField, )",
       "error": [
-        "Argument of [percentile] must be [double], found value [booleanField] type [boolean]"
+        "SyntaxError: no viable alternative at input 'percentile(booleanField, )'",
+        "SyntaxError: mismatched input ')' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "At least one aggregation or grouping expression required in [STATS]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(doubleField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(doubleField, longField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(doubleField,longField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(doubleField, longField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(doubleField, longField)) + percentile(doubleField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(doubleField,longField))+percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(doubleField, longField)) + percentile(doubleField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(doubleField,longField))]",
+        "Argument of [+] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField / 2, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField / 2, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField/2,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField / 2, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField/2,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField, longField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(doubleField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(doubleField, integerField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(doubleField,integerField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(doubleField, integerField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(doubleField,integerField))+percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(doubleField,integerField))]",
+        "Argument of [+] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField / 2, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField / 2, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField/2,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField / 2, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField/2,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(doubleField, integerField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(doubleField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(longField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(longField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(longField, doubleField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(longField,doubleField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(longField, doubleField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(longField, doubleField)) + percentile(longField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(longField,doubleField))+percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(longField, doubleField)) + percentile(longField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(longField,doubleField))]",
+        "Argument of [+] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(longField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(longField, doubleField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(longField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(longField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(longField, longField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(longField,longField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(longField, longField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(longField, longField)) + percentile(longField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(longField,longField))+percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(longField, longField)) + percentile(longField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(longField,longField))]",
+        "Argument of [+] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(longField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(longField, longField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(longField, longField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(longField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(longField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(longField, integerField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(longField,integerField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(longField, integerField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(longField, integerField)) + percentile(longField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(longField,integerField))+percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(longField, integerField)) + percentile(longField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(longField,integerField))]",
+        "Argument of [+] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(longField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(longField, integerField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(longField, integerField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(longField,integerField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(integerField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(integerField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(integerField, doubleField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(integerField,doubleField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(integerField, doubleField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(integerField,doubleField))+percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(integerField,doubleField))]",
+        "Argument of [+] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(integerField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(integerField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(integerField, doubleField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [doubleField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,doubleField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = percentile(integerField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(integerField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(integerField, longField))",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(integerField,longField))]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(integerField, longField))",
-      "error": [],
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(integerField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = round(percentile(integerField, longField)) + percentile(integerField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(integerField,longField))+percentile(integerField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats round(percentile(integerField, longField)) + percentile(integerField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(integerField,longField))]",
+        "Argument of [+] must be a constant, received [percentile(integerField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(integerField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(integerField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, longField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats percentile(integerField, longField) by round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var0 = percentile(integerField, longField) by var1 = round(doubleField / 2)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,longField)]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(doubleField), percentile(integerField, longField) by round(doubleField / 2), ipField",
-      "error": [],
+      "error": [
+        "Argument of [percentile] must be a constant, received [longField]"
+      ],
       "warning": []
     },
     {
@@ -35281,6 +35551,383 @@
       "query": "row nullVar = null | stats percentile(nullVar, nullVar)",
       "error": [
         "Argument of [percentile] must be a constant, received [nullVar]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "f",
+      "error": [
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from ",
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"index\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"\"\"index\"\"\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FrOm index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index, other_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index, other_index,.secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from ind*, other*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *a_i*dex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM in*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *n*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *n*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i*d*x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i*d*x",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i***x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i****",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM index**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM in*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM ind*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *,-.*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM remote-*:indexes*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM remote-*:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM remote-ccs:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM a_index, remote-ccs:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from my-index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index,",
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index\n, \tother_index\t,\n \t ",
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from assignment = 1",
+      "error": [
+        "SyntaxError: mismatched input '=' expecting <EOF>",
+        "Unknown index [assignment]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM `index`",
+      "error": [
+        "Unknown index [`index`]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from assignment = 1",
+      "error": [
+        "SyntaxError: mismatched input '=' expecting <EOF>",
+        "Unknown index [assignment]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from average()",
+      "error": [
+        "Unknown index [average()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "fRom custom_function()",
+      "error": [
+        "Unknown index [custom_function()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM indexes*",
+      "error": [
+        "Unknown index [indexes*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from numberField",
+      "error": [
+        "Unknown index [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM policy",
+      "error": [
+        "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id, \t\n _index\n ",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index (metadata _id)",
+      "error": [
+        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index [METADATA _id]",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [metadata _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [METADATA _id, _source]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from remote-ccs:indexes [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from *:indexes [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [METADATA _id, _source2]",
+      "error": [
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
+      ],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [metadata _id, _source] [METADATA _id2]",
+      "error": [
+        "SyntaxError: mismatched input '[' expecting <EOF>"
+      ],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id, _source",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from remote-ccs:indexes METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from *:indexes METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id, _source2",
+      "error": [
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id, _source METADATA _id2",
+      "error": [
+        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
       ],
       "warning": []
     }

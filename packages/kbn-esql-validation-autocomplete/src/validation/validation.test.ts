@@ -13554,576 +13554,665 @@ describe('validation logic', () => {
         );
       });
 
-      describe.only('percentile', () => {
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(doubleField, doubleField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats percentile(doubleField, doubleField)', []);
+      describe('percentile', () => {
+        testErrorsAndWarnings('from a_index | stats var = percentile(doubleField, doubleField)', [
+          'Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, doubleField)', [
+          'Argument of [percentile] must be a constant, received [doubleField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(doubleField, doubleField))',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(doubleField,doubleField))]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(doubleField, doubleField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(doubleField, doubleField))', [
+          'Argument of [round] must be a constant, received [percentile(doubleField,doubleField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(doubleField,doubleField))+percentile(doubleField,doubleField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(doubleField,doubleField))]',
+            'Argument of [+] must be a constant, received [percentile(doubleField,doubleField)]',
+          ]
         );
 
-        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, doubleField)', [
+          'Argument of [percentile] must be a constant, received [doubleField]',
+        ]);
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(doubleField / 2, doubleField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField/2,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField / 2, doubleField)',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, doubleField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField/2,doubleField)]']
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(doubleField, doubleField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(doubleField, doubleField)', [
+          'Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, doubleField)',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(doubleField, doubleField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), ipField',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var = percentile(avg(integerField), avg(integerField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            'Argument of [=] must be a constant, received [percentile(avg(integerField),avg(integerField))]',
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
           ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(avg(integerField), avg(integerField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+            'Argument of [percentile] must be a constant, received [avg(integerField)]',
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
           ]
         );
 
         testErrorsAndWarnings('from a_index | stats percentile(booleanField, )', [
-          'Argument of [percentile] must be [double], found value [booleanField] type [boolean]',
+          "SyntaxError: no viable alternative at input 'percentile(booleanField, )'",
+          "SyntaxError: mismatched input ')' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+          'At least one aggregation or grouping expression required in [STATS]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats var = percentile(doubleField, longField)', []);
-        testErrorsAndWarnings('from a_index | stats percentile(doubleField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(doubleField, longField)', [
+          'Argument of [=] must be a constant, received [percentile(doubleField,longField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, longField)', [
+          'Argument of [percentile] must be a constant, received [longField]',
+        ]);
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(doubleField, longField))',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(doubleField,longField))]',
+          ]
         );
-        testErrorsAndWarnings('from a_index | stats round(percentile(doubleField, longField))', []);
+        testErrorsAndWarnings('from a_index | stats round(percentile(doubleField, longField))', [
+          'Argument of [round] must be a constant, received [percentile(doubleField,longField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(doubleField, longField)) + percentile(doubleField, longField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(doubleField,longField))+percentile(doubleField,longField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(doubleField, longField)) + percentile(doubleField, longField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(doubleField,longField))]',
+            'Argument of [+] must be a constant, received [percentile(doubleField,longField)]',
+          ]
         );
 
-        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, longField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, longField)', [
+          'Argument of [percentile] must be a constant, received [longField]',
+        ]);
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(doubleField / 2, longField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField/2,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField / 2, longField)',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, longField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField/2,longField)]']
         );
 
-        testErrorsAndWarnings('from a_index | stats var0 = percentile(doubleField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(doubleField, longField)', [
+          'Argument of [=] must be a constant, received [percentile(doubleField,longField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, longField)',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(doubleField, longField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), ipField',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,longField)]']
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(doubleField, integerField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats percentile(doubleField, integerField)', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(doubleField, integerField)', [
+          'Argument of [=] must be a constant, received [percentile(doubleField,integerField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, integerField)', [
+          'Argument of [percentile] must be a constant, received [integerField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(doubleField, integerField))',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(doubleField,integerField))]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(doubleField, integerField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(doubleField, integerField))', [
+          'Argument of [round] must be a constant, received [percentile(doubleField,integerField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(doubleField,integerField))+percentile(doubleField,integerField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(doubleField,integerField))]',
+            'Argument of [+] must be a constant, received [percentile(doubleField,integerField)]',
+          ]
         );
 
-        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, integerField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, integerField)', [
+          'Argument of [percentile] must be a constant, received [integerField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(doubleField / 2, integerField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField/2,integerField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField / 2, integerField)',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, integerField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField/2,integerField)]']
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(doubleField, integerField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(doubleField, integerField)', [
+          'Argument of [=] must be a constant, received [percentile(doubleField,integerField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, integerField)',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,integerField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(doubleField, integerField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,integerField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), ipField',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,integerField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [=] must be a constant, received [percentile(doubleField,integerField)]']
         );
 
-        testErrorsAndWarnings('from a_index | stats var = percentile(longField, doubleField)', []);
-        testErrorsAndWarnings('from a_index | stats percentile(longField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(longField, doubleField)', [
+          'Argument of [=] must be a constant, received [percentile(longField,doubleField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(longField, doubleField)', [
+          'Argument of [percentile] must be a constant, received [doubleField]',
+        ]);
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(longField, doubleField))',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(longField,doubleField))]',
+          ]
         );
-        testErrorsAndWarnings('from a_index | stats round(percentile(longField, doubleField))', []);
+        testErrorsAndWarnings('from a_index | stats round(percentile(longField, doubleField))', [
+          'Argument of [round] must be a constant, received [percentile(longField,doubleField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(longField, doubleField)) + percentile(longField, doubleField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(longField,doubleField))+percentile(longField,doubleField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(longField, doubleField)) + percentile(longField, doubleField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(longField,doubleField))]',
+            'Argument of [+] must be a constant, received [percentile(longField,doubleField)]',
+          ]
         );
 
-        testErrorsAndWarnings('from a_index | stats var0 = percentile(longField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(longField, doubleField)', [
+          'Argument of [=] must be a constant, received [percentile(longField,doubleField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, doubleField)',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(longField, doubleField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), ipField',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,doubleField)]']
         );
 
-        testErrorsAndWarnings('from a_index | stats var = percentile(longField, longField)', []);
-        testErrorsAndWarnings('from a_index | stats percentile(longField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(longField, longField)', [
+          'Argument of [=] must be a constant, received [percentile(longField,longField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(longField, longField)', [
+          'Argument of [percentile] must be a constant, received [longField]',
+        ]);
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(longField, longField))',
-          []
+          ['Argument of [=] must be a constant, received [round(percentile(longField,longField))]']
         );
-        testErrorsAndWarnings('from a_index | stats round(percentile(longField, longField))', []);
+        testErrorsAndWarnings('from a_index | stats round(percentile(longField, longField))', [
+          'Argument of [round] must be a constant, received [percentile(longField,longField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(longField, longField)) + percentile(longField, longField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(longField,longField))+percentile(longField,longField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(longField, longField)) + percentile(longField, longField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(longField,longField))]',
+            'Argument of [+] must be a constant, received [percentile(longField,longField)]',
+          ]
         );
 
-        testErrorsAndWarnings('from a_index | stats var0 = percentile(longField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(longField, longField)', [
+          'Argument of [=] must be a constant, received [percentile(longField,longField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, longField)',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, longField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(longField, longField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(longField, longField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), ipField',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,longField)]']
         );
 
-        testErrorsAndWarnings('from a_index | stats var = percentile(longField, integerField)', []);
-        testErrorsAndWarnings('from a_index | stats percentile(longField, integerField)', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(longField, integerField)', [
+          'Argument of [=] must be a constant, received [percentile(longField,integerField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(longField, integerField)', [
+          'Argument of [percentile] must be a constant, received [integerField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(longField, integerField))',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(longField,integerField))]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(longField, integerField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(longField, integerField))', [
+          'Argument of [round] must be a constant, received [percentile(longField,integerField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(longField, integerField)) + percentile(longField, integerField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(longField,integerField))+percentile(longField,integerField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(longField, integerField)) + percentile(longField, integerField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(longField,integerField))]',
+            'Argument of [+] must be a constant, received [percentile(longField,integerField)]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(longField, integerField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(longField, integerField)', [
+          'Argument of [=] must be a constant, received [percentile(longField,integerField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, integerField)',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,integerField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(longField, integerField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(longField, integerField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,integerField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), ipField',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,integerField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [percentile] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [=] must be a constant, received [percentile(longField,integerField)]']
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(integerField, doubleField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats percentile(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(integerField, doubleField)', [
+          'Argument of [=] must be a constant, received [percentile(integerField,doubleField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(integerField, doubleField)', [
+          'Argument of [percentile] must be a constant, received [doubleField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(integerField, doubleField))',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(integerField,doubleField))]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(integerField, doubleField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(integerField, doubleField))', [
+          'Argument of [round] must be a constant, received [percentile(integerField,doubleField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(integerField,doubleField))+percentile(integerField,doubleField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(integerField,doubleField))]',
+            'Argument of [+] must be a constant, received [percentile(integerField,doubleField)]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(integerField, doubleField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(integerField, doubleField)', [
+          'Argument of [=] must be a constant, received [percentile(integerField,doubleField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(integerField, doubleField)',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(integerField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(integerField, doubleField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(integerField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), ipField',
-          []
+          ['Argument of [=] must be a constant, received [percentile(integerField,doubleField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [percentile] must be a constant, received [doubleField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
+          ['Argument of [=] must be a constant, received [percentile(integerField,doubleField)]']
         );
 
-        testErrorsAndWarnings('from a_index | stats var = percentile(integerField, longField)', []);
-        testErrorsAndWarnings('from a_index | stats percentile(integerField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats var = percentile(integerField, longField)', [
+          'Argument of [=] must be a constant, received [percentile(integerField,longField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(integerField, longField)', [
+          'Argument of [percentile] must be a constant, received [longField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(integerField, longField))',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(integerField,longField))]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(integerField, longField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(integerField, longField))', [
+          'Argument of [round] must be a constant, received [percentile(integerField,longField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats var = round(percentile(integerField, longField)) + percentile(integerField, longField)',
-          []
+          [
+            'Argument of [=] must be a constant, received [round(percentile(integerField,longField))+percentile(integerField,longField)]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats round(percentile(integerField, longField)) + percentile(integerField, longField)',
-          []
+          [
+            'Argument of [+] must be a constant, received [round(percentile(integerField,longField))]',
+            'Argument of [+] must be a constant, received [percentile(integerField,longField)]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(integerField, longField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(integerField, longField)', [
+          'Argument of [=] must be a constant, received [percentile(integerField,longField)]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(integerField, longField)',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = percentile(integerField, longField)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(integerField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats percentile(integerField, longField) by round(doubleField / 2)',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
