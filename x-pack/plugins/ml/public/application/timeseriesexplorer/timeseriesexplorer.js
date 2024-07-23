@@ -1166,6 +1166,7 @@ export class TimeSeriesExplorer extends React.Component {
               </EuiFlexGroup>
 
               <TimeSeriesExplorerControls
+                forecastId={this.props.selectedForecastId}
                 selectedDetectorIndex={selectedDetectorIndex}
                 selectedEntities={selectedEntities}
                 selectedJobId={selectedJobId}

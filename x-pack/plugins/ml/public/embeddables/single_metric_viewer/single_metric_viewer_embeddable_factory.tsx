@@ -157,6 +157,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           return (
             <SingleMetricViewerComponent
+              shouldShowForecastButton={true}
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}

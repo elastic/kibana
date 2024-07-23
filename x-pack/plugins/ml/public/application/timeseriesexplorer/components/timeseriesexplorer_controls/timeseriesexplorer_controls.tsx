@@ -34,6 +34,7 @@ import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embedd
 import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
 
 interface Props {
+  forecastId?: string;
   selectedDetectorIndex: number;
   selectedEntities?: MlEntity;
   selectedJobId: JobId;
@@ -60,6 +61,7 @@ function getDefaultEmbeddablePanelConfig(jobId: JobId, queryString?: string) {
 }
 
 export const TimeSeriesExplorerControls: FC<Props> = ({
+  forecastId,
   selectedDetectorIndex,
   selectedEntities,
   selectedJobId,
@@ -131,6 +133,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
       ),
       onClick: closePopoverOnAction(() => {
         openCasesModalCallback({
+          forecastId,
           jobIds: [selectedJobId],
           selectedDetectorIndex,
           selectedEntities,

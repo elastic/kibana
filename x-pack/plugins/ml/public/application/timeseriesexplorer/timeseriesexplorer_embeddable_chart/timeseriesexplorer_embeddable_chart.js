@@ -805,6 +805,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       selectedDetectorIndex,
       selectedJob,
       selectedJobStats,
+      shouldShowForecastButton,
     } = this.props;
 
     const {
@@ -1032,7 +1033,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   </EuiFlexItem>
                 )}
 
-                {arePartitioningFieldsProvided && selectedJob && (
+                {arePartitioningFieldsProvided && selectedJob && shouldShowForecastButton === true && (
                   <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
                     <ForecastingModal
                       buttonMode={'empty'}

@@ -52,6 +52,7 @@ export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
 };
 
 export interface SingleMetricViewerProps {
+  shouldShowForecastButton?: boolean;
   bounds?: TimeRangeBounds;
   forecastId?: string;
   selectedEntities?: MlEntity;
@@ -87,6 +88,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedDetectorIndex,
   selectedEntities,
   selectedJobId,
+  shouldShowForecastButton,
   uuid,
 }) => {
   const [chartDimensions, setChartDimensions] = useState<{ width: number; height: number }>({
@@ -258,6 +260,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       selectedJobStats={selectedJobWrapper.stats}
                       onRenderComplete={onRenderComplete}
                       onForecastComplete={onForecastComplete}
+                      shouldShowForecastButton={shouldShowForecastButton}
                     />
                   )}
               </DatePickerContextProvider>
