@@ -11,13 +11,18 @@ import { ServiceInventoryView } from '../context/entity_manager_context/entity_m
 
 export const SERVICE_INVENTORY_STORAGE_KEY = 'apm.service.inventory.view';
 
-export const serviceInventoryViewType$ = new BehaviorSubject({
-  serviceInventoryViewType: JSON.parse(
-    window.localStorage.getItem(SERVICE_INVENTORY_STORAGE_KEY) || ServiceInventoryView.classic
-  ),
-});
+export let serviceInventoryViewType$: BehaviorSubject<{ serviceInventoryViewType: string }>;
 
 export function registerServiceInventoryViewTypeContext(analytics: AnalyticsServiceSetup) {
+  const serviceInventoryLocalStorageValue = window.localStorage.getItem(
+    SERVICE_INVENTORY_STORAGE_KEY
+  );
+  serviceInventoryViewType$ = new BehaviorSubject({
+    serviceInventoryViewType:
+      serviceInventoryLocalStorageValue === null
+        ? ServiceInventoryView.classic
+        : JSON.parse(serviceInventoryLocalStorageValue),
+  });
   analytics.registerContextProvider({
     name: 'serviceInventoryViewType',
     context$: serviceInventoryViewType$,
