@@ -122,9 +122,12 @@ export class TaskManagerPlugin
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     core.metrics.getOpsMetrics$().subscribe((val) => {
+      // eslint-disable-next-line no-console
       console.log('VAL FOR HEAP SIZE LIMIT', val.process.memory.heap.size_limit);
     });
+    // eslint-disable-next-line no-console
     console.log('v8 HEAP STATS', v8.getHeapStatistics());
+    // eslint-disable-next-line no-console
     console.log('PROCESS', process.memoryUsage());
 
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
