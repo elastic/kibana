@@ -100,4 +100,20 @@ describe('getModelDeploymentState', () => {
     const result = getModelDeploymentState(model);
     expect(result).toEqual(MODEL_STATE.STOPPING);
   });
+
+  it('returns undefined for empty deployment stats', () => {
+    const model = {
+      stats: {
+        model_id: '.elser_model_2',
+        model_size_stats: {
+          model_size_bytes: 438123914,
+          required_native_memory_bytes: 2101346304,
+        },
+
+        deployment_stats: [],
+      },
+    } as unknown as ModelItem;
+    const result = getModelDeploymentState(model);
+    expect(result).toEqual(undefined);
+  });
 });

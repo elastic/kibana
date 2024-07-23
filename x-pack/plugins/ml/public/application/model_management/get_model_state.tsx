@@ -18,6 +18,8 @@ import type { ModelItem } from './models_list';
  * If all deployments are in the STOPPING state, the model state is STOPPING.
  */
 export const getModelDeploymentState = (model: ModelItem): ModelState | undefined => {
+  if (!model.stats?.deployment_stats?.length) return;
+
   if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED)) {
     return MODEL_STATE.STARTED;
   }
