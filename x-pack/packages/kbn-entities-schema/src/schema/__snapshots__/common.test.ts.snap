@@ -73,3 +73,47 @@ Object {
   "success": false,
 }
 `;
+
+exports[`schemas metadataSchema should parse successfully with a source and desitination 1`] = `
+Object {
+  "data": Object {
+    "destination": "hostName",
+    "limit": 1000,
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;
+
+exports[`schemas metadataSchema should parse successfully with an valid string 1`] = `
+Object {
+  "data": Object {
+    "destination": "host.name",
+    "limit": 1000,
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;
+
+exports[`schemas metadataSchema should parse successfully with just a source 1`] = `
+Object {
+  "data": Object {
+    "destination": "host.name",
+    "limit": 1000,
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;
+
+exports[`schemas metadataSchema should parse successfully with valid object 1`] = `
+Object {
+  "data": Object {
+    "destination": "hostName",
+    "limit": 1000,
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;

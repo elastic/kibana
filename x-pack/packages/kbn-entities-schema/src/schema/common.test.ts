@@ -33,5 +33,29 @@ describe('schemas', () => {
       expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
     });
+    it('should parse successfully with an valid string', () => {
+      const result = metadataSchema.safeParse('host.name');
+      expect(result.success).toBeTruthy();
+      expect(result).toMatchSnapshot();
+    });
+    it('should parse successfully with just a source', () => {
+      const result = metadataSchema.safeParse({ source: 'host.name' });
+      expect(result.success).toBeTruthy();
+      expect(result).toMatchSnapshot();
+    });
+    it('should parse successfully with a source and desitination', () => {
+      const result = metadataSchema.safeParse({ source: 'host.name', destination: 'hostName' });
+      expect(result.success).toBeTruthy();
+      expect(result).toMatchSnapshot();
+    });
+    it('should parse successfully with valid object', () => {
+      const result = metadataSchema.safeParse({
+        source: 'host.name',
+        destination: 'hostName',
+        size: 1,
+      });
+      expect(result.success).toBeTruthy();
+      expect(result).toMatchSnapshot();
+    });
   });
 });
