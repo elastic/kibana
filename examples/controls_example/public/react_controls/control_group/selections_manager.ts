@@ -75,9 +75,11 @@ export function initSelectionsManager(
     subscriptions.push(
       combineLatest([filters$, unpublishedFilters$, timeslice$, unpublishedTimeslice$]).subscribe(
         ([filters, unpublishedFilters, timeslice, unpublishedTimeslice]) => {
-          hasUnappliedSelections$.next(
-            !deepEqual(timeslice, unpublishedTimeslice) || !deepEqual(filters, unpublishedFilters)
-          );
+          const next =
+            !deepEqual(timeslice, unpublishedTimeslice) || !deepEqual(filters, unpublishedFilters);
+          if (hasUnappliedSelections$.value !== next) {
+            hasUnappliedSelections$.next(next);
+          }
         }
       )
     );
