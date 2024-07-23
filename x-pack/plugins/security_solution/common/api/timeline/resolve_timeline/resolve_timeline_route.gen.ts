@@ -34,6 +34,6 @@ export type ResolveTimelineRequestQueryInput = z.input<typeof ResolveTimelineReq
 export type ResolveTimelineResponse = z.infer<typeof ResolveTimelineResponse>;
 export const ResolveTimelineResponse = z.object({
   data: z.object({
-    getOneTimeline: TimelineResponse.nullable().optional(),
+    getOneTimeline: TimelineResponse,
   }),
 });

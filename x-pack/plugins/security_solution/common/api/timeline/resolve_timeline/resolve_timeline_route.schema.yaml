@@ -36,15 +36,14 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
                     properties:
                       getOneTimeline:
-                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                        nullable: true
-                required:
-                  - data
+                        allOf:
+                          - $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
         '400':
           description: The request is missing parameters
         '404':

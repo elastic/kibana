@@ -24,18 +24,19 @@ export const PersistNoteRouteRequestBody = z.object({
   overrideOwner: z.boolean().nullable().optional(),
   noteId: z.string().nullable().optional(),
   version: z.string().nullable().optional(),
+  eventIngested: z.string().nullable().optional(),
+  eventTimestamp: z.string().nullable().optional(),
+  eventDataView: z.string().nullable().optional(),
 });
 export type PersistNoteRouteRequestBodyInput = z.input<typeof PersistNoteRouteRequestBody>;
 
 export type PersistNoteRouteResponse = z.infer<typeof PersistNoteRouteResponse>;
 export const PersistNoteRouteResponse = z.object({
   data: z.object({
-    persistNote: z
-      .object({
-        code: z.number().optional(),
-        message: z.string().optional(),
-        note: Note.optional(),
-      })
-      .optional(),
+    persistNote: z.object({
+      code: z.number(),
+      message: z.string(),
+      note: Note,
+    }),
   }),
 });

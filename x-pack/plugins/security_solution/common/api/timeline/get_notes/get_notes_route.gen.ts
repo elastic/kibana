@@ -21,7 +21,7 @@ export const DocumentIds = z.union([z.array(z.string()), z.string()]);
 
 export type GetNotesRequestQuery = z.infer<typeof GetNotesRequestQuery>;
 export const GetNotesRequestQuery = z.object({
-  documentIds: DocumentIds.optional(),
+  documentIds: DocumentIds,
   page: z.coerce.number().optional(),
   perPage: z.coerce.number().optional(),
   search: z.string().nullable().optional(),

@@ -22,12 +22,11 @@ export type ImportTimelinesRequestBody = z.infer<typeof ImportTimelinesRequestBo
 export const ImportTimelinesRequestBody = z.object({
   file: Readable.merge(
     z.object({
-      hapi: z
-        .object({
-          filename: z.string().optional(),
-          headers: z.object({}).optional(),
-        })
-        .optional(),
+      hapi: z.object({
+        filename: z.string(),
+        headers: z.object({}),
+        isImmutable: z.enum(['true', 'false']).optional(),
+      }),
     })
   ),
 });

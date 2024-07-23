@@ -21,7 +21,7 @@ export const ExportTimelinesRequestQuery = z.object({
   /**
    * The name of the file to export
    */
-  file_name: z.string().optional(),
+  file_name: z.string(),
 });
 export type ExportTimelinesRequestQueryInput = z.input<typeof ExportTimelinesRequestQuery>;
 

@@ -74,9 +74,20 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required:
+                      [
+                        timelines,
+                        totalCount,
+                        defaultTimelineCoun,
+                        templateTimelineCount,
+                        favoriteCount,
+                        elasticTemplateTimelineCount,
+                        customTemplateTimelineCount,
+                      ]
                     properties:
                       timelines:
                         type: array
@@ -94,8 +105,6 @@ paths:
                         type: number
                       customTemplateTimelineCount:
                         type: number
-                required:
-                  - data
         '400':
           description: Bad request. The user supplied invalid data.
           content:

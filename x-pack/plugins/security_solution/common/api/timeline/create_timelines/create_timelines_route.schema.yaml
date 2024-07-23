@@ -58,17 +58,17 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistTimeline]
                     properties:
                       persistTimeline:
                         type: object
                         properties:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                required:
-                  - data
         '405':
           description: Indicates that there was an error in the timeline creation.
           content:

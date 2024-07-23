@@ -38,10 +38,8 @@ export type CreateTimelinesRequestBodyInput = z.input<typeof CreateTimelinesRequ
 export type CreateTimelinesResponse = z.infer<typeof CreateTimelinesResponse>;
 export const CreateTimelinesResponse = z.object({
   data: z.object({
-    persistTimeline: z
-      .object({
-        timeline: TimelineResponse.optional(),
-      })
-      .optional(),
+    persistTimeline: z.object({
+      timeline: TimelineResponse.optional(),
+    }),
   }),
 });

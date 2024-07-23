@@ -16,11 +16,13 @@ paths:
       x-codegen-enabled: true
       operationId: GetNotes
       description: Gets notes
+      summary: Get all notes for a given document.
       tags:
         - access:securitySolution
       parameters:
         - name: documentIds
           in: query
+          required: true
           schema:
             $ref: '#/components/schemas/DocumentIds'
         - name: page

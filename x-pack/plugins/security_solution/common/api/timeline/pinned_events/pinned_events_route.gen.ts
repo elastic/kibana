@@ -22,7 +22,7 @@ export type PersistPinnedEventRouteRequestBody = z.infer<typeof PersistPinnedEve
 export const PersistPinnedEventRouteRequestBody = z.object({
   eventId: z.string(),
   pinnedEventId: z.string().nullable().optional(),
-  timelineId: z.string().optional(),
+  timelineId: z.string(),
 });
 export type PersistPinnedEventRouteRequestBodyInput = z.input<
   typeof PersistPinnedEventRouteRequestBody

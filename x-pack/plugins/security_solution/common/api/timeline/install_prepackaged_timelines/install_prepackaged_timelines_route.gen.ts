@@ -22,9 +22,9 @@ export type InstallPrepackedTimelinesRequestBody = z.infer<
   typeof InstallPrepackedTimelinesRequestBody
 >;
 export const InstallPrepackedTimelinesRequestBody = z.object({
-  timelinesToInstall: z.array(ImportTimelines.nullable()).optional(),
-  timelinesToUpdate: z.array(ImportTimelines.nullable()).optional(),
-  prepackagedTimelines: z.array(SavedTimeline).optional(),
+  timelinesToInstall: z.array(ImportTimelines.nullable()),
+  timelinesToUpdate: z.array(ImportTimelines.nullable()),
+  prepackagedTimelines: z.array(SavedTimeline),
 });
 export type InstallPrepackedTimelinesRequestBodyInput = z.input<
   typeof InstallPrepackedTimelinesRequestBody
