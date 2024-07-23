@@ -81,7 +81,7 @@ export const OptionsListControl = ({
   // remove all other selections if this control is single select
   useEffect(() => {
     if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
-      optionsList.dispatch.replaceSelection(String(selectedOptions[0]));
+      optionsList.dispatch.replaceSelection(selectedOptions[0]);
     }
   }, [selectedOptions, singleSelect, optionsList.dispatch]);
 
@@ -136,7 +136,7 @@ export const OptionsListControl = ({
                         const isInvalid = invalidSelections?.includes(value);
                         return (
                           <span
-                            key={text}
+                            key={text} // each item must have a unique key to prevent warning
                             className={`optionsList__filter ${
                               isInvalid ? 'optionsList__filterInvalid' : ''
                             }`}

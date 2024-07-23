@@ -384,14 +384,14 @@ describe('Options list popover', () => {
         componentState: {
           field: stubDataView.fields.getByName('bytes')?.toSpec(),
           availableOptions: [
-            { value: '1000', docCount: 1 },
-            { value: '123456789', docCount: 4 },
+            { value: 1000, docCount: 1 },
+            { value: 123456789, docCount: 4 },
           ],
         },
       });
 
-      expect(mockedFormatter).toHaveBeenNthCalledWith(1, '1000');
-      expect(mockedFormatter).toHaveBeenNthCalledWith(2, '123456789');
+      expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1000);
+      expect(mockedFormatter).toHaveBeenNthCalledWith(2, 123456789);
       const options = await popover.findAllByRole('option');
       expect(options[0].textContent).toEqual('Exists');
       expect(
@@ -407,8 +407,8 @@ describe('Options list popover', () => {
         componentState: {
           field: stubDataView.fields.getByName('@timestamp')?.toSpec(),
           availableOptions: [
-            { value: '1721283696000', docCount: 1 },
-            { value: '1721295533000', docCount: 2 },
+            { value: 1721283696000, docCount: 1 },
+            { value: 1721295533000, docCount: 2 },
           ],
         },
       });
