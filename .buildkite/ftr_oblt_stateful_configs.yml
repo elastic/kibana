@@ -27,6 +27,10 @@ enabled:
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/slos/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
+  - x-pack/test/apm_api_integration/basic/config.ts
+  - x-pack/test/apm_api_integration/cloud/config.ts
+  - x-pack/test/apm_api_integration/rules/config.ts
+  - x-pack/test/apm_api_integration/trial/config.ts
   - x-pack/test/dataset_quality_api_integration/basic/config.ts
   - x-pack/test/functional/apps/observability_logs_explorer/config.ts
   - x-pack/test/functional/apps/dataset_quality/config.ts
