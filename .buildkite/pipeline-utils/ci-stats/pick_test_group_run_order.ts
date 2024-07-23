@@ -110,15 +110,23 @@ function isObj(x: unknown): x is Record<string, unknown> {
 function getEnabledFtrConfigs(patterns?: string[]) {
   try {
     const configs = loadYaml(Fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8'));
+
     if (!isObj(configs)) {
       throw new Error('expected yaml file to parse to an object');
     }
-    if (!configs.enabled) {
+
+    let enabledConfigs = configs.enabled;
+    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
+      enabledConfigs = configs.fips;
+    }
+
+    if (!enabledConfigs) {
       throw new Error('expected yaml file to have an "enabled" key');
     }
+
     if (
-      !Array.isArray(configs.enabled) ||
-      !configs.enabled.every(
+      !Array.isArray(enabledConfigs) ||
+      !enabledConfigs.every(
         (p): p is string | { [configPath: string]: { queue: string } } =>
           typeof p === 'string' ||
           (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
@@ -128,13 +136,14 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   - {configPath}:
       queue: {queueName}`);
     }
+
     if (typeof configs.defaultQueue !== 'string') {
       throw new Error('expected yaml file to have a string "defaultQueue" key');
     }
 
     const defaultQueue = configs.defaultQueue;
     const ftrConfigsByQueue = new Map<string, string[]>();
-    for (const enabled of configs.enabled) {
+    for (const enabled of enabledConfigs) {
       const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
       const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
 
