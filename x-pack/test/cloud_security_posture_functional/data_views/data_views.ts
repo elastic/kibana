@@ -52,19 +52,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await cspSecurity.createUsers();
     });
 
-    beforeEach(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['index-pattern'],
-        space: 'default',
-      });
-      await kibanaServer.savedObjects.clean({
-        types: ['index-pattern'],
-        space: TEST_SPACE,
-      });
-
-      await spacesService.delete(TEST_SPACE);
-    });
-
     afterEach(async () => {
       await kibanaServer.savedObjects.clean({
         types: ['index-pattern'],
@@ -119,77 +106,73 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('Verify data view is created once user reach the findings page -  non default space', async () => {
-      // await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.common.navigateToApp('home');
-
       await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
       await pageObjects.spaceSelector.openSpacesNav();
       await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
+      await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
       const soClient = await kibanaServer.savedObjects;
       const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
+
       expect(idDataViewExists).to.be(false);
 
       const findings = pageObjects.findings;
       await findings.navigateToLatestFindingsPage(TEST_SPACE);
       await pageObjects.header.waitUntilLoadingHasFinished();
-
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
         soClient,
         expectedDataViewId,
         TEST_SPACE
       );
+
       expect(idDataViewExistsPostFindingsNavigation).to.be(true);
     });
 
     it('Verify data view is created once user reach the dashboard page -  non default space', async () => {
       // await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.common.navigateToApp('home');
-
       await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
       await pageObjects.spaceSelector.openSpacesNav();
       await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
+      await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
       const soClient = await kibanaServer.savedObjects;
       const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
+
       expect(idDataViewExists).to.be(false);
 
       const cspDashboard = pageObjects.cloudPostureDashboard;
       await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
       await pageObjects.header.waitUntilLoadingHasFinished();
-
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
         soClient,
         expectedDataViewId,
-        'default'
+        TEST_SPACE
       );
+
       expect(idDataViewExistsPostFindingsNavigation).to.be(true);
     });
 
-    it('Verify data view is created once user with read permissions reach the dashboard page with', async () => {
-      // await cspSecurity.logout();
-      await cspSecurity.login('csp_read_user');
-
+    it('Verify data view is created once user with read permissions reach the dashboard page', async () => {
       await pageObjects.common.navigateToApp('home');
-
+      await cspSecurity.logout();
+      await cspSecurity.login('csp_read_user');
       const soClient = await kibanaServer.savedObjects;
       const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
+
       expect(idDataViewExists).to.be(false);
 
       const cspDashboard = pageObjects.cloudPostureDashboard;
       await cspDashboard.navigateToComplianceDashboardPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
-
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
         soClient,
         expectedDataViewId,
         'default'
       );
+
       expect(idDataViewExistsPostFindingsNavigation).to.be(true);
     });
   });
