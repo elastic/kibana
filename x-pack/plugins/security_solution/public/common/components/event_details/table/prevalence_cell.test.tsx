@@ -27,7 +27,6 @@ const eventId = 'TUWyf3wBFCFU0qRJTauW';
 const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'];
 const hostIpFieldFromBrowserField: BrowserField = {
   aggregatable: true,
-  format: '',
   name: 'host.ip',
   readFromDocValues: false,
   searchable: true,
@@ -37,7 +36,6 @@ const hostIpData: EventFieldsData = {
   ...hostIpFieldFromBrowserField,
   ariaRowindex: 35,
   field: 'host.ip',
-  format: '',
   isObjectArray: false,
   originalValue: [...hostIpValues],
   values: [...hostIpValues],
