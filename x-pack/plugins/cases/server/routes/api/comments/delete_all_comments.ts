@@ -16,6 +16,7 @@ export const deleteAllCommentsRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Delete all alerts and comments from a case`,
+    tags: ['oas-tag:cases'],
   },
   params: {
     params: schema.object({

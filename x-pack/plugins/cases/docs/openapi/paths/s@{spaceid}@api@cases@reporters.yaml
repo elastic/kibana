@@ -1,5 +1,5 @@
 get:
-  summary: Get case reporters
+  summary: Get case creators
   operationId: getCaseReporters
   description: >
     Returns information about the users who opened cases.

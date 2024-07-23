@@ -1,5 +1,5 @@
 get:
-  summary: Get case statuses
+  summary: Get case status summary
   operationId: getCaseStatus
   description: >
     Returns the number of cases that are open, closed, and in progress.

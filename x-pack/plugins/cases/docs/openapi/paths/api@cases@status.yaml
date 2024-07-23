@@ -1,5 +1,5 @@
 get:
-  summary: Get case statuses in the default space
+  summary: Get case status summary in the default space
   operationId: getCaseStatusDefaultSpace
   description: >
     Returns the number of cases that are open, closed, and in progress in the default space.

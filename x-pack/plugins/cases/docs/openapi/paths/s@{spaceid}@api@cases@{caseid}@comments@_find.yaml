@@ -1,5 +1,5 @@
 get:
-  summary: Find case comments
+  summary: Find case comments and alerts
   operationId: findCaseComments
   description: >
     Returns a paginated list of comments.

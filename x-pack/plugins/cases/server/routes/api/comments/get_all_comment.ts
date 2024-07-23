@@ -29,6 +29,7 @@ export const getAllCommentsRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Gets all comments for a case`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

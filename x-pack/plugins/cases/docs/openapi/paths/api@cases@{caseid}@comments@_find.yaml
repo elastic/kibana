@@ -1,5 +1,5 @@
 get:
-  summary: Find case comments in the default space
+  summary: Find case comments and alerts in the default space
   operationId: findCaseCommentsDefaultSpace
   description: >
     Retrieves a paginated list of comments for a case.

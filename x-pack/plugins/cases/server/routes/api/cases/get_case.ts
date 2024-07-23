@@ -33,6 +33,7 @@ export const getCaseRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Get a case`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {

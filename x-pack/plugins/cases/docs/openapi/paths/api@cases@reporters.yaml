@@ -1,5 +1,5 @@
 get:
-  summary: Get case reporters in the default space
+  summary: Get case creators in the default space
   operationId: getCaseReportersDefaultSpace
   description: >
     Returns information about the users who opened cases in the default space.

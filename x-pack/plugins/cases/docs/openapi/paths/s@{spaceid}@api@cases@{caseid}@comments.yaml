@@ -1,5 +1,5 @@
 post:
-  summary: Add a comment or alert to a case
+  summary: Add a case comment or alert
   operationId: addCaseComment
   description: >
     You must have `all` privileges for the **Cases** feature in the
@@ -39,7 +39,7 @@ post:
             $ref: '../components/schemas/4xx_response.yaml'
 
 delete:
-  summary: Delete comments and alerts from a case
+  summary: Delete all comments and alerts from a case
   operationId: deleteCaseComments
   description: >
     You must have `all` privileges for the **Cases** feature in the
@@ -62,7 +62,7 @@ delete:
             $ref: '../components/schemas/4xx_response.yaml'
 
 patch:
-  summary: Update a comment or alert in a case
+  summary: Update a case comment or alert
   operationId: updateCaseComment
   description: >
     You must have `all` privileges for the **Cases** feature in the
@@ -102,7 +102,7 @@ patch:
             $ref: '../components/schemas/4xx_response.yaml'
 
 get:
-  summary: Get case comments
+  summary: Get all case comments
   operationId: getAllCaseComments
   description: >
     Deprecated in 8.1.0. This API is deprecated and will be removed in a future release;
