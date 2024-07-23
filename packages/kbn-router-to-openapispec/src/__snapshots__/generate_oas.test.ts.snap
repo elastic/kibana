@@ -89,6 +89,7 @@ Object {
                 },
               },
             },
+            "description": undefined,
           },
         },
         "summary": "",
@@ -215,6 +216,8 @@ Object {
                 },
               },
             },
+            "description": "OK response oas-test-version-1
+OK response oas-test-version-2",
           },
         },
         "summary": "versioned route",
@@ -224,6 +227,34 @@ Object {
       },
     },
     "/foo/{id}/{path*}": Object {
+      "delete": Object {
+        "description": "route description",
+        "operationId": "/foo/{id}/{path*}#2",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": undefined,
+        "responses": Object {
+          "200": Object {
+            "description": "good response",
+          },
+        },
+        "summary": "route summary",
+        "tags": Array [
+          "bar",
+        ],
+      },
       "get": Object {
         "description": "route description",
         "operationId": "/foo/{id}/{path*}#0",
@@ -362,6 +393,7 @@ Object {
                 },
               },
             },
+            "description": undefined,
           },
         },
         "summary": "route summary",
@@ -507,6 +539,7 @@ Object {
                 },
               },
             },
+            "description": undefined,
           },
         },
         "summary": "route summary",
@@ -615,6 +648,7 @@ Object {
                 },
               },
             },
+            "description": undefined,
           },
         },
         "summary": "",
@@ -691,6 +725,7 @@ Object {
                 "schema": Object {},
               },
             },
+            "description": undefined,
           },
         },
         "summary": "",
@@ -728,6 +763,7 @@ Object {
                 "schema": Object {},
               },
             },
+            "description": undefined,
           },
         },
         "summary": "",

@@ -6,7 +6,7 @@
  */
 
 import {
-  resetAll,
+  resetResults,
   resetErrors,
   resetGroups,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
@@ -24,7 +24,7 @@ export const overridesHandlerFactory =
   () => {
     if (!requestBody.overrides) {
       logDebugMessage('Full Reset.');
-      responseStream.push(resetAll());
+      responseStream.push(resetResults());
     } else {
       logDebugMessage('Reset Errors.');
       responseStream.push(resetErrors());
