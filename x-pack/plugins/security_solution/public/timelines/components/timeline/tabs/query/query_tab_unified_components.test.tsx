@@ -790,9 +790,9 @@ describe('query tab with unified timeline', () => {
         renderTestComponents();
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
-          'data-euiicon-type',
-          'expand'
+        expect(screen.getByTestId('docTableExpandToggleColumn')).toHaveAttribute(
+          'aria-pressed',
+          'false'
         );
 
         // Open Flyout
@@ -811,9 +811,9 @@ describe('query tab with unified timeline', () => {
           });
         });
 
-        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
-          'data-euiicon-type',
-          'minimize'
+        expect(screen.getByTestId('docTableExpandToggleColumn')).toHaveAttribute(
+          'aria-pressed',
+          'true'
         );
 
         // Close Flyout
@@ -821,9 +821,9 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(mockCloseFlyout).toHaveBeenNthCalledWith(1);
-          expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
-            'data-euiicon-type',
-            'expand'
+          expect(screen.getByTestId('docTableExpandToggleColumn')).toHaveAttribute(
+            'aria-pressed',
+            'false'
           );
         });
       },
