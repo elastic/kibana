@@ -92,7 +92,7 @@ export function LogRateChart({ height }: { height: number }) {
               description={
                 <FormattedMessage
                   defaultMessage="Rate of logs per minute observed for given {serviceName}."
-                  id="xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.description"
+                  id="xpack.apm.multiSignal.servicesTable.logRate.tooltip.description"
                   values={{
                     serviceName: (
                       <code
@@ -101,7 +101,7 @@ export function LogRateChart({ height }: { height: number }) {
                         `}
                       >
                         {i18n.translate(
-                          'xpack.apm.multiSignal.servicesTable.logRatePerMinute.tooltip.serviceNameLabel',
+                          'xpack.apm.multiSignal.servicesTable.logRate.tooltip.serviceNameLabel',
                           {
                             defaultMessage: 'service.name',
                           }
