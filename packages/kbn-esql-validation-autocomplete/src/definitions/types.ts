@@ -19,7 +19,6 @@ export const supportedFieldTypes = [
   'counter_integer',
   'counter_long',
   'counter_double',
-  'date',
   'datetime',
   'date_period',
   'text',
