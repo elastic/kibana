@@ -177,7 +177,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }
 
-  if (command && command.args.length) {
+  if (command && isOptionItem(command.args[command.args.length - 1])) {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
     }

@@ -1079,7 +1079,7 @@ describe('autocomplete', () => {
     testSuggestions('FROM index1 | RENAME f', getFieldNamesByType('any'), undefined, 22);
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A', ['AS'], undefined, 28);
+    testSuggestions('FROM index1 | RENAME field A', ['AS $0'], undefined, 28);
 
     // RENAME field AS var0
     testSuggestions('FROM index1 | RENAME field AS v', ['var0'], undefined, 31);
