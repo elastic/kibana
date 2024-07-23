@@ -224,15 +224,14 @@ export const FormControls: FC<{
       dataViews.get(dataViewId).then((dataView) => {
         const { dataViewFields, messageField } = getMessageField(dataView);
         setFields(dataViewFields);
+        const field = dataViewFields.find((f) => f.name === formInput.fieldName);
         if (formInput.fieldName === undefined) {
           // form input does not contain a field name, select the found message field
           setSelectedField(messageField ?? null);
           return;
         }
-
         // otherwise, select the field from the form input
-        const field = dataViewFields.find((f) => f.name === formInput.fieldName);
-        setSelectedField(field ?? null);
+        setSelectedField(field ?? messageField ?? null);
       });
     },
     [dataViewId, dataViews, formInput, onChange]
