@@ -130,7 +130,7 @@ import {
   isSecretStorageEnabled,
 } from './secrets';
 import { getPackageAssetsMap } from './epm/packages/get';
-import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
+import { validateOutputForPackagePolicy } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
@@ -228,7 +228,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       agentPolicies.push(agentPolicy);
 
       if (agentPolicy && enrichedPackagePolicy.package?.name) {
-        await validateOutputForNewPackagePolicy(
+        await validateOutputForPackagePolicy(
           soClient,
           agentPolicy,
           enrichedPackagePolicy.package?.name
@@ -1964,6 +1964,71 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           errorsThrown
         );
       }
+    }
+  }
+
+  public async removeOutputFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    outputId: string
+  ) {
+    const packagePolicies = (
+      await soClient.find<PackagePolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id'],
+        searchFields: ['output_id'],
+        search: escapeSearchQueryPhrase(outputId),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).saved_objects.map(mapPackagePolicySavedObjectToPackagePolicy);
+
+    if (packagePolicies.length > 0) {
+      const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
+        name: packagePolicy.name,
+        enabled: packagePolicy.enabled,
+        policy_ids: packagePolicy.policy_ids,
+        inputs: packagePolicy.inputs,
+        output_id: packagePolicy.output_id === outputId ? null : packagePolicy.output_id,
+      });
+
+      // Validate that the new cleared/default output is valid for the package policies
+      // (from each of the associated agent policies) before updating any of them
+      await pMap(
+        packagePolicies,
+        async (packagePolicy) => {
+          const existingPackagePolicy = await this.get(soClient, packagePolicy.id);
+
+          if (!existingPackagePolicy) {
+            throw new PackagePolicyNotFoundError('Package policy not found');
+          }
+
+          for (const policyId of packagePolicy.policy_ids) {
+            if (packagePolicy.package?.name) {
+              const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+              if (agentPolicy) {
+                await validateOutputForPackagePolicy(
+                  soClient,
+                  agentPolicy,
+                  packagePolicy.package.name,
+                  false
+                );
+              }
+            }
+          }
+        },
+        {
+          concurrency: 50,
+        }
+      );
+      await pMap(
+        packagePolicies,
+        (packagePolicy) => {
+          this.update(soClient, esClient, packagePolicy.id, getPackagePolicyUpdate(packagePolicy));
+        },
+        {
+          concurrency: 50,
+        }
+      );
     }
   }
 

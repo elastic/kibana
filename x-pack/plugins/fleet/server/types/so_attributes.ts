@@ -121,6 +121,8 @@ export interface PackagePolicySOAttributes {
   inputs: PackagePolicyInput[];
   policy_id?: string;
   policy_ids: string[];
+  // Nullable to allow user to reset to default outputs
+  output_id?: string | null;
   updated_at: string;
   updated_by: string;
   description?: string;

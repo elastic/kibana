@@ -19,10 +19,12 @@ import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
+import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
+jest.mock('./package_policy');
 jest.mock('./audit_logging');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -43,6 +45,7 @@ mockedAppContextService.getLogger.mockImplementation(() => {
 mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 const CLOUD_ID =
   'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==';
@@ -293,6 +296,7 @@ describe('Output Service', () => {
     mockedAgentPolicyService.hasFleetServerIntegration.mockClear();
     mockedAgentPolicyService.hasSyntheticsIntegration.mockClear();
     mockedAgentPolicyService.removeOutputFromAll.mockReset();
+    mockedPackagePolicyService.removeOutputFromAll.mockReset();
     mockedAppContextService.getInternalUserSOClient.mockReset();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
@@ -1758,6 +1762,7 @@ describe('Output Service', () => {
         fromPreconfiguration: true,
       });
       expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalled();
+      expect(mockedPackagePolicyService.removeOutputFromAll).toBeCalled();
       expect(soClient.delete).toBeCalled();
     });
 

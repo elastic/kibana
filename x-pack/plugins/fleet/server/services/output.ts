@@ -63,6 +63,7 @@ import {
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
+import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
@@ -739,6 +740,12 @@ class OutputService {
     if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
+
+    await packagePolicyService.removeOutputFromAll(
+      soClient,
+      appContextService.getInternalUserESClient(),
+      id
+    );
 
     await agentPolicyService.removeOutputFromAll(
       soClient,
