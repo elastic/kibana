@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, skipWhile } from 'rxjs';
+import React, { useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -26,7 +26,7 @@ import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   PublishesDataViews,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
@@ -63,9 +63,12 @@ export const getControlGroupEmbeddableFactory = (services: {
         ignoreParentSettings,
       } = initialState;
 
-      const controlsManager = initControlsManager(initialChildControlState);
-      const selectionsManager = initSelectionsManager(controlsManager.api);
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
+      const controlsManager = initControlsManager(initialChildControlState);
+      const selectionsManager = initSelectionsManager({
+        ...controlsManager.api,
+        autoApplySelections$,
+      });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
@@ -167,15 +170,10 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const labelPosition = useStateFromPublishingSubject(labelPosition$);
-
-          const [hasUnappliedSelections, setHasUnappliedSelections] = useState(false);
-          useEffect(() => {
-            const subscription = selectionsManager.hasUnappliedSelections$
-              .pipe(skipWhile((next) => hasUnappliedSelections === next))
-              .subscribe((next) => setHasUnappliedSelections(next));
-            return () => subscription.unsubscribe();
-          }, [selectionsManager.hasUnappliedSelections$]);
+          const [hasUnappliedSelections, labelPosition] = useBatchedPublishingSubjects(
+            selectionsManager.hasUnappliedSelections$,
+            labelPosition$
+          );
 
           useEffect(() => {
             return () => {

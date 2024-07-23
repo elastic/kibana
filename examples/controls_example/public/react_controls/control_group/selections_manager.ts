@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, combineLatest, map, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
@@ -19,14 +19,13 @@ import {
 import { ControlGroupApi } from './types';
 
 export function initSelectionsManager(
-  controlGroupApi: Pick<ControlGroupApi, 'children$' | 'untilInitialized'>
+  controlGroupApi: Pick<ControlGroupApi, 'autoApplySelections$' | 'children$' | 'untilInitialized'>
 ) {
   const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
   const unpublishedFilters$ = new BehaviorSubject<Filter[] | undefined>([]);
-  const hasUnpublishedFilters$ = new BehaviorSubject(false);
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unpublishedTimeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-  const hasUnpublishedTimeslice$ = new BehaviorSubject(false);
+  const hasUnappliedSelections$ = new BehaviorSubject(false);
 
   const subscriptions: Subscription[] = [];
   controlGroupApi.untilInitialized().then(() => {
@@ -73,20 +72,34 @@ export function initSelectionsManager(
       ).subscribe((newTimeslice) => unpublishedTimeslice$.next(newTimeslice))
     );
 
-    subscriptions.push(combineLatest([filters$, unpublishedFilters$]).subscribe(([filters, unpublishedFilters]) => {
-      hasUnpublishedFilters$.next(!deepEqual(filters, unpublishedFilters));
-    }));
+    subscriptions.push(
+      combineLatest([filters$, unpublishedFilters$, timeslice$, unpublishedTimeslice$]).subscribe(
+        ([filters, unpublishedFilters, timeslice, unpublishedTimeslice]) => {
+          hasUnappliedSelections$.next(
+            !deepEqual(timeslice, unpublishedTimeslice) || !deepEqual(filters, unpublishedFilters)
+          );
+        }
+      )
+    );
 
-    subscriptions.push(combineLatest([timeslice$, unpublishedTimeslice$]).subscribe(([timeslice, unpublishedTimeslice]) => {
-      hasUnpublishedTimeslice$.next(!deepEqual(timeslice, unpublishedTimeslice));
-    }));
+    subscriptions.push(
+      combineLatest([
+        controlGroupApi.autoApplySelections$,
+        unpublishedFilters$,
+        unpublishedTimeslice$,
+      ]).subscribe(([autoApplySelections]) => {
+        if (autoApplySelections) {
+          applySelections();
+        }
+      })
+    );
   });
 
   function applySelections() {
-    if (hasUnpublishedFilters$.value) {
+    if (!deepEqual(filters$.value, unpublishedFilters$.value)) {
       filters$.next(unpublishedFilters$.value);
     }
-    if (hasUnpublishedTimeslice$.value) {
+    if (!deepEqual(timeslice$.value, unpublishedTimeslice$.value)) {
       timeslice$.next(unpublishedTimeslice$.value);
     }
   }
@@ -100,11 +113,6 @@ export function initSelectionsManager(
     cleanup: () => {
       subscriptions.forEach((subscription) => subscription.unsubscribe());
     },
-    hasUnappliedSelections$: combineLatest([hasUnpublishedFilters$, hasUnpublishedTimeslice$]).pipe(
-      map(
-        ([hasUnpublishedFilters, hasUnpublishedTimeslice]) =>
-          hasUnpublishedFilters || hasUnpublishedTimeslice
-      )
-    ),
+    hasUnappliedSelections$,
   };
 }
