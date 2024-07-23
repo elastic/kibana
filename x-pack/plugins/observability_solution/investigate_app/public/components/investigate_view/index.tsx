@@ -58,7 +58,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     addItem,
     setItemPositions,
     setItemTitle,
-    blocks,
     copyItem,
     deleteItem,
     investigation,
@@ -198,7 +197,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AddWidgetUI
-                workflowBlocks={blocks}
                 user={user}
                 revision={revision}
                 start={range.start}

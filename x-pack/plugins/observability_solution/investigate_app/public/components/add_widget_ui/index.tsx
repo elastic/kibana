@@ -11,13 +11,11 @@ import type {
   InvestigateWidgetCreate,
   InvestigationRevision,
   OnWidgetAdd,
-  WorkflowBlock,
 } from '@kbn/investigate-plugin/public';
 import { assertNever } from '@kbn/std';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
 import { AddWidgetMode } from '../../constants/add_widget_mode';
-import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
 import { EsqlWidgetControl } from '../esql_widget_control';
 import { NoteWidgetControl } from '../note_widget_control';
 
@@ -27,7 +25,6 @@ type AddWidgetUIProps = {
   revision: InvestigationRevision;
   start: Moment;
   end: Moment;
-  workflowBlocks: WorkflowBlock[];
 } & GlobalWidgetParameters;
 
 function getControlsForMode({
@@ -76,23 +73,11 @@ export function AddWidgetUI({
   query,
   filters,
   timeRange,
-  workflowBlocks,
 }: AddWidgetUIProps) {
   const [mode] = useState(AddWidgetMode.Note);
 
-  const workflowBlocksControl = useWorkflowBlocks({
-    start: start.toISOString(),
-    end: end.toISOString(),
-    dynamicBlocks: workflowBlocks,
-    isTimelineEmpty: revision.items.length === 0,
-    onWidgetAdd,
-  });
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {workflowBlocksControl ? (
-        <EuiFlexItem grow={false}>{workflowBlocksControl}</EuiFlexItem>
-      ) : null}
       <EuiFlexItem grow={false}>
         {getControlsForMode({
           mode,
