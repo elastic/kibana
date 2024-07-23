@@ -451,8 +451,6 @@ export function LensEditConfigurationFlyout({
                   setQuery(q);
                   prevQuery.current = q;
                 }}
-                expandCodeEditor={(status: boolean) => {}}
-                isCodeEditorExpanded
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
                 errors={errors}
@@ -464,7 +462,6 @@ export function LensEditConfigurationFlyout({
                       })
                     : undefined
                 }
-                hideMinimizeButton
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {

@@ -14,9 +14,7 @@ export const EDITOR_MAX_HEIGHT = 400;
 
 export const textBasedLanguageEditorStyles = (
   euiTheme: EuiThemeComputed,
-  isCompactFocused: boolean,
   editorHeight: number,
-  isCodeEditorExpanded: boolean,
   hasErrors: boolean,
   hasWarning: boolean,
   isCodeEditorExpandedFocused: boolean,
@@ -27,41 +25,30 @@ export const textBasedLanguageEditorStyles = (
 ) => {
   const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
 
-  const showHeader = hideHeaderWhenExpanded === true && isCodeEditorExpanded;
-
-  let position = isCompactFocused ? ('absolute' as const) : ('relative' as const);
-  if (isCodeEditorExpanded) {
-    position = 'relative';
-  }
-
   return {
     editorContainer: {
-      position,
+      position: 'relative' as const,
       left: 0,
       right: 0,
-      zIndex: isCompactFocused ? 4 : 0,
+      zIndex: 4,
       height: `${editorHeight}px`,
-      border: isCompactFocused ? euiTheme.border.thin : 'none',
-      borderLeft: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
-      borderRight: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
-      borderTopLeftRadius: isCodeEditorExpanded ? 0 : euiTheme.border.radius.medium,
-      borderBottom: isCodeEditorExpanded
-        ? 'none'
-        : isCompactFocused
-        ? euiTheme.border.thin
-        : 'none',
+      border: euiTheme.border.thin,
+      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderTopLeftRadius: 0,
+      borderBottom: euiTheme.border.thin,
     },
     resizableContainer: {
       display: 'flex',
-      width: isCodeEditorExpanded ? '100%' : `calc(100% - ${hasReference ? 80 : 40}px)`,
-      alignItems: isCompactFocused ? 'flex-start' : 'center',
-      border: !isCompactFocused ? euiTheme.border.thin : 'none',
-      borderTopLeftRadius: isCodeEditorExpanded ? 0 : euiTheme.border.radius.medium,
-      borderBottomLeftRadius: isCodeEditorExpanded ? 0 : euiTheme.border.radius.medium,
+      width: '100%',
+      alignItems: 'flex-start',
+      border: 'none',
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
       borderBottomWidth: hasErrors ? '2px' : '1px',
       borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
-      borderRight: isCodeEditorExpanded ? euiTheme.border.thin : 'none',
-      ...(isCodeEditorExpanded && { overflow: 'hidden' }),
+      borderRight: euiTheme.border.thin,
+      overflow: 'hidden',
     },
     linesBadge: {
       position: 'absolute' as const,
@@ -80,22 +67,21 @@ export const textBasedLanguageEditorStyles = (
     bottomContainer: {
       borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
       borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
-      borderTop:
-        isCodeEditorExpanded && !isCodeEditorExpandedFocused
-          ? hasErrors
-            ? `2px solid ${euiTheme.colors.danger}`
-            : euiTheme.border.thin
-          : `2px solid ${bottomContainerBorderColor}`,
+      borderTop: !isCodeEditorExpandedFocused
+        ? hasErrors
+          ? `2px solid ${euiTheme.colors.danger}`
+          : euiTheme.border.thin
+        : `2px solid ${bottomContainerBorderColor}`,
       borderBottom: editorIsInline ? 'none' : euiTheme.border.thin,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
       paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
-      width: isCodeEditorExpanded ? '100%' : 'calc(100% + 2px)',
+      width: '100%',
       position: 'relative' as const,
       marginTop: 0,
-      marginLeft: isCodeEditorExpanded ? 0 : -1,
+      marginLeft: 0,
       marginBottom: 0,
       borderBottomLeftRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
       borderBottomRightRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
@@ -121,8 +107,8 @@ export const textBasedLanguageEditorStyles = (
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.s,
       paddingRight: euiTheme.size.s,
-      paddingTop: showHeader ? euiTheme.size.s : euiTheme.size.xs,
-      paddingBottom: showHeader ? euiTheme.size.s : euiTheme.size.xs,
+      paddingTop: hideHeaderWhenExpanded ? euiTheme.size.s : euiTheme.size.xs,
+      paddingBottom: hideHeaderWhenExpanded ? euiTheme.size.s : euiTheme.size.xs,
       width: '100%',
       position: 'relative' as const,
       marginLeft: 0,

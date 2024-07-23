@@ -232,7 +232,6 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
-    const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -734,8 +733,6 @@ export const QueryBarTopRow = React.memo(
           <TextBasedLangEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}
-            expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
-            isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
@@ -778,18 +775,14 @@ export const QueryBarTopRow = React.memo(
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
               >
-                {!isQueryLangSelected
-                  ? renderQueryInput()
-                  : !codeEditorIsExpanded
-                  ? renderTextLangEditor()
-                  : null}
+                {!isQueryLangSelected ? renderQueryInput() : null}
               </EuiFlexItem>
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}
-            {codeEditorIsExpanded && renderTextLangEditor()}
+            {renderTextLangEditor()}
           </>
         )}
       </>

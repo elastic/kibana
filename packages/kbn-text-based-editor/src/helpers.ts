@@ -195,10 +195,6 @@ export const getDocumentationSections = async (language: string) => {
   }
 };
 
-export const getInlineEditorText = (queryString: string, isMultiLine: boolean) => {
-  return isMultiLine ? queryString.replace(/\r?\n|\r/g, ' ').replace(/  +/g, ' ') : queryString;
-};
-
 export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string => {
   const pipes = code?.split('|');
   const codeNoLines = pipes?.map((pipe) => {

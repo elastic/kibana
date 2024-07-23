@@ -18,7 +18,6 @@ import { TextBasedLangEditor } from '@kbn/esql/public';
   query={query}
   onTextLangQueryChange={onTextLangQueryChange}
   expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
-  isCodeEditorExpanded={codeEditorIsExpandedFlag}
   errors={props.textBasedLanguageModeErrors}
   isDisabled={false}
   onTextLangQuerySubmit={onTextLangQuerySubmit}
