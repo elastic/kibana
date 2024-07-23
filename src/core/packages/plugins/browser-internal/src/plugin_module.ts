@@ -24,7 +24,6 @@ import {
   IAppMount,
 } from '@kbn/core-application-browser';
 import { DiService, Global } from '@kbn/core-di-common';
-import { InternalDiService } from '@kbn/core-di-common-internal';
 
 export function createPluginInitializerModule(
   context: PluginInitializerContext
@@ -49,11 +48,11 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
           application.register({
             ...config,
             mount(params) {
-              const scope = container.get(InternalDiService).fork();
+              const scope = container.get(DiService).fork();
               scope.bind(AppMountParametersToken).toConstantValue(params);
               scope.bind(Global).toConstantValue(AppMountParametersToken);
 
-              return container.get(DiService).getContainer(scope)!.get<IAppMount>(config).mount();
+              return scope.get<IAppMount>(config).mount();
             },
           });
         });
