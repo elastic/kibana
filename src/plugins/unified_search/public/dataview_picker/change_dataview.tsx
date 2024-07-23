@@ -98,7 +98,11 @@ export function ChangeDataView({
     kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 
-  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth, dataViewsList });
+  const styles = changeDataViewStyles({
+    fullWidth: trigger.fullWidth,
+    dataViewsList,
+    theme: euiTheme,
+  });
 
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
@@ -141,17 +145,16 @@ export function ChangeDataView({
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
-      <EuiButton
+      <EuiButtonEmpty
         css={styles.trigger}
         data-test-subj={dataTestSubj}
         onClick={() => {
           setPopoverIsOpen(!isPopoverOpen);
         }}
-        color={isMissingCurrent ? 'danger' : 'primary'}
+        color={isMissingCurrent ? 'danger' : 'text'}
         iconSide="right"
         iconType="arrowDown"
         title={triggerLabel}
-        fullWidth={fullWidth}
         disabled={isDisabled}
         textProps={{ className: 'eui-textTruncate' }}
         {...rest}
@@ -169,7 +172,7 @@ export function ChangeDataView({
           )}
           {triggerLabel}
         </>
-      </EuiButton>
+      </EuiButtonEmpty>
     );
   };
 
