@@ -87,7 +87,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
             `}
             value={content ?? ''}
             onChange={(value) => content$.next(value)}
-            aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
+            aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableAriaLabel', {
               defaultMessage: 'Dashboard markdown editor',
             })}
             height="full"

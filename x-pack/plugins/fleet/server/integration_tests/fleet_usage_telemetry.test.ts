@@ -369,6 +369,20 @@ describe('fleet usage telemetry', () => {
       ],
     });
 
+    await soClient.create('ingest-package-policies', {
+      name: 'nginx-1',
+      namespace: 'default',
+      package: {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '1.0.0',
+      },
+      enabled: true,
+      policy_id: 'policy2',
+      policy_ids: ['policy2', 'policy3'],
+      inputs: [],
+    });
+
     await soClient.create(
       'ingest-outputs',
       {
@@ -593,6 +607,19 @@ describe('fleet usage telemetry', () => {
           'this should not be included in metrics',
         ],
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        integrations_details: [
+          {
+            total_integration_policies: 2,
+            shared_integration_policies: 1,
+            shared_integrations: {
+              agents: undefined,
+              name: 'nginx-1',
+              pkg_name: 'nginx',
+              pkg_version: '1.0.0',
+              shared_by_agent_policies: 2,
+            },
+          },
+        ],
       })
     );
     expect(usage?.upgrade_details.length).toBe(3);
