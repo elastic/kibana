@@ -14,6 +14,7 @@ export const SINGLE_TICK_REGEX = /`/g;
 export const SINGLE_BACKTICK = '`';
 export const DOUBLE_BACKTICK = '``';
 
+export const ESQL_COMMON_NUMERIC_TYPES = ['double', 'long', 'integer'] as const;
 export const ESQL_NUMERIC_DECIMAL_TYPES = [
   'double',
   'unsigned_long',

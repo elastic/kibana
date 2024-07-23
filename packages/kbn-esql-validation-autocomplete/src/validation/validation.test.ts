@@ -1091,17 +1091,19 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
         testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
 
+        // @TODO: Nonsensical error - need to expand types allowed
+        // e.g. [datetime, double, integer, ip, keyword, long, text, unsigned_long or version]
         testErrorsAndWarnings(
           `from a_index | eval booleanField ${op} "true"`,
           ['==', '!='].includes(op)
             ? []
-            : [`Argument of [${op}] must be [string], found value [booleanField] type [boolean]`]
+            : [`Argument of [${op}] must be [date], found value [booleanField] type [boolean]`]
         );
         testErrorsAndWarnings(
           `from a_index | eval "true" ${op} booleanField`,
           ['==', '!='].includes(op)
             ? []
-            : [`Argument of [${op}] must be [string], found value [booleanField] type [boolean]`]
+            : [`Argument of [${op}] must be [date], found value [booleanField] type [boolean]`]
         );
 
         testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);

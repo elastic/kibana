@@ -6086,14 +6086,14 @@
     {
       "query": "from a_index | eval booleanField > \"true\"",
       "error": [
-        "Argument of [>] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" > booleanField",
       "error": [
-        "Argument of [>] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6232,14 +6232,14 @@
     {
       "query": "from a_index | eval booleanField >= \"true\"",
       "error": [
-        "Argument of [>=] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" >= booleanField",
       "error": [
-        "Argument of [>=] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6378,14 +6378,14 @@
     {
       "query": "from a_index | eval booleanField < \"true\"",
       "error": [
-        "Argument of [<] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" < booleanField",
       "error": [
-        "Argument of [<] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6524,14 +6524,14 @@
     {
       "query": "from a_index | eval booleanField <= \"true\"",
       "error": [
-        "Argument of [<=] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" <= booleanField",
       "error": [
-        "Argument of [<=] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },

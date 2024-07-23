@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
+import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { i18n } from '@kbn/i18n';
 import type { FunctionDefinition, FunctionParameterType } from './types';
 
@@ -108,7 +108,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       type: 'agg',
       supportedCommands: ['stats', 'metrics'],
       signatures: [
-        ...ESQL_NUMBER_TYPES.map((type) => ({
+        ...ESQL_COMMON_NUMERIC_TYPES.map((type) => ({
           params: [{ name: 'column', type, noNestingFunctions: true }],
           returnType: type,
         })),
@@ -135,7 +135,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       type: 'agg',
       supportedCommands: ['stats', 'metrics'],
       signatures: [
-        ...ESQL_NUMBER_TYPES.map((type) => ({
+        ...ESQL_COMMON_NUMERIC_TYPES.map((type) => ({
           params: [{ name: 'column', type, noNestingFunctions: true }],
           returnType: type,
         })),
