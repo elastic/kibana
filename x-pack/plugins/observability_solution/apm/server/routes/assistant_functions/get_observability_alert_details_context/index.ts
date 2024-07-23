@@ -89,10 +89,6 @@ export const getAlertDetailsContextHandler = (
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const alertStartedAt = query.alert_started_at;
-    const alertRuleParameterTimeSize = query.alert_rule_parameter_time_size
-      ? parseInt(query.alert_rule_parameter_time_size, 10)
-      : undefined;
-    const alertRuleParameterTimeUnit = query.alert_rule_parameter_time_unit;
     const serviceEnvironment = query['service.environment'];
     const hostName = query['host.name'];
     const kubernetesPodName = query['kubernetes.pod.name'];
@@ -173,8 +169,10 @@ export const getAlertDetailsContextHandler = (
         coreContext,
         arguments: {
           alertStartedAt: moment(alertStartedAt).toISOString(),
-          alertRuleParameterTimeSize,
-          alertRuleParameterTimeUnit,
+          alertRuleParameterTimeSize: query.alert_rule_parameter_time_size
+            ? parseInt(query.alert_rule_parameter_time_size, 10)
+            : undefined,
+          alertRuleParameterTimeUnit: query.alert_rule_parameter_time_unit,
           entities: {
             'service.name': serviceName,
             'host.name': hostName,
