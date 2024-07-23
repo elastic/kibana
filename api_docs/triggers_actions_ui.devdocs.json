@@ -603,6 +603,101 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.fetchConnectorTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchConnectorTypes",
+        "description": [],
+        "signature": [
+          "({ http, featureId, includeSystemActions, }: { http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; featureId?: string | undefined; includeSystemActions?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.ActionType",
+            "text": "ActionType"
+          },
+          "[]>"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/common/apis/fetch_connector_types/fetch_connector_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.fetchConnectorTypes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  featureId,\n  includeSystemActions = false,\n}",
+            "description": [],
+            "path": "packages/kbn-alerts-ui-shared/src/common/apis/fetch_connector_types/fetch_connector_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.fetchConnectorTypes.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/common/apis/fetch_connector_types/fetch_connector_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.fetchConnectorTypes.$1.featureId",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/common/apis/fetch_connector_types/fetch_connector_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.fetchConnectorTypes.$1.includeSystemActions",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeSystemActions",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/common/apis/fetch_connector_types/fetch_connector_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.ForLastExpression",
         "type": "Function",
         "tags": [],
@@ -1079,101 +1174,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadActionTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "loadActionTypes",
-        "description": [],
-        "signature": [
-          "({\n  http,\n  featureId,\n  includeSystemActions = false,\n}: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; featureId?: string | undefined; includeSystemActions?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionType",
-            "text": "ActionType"
-          },
-          "[]>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadActionTypes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  http,\n  featureId,\n  includeSystemActions = false,\n}",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadActionTypes.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadActionTypes.$1.featureId",
-                "type": "string",
-                "tags": [],
-                "label": "featureId",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadActionTypes.$1.includeSystemActions",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "includeSystemActions",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -5986,7 +5986,7 @@
         "tags": [],
         "label": "AlertProvidedActionVariables",
         "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts",
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/action_variables.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7715,7 +7715,7 @@
           "signature": [
             "(props: Omit<",
             "ActionAccordionFormProps",
-            ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
+            ", \"setActions\" | \"actionTypeRegistry\"> & { setActions: (actions: ",
             {
               "pluginId": "@kbn/alerting-types",
               "scope": "common",
@@ -7741,7 +7741,7 @@
               "signature": [
                 "Omit<",
                 "ActionAccordionFormProps",
-                ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
+                ", \"setActions\" | \"actionTypeRegistry\"> & { setActions: (actions: ",
                 {
                   "pluginId": "@kbn/alerting-types",
                   "scope": "common",
@@ -7877,7 +7877,7 @@
             },
             ">(props: Omit<",
             "RuleAddProps",
-            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
             "RuleAddProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7895,7 +7895,7 @@
               "signature": [
                 "Omit<",
                 "RuleAddProps",
-                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
+                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -7947,7 +7947,7 @@
             },
             ">(props: Omit<",
             "RuleEditProps",
-            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
             "RuleEditProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7965,7 +7965,7 @@
               "signature": [
                 "Omit<",
                 "RuleEditProps",
-                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
+                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

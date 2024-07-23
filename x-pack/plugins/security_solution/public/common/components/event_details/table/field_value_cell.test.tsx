@@ -21,7 +21,6 @@ const hostIpData: EventFieldsData = {
   aggregatable: true,
   ariaRowindex: 35,
   field: 'host.ip',
-  format: '',
   isObjectArray: false,
   name: 'host.ip',
   originalValue: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
@@ -85,7 +84,6 @@ describe('FieldValueCell', () => {
       aggregatable: false,
       ariaRowindex: 50,
       field: 'message',
-      format: '',
       isObjectArray: false,
       name: 'message',
       originalValue: ['Endpoint network event'],
@@ -98,7 +96,6 @@ describe('FieldValueCell', () => {
 
     const messageFieldFromBrowserField: BrowserField = {
       aggregatable: false,
-      format: '',
       name: 'message',
       readFromDocValues: false,
       searchable: true,
@@ -133,7 +130,6 @@ describe('FieldValueCell', () => {
   describe('when `BrowserField` metadata IS available', () => {
     const hostIpFieldFromBrowserField: BrowserField = {
       aggregatable: true,
-      format: '',
       name: 'host.ip',
       readFromDocValues: false,
       searchable: true,
