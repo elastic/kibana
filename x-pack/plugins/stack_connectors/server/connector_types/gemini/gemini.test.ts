@@ -162,7 +162,7 @@ describe('GeminiConnector', () => {
               maxOutputTokens: 8192,
             },
             safety_settings: [
-              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
             ],
           }),
           headers: {
@@ -194,7 +194,7 @@ describe('GeminiConnector', () => {
               maxOutputTokens: 8192,
             },
             safety_settings: [
-              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
             ],
           }),
           headers: {
@@ -244,7 +244,7 @@ describe('GeminiConnector', () => {
               maxOutputTokens: 8192,
             },
             safety_settings: [
-              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
             ],
           }),
           responseType: 'stream',
@@ -277,7 +277,7 @@ describe('GeminiConnector', () => {
               maxOutputTokens: 8192,
             },
             safety_settings: [
-              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
             ],
           }),
           responseType: 'stream',
