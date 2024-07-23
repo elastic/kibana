@@ -24,28 +24,47 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { EuiFlexGroup, EuiLoadingChart, EuiPanel } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiPanel,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ControlStyle } from '@kbn/controls-plugin/public';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ControlsInOrder } from '../init_controls_manager';
 import { ControlGroupApi } from '../types';
 import { ControlRenderer } from '../../control_renderer';
 import { ControlClone } from '../../components/control_clone';
 import { DefaultControlApi } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 
 interface Props {
+  applySelections: () => void;
   controlGroupApi: ControlGroupApi;
   controlsManager: {
     controlsInOrder$: BehaviorSubject<ControlsInOrder>;
     getControlApi: (uuid: string) => DefaultControlApi | undefined;
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => void;
   };
+  hasUnappliedSelections: boolean;
   labelPosition: ControlStyle;
 }
 
-export function ControlGroup({ controlGroupApi, controlsManager, labelPosition }: Props) {
+export function ControlGroup({
+  applySelections,
+  controlGroupApi,
+  controlsManager,
+  labelPosition,
+  hasUnappliedSelections,
+}: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const controlsInOrder = useStateFromPublishingSubject(controlsManager.controlsInOrder$);
+  const [autoApplySelections, controlsInOrder] = useBatchedPublishingSubjects(
+    controlGroupApi.autoApplySelections$,
+    controlsManager.controlsInOrder$
+  );
 
   /** Handle drag and drop */
   const sensors = useSensors(
@@ -78,6 +97,28 @@ export function ControlGroup({ controlGroupApi, controlsManager, labelPosition }
       ignore = true;
     };
   }, [controlGroupApi]);
+
+  function renderApplyButton() {
+    return !autoApplySelections ? (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={ControlGroupStrings.management.getApplyButtonTitle(hasUnappliedSelections)}
+        >
+          <EuiButtonIcon
+            size="m"
+            disabled={!hasUnappliedSelections}
+            iconSize="m"
+            display="fill"
+            color={'success'}
+            iconType={'check'}
+            data-test-subj="controlGroup--applyFiltersButton"
+            aria-label={ControlGroupStrings.management.getApplyButtonTitle(hasUnappliedSelections)}
+            onClick={applySelections}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    ) : null;
+  }
 
   return (
     <EuiPanel borderRadius="m" paddingSize="none" color={draggingId ? 'success' : 'transparent'}>
@@ -118,6 +159,7 @@ export function ControlGroup({ controlGroupApi, controlsManager, labelPosition }
             ) : null}
           </DragOverlay>
         </DndContext>
+        {renderApplyButton()}
       </EuiFlexGroup>
     </EuiPanel>
   );

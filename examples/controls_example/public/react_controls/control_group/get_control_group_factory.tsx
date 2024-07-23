@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import React, { useEffect, useState } from 'react';
+import { BehaviorSubject, skipWhile } from 'rxjs';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -21,16 +21,11 @@ import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
-  apiPublishesFilters,
-  apiPublishesTimeslice,
   PublishesDataViews,
-  PublishesFilters,
-  PublishesTimeslice,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
@@ -44,6 +39,7 @@ import {
   ControlGroupUnsavedChanges,
 } from './types';
 import { ControlGroup } from './components/control_group';
+import { initSelectionsManager } from './selections_manager';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -68,9 +64,8 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialState;
 
       const controlsManager = initControlsManager(initialChildControlState);
+      const selectionsManager = initSelectionsManager(controlsManager.api);
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
@@ -103,6 +98,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
+        ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
           controlFetch$(
             chaining$(
@@ -156,50 +152,12 @@ export const getControlGroupEmbeddableFactory = (services: {
         },
         grow,
         width,
-        filters$,
         dataViews,
         labelPosition: labelPosition$,
-        timeslice$,
-      });
-
-      /**
-       * Subscribe to all children's output filters, combine them, and output them
-       * TODO: If `autoApplySelections` is false, publish to "unpublishedFilters" instead
-       * and only output to filters$ when the apply button is clicked.
-       *       OR
-       *       Always publish to "unpublishedFilters" and publish them manually on click
-       *       (when `autoApplySelections` is false) or after a small debounce (when false)
-       *       See: https://github.com/elastic/kibana/pull/182842#discussion_r1624929511
-       * - Note: Unsaved changes of control group **should** take into consideration the
-       *         output filters,  but not the "unpublishedFilters"
-       */
-      const outputFiltersSubscription = combineCompatibleChildrenApis<PublishesFilters, Filter[]>(
-        api,
-        'filters$',
-        apiPublishesFilters,
-        []
-      ).subscribe((newFilters) => filters$.next(newFilters));
-
-      const childrenTimesliceSubscription = combineCompatibleChildrenApis<
-        PublishesTimeslice,
-        [number, number] | undefined
-      >(
-        api,
-        'timeslice$',
-        apiPublishesTimeslice,
-        undefined,
-        // flatten method
-        (values) => {
-          // control group should never allow multiple timeslider controls
-          // returns first timeslider control value
-          return values.length === 0 ? undefined : values[0];
-        }
-      ).subscribe((timeslice) => {
-        timeslice$.next(timeslice);
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
-      const childDataViewsSubscription = combineCompatibleChildrenApis<
+      const childrenDataViewsSubscription = combineCompatibleChildrenApis<
         PublishesDataViews,
         DataView[]
       >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
@@ -211,18 +169,27 @@ export const getControlGroupEmbeddableFactory = (services: {
         Component: () => {
           const labelPosition = useStateFromPublishingSubject(labelPosition$);
 
+          const [hasUnappliedSelections, setHasUnappliedSelections] = useState(false);
+          useEffect(() => {
+            const subscription = selectionsManager.hasUnappliedSelections$
+              .pipe(skipWhile((next) => hasUnappliedSelections === next))
+              .subscribe((next) => setHasUnappliedSelections(next));
+            return () => subscription.unsubscribe();
+          }, [selectionsManager.hasUnappliedSelections$]);
+
           useEffect(() => {
             return () => {
-              outputFiltersSubscription.unsubscribe();
-              childDataViewsSubscription.unsubscribe();
-              childrenTimesliceSubscription.unsubscribe();
+              selectionsManager.cleanup();
+              childrenDataViewsSubscription.unsubscribe();
             };
           }, []);
 
           return (
             <ControlGroup
+              applySelections={selectionsManager.applySelections}
               controlGroupApi={api}
               controlsManager={controlsManager}
+              hasUnappliedSelections={hasUnappliedSelections}
               labelPosition={labelPosition}
             />
           );
