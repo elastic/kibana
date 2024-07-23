@@ -533,6 +533,10 @@ export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
+export interface PackageMetadata {
+  has_policies: true;
+}
+
 export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
