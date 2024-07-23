@@ -8,10 +8,10 @@
 
 import React from 'react';
 
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { LegacyVisInstance } from '../../types';
+import { VizChartWarning } from '../viz_chart_warning';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeEditorVisInstance } from '../types';
-import { VizChartWarning } from './viz_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();
 const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
@@ -41,7 +41,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: jest.fn((comp) => comp),
 }));
 
-jest.mock('../../services', () => ({
+jest.mock('../../../services', () => ({
   getUISettings: jest.fn(() => ({
     get: jest.fn(),
   })),
@@ -72,7 +72,7 @@ describe('VisualizeEditorCommon', () => {
                 title: 'TSVB',
               },
             },
-          } as VisualizeEditorVisInstance
+          } as LegacyVisInstance
         }
       />
     );
@@ -109,7 +109,7 @@ describe('VisualizeEditorCommon', () => {
                 title: 'TSVB',
               },
             },
-          } as VisualizeEditorVisInstance
+          } as LegacyVisInstance
         }
       />
     );
@@ -154,7 +154,7 @@ describe('VisualizeEditorCommon', () => {
                 },
               },
             },
-          } as unknown as VisualizeEditorVisInstance
+          } as unknown as LegacyVisInstance
         }
       />
     );

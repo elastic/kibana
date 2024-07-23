@@ -9,9 +9,9 @@
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
 import {
-  ByValueVisInstance,
   EmbeddableApiHandler,
   IEditorController,
+  LegacyVisInstance,
   VisualizeServices,
 } from '../../../types';
 import { VisualizeEditorInput } from '../../../../react_embeddable/types';
@@ -28,7 +28,7 @@ export const useVisByValue = (
   originatingPath?: string
 ) => {
   const [state, setState] = useState<{
-    byValueVisInstance?: ByValueVisInstance;
+    byValueVisInstance?: LegacyVisInstance;
     visEditorController?: IEditorController;
   }>({});
   const visEditorRef = useRef<HTMLDivElement>(null);

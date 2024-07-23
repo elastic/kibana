@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { EventEmitter } from 'events';
 import { AppMountParameters, OverlayRef } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { switchMap } from 'rxjs';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import type {
-  VisualizeServices,
-  VisualizeAppState,
-  VisualizeAppStateContainer,
-  VisualizeEditorVisInstance,
-} from '../../types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { EventEmitter } from 'events';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME } from '../../../../common/constants';
+import { VisualizeRuntimeState } from '../../../react_embeddable/types';
+import type {
+  LegacyVisInstance,
+  VisualizeAppState,
+  VisualizeLegacyAppStateContainer,
+  VisualizeServices,
+} from '../../types';
 import { getTopNavConfig, isFallbackDataView } from '../../utils';
 import {
   NavigateToLensFn,
   OpenInspectorFn,
   SerializeStateFn,
 } from '../../utils/use/use_embeddable_api_handler';
-import { VisualizeRuntimeState } from '../../../react_embeddable/types';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -42,9 +42,9 @@ interface VisualizeTopNavProps {
   hasUnappliedChanges: boolean;
   originatingApp?: string;
   originatingPath?: string;
-  visInstance: VisualizeEditorVisInstance;
+  visInstance: LegacyVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
-  stateContainer: VisualizeAppStateContainer;
+  stateContainer: VisualizeLegacyAppStateContainer;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];

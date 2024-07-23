@@ -6,30 +6,26 @@
  * Side Public License, v 1.
  */
 
-import '../visualize_editor.scss';
-import { EventEmitter } from 'events';
-import React, { RefObject, useCallback, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { VisualizeTopNav } from './visualize_top_nav';
-import { ExperimentalVisInfo } from '../experimental_vis_info';
+import { EventEmitter } from 'events';
+import React, { RefObject, useCallback, useEffect } from 'react';
 import { urlFor } from '../../..';
+import { VisualizeRuntimeState } from '../../../react_embeddable/types';
 import { getUISettings } from '../../../services';
-import { VizChartWarning } from '../viz_chart_warning';
 import {
-  SavedVisInstance,
+  LegacyVisInstance,
   VisualizeAppState,
-  VisualizeServices,
   VisualizeAppStateContainer,
-  VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../../types';
 import {
   CHARTS_CONFIG_TOKENS,
-  CHARTS_WITHOUT_SMALL_MULTIPLES,
   CHARTS_TO_BE_DEPRECATED,
+  CHARTS_WITHOUT_SMALL_MULTIPLES,
   isSplitChart as isSplitChartFn,
 } from '../../utils/split_chart_warning_helpers';
 import {
@@ -37,10 +33,13 @@ import {
   OpenInspectorFn,
   SerializeStateFn,
 } from '../../utils/use/use_embeddable_api_handler';
-import { VisualizeRuntimeState } from '../../../react_embeddable/types';
+import { ExperimentalVisInfo } from '../experimental_vis_info';
+import '../visualize_editor.scss';
+import { VizChartWarning } from '../viz_chart_warning';
+import { VisualizeTopNav } from './visualize_top_nav';
 
 interface VisualizeEditorCommonProps {
-  visInstance?: VisualizeEditorVisInstance;
+  visInstance?: LegacyVisInstance;
   appState: VisualizeAppStateContainer | null;
   currentAppState?: VisualizeAppState;
   isChromeVisible?: boolean;
@@ -88,7 +87,7 @@ export const VisualizeEditorCommon = ({
 
   useEffect(() => {
     async function aliasMatchRedirect() {
-      const sharingSavedObjectProps = visInstance?.savedObjectProperties?.sharingSavedObjectProps;
+      const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
       if (services.spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
@@ -108,16 +107,12 @@ export const VisualizeEditorCommon = ({
     }
 
     aliasMatchRedirect();
-  }, [
-    visInstance?.vis?.type.title,
-    services,
-    visInstance?.savedObjectProperties?.sharingSavedObjectProps,
-  ]);
+  }, [visInstance?.vis?.type.title, services, visInstance?.savedVis.sharingSavedObjectProps]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
     const currentObjectId = visInstance?.savedVis.id;
-    const sharingSavedObjectProps = visInstance?.savedObjectProperties?.sharingSavedObjectProps;
+    const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
     if (services.spaces && sharingSavedObjectProps?.outcome === 'conflict' && currentObjectId) {
       // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
@@ -138,7 +133,7 @@ export const VisualizeEditorCommon = ({
     return null;
   }, [
     visInstance?.savedVis.id,
-    visInstance?.savedObjectProperties?.sharingSavedObjectProps,
+    visInstance?.savedVis.sharingSavedObjectProps,
     visInstance?.vis?.type.title,
     services.spaces,
     services.history.location.search,
@@ -208,8 +203,8 @@ export const VisualizeEditorCommon = ({
                 id="visualizations.pageHeading"
                 defaultMessage="{chartName} {chartType} visualization"
                 values={{
-                  chartName: (visInstance as SavedVisInstance).savedVis.title,
-                  chartType: (visInstance as SavedVisInstance).vis.type.title,
+                  chartName: (visInstance as LegacyVisInstance).savedVis.title,
+                  chartType: (visInstance as LegacyVisInstance).vis.type.title,
                 }}
               />
             ) : (

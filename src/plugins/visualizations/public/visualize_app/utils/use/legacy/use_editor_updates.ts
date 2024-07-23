@@ -13,9 +13,9 @@ import { Query } from '@kbn/es-query';
 import {
   VisualizeServices,
   VisualizeAppState,
-  VisualizeAppStateContainer,
-  VisualizeEditorVisInstance,
   IEditorController,
+  LegacyVisInstance,
+  VisualizeLegacyAppStateContainer,
 } from '../../../types';
 import { convertFromSerializedVis } from '../../../../utils/saved_visualize_utils';
 
@@ -23,8 +23,8 @@ export const useEditorUpdates = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   setHasUnsavedChanges: (value: boolean) => void,
-  appState: VisualizeAppStateContainer | null,
-  visInstance: VisualizeEditorVisInstance | undefined,
+  appState: VisualizeLegacyAppStateContainer | null,
+  visInstance: LegacyVisInstance | undefined,
   visEditorController: IEditorController | undefined
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
@@ -46,15 +46,12 @@ export const useEditorUpdates = (
       const reloadVisualization = () => {
         if (visEditorController) {
           visEditorController.render({
-            core: services,
-            data: services.data,
             uiState: vis.uiState,
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
             query: queryString.getQuery() as Query,
             linked: !!vis.data.savedSearchId,
             savedSearch,
-            unifiedSearch: services.unifiedSearch,
           });
         }
       };

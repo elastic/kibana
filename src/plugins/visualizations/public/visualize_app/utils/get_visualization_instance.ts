@@ -11,7 +11,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import { SerializedVis, Vis, VisSavedObject } from '../..';
-import type { VisInstance, VisualizeServices } from '../types';
+import type { LegacyVisInstance, VisualizeServices } from '../types';
 import { VisualizeEditorInput } from '../../react_embeddable/types';
 
 const createLinkedSavedSearch = async (vis: Vis, visualizeServices: VisualizeServices) => {
@@ -82,7 +82,7 @@ export const getVisualizationInstance = async (
    * Both come from url search query
    */
   opts?: Record<string, unknown> | string
-): Promise<VisInstance> => {
+): Promise<LegacyVisInstance> => {
   const { data, spaces, savedObjectsTagging, ...startServices } = visualizeServices;
 
   const savedVis: VisSavedObject = await getSavedVisualization(

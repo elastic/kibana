@@ -48,7 +48,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { PersistedState, Vis, VisParams } from '..';
 
 import { ExtraSavedObjectProperties, VisualizeRuntimeState } from '../react_embeddable/types';
-import type { ListingViewRegistry, SavedVisState, SerializedVis } from '../types';
+import type { ListingViewRegistry, SavedVisState, SerializedVis, VisSavedObject } from '../types';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 import { EmbeddableApiHandler } from './utils/use/use_embeddable_api_handler';
 
@@ -134,6 +134,15 @@ export interface VisInstance {
   savedVis: SerializedVis;
   savedObjectProperties?: Partial<ExtraSavedObjectProperties>;
   references?: Reference[];
+  panelTitle?: string;
+  panelDescription?: string;
+  panelTimeRange?: TimeRange;
+}
+
+export interface LegacyVisInstance {
+  vis: Vis;
+  savedVis: VisSavedObject;
+  savedSearch?: SavedSearch;
   panelTitle?: string;
   panelDescription?: string;
   panelTimeRange?: TimeRange;

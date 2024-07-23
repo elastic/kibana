@@ -17,7 +17,7 @@ import { getTypes } from '../../../../services';
 import {
   EmbeddableApiHandler,
   IEditorController,
-  SavedVisInstance,
+  LegacyVisInstance,
   VisualizeServices,
 } from '../../../types';
 import {
@@ -43,7 +43,7 @@ export const useSavedVisInstance = (
   embeddableInput?: Omit<VisualizeEditorInput, 'serializedVis'>
 ) => {
   const [state, setState] = useState<{
-    savedVisInstance?: SavedVisInstance;
+    savedVisInstance?: LegacyVisInstance;
     visEditorController?: IEditorController;
   }>({});
   const visEditorRef = useRef<HTMLDivElement | null>(null);
@@ -61,7 +61,7 @@ export const useSavedVisInstance = (
     } = services;
     const getSavedVisInstance = async () => {
       try {
-        let savedVisInstance: SavedVisInstance;
+        let savedVisInstance: LegacyVisInstance;
         if (history.location.pathname === '/create') {
           const searchParams = parse(history.location.search);
           const visType = getTypes()

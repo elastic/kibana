@@ -7,7 +7,6 @@
  */
 
 export { useChromeVisibility } from './use_chrome_visibility';
-export { useEditorUpdates } from './use_editor_updates';
 export { useEditorUpdates as useLegacyEditorUpdates } from './legacy/use_editor_updates';
 export { useSavedVisInstance } from './legacy/use_saved_vis_instance';
 export { useVisualizeAppState } from './use_visualize_app_state';
