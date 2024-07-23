@@ -163,17 +163,17 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {
-      if (input.switchToDocumentView === undefined) {
-        return;
-      }
-
       const filter = buildEmptyFilter(false, dataView.id);
       if (alias) {
         filter.meta.alias = alias;
       }
       filter.query = values.query;
-      input.switchToDocumentView();
-      filterManager.addFilters([filter]);
+      if (typeof input.switchToDocumentView === 'function') {
+        input.switchToDocumentView();
+      }
+      setTimeout(() => {
+        filterManager.addFilters([filter]);
+      }, 500);
     },
     [dataView.id, filterManager, input]
   );
