@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('sentinelone connector', function () {
     before(async () => {
       simulatorUrl = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES)
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SENTINELONE)
       );
       editSimulatorUrl = simulatorUrl.replace('/elastic:changeme@', '/');
     });

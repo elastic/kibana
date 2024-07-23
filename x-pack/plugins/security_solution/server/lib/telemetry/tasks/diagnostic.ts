@@ -8,11 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { newTelemetryLogger, getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
-import type { TelemetryEvent } from '../types';
+import { TelemetryChannel, type TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
-import { TELEMETRY_CHANNEL_ENDPOINT_ALERTS } from '../constants';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryDiagnosticsTaskConfig() {
@@ -65,7 +64,7 @@ export function createTelemetryDiagnosticsTaskConfig() {
           log.l('Sending diagnostic alerts', {
             alerts_count: alerts.length,
           });
-          await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
+          sender.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, processedAlerts);
         }
 
         await taskMetricsService.end(trace);
