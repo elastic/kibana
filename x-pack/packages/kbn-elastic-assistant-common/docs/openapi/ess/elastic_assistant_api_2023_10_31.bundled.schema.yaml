@@ -11,7 +11,7 @@ servers:
       port:
         default: '5601'
 paths:
-  /api/elastic_assistant/chat/complete:
+  /api/security_ai_assistant/chat/complete:
     post:
       description: Creates a model response for the given chat conversation.
       operationId: ChatComplete

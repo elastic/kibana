@@ -3,7 +3,7 @@ info:
   title: Find AnonymizationFields API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/anonymization_fields/_find:
+  /api/security_ai_assistant/anonymization_fields/_find:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]

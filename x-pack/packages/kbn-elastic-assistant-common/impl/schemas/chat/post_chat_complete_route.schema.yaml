@@ -3,7 +3,7 @@ info:
   title: Chat Complete API endpoint
   version: '2023-10-31'
 paths:
-  /api/elastic_assistant/chat/complete:
+  /api/security_ai_assistant/chat/complete:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
