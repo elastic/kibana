@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
@@ -17,9 +17,9 @@ import {
   apiHasAppContext,
   apiHasDisableTriggers,
   apiHasExecutionContext,
+  apiIsOfType,
   apiPublishesUnifiedSearch,
   apiPublishesViewMode,
-  apiIsOfType,
   fetch$,
   initializeTitles,
   useStateFromPublishingSubject,
@@ -99,9 +99,24 @@ export const getVisualizeEmbeddableFactory: (
 
     let updateExpressionParams = async () => {};
 
+    let initialDataViews: DataView[] | undefined = [];
+    if (initialVisInstance.data.indexPattern)
+      initialDataViews = [initialVisInstance.data.indexPattern];
+    if (initialVisInstance.type.getUsedIndexPattern) {
+      initialDataViews = await initialVisInstance.type.getUsedIndexPattern(
+        initialVisInstance.params
+      );
+    }
+
+    const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const defaultPanelTitle = new BehaviorSubject<string | undefined>(initialVisInstance.title);
+
     const api = buildApi(
       {
         ...titlesApi,
+        defaultPanelTitle,
+        dataLoading: dataLoading$,
+        dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
         serializeState: () => {
           const savedObjectProperties = savedObjectProperties$.getValue();
           return serializeState({
@@ -289,6 +304,8 @@ export const getVisualizeEmbeddableFactory: (
                   syncTooltips: parentApi.settings.syncTooltips$.getValue(),
                 }
               : {};
+
+            dataLoading$.next(true);
             updateExpressionParams = async () => {
               const { params, abortController } = await getExpressionRendererProps({
                 unifiedSearch,
@@ -342,6 +359,7 @@ export const getVisualizeEmbeddableFactory: (
                       ? inspectorAdapters()
                       : inspectorAdapters
                   );
+                  dataLoading$.next(false);
                 },
               });
               if (params) expressionParams$.next(params);
