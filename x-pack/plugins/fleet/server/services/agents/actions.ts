@@ -52,7 +52,7 @@ export async function createAgentAction(
         ? undefined
         : newAgentAction.expiration ?? new Date(now + ONE_MONTH_IN_MS).toISOString(),
     agents: newAgentAction.agents,
-    namespace: newAgentAction.namespace,
+    namespaces: newAgentAction.namespaces,
     action_id: actionId,
     data: newAgentAction.data,
     type: newAgentAction.type,
@@ -183,7 +183,7 @@ export async function bulkCreateAgentActionResults(
   results: Array<{
     actionId: string;
     agentId: string;
-    namespace?: string;
+    namespaces?: string[];
     error?: string;
   }>
 ): Promise<void> {
@@ -196,7 +196,7 @@ export async function bulkCreateAgentActionResults(
       '@timestamp': new Date().toISOString(),
       action_id: result.actionId,
       agent_id: result.agentId,
-      namespace: result.namespace,
+      namespaces: result.namespaces,
       error: result.error,
     };
 
