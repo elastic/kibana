@@ -99,6 +99,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         fullWidth={true}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        enableFindAction={true}
         options={{
           readOnly: true,
           fontSize: readOnlySettings.fontSize,
