@@ -31,9 +31,9 @@ import {
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
 import {
+  getSwappedWindowParameters,
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
-  type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,6 +41,10 @@ import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
+import {
+  setCurrentAnalysisType,
+  setCurrentAnalysisWindowParameters,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -161,23 +165,20 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     analysisType,
     earliest,
     latest,
-    windowParameters,
+    chartWindowParameters,
     documentStats: { sampleProbability },
     stickyHistogram,
     isBrushCleared,
   } = useAppSelector((s) => s.logRateAnalysis);
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.logRateAnalysisStream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
+  const { currentAnalysisType, currentAnalysisWindowParameters } = data;
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
   const abortCtrl = useRef(new AbortController());
 
-  const [currentAnalysisType, setCurrentAnalysisType] = useState<LogRateAnalysisType | undefined>();
-  const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
-    WindowParameters | undefined
-  >();
   const [groupResults, setGroupResults] = useState<boolean>(false);
   const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
   const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
@@ -281,8 +282,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       dispatch(clearAllRowState());
     }
 
-    setCurrentAnalysisType(analysisType);
-    setCurrentAnalysisWindowParameters(windowParameters);
+    dispatch(setCurrentAnalysisType(analysisType));
+    dispatch(setCurrentAnalysisWindowParameters(chartWindowParameters));
 
     // We trigger hooks updates above so we cannot directly call `start()` here
     // because it would be run with stale arguments.
@@ -290,7 +291,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   }
 
   const startParams = useMemo(() => {
-    if (!windowParameters) {
+    if (!chartWindowParameters) {
       return undefined;
     }
 
@@ -311,13 +312,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         // If analysis type is `spike`, pass on window parameters as is,
         // if it's `dip`, swap baseline and deviation.
         ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-          ? windowParameters
-          : {
-              baselineMin: windowParameters.deviationMin,
-              baselineMax: windowParameters.deviationMax,
-              deviationMin: windowParameters.baselineMin,
-              deviationMax: windowParameters.baselineMax,
-            }),
+          ? chartWindowParameters
+          : getSwappedWindowParameters(chartWindowParameters)),
         overrides,
         sampleProbability,
       },
@@ -330,7 +326,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     http,
     searchQuery,
     dataView,
-    windowParameters,
+    chartWindowParameters,
     sampleProbability,
     overrides,
     embeddingOrigin,
@@ -346,8 +342,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   useEffect(() => {
     if (startParams) {
-      setCurrentAnalysisType(analysisType);
-      setCurrentAnalysisWindowParameters(windowParameters);
+      dispatch(setCurrentAnalysisType(analysisType));
+      dispatch(setCurrentAnalysisWindowParameters(chartWindowParameters));
       dispatch(startStream(startParams));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -361,8 +357,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const shouldRerunAnalysis = useMemo(
     () =>
       currentAnalysisWindowParameters !== undefined &&
-      !isEqual(currentAnalysisWindowParameters, windowParameters),
-    [currentAnalysisWindowParameters, windowParameters]
+      !isEqual(currentAnalysisWindowParameters, chartWindowParameters),
+    [currentAnalysisWindowParameters, chartWindowParameters]
   );
 
   const showLogRateAnalysisResultsTable = data?.significantItems.length > 0;
