@@ -37,6 +37,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utils"
   ]
 }
