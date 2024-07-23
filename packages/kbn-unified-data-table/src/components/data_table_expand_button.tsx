@@ -65,7 +65,6 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         <EuiButtonIcon
           id={rowIndex === 0 ? tourStep : undefined}
           size="xs"
-          iconSize="s"
           aria-label={buttonLabel}
           data-test-subj={testSubj}
           onClick={() => {
@@ -74,8 +73,9 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
             setPressed(Boolean(nextHit));
             setExpanded?.(nextHit);
           }}
+          display={isCurrentRowExpanded ? 'base' : 'empty'}
           color={isCurrentRowExpanded ? 'primary' : 'text'}
-          iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
+          iconType="inspect"
           isSelected={isCurrentRowExpanded}
         />
       </EuiToolTip>

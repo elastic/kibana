@@ -53,7 +53,7 @@ export const SELECT_ROW = 'select';
 
 const openDetails = {
   id: OPEN_DETAILS,
-  width: 24,
+  width: 26,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>
