@@ -750,7 +750,14 @@ class AgentPolicyService {
       throw new AgentPolicyNotFoundError('Copied agent policy not found');
     }
 
-    await this.deployPolicy(soClient, newAgentPolicy.id);
+    // bump revision if agent policy is updated after creation
+    if (baseAgentPolicy.package_policies || baseAgentPolicy.is_protected) {
+      await this.bumpRevision(soClient, esClient, newAgentPolicy.id, {
+        user: options?.user,
+      });
+    } else {
+      await this.deployPolicy(soClient, newAgentPolicy.id);
+    }
     logger.debug(`Completed copy of agent policy ${id}`);
     return updatedAgentPolicy;
   }
