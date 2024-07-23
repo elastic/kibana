@@ -40,7 +40,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const groupingHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     requestBody,
     responseStream,
     logDebugMessage,
@@ -81,24 +81,26 @@ export const groupingHandlerFactory =
     );
 
     try {
-      const { fields, itemSets } = await fetchFrequentItemSets(
-        client,
-        requestBody.index,
-        JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
-        significantTerms,
-        requestBody.timeFieldName,
-        requestBody.deviationMin,
-        requestBody.deviationMax,
+      const { fields, itemSets } = await fetchFrequentItemSets({
+        esClient,
         logger,
-        stateHandler.sampleProbability(),
-        responseStream.pushError,
-        abortSignal
-      );
+        emitError: responseStream.pushError,
+        abortSignal,
+        arguments: {
+          index: requestBody.index,
+          searchQuery: JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
+          significantItems: significantTerms,
+          timeFieldName: requestBody.timeFieldName,
+          deviationMin: requestBody.deviationMin,
+          deviationMax: requestBody.deviationMax,
+          sampleProbability: stateHandler.sampleProbability(),
+        },
+      });
 
       if (significantCategories.length > 0 && significantTerms.length > 0) {
         const { fields: significantCategoriesFields, itemSets: significantCategoriesItemSets } =
           await fetchTerms2CategoriesCounts(
-            client,
+            esClient,
             requestBody,
             JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
             significantTerms,
@@ -161,27 +163,26 @@ export const groupingHandlerFactory =
             let cpgTimeSeries: NumericChartData;
             try {
               cpgTimeSeries = (
-                (await fetchHistogramsForFields(
-                  client,
-                  requestBody.index,
-                  histogramQuery,
-                  // fields
-                  [
-                    {
-                      fieldName: requestBody.timeFieldName,
-                      type: KBN_FIELD_TYPES.DATE,
-                      interval: overallTimeSeries.interval,
-                      min: overallTimeSeries.stats[0],
-                      max: overallTimeSeries.stats[1],
-                    },
-                  ],
-                  // samplerShardSize
-                  -1,
-                  undefined,
+                (await fetchHistogramsForFields({
+                  esClient,
                   abortSignal,
-                  stateHandler.sampleProbability(),
-                  RANDOM_SAMPLER_SEED
-                )) as [NumericChartData]
+                  arguments: {
+                    indexPattern: requestBody.index,
+                    query: histogramQuery,
+                    fields: [
+                      {
+                        fieldName: requestBody.timeFieldName,
+                        type: KBN_FIELD_TYPES.DATE,
+                        interval: overallTimeSeries.interval,
+                        min: overallTimeSeries.stats[0],
+                        max: overallTimeSeries.stats[1],
+                      },
+                    ],
+                    samplerShardSize: -1,
+                    randomSamplerProbability: stateHandler.sampleProbability(),
+                    randomSamplerSeed: RANDOM_SAMPLER_SEED,
+                  },
+                })) as [NumericChartData]
               )[0];
             } catch (e) {
               if (!isRequestAbortedError(e)) {

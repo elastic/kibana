@@ -29,9 +29,11 @@ describe(
         ],
       },
     },
+    pageLoadTimeout: 1 * 60 * 1000,
   },
   () => {
     const HEARTBEAT_COUNT = 2001;
+    const UNBILLED_COUNT = 5;
 
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHeartbeats> | undefined;
 
@@ -40,6 +42,7 @@ describe(
       startTransparentApiProxy({ port: 3623 });
       indexEndpointHeartbeats({
         count: HEARTBEAT_COUNT,
+        unbilledCount: UNBILLED_COUNT,
       }).then((indexedHeartbeats) => {
         endpointData = indexedHeartbeats;
       });
@@ -53,8 +56,7 @@ describe(
       stopTransparentApiProxy();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/187083
-    describe.skip('Usage Reporting Task', () => {
+    describe('Usage Reporting Task', () => {
       it('properly sends indexed heartbeats to the metering api', () => {
         const expectedChunks = Math.ceil(HEARTBEAT_COUNT / METERING_SERVICE_BATCH_SIZE);
 

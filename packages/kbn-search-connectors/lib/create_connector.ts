@@ -53,6 +53,14 @@ export const createConnector = async (
     });
   }
 
+  if (input.configuration) {
+    await client.transport.request({
+      method: 'PUT',
+      path: `/_connector/${connectorId}/_configuration`,
+      body: { configuration: input.configuration },
+    });
+  }
+
   // createConnector function expects to return a Connector doc, so we fetch it from the index
   const connector = await fetchConnectorById(client, connectorId);
 

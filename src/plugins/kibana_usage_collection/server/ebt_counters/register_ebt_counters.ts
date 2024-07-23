@@ -18,7 +18,7 @@ export function registerEbtCounters(
     // We create one counter per source ('client'|<shipper_name>).
     const domainId = `ebt_counters.${source}`;
     const usageCounter =
-      usageCollection.getUsageCounterByType(domainId) ??
+      usageCollection.getUsageCounterByDomainId(domainId) ??
       usageCollection.createUsageCounter(domainId);
 
     usageCounter.incrementCounter({

@@ -60,7 +60,7 @@ export class EncryptedSavedObjectsPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
+  public setup(core: CoreSetup, _deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
     const config = this.initializerContext.config.get<ConfigType>();
     const canEncrypt = config.encryptionKey !== undefined;
     if (!canEncrypt) {
@@ -75,6 +75,18 @@ export class EncryptedSavedObjectsPlugin
 
       this.logger.info(
         `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: ${hashedEncryptionKey}`
+      );
+    }
+
+    const readOnlyKeys = config.keyRotation?.decryptionOnlyKeys;
+
+    if (readOnlyKeys !== undefined && readOnlyKeys.length > 0) {
+      const readOnlyKeyHashses = readOnlyKeys.map((readOnlyKey, i) =>
+        createHash('sha3-256').update(readOnlyKey).digest('base64')
+      );
+
+      this.logger.info(
+        `Hashed 'xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys' for this instance: ${readOnlyKeyHashses}`
       );
     }
 
@@ -95,7 +107,6 @@ export class EncryptedSavedObjectsPlugin
     this.savedObjectsSetup = setupSavedObjects({
       service,
       savedObjects: core.savedObjects,
-      security: deps.security,
       getStartServices: core.getStartServices,
     });
 
@@ -110,7 +121,6 @@ export class EncryptedSavedObjectsPlugin
             logger: this.logger.get('key-rotation-service'),
             service,
             getStartServices: core.getStartServices,
-            security: deps.security,
           })
         ),
         config,

@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
 import {
@@ -26,7 +27,7 @@ export const AlertSummaryWidget = ({
   hideChart,
   hideStats,
   onLoaded,
-  dependencies: { charts },
+  dependencies: { charts, uiSettings },
 }: AlertSummaryWidgetProps & AlertSummaryWidgetDependencies) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
@@ -63,6 +64,7 @@ export const AlertSummaryWidget = ({
         chartProps={chartProps}
         dateFormat={timeRange.dateFormat}
         recoveredAlertCount={recoveredAlertCount}
+        timeZone={getTimeZone(uiSettings)}
         hideChart={hideChart}
         hideStats={hideStats}
         dependencyProps={dependencyProps}

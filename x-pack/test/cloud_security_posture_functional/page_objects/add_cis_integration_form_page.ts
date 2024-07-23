@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { setTimeout as sleep } from 'node:timers/promises';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -174,12 +176,14 @@ export function AddCisIntegrationFormPageProvider({
     await integrationList[0].click();
   };
 
-  const clickLaunchAndGetCurrentUrl = async (buttonId: string, tabNumber: number) => {
+  const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
     const button = await testSubjects.find(buttonId);
     await button.click();
-    await browser.switchTab(tabNumber);
-    await new Promise((r) => setTimeout(r, 3000));
+    // Wait a bit to allow the new tab to load the URL
+    await sleep(3000);
+    await browser.switchTab(1);
     const currentUrl = await browser.getCurrentUrl();
+    await browser.closeCurrentWindow();
     await browser.switchTab(0);
     return currentUrl;
   };
@@ -278,6 +282,21 @@ export function AddCisIntegrationFormPageProvider({
     return await (await checkBox.findByCssSelector(`input[id='${id}']`)).getAttribute('checked');
   };
 
+  const getReplaceSecretButton = async (secretField: string) => {
+    return await testSubjects.find(`button-replace-${secretField}`);
+  };
+
+  const inputUniqueIntegrationName = async () => {
+    const flyout = await testSubjects.find('createPackagePolicy_page');
+    const nameField = await flyout.findAllByCssSelector('input[id="name"]');
+    await nameField[0].type(uuidv4());
+  };
+
+  const getSecretComponentReplaceButton = async (secretButtonSelector: string) => {
+    const secretComponentReplaceButton = await testSubjects.find(secretButtonSelector);
+    return secretComponentReplaceButton;
+  };
+
   return {
     cisAzure,
     cisAws,
@@ -311,5 +330,8 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
+    getReplaceSecretButton,
+    getSecretComponentReplaceButton,
+    inputUniqueIntegrationName,
   };
 }

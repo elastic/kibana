@@ -17,9 +17,6 @@ export type DataStreamStatServiceResponse = GetDataStreamsStatsResponse;
 
 export type GetIntegrationsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations`>['params'];
-export type GetIntegrationsResponse = APIReturnType<`GET /internal/dataset_quality/integrations`>;
-export type IntegrationType = GetIntegrationsResponse['integrations'][0];
-export type IntegrationsResponse = IntegrationType[];
 
 export type GetDataStreamsDegradedDocsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
@@ -69,9 +66,6 @@ export type GetNonAggregatableDataStreamsResponse =
 
 export type GetIntegrationDashboardsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>['params']['path'];
-export type GetIntegrationDashboardsResponse =
-  APIReturnType<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>;
-export type DashboardType = GetIntegrationDashboardsResponse['dashboards'][0];
 
 export type { DataStreamStat } from './data_stream_stat';
 export type {

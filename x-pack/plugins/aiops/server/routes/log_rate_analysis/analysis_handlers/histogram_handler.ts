@@ -35,7 +35,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const histogramHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
@@ -90,27 +90,26 @@ export const histogramHandlerFactory =
 
           try {
             cpTimeSeries = (
-              (await fetchHistogramsForFields(
-                client,
-                requestBody.index,
-                histogramQuery,
-                // fields
-                [
-                  {
-                    fieldName: requestBody.timeFieldName,
-                    type: KBN_FIELD_TYPES.DATE,
-                    interval: overallTimeSeries.interval,
-                    min: overallTimeSeries.stats[0],
-                    max: overallTimeSeries.stats[1],
-                  },
-                ],
-                // samplerShardSize
-                -1,
-                undefined,
+              (await fetchHistogramsForFields({
+                esClient,
                 abortSignal,
-                stateHandler.sampleProbability(),
-                RANDOM_SAMPLER_SEED
-              )) as [NumericChartData]
+                arguments: {
+                  indexPattern: requestBody.index,
+                  query: histogramQuery,
+                  fields: [
+                    {
+                      fieldName: requestBody.timeFieldName,
+                      type: KBN_FIELD_TYPES.DATE,
+                      interval: overallTimeSeries.interval,
+                      min: overallTimeSeries.stats[0],
+                      max: overallTimeSeries.stats[1],
+                    },
+                  ],
+                  samplerShardSize: -1,
+                  randomSamplerProbability: stateHandler.sampleProbability(),
+                  randomSamplerSeed: RANDOM_SAMPLER_SEED,
+                },
+              })) as [NumericChartData]
             )[0];
           } catch (e) {
             logger.error(
@@ -183,27 +182,26 @@ export const histogramHandlerFactory =
 
         try {
           catTimeSeries = (
-            (await fetchHistogramsForFields(
-              client,
-              requestBody.index,
-              histogramQuery,
-              // fields
-              [
-                {
-                  fieldName: requestBody.timeFieldName,
-                  type: KBN_FIELD_TYPES.DATE,
-                  interval: overallTimeSeries.interval,
-                  min: overallTimeSeries.stats[0],
-                  max: overallTimeSeries.stats[1],
-                },
-              ],
-              // samplerShardSize
-              -1,
-              undefined,
+            (await fetchHistogramsForFields({
+              esClient,
               abortSignal,
-              stateHandler.sampleProbability(),
-              RANDOM_SAMPLER_SEED
-            )) as [NumericChartData]
+              arguments: {
+                indexPattern: requestBody.index,
+                query: histogramQuery,
+                fields: [
+                  {
+                    fieldName: requestBody.timeFieldName,
+                    type: KBN_FIELD_TYPES.DATE,
+                    interval: overallTimeSeries.interval,
+                    min: overallTimeSeries.stats[0],
+                    max: overallTimeSeries.stats[1],
+                  },
+                ],
+                samplerShardSize: -1,
+                randomSamplerProbability: stateHandler.sampleProbability(),
+                randomSamplerSeed: RANDOM_SAMPLER_SEED,
+              },
+            })) as [NumericChartData]
           )[0];
         } catch (e) {
           logger.error(

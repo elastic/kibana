@@ -10,6 +10,10 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import {
+  getEntityHistoryIndexTemplateV1,
+  getEntityLatestIndexTemplateV1,
+} from '../../../common/helpers';
+import {
   createAndInstallHistoryIngestPipeline,
   createAndInstallLatestIngestPipeline,
 } from './create_and_install_ingest_pipeline';
@@ -17,6 +21,7 @@ import {
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
 } from './create_and_install_transform';
+import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitions } from './find_entity_definition';
@@ -27,13 +32,15 @@ import {
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
+import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
+import { getEntitiesLatestIndexTemplateConfig } from '../../templates/entities_latest_template';
+import { getEntitiesHistoryIndexTemplateConfig } from '../../templates/entities_history_template';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   definition: EntityDefinition;
   logger: Logger;
-  spaceId: string;
 }
 
 export async function installEntityDefinition({
@@ -41,7 +48,6 @@ export async function installEntityDefinition({
   soClient,
   definition,
   logger,
-  spaceId,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
   const installState = {
     ingestPipelines: {
@@ -53,18 +59,39 @@ export async function installEntityDefinition({
       latest: false,
     },
     definition: false,
+    indexTemplates: {
+      history: false,
+      latest: false,
+    },
   };
 
   try {
-    logger.debug(`Installing definition ${JSON.stringify(definition)}`);
+    logger.debug(() => `Installing definition ${JSON.stringify(definition)}`);
+
+    validateDefinitionCanCreateValidTransformIds(definition);
+
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
 
+    // install scoped index template
+    await upsertTemplate({
+      esClient,
+      logger,
+      template: getEntitiesHistoryIndexTemplateConfig(definition.id),
+    });
+    installState.indexTemplates.history = true;
+    await upsertTemplate({
+      esClient,
+      logger,
+      template: getEntitiesLatestIndexTemplateConfig(definition.id),
+    });
+    installState.indexTemplates.latest = true;
+
     // install ingest pipelines
     logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
-    await createAndInstallHistoryIngestPipeline(esClient, entityDefinition, logger, spaceId);
+    await createAndInstallHistoryIngestPipeline(esClient, entityDefinition, logger);
     installState.ingestPipelines.history = true;
-    await createAndInstallLatestIngestPipeline(esClient, entityDefinition, logger, spaceId);
+    await createAndInstallLatestIngestPipeline(esClient, entityDefinition, logger);
     installState.ingestPipelines.latest = true;
 
     // install transforms
@@ -97,6 +124,21 @@ export async function installEntityDefinition({
       await stopAndDeleteLatestTransform(esClient, definition, logger);
     }
 
+    if (installState.indexTemplates.history) {
+      await deleteTemplate({
+        esClient,
+        logger,
+        name: getEntityHistoryIndexTemplateV1(definition.id),
+      });
+    }
+    if (installState.indexTemplates.latest) {
+      await deleteTemplate({
+        esClient,
+        logger,
+        name: getEntityLatestIndexTemplateV1(definition.id),
+      });
+    }
+
     throw e;
   }
 }
@@ -106,7 +148,6 @@ export async function installBuiltInEntityDefinitions({
   soClient,
   logger,
   builtInDefinitions,
-  spaceId,
 }: Omit<InstallDefinitionParams, 'definition'> & {
   builtInDefinitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
@@ -126,7 +167,6 @@ export async function installBuiltInEntityDefinitions({
         esClient,
         soClient,
         logger,
-        spaceId,
       });
     }
 
@@ -140,7 +180,6 @@ export async function installBuiltInEntityDefinitions({
         esClient,
         soClient,
         logger,
-        spaceId,
       });
     }
 

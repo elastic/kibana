@@ -18,10 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
-    });
-
     it('server log connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();

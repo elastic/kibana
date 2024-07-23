@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites>
-  <testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71">
+<testsuites name="ftr" timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts">
+  <testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71" command-line="node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts">
     <testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378">
       <system-out>
         <![CDATA[[00:00:00]       │

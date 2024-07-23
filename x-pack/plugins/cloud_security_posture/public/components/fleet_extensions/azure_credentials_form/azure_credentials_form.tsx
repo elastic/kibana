@@ -279,8 +279,8 @@ export const AzureInputVarFields = ({
 }) => {
   return (
     <div>
-      {fields.map((field) => (
-        <>
+      {fields.map((field, index) => (
+        <div key={index}>
           {field.type === 'password' && field.isSecret === true && (
             <>
               <EuiSpacer size="m" />
@@ -332,7 +332,7 @@ export const AzureInputVarFields = ({
               />
             </EuiFormRow>
           )}
-        </>
+        </div>
       ))}
     </div>
   );

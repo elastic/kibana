@@ -21,7 +21,6 @@ properties:
   customFields:
     type: array
     description: Custom fields case configuration.
-    x-technical-preview: true
     minItems: 0
     maxItems: 10
     items:
@@ -35,3 +34,5 @@ properties:
         $ref: 'case_configure_customfields.yaml'
   owner:
     $ref: 'owners.yaml'
+  templates:
+    $ref: 'templates.yaml'

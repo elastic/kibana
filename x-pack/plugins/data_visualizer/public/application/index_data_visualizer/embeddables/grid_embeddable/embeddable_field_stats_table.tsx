@@ -23,7 +23,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 const EmbeddableFieldStatsTableWrapper = (
   props: Required<FieldStatisticTableEmbeddableProps, 'dataView'>
 ) => {
-  const { onTableUpdate, onAddFilter } = props;
+  const { onTableUpdate, onAddFilter, onRenderComplete } = props;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -72,6 +72,12 @@ const EmbeddableFieldStatsTableWrapper = (
     },
     [props.dataView, searchQueryLanguage, searchString, props.totalDocuments, onAddFilter]
   );
+
+  useEffect(() => {
+    if (progress === 100 && onRenderComplete) {
+      onRenderComplete();
+    }
+  }, [progress, onRenderComplete]);
 
   if (progress === 100 && configs.length === 0) {
     return <EmbeddableNoResultsEmptyPrompt />;

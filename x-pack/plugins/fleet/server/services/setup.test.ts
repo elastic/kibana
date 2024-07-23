@@ -20,6 +20,7 @@ import { setupFleet } from './setup';
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
 jest.mock('./preconfiguration/fleet_proxies');
+jest.mock('./preconfiguration/space_settings');
 jest.mock('./settings');
 jest.mock('./output');
 jest.mock('./download_source');

@@ -439,6 +439,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
     ? {
         anomaly_threshold: ruleFields.anomalyThreshold,
         machine_learning_job_id: ruleFields.machineLearningJobId,
+        ...alertSuppressionFields,
       }
     : isThresholdFields(ruleFields)
     ? {

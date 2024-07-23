@@ -16,12 +16,12 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 
       options: {
@@ -30,7 +30,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationCreateProps),
@@ -41,27 +41,27 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
         const assistantResponse = buildResponse(response);
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            authenticatedUser: true,
+            context: ctx,
+            license: true,
+            request,
+            response,
+          });
+          if (checkResponse) {
+            return checkResponse;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
 
+          const currentUser = ctx.elasticAssistant.getCurrentUser();
+          const userFilter = currentUser?.username
+            ? `name: "${currentUser?.username}"`
+            : `id: "${currentUser?.profile_uid}"`;
           const result = await dataClient?.findDocuments({
             perPage: 100,
             page: 1,
-            filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND title:${request.body.title}`,
+            filter: `users:{ ${userFilter} } AND title:${request.body.title}`,
             fields: ['title'],
           });
           if (result?.data != null && result.total > 0) {
@@ -73,7 +73,6 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
 
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,
-            authenticatedUser,
           });
 
           if (createdConversation == null) {

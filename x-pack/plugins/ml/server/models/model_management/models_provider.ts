@@ -597,11 +597,28 @@ export class ModelsProvider {
     taskType: InferenceTaskType,
     modelConfig: InferenceModelConfig
   ) {
-    return await this._client.asCurrentUser.inference.putModel({
-      inference_id: inferenceId,
-      task_type: taskType,
-      model_config: modelConfig,
-    });
+    try {
+      const result = await this._client.asCurrentUser.inference.putModel(
+        {
+          inference_id: inferenceId,
+          task_type: taskType,
+          model_config: modelConfig,
+        },
+        { maxRetries: 0 }
+      );
+      return result;
+    } catch (error) {
+      // Request timeouts will usually occur when the model is being downloaded/deployed
+      // Erroring out is misleading in these cases, so we return the model_id and task_type
+      if (error.name === 'TimeoutError') {
+        return {
+          model_id: modelConfig.service,
+          task_type: taskType,
+        };
+      } else {
+        throw error;
+      }
+    }
   }
 
   async getModelsDownloadStatus() {

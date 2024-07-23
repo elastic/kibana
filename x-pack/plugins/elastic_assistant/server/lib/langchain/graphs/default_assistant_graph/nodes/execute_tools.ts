@@ -30,7 +30,7 @@ export const TOOLS_NODE = 'tools';
  * @param tools - The tools available to execute
  */
 export const executeTools = async ({ config, logger, state, tools }: ExecuteToolsParams) => {
-  logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const toolExecutor = new ToolExecutor({ tools });
   const agentAction = state.agentOutcome;
@@ -40,6 +40,7 @@ export const executeTools = async ({ config, logger, state, tools }: ExecuteTool
   }
   const out = await toolExecutor.invoke(agentAction, config);
   return {
+    ...state,
     steps: [{ action: agentAction, observation: JSON.stringify(out, null, 2) }],
   };
 };

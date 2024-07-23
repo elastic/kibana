@@ -7,13 +7,19 @@
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 const INTERNAL_API_BASE_PATH = '/internal/index_management';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Create enrich policy', function () {
     const INDEX_A_NAME = `index-${Math.random()}`;
@@ -21,6 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
     const POLICY_NAME = `policy-${Math.random()}`;
 
     before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       try {
         await es.indices.create({
           index: INDEX_A_NAME,
@@ -66,13 +74,14 @@ export default function ({ getService }: FtrProviderContext) {
         log.debug('[Cleanup error] Error deleting test index');
         throw err;
       }
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('Allows to create an enrich policy', async () => {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           policy: {
             name: POLICY_NAME,
@@ -88,10 +97,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Can retrieve fields from indices', async () => {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({ indices: [INDEX_A_NAME, INDEX_B_NAME] })
         .expect(200);
 
@@ -117,12 +126,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Can retrieve matching indices', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertestWithoutAuth
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
-        .send({ pattern: 'index-' })
-        .expect(200);
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
+        .send({ pattern: 'index-' });
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       expect(
         body.indices.every((value: string) => [INDEX_A_NAME, INDEX_B_NAME].includes(value))
