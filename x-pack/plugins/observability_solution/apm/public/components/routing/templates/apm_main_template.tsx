@@ -118,7 +118,7 @@ export function ApmMainTemplate({
 
   const hasApmData = !!data?.hasData;
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
-  const showNewEmptyState =
+  const showCustomEmptyState =
     !hasApmData &&
     isEntityCentricExperienceSettingEnabled &&
     serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic;
@@ -168,7 +168,7 @@ export function ApmMainTemplate({
     </EuiFlexGroup>
   );
 
-  const pageTemplate = showNewEmptyState ? (
+  const pageTemplate = showCustomEmptyState ? (
     <CustomNoDataTemplate isPageDataLoaded={isLoading === false} noDataConfig={noDataConfig} />
   ) : (
     <ObservabilityPageTemplate
