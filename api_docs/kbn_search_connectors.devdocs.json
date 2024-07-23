@@ -6491,7 +6491,7 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          "; status: ",
+          "; description: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -6499,7 +6499,7 @@
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
           },
-          "; description: string | null; language: string | null; pipeline?: ",
+          "; language: string | null; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
