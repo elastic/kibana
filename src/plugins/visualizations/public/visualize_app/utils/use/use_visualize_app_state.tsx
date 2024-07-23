@@ -60,16 +60,13 @@ export const useVisualizeAppState = (
     (newState: VisualizeRuntimeState) => {
       state$.current.next(newState);
       const encodedState = encode(newState);
-      const newUrl = stringifyUrl(
-        {
-          url: history.location.pathname,
-          query: {
-            ...parse(history.location.search),
-            [STATE_STORAGE_KEY]: encodedState,
-          },
+      const newUrl = stringifyUrl({
+        url: history.location.pathname,
+        query: {
+          ...parse(history.location.search),
+          [STATE_STORAGE_KEY]: encodedState,
         },
-        { encode: false }
-      );
+      });
       history.replace(newUrl);
     },
     [history]
