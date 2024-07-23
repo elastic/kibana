@@ -15,16 +15,16 @@ import type { interfaces } from 'inversify';
  */
 export interface CoreDiServiceSetup {
   /**
-   * Load the plugin module, registering the internal services and exposing the global ones.
+   * Get the plugin-scoped container
    */
-  load(module: interfaces.ContainerModule): void;
+  getContainer(container?: interfaces.Container): interfaces.Container;
 }
 
 /**
  * Public start contract of the DI service.
  * @public
  */
-export interface CoreDiServiceStart {
+export interface CoreDiServiceStart extends CoreDiServiceSetup {
   /**
    * Dispose the current plugin scope
    */
@@ -34,9 +34,4 @@ export interface CoreDiServiceStart {
    * Fork the current plugin scope
    */
   fork(container?: interfaces.Container): interfaces.Container;
-
-  /**
-   * Get the plugin-scoped container
-   */
-  getContainer(container?: interfaces.Container): interfaces.Container | undefined;
 }

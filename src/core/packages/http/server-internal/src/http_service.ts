@@ -237,8 +237,8 @@ export class HttpService
   public async start(deps: StartDeps) {
     // trigger the activation handler for the routes registered via `ContainerModule`
     // @todo the routers should be registered in the activation of the HTTP service when it's moved to its own `ContainerModule`
-    if (deps.injection.root.isBound(RouterService)) {
-      deps.injection.root.getAll(RouterService);
+    if (deps.injection.getContainer().isBound(RouterService)) {
+      deps.injection.getContainer().getAll(RouterService);
     }
     const config = await firstValueFrom(this.config$);
     if (this.shouldListen(config)) {

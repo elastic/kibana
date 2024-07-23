@@ -92,7 +92,7 @@ export function createPluginSetupContext<
       },
     },
     injection: {
-      load: deps.injection.load.bind(deps.injection, plugin.opaqueId),
+      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
     },
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
