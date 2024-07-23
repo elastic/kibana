@@ -43,7 +43,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       };
       await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
-      // await ml.api.createTrainedModel(TINY_ELSER.id, modelConfig);
       await ml.api.assureMlStatsIndexExists();
       const port = await getPort({ port: getPort.makeRange(9000, 9100) });
 

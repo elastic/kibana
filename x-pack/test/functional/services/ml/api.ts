@@ -1575,7 +1575,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async importTrainedModel(
       modelId: string,
       modelName: SupportedTrainedModelNamesType,
-      config: PutTrainedModelConfig
+      config?: PutTrainedModelConfig
     ) {
       const trainedModelConfig = config || this.getTrainedModelConfig(modelName);
       await this.createTrainedModel(modelId, trainedModelConfig);
@@ -1604,11 +1604,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
      * Creates ingest pipelines for trained model
      * @param modelId
      */
-    async createIngestPipeline(modelId: string, pipelineName: string, body: any) {
+    async createIngestPipeline(modelId: string) {
       log.debug(`Creating ingest pipeline for trained model with id "${modelId}"`);
       const { body: ingestPipeline, status } = await esSupertest
-        .put(`/_ingest/pipeline/${pipelineName}`)
-        .send(body);
+        .put(`/_ingest/pipeline/pipeline_${modelId}`)
+        .send({
+          processors: [
+            {
+              inference: {
+                model_id: modelId,
+              },
+            },
+          ],
+        });
       this.assertResponseStatusCode(200, status, ingestPipeline);
 
       log.debug('> Ingest pipeline created');
