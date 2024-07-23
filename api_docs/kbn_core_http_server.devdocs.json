@@ -4744,10 +4744,6 @@
               },
               {
                 "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/ping.ts"
-              },
-              {
-                "plugin": "entityManager",
                 "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/get.ts"
               },
               {
@@ -7439,6 +7435,10 @@
               {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -13321,10 +13321,10 @@
             "id": "def-common.RouteValidatorFullConfigResponse.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: LazyValidator; }",
+            "label": "[statusCode: number]: { description?: string | undefined; bodyContentType?: string | undefined; body?: LazyValidator | undefined; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
+              "[statusCode: number]:  { description?: string | undefined; bodyContentType?: string | undefined; body?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -13332,7 +13332,7 @@
                 "section": "def-common.LazyValidator",
                 "text": "LazyValidator"
               },
-              "; }"
+              " | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
             "deprecated": false,
@@ -14066,7 +14066,7 @@
         "tags": [],
         "label": "VersionedRouter",
         "description": [
-          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead.\n"
+          "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead\n"
         ],
         "signature": [
           {
@@ -16454,6 +16454,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -16961,10 +16965,10 @@
             "id": "def-common.VersionedRouteResponseValidation.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: VersionedResponseBodyValidation; }",
+            "label": "[statusCode: number]: { description?: string | undefined; bodyContentType?: string | undefined; body?: VersionedResponseBodyValidation | undefined; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
+              "[statusCode: number]:  { description?: string | undefined; bodyContentType?: string | undefined; body?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -16972,7 +16976,7 @@
                 "section": "def-common.VersionedResponseBodyValidation",
                 "text": "VersionedResponseBodyValidation"
               },
-              "; }"
+              " | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
@@ -17963,6 +17967,14 @@
             "docId": "kibKbnConfigSchemaPluginApi",
             "section": "def-common.Type",
             "text": "Type"
+          },
+          "<unknown> | ",
+          {
+            "pluginId": "@kbn/zod",
+            "scope": "common",
+            "docId": "kibKbnZodPluginApi",
+            "section": "def-common.ZodEsque",
+            "text": "ZodEsque"
           },
           "<unknown>"
         ],
@@ -19387,6 +19399,14 @@
             "docId": "kibKbnConfigSchemaPluginApi",
             "section": "def-common.Type",
             "text": "Type"
+          },
+          "<T> | ",
+          {
+            "pluginId": "@kbn/zod",
+            "scope": "common",
+            "docId": "kibKbnZodPluginApi",
+            "section": "def-common.ZodEsque",
+            "text": "ZodEsque"
           },
           "<T> | ",
           {

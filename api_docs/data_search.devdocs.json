@@ -3611,7 +3611,15 @@
             "label": "uiSettingsClient",
             "description": [],
             "signature": [
-              "{ get: <T = any>(key: string) => Promise<T>; }"
+              "{ get: <T = any>(key: string, context?: ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.GetUiSettingsContext",
+                "text": "GetUiSettingsContext"
+              },
+              " | undefined) => Promise<T>; }"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -10084,14 +10092,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
