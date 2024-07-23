@@ -13,10 +13,12 @@ export function SecuritySolutionESSUtils({
 }: FtrProviderContext): SecuritySolutionUtils {
   const config = getService('config');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   return {
     getUsername: (_role?: string) =>
       Promise.resolve(config.get('servers.kibana.username') as string),
     createSuperTest: (_role?: string) => Promise.resolve(supertest),
+    createBsearch: (_role?: string) => Promise.resolve(bsearch),
   };
 }
