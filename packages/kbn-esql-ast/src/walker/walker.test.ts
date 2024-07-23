@@ -607,7 +607,7 @@ describe('Walker.params', () => {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 'latest',
+        value: 'end',
       },
     ]);
   });
