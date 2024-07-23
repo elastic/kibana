@@ -53,7 +53,20 @@ export class CoreInjectionService {
             return index == null ? scope.get(service) : scope.getAll(service)[index];
           })
           .inRequestScope();
+        target.bind(Global).toConstantValue(service);
       });
+  }
+
+  private static getContext(container: interfaces.Container): interfaces.Container {
+    return container.isBound(CoreInjectionService.Context)
+      ? container.get(CoreInjectionService.Context)
+      : container;
+  }
+
+  private static getScopes(container: interfaces.Container): interfaces.Container[] {
+    return container.isCurrentBound(CoreInjectionService.Scope)
+      ? container.getAll(CoreInjectionService.Scope)
+      : [];
   }
 
   private root = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
@@ -65,9 +78,16 @@ export class CoreInjectionService {
     this.load = this.load.bind(this);
   }
 
-  protected getContainer(id: PluginOpaqueId, root = this.root) {
-    return root.isBoundNamed(CoreInjectionService.Scope, id)
-      ? root.getNamed(CoreInjectionService.Scope, id)
+  protected getContainer(
+    id?: PluginOpaqueId,
+    container: interfaces.Container = this.root
+  ): interfaces.Container | undefined {
+    if (!id) {
+      return container;
+    }
+
+    return container.isBoundNamed(CoreInjectionService.Scope, id)
+      ? container.getNamed(CoreInjectionService.Scope, id)
       : undefined;
   }
 
@@ -82,40 +102,55 @@ export class CoreInjectionService {
     this.getContainer(id)!.load(module);
   }
 
-  protected dispose(container: interfaces.Container) {
-    const scopes = container.isCurrentBound(CoreInjectionService.Scope)
-      ? container.getAll(CoreInjectionService.Scope)
-      : [];
+  protected dispose(container: interfaces.Container): void {
+    const context = CoreInjectionService.getContext(container);
+    if (context === this.root && container !== this.root) {
+      // to prevent accidental disposal outside of the internal contract
+      throw new Error('The root container can only be explicitly disposed');
+    }
 
-    scopes.forEach((scope) => scope.unbindAll());
-    container.unbindAll();
+    CoreInjectionService.getScopes(context).forEach((scope) => scope.unbindAll());
+    context.unbindAll();
   }
 
-  protected fork(root: interfaces.Container = this.root) {
-    const fork = root.createChild();
-    const scopes = root.isCurrentBound(CoreInjectionService.Scope)
-      ? root.getAll(CoreInjectionService.Scope)
-      : [];
+  protected fork(
+    id?: PluginOpaqueId,
+    container: interfaces.Container = this.root
+  ): interfaces.Container {
+    const context = CoreInjectionService.getContext(container);
+    const fork = context.createChild();
 
-    scopes
+    CoreInjectionService.getScopes(context)
       .map((scope) => scope.get(CoreInjectionService.Id))
-      .forEach((id) => {
+      .forEach((scope) => {
         fork
           .bind(CoreInjectionService.Scope)
-          .toDynamicValue(({ container }) =>
-            container.parent!.getNamed(CoreInjectionService.Scope, id).createChild()
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          .toDynamicValue(({ container: fork }) =>
+            fork.parent!.getNamed(CoreInjectionService.Scope, scope).createChild()
           )
           .inSingletonScope()
-          .onActivation(({ container }, scope) => {
-            scope.bind(CoreInjectionService.Context).toConstantValue(container);
-            CoreInjectionService.bindGlobals(scope, container);
+          .whenTargetNamed(scope)
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          .onActivation(({ container: fork }, scope) => {
+            scope
+              .bind(CoreInjectionService.Context)
+              .toConstantValue(fork)
+              // eslint-disable-next-line @typescript-eslint/no-shadow
+              .onActivation(({ container: scope }, fork) => {
+                // up from forked plugin scope to forked root
+                CoreInjectionService.bindGlobals(fork, scope);
+
+                return fork;
+              });
+            // down from forked root to forked plugin scope
+            CoreInjectionService.bindGlobals(scope, fork);
 
             return scope;
-          })
-          .whenTargetNamed(id);
+          });
       });
 
-    return fork;
+    return this.getContainer(id, fork)!;
   }
 
   public setup(): InternalCoreDiServiceSetup {
@@ -142,11 +177,9 @@ export class CoreInjectionService {
       .toDynamicValue(({ container }) => container)
       .inRequestScope();
 
-    if (this.root.isBound(CoreInjectionService.Scope)) {
-      this.root
-        .getAll(CoreInjectionService.Scope)
-        .forEach((scope) => CoreInjectionService.bindGlobals(this.root, scope));
-    }
+    CoreInjectionService.getScopes(this.root).forEach((scope) =>
+      CoreInjectionService.bindGlobals(this.root, scope)
+    );
 
     return contract;
   }
