@@ -4,16 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  ISavedObjectsRepository,
-  SavedObject,
-  type CoreSetup,
-  type KibanaRequest,
-  type Logger,
-} from '@kbn/core/server';
+import { type CoreSetup, type Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { DataViewAttributes, DataViewsService } from '@kbn/data-views-plugin/common';
+
 import {
   CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME,
@@ -37,113 +30,7 @@ import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
-
-const getDataViewSafe = async (
-  soClient: ISavedObjectsRepository,
-  currentSpaceId: string,
-  currentSpaceDataViewId: string
-): Promise<SavedObject<DataViewAttributes> | undefined> => {
-  try {
-    const dataView = await soClient.get<DataViewAttributes>(
-      'index-pattern',
-      currentSpaceDataViewId,
-      {
-        namespace: currentSpaceId,
-      }
-    );
-    return dataView;
-  } catch (e) {
-    return;
-  }
-};
-
-const setupCdrDataView = async (
-  core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
-  request: KibanaRequest,
-  dataViewName: string,
-  indexPattern: string,
-  dataViewId: string,
-  logger: Logger
-) => {
-  const [coreStart, startDeps] = await core.getStartServices();
-  const soClient = coreStart.savedObjects.createInternalRepository();
-  const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-  try {
-    const currentSpaceId = (await startDeps.spaces?.spacesService.getSpaceId(request)) || 'default';
-
-    const dataViewsClient = await startDeps.dataViews.dataViewsServiceFactory(
-      soClient,
-      esClient,
-      request,
-      true
-    );
-
-    const currentSpaceDataViewId = `${dataViewId}-${currentSpaceId}`;
-
-    const isDataView = await getDataViewSafe(soClient, currentSpaceId, currentSpaceDataViewId);
-
-    if (!isDataView) {
-      logger.info(`Creating and saving data view with ID: ${currentSpaceDataViewId}`);
-      // soClient.create(
-      //   'index-pattern',
-      //   {
-      //     attributes: {
-      //       title: indexPattern,
-      //       name: `${dataViewName} - ${currentSpaceId} `,
-      //       timeFieldName: '@timestamp',
-      //       namespace: currentSpaceId,
-      //       allowNoIndex: true,
-      //     },
-      //   },
-      //   {
-      //     id: currentSpaceDataViewId,
-      //     managed: true,
-      //   }
-      // );
-
-      // const dv = await dataViewsClient.create(
-      //   {
-      //     id: currentSpaceDataViewId,
-      //     title: indexPattern,
-      //     name: `${dataViewName} - ${currentSpaceId} `,
-      //     namespaces: [currentSpaceId],
-      //     allowNoIndex: true,
-      //     timeFieldName: '@timestamp',
-      //   },
-      //   true
-      // );
-      await dataViewsClient.createAndSave(
-        {
-          id: currentSpaceDataViewId,
-          title: indexPattern,
-          name: `${dataViewName} - ${currentSpaceId} `,
-          namespaces: [currentSpaceId],
-          allowNoIndex: true,
-          timeFieldName: '@timestamp',
-        },
-        true
-      );
-      logger.info(`Data view ${currentSpaceDataViewId} setup completed successfully`);
-    } else {
-      logger.info(`Data view ${currentSpaceDataViewId} already exists`);
-    }
-  } catch (error) {
-    logger.error(`Failed to setup data view`, error);
-  }
-};
-
-const migrateCdrDataView = async (
-  dataViewsClient: DataViewsService,
-  soClient: ISavedObjectsRepository,
-  logger: Logger
-) => {
-  // get all data view with name CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME
-  // for each data view get index patterns
-  // keep the index pattern that we are not manage
-  // create new data view with the index pattern we kept
-  const allSpaces = (await soClient.find({ type: 'space' })).saved_objects.map((space) => space.id);
-};
+import { migrateCdrDataViews, setupCdrDataView } from '../saved_objects/data_views';
 
 /**
  * 1. Registers routes
@@ -168,6 +55,11 @@ export function setupRoutes({
   defineBulkActionCspBenchmarkRulesRoute(router);
   defineGetCspBenchmarkRulesStatesRoute(router);
 
+  core.getStartServices().then(([coreStart]) => {
+    const soClient = coreStart.savedObjects.createInternalRepository();
+    migrateCdrDataViews(soClient, logger);
+  });
+
   core.http.registerOnPreRouting(async (request, response, toolkit) => {
     if (request.url.pathname === '/internal/cloud_security_posture/status') {
       setupCdrDataView(
@@ -178,6 +70,7 @@ export function setupRoutes({
         CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
         logger
       );
+
       setupCdrDataView(
         core,
         request,
