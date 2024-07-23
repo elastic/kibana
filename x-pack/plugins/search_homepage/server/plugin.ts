@@ -26,10 +26,12 @@ export class SearchHomepagePlugin
     const router = core.http.createRouter();
 
     defineRoutes({
-      getStartServices: core.getStartServices,
       logger: this.logger,
       router,
-      options: { hasIndexStats: this.config.enableIndexStats },
+      options: {
+        hasIndexStats: this.config.enableIndexStats,
+        getStartServices: core.getStartServices,
+      },
     });
 
     return {};
