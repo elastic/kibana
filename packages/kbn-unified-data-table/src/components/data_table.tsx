@@ -294,7 +294,7 @@ export interface UnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
-   * @deprecated use `additionalRowLeadingControls` instead
+   * @deprecated Use only `additionalRowLeadingControls` instead
    * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
    */
   externalControlColumns?: EuiDataGridControlColumn[];
