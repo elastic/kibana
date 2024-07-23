@@ -25,19 +25,21 @@ import {
   createCustomCallbackMocks,
   createSuggestContext,
   getPolicyFields,
+  PartialSuggestionWithText,
+  TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 
 describe('autocomplete', () => {
   type TestArgs = [
     string,
-    string[],
+    Array<string | PartialSuggestionWithText>,
     (string | number)?,
     Parameters<typeof createCustomCallbackMocks>?
   ];
 
   const testSuggestionsFn = (
     statement: string,
-    expected: string[],
+    expected: Array<string | PartialSuggestionWithText>,
     triggerCharacter: string | number = '',
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
@@ -67,10 +69,20 @@ describe('autocomplete', () => {
         callbackMocks
       );
 
-      const sortedSuggestions = suggestions.map((suggestion) => suggestion.text).sort();
-      const sortedExpected = expected.sort();
+      const sortedSuggestionTexts = suggestions.map((suggestion) => suggestion.text).sort();
+      const sortedExpectedTexts = expected
+        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .sort();
 
-      expect(sortedSuggestions).toEqual(sortedExpected);
+      expect(sortedSuggestionTexts).toEqual(sortedExpectedTexts);
+      const expectedNonStringSuggestions = expected.filter(
+        (suggestion) => typeof suggestion !== 'string'
+      ) as PartialSuggestionWithText[];
+
+      for (const expectedSuggestion of expectedNonStringSuggestions) {
+        const suggestion = suggestions.find((s) => s.text === expectedSuggestion.text);
+        expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      }
     });
   };
 
@@ -726,28 +738,30 @@ describe('autocomplete', () => {
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
+              const addCommaIfRequired = (s: string | PartialSuggestionWithText) => {
+                // don't add commas to the empty string or if there are no more required args
+                if (!requiresMoreArgs || s === '' || (typeof s === 'object' && s.text === '')) {
+                  return s;
+                }
+                return typeof s === 'string' ? `${s},` : { ...s, text: `${s.text},` };
+              };
+
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs)
-                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-                        (f) => (requiresMoreArgs ? `${f},` : f)
-                      ),
+                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
                         getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
-                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-                        requiresMoreArgs ? `${d},` : d
                       ),
-                    ]
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+                    ].map(addCommaIfRequired)
               );
               testSuggestions(
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
@@ -756,23 +770,17 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs)
-                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-                        (f) => (requiresMoreArgs ? `${f},` : f)
-                      ),
+                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
                         getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
-                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-                        requiresMoreArgs ? `${d},` : d
                       ),
-                    ]
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+                    ].map(addCommaIfRequired)
               );
             }
           });
@@ -814,15 +822,17 @@ describe('autocomplete', () => {
           'number',
         ]),
       ]);
+
       testSuggestions(
         'from a | eval var0=date_trunc()',
         [
-          ...[...TIME_SYSTEM_PARAMS, 'Choose from the time picker'].map((t) => `${t},`),
+          ...[...TIME_SYSTEM_PARAMS].map((t) => `${t},`),
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
           ...getFunctionSignaturesByReturnType('eval', 'date', { evalMath: true }, undefined, [
             'date_trunc',
           ]).map((t) => `${t},`),
           ...getFieldNamesByType('date').map((t) => `${t},`),
+          TIME_PICKER_SUGGESTION,
         ],
         '('
       );
