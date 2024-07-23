@@ -6,9 +6,9 @@
  */
 
 import type { LogRateHistogramItem } from './log_rate_histogram_item';
-import { getLogRateAnalysisType } from './get_log_rate_analysis_type';
+import { getLogRateAnalysisTypeForHistogram } from './get_log_rate_analysis_type_for_histogram';
 
-describe('getLogRateAnalysisType', () => {
+describe('getLogRateAnalysisTypeForHistogram', () => {
   const LogRateHistogramMock: LogRateHistogramItem[] = [
     { time: 0, value: 10 },
     { time: 1, value: 10 },
@@ -24,7 +24,7 @@ describe('getLogRateAnalysisType', () => {
 
   test('returns "spike" for the given parameters', () => {
     expect(
-      getLogRateAnalysisType(LogRateHistogramMock, {
+      getLogRateAnalysisTypeForHistogram(LogRateHistogramMock, {
         baselineMin: 4,
         baselineMax: 6,
         deviationMin: 7,
@@ -35,7 +35,7 @@ describe('getLogRateAnalysisType', () => {
 
   test('returns "dip" for the given parameters', () => {
     expect(
-      getLogRateAnalysisType(LogRateHistogramMock, {
+      getLogRateAnalysisTypeForHistogram(LogRateHistogramMock, {
         baselineMin: 0,
         baselineMax: 2,
         deviationMin: 3,
@@ -46,7 +46,7 @@ describe('getLogRateAnalysisType', () => {
 
   test('falls back to "spike" if both time range have the same median', () => {
     expect(
-      getLogRateAnalysisType(LogRateHistogramMock, {
+      getLogRateAnalysisTypeForHistogram(LogRateHistogramMock, {
         baselineMin: 0,
         baselineMax: 2,
         deviationMin: 4,
