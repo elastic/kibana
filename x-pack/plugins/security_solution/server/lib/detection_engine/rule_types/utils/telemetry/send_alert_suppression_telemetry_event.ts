@@ -69,6 +69,5 @@ export const sendAlertSuppressionTelemetryEvent = ({
     suppressionMissingFields,
   };
 
-  console.log('..... telemetryEvent', telemetryEvent);
   telemetry.reportEvent(ALERT_SUPPRESSION_EVENT.eventType, telemetryEvent);
 };
