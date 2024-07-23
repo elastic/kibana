@@ -23,11 +23,11 @@ describe('dataSourceDiffAlgorithm', () => {
       const mockVersions: ThreeVersionsOf<RuleDataSource> = {
         base_version: {
           type: DataSourceType.index_patterns,
-          index_patterns: ['one', 'two', 'three'],
+          index_patterns: ['one', 'two', 'two', 'three'],
         },
         current_version: {
           type: DataSourceType.index_patterns,
-          index_patterns: ['one', 'two', 'three'],
+          index_patterns: ['one', 'three', 'two'],
         },
         target_version: {
           type: DataSourceType.index_patterns,
