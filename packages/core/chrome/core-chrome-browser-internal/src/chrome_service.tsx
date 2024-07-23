@@ -174,23 +174,8 @@ export class ChromeService {
     this.mutationObserver.observe(body, { attributes: true });
   };
 
-  public setup({ analytics }: SetupDeps) {
-    const docTitle = this.docTitle.setup({ document: window.document });
-    registerAnalyticsContextProvider(analytics, docTitle.title$);
-  }
-
-  public async start({
-    application,
-    docLinks,
-    http,
-    injectedMetadata,
-    notifications,
-    customBranding,
-  }: StartDeps): Promise<InternalChromeStart> {
-    this.initVisibility(application);
-    this.handleEuiFullScreenChanges();
-
-    // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
     const isDev = this.params.coreContext.env.mode.name === 'development';
     if (isDev) {
       setEuiDevProviderWarning((providerError) => {
@@ -220,6 +205,24 @@ export class ChromeService {
         });
       });
     }
+  };
+
+  public setup({ analytics }: SetupDeps) {
+    const docTitle = this.docTitle.setup({ document: window.document });
+    registerAnalyticsContextProvider(analytics, docTitle.title$);
+  }
+
+  public async start({
+    application,
+    docLinks,
+    http,
+    injectedMetadata,
+    notifications,
+    customBranding,
+  }: StartDeps): Promise<InternalChromeStart> {
+    this.initVisibility(application);
+    this.handleEuiFullScreenChanges();
+    this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
