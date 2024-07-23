@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getSelectionAsFieldType } from '@kbn/controls-plugin/public/options_list/options_list_reducers';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get, isEmpty } from 'lodash';
 
@@ -55,6 +56,8 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
       return validationAggregation;
     },
     parse: (rawEsResult, { fieldSpec }) => {
+      if (!fieldSpec) return;
+
       const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       const rawInvalidSuggestions = get(
         rawEsResult,
@@ -62,11 +65,10 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
           ? 'aggregations.nestedValidation.validation.buckets'
           : 'aggregations.validation.buckets'
       );
-      const storeAsNumber = fieldSpec?.type === 'number' || fieldSpec?.type === 'date';
       return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
         ? Object.keys(rawInvalidSuggestions)
             .filter((key) => rawInvalidSuggestions[key].doc_count === 0)
-            .map((key: string): OptionsListSelection => (storeAsNumber ? +key : key))
+            .map((key: string): OptionsListSelection => getSelectionAsFieldType(fieldSpec, key))
         : [];
     },
   });
