@@ -45,8 +45,12 @@ import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
+import { appContextService } from '../../services';
 
 export function verifyNamespace(agent: Agent, currentNamespace?: string) {
+  if (!appContextService.getExperimentalFeatures().useSpaceAwareness) {
+    return;
+  }
   const isInNamespace =
     (currentNamespace && agent.namespaces?.includes(currentNamespace)) ||
     (!currentNamespace &&
