@@ -757,7 +757,7 @@
     {
       "query": "row var = now() + now()",
       "error": [
-        "Argument of [+] must be [time_literal], found value [now()] type [datetime]"
+        "Argument of [+] must be [date_period], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -774,7 +774,7 @@
     {
       "query": "row var = now() - now()",
       "error": [
-        "Argument of [-] must be [time_literal], found value [now()] type [datetime]"
+        "Argument of [-] must be [date_period], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6022,7 +6022,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField > doubleField",
+      "query": "from a_index | eval keywordField > doubleField",
       "error": [
         "Argument of [>] must be [double], found value [stringField] type [string]"
       ],
@@ -6043,7 +6043,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField > dateField",
+      "query": "from a_index | eval keywordField > dateField",
       "error": [
         "Argument of [>] must be [string], found value [dateField] type [date]"
       ],
@@ -6059,7 +6059,7 @@
     {
       "query": "from a_index | eval stringField > now()",
       "error": [
-        "Argument of [>] must be [string], found value [now()] type [datetime]"
+        "Argument of [>] must be [datetime], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6168,7 +6168,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField >= doubleField",
+      "query": "from a_index | eval keywordField >= doubleField",
       "error": [
         "Argument of [>=] must be [double], found value [stringField] type [string]"
       ],
@@ -6189,7 +6189,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField >= dateField",
+      "query": "from a_index | eval keywordField >= dateField",
       "error": [
         "Argument of [>=] must be [string], found value [dateField] type [date]"
       ],
@@ -6205,7 +6205,7 @@
     {
       "query": "from a_index | eval stringField >= now()",
       "error": [
-        "Argument of [>=] must be [string], found value [now()] type [datetime]"
+        "Argument of [>=] must be [datetime], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6314,7 +6314,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField < doubleField",
+      "query": "from a_index | eval keywordField < doubleField",
       "error": [
         "Argument of [<] must be [double], found value [stringField] type [string]"
       ],
@@ -6335,7 +6335,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField < dateField",
+      "query": "from a_index | eval keywordField < dateField",
       "error": [
         "Argument of [<] must be [string], found value [dateField] type [date]"
       ],
@@ -6351,7 +6351,7 @@
     {
       "query": "from a_index | eval stringField < now()",
       "error": [
-        "Argument of [<] must be [string], found value [now()] type [datetime]"
+        "Argument of [<] must be [datetime], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6460,7 +6460,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField <= doubleField",
+      "query": "from a_index | eval keywordField <= doubleField",
       "error": [
         "Argument of [<=] must be [double], found value [stringField] type [string]"
       ],
@@ -6481,7 +6481,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField <= dateField",
+      "query": "from a_index | eval keywordField <= dateField",
       "error": [
         "Argument of [<=] must be [string], found value [dateField] type [date]"
       ],
@@ -6497,7 +6497,7 @@
     {
       "query": "from a_index | eval stringField <= now()",
       "error": [
-        "Argument of [<=] must be [string], found value [now()] type [datetime]"
+        "Argument of [<=] must be [datetime], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6603,7 +6603,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField == doubleField",
+      "query": "from a_index | eval keywordField == doubleField",
       "error": [
         "Argument of [==] must be [double], found value [stringField] type [string]"
       ],
@@ -6624,7 +6624,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField == dateField",
+      "query": "from a_index | eval keywordField == dateField",
       "error": [
         "Argument of [==] must be [string], found value [dateField] type [date]"
       ],
@@ -6640,7 +6640,7 @@
     {
       "query": "from a_index | eval stringField == now()",
       "error": [
-        "Argument of [==] must be [string], found value [now()] type [datetime]"
+        "Argument of [==] must be [datetime], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6742,7 +6742,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField != doubleField",
+      "query": "from a_index | eval keywordField != doubleField",
       "error": [
         "Argument of [!=] must be [double], found value [stringField] type [string]"
       ],
@@ -6763,7 +6763,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField != dateField",
+      "query": "from a_index | eval keywordField != dateField",
       "error": [
         "Argument of [!=] must be [string], found value [dateField] type [date]"
       ],
@@ -6779,7 +6779,7 @@
     {
       "query": "from a_index | eval stringField != now()",
       "error": [
-        "Argument of [!=] must be [string], found value [now()] type [datetime]"
+        "Argument of [!=] must be [datetime], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6861,7 +6861,7 @@
     {
       "query": "from a_index | eval now() + now()",
       "error": [
-        "Argument of [+] must be [time_literal], found value [now()] type [datetime]"
+        "Argument of [+] must be [date_period], found value [now()] type [datetime]"
       ],
       "warning": []
     },
@@ -6897,7 +6897,7 @@
     {
       "query": "from a_index | eval now() - now()",
       "error": [
-        "Argument of [-] must be [time_literal], found value [now()] type [datetime]"
+        "Argument of [-] must be [date_period], found value [now()] type [datetime]"
       ],
       "warning": []
     },

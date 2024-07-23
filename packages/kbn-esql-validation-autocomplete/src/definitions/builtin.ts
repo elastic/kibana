@@ -128,6 +128,7 @@ const addTypeTable: MathFunctionSignature[] = [
   ['date_period', 'datetime', 'datetime'],
   ['datetime', 'date_period', 'datetime'],
   ['datetime', 'time_duration', 'datetime'],
+  ['datetime', 'time_literal', 'datetime'],
   ['double', 'double', 'double'],
   ['double', 'integer', 'double'],
   ['double', 'long', 'double'],
@@ -140,14 +141,14 @@ const addTypeTable: MathFunctionSignature[] = [
   ['time_duration', 'datetime', 'datetime'],
   ['time_duration', 'time_duration', 'time_duration'],
   ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-  ['date', 'time_literal', 'date'],
-  ['time_literal', 'date', 'date'],
+  ['time_literal', 'datetime', 'datetime'],
 ];
 
 const subtractTypeTable: MathFunctionSignature[] = [
   ['date_period', 'date_period', 'date_period'],
   ['datetime', 'date_period', 'datetime'],
   ['datetime', 'time_duration', 'datetime'],
+  ['datetime', 'time_literal', 'datetime'],
   ['double', 'double', 'double'],
   ['double', 'integer', 'double'],
   ['double', 'long', 'double'],
@@ -160,8 +161,7 @@ const subtractTypeTable: MathFunctionSignature[] = [
   ['time_duration', 'datetime', 'datetime'],
   ['time_duration', 'time_duration', 'time_duration'],
   ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-  ['date', 'time_literal', 'date'],
-  ['time_literal', 'date', 'date'],
+  ['time_literal', 'datetime', 'datetime'],
 ];
 
 const multiplyTypeTable: MathFunctionSignature[] = [

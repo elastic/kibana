@@ -388,7 +388,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `row var = now() ${op} now()`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [datetime]`]
+            ? [`Argument of [${op}] must be [date_period], found value [now()] type [datetime]`]
             : [
                 `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
                 `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
@@ -1063,7 +1063,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} stringField`, [
           `Argument of [${op}] must be [double], found value [stringField] type [string]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval stringField ${op} doubleField`, [
+        testErrorsAndWarnings(`from a_index | eval keywordField ${op} doubleField`, [
           `Argument of [${op}] must be [double], found value [stringField] type [string]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} "2022"`, [
@@ -1073,7 +1073,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval dateField ${op} stringField`, [
           `Argument of [${op}] must be [string], found value [dateField] type [date]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval stringField ${op} dateField`, [
+        testErrorsAndWarnings(`from a_index | eval keywordField ${op} dateField`, [
           `Argument of [${op}] must be [string], found value [dateField] type [date]`,
         ]);
 
@@ -1082,7 +1082,7 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [double], found value [stringField] type [string]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval stringField ${op} now()`, [
-          `Argument of [${op}] must be [string], found value [now()] type [datetime]`,
+          `Argument of [${op}] must be [datetime], found value [stringField] type [string]`,
         ]);
 
         testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
@@ -1132,7 +1132,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from a_index | eval now() ${op} now()`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [datetime]`]
+            ? [`Argument of [${op}] must be [date_period], found value [now()] type [datetime]`]
             : [
                 `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
                 `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
