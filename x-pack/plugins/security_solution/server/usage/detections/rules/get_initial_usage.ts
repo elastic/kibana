@@ -14,7 +14,7 @@ import type {
   AlertSuppressionUsage,
 } from './types';
 
-const initialAlertSuppression: AlertSuppressionUsage = {
+export const initialAlertSuppression: AlertSuppressionUsage = {
   enabled: 0,
   disabled: 0,
   suppressed_per_time_period: 0,
