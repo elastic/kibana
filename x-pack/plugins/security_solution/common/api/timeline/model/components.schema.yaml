@@ -10,7 +10,7 @@ components:
       enum:
         - default
         - template
-      # enum default value is temporary unsupported by code generator
+      # enum default value is temporarily unsupported by the code generator
       # default: default
       description: The type of timeline to create. Valid values are `default` and `template`.
     DataProviderType:
@@ -18,7 +18,7 @@ components:
       enum:
         - default
         - template
-      # enum default value is temporary unsupported by code generator
+      # enum default value is temporarily unsupported by the code generator
       # default: default
       description: The type of data provider to create. Valid values are `default` and `template`.
     SavedTimeline:
@@ -399,7 +399,7 @@ components:
         - active
         - draft
         - immutable
-      # enum default value is temporary unsupported by code generator
+      # enum default value is temporarily unsupported by the code generator
       # default: draft
       description: The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
     ImportTimelines:
