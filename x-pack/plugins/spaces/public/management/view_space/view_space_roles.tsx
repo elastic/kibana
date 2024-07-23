@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -19,15 +18,12 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  EuiBasicTableColumn,
-  EuiComboBoxOptionOption,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -36,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 
+import { SpaceAssignedRolesTable } from './component/space_assigned_roles_table';
 import { useViewSpaceServices, type ViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
 import { FeatureTable } from '../edit_space/enabled_features/feature_table';
@@ -73,7 +70,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
 
   const rolesAPIClient = useRef<RolesAPIClient>();
 
-  const { getRolesAPIClient } = useViewSpaceServices();
+  const { getRolesAPIClient, getUrlForApp } = useViewSpaceServices();
 
   const resolveRolesAPIClient = useCallback(async () => {
     try {
@@ -100,63 +97,6 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
     }
   }, [roleAPIClientInitialized]);
 
-  const getRowProps = (item: Role) => {
-    const { name } = item;
-    return {
-      'data-test-subj': `space-role-row-${name}`,
-      onClick: () => {},
-    };
-  };
-
-  const getCellProps = (item: Role, column: EuiTableFieldDataColumnType<Role>) => {
-    const { name } = item;
-    const { field } = column;
-    return {
-      'data-test-subj': `space-role-cell-${name}-${String(field)}`,
-      textOnly: true,
-    };
-  };
-
-  const columns: Array<EuiBasicTableColumn<Role>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.spaces.management.spaceDetails.roles.column.name.title', {
-        defaultMessage: 'Role',
-      }),
-    },
-    {
-      field: 'privileges',
-      name: i18n.translate('xpack.spaces.management.spaceDetails.roles.column.privileges.title', {
-        defaultMessage: 'Privileges',
-      }),
-      render: (_value, record) => {
-        return record.kibana.map((kibanaPrivilege) => {
-          return kibanaPrivilege.base.join(', ');
-        });
-      },
-    },
-  ];
-
-  if (!isReadOnly) {
-    columns.push({
-      name: 'Actions',
-      actions: [
-        {
-          name: i18n.translate(
-            'xpack.spaces.management.spaceDetails.roles.column.actions.remove.title',
-            {
-              defaultMessage: 'Remove from space',
-            }
-          ),
-          description: 'Click this action to remove the role privileges from this space.',
-          onClick: () => {
-            window.alert('Not yet implemented.');
-          },
-        },
-      ],
-    });
-  }
-
   const rolesInUse = filterRolesAssignedToSpace(roles, space);
 
   if (!rolesInUse) {
@@ -182,42 +122,33 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
       )}
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  {i18n.translate('xpack.spaces.management.spaceDetails.roles.heading', {
-                    defaultMessage:
-                      'Roles that can access this space. Privileges are managed at the role level.',
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            {!isReadOnly && (
-              <EuiFlexItem grow={false} color="primary">
-                <EuiButton
-                  onClick={async () => {
-                    if (!roleAPIClientInitialized) {
-                      await resolveRolesAPIClient();
-                    }
-                    setShowRolesPrivilegeEditor(true);
-                  }}
-                >
-                  {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign', {
-                    defaultMessage: 'Assign role',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.spaces.management.spaceDetails.roles.heading"
+              defaultMessage="Assign roles to this space so that users with those roles are able to access it. You can create and edit them in {linkToRolesPage}."
+              values={{
+                linkToRolesPage: (
+                  <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
+                    {i18n.translate(
+                      'xpack.spaces.management.spaceDetails.roles.rolesPageAnchorText',
+                      { defaultMessage: 'Roles' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiBasicTable
-            rowHeader="firstName"
-            columns={columns}
-            items={rolesInUse}
-            rowProps={getRowProps}
-            cellProps={getCellProps}
+          <SpaceAssignedRolesTable
+            isReadOnly={isReadOnly}
+            assignedRoles={rolesInUse}
+            onAssignNewRoleClick={async () => {
+              if (!roleAPIClientInitialized) {
+                await resolveRolesAPIClient();
+              }
+              setShowRolesPrivilegeEditor(true);
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
