@@ -8,6 +8,7 @@
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   HasEditCapabilities,
   PublishesDataLoading,
@@ -70,6 +71,7 @@ export type VisualizeApi = HasEditCapabilities &
   PublishesDataViews &
   PublishesDataLoading &
   HasVisualizeConfig &
+  HasInspectorAdapters &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     subscribeToSerializedStateChanges: (listener: () => void) => void;
