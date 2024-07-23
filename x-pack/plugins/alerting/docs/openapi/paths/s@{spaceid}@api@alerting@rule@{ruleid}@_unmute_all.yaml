@@ -1,5 +1,5 @@
 post:
-  summary: Unmutes all alerts.
+  summary: Unmute all alerts
   operationId: unmuteAllAlerts
   description: >
     If the rule has its notifications snoozed indefinitely, this API cancels the snooze.

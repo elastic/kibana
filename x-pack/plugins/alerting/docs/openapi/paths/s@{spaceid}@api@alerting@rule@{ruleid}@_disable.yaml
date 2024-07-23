@@ -1,5 +1,5 @@
 post:
-  summary: Disables a rule.
+  summary: Disable a rule
   operationId: disableRule
   description: >
     You must have `all` privileges for the appropriate Kibana features,

@@ -1,5 +1,5 @@
 post:
-  summary: Mutes all alerts.
+  summary: Mute all alerts
   operationId: muteAllAlerts
   description: >
     This API snoozes the notifications for the rule indefinitely. The rule

@@ -1,5 +1,5 @@
 post:
-  summary: Creates a rule with a randomly generated rule identifier.
+  summary: Create a rule with a random identifier
   operationId: createRule
   description: >
     To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating.

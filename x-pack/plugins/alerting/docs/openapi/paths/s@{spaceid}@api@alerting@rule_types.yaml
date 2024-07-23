@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a list of rule types.
+  summary: Get the rule types
   operationId: getRuleTypes
   description: >
     If you have `read` privileges for one or more Kibana features, the API

@@ -1,5 +1,5 @@
 post:
-  summary: Unmutes an alert.
+  summary: Unmute an alert
   operationId: unmuteAlert
   description: >
     You must have `all` privileges for the appropriate Kibana features,

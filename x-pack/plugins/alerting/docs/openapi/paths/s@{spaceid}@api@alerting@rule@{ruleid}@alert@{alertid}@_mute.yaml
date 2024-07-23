@@ -1,5 +1,5 @@
 post:
-  summary: Mutes an alert.
+  summary: Mute an alert
   operationId: muteAlert
   description: >
     You must have `all` privileges for the appropriate Kibana features,

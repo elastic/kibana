@@ -1,5 +1,5 @@
 post:
-  summary: Mutes an alert instance.
+  summary: Mute an alert instance
   operationId: legacyMuteAlertInstance
   deprecated: true
   description: Deprecated in 7.13.0. Use the mute alert API instead.

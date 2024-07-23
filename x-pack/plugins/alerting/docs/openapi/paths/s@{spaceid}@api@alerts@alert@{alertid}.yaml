@@ -1,5 +1,5 @@
 delete:
-  summary: Permanently removes an alert.
+  summary: Delete an alert
   operationId: legaryDeleteAlert
   deprecated: true
   description: >
@@ -28,7 +28,7 @@ delete:
             $ref: '../components/schemas/401_response.yaml'
 
 get:
-  summary: Retrieves an alert by its identifier.
+  summary: Get an alert by identifier
   operationId: legacyGetAlert
   deprecated: true
   description: Deprecated in 7.13.0. Use the get rule API instead.
@@ -58,7 +58,7 @@ get:
             $ref: '../components/schemas/401_response.yaml'
 
 post:
-  summary: Create an alert.
+  summary: Create an alert
   operationId: legacyCreateAlert
   deprecated: true
   description: Deprecated in 7.13.0. Use the create rule API instead.
@@ -174,7 +174,7 @@ post:
             $ref: '../components/schemas/401_response.yaml'
 
 put:
-  summary: Updates the attributes for an alert.
+  summary: Update an alert
   operationId: legacyUpdateAlert
   deprecated: true
   description: Deprecated in 7.13.0. Use the update rule API instead.

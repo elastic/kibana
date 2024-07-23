@@ -1,5 +1,5 @@
 post:
-  summary: Enables a rule.
+  summary: Enable a rule
   operationId: enableRule
   description: >
     To enable a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule.

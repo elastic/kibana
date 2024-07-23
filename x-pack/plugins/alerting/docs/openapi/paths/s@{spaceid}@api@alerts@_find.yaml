@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a paginated set of alerts.
+  summary: Get a paginated set of alerts
   operationId: legacyFindAlerts
   deprecated: true
   description: >

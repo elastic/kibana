@@ -1,5 +1,5 @@
 post:
-  summary: Disables an alert.
+  summary: Disable an alert
   operationId: legacyDisableAlert
   deprecated: true
   description: Deprecated in 7.13.0. Use the disable rule API instead.

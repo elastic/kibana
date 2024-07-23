@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a list of alert types.
+  summary: Get the alert types
   operationId: legacyGetAlertTypes
   deprecated: true
   description: Deprecated in 7.13.0. Use the get rule types API instead.

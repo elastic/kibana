@@ -1,5 +1,5 @@
 post:
-  summary: Unmutes an alert instance.
+  summary: Unmute an alert instance
   operationId: legacyUnmuteAlertInstance
   deprecated: true
   description: Deprecated in 7.13.0. Use the unmute alert API instead.

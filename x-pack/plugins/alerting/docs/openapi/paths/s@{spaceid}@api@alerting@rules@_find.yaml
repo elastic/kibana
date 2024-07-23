@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves information about rules.
+  summary: Find rule information
   operationId: findRules
   description: >
     You must have `read` privileges for the appropriate Kibana features,
