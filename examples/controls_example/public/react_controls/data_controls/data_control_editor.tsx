@@ -147,6 +147,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     initialState.controlType
   );
   const [controlEditorValid, setControlEditorValid] = useState<boolean>(false);
+
   /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
   // const editorConfig = controlGroup.getEditorConfig();
 
@@ -194,7 +195,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     const CustomSettings = controlFactory.CustomOptionsComponent;
 
     if (!CustomSettings) return;
-
     return (
       <EuiDescribedFormGroup
         ratio="third"
@@ -211,13 +211,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         data-test-subj="control-editor-custom-settings"
       >
         <CustomSettings
-          initialState={initialState}
+          currentState={editorState}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlEditorValid}
         />
       </EuiDescribedFormGroup>
     );
-  }, [fieldRegistry, selectedControlType, editorState, initialState]);
+  }, [fieldRegistry, selectedControlType, editorState]);
 
   return (
     <>

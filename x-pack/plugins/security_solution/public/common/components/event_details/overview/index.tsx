@@ -30,6 +30,7 @@ import { OverviewCardWithActions, OverviewCard } from './overview_card';
 import { StatusPopoverButton } from './status_popover_button';
 import { SeverityBadge } from '../../severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
+import { getFieldFormat } from '../get_field_format';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
@@ -174,7 +175,7 @@ export const Overview = React.memo<Props>(
               fieldName={ruleNameData.data.field}
               linkValue={ruleNameData.linkValue}
               fieldType={ruleNameData.data.type}
-              fieldFormat={ruleNameData.data.format}
+              fieldFormat={getFieldFormat(ruleNameData.data)}
               isDraggable={false}
               truncate={false}
             />
