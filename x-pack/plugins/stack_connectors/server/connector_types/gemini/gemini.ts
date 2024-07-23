@@ -123,9 +123,19 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     });
   }
 
-  protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
+  protected getResponseErrorMessage(
+    error: AxiosError<{
+      error?: { code?: number; message?: string; status?: string };
+      message?: string;
+    }>
+  ): string {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
+    }
+    if (error.response?.data?.error) {
+      return `API Error: ${
+        error.response?.data?.error.status ? `${error.response.data.error.status}: ` : ''
+      }${error.response?.data?.error.message ? `${error.response.data.error.message}` : ''}`;
     }
     if (
       error.response.status === 400 &&
@@ -342,8 +352,8 @@ const formatGeminiPayload = (
     safety_settings: [
       {
         category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        // when block high, the model will block responses about suspicious alerts
-        threshold: HarmBlockThreshold.BLOCK_NONE,
+        // without setting threshold, the model will block responses about suspicious alerts
+        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
       },
     ],
   };
