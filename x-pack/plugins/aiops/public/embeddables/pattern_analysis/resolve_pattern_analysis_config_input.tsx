@@ -61,6 +61,7 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
           size: 's',
           type: 'overlay',
           paddingSize: 'm',
+          hideCloseButton: true,
           'data-test-subj': 'aiopsPatternAnalysisEmbeddableInitializer',
           'aria-labelledby': 'patternAnalysisConfig',
           onClose: () => {
