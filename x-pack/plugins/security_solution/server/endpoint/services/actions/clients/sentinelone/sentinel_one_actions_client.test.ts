@@ -1122,6 +1122,25 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('#getFileInfo()', () => {
     beforeEach(() => {
+      const s1DataGenerator = new SentinelOneDataGenerator('seed');
+      const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+        s1DataGenerator.generateActionEsHit({
+          agent: { id: '123' },
+          EndpointActions: { data: { command: 'get-file' } },
+          meta: {
+            agentId: 's1-agent-a',
+            agentUUID: 'agent-uuid-1',
+            hostName: 's1-host-name',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
@@ -1141,11 +1160,16 @@ describe('SentinelOneActionsClient class', () => {
       applyEsClientSearchMock({
         esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
         index: ENDPOINT_ACTIONS_INDEX,
-        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+        response: SentinelOneDataGenerator.toEsSearchResponse([
+          new SentinelOneDataGenerator('seed').generateActionEsHit({
+            agent: { id: '123' },
+            EndpointActions: { data: { command: 'get-file' }, input_type: 'endpoint' },
+          }),
+        ]),
       });
 
       await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
-        'Action id [abc] not found with an agent type of [sentinel_one]'
+        'Action id [abc] with agent type of [sentinel_one] not found'
       );
     });
 
@@ -1188,6 +1212,24 @@ describe('SentinelOneActionsClient class', () => {
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
 
+      const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+        s1DataGenerator.generateActionEsHit({
+          agent: { id: '123' },
+          EndpointActions: { data: { command: 'get-file' } },
+          meta: {
+            agentId: 's1-agent-a',
+            agentUUID: 'agent-uuid-1',
+            hostName: 's1-host-name',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+
       const esHit = s1DataGenerator.generateResponseEsHit({
         agent: { id: '123' },
         EndpointActions: { data: { command: 'get-file' } },
@@ -1221,6 +1263,7 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         false;
+      // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
         false;
 
@@ -1233,11 +1276,16 @@ describe('SentinelOneActionsClient class', () => {
       applyEsClientSearchMock({
         esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
         index: ENDPOINT_ACTIONS_INDEX,
-        response: SentinelOneDataGenerator.toEsSearchResponse([]),
+        response: SentinelOneDataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateActionEsHit({
+            agent: { id: '123' },
+            EndpointActions: { data: { command: 'get-file' }, input_type: 'endpoint' },
+          }),
+        ]),
       });
 
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Action id [abc] not found with an agent type of [sentinel_one]'
+        'Action id [abc] with agent type of [sentinel_one] not found'
       );
     });
 
@@ -1288,7 +1336,7 @@ describe('SentinelOneActionsClient class', () => {
       (connectorActionsMock.execute as jest.Mock).mockReturnValue({ data: undefined });
 
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Unable to establish a readable stream for file with SentinelOne'
+        'Unable to establish a file download Readable stream with SentinelOne for response action [get-file] [abc]'
       );
     });
 
