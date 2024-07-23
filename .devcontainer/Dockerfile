@@ -52,7 +52,7 @@ RUN set -e ; \
   tar -zxf "openssl-${OPENSSL_VERSION}.tar.gz" ; \
   rm -rf openssl-${OPENSSL_VERSION}.tar* ; \
   cd "${OPENSSL_PATH}-${OPENSSL_VERSION}" ; \
-  ./Configure --prefix="${OPENSSL_PATH}" --openssldir="${OPENSSL_PATH}/ssl" --libdir="${OPENSSL_PATH}/lib" enable-fips; \
+  ./Configure --prefix="${OPENSSL_PATH}" --openssldir="${OPENSSL_PATH}/ssl" --libdir="${OPENSSL_PATH}/lib" shared -Wl,-rpath,${OPENSSL_PATH}/lib enable-fips; \
   make -j $(nproc) > /dev/null ; \
   make install > /dev/null ; \
   rm -rf  "${OPENSSL_PATH}-${OPENSSL_VERSION}" ; \
