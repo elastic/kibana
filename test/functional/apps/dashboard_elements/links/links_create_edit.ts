@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.exists('savedObjectSaveModal');
         await testSubjects.click('saveCancelButton');
-        await testSubjects.existOrFail('links--linkEditor--flyout');
+        await testSubjects.existOrFail('links--panelEditor--flyout');
         await dashboardLinks.clickPanelEditorCloseButton();
       });
 
