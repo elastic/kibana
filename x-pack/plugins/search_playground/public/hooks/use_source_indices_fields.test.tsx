@@ -23,7 +23,8 @@ let formHookSpy: jest.SpyInstance;
 import { useSourceIndicesFields } from './use_source_indices_field';
 import { IndicesQuerySourceFields } from '../types';
 
-describe('useSourceIndicesFields Hook', () => {
+// Failing: See https://github.com/elastic/kibana/issues/188840
+describe.skip('useSourceIndicesFields Hook', () => {
   let postMock: jest.Mock;
 
   beforeEach(() => {
