@@ -22030,47 +22030,70 @@
     },
     {
       "query": "row var = st_within(cartesianPointField, cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_within(cartesianPointField, cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_within(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_within(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -22085,52 +22108,78 @@
     },
     {
       "query": "row var = st_within(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(geoPointField, geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_within(geoPointField, geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_geopoint(geoPointField), to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(geoPointField, to_geoshape(\"POINT (30 10)\"))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_within(geoPointField, to_geoshape(\"POINT (30 10)\"))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_geopoint(geoPointField), to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_geoshape(\"POINT (30 10)\"), geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_within(to_geoshape(\"POINT (30 10)\"), geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_within(to_geoshape(geoPointField), to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -22145,7 +22194,10 @@
     },
     {
       "query": "row var = st_within(to_geoshape(geoPointField), to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -22308,32 +22360,44 @@
     },
     {
       "query": "row var = st_x(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_x(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_x(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_x(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_x(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_x(to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -22411,32 +22475,44 @@
     },
     {
       "query": "row var = st_y(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_y(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_y(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_y(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row st_y(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = st_y(to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -23345,17 +23421,23 @@
     },
     {
       "query": "row var = to_cartesianpoint(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row to_cartesianpoint(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = to_cartesianpoint(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -23458,17 +23540,23 @@
     },
     {
       "query": "row var = to_cartesianshape(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row to_cartesianshape(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = to_cartesianshape(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -23483,7 +23571,9 @@
     },
     {
       "query": "row var = to_cartesianshape(to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -24414,17 +24504,23 @@
     },
     {
       "query": "row var = to_geopoint(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row to_geopoint(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = to_geopoint(to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
