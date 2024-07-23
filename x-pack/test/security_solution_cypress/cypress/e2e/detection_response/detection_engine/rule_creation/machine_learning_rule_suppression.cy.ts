@@ -19,9 +19,9 @@ import {
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 import {
-  executeSetupModuleRequest,
   forceStartDatafeeds,
   forceStopAndCloseJob,
+  setupMlModulesWithRetry,
 } from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
@@ -94,7 +94,7 @@ describe(
       describe('when ML jobs have run', () => {
         before(() => {
           cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
-          executeSetupModuleRequest({ moduleName: 'security_linux_v3' });
+          setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
           forceStartDatafeeds({ jobIds: [jobId] });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
         });

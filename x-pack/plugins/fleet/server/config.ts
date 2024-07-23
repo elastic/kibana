@@ -34,7 +34,11 @@ export const config: PluginConfigDescriptor = {
     agents: {
       enabled: true,
     },
-    agentless: true,
+    agentless: {
+      api: {
+        url: true,
+      },
+    },
     enableExperimental: true,
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
@@ -146,7 +150,12 @@ export const config: PluginConfigDescriptor = {
       agentless: schema.maybe(
         schema.object({
           api: schema.object({
-            url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+            url: schema.uri({ scheme: ['http', 'https'] }),
+            tls: schema.object({
+              certificate: schema.string(),
+              key: schema.string(),
+              ca: schema.string(),
+            }),
           }),
         })
       ),

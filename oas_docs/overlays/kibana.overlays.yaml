@@ -1,0 +1,16 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the Kibana API document
+  version: 0.0.1
+actions:
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
