@@ -7,8 +7,9 @@
 
 import type { CSSProperties } from 'react';
 import React from 'react';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { BrowserField } from '../../../containers/source';
+
 import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -19,7 +20,7 @@ export interface FieldValueCellProps {
   contextId: string;
   data: EventFieldsData | FieldsData;
   eventId: string;
-  fieldFromBrowserField?: Partial<BrowserField>;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   getLinkValue?: (field: string) => string | null;
   isDraggable?: boolean;
   linkValue?: string | null | undefined;

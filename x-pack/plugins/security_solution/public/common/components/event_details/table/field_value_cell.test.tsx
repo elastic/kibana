@@ -7,8 +7,8 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
-import type { BrowserField } from '../../../containers/source';
 import { FieldValueCell } from './field_value_cell';
 import { TestProviders } from '../../../mock';
 import type { EventFieldsData } from '../types';
@@ -94,7 +94,7 @@ describe('FieldValueCell', () => {
     };
     const messageValues = ['Endpoint network event'];
 
-    const messageFieldFromBrowserField: BrowserField = {
+    const messageFieldFromBrowserField: FieldSpec = {
       aggregatable: false,
       name: 'message',
       readFromDocValues: false,
@@ -127,8 +127,8 @@ describe('FieldValueCell', () => {
     });
   });
 
-  describe('when `BrowserField` metadata IS available', () => {
-    const hostIpFieldFromBrowserField: BrowserField = {
+  describe('when `FieldSpec` metadata IS available', () => {
+    const hostIpFieldFromBrowserField: FieldSpec = {
       aggregatable: true,
       name: 'host.ip',
       readFromDocValues: false,

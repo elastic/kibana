@@ -10,11 +10,11 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import type { BrowserFields } from '../../containers/source';
 import * as i18n from './translations';
 import type { EventFieldsData } from './types';
-import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
 import { getSourcererScopeId } from '../../../helpers';
@@ -35,10 +35,10 @@ const HoverActionsContainer = styled(EuiPanel)`
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 export const getFieldFromBrowserField = memoizeOne(
-  (field: string, browserFields: BrowserFields): BrowserField | undefined => {
+  (field: string, browserFields: BrowserFields): Partial<FieldSpec> | undefined => {
     const category = getCategory(field);
 
-    return browserFields[category]?.fields?.[field] as BrowserField;
+    return browserFields[category]?.fields?.[field];
   },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );

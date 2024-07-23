@@ -7,8 +7,8 @@
 
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
-import type { BrowserField } from '../../../containers/source';
 import { SummaryValueCell } from './summary_value_cell';
 import { TestProviders } from '../../../mock';
 import type { EventFieldsData } from '../types';
@@ -22,7 +22,7 @@ jest.mock('../../../hooks/use_get_field_spec');
 
 const eventId = 'TUWyf3wBFCFU0qRJTauW';
 const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'];
-const hostIpFieldFromBrowserField: BrowserField = {
+const hostIpFieldFromBrowserField: FieldSpec = {
   aggregatable: true,
   name: 'host.ip',
   readFromDocValues: false,
