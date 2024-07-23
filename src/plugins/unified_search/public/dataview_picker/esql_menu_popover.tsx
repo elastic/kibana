@@ -15,13 +15,18 @@ import {
   EuiContextMenuItem,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { IUnifiedSearchPluginServices } from '../types';
 
 interface ESQLMenuPopoverProps {
   onDataViewSwitch: () => void;
 }
 
 export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
+
+  const { docLinks } = kibana.services;
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
@@ -42,9 +47,8 @@ export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
         key="about"
         icon="iInCircle"
         data-test-subj="esql-about"
-        onClick={() => {
-          // go to docs
-        }}
+        target="_blank"
+        href={docLinks?.links?.query?.queryESQL ?? ''}
       >
         {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.aboutESQL', {
           defaultMessage: 'About ES|QL',
@@ -66,7 +70,7 @@ export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
       </EuiContextMenuItem>
     );
     return panelItems;
-  }, [onDataViewSwitch]);
+  }, [docLinks?.links?.query?.queryESQL, onDataViewSwitch]);
 
   return (
     <EuiPopover
