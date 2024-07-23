@@ -10,6 +10,7 @@ import { TextBasedLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import { GlobalWidgetParameters, OnWidgetAdd } from '@kbn/investigate-plugin/public';
 import React from 'react';
+import { EsqlWidgetPreview } from './esql_widget_preview';
 
 type Props = {
   onWidgetAdd: OnWidgetAdd;
@@ -85,24 +86,49 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
                 />
               </EuiFlexItem>
               <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="image" size="xxl" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <p>
-                    {i18n.translate(
-                      'xpack.investigateApp.addObservationUI.p.selectADataSourceLabel',
-                      { defaultMessage: 'Select a data source to generate a preview chart' }
-                    )}
-                  </p>
-                </EuiFlexItem>
+                {!isPreviewOpen ? (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="image" size="xxl" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <p>
+                        {i18n.translate(
+                          'xpack.investigateApp.addObservationUI.p.selectADataSourceLabel',
+                          { defaultMessage: 'Select a data source to generate a preview chart' }
+                        )}
+                      </p>
+                    </EuiFlexItem>
+                  </>
+                ) : (
+                  <EsqlWidgetPreview
+                    filters={filters}
+                    esqlQuery={submittedEsqlQuery}
+                    timeRange={timeRange}
+                    query={query}
+                    onWidgetAdd={(widget) => {
+                      setIsPreviewOpen(false);
+                      return onWidgetAdd(widget);
+                    }}
+                  />
+                )}
               </EuiFlexGroup>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton color="text" data-test-subj="investigateAppAddObservationUICancelButton">
+            <EuiButton
+              color="text"
+              data-test-subj="investigateAppAddObservationUICancelButton"
+              onClick={() => {
+                setIsExpanded(false);
+                setIsPreviewOpen(false);
+                setEsqlQuery('FROM *');
+                setSubmittedEsqlQuery('FROM *');
+                setIsOpen(false);
+              }}
+            >
               {i18n.translate('xpack.investigateApp.addObservationUI.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}

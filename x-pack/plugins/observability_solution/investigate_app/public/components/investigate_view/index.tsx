@@ -16,8 +16,8 @@ import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
+import { AddNoteUI } from '../add_note_ui';
 import { AddObservationUI } from '../add_observation_ui';
-import { AddWidgetUI } from '../add_widget_ui';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
 
 const containerClassName = css`
@@ -196,11 +196,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <AddWidgetUI
+              <AddNoteUI
                 user={user}
-                revision={revision}
-                start={range.start}
-                end={range.end}
                 filters={revision.parameters.filters}
                 query={revision.parameters.query}
                 timeRange={revision.parameters.timeRange}
