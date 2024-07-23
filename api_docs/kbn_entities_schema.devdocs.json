@@ -185,6 +185,36 @@
       },
       {
         "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.deleteEntityDefinitionParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "deleteEntityDefinitionParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.deleteEntityDefinitionQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "deleteEntityDefinitionQuerySchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ deleteData: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodBoolean>>; }, \"strip\", Zod.ZodTypeAny, { deleteData?: boolean | undefined; }, { deleteData?: boolean | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.docCountMetricSchema",
         "type": "Object",
         "tags": [],
@@ -331,6 +361,21 @@
       },
       {
         "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.getEntityDefinitionQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getEntityDefinitionQuerySchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.identityFieldsSchema",
         "type": "Object",
         "tags": [],
@@ -464,6 +509,21 @@
           "Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodLiteral<\"percentile\">; field: Zod.ZodString; percentile: Zod.ZodNumber; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.resetEntityDefinitionParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "resetEntityDefinitionParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/reset.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
