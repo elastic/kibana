@@ -84,6 +84,11 @@ export interface FetchResult {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
+export interface BulkUpdateOpts {
+  validate: boolean;
+  excludeLargeFields?: boolean;
+}
+
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
   { type: string; id: string; error: SavedObjectError }
@@ -108,6 +113,7 @@ export class TaskStore {
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
   public readonly taskValidator: TaskValidator;
+  private readonly logger: Logger;
 
   private esClient: ElasticsearchClient;
   private esClientWithoutRetries: ElasticsearchClient;
@@ -134,6 +140,7 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.logger = opts.logger;
     this.taskValidator = new TaskValidator({
       logger: opts.logger,
       definitions: opts.definitions,
@@ -294,13 +301,23 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    options: { validate: boolean }
+    { validate, excludeLargeFields = false }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
+    // if we're excluding large fields (state and params), we cannot apply validation so log a warning
+    if (validate && excludeLargeFields) {
+      validate = false;
+      this.logger.warn(`Skipping validation for bulk update because excludeLargeFields=true.`);
+    }
+
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
-        validate: options.validate,
+        validate,
       });
-      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
+      const taskAttributes = taskInstanceToAttributes(taskInstance, doc.id);
+      attrsById.set(
+        doc.id,
+        excludeLargeFields ? omit(taskAttributes, 'state', 'params') : taskAttributes
+      );
       return attrsById;
     }, new Map());
 
@@ -340,7 +357,7 @@ export class TaskStore {
         ),
       });
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
-        validate: options.validate,
+        validate,
       });
       return asOk(result);
     });
@@ -627,7 +644,10 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-function taskInstanceToAttributes(doc: TaskInstance, id: string): SerializedConcreteTaskInstance {
+export function taskInstanceToAttributes(
+  doc: TaskInstance,
+  id: string
+): SerializedConcreteTaskInstance {
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),

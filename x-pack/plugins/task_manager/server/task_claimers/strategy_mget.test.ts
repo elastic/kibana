@@ -388,7 +388,6 @@ describe('TaskClaiming', () => {
         'task:id-5',
         'task:id-6',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -411,8 +410,9 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 3,
@@ -476,7 +476,6 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         1,
@@ -488,7 +487,7 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         2,
@@ -502,8 +501,9 @@ describe('TaskClaiming', () => {
             status: 'unrecognized',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 1,
@@ -579,7 +579,6 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(2);
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         1,
@@ -591,7 +590,7 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         2,
@@ -605,8 +604,9 @@ describe('TaskClaiming', () => {
             status: 'unrecognized',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 1,
@@ -686,7 +686,7 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
       expect(store.bulkUpdate).toHaveBeenNthCalledWith(
         2,
@@ -700,7 +700,7 @@ describe('TaskClaiming', () => {
             status: 'unrecognized',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
 
       expect(result.stats).toEqual({
@@ -817,7 +817,6 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -834,8 +833,9 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 2,
@@ -899,7 +899,6 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -916,8 +915,9 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 2,
@@ -981,7 +981,6 @@ describe('TaskClaiming', () => {
 
       expect(store.fetch.mock.calls[0][0]).toMatchObject({ size: 40, seq_no_primary_term: true });
       expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -998,8 +997,9 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 2,
@@ -1076,7 +1076,6 @@ describe('TaskClaiming', () => {
         'task:id-5',
         'task:id-6',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-5']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1105,8 +1104,9 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-5']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 4,
@@ -1131,7 +1131,9 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-
+      store.bulkUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(asOk)
+      );
       store.bulkGet.mockResolvedValueOnce([
         asOk(fetchedTasks[0]),
         // @ts-expect-error
@@ -1143,9 +1145,6 @@ describe('TaskClaiming', () => {
         asOk(fetchedTasks[2]),
         asOk(fetchedTasks[3]),
       ]);
-      store.bulkUpdate.mockResolvedValueOnce(
-        [fetchedTasks[0], fetchedTasks[2], fetchedTasks[3]].map(asOk)
-      );
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -1191,7 +1190,6 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1199,6 +1197,12 @@ describe('TaskClaiming', () => {
             ...fetchedTasks[0],
             ownerId: 'test-test',
             retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
             status: 'claiming',
           },
           {
@@ -1214,8 +1218,9 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 3,
@@ -1240,9 +1245,10 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-
+      store.bulkUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(asOk)
+      );
       store.bulkGet.mockRejectedValueOnce(new Error('oh no'));
-      store.bulkUpdate.mockResolvedValueOnce([]);
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -1288,9 +1294,37 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[0],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[3],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false, excludeLargeFields: true }
+      );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 0,
@@ -1315,8 +1349,6 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-
-      store.bulkGet.mockResolvedValueOnce(fetchedTasks.map(asOk));
       store.bulkUpdate.mockResolvedValueOnce([
         asOk(fetchedTasks[0]),
         // @ts-expect-error
@@ -1325,6 +1357,11 @@ describe('TaskClaiming', () => {
           id: fetchedTasks[1].id,
           error: new Error('Oh no'),
         }),
+        asOk(fetchedTasks[2]),
+        asOk(fetchedTasks[3]),
+      ]);
+      store.bulkGet.mockResolvedValueOnce([
+        asOk(fetchedTasks[0]),
         asOk(fetchedTasks[2]),
         asOk(fetchedTasks[3]),
       ]);
@@ -1373,7 +1410,6 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(store.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1402,8 +1438,9 @@ describe('TaskClaiming', () => {
             status: 'claiming',
           },
         ],
-        { validate: false }
+        { validate: false, excludeLargeFields: true }
       );
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
         tasksClaimed: 3,
@@ -1428,9 +1465,8 @@ describe('TaskClaiming', () => {
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       store.fetch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-
-      store.bulkGet.mockResolvedValueOnce([]);
       store.bulkUpdate.mockRejectedValueOnce(new Error('oh no'));
+      store.bulkGet.mockResolvedValueOnce([]);
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -1476,9 +1512,37 @@ describe('TaskClaiming', () => {
         'task:id-3',
         'task:id-4',
       ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
       expect(store.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(store.bulkUpdate).toHaveBeenCalledWith([], { validate: false });
+      expect(store.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            ...fetchedTasks[0],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[0].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[1],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[1].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[2],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[2].runAt,
+            status: 'claiming',
+          },
+          {
+            ...fetchedTasks[3],
+            ownerId: 'test-test',
+            retryAt: fetchedTasks[3].runAt,
+            status: 'claiming',
+          },
+        ],
+        { validate: false, excludeLargeFields: true }
+      );
+      expect(store.bulkGet).toHaveBeenCalledWith([]);
 
       expect(result.stats).toEqual({
         tasksClaimed: 0,
