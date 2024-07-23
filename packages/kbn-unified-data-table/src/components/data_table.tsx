@@ -1062,6 +1062,7 @@ export const UnifiedDataTable = ({
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
+          data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
