@@ -5,6 +5,7 @@ info:
 paths:
   /internal/osquery/privileges_check:
     get:
+      operationId: ReadPrivilegesCheck
       summary: Get Osquery privileges check
       responses:
         '200':
@@ -13,4 +14,4 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: { }
+                properties: {}
