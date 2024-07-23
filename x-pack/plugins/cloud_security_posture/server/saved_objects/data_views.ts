@@ -35,7 +35,9 @@ const DATA_VIEW_TIME_FIELD = '@timestamp';
 const getDataViewSafe = async (
   soClient: ISavedObjectsRepository,
   currentSpaceId: string,
-  currentSpaceDataViewId: string
+  currentSpaceDataViewId: string,
+  indexPattern: string,
+  logger: Logger
 ): Promise<SavedObject<DataViewAttributes> | undefined> => {
   try {
     const dataView = await soClient.get<DataViewAttributes>(
@@ -45,6 +47,17 @@ const getDataViewSafe = async (
         namespace: currentSpaceId,
       }
     );
+
+    // Verify user didn't edit the index pattern
+    const currentIndexPatterns = dataView.attributes.title.split(',');
+    const requiredIndexPatterns = indexPattern.split(',');
+
+    const allExist = requiredIndexPatterns.every((element) =>
+      currentIndexPatterns.includes(element)
+    );
+
+    if (!allExist) migrateCdrDataViews(soClient, logger);
+
     return dataView;
   } catch (e) {
     return;
@@ -76,7 +89,9 @@ export const setupCdrDataView = async (
     const isDataViewExists = await getDataViewSafe(
       soClient,
       currentSpaceId,
-      currentSpaceDataViewId
+      currentSpaceDataViewId,
+      indexPattern,
+      logger
     );
 
     if (isDataViewExists) return;
@@ -105,14 +120,20 @@ export const setupCdrDataView = async (
   }
 };
 
-const migrateIndexPattern = (oldPattern: string, newPattern: string): string => {
-  const indexPatternsArray = oldPattern.split(',');
+const migrateIndexPattern = (previousIndexPattern: string, newPattern: string): string => {
+  const previousPatternsArray = previousIndexPattern.split(',');
+  const newPatternsArray = newPattern.split(',');
 
-  if (!indexPatternsArray.includes(newPattern)) {
-    indexPatternsArray.push(newPattern);
-  }
+  newPatternsArray.forEach((pattern) => {
+    if (!previousPatternsArray.includes(pattern)) {
+      previousPatternsArray.push(pattern);
+    }
+  });
 
-  return indexPatternsArray.join(',');
+  // Join the array back into a string with elements separated by commas
+  const updatedIndexPattern = previousPatternsArray.join(',');
+
+  return updatedIndexPattern;
 };
 
 export const migrateCdrDataViews = async (soClient: ISavedObjectsRepository, logger: Logger) => {
@@ -131,7 +152,6 @@ export const migrateCdrDataViews = async (soClient: ISavedObjectsRepository, log
 
           // For each data view with the old index pattern, update the index pattern to contain the new one
           dataViews.saved_objects.map(async (dataView) => {
-            console.log({ dataView });
             await soClient.update(
               'index-pattern',
               dataView.id,
