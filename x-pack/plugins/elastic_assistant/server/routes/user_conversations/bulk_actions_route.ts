@@ -182,6 +182,7 @@ export const bulkActionConversationsRoute = (
               perPage: 100,
               page: 1,
               filter: `users:{ ${userFilter} } AND (${body.create
+                // without stringify, special characters in the title can break this filter
                 .map((c) => `title:${JSON.stringify(c.title)}`)
                 .join(' OR ')})`,
               fields: ['title'],
