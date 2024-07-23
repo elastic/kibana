@@ -104,9 +104,6 @@ export const fetchLogRateAnalysisForAlert = async ({
 
   // FIELD CANDIDATES
 
-  const keywordFieldCandidates: string[] = [];
-  const textFieldCandidates: string[] = [];
-
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
     index: args.index,
     start: earliestMs,
@@ -141,8 +138,6 @@ export const fetchLogRateAnalysisForAlert = async ({
     ...analysisWindowParameters,
   };
 
-  keywordFieldCandidates.push(...indexInfo.keywordFieldCandidates);
-  textFieldCandidates.push(...indexInfo.textFieldCandidates);
   const sampleProbability = getSampleProbability(
     indexInfo.deviationTotalDocCount + indexInfo.baselineTotalDocCount
   );
@@ -194,8 +189,10 @@ export const fetchLogRateAnalysisForAlert = async ({
   // on top of that the async queue will process multiple queries concurrently.
   pValuesQueue.push(
     [
-      ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
-      ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+      ...chunk(indexInfo.textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+        textFieldCandidates: d,
+      })),
+      ...chunk(indexInfo.keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
         keywordFieldCandidates: d,
       })),
     ],
