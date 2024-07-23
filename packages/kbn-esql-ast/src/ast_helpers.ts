@@ -49,7 +49,8 @@ export function nonNullable<T>(v: T): v is NonNullable<T> {
 }
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
   return (
-    typeof type === 'string' && ESQL_NUMBER_TYPES.includes(type as typeof ESQL_NUMBER_TYPES[number])
+    typeof type === 'string' &&
+    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as typeof ESQL_NUMBER_TYPES[number])
   );
 }
 
