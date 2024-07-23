@@ -473,42 +473,7 @@ describe('options list type-specific search queries', () => {
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)).toEqual({});
       });
 
-      test('creates exact match search on valid search string', () => {
-        const optionsListRequestBodyMock: OptionsListRequestBody = {
-          size: 10,
-          fieldName: 'bytes',
-          allowExpensiveQueries: true,
-          sort: { by: '_key', direction: 'desc' },
-          searchString: '1234',
-          fieldSpec: { type: 'number' } as unknown as FieldSpec,
-        };
-        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-          optionsListRequestBodyMock
-        );
-        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-          .toMatchInlineSnapshot(`
-          Object {
-            "suggestions": Object {
-              "aggs": Object {
-                "filteredSuggestions": Object {
-                  "terms": Object {
-                    "field": "bytes",
-                    "shard_size": 10,
-                  },
-                },
-              },
-              "filter": Object {
-                "term": Object {
-                  "bytes": Object {
-                    "case_insensitive": false,
-                    "value": "1234",
-                  },
-                },
-              },
-            },
-          }
-        `);
-      });
+      // for tests related to searching numeric fields, refer to './options_list_exact_match.test.ts`
     });
   });
 
@@ -719,37 +684,6 @@ describe('options list type-specific search queries', () => {
       `);
     });
 
-    test('parses numeric field result', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
-        size: 10,
-        fieldName: 'bytes',
-        allowExpensiveQueries: true,
-        searchString: '12345',
-        fieldSpec: { type: 'number' } as unknown as FieldSpec,
-      };
-      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-        optionsListRequestBodyMock
-      );
-      rawSearchResponseMock.aggregations = {
-        suggestions: {
-          filteredSuggestions: {
-            buckets: [{ doc_count: 5, key: 12345 }],
-          },
-        },
-      };
-
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
-        Object {
-          "suggestions": Array [
-            Object {
-              "docCount": 5,
-              "value": "12345",
-            },
-          ],
-          "totalCardinality": 1,
-        }
-      `);
-    });
+    // for tests related to parsing numeric suggestions, refer to './options_list_exact_match.test.ts`
   });
 });
