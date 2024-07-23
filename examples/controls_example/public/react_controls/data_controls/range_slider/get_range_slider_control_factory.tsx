@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-
+import React, { useEffect, useMemo } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
 import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
@@ -37,9 +35,8 @@ export const getRangesliderControlFactory = (
     isFieldCompatible: (field) => {
       return field.aggregatable && field.type === 'number';
     },
-    CustomOptionsComponent: ({ initialState, updateState, setControlEditorValid }) => {
-      const [step, setStep] = useState(initialState.step ?? 1);
-
+    CustomOptionsComponent: ({ currentState, updateState, setControlEditorValid }) => {
+      const step = currentState.step ?? 1;
       return (
         <>
           <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
@@ -47,7 +44,6 @@ export const getRangesliderControlFactory = (
               value={step}
               onChange={(event) => {
                 const newStep = event.target.valueAsNumber;
-                setStep(newStep);
                 updateState({ step: newStep });
                 setControlEditorValid(newStep > 0);
               }}
