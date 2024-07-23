@@ -10,7 +10,6 @@ ENV OPENSSL_PATH=${HOME}/openssl
 ENV OPENSSL_VERSION='3.0.8'
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
 ENV OPENSSL_MODULES=${OPENSSL_PATH}/lib/ossl-modules
-ENV NODE_OPTIONS="--enable-fips --openssl-config=${KBN_DIR}/.devcontainer/config/nodejs.cnf"
 ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
 
 RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl make gcc
@@ -64,6 +63,9 @@ RUN mkdir -p $NVM_DIR && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.bashrc && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.zshrc  && \
   chown -R 1000:1000 "${HOME}/.npm"
+
+# Set after installing Node, otherwise FIPS interferes
+ENV NODE_OPTIONS="--enable-fips --openssl-config=${KBN_DIR}/.devcontainer/config/nodejs.cnf"
 
 # This is for documentation. Ports are exposed via devcontainer.json
 EXPOSE 9200 5601
