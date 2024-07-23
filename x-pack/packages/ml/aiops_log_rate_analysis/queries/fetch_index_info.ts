@@ -11,6 +11,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
+import { containsECSIdentifierFields, filterByECSFields } from '../ecs_fields';
 
 import { getTotalDocCountRequest } from './get_total_doc_count_request';
 
@@ -117,7 +118,7 @@ export const fetchIndexInfo = async ({
     (d) => `${d}.keyword`
   );
 
-  const fieldCandidates: string[] = [...acceptableFields].filter(
+  let fieldCandidates: string[] = [...acceptableFields].filter(
     (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
   );
   const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
@@ -127,6 +128,12 @@ export const fetchIndexInfo = async ({
       textFieldCandidatesOverrides.includes(field)
     );
   });
+
+  // Finally, check if the fields allow to identify the index as ECS.
+  // If that's the case, we'll only consider a set of ECS fields for the analysis.
+  if (containsECSIdentifierFields(fieldCandidates)) {
+    fieldCandidates = filterByECSFields(fieldCandidates);
+  }
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;
