@@ -22,7 +22,6 @@ export default function ({ getService }: FtrProviderContext) {
   const rolesUsersProvider = getService('rolesUsersProvider');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
-
   describe('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
@@ -181,7 +180,6 @@ export default function ({ getService }: FtrProviderContext) {
           body: { data },
         } = await customUsernameSupertest
           .post(EXECUTE_ROUTE)
-          // .auth(username, password)
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')
           .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la' } })
@@ -203,7 +201,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should have access to file info api', async () => {
         await customUsernameSupertest
           .get(fileInfoApiRoutePath)
-          // .auth(username, password)
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')
           // We expect 404 because the indexes with the file info don't exist.
@@ -214,7 +211,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should have access to file download api', async () => {
         await customUsernameSupertest
           .get(`${fileInfoApiRoutePath}/download`)
-          // .auth(username, password)
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')
           // We expect 404 because the indexes with the file info don't exist.
