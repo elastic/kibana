@@ -7,9 +7,16 @@
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
+import { appContextService } from '../app_context';
+
 import type { Agent } from '../../types';
 
 export function isAgentInNamespace(agent: Agent, namespace?: string) {
+  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  if (!useSpaceAwareness) {
+    return true;
+  }
+
   return (
     (namespace && agent.namespaces?.includes(namespace)) ||
     (!namespace &&
@@ -20,7 +27,8 @@ export function isAgentInNamespace(agent: Agent, namespace?: string) {
 }
 
 export function agentsKueryNamespaceFilter(namespace?: string) {
-  if (!namespace) {
+  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  if (!useSpaceAwareness || !namespace) {
     return;
   }
   return namespace === DEFAULT_NAMESPACE_STRING
