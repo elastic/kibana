@@ -337,12 +337,19 @@ export const monitoringSchema = schema.object(
           }),
           { meta: { description: 'History of the rule run.' } }
         ),
-        calculated_metrics: schema.object({
-          p50: schema.maybe(schema.number()),
-          p95: schema.maybe(schema.number()),
-          p99: schema.maybe(schema.number()),
-          success_ratio: schema.number(),
-        }),
+        calculated_metrics: schema.object(
+          {
+            p50: schema.maybe(schema.number()),
+            p95: schema.maybe(schema.number()),
+            p99: schema.maybe(schema.number()),
+            success_ratio: schema.number(),
+          },
+          {
+            meta: {
+              description: 'Calculation of different percentiles and success ratio.',
+            },
+          }
+        ),
         last_run: schema.object({
           timestamp: schema.string({
             meta: { description: 'Time when the rule was run last.' },

@@ -44,6 +44,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         response: {
           200: {
             body: () => ruleResponseSchemaV1,
+            description: 'Indicates a successful call.',
           },
         },
       },

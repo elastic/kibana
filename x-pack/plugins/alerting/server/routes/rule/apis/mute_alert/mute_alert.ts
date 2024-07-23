@@ -29,6 +29,11 @@ export const muteAlertRoute = (
         request: {
           params: muteAlertParamsSchemaV1,
         },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

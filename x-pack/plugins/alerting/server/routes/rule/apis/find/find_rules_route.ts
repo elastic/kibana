@@ -52,6 +52,7 @@ const buildFindRulesRoute = ({
         response: {
           200: {
             body: () => ruleResponseSchemaV1,
+            description: 'Indicates a successful call.',
           },
         },
       },
