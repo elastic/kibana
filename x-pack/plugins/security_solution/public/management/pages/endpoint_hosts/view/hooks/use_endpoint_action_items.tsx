@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import type { Platform } from '../../../../components/endpoint_responder/components/header_info/platforms';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowResponder } from '../../../../hooks';
@@ -20,6 +19,7 @@ import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { getHostPlatform } from '../../../../../common/lib/endpoint/utils/get_host_platform';
 
 interface Options {
   isEndpointList: boolean;
@@ -131,7 +131,7 @@ export const useEndpointActionItems = (
                   capabilities:
                     (endpointMetadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
                   hostName: endpointMetadata.host.name,
-                  platform: endpointMetadata.host.os.name.toLowerCase() as Platform,
+                  platform: getHostPlatform(endpointMetadata),
                 });
               },
               children: (

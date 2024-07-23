@@ -53,7 +53,7 @@ const props = {
       searchable: true,
       aggregatable: true,
       readFromDocValues: true,
-      format: 'string',
+      format: { id: 'string' },
       shortDotsEnable: false,
       isMapped: true,
       indexes: ['apm-*-transaction*'],
