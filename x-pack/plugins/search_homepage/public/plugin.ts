@@ -57,12 +57,13 @@ export class SearchHomepagePlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: SearchHomepageServicesContext = {
+        const services: SearchHomepageServicesContext = {
+          ...coreStart,
           ...depsStart,
           history,
         };
 
-        return renderApp(coreStart, startDeps, element);
+        return renderApp(coreStart, services, element);
       },
     });
 

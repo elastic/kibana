@@ -26,7 +26,7 @@ export const renderApp = async (
   const queryClient = initQueryClient(core.notifications.toasts);
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <KibanaContextProvider services={{ ...core, ...services }}>
+      <KibanaContextProvider services={services}>
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
           <I18nProvider>
             <QueryClientProvider client={queryClient}>
