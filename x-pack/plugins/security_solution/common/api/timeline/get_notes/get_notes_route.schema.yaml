@@ -54,7 +54,7 @@ paths:
             type: string
             nullable: true
       responses:
-        200:
+        '200':
           description: Indicates the requested notes were returned.
 
 components:
