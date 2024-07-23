@@ -9,6 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { createHash } from 'crypto';
 import type {
   EntityRelationRecord,
   RelatedEntityRelation,
@@ -37,7 +38,11 @@ export class EntityRelationsDataClient {
       });
     }
 
+    const recordHash = createHash('sha256')
+      .update([record.entity_type, record.entity.name, record.related_entity.id].join('-'))
+      .digest('hex');
     await this.options.esClient.index({
+      id: recordHash,
       index: this.getIndex(),
       refresh: refresh ?? false,
       body: record,
@@ -48,10 +53,12 @@ export class EntityRelationsDataClient {
     relation,
     entityType,
     entityName,
+    size = 100,
   }: {
     relation?: RelatedEntityRelation;
     entityType: RelatedEntityType;
     entityName: string;
+    size?: number;
   }): Promise<EntityRelationRecord[]> {
     const filter: QueryDslQueryContainer[] = [
       {
@@ -75,13 +82,14 @@ export class EntityRelationsDataClient {
     }
     const query: ESFilter = {
       bool: {
-        must: filter,
+        filter,
       },
     };
 
     const response = await this.options.esClient.search<EntityRelationRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
+      size,
       query,
     });
 

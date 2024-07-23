@@ -23,6 +23,7 @@ export const GetEntityRelationsRequestQuery = z.object({
   relation: RelatedEntityRelation.optional(),
   entity_type: RelatedEntityType,
   entity_name: z.string(),
+  size: z.coerce.number().optional(),
 });
 export type GetEntityRelationsRequestQueryInput = z.input<typeof GetEntityRelationsRequestQuery>;
 

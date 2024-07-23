@@ -32,7 +32,11 @@ paths:
           required: true
           schema:
             type: string
-
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: number
       responses:
         '200':
           description: Successful response

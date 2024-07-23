@@ -43,6 +43,7 @@ export const getRelatedEntitiesRoute = (router: EntityAnalyticsRoutesDeps['route
             relation: request.query.relation,
             entityType: request.query.entity_type,
             entityName: request.query.entity_name,
+            size: request.query.size,
           });
 
           return response.ok({
