@@ -92,7 +92,9 @@
     "@kbn/aiops-plugin",
     "@kbn/data-visualizer-plugin",
     "@kbn/search-types",
-    "@kbn/observability-ai-assistant-plugin"
+    "@kbn/presentation-containers",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/fields-metadata-plugin"
   ],
   "exclude": ["target/**/*"]
 }

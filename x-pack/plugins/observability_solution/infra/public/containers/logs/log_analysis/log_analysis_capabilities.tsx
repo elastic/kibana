@@ -7,12 +7,12 @@
 
 import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
 } from './api/ml_api_types';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogAnalysisCapabilities = () => {
