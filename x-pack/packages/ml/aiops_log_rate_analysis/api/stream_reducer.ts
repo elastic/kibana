@@ -85,7 +85,7 @@ export const logRateAnalysisResultsSlice = createSlice({
     resetGroups: (state) => {
       state.significantItemsGroups = [];
     },
-    // reset the results but keeps
+    // Reset the results but keep the current analysis type and window parameters.
     resetResults: (state) => ({
       ...getDefaultState(),
       currentAnalysisType: state.currentAnalysisType,
