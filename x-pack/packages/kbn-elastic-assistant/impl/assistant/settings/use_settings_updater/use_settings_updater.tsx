@@ -172,21 +172,13 @@ export const useSettingsUpdater = (
     const bulkResult = hasBulkConversations
       ? await bulkUpdateConversations(http, conversationsSettingsBulkActions, toasts)
       : undefined;
-
-    const didUpdateKnowledgeBase =
-      knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
-    const didUpdateRAGAlerts =
-      knowledgeBase.isEnabledRAGAlerts !== updatedKnowledgeBaseSettings.isEnabledRAGAlerts;
     const didUpdateAssistantStreamingEnabled =
       assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
-    if (didUpdateKnowledgeBase || didUpdateRAGAlerts || didUpdateAssistantStreamingEnabled) {
+    const didUpdateAlertsCount =
+      knowledgeBase.latestAlerts !== updatedKnowledgeBaseSettings.latestAlerts;
+    if (didUpdateAssistantStreamingEnabled || didUpdateAlertsCount) {
       assistantTelemetry?.reportAssistantSettingToggled({
-        ...(didUpdateKnowledgeBase
-          ? { isEnabledKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
-          : {}),
-        ...(didUpdateRAGAlerts
-          ? { isEnabledRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
-          : {}),
+        ...(didUpdateAlertsCount ? { alertsCountUpdated: didUpdateAlertsCount } : {}),
         ...(didUpdateAssistantStreamingEnabled
           ? { assistantStreamingEnabled: updatedAssistantStreamingEnabled }
           : {}),
@@ -211,8 +203,6 @@ export const useSettingsUpdater = (
     http,
     conversationsSettingsBulkActions,
     toasts,
-    knowledgeBase.isEnabledKnowledgeBase,
-    knowledgeBase.isEnabledRAGAlerts,
     updatedKnowledgeBaseSettings,
     assistantStreamingEnabled,
     updatedAssistantStreamingEnabled,
