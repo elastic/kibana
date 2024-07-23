@@ -804,6 +804,7 @@ describe('SentinelOneActionsClient class', () => {
       });
 
       it('should create response at error if request has no parentTaskId', async () => {
+        // @ts-expect-error
         actionRequestsSearchResponse.hits.hits[0]!._source!.meta!.parentTaskId = '';
         await s1ActionsClient.processPendingActions(processPendingActionsOptions);
 
