@@ -29,7 +29,7 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 === {api-description-title}
 
 Connectors are used to interface with external systems. You must create a
-connector before you can it in your cases. Refer to <<add-case-connectors>>.
+connector before you can it in your cases. Refer to <<case-connectors>>.
 
 === {api-path-parms-title}
 

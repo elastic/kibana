@@ -59,12 +59,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await esClient.indices.refresh({ index: SLO_DESTINATION_INDEX_NAME });
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
       await esDeleteAllIndices(SLO_DESTINATION_INDEX_PATTERN);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('computes the historical summary for a rolling occurrences SLO', async () => {

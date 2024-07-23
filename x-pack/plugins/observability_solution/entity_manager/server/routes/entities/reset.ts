@@ -6,7 +6,8 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { resetEntityDefinitionParamsSchema } from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
@@ -30,7 +31,6 @@ import {
 } from '../../lib/entities/create_and_install_transform';
 import { startTransform } from '../../lib/entities/start_transform';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -38,11 +38,9 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}/_reset`,
+      path: '/internal/entities/definition/{id}/_reset',
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+        params: buildRouteValidationWithZod(resetEntityDefinitionParamsSchema.strict()),
       },
     },
     async (context, req, res) => {

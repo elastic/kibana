@@ -108,6 +108,14 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'number',
         },
+        {
+          params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
+          returnType: 'boolean',
+        },
+        {
+          params: [{ name: 'column', type: 'ip', noNestingFunctions: true }],
+          returnType: 'ip',
+        },
       ],
       examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
     },
@@ -126,6 +134,14 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'number',
+        },
+        {
+          params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
+          returnType: 'boolean',
+        },
+        {
+          params: [{ name: 'column', type: 'ip', noNestingFunctions: true }],
+          returnType: 'ip',
         },
       ],
       examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],

@@ -16,6 +16,8 @@ paths:
     get:
       x-labels: [ess, serverless]
       x-internal: true
+      x-codegen-enabled: true
+      operationId: GetRiskEngineStatus
       summary: Get the status of the Risk Engine
       description: Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
       responses:
