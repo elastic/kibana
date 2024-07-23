@@ -15,7 +15,7 @@ export const SELECTED_REQUESTS_CLASSNAME = 'console__monaco_editor__selectedRequ
 
 export const whitespacesRegex = /\s+/;
 export const newLineRegex = /\n/;
-export const slashRegex = /\//;
+export const slashesRegex = /\/+/;
 export const ampersandRegex = /&/;
 export const equalsSignRegex = /=/;
 export const questionMarkRegex = /\?/;
