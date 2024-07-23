@@ -16,11 +16,16 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiButton,
+  EuiButtonEmpty,
   EuiText,
   EuiCheckbox,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiLink,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+
+const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
 
 export interface TextBasedLanguagesTransitionModalProps {
   closeModal: (dismissFlag: boolean, needsSave?: boolean) => void;
@@ -51,7 +56,7 @@ export default function TextBasedLanguagesTransitionModal({
           {i18n.translate(
             'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalTitle',
             {
-              defaultMessage: 'Your query will be removed',
+              defaultMessage: 'Unsaved changes',
             }
           )}
         </EuiModalHeaderTitle>
@@ -68,17 +73,39 @@ export default function TextBasedLanguagesTransitionModal({
             }
           )}
         </EuiText>
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="GrayText">
+              {i18n.translate(
+                'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalHelpText',
+                {
+                  defaultMessage: 'Help us improve ES|QL',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink external href={FEEDBACK_LINK} target="_blank">
+              {i18n.translate(
+                'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalFeedbackLink',
+                {
+                  defaultMessage: 'Submit feedback',
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="s" />
       </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiModalFooter css={{ paddingBlockStart: 0 }}>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id="dismiss-text-based-languages-transition-modal"
               label={i18n.translate(
                 'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalDismissButton',
                 {
-                  defaultMessage: "Don't show this warning again",
+                  defaultMessage: "Store response and don't show again",
                 }
               )}
               checked={dismissModalChecked}
@@ -88,25 +115,25 @@ export default function TextBasedLanguagesTransitionModal({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiButtonEmpty
                   onClick={() => closeModal(dismissModalChecked)}
-                  color="warning"
-                  iconType="merge"
+                  color="danger"
+                  iconType="trash"
                   data-test-subj="unifiedSearch_switch_noSave"
                 >
                   {i18n.translate(
                     'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',
                     {
-                      defaultMessage: 'Switch without saving',
+                      defaultMessage: 'Discard and switch',
                     }
                   )}
-                </EuiButton>
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => closeModal(dismissModalChecked, true)}
                   fill
-                  color="success"
+                  color="primary"
                   iconType="save"
                   data-test-subj="unifiedSearch_switch_andSave"
                 >
