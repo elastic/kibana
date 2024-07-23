@@ -36,7 +36,7 @@ import type {
 } from '../../../common/search_strategy';
 import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
 import type { InspectResponse } from '../../types';
-import type { KueryFilterQueryKind } from '../../../common/types/timeline';
+import type { KueryFilterQueryKind, TimelineTabs } from '../../../common/types/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
@@ -96,6 +96,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
+  timelineTab?: TimelineTabs;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -483,7 +484,9 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  timelineTab,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  const { telemetry } = useKibana().services;
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
@@ -511,8 +514,24 @@ export const useTimelineEvents = ({
 
   useEffect(() => {
     if (!timelineSearchHandler) return;
+
+    const startTime = performance.now();
     timelineSearchHandler(onTimelineSearchComplete);
-  }, [timelineSearchHandler, onTimelineSearchComplete]);
+    const endTime = performance.now();
+
+    telemetry.reportTimelinesTrackQueryRun({
+      tab: timelineTab ?? undefined,
+      duration: endTime - startTime,
+      language,
+    });
+  }, [
+    timelineSearchHandler,
+    onTimelineSearchComplete,
+    timelineResponse.events,
+    telemetry,
+    timelineTab,
+    language,
+  ]);
 
   return [dataLoadingState, timelineResponse];
 };

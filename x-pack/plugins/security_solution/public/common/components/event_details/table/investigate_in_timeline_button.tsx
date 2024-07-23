@@ -24,6 +24,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { useKibana } from '../../../lib/kibana';
 
 export interface InvestigateInTimelineButtonProps {
   asEmptyButton: boolean;
@@ -34,6 +35,7 @@ export interface InvestigateInTimelineButtonProps {
   isDisabled?: boolean;
   iconType?: IconType;
   children?: React.ReactNode;
+  idForTelemetry?: string; // Where the button is used
 }
 
 export const InvestigateInTimelineButton: FC<
@@ -46,19 +48,21 @@ export const InvestigateInTimelineButton: FC<
   timeRange,
   keepDataView,
   iconType,
+  idForTelemetry = 'unknown',
   ...rest
 }) => {
   const dispatch = useDispatch();
-
+  const { telemetry } = useKibana().services;
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
   const hasTemplateProviders =
     dataProviders && dataProviders.find((provider) => provider.type === 'template');
 
+  const timelineType = hasTemplateProviders ? TimelineType.template : TimelineType.default;
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
+    timelineType,
   });
 
   const configureAndOpenTimeline = useCallback(async () => {
@@ -102,16 +106,24 @@ export const InvestigateInTimelineButton: FC<
       }
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
+      telemetry.reportInvestigateInTimelineEvent({
+        dataProviderCount: dataProviders?.length ?? 0,
+        openedFrom: `investigate-in-timeline-button-${idForTelemetry}`,
+        timelineType,
+      });
     }
   }, [
+    idForTelemetry,
     dataProviders,
-    clearTimeline,
-    dispatch,
-    defaultDataView.id,
-    signalIndexName,
     filters,
     timeRange,
     keepDataView,
+    dispatch,
+    telemetry,
+    timelineType,
+    clearTimeline,
+    defaultDataView.id,
+    signalIndexName,
   ]);
 
   return asEmptyButton ? (

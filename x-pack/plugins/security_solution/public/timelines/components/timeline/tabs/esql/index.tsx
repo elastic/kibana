@@ -50,6 +50,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       discover,
       dataViews: dataViewService,
       savedSearch: savedSearchService,
+      telemetry,
     },
   } = useKibana();
 
@@ -83,8 +84,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   } = useDiscoverState();
 
   const discoverCustomizationCallbacks = useSetDiscoverCustomizationCallbacks();
-
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
@@ -96,7 +96,21 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     status: savedSearchByIdStatus,
   } = useQuery({
     queryKey: ['savedSearchById', savedSearchId ?? ''],
-    queryFn: () => (savedSearchId ? savedSearchService.get(savedSearchId) : Promise.resolve(null)),
+    queryFn: () => {
+      if (savedSearchId) {
+        const startTime = performance.now();
+        savedSearchService.get(savedSearchId);
+        const endTime = performance.now();
+
+        telemetry.reportTimelinesTrackQueryRun({
+          tab: 'esql',
+          duration: endTime - startTime,
+          language: 'esql',
+        });
+      } else {
+        Promise.resolve(null);
+      }
+    },
   });
 
   const getCombinedDiscoverSavedSearchState: () => SavedSearch | undefined = useCallback(() => {

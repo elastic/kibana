@@ -73,7 +73,7 @@ export const useAddBulkToTimelineAction = ({
     selectedPatterns,
   } = useSourcererDataView(scopeId);
   const dispatch = useDispatch();
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, telemetry } = useKibana().services;
 
   const { filters, dataTable: { selectAll, totalCount, sort, selectedEventIds } = tableDefaults } =
     useSelector((state: State) => eventsViewerSelector(state, tableId));
@@ -172,6 +172,11 @@ export const useAddBulkToTimelineAction = ({
 
   const sendBulkEventsToTimelineHandler = useCallback(
     (items: TimelineItem[]) => {
+      telemetry.reportBulkInvestigateInTimelineEvent({
+        documentCount: items?.length ?? 0,
+        openedFrom: tableId,
+        timelineType: 'default',
+      });
       sendBulkEventsToTimelineAction(
         createTimeline,
         items.map((item) => item.ecs),
@@ -187,7 +192,7 @@ export const useAddBulkToTimelineAction = ({
         })
       );
     },
-    [dispatch, createTimeline, selectedEventIds, tableId]
+    [telemetry, tableId, createTimeline, dispatch, selectedEventIds]
   );
 
   const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(

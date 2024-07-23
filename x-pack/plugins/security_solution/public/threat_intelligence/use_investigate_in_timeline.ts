@@ -17,6 +17,7 @@ import { timelineActions } from '../timelines/store';
 import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
 import { useUpdateTimeline } from '../timelines/components/open_timeline/use_update_timeline';
+import { useKibana } from '../common/lib/kibana';
 
 interface UseInvestigateInTimelineActionProps {
   /**
@@ -47,6 +48,7 @@ export const useInvestigateInTimeline = ({
   to,
 }: UseInvestigateInTimelineActionProps) => {
   const dispatch = useDispatch();
+  const { telemetry } = useKibana().services;
   const { startTransaction } = useStartTransaction();
 
   const updateTimelineIsLoading = useCallback(
@@ -63,6 +65,11 @@ export const useInvestigateInTimeline = ({
 
   const createTimeline = useCallback(
     async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      telemetry.reportInvestigateInTimelineEvent({
+        openedFrom: 'threat-intelligence-plugin',
+        dataProviderCount: timeline.dataProviders?.length,
+        timelineType: timeline.timelineType,
+      });
       await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({

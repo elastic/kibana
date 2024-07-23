@@ -41,6 +41,7 @@ export const SessionPreviewContainer: FC = () => {
   const { startTransaction } = useStartTransaction();
   const scopedActions = getScopedActions(timelineId);
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
+    idForTelemetry: 'session-preview',
     ecsRowData: dataAsNestedObject,
   });
 

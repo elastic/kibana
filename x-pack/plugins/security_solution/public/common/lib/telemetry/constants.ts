@@ -86,6 +86,14 @@ export enum TelemetryEventTypes {
   EventLogShowSourceEventDateRange = 'Event Log -> Show Source -> Event Date Range',
   OpenNoteInExpandableFlyoutClicked = 'Open Note In Expandable Flyout Clicked',
   AddNoteFromExpandableFlyoutClicked = 'Add Note From Expandable Flyout Clicked',
+  InvestigateInTimeline = 'SecurityTimelines: Investigate In Timeline',
+  BulkInvestigateInTimeline = 'SecurityTimelines: Bulk Investigate In Timeline',
+  TimelinesTabClicked = 'SecurityTimelines: Timeline Tab Clicked',
+  TimelinesEventRendererToggled = 'SecurityTimelines: Timeline Event Renderer Toggled',
+  TimelinesQueryBuilderToggled = 'SecurityTimelines: Timeline Query Builder Toggled',
+  TimelinesDocumentPinned = 'SecurityTimelines: Timeline Document Pinned',
+  TimelinesAddDocumentNote = 'SecurityTimelines: Timeline Add Document Note',
+  TimelinesQueryRun = 'SecurityTimelines: Timeline Query Run',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

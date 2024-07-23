@@ -44,6 +44,14 @@ import type {
   ReportManualRuleRunOpenModalParams,
   ReportEventLogShowSourceEventDateRangeParams,
   ReportEventLogFilterByRunTypeParams,
+  ReportInvestigateInTimelineParams,
+  ReportBulkInvestigateInTimelineParams,
+  ReportTimelinesTabClickedParams,
+  ReportTimelinesAddDocumentNoteParams,
+  ReportTimelinesDocumentPinnedParams,
+  ReportTimelinesEventRendererToggledParams,
+  ReportTimelinesQueryRunParams,
+  ReportTimelinesQueryBuilderToggledParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -210,5 +218,39 @@ export class TelemetryClient implements TelemetryClientStart {
     params: AddNoteFromExpandableFlyoutClickedParams
   ) => {
     this.analytics.reportEvent(TelemetryEventTypes.AddNoteFromExpandableFlyoutClicked, params);
+  };
+
+  public reportInvestigateInTimelineEvent = (params: ReportInvestigateInTimelineParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.InvestigateInTimeline, params);
+  };
+
+  public reportBulkInvestigateInTimelineEvent = (params: ReportBulkInvestigateInTimelineParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.BulkInvestigateInTimeline, params);
+  };
+
+  public reportTimelinesTabClicked = (params: ReportTimelinesTabClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TimelinesTabClicked, params);
+  };
+
+  public reportTimelinesEventRendererToggled = (
+    params: ReportTimelinesEventRendererToggledParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TimelinesEventRendererToggled, params);
+  };
+
+  public reportTimelinesQueryBuilderToggled = (params: ReportTimelinesQueryBuilderToggledParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TimelinesQueryBuilderToggled, params);
+  };
+
+  public reportTimelinesDocumentPinned = (params: ReportTimelinesDocumentPinnedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TimelinesDocumentPinned, params);
+  };
+
+  public reportTimelinesAddDocumentNote = (params: ReportTimelinesAddDocumentNoteParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TimelinesAddDocumentNote, params);
+  };
+
+  public reportTimelinesTrackQueryRun = (params: ReportTimelinesQueryRunParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TimelinesQueryRun, params);
   };
 }

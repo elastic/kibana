@@ -43,6 +43,7 @@ import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useKibana } from '../../lib/kibana';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -69,7 +70,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   disablePinAction = true,
 }) => {
   const dispatch = useDispatch();
-
+  const { telemetry } = useKibana().services;
   const { timelineType } = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
@@ -79,8 +80,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
 
   const onPinEvent: OnPinEvent = useCallback(
-    (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
-    [dispatch, timelineId]
+    (evtId) => {
+      telemetry.reportTimelinesDocumentPinned({
+        timelineType,
+      });
+      dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId }))
+    },
+    [dispatch, telemetry, timelineId, timelineType]
   );
 
   const onUnPinEvent: OnPinEvent = useCallback(
@@ -269,6 +275,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           {timelineId !== TimelineId.active && (
             <InvestigateInTimelineAction
               ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
+              idForTelemetry={timelineId} // timelineId is actually the table id here
               key="investigate-in-timeline"
               ecsRowData={ecsData}
             />

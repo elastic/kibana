@@ -72,11 +72,24 @@ import type {
   NotesTelemetryEvents,
   OpenNoteInExpandableFlyoutClickedParams,
 } from './events/notes/types';
+import type {
+  ReportBulkInvestigateInTimelineParams,
+  ReportInvestigateInTimelineParams,
+  ReportTimelinesAddDocumentNoteParams,
+  ReportTimelinesDocumentPinnedParams,
+  ReportTimelinesEventRendererToggledParams,
+  ReportTimelinesQueryRunParams,
+  ReportTimelinesQueryBuilderToggledParams,
+  ReportTimelinesTabClickedParams,
+  ReportTimelinesTelemetryEventParams,
+  TimelinesTelemetryEvent,
+} from './events/timeline/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
+export * from './events/timeline/types';
 export type {
   ReportEntityAlertsClickedParams,
   ReportEntityDetailsClickedParams,
@@ -129,6 +142,7 @@ export type TelemetryEventParams =
   | ReportAnomaliesCountClickedParams
   | ReportDataQualityIndexCheckedParams
   | ReportDataQualityCheckAllCompletedParams
+  | ReportTimelinesTelemetryEventParams
   | ReportBreadcrumbClickedParams
   | ReportDocumentDetailsTelemetryEventParams
   | OnboardingHubStepOpenParams
@@ -194,12 +208,23 @@ export interface TelemetryClientStart {
   // new notes
   reportOpenNoteInExpandableFlyoutClicked(params: OpenNoteInExpandableFlyoutClickedParams): void;
   reportAddNoteFromExpandableFlyoutClicked(params: AddNoteFromExpandableFlyoutClickedParams): void;
+
+  // timeline
+  reportInvestigateInTimelineEvent(params: ReportInvestigateInTimelineParams): void;
+  reportBulkInvestigateInTimelineEvent(params: ReportBulkInvestigateInTimelineParams): void;
+  reportTimelinesTabClicked(params: ReportTimelinesTabClickedParams): void;
+  reportTimelinesEventRendererToggled(params: ReportTimelinesEventRendererToggledParams): void;
+  reportTimelinesQueryBuilderToggled(params: ReportTimelinesQueryBuilderToggledParams): void;
+  reportTimelinesDocumentPinned(params: ReportTimelinesDocumentPinnedParams): void;
+  reportTimelinesAddDocumentNote(params: ReportTimelinesAddDocumentNoteParams): void;
+  reportTimelinesTrackQueryRun(params: ReportTimelinesQueryRunParams): void;
 }
 
 export type TelemetryEvent =
   | AssistantTelemetryEvent
   | AlertsGroupingTelemetryEvent
   | EntityAnalyticsTelemetryEvent
+  | TimelinesTelemetryEvent
   | DataQualityTelemetryEvents
   | DocumentDetailsTelemetryEvents
   | {

@@ -12,6 +12,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useKibana } from '../../../../common/lib/kibana';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
@@ -235,6 +236,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
+  const { telemetry } = useKibana().services;
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
   const getNumberOfPinnedEvents = useMemo(() => getPinnedEventSelector(), []);
@@ -296,37 +298,65 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   );
 
   const setQueryAsActiveTab = useCallback(() => {
+    telemetry.reportTimelinesTabClicked({
+      tab: TimelineTabs.query,
+      timelineType,
+    });
     setActiveTab(TimelineTabs.query);
-  }, [setActiveTab]);
+  }, [setActiveTab, telemetry, timelineType]);
 
   const setEqlAsActiveTab = useCallback(() => {
+    telemetry.reportTimelinesTabClicked({
+      tab: TimelineTabs.eql,
+      timelineType,
+    });
     setActiveTab(TimelineTabs.eql);
-  }, [setActiveTab]);
+  }, [setActiveTab, telemetry, timelineType]);
 
   const setGraphAsActiveTab = useCallback(() => {
+    telemetry.reportTimelinesTabClicked({
+      tab: TimelineTabs.graph,
+      timelineType,
+    });
     setActiveTab(TimelineTabs.graph);
-  }, [setActiveTab]);
+  }, [setActiveTab, telemetry, timelineType]);
 
   const setNotesAsActiveTab = useCallback(() => {
+    telemetry.reportTimelinesTabClicked({
+      tab: TimelineTabs.notes,
+      timelineType,
+    });
     setActiveTab(TimelineTabs.notes);
-  }, [setActiveTab]);
+  }, [setActiveTab, telemetry, timelineType]);
 
   const setPinnedAsActiveTab = useCallback(() => {
+    telemetry.reportTimelinesTabClicked({
+      tab: TimelineTabs.pinned,
+      timelineType,
+    });
     setActiveTab(TimelineTabs.pinned);
-  }, [setActiveTab]);
+  }, [setActiveTab, telemetry, timelineType]);
 
   const setSessionAsActiveTab = useCallback(() => {
+    telemetry.reportTimelinesTabClicked({
+      tab: TimelineTabs.session,
+      timelineType,
+    });
     setActiveTab(TimelineTabs.session);
-  }, [setActiveTab]);
+  }, [setActiveTab, telemetry, timelineType]);
 
   const setEsqlAsActiveTab = useCallback(() => {
+    telemetry.reportTimelinesTabClicked({
+      tab: TimelineTabs.esql,
+      timelineType,
+    });
     dispatch(
       initializeTimelineSettings({
         id: timelineId,
       })
     );
     setActiveTab(TimelineTabs.esql);
-  }, [setActiveTab, dispatch, timelineId]);
+  }, [telemetry, timelineType, dispatch, timelineId, setActiveTab]);
 
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {

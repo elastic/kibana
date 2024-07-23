@@ -70,7 +70,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     const [dataView, setDataView] = useState<DataView>();
     const {
-      services: { data },
+      services: { data, telemetry },
     } = useKibana();
 
     const { indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
@@ -155,7 +155,19 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       dispatch(
         setDataProviderVisibility({ id: timelineId, isDataProviderVisible: !isDataProviderVisible })
       );
-    }, [isDataProviderVisible, timelineId, dispatch]);
+      telemetry.reportTimelinesQueryBuilderToggled({
+        timelineType,
+        queryBuilderEnabled: !!isDataProviderVisible,
+        dataProviderCount: dataProviders?.length ?? 0,
+      });
+    }, [
+      dispatch,
+      timelineId,
+      isDataProviderVisible,
+      telemetry,
+      timelineType,
+      dataProviders?.length,
+    ]);
 
     useEffect(() => {
       /*
@@ -168,11 +180,16 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
        *
        * */
       if (dataProviders?.length > 0) {
+        telemetry.reportTimelinesQueryBuilderToggled({
+          timelineType,
+          queryBuilderEnabled: true,
+          dataProviderCount: dataProviders.length,
+        });
         dispatch(setDataProviderVisibility({ id: timelineId, isDataProviderVisible: true }));
       } else if (dataProviders?.length === 0) {
         dispatch(setDataProviderVisibility({ id: timelineId, isDataProviderVisible: false }));
       }
-    }, [dataProviders, dispatch, timelineId]);
+    }, [dataProviders, dispatch, telemetry, timelineId, timelineType]);
 
     return (
       <EuiFlexGroup direction="column" gutterSize="s">

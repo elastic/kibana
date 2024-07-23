@@ -56,6 +56,7 @@ const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
     return (
       <InvestigateInTimelineButton
         asEmptyButton={true}
+        idForTelemetry="alertPrevalenceCell"
         dataProviders={cellDataProviders.dataProviders}
         filters={cellDataProviders.filters}
       >

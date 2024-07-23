@@ -8,6 +8,7 @@
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
@@ -45,14 +46,18 @@ const NotesButtonContainer = styled(EuiFlexGroup)`
 
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
   ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId, notesCount }) => {
+    const { telemetry } = useKibana().services;
     const isTemplate = timelineType === TimelineType.template;
     const onClick = useCallback(() => {
       if (eventId != null) {
+        telemetry.reportTimelinesAddDocumentNote({
+          timelineType,
+        });
         toggleShowNotes?.(eventId);
       } else {
         toggleShowNotes?.();
       }
-    }, [toggleShowNotes, eventId]);
+    }, [eventId, telemetry, timelineType, toggleShowNotes]);
 
     return (
       <NotesButtonContainer>

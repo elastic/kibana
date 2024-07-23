@@ -105,7 +105,12 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
           `}
           grow={false}
         >
-          <InvestigateInTimelineButton asEmptyButton={true} dataProviders={null} filters={filters}>
+          <InvestigateInTimelineButton
+            idForTelemetry="attackDiscovery"
+            asEmptyButton={true}
+            dataProviders={null}
+            filters={filters}
+          >
             <EuiFlexGroup
               alignItems="center"
               data-test-subj="investigateInTimelineButton"

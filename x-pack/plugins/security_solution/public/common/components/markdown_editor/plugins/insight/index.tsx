@@ -218,6 +218,7 @@ const LicensedInsightComponent = ({
       <>
         <InvestigateInTimelineButton
           asEmptyButton={false}
+          idForTelemetry="markdownEditorInsights"
           isDisabled={hasError}
           dataProviders={dataProviders}
           filters={filters}

@@ -203,6 +203,7 @@ export const TakeActionDropdown = React.memo(
     });
 
     const { investigateInTimelineActionItems } = useInvestigateInTimeline({
+      idForTelemetry: scopeId,
       ecsRowData: ecsData,
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });

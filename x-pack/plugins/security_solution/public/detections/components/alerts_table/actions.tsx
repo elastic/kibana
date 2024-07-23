@@ -524,6 +524,7 @@ const createThresholdTimeline = async (
       to: thresholdTo,
       ruleNote: noteContent,
       ruleAuthor,
+      timelineRuleType: 'threshold',
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -679,6 +680,7 @@ const createNewTermsTimeline = async (
       },
       to,
       ruleNote: noteContent,
+      timelineRuleType: 'new_terms',
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -850,6 +852,7 @@ const createSuppressedTimeline = async (
       },
       to,
       ruleNote: noteContent,
+      timelineRuleType: 'suppression',
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -1082,6 +1085,7 @@ export const sendAlertToTimelineAction = async ({
             ruleNote: noteContent,
             ruleAuthor,
             notes: notes ?? null,
+            timelineRuleType: 'suppression',
           });
         }
       }
@@ -1120,10 +1124,12 @@ export const sendAlertToTimelineAction = async ({
       [ecsData._id],
       'dataProvider'
     );
+    let timelineRuleType: CreateTimelineProps['timelineRuleType'];
     if (isEqlAlertWithGroupId(ecsData)) {
       const tempEql = buildEqlDataProviderOrFilter([ecsData._id], ecs);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;
+      timelineRuleType = 'eql';
     }
 
     return createTimeline({
@@ -1154,6 +1160,7 @@ export const sendAlertToTimelineAction = async ({
       to,
       ruleNote: noteContent,
       ruleAuthor,
+      timelineRuleType,
     });
   }
 };

@@ -6,6 +6,7 @@
  */
 
 import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -69,6 +70,7 @@ export interface CreateTimelineProps {
   notes: Note[] | null;
   ruleNote?: string;
   ruleAuthor?: string | string[];
+  timelineRuleType?: RuleType | 'suppression';
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => Promise<void>;

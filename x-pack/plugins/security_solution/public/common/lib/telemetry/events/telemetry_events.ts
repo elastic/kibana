@@ -23,6 +23,16 @@ import {
   assetCriticalityCsvImportedEvent,
 } from './entity_analytics';
 import {
+  investigateInTimelineEvent,
+  bulkInvestigateInTimelineEvent,
+  timelineTabClicked,
+  timelineEventRendererToggled,
+  timelineQueryBuilderToggled,
+  timelineDocumentPinned,
+  timelineAddDocumentNote,
+  timelineTrackQueryRun,
+} from './timeline';
+import {
   assistantInvokedEvent,
   assistantSettingToggledEvent,
   assistantMessageSentEvent,
@@ -192,4 +202,12 @@ export const telemetryEvents = [
   eventLogShowSourceEventDateRangeEvent,
   openNoteInExpandableFlyoutClickedEvent,
   addNoteFromExpandableFlyoutClickedEvent,
+  investigateInTimelineEvent,
+  bulkInvestigateInTimelineEvent,
+  timelineTabClicked,
+  timelineEventRendererToggled,
+  timelineQueryBuilderToggled,
+  timelineDocumentPinned,
+  timelineAddDocumentNote,
+  timelineTrackQueryRun,
 ];

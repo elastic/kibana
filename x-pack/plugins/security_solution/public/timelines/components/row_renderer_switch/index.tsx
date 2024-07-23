@@ -10,6 +10,7 @@ import { EuiToolTip, EuiSwitch, EuiFormRow, useGeneratedHtmlId } from '@elastic/
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { useKibana } from '../../../common/lib/kibana';
 import { RowRendererId } from '../../../../common/api/timeline';
 import type { State } from '../../../common/store';
 import { setExcludedRowRendererIds } from '../../store/actions';
@@ -34,6 +35,7 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
   const { timelineId } = props;
 
   const dispatch = useDispatch();
+  const { telemetry } = useKibana().services;
 
   const excludedRowRendererIds = useSelector((state: State) =>
     selectExcludedRowRendererIds(state, timelineId)
@@ -64,8 +66,12 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
       } else {
         handleDisableAll();
       }
+      telemetry.reportTimelinesEventRendererToggled({
+        tab: 'query',
+        eventRendererEnabled: !!e.target.checked,
+      });
     },
-    [handleDisableAll, handleEnableAll]
+    [handleDisableAll, handleEnableAll, telemetry]
   );
 
   const rowRendererLabel = useMemo(

@@ -200,6 +200,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     sort: timelineQuerySortField,
     startDate: start,
     timerangeKind,
+    timelineTab: activeTab,
   });
 
   const { openFlyout } = useExpandableFlyoutApi();

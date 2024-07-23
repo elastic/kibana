@@ -37,6 +37,7 @@ import { defaultUdtHeaders } from '../../../../timelines/components/timeline/uni
 import { defaultHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface UseInvestigateInTimelineActionProps {
+  idForTelemetry?: string;
   ecsRowData?: Ecs | Ecs[] | null;
   onInvestigateInTimelineAlertClick?: () => void;
 }
@@ -94,10 +95,12 @@ const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
 export const useInvestigateInTimeline = ({
   ecsRowData,
   onInvestigateInTimelineAlertClick,
+  idForTelemetry,
 }: UseInvestigateInTimelineActionProps) => {
   const { addError } = useAppToasts();
   const {
     data: { search: searchStrategyClient },
+    telemetry,
   } = useKibana().services;
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
@@ -150,7 +153,19 @@ export const useInvestigateInTimeline = ({
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
-    async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+    async ({
+      from: fromTimeline,
+      timeline,
+      to: toTimeline,
+      ruleNote,
+      timelineRuleType,
+    }: CreateTimelineProps) => {
+      telemetry.reportInvestigateInTimelineEvent({
+        openedFrom: idForTelemetry ?? 'unknown',
+        dataProviderCount: timeline.dataProviders?.length,
+        timelineRuleType,
+        timelineType: timeline.timelineType,
+      });
       await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
@@ -173,9 +188,11 @@ export const useInvestigateInTimeline = ({
       });
     },
     [
-      updateTimeline,
-      updateTimelineIsLoading,
+      telemetry,
+      idForTelemetry,
       clearActiveTimeline,
+      updateTimelineIsLoading,
+      updateTimeline,
       unifiedComponentsInTimelineDisabled,
     ]
   );

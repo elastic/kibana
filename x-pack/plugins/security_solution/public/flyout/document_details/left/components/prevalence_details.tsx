@@ -195,6 +195,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       );
       return data.alertCount > 0 ? (
         <InvestigateInTimelineButton
+          idForTelemetry="alertsPrevalenceDetailsTable"
           asEmptyButton={true}
           dataProviders={dataProviders}
           filters={[]}
@@ -250,6 +251,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       }));
       return data.docCount > 0 ? (
         <InvestigateInTimelineButton
+          idForTelemetry="docsPrevalenceDetailsTable"
           asEmptyButton={true}
           dataProviders={dataProviders}
           filters={[]}

@@ -35,6 +35,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
+    idForTelemetry: 'analyzer-preview',
     ecsRowData: dataAsNestedObject,
   });
 

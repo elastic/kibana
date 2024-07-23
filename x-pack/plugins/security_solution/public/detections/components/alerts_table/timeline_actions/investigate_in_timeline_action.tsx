@@ -20,15 +20,18 @@ interface InvestigateInTimelineActionProps {
   ariaLabel?: string;
   buttonType?: 'text' | 'icon' | 'emptyButton';
   onInvestigateInTimelineAlertClick?: () => void;
+  idForTelemetry?: string;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
   ecsRowData,
+  idForTelemetry,
   buttonType,
   onInvestigateInTimelineAlertClick,
 }) => {
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
+    idForTelemetry,
     ecsRowData,
     onInvestigateInTimelineAlertClick,
   });

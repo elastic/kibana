@@ -136,6 +136,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,
+    timelineTab: activeTab,
   });
 
   const { openFlyout } = useExpandableFlyoutApi();

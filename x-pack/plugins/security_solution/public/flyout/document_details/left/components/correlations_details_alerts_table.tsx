@@ -221,6 +221,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           alertIds && alertIds.length && alertIds.length > 0 ? (
             <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
               <InvestigateInTimelineButton
+                idForTelemetry={dataTestSubj}
                 dataProviders={dataProviders}
                 filters={filters}
                 asEmptyButton

@@ -172,6 +172,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       startDate: '',
       sort: timelineQuerySortField,
       timerangeKind: undefined,
+      timelineTab: TimelineTabs.pinned,
     });
 
   const { openFlyout } = useExpandableFlyoutApi();
