@@ -14,11 +14,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceEcoTour } from '../../../../hooks/use_eco_tour';
 import {
   associateServiceLogs,
   collectServiceLogs,
   addApmAgent,
 } from '../../../shared/add_data_buttons/buttons';
+import { ServiceEcoTour } from '../../../shared/entity_enablement/service_eco_tour';
 
 const addData = i18n.translate('xpack.apm.addDataContextMenu.link', {
   defaultMessage: 'Add data',
@@ -26,6 +28,8 @@ const addData = i18n.translate('xpack.apm.addDataContextMenu.link', {
 
 export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const { tourState, setTourState } = useServiceEcoTour();
+
   const {
     core: {
       http: { basePath },
@@ -69,17 +73,23 @@ export function AddDataContextMenu() {
     },
   ];
 
+  const handleTourClose = () => {
+    setTourState({ shownBefore: true, isActive: false });
+    setPopoverOpen(false);
+  };
   return (
     <>
       <EuiPopover
         id="integrations-menu"
         button={button}
-        isOpen={popoverOpen}
+        isOpen={popoverOpen || tourState.isActive}
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downRight"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <ServiceEcoTour onFinish={handleTourClose}>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </ServiceEcoTour>
       </EuiPopover>
     </>
   );

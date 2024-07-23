@@ -27,10 +27,12 @@ import { useEntityManagerEnablementContext } from '../../../context/entity_manag
 import { FeedbackModal } from './feedback_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 import { Unauthorized } from './unauthorized_modal';
+import { useServiceEcoTour } from '../../../hooks/use_eco_tour';
 
 export function EntityEnablement() {
   const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
+  const { tourState, setTourState } = useServiceEcoTour();
 
   const {
     services: { entityManager },
@@ -58,6 +60,10 @@ export function EntityEnablement() {
       if (response.success) {
         setIsLoading(false);
         setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
+
+        if (!tourState.shownBefore) {
+          setTourState({ ...tourState, isActive: true });
+        }
         refetch();
       }
 
