@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import type {
-  GetInfraHostsCountRequestBodyPayload,
-  GetInfraHostsCountRequestResponsePayload,
+  GetInfraAssetCountRequestBodyPayload,
+  GetInfraAssetCountResponsePayload,
+  GetInfraAssetCountRequestParamsPayload,
 } from '@kbn/infra-plugin/common/http_api';
 import type { RoleCredentials } from '../../../../shared/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -26,12 +27,17 @@ export default function ({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
-  const fetchHostsCount = async (
-    body: GetInfraHostsCountRequestBodyPayload,
-    roleAuthc: RoleCredentials
-  ): Promise<GetInfraHostsCountRequestResponsePayload | undefined> => {
+  const fetchHostsCount = async ({
+    params,
+    body,
+    roleAuthc,
+  }: {
+    params: GetInfraAssetCountRequestParamsPayload;
+    body: GetInfraAssetCountRequestBodyPayload;
+    roleAuthc: RoleCredentials;
+  }): Promise<GetInfraAssetCountResponsePayload | undefined> => {
     const response = await supertestWithoutAuth
-      .post('/api/metrics/infra/hosts_count')
+      .post(`/api/infra/${params.assetType}/count`)
       .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(body)
@@ -39,10 +45,10 @@ export default function ({ getService }: FtrProviderContext) {
     return response.body;
   };
 
-  describe('API /api/metrics/infra/hosts_count', () => {
+  describe('API /api/infra/{assetType}/count', () => {
     let roleAuthc: RoleCredentials;
     describe('works', () => {
-      describe('with system module monitored host', () => {
+      describe('with host', () => {
         before(async () => {
           roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
           return esArchiver.load(ARCHIVE_NAME);
@@ -53,9 +59,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('received data', async () => {
-          const infraHosts = await fetchHostsCount(
-            {
-              type: 'host',
+          const infraHosts = await fetchHostsCount({
+            params: { assetType: 'host' },
+            body: {
               query: {
                 bool: {
                   must: [],
@@ -68,13 +74,13 @@ export default function ({ getService }: FtrProviderContext) {
               to: timeRange.to,
               sourceId: 'default',
             },
-            roleAuthc
-          );
+            roleAuthc,
+          });
 
           if (infraHosts) {
-            const { count, type } = infraHosts;
+            const { count, assetType } = infraHosts;
             expect(count).to.equal(1);
-            expect(type).to.be('host');
+            expect(assetType).to.be('host');
           } else {
             throw new Error('Hosts count response should not be empty');
           }

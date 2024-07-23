@@ -35,9 +35,14 @@ export const GetInfraAssetCountResponsePayloadRT = rt.intersection([
 export type GetInfraAssetCountRequestParamsPayload = rt.TypeOf<
   typeof GetInfraAssetCountRequestParamsPayloadRT
 >;
-export type GetInfraAssetCountRequestBodyPayload = rt.TypeOf<
-  typeof GetInfraAssetCountRequestBodyPayloadRT
->;
+export type GetInfraAssetCountRequestBodyPayload = Omit<
+  rt.TypeOf<typeof GetInfraAssetCountRequestBodyPayloadRT>,
+  'from' | 'to'
+> & {
+  from: string;
+  to: string;
+};
+
 export type GetInfraAssetCountResponsePayload = rt.TypeOf<
   typeof GetInfraAssetCountResponsePayloadRT
 >;
