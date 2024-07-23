@@ -38,9 +38,9 @@ import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_w
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alert_fields';
+import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alert_fields');
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_bulk_get_cases');
 jest.mock('./hooks/use_bulk_get_maintenance_windows');

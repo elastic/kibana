@@ -13,13 +13,13 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
-import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alert_fields';
+import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alert_fields');
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../../common/lib/kibana', () => ({

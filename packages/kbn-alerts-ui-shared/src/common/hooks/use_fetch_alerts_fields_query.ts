@@ -9,7 +9,7 @@
 import { AlertConsumers, isValidFeatureId } from '@kbn/rule-data-utils';
 import { useQuery } from '@tanstack/react-query';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
-import { fetchAlertsFields, FetchAlertsFieldsParams } from '../apis/fetch_alert_fields';
+import { fetchAlertsFields, FetchAlertsFieldsParams } from '../apis/fetch_alerts_fields';
 
 export type UseFetchAlertsFieldsQueryParams = FetchAlertsFieldsParams;
 
