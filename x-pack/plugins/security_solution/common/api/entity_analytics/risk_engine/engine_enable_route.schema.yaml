@@ -18,6 +18,8 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      x-codegen-enabled: true
+      operationId: EnableRiskEngine
       summary: Enable the Risk Engine
       requestBody:
         content:
@@ -28,7 +30,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineEnableResponse'
+                type: object
+                properties:
+                  success:
+                    type: boolean
         '400':
           description: Task manager is unavailable
           content:
@@ -40,16 +45,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineEnableErrorResponse'
+                $ref: '#/components/schemas/EnableRiskEngineErrorResponse'
 
 components:
   schemas:
-    RiskEngineEnableResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-    RiskEngineEnableErrorResponse:
+    EnableRiskEngineErrorResponse:
       type: object
       required:
         - message
