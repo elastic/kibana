@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       try {
         assertTelemetryPayload({ root, plugins }, stats);
       } catch (err) {
-        err.message = `The telemetry schemas in are out-of-date. Please define the schema of your collector and run "node scripts/telemetry_check --fix" to update them: ${err.message}`;
+        err.message = `The telemetry schemas are out-of-date. Please define the schema of your collector and run "node scripts/telemetry_check --fix" to update them: ${err.message}`;
         throw err;
       }
     });

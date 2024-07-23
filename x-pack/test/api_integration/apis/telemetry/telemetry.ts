@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
             assertTelemetryPayload({ root: monitoringRoot, plugins }, stats);
           });
         } catch (err) {
-          err.message = `The telemetry schemas in 'x-pack/plugins/telemetry_collection_xpack/schema/' are out-of-date, please update it as required: ${err.message}`;
+          err.message = `The telemetry schemas in 'x-pack/plugins/telemetry_collection_xpack/schema/' are out-of-date. Please define the schema of your collector and run "node scripts/telemetry_check --fix" to update them: ${err.message}`;
           throw err;
         }
       });
