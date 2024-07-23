@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import type { MouseEvent } from 'react';
 import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType } from '@elastic/eui';
@@ -54,21 +54,27 @@ export const useTagFilterPanel = ({
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
   const totalActiveFilters = Object.keys(tagSelection).length;
+  const onClickTime = useRef<number>(0);
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {
-      // Note: see data flow comment in useEffect() below
+      // onSelectChange() handler is to support keyboard navigation. When user clicks on a tag
+      // we call the onOptionClick() imperatively below and we don't need to do anything here.
+      const timeSinceOptionClick = Date.now() - onClickTime.current;
+      if (timeSinceOptionClick < 100) return;
+
       const diff = updatedOptions.find((item, index) => item.checked !== options[index].checked);
       if (diff) {
         addOrRemoveIncludeTagFilter(diff.tag);
       }
     },
-    [options, addOrRemoveIncludeTagFilter]
+    [addOrRemoveIncludeTagFilter, options]
   );
 
   const onOptionClick = useCallback(
     (tag: Tag) => (e: MouseEvent) => {
       const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
+      onClickTime.current = Date.now();
 
       if (withModifierKey) {
         addOrRemoveExcludeTagFilter(tag);

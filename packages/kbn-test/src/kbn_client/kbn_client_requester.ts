@@ -121,7 +121,6 @@ export class KbnClientRequester {
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
     const msgOrThrow = errMsg({
       redacted,
-      attempt,
       maxAttempts,
       requestedRetries: options.retries !== undefined,
       failedToGetResponseSvc: (error: Error) => isAxiosRequestError(error),
@@ -139,7 +138,10 @@ export class KbnClientRequester {
           await delay(1000 * attempt);
           continue;
         }
-        throw new KbnClientRequesterError(`${msgOrThrow(error)} -- and ran out of retries`, error);
+        throw new KbnClientRequesterError(
+          `${msgOrThrow(attempt, error)} -- and ran out of retries`,
+          error
+        );
       }
     }
   }
@@ -147,21 +149,19 @@ export class KbnClientRequester {
 
 export function errMsg({
   redacted,
-  attempt,
-  maxAttempts,
   requestedRetries,
+  maxAttempts,
   failedToGetResponseSvc,
   path,
   method,
   description,
 }: ReqOptions & {
   redacted: string;
-  attempt: number;
   maxAttempts: number;
   requestedRetries: boolean;
   failedToGetResponseSvc: (x: Error) => boolean;
 }) {
-  return function errMsgOrReThrow(_: any) {
+  return function errMsgOrReThrow(attempt: number, _: any) {
     const result = isConcliftOnGetError(_)
       ? `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`
       : requestedRetries || failedToGetResponseSvc(_)
