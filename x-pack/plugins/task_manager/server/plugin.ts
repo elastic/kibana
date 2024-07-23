@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import v8 from 'v8';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -120,6 +121,12 @@ export class TaskManagerPlugin
     core: CoreSetup<TaskManagerStartContract, unknown>,
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
+    core.metrics.getOpsMetrics$().subscribe((val) => {
+      console.log('VAL FOR HEAP SIZE LIMIT', val.process.memory.heap.size_limit);
+    });
+    console.log('v8 HEAP STATS', v8.getHeapStatistics());
+    console.log('PROCESS', process.memoryUsage());
+
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);
