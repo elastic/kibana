@@ -178,7 +178,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 20:41:53.463png1,969',
         'Sep 22, 2015 @ 20:40:22.952jpg1,576',
         'Sep 22, 2015 @ 20:11:39.532png1,708',
-        'Sep 22, 2015 @ 19:45:13.813php1,406',
       ]);
 
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
