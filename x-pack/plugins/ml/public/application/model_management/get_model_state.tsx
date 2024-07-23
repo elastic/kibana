@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 import type { ModelItem } from './models_list';
 
 /**
- * Resolves result model state based on the download status and deployments stats.
+ * Resolves result model state based on the state of each deployment.
+ *
+ * If at least one deployment is in the STARTED state, the model state is STARTED.
+ * Then if none of the deployments are in the STARTED state, but at least one is in the STARTING state, the model state is STARTING.
+ * If all deployments are in the STOPPING state, the model state is STOPPING.
  */
 export const getModelDeploymentState = (model: ModelItem): ModelState | undefined => {
   if (model.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED)) {

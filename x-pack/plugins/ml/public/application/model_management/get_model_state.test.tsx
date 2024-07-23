@@ -62,6 +62,11 @@ describe('getModelDeploymentState', () => {
             model_id: '.elser_model_2',
             state: 'starting',
           },
+          {
+            deployment_id: '.elser_model_2',
+            model_id: '.elser_model_2',
+            state: 'stopping',
+          },
         ],
       },
     } as unknown as ModelItem;
