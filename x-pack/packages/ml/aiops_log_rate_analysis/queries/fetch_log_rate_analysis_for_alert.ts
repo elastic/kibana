@@ -57,17 +57,6 @@ export interface SimpleSignificantItem {
  * Asynchronously fetches log rate analysis from an Elasticsearch client.
  * Use this function if you want to fetch log rate analysis in other contexts
  * than the Log Rate Analysis UI in the ML plugin UI.
- *
- * @param {Object} params - The parameters for fetching log rate analysis.
- * @param {ElasticsearchClient} params.esClient - The Elasticsearch client to use for the query.
- * @param {AbortSignal} [params.abortSignal] - An optional abort signal to cancel the request.
- * @param {Object} params.arguments - The arguments for the log rate analysis query.
- * @param {string} params.arguments.index - The index to query against.
- * @param {string} params.arguments.start - The start time for the query range.
- * @param {string} params.arguments.end - The end time for the query range.
- * @param {string} params.arguments.timefield - The field used to filter documents by time.
- *
- * @returns {Promise<void>} A promise that resolves when the operation is complete.
  */
 export const fetchLogRateAnalysisForAlert = async ({
   esClient,
@@ -162,7 +151,6 @@ export const fetchLogRateAnalysisForAlert = async ({
 
   const significantCategories: SignificantItem[] = [];
   const significantTerms: SignificantItem[] = [];
-  const fieldsToSample = new Set<string>();
 
   const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
     if (isKeywordFieldCandidates(payload)) {
@@ -179,9 +167,6 @@ export const fetchLogRateAnalysisForAlert = async ({
       });
 
       if (pValues.length > 0) {
-        pValues.forEach((d) => {
-          fieldsToSample.add(d.fieldName);
-        });
         significantTerms.push(...pValues);
       }
     } else if (isTextFieldCandidates(payload)) {
