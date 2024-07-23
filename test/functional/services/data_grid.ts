@@ -324,9 +324,9 @@ export class DataGridService extends FtrService {
     });
 
     if (toggle) {
+      await toggle.scrollIntoViewIfNecessary();
+      await toggle.click();
       await this.retry.waitFor('doc viewer to open', async () => {
-        await toggle!.scrollIntoViewIfNecessary();
-        await toggle!.click();
         return this.isShowingDocViewer();
       });
     } else {
