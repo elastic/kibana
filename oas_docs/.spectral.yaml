@@ -24,6 +24,7 @@ rules:
   # Schema
   oas3-schema: error
   oas2-schema: error
+  array-items: false
   # Tags
   openapi-tags: warn
   openapi-tags-alphabetical: info
