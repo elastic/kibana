@@ -73,4 +73,12 @@ export function getPutPayloadSchema(
   });
 }
 
+export function getPostPayloadSchema(
+  getBasePrivilegeNames: () => { global: string[]; space: string[] }
+) {
+  return schema.object({
+    roles: schema.recordOf(schema.string(), getPutPayloadSchema(getBasePrivilegeNames)),
+  });
+}
+
 export type RolePayloadSchemaType = TypeOf<ReturnType<typeof getPutPayloadSchema>>;
