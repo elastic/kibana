@@ -19,7 +19,7 @@ import { omit } from 'lodash';
 import { ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../types';
 
-type ControlOrder = Array<{ id: string; type: string }>;
+export type ControlsInOrder = Array<{ id: string; type: string }>;
 
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
   const initialControlIds = Object.keys(initialControlPanelsState);
@@ -27,7 +27,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
   const controlsPanelState: { [panelId: string]: DefaultControlState } = {
     ...initialControlPanelsState,
   };
-  const controlsInOrder$ = new BehaviorSubject<ControlOrder>(
+  const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
     Object.keys(initialControlPanelsState)
       .map((key) => ({
         id: key,

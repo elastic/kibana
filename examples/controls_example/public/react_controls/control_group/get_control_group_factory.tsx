@@ -6,26 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  KeyboardSensor,
-  MeasuringStrategy,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  rectSortingStrategy,
-  SortableContext,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import { EuiFlexGroup, EuiPanel, EuiLoadingChart } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -49,10 +31,8 @@ import {
   PublishesDataViews,
   PublishesFilters,
   PublishesTimeslice,
-  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-
-import { ControlRenderer } from '../control_renderer';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
@@ -63,7 +43,7 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { ControlClone } from '../components/control_clone';
+import { ControlGroup } from './components/control_group';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -81,7 +61,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialChildControlState,
         defaultControlGrow,
         defaultControlWidth,
-        labelPosition,
+        initialLabelPosition,
         chainingSystem,
         autoApplySelections,
         ignoreParentSettings,
@@ -103,7 +83,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         defaultControlWidth ?? DEFAULT_CONTROL_WIDTH
       );
       const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
-        labelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
+        initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
 
       /** TODO: Handle loading; loading should be true if any child is loading */
@@ -229,32 +209,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const [isInitialized, setIsInitialized] = useState(false);
-          const [controlsInOrder, controlStyle] = useBatchedPublishingSubjects(
-            controlsManager.controlsInOrder$,
-            labelPosition$
-          );
-
-          /** Handle drag and drop */
-          const sensors = useSensors(
-            useSensor(PointerSensor),
-            useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-          );
-          const [draggingId, setDraggingId] = useState<string | null>(null);
-          const onDragEnd = useCallback(
-            ({ over, active }: DragEndEvent) => {
-              const oldIndex = active?.data.current?.sortable.index;
-              const newIndex = over?.data.current?.sortable.index;
-              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
-                controlsManager.controlsInOrder$.next(
-                  arrayMove([...controlsInOrder], oldIndex, newIndex)
-                );
-              }
-              (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
-              setDraggingId(null);
-            },
-            [controlsInOrder]
-          );
+          const labelPosition = useStateFromPublishingSubject(labelPosition$);
 
           useEffect(() => {
             return () => {
@@ -264,63 +219,12 @@ export const getControlGroupEmbeddableFactory = (services: {
             };
           }, []);
 
-          useEffect(() => {
-            let ignore = false;
-            controlsManager.api.untilInitialized().then(() => {
-              if (!ignore) {
-                setIsInitialized(true);
-              }
-            });
-
-            return () => {
-              ignore = true;
-            };
-          }, []);
-
           return (
-            <EuiPanel
-              borderRadius="m"
-              paddingSize="none"
-              color={draggingId ? 'success' : 'transparent'}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
-                {!isInitialized && <EuiLoadingChart />}
-                <DndContext
-                  onDragStart={({ active }) => setDraggingId(`${active.id}`)}
-                  onDragEnd={onDragEnd}
-                  onDragCancel={() => setDraggingId(null)}
-                  sensors={sensors}
-                  measuring={{
-                    droppable: {
-                      strategy: MeasuringStrategy.BeforeDragging,
-                    },
-                  }}
-                >
-                  <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-                    {controlsInOrder.map(({ id, type }) => (
-                      <ControlRenderer
-                        key={id}
-                        uuid={id}
-                        type={type}
-                        getParentApi={() => api}
-                        onApiAvailable={(controlApi) => {
-                          controlsManager.setControlApi(id, controlApi);
-                        }}
-                        isControlGroupInitialized={isInitialized}
-                      />
-                    ))}
-                  </SortableContext>
-                  <DragOverlay>
-                    {draggingId ? (
-                      <ControlClone
-                        controlStyle={controlStyle}
-                        controlApi={controlsManager.getControlApi(draggingId)}
-                      />
-                    ) : null}
-                  </DragOverlay>
-                </DndContext>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <ControlGroup
+              controlGroupApi={api}
+              controlsManager={controlsManager}
+              labelPosition={labelPosition}
+            />
           );
         },
       };
