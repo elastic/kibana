@@ -27,6 +27,7 @@ const previouslyRegisteredTypes = [
   'application_usage_totals',
   'application_usage_transactional',
   'background-session',
+  'background-task-node',
   'canvas-element',
   'canvas-workpad',
   'canvas-workpad-template',
@@ -72,6 +73,7 @@ const previouslyRegisteredTypes = [
   'fleet-proxy',
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
+  'fleet-space-settings',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
@@ -146,7 +148,8 @@ const previouslyRegisteredTypes = [
   'synthetics-dynamic-settings',
   'uptime-synthetics-api-key',
   'url',
-  'usage-counters',
+  'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
+  'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
 ].sort();

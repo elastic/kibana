@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
   AnalyticsServiceSetup,
@@ -17,12 +18,12 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -99,7 +100,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   spaces?: SpacesPluginStart;
-  security: SecurityPluginStart;
+  security: SecurityServiceStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -112,9 +113,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
-  getAIAssistantKnowledgeBaseDataClient: (
-    initializeKnowledgeBase: boolean
-  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
+  getAIAssistantKnowledgeBaseDataClient: () => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;

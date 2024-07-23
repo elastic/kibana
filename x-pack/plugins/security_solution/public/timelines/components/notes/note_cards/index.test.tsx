@@ -13,6 +13,7 @@ import { NoteCards } from '.';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 import { TestProviders } from '../../../../common/mock';
 import type { TimelineResultNote } from '../../open_timeline/types';
+import { TimelineId } from '../../../../../common/types';
 
 const getNotesByIds = () => ({
   abc: {
@@ -60,6 +61,7 @@ describe('NoteCards', () => {
     status: TimelineStatus.active,
     toggleShowAddNote: jest.fn(),
     updateNote: jest.fn(),
+    timelineId: TimelineId.test,
   };
 
   test('it renders the notes column when notes are specified', () => {

@@ -12,7 +12,6 @@ import { RoleCredentials } from '../../../../shared/services';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 
-const indexName = 'basic_index';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -36,13 +35,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('admin');
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'searchPlayground',
       });
 
       const requestHeader = svlCommonApi.getInternalRequestHeader();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       createConnector = async () => {
         removeOpenAIConnector = await createOpenAIConnector({
           supertest: supertestWithoutAuth,
@@ -57,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // await removeOpenAIConnector?.();
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await pageObjects.svlCommonPage.forceLogout();
     });
 
@@ -66,6 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToExist();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexCalloutExists();
       });
 
       describe('with gen ai connectors', () => {
@@ -78,8 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await removeOpenAIConnector?.();
           await browser.refresh();
         });
-        it('hide gen ai panel', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnector();
+        it('show success llm button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
         });
       });
 
@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('creates a connector successfully', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnectorAfterCreatingConnector(
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSuccessButtonAfterCreatingConnector(
             createConnector
           );
         });
@@ -102,17 +102,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without any indices', () => {
-        it('show no index callout', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectNoIndexCalloutExists();
-        });
-
         it('hide no index callout when index added', async () => {
           await createIndex();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectIndex(indexName);
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
         });
 
         after(async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.removeIndexFromComboBox();
           await esArchiver.unload(esArchiveIndex);
           await browser.refresh();
         });
@@ -125,14 +120,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.refresh();
         });
 
-        it('dropdown shows up', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectIndicesInDropdown();
-        });
-
-        it('can select index from dropdown and navigate to chat window', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndStartButtonEnabled(
-            indexName
-          );
+        it('can select index from dropdown and load chat page', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
         });
 
         after(async () => {
@@ -148,7 +137,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await createConnector();
         await createIndex();
         await browser.refresh();
-        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage(indexName);
+        await pageObjects.searchPlayground.session.clearSession();
+        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
       });
       it('loads successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
@@ -163,6 +153,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 (fn) => fn.function.name === 'title_conversation'
               ) === undefined
           );
+
+          await pageObjects.searchPlayground.session.expectSession();
 
           await pageObjects.searchPlayground.PlaygroundChatPage.sendQuestion();
 
@@ -186,6 +178,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('show edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+        });
+
+        it('save selected fields between modes', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('loads a session from localstorage', async () => {
+          await pageObjects.searchPlayground.session.setSession();
+          await browser.refresh();
+          await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectPromptToBe(
+            'You are a fireman in london that helps answering question-answering tasks.'
+          );
         });
       });
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
 import { FieldSelect } from './field_select';
 import type { TextBasedPrivateState } from '../types';
-import { retrieveLayerColumnsFromCache, getColumnsFromCache } from '../fieldlist_cache';
 import { isNotNumeric, isNumeric } from '../utils';
 
 export type TextBasedDimensionEditorProps =
@@ -22,30 +22,55 @@ export type TextBasedDimensionEditorProps =
   };
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
+  const [allColumns, setAllColumns] = useState<DatatableColumn[]>([]);
   const query = props.state.layers[props.layerId]?.query;
 
-  const allColumns = retrieveLayerColumnsFromCache(
-    props.state.layers[props.layerId]?.columns ?? [],
-    query
-  );
-  const allFields = query ? getColumnsFromCache(query) : [];
+  useEffect(() => {
+    // in case the columns are not in the cache, I refetch them
+    async function fetchColumns() {
+      if (query) {
+        const table = await fetchFieldsFromESQL(
+          { esql: `${query.esql} | limit 0` },
+          props.expressions
+        );
+        if (table) {
+          setAllColumns(table.columns);
+        }
+      }
+    }
+    fetchColumns();
+  }, [props.expressions, query]);
+
   const hasNumberTypeColumns = allColumns?.some(isNumeric);
-  const fields = allFields.map((col) => {
-    return {
-      id: col.id,
-      name: col.name,
-      meta: col?.meta ?? { type: 'number' },
-      compatible:
-        props.isMetricDimension && hasNumberTypeColumns
-          ? props.filterOperations({
-              dataType: col?.meta?.type as DataType,
-              isBucketed: Boolean(isNotNumeric(col)),
-              scale: 'ordinal',
-            })
-          : true,
-    };
-  });
-  const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
+  const fields = useMemo(() => {
+    return allColumns.map((col) => {
+      return {
+        id: col.id,
+        name: col.name,
+        meta: col?.meta ?? { type: 'number' },
+        compatible:
+          props.isMetricDimension && hasNumberTypeColumns
+            ? props.filterOperations({
+                dataType: col?.meta?.type as DataType,
+                isBucketed: Boolean(isNotNumeric(col)),
+                scale: 'ordinal',
+              })
+            : true,
+      };
+    });
+  }, [allColumns, hasNumberTypeColumns, props]);
+
+  const selectedField = useMemo(() => {
+    const field = fields?.find((column) => column.id === props.columnId);
+    if (field) {
+      return {
+        fieldName: field.name,
+        meta: field.meta,
+        columnId: field.id,
+      };
+    }
+    return undefined;
+  }, [fields, props.columnId]);
 
   return (
     <>

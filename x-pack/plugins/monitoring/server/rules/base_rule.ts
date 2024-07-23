@@ -264,7 +264,8 @@ export class BaseRule {
     DefaultAlert
   >): Promise<any> {
     this.scopedLogger.debug(
-      `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
+      () =>
+        `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
     const { alertsClient } = services;

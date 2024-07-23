@@ -244,6 +244,7 @@ export const calculateRiskScores = async ({
       size: 0,
       _source: false,
       index,
+      ignore_unavailable: true,
       runtime_mappings: runtimeMappings,
       query: {
         function_score: {

@@ -21,6 +21,8 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
+import { agentlessAgentService } from './agents/agentless_agent';
+
 import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
@@ -67,9 +69,9 @@ async function createPackagePolicy(
         force: true,
         user: options.user,
       });
+
       throw error;
     });
-
   if (!newPackagePolicy) return;
 
   newPackagePolicy.policy_id = agentPolicy.id;
@@ -82,7 +84,7 @@ async function createPackagePolicy(
     user: options.user,
     bumpRevision: false,
     authorizationHeader: options.authorizationHeader,
-    force: options.force,
+    force: options.force || agentPolicy.supports_agentless === true,
   });
 }
 
@@ -170,6 +172,11 @@ export async function createAgentPolicyWithPackages({
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
+
+  // Create the agentless agent
+  if (agentPolicy.supports_agentless) {
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+  }
 
   return agentPolicy;
 }

@@ -3574,14 +3574,6 @@
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
               }
@@ -7220,7 +7212,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"meta\" | \"rows\" | \"columns\">; relation?: ",
+              ", \"meta\" | \"columns\" | \"rows\">; relation?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7259,7 +7251,7 @@
                     "section": "def-common.Datatable",
                     "text": "Datatable"
                   },
-                  ", \"meta\" | \"rows\" | \"columns\">; relation?: ",
+                  ", \"meta\" | \"columns\" | \"rows\">; relation?: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -11818,6 +11810,14 @@
             {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
             },
             {
               "plugin": "dataVisualizer",

@@ -24,6 +24,7 @@ import {
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   FLEET_SETUP_LOCK_TYPE,
+  SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -86,7 +87,10 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
-import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
+import {
+  packagePolicyV13AdvancedFields,
+  packagePolicyV10OnWriteScanFix,
+} from './model_versions/security_solution';
 import {
   migratePackagePolicyIdsToV8150,
   migratePackagePolicySetRequiresRootToV8150,
@@ -117,6 +121,22 @@ export const getSavedObjectTypes = (
           status: { type: 'keyword' },
           uuid: { type: 'text' },
           started_at: { type: 'date' },
+        },
+      },
+    },
+    [SPACE_SETTINGS_SAVED_OBJECT_TYPE]: {
+      name: SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'single',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          // allowed_namespace_prefixes: { enabled: false },
+          // managed_by: { type: 'keyword', index: false },
         },
       },
     },
@@ -608,6 +628,14 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: migratePackagePolicyIdsToV8150,
+            },
+          ],
+        },
+        '13': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV13AdvancedFields,
             },
           ],
         },

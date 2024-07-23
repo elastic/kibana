@@ -17,7 +17,6 @@ import {
   EuiDescriptionListDescription,
   EuiButtonEmpty,
   EuiSpacer,
-  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 
 import { useAgentless } from '../hooks/setup_technology';
@@ -252,8 +251,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiDescriptionList>
     ) : undefined;
 
-    const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
-    const maxWidth = isBiggerScreen ? 1200 : 800;
+    const maxWidth = 800;
     return (
       <WithHeaderLayout
         restrictHeaderWidth={maxWidth}
