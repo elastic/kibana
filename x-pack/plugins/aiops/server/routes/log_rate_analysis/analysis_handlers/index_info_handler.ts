@@ -32,8 +32,8 @@ export const indexInfoHandlerFactory =
       stateHandler,
     } = options;
 
-    const fieldCandidates: string[] = [];
-    let fieldCandidatesCount = fieldCandidates.length;
+    const keywordFieldCandidates: string[] = [];
+    let keywordFieldCandidatesCount = keywordFieldCandidates.length;
 
     const textFieldCandidates: string[] = [];
     let textFieldCandidatesCount = textFieldCandidates.length;
@@ -68,8 +68,8 @@ export const indexInfoHandlerFactory =
         logDebugMessage(`Baseline document count: ${indexInfo.baselineTotalDocCount}`);
         logDebugMessage(`Deviation document count: ${indexInfo.deviationTotalDocCount}`);
 
-        fieldCandidates.push(...indexInfo.fieldCandidates);
-        fieldCandidatesCount = fieldCandidates.length;
+        keywordFieldCandidates.push(...indexInfo.keywordFieldCandidates);
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
         textFieldCandidates.push(...indexInfo.textFieldCandidates);
         textFieldCandidatesCount = textFieldCandidates.length;
         zeroDocsFallback = indexInfo.zeroDocsFallback;
@@ -96,7 +96,7 @@ export const indexInfoHandlerFactory =
               defaultMessage:
                 'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
               values: {
-                fieldCandidatesCount: fieldCandidatesCount + textFieldCandidatesCount,
+                fieldCandidatesCount: keywordFieldCandidatesCount + textFieldCandidatesCount,
               },
             }
           ),
@@ -105,7 +105,7 @@ export const indexInfoHandlerFactory =
 
       responseStream.push(setZeroDocsFallback(zeroDocsFallback));
 
-      if (fieldCandidatesCount === 0) {
+      if (keywordFieldCandidatesCount === 0) {
         responseStream.endWithUpdatedLoadingState();
       } else if (stateHandler.shouldStop()) {
         logDebugMessage('shouldStop after fetching field candidates.');
@@ -114,5 +114,5 @@ export const indexInfoHandlerFactory =
       }
     }
 
-    return { fieldCandidates, textFieldCandidates, zeroDocsFallback };
+    return { keywordFieldCandidates, textFieldCandidates, zeroDocsFallback };
   };

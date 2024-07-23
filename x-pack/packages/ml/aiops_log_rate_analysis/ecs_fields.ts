@@ -73,7 +73,7 @@ const ecsFieldsMustHave = [
   'log.level', // Severity level of the log event
 ];
 
-export function containsECSIdentiferFields(fieldsArray: string[]): boolean {
+export function containsECSIdentifierFields(fieldsArray: string[]): boolean {
   return ecsFieldsMustHave.every((d) => fieldsArray.includes(d));
 }
 

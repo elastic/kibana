@@ -33,7 +33,7 @@ const SUPPORTED_ES_FIELD_TYPES = [
 const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
 
 interface IndexInfo {
-  fieldCandidates: string[];
+  keywordFieldCandidates: string[];
   textFieldCandidates: string[];
   baselineTotalDocCount: number;
   deviationTotalDocCount: number;
@@ -118,21 +118,22 @@ export const fetchIndexInfo = async ({
     (d) => `${d}.keyword`
   );
 
-  let fieldCandidates: string[] = [...acceptableFields].filter(
+  let keywordFieldCandidates: string[] = [...acceptableFields].filter(
     (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
   );
   const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
     const fieldName = field.replace(new RegExp(/\.text$/), '');
     return (
-      (!fieldCandidates.includes(fieldName) && !fieldCandidates.includes(`${fieldName}.keyword`)) ||
+      (!keywordFieldCandidates.includes(fieldName) &&
+        !keywordFieldCandidates.includes(`${fieldName}.keyword`)) ||
       textFieldCandidatesOverrides.includes(field)
     );
   });
 
   // Finally, check if the fields allow to identify the index as ECS.
   // If that's the case, we'll only consider a set of ECS fields for the analysis.
-  if (containsECSIdentifierFields(fieldCandidates)) {
-    fieldCandidates = filterByECSFields(fieldCandidates);
+  if (containsECSIdentifierFields(keywordFieldCandidates)) {
+    keywordFieldCandidates = filterByECSFields(keywordFieldCandidates);
   }
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
@@ -141,7 +142,7 @@ export const fetchIndexInfo = async ({
     .value;
 
   return {
-    fieldCandidates: fieldCandidates.sort(),
+    keywordFieldCandidates: keywordFieldCandidates.sort(),
     textFieldCandidates: textFieldCandidates.sort(),
     baselineTotalDocCount,
     deviationTotalDocCount,

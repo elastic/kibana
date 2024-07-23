@@ -41,13 +41,13 @@ export const topItemsHandlerFactory =
     stateHandler,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
-    fieldCandidates,
+    keywordFieldCandidates,
     textFieldCandidates,
   }: {
-    fieldCandidates: string[];
+    keywordFieldCandidates: string[];
     textFieldCandidates: string[];
   }) => {
-    let fieldCandidatesCount = fieldCandidates.length;
+    let keywordFieldCandidatesCount = keywordFieldCandidates.length;
 
     // This will store the combined count of detected log patterns and keywords
     let fieldValuePairsCount = 0;
@@ -93,21 +93,21 @@ export const topItemsHandlerFactory =
     let loadingStepSizeTopTerms = PROGRESS_STEP_P_VALUES;
 
     if (requestBody.overrides?.remainingFieldCandidates) {
-      fieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
+      keywordFieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
       remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
-      fieldCandidatesCount = fieldCandidates.length;
+      keywordFieldCandidatesCount = keywordFieldCandidates.length;
       loadingStepSizeTopTerms =
         LOADED_FIELD_CANDIDATES +
         PROGRESS_STEP_P_VALUES -
         (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
     } else {
-      remainingFieldCandidates = fieldCandidates;
+      remainingFieldCandidates = keywordFieldCandidates;
     }
 
     logDebugMessage('Fetch p-values.');
 
     const topTermsQueue = queue(async function (fieldCandidate: string) {
-      stateHandler.loaded((1 / fieldCandidatesCount) * loadingStepSizeTopTerms, false);
+      stateHandler.loaded((1 / keywordFieldCandidatesCount) * loadingStepSizeTopTerms, false);
 
       let fetchedTopTerms: Awaited<ReturnType<typeof fetchTopTerms>>;
 
@@ -159,7 +159,7 @@ export const topItemsHandlerFactory =
       );
     }, MAX_CONCURRENT_QUERIES);
 
-    topTermsQueue.push(fieldCandidates, (err) => {
+    topTermsQueue.push(keywordFieldCandidates, (err) => {
       if (err) {
         logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
         responseStream.pushError(`Failed to fetch p-values.`);

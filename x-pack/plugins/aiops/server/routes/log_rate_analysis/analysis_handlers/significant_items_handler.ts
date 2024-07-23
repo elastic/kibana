@@ -46,13 +46,13 @@ export const significantItemsHandlerFactory =
     stateHandler,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
-    fieldCandidates,
+    keywordFieldCandidates,
     textFieldCandidates,
   }: {
-    fieldCandidates: string[];
+    keywordFieldCandidates: string[];
     textFieldCandidates: string[];
   }) => {
-    let fieldCandidatesCount = fieldCandidates.length;
+    let keywordFieldCandidatesCount = keywordFieldCandidates.length;
     const textFieldCandidatesCount = textFieldCandidates.length;
 
     // This will store the combined count of detected significant log patterns and keywords
@@ -78,21 +78,21 @@ export const significantItemsHandlerFactory =
     let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
 
     if (requestBody.overrides?.remainingFieldCandidates) {
-      fieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
+      keywordFieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
       remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
-      fieldCandidatesCount = fieldCandidates.length;
+      keywordFieldCandidatesCount = keywordFieldCandidates.length;
       loadingStepSizePValues =
         LOADED_FIELD_CANDIDATES +
         PROGRESS_STEP_P_VALUES -
         (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
     } else {
-      remainingFieldCandidates = fieldCandidates;
+      remainingFieldCandidates = keywordFieldCandidates;
     }
 
     logDebugMessage('Fetch p-values.');
 
     const loadingStep =
-      (1 / (fieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
+      (1 / (keywordFieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
 
     const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
       let queueItemLoadingStep = 0;
@@ -182,7 +182,9 @@ export const significantItemsHandlerFactory =
     pValuesQueue.push(
       [
         ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
-        ...chunk(fieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ keywordFieldCandidates: d })),
+        ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+          keywordFieldCandidates: d,
+        })),
       ],
       (err) => {
         if (err) {

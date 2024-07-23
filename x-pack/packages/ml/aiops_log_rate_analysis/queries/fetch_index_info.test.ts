@@ -45,10 +45,10 @@ describe('fetch_index_info', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const { baselineTotalDocCount, deviationTotalDocCount, fieldCandidates } =
+      const { baselineTotalDocCount, deviationTotalDocCount, keywordFieldCandidates } =
         await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
-      expect(fieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
+      expect(keywordFieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
       expect(baselineTotalDocCount).toEqual(5000000);
       expect(deviationTotalDocCount).toEqual(5000000);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
@@ -74,11 +74,11 @@ describe('fetch_index_info', () => {
       const {
         baselineTotalDocCount,
         deviationTotalDocCount,
-        fieldCandidates,
+        keywordFieldCandidates,
         textFieldCandidates,
       } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
-      expect(fieldCandidates).toEqual([
+      expect(keywordFieldCandidates).toEqual([
         '_metadata.elastic_apm_trace_id',
         '_metadata.elastic_apm_transaction_id',
         '_metadata.message_template',
@@ -256,11 +256,11 @@ describe('fetch_index_info', () => {
       const {
         baselineTotalDocCount,
         deviationTotalDocCount,
-        fieldCandidates,
+        keywordFieldCandidates,
         textFieldCandidates,
       } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
-      expect(fieldCandidates).toEqual([
+      expect(keywordFieldCandidates).toEqual([
         'category.keyword',
         'currency',
         'customer_first_name.keyword',
@@ -313,11 +313,11 @@ describe('fetch_index_info', () => {
       const {
         baselineTotalDocCount,
         deviationTotalDocCount,
-        fieldCandidates,
+        keywordFieldCandidates,
         textFieldCandidates,
       } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
-      expect(fieldCandidates).toEqual(['items']);
+      expect(keywordFieldCandidates).toEqual(['items']);
       expect(textFieldCandidates).toEqual([]);
       expect(baselineTotalDocCount).toEqual(5000000);
       expect(deviationTotalDocCount).toEqual(5000000);
