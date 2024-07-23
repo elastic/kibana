@@ -233,9 +233,6 @@ export const fetchLogRateAnalysisForAlert = async ({
   // RETURN DATA
 
   const significantItems: SimpleSignificantItem[] = [...significantTerms, ...significantCategories]
-    .filter(({ bg_count: bgCount, doc_count: docCount }) => {
-      return docCount > bgCount;
-    })
     .map(({ fieldName, fieldValue, type, doc_count: docCount, bg_count: bgCount }) => {
       const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
         logRateAnalysisType,
