@@ -172,19 +172,23 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
+    const organizationId = this.config.organization_id;
     const projectId = this.config.serverless?.project_id;
     const projectType = this.config.serverless?.project_type;
+    const orchestratorTarget = this.config.serverless?.orchestrator_target;
     const isServerlessEnabled = !!projectId;
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
       isCloudEnabled,
+      organizationId,
       trialEndDate: this.config.trial_end_date,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       deploymentId,
       projectId,
       projectType,
+      orchestratorTarget,
     });
 
     let decodedId: DecodedCloudId | undefined;
@@ -195,7 +199,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     return {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
-      organizationId: this.config.organization_id,
+      organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
       elasticsearchUrl: decodedId?.elasticsearchUrl,
@@ -217,7 +221,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         projectId,
         projectName: this.config.serverless?.project_name,
         projectType,
-        orchestratorTarget: this.config.serverless?.orchestrator_target,
+        orchestratorTarget,
       },
     };
   }
