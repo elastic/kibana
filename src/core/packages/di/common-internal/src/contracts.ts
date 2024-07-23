@@ -12,22 +12,12 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 
 /** @internal */
 export interface InternalCoreDiServiceSetup {
-  /**
-   * Loads a scoped module that will be loaded for each plugin.
-   */
-  load(id: PluginOpaqueId, module: interfaces.ContainerModule): void;
+  getContainer(id?: PluginOpaqueId, container?: interfaces.Container): interfaces.Container;
 }
 
 /** @internal */
-export interface InternalCoreDiServiceStart {
-  root: interfaces.Container;
-
+export interface InternalCoreDiServiceStart extends InternalCoreDiServiceSetup {
   dispose(container?: interfaces.Container): void;
 
   fork(id?: PluginOpaqueId, container?: interfaces.Container): interfaces.Container;
-
-  getContainer(
-    id?: PluginOpaqueId,
-    container?: interfaces.Container
-  ): interfaces.Container | undefined;
 }

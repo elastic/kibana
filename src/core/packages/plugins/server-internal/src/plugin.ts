@@ -137,10 +137,11 @@ export class PluginWrapper<
     }
 
     if (this.definition.module) {
-      const { injection } = setupContext as CoreSetup;
-      injection.load(this.definition.module);
-      injection.load(createPluginInitializerModule(this.initializerContext));
-      injection.load(createPluginSetupModule(setupContext as CoreSetup));
+      const container = (setupContext as CoreSetup).injection.getContainer();
+
+      container.load(this.definition.module);
+      container.load(createPluginInitializerModule(this.initializerContext));
+      container.load(createPluginSetupModule(setupContext as CoreSetup));
     }
 
     return this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins);
