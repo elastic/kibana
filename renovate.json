@@ -63,7 +63,7 @@
       "matchDepNames": ["@openfeature/core", "@openfeature/server-sdk", "@openfeature/web-sdk"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:skip"],
+      "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
