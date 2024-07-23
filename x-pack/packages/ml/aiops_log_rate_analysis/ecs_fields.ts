@@ -50,8 +50,6 @@ const ecsFields = [
   'network.protocol',
   'file.path',
   'observer.name',
-  'agent.hostname',
-  // 'agent.id',
   'agent.name',
   'agent.type',
   'agent.version',
