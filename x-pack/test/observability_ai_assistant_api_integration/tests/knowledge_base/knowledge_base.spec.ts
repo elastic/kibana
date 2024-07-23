@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import getPort from 'get-port';
-import http, { Server } from 'http';
+import http from 'http';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
 
@@ -33,8 +32,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       response: http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage }
     ) => {};
 
-    let server: Server;
-
     before(async () => {
       const config = {
         ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
@@ -44,17 +41,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
       await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
       await ml.api.assureMlStatsIndexExists();
-      const port = await getPort({ port: getPort.makeRange(9000, 9100) });
-
-      server = http
-        .createServer((request, response) => {
-          requestHandler(request, response);
-        })
-        .listen(port);
     });
 
     after(async () => {
-      server.close();
       await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
       await ml.api.deleteTrainedModelES(TINY_ELSER.id);
       await ml.api.cleanMlIndices();
