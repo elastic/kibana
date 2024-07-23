@@ -55,7 +55,7 @@ describe('SyntheticsPrivateLocation', () => {
   } as unknown as HeartbeatConfig;
 
   const serverMock: SyntheticsServerSetup = {
-    uptimeEsClient: { search: jest.fn() },
+    syntheticsEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
     config: {
       service: {

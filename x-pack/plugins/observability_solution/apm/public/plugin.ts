@@ -19,6 +19,7 @@ import {
   PluginInitializerContext,
   SecurityServiceStart,
 } from '@kbn/core/public';
+import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
@@ -81,6 +82,7 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
+import { registerServiceInventoryViewTypeContext } from './analytics/register_service_inventory_view_type_context';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
@@ -105,6 +107,7 @@ export interface ApmPluginSetupDeps {
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
+  entityManager: EntityManagerPublicPluginSetup;
 }
 
 export interface ApmServices {
@@ -140,7 +143,12 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
+  entityManager: EntityManagerPublicPluginSetup;
 }
+
+const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
+  defaultMessage: 'Applications',
+});
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
@@ -202,7 +210,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
             return [
               // APM navigation
               {
-                label: 'APM',
+                label: applicationsTitle,
                 sortKey: 400,
                 entries: [
                   {
@@ -266,6 +274,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     };
 
     this.telemetry.setup({ analytics: core.analytics });
+    registerServiceInventoryViewTypeContext(core.analytics);
 
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(

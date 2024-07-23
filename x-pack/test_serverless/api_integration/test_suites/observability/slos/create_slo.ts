@@ -10,8 +10,8 @@ import expect from '@kbn/expect';
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 import { ALL_VALUE } from '@kbn/slo-schema';
-
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '@kbn/slo-plugin/common/constants';
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ esClient, logger });
       await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
       await transform.api.cleanTransformIndices();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('non partition by SLO', () => {
@@ -169,15 +169,20 @@ export default function ({ getService }: FtrProviderContext) {
         assertTransformsResponseBody(body, expectedTransforms);
       });
 
-      it('creates ingest pipeline', async () => {
+      it('creates ingest pipelines', async () => {
         const sloRevision = 1;
-        const pipelineResponse = await esClient.ingest.getPipeline({
+        const rollupPipelineResponse = await esClient.ingest.getPipeline({
+          id: getSLOPipelineId(sloId, sloRevision),
+        });
+        const expectedRollupPipeline = `.slo-observability.sli.pipeline-${sloId}-${sloRevision}`;
+        expect(rollupPipelineResponse[expectedRollupPipeline]).not.to.be(undefined);
+
+        const summaryPipelineResponse = await esClient.ingest.getPipeline({
           id: getSLOSummaryPipelineId(sloId, sloRevision),
         });
-        const expectedPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
-
-        expect(pipelineResponse[expectedPipeline]).not.to.be(undefined);
-        expect(pipelineResponse[expectedPipeline].description).to.be(
+        const expectedSummaryPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+        expect(summaryPipelineResponse[expectedSummaryPipeline]).not.to.be(undefined);
+        expect(summaryPipelineResponse[expectedSummaryPipeline].description).to.be(
           `Ingest pipeline for SLO summary data [id: ${sloId}, revision: ${sloRevision}]`
         );
       });
