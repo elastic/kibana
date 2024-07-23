@@ -8522,19 +8522,36 @@ describe('validation logic', () => {
           'Argument of [to_unsigned_long] must be [boolean], found value [to_cartesianpoint("POINT (30 10)")] type [cartesian_point]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(booleanField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(booleanField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(booleanField)] type [unsigned_long]',
+        ]);
 
         testErrorsAndWarnings('from a_index | where to_unsigned_long(cartesianPointField) > 0', [
           'Argument of [to_unsigned_long] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
+          'Argument of [>] must be [double], found value [to_unsigned_long(cartesianPointField)] type [unsigned_long]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(datetimeField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(doubleField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(integerField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(keywordField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(longField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(textField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(unsignedLongField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(datetimeField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(datetimeField)] type [unsigned_long]',
+        ]);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(doubleField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(doubleField)] type [unsigned_long]',
+        ]);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(integerField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(integerField)] type [unsigned_long]',
+        ]);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(keywordField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(keywordField)] type [unsigned_long]',
+        ]);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(longField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(longField)] type [unsigned_long]',
+        ]);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(textField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(textField)] type [unsigned_long]',
+        ]);
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(unsignedLongField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(unsignedLongField)] type [unsigned_long]',
+        ]);
         testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_unsigned_long(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_ul(booleanField)', []);
@@ -11784,7 +11801,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
-        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
+          'Argument of [max] must be [double], found value [concat("20", "22")] type [keyword]',
+        ]);
       });
 
       describe('min', () => {
@@ -12131,7 +12150,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
-        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
+          'Argument of [min] must be [double], found value [concat("20", "22")] type [keyword]',
+        ]);
       });
 
       describe('count', () => {
@@ -12419,12 +12440,16 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | stats top(null, null, null)', []);
-        testErrorsAndWarnings('row nullVar = null | stats top(nullVar, nullVar, nullVar)', []);
-        testErrorsAndWarnings('from a_index | stats var = top(textField, integerField, "asc")', []);
+        testErrorsAndWarnings('row nullVar = null | stats top(nullVar, nullVar, nullVar)', [
+          'Argument of [top] must be a constant, received [nullVar]',
+          'Argument of [top] must be a constant, received [nullVar]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = top(textField, integerField, "asc")', [
+          'Argument of [=] must be a constant, received [top(textField,integerField,"asc")]',
+        ]);
 
         testErrorsAndWarnings('from a_index | stats top(textField, integerField, "asc")', [
           'Argument of [top] must be a constant, received [integerField]',
-          'Argument of [top] must be a constant, received [keywordField]',
         ]);
 
         testErrorsAndWarnings('from a_index | sort top(textField, integerField, "asc")', [
@@ -13510,47 +13535,79 @@ describe('validation logic', () => {
             'Argument of [bucket] must be a constant, received [nullVar]',
           ]
         );
+
         testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
-        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', []);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', [
+          'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket("2022", integerField, textField, textField)',
-          []
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [textField]',
+            'Argument of [bucket] must be a constant, received [textField]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, textField, textField)',
-          []
+          [
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [textField]',
+            'Argument of [bucket] must be a constant, received [textField]',
+          ]
         );
 
-        testErrorsAndWarnings(
-          'from a_index | stats bucket("2022", integerField, "2022", "2022")',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats bucket("2022", integerField, "2022", "2022")', [
+          'Argument of [bucket] must be a constant, received [integerField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), concat("20", "22"))',
-          []
+          [
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats bucket("2022", integerField, textField, "2022")',
-          []
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [textField]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, textField, concat("20", "22"))',
-          []
+          [
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [textField]',
+            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats bucket("2022", integerField, "2022", textField)',
-          []
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [textField]',
+          ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), textField)',
-          []
+          [
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be a constant, received [textField]',
+          ]
         );
       });
 

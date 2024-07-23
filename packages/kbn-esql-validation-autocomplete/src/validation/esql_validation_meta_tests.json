@@ -26356,49 +26356,66 @@
     },
     {
       "query": "from a_index | where to_unsigned_long(booleanField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(booleanField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(cartesianPointField) > 0",
       "error": [
-        "Argument of [to_unsigned_long] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
+        "Argument of [to_unsigned_long] must be [boolean], found value [cartesianPointField] type [cartesian_point]",
+        "Argument of [>] must be [double], found value [to_unsigned_long(cartesianPointField)] type [unsigned_long]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(datetimeField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(datetimeField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(doubleField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(doubleField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(integerField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(integerField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(keywordField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(keywordField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(longField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(longField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(textField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(textField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where to_unsigned_long(unsignedLongField) > 0",
-      "error": [],
+      "error": [
+        "Argument of [>] must be [double], found value [to_unsigned_long(unsignedLongField)] type [unsigned_long]"
+      ],
       "warning": []
     },
     {
@@ -31586,7 +31603,9 @@
     },
     {
       "query": "from a_index | stats max(concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [max] must be [double], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -32220,7 +32239,9 @@
     },
     {
       "query": "from a_index | stats min(concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [min] must be [double], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -32690,19 +32711,23 @@
     },
     {
       "query": "row nullVar = null | stats top(nullVar, nullVar, nullVar)",
-      "error": [],
+      "error": [
+        "Argument of [top] must be a constant, received [nullVar]",
+        "Argument of [top] must be a constant, received [nullVar]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = top(textField, integerField, \"asc\")",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [top(textField,integerField,\"asc\")]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats top(textField, integerField, \"asc\")",
       "error": [
-        "Argument of [top] must be a constant, received [integerField]",
-        "Argument of [top] must be a constant, received [keywordField]"
+        "Argument of [top] must be a constant, received [integerField]"
       ],
       "warning": []
     },
@@ -34051,47 +34076,81 @@
     },
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 1 year)",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(\"2022\", integerField, textField, textField)",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be a constant, received [integerField]",
+        "Argument of [bucket] must be a constant, received [textField]",
+        "Argument of [bucket] must be a constant, received [textField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, textField)",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be a constant, received [integerField]",
+        "Argument of [bucket] must be a constant, received [textField]",
+        "Argument of [bucket] must be a constant, received [textField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(\"2022\", integerField, \"2022\", \"2022\")",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be a constant, received [integerField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be a constant, received [integerField]",
+        "Argument of [bucket] must be [text], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [text], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(\"2022\", integerField, textField, \"2022\")",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be a constant, received [integerField]",
+        "Argument of [bucket] must be a constant, received [textField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be a constant, received [integerField]",
+        "Argument of [bucket] must be a constant, received [textField]",
+        "Argument of [bucket] must be [text], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(\"2022\", integerField, \"2022\", textField)",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be a constant, received [integerField]",
+        "Argument of [bucket] must be a constant, received [textField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), textField)",
-      "error": [],
+      "error": [
+        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be a constant, received [integerField]",
+        "Argument of [bucket] must be [text], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be a constant, received [textField]"
+      ],
       "warning": []
     },
     {
