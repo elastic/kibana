@@ -49,3 +49,11 @@ export interface ComponentTemplateListItem {
 export interface ComponentTemplateDatastreams {
   data_streams: string[];
 }
+
+export interface ComponentTemplateMeta {
+  managed: boolean;
+  managed_by: string;
+  package: {
+    name: string;
+  };
+}
