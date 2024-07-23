@@ -21,6 +21,7 @@ import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
 import { executeEditAction } from './edit_action_helpers';
 import { Embeddable } from '../../embeddable';
+import type { EditorFrameService } from '../../editor_frame_service';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -31,20 +32,41 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export function isCreateActionCompatible(core: CoreStart) {
-  return core.uiSettings.get(ENABLE_ESQL);
+export async function isCreateActionCompatible(
+  core: CoreStart,
+  editorFrameService: EditorFrameService
+) {
+  let isCompatible: boolean = core.uiSettings.get(ENABLE_ESQL);
+
+  if (isCompatible && !getDatasourceMap() && !getVisualizationMap()) {
+    const [visualizationMap, datasourceMap] = await Promise.all([
+      editorFrameService.loadVisualizations(),
+      editorFrameService.loadDatasources(),
+    ]);
+
+    if (visualizationMap && datasourceMap) {
+      setDatasourceMap(datasourceMap);
+      setVisualizationMap(visualizationMap);
+    } else {
+      isCompatible = false;
+    }
+  }
+
+  return isCompatible;
 }
 
 export async function executeCreateAction({
   deps,
   core,
   api,
+  editorFrameService,
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
   api: PresentationContainer;
+  editorFrameService: EditorFrameService;
 }) {
-  const isCompatibleAction = isCreateActionCompatible(core);
+  const isCompatibleAction = await isCreateActionCompatible(core, editorFrameService);
 
   const getFallbackDataView = async () => {
     const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
