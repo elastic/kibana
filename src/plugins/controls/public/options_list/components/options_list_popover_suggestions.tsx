@@ -64,9 +64,12 @@ export const OptionsListPopoverSuggestions = ({
   );
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
-  const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
+  const selectedOptionsSet = useMemo(
+    () => new Set<string>(selectedOptions?.map((value) => String(value))),
+    [selectedOptions]
+  );
   const invalidSelectionsSet = useMemo(
-    () => new Set<string>(invalidSelections),
+    () => new Set<string>(invalidSelections?.map((value) => String(value))),
     [invalidSelections]
   );
   const suggestions = useMemo(() => {
@@ -95,12 +98,12 @@ export const OptionsListPopoverSuggestions = ({
       }
 
       return {
-        key: suggestion.value,
-        label: fieldFormatter(suggestion.value) ?? suggestion.value,
-        checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
+        key: String(suggestion.value),
+        label: String(fieldFormatter(suggestion.value) ?? suggestion.value),
+        checked: selectedOptionsSet?.has(String(suggestion.value)) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelectionsSet.has(suggestion.value)
+          showOnlySelected && invalidSelectionsSet.has(String(suggestion.value))
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
@@ -191,7 +194,7 @@ export const OptionsListPopoverSuggestions = ({
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, _, changedOption) => {
-            const key = changedOption.key ?? changedOption.label;
+            const key = changedOption.key!;
             setSelectableOptions(newSuggestions);
             // the order of these checks matters, so be careful if rearranging them
             if (key === 'exists-option') {

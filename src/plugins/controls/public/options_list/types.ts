@@ -27,9 +27,9 @@ interface SearchString {
 export interface OptionsListComponentState {
   availableOptions?: OptionsListSuggestions;
   allowExpensiveQueries: boolean;
-  invalidSelections?: string[];
+  invalidSelections?: Array<string | number>;
   searchString: SearchString;
-  validSelections?: string[];
+  validSelections?: Array<string | number>;
   totalCardinality?: number;
   popoverOpen: boolean;
   field?: FieldSpec;

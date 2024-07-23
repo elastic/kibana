@@ -18,7 +18,7 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
-  selectedOptions?: string[];
+  selectedOptions?: Array<string | number>;
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
@@ -30,7 +30,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   exclude?: boolean;
 }
 
-export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
+export type OptionsListSuggestions = Array<{ value: string | number; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -38,7 +38,7 @@ export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>
 export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
   totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
-  invalidSelections?: string[];
+  invalidSelections?: Array<string | number>;
 }
 
 /**
@@ -61,12 +61,9 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
  */
 export type OptionsListRequest = Omit<
   OptionsListRequestBody,
-  'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
+  'filters' | 'fieldName' | 'fieldSpec'
 > & {
-  searchTechnique?: OptionsListSearchTechnique;
-  allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
-  runPastTimeout?: boolean;
   dataView: DataView;
   filters?: Filter[];
   field: FieldSpec;
@@ -76,16 +73,16 @@ export type OptionsListRequest = Omit<
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListRequestBody {
+export interface OptionsListRequestBody
+  extends Pick<
+    OptionsListEmbeddableInput,
+    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
+  > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
-  sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: Array<string | number>;
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;
-  fieldName: string;
   size: number;
 }

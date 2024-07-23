@@ -128,7 +128,7 @@ export const OptionsListControl = ({
               ) : (
                 <>
                   {selectedOptions?.length
-                    ? selectedOptions.map((value: string, i, { length }) => {
+                    ? selectedOptions.map((value: string | number, i, { length }) => {
                         const text = `${fieldFormatter(value)}${
                           i + 1 === length ? '' : delimiter
                         } `;

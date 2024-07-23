@@ -34,11 +34,7 @@ export const useFieldFormatter = ({
       const formatterForField =
         dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
         ((toFormat: string) => toFormat);
-      setFieldFormatter(() =>
-        fieldSpec.type === 'date' // date fields must be passed in as a number for the formatter to work
-          ? (value: string) => formatterForField(parseInt(value, 10))
-          : formatterForField
-      );
+      setFieldFormatter(() => formatterForField);
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);
 

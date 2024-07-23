@@ -24,10 +24,17 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
   searchString: { value: '', valid: true },
 });
 
+export const getSelectionAsFieldType = (field: FieldSpec, key: string): string | number => {
+  const storeAsNumber = field.type === 'number' || field.type === 'date';
+  return storeAsNumber ? +key : key;
+};
+
 export const optionsListReducers = {
   deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.explicitInput.selectedOptions) return;
-    const itemIndex = state.explicitInput.selectedOptions.indexOf(action.payload);
+    if (!state.explicitInput.selectedOptions || !state.componentState.field) return;
+
+    const key = getSelectionAsFieldType(state.componentState.field, action.payload);
+    const itemIndex = state.explicitInput.selectedOptions.indexOf(key);
     if (itemIndex !== -1) {
       const newSelections = [...state.explicitInput.selectedOptions];
       newSelections.splice(itemIndex, 1);
@@ -77,15 +84,22 @@ export const optionsListReducers = {
     }
   },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+    if (!state.componentState.field) return;
+
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
-    state.explicitInput.selectedOptions?.push(action.payload);
+
+    const key = getSelectionAsFieldType(state.componentState.field, action.payload);
+    state.explicitInput.selectedOptions?.push(key);
   },
   replaceSelection: (
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<string>
   ) => {
-    state.explicitInput.selectedOptions = [action.payload];
+    if (!state.componentState.field) return;
+
+    const key = getSelectionAsFieldType(state.componentState.field, action.payload);
+    state.explicitInput.selectedOptions = [key];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
@@ -101,10 +115,7 @@ export const optionsListReducers = {
   },
   setValidAndInvalidSelections: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<{
-      validSelections: string[];
-      invalidSelections: string[];
-    }>
+    action: PayloadAction<Pick<OptionsListComponentState, 'validSelections' | 'invalidSelections'>>
   ) => {
     const { invalidSelections, validSelections } = action.payload;
     state.componentState.invalidSelections = invalidSelections;

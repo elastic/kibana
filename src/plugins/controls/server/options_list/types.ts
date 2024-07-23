@@ -10,17 +10,18 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   OptionsListRequestBody,
   OptionsListParsedSuggestions,
+  OptionsListSuccessResponse,
 } from '../../common/options_list/types';
 
 export interface EsBucket {
-  key: any;
+  key: string | number;
   key_as_string?: string;
   doc_count: number;
 }
 
 export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse, req: OptionsListRequestBody) => string[];
+  parse: (response: SearchResponse, req: OptionsListRequestBody) => Array<string | number>;
 }
 
 export interface OptionsListSuggestionAggregationBuilder {

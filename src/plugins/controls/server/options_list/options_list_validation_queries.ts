@@ -21,9 +21,9 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
       let selectedOptionsFilters;
       if (selectedOptions) {
         selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
-          acc[currentOption] = { match: { [fieldName]: String(currentOption) } };
+          acc[currentOption] = { match: { [fieldName]: currentOption } };
           return acc;
-        }, {} as { [key: string]: { match: { [key: string]: string } } });
+        }, {} as { [key: string]: { match: { [key: string]: string | number } } });
       }
 
       if (isEmpty(selectedOptionsFilters ?? [])) {
@@ -62,10 +62,11 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
           ? 'aggregations.nestedValidation.validation.buckets'
           : 'aggregations.validation.buckets'
       );
+      const storeAsNumber = fieldSpec?.type === 'number' || fieldSpec?.type === 'date';
       return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
-        ? Object.keys(rawInvalidSuggestions).filter(
-            (key) => rawInvalidSuggestions[key].doc_count === 0
-          )
+        ? Object.keys(rawInvalidSuggestions)
+            .filter((key) => rawInvalidSuggestions[key].doc_count === 0)
+            .map((key: string): string | number => (storeAsNumber ? +key : key))
         : [];
     },
   });
