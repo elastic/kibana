@@ -1172,7 +1172,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     lineContent.length + 1
                   );
 
-                  const addition = `to_datetime("${date.toISOString()}")${contentAfterCursor}`;
+                  const addition = `"${date.toISOString()}"${contentAfterCursor}`;
                   editor1.current?.executeEdits('time', [
                     {
                       range: {

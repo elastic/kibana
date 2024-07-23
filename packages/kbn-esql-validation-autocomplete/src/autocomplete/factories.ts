@@ -409,12 +409,7 @@ export function getDateLiterals() {
           defaultMessage: 'Choose from the time picker',
         }
       ),
-      text: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePickerLabel',
-        {
-          defaultMessage: 'Choose from the time picker',
-        }
-      ),
+      text: '',
       kind: 'Issue',
       detail: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
