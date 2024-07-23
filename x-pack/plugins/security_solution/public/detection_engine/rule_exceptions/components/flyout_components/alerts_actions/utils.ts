@@ -58,3 +58,17 @@ export const entryHasNonEcsType = (
   }
   return false;
 };
+
+export const shouldDisableBulkClose = ({
+  items,
+  signalIndexPatterns,
+}: {
+  items: ExceptionsBuilderReturnExceptionItem[];
+  signalIndexPatterns: DataViewBase;
+}): boolean => {
+  return (
+    entryHasListType(items) ||
+    entryHasNonEcsType(items, signalIndexPatterns) ||
+    items.every((item) => item.entries.length === 0)
+  );
+};

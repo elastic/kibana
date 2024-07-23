@@ -177,6 +177,31 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
     expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeFalsy();
   });
 
+  it('it displays bulk close checkbox disabled if no exception items exist', () => {
+    const wrapper = mountWithIntl(
+      <TestProviders>
+        <ExceptionItemsFlyoutAlertsActions
+          exceptionListItems={[]}
+          exceptionListType={ExceptionListTypeEnum.DETECTION}
+          shouldCloseSingleAlert={false}
+          shouldBulkCloseAlert={false}
+          disableBulkClose={false}
+          alertData={alertDataMock}
+          alertStatus="open"
+          onDisableBulkClose={jest.fn()}
+          onUpdateBulkCloseIndex={jest.fn()}
+          onBulkCloseCheckboxChange={jest.fn()}
+          onSingleAlertCloseCheckboxChange={jest.fn()}
+          isAlertDataLoading={false}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').at(0).props().disabled
+    ).toBeTruthy();
+  });
+
   it('it displays endpoint quarantine text if exception list type is "endpoint"', () => {
     const wrapper = mountWithIntl(
       <TestProviders>

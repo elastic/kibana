@@ -7,24 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CANCEL = i18n.translate('xpack.securitySolution.ruleExceptions.editException.cancel', {
-  defaultMessage: 'Cancel',
-});
-
-export const EDIT_EXCEPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.ruleExceptions.editException.editExceptionTitle',
-  {
-    defaultMessage: 'Edit rule exception',
-  }
-);
-
-export const EDIT_ENDPOINT_EXCEPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.ruleExceptions.editException.editEndpointExceptionTitle',
-  {
-    defaultMessage: 'Edit endpoint exception',
-  }
-);
-
 export const EDIT_RULE_EXCEPTION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.ruleExceptions.editException.editRuleExceptionToastSuccessTitle',
   {
