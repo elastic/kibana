@@ -294,6 +294,16 @@ export interface UnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
+   * @deprecated use `additionalRowLeadingControls` instead
+   * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
+   */
+  externalControlColumns?: EuiDataGridControlColumn[];
+  /**
+   * @deprecated Use only `additionalRowLeadingControls` instead
+   * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
+   */
+  trailingControlColumns?: EuiDataGridControlColumn[];
+  /**
    * Optional value to extend the list of default row actions
    */
   additionalRowLeadingControls?: RowControlColumn[];
@@ -434,6 +444,8 @@ export const UnifiedDataTable = ({
   services,
   renderCustomGridBody,
   renderCustomToolbar,
+  externalControlColumns, // TODO: deprecate in favor of additionalRowLeadingControls
+  trailingControlColumns, // TODO: deprecate in favor of additionalRowLeadingControls
   totalHits,
   onFetchMoreRecords,
   renderDocumentView,
@@ -847,16 +859,13 @@ export const UnifiedDataTable = ({
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-  // for swapping the default controls https://github.com/elastic/kibana/pull/165866/commits/604d7223261c084539919a7174b8d07fbdecf937
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
-    // const leadingColumns = externalControlColumns
-    //   ? [...internalControlColumns, ...externalControlColumns]
-    //   : internalControlColumns;
-
-    const leadingColumns: EuiDataGridControlColumn[] = internalControlColumns;
+    const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
+      ? [...internalControlColumns, ...externalControlColumns]
+      : internalControlColumns;
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
@@ -870,7 +879,13 @@ export const UnifiedDataTable = ({
     }
 
     return leadingColumns;
-  }, [canSetExpandedDoc, controlColumnIds, getRowIndicator, additionalRowLeadingControls]);
+  }, [
+    canSetExpandedDoc,
+    controlColumnIds,
+    externalControlColumns,
+    getRowIndicator,
+    additionalRowLeadingControls,
+  ]);
 
   // const controlColumnsConfig = customControlColumnsConfiguration?.({
   //   controlColumns: getAllControlColumns(),
@@ -1106,6 +1121,7 @@ export const UnifiedDataTable = ({
               gridStyle={gridStyleOverride ?? GRID_STYLE}
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
+              trailingControlColumns={trailingControlColumns}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
             />
