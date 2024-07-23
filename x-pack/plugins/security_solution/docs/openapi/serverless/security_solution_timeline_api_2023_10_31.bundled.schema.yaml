@@ -58,6 +58,7 @@ paths:
       parameters:
         - in: query
           name: documentIds
+          required: true
           schema:
             $ref: '#/components/schemas/DocumentIds'
         - in: query
@@ -93,6 +94,7 @@ paths:
       responses:
         '200':
           description: Indicates the requested notes were returned.
+      summary: Get all notes for a given document.
       tags:
         - 'access:securitySolution'
     patch:
@@ -103,6 +105,15 @@ paths:
             schema:
               type: object
               properties:
+                eventDataView:
+                  nullable: true
+                  type: string
+                eventIngested:
+                  nullable: true
+                  type: string
+                eventTimestamp:
+                  nullable: true
+                  type: string
                 note:
                   $ref: '#/components/schemas/BareNote'
                 noteId:
@@ -137,6 +148,12 @@ paths:
                             type: string
                           note:
                             $ref: '#/components/schemas/Note'
+                        required:
+                          - code
+                          - message
+                          - note
+                    required:
+                      - persistNote
                 required:
                   - data
           description: Indicates the note was successfully created.
@@ -161,6 +178,7 @@ paths:
                   type: string
               required:
                 - eventId
+                - timelineId
         description: The pinned event to persist or update along with additional metadata.
         required: true
       responses:
@@ -182,6 +200,8 @@ paths:
                                 type: number
                               message:
                                 type: string
+                    required:
+                      - persistPinnedEventOnTimeline
                 required:
                   - data
           description: Indicate the event was successfully pinned in the timeline.
@@ -256,6 +276,8 @@ paths:
                       getOneTimeline:
                         $ref: '#/components/schemas/TimelineResponse'
                         nullable: true
+                    required:
+                      - getOneTimeline
                 required:
                   - data
           description: Indicates that the (template) timeline was found and returned.
@@ -279,9 +301,15 @@ paths:
                 timeline:
                   $ref: '#/components/schemas/SavedTimeline'
                 timelineId:
+                  nullable: true
                   type: string
                 version:
+                  nullable: true
                   type: string
+              required:
+                - timelineId
+                - version
+                - timeline
         description: The timeline updates along with the timeline ID and version.
         required: true
       responses:
@@ -299,6 +327,8 @@ paths:
                         properties:
                           timeline:
                             $ref: '#/components/schemas/TimelineResponse'
+                    required:
+                      - persistTimeline
                 required:
                   - data
           description: >-
@@ -370,6 +400,8 @@ paths:
                         properties:
                           timeline:
                             $ref: '#/components/schemas/TimelineResponse'
+                    required:
+                      - persistTimeline
                 required:
                   - data
           description: Indicates the timeline was successfully created.
@@ -393,6 +425,7 @@ paths:
       parameters:
         - in: query
           name: timelineType
+          required: true
           schema:
             $ref: '#/components/schemas/TimelineType'
       responses:
@@ -410,6 +443,12 @@ paths:
                         properties:
                           timeline:
                             $ref: '#/components/schemas/TimelineResponse'
+                        required:
+                          - timeline
+                    required:
+                      - persistTimeline
+                required:
+                  - data
           description: Indicates that the draft timeline was successfully retrieved.
         '403':
           content:
@@ -457,6 +496,8 @@ paths:
               properties:
                 timelineType:
                   $ref: '#/components/schemas/TimelineType'
+              required:
+                - timelineType
         description: >-
           The type of timeline to create. Valid values are `default` and
           `template`.
@@ -476,6 +517,10 @@ paths:
                         properties:
                           timeline:
                             $ref: '#/components/schemas/TimelineResponse'
+                        required:
+                          - timeline
+                    required:
+                      - persistTimeline
                 required:
                   - data
           description: >-
@@ -518,6 +563,7 @@ paths:
         - description: The name of the file to export
           in: query
           name: file_name
+          required: true
           schema:
             type: string
       requestBody:
@@ -576,6 +622,11 @@ paths:
                 timelineType:
                   $ref: '#/components/schemas/TimelineType'
                   nullable: true
+              required:
+                - timelineId
+                - templateTimelineId
+                - templateTimelineVersion
+                - timelineType
         description: The required fields used to favorite a (template) timeline.
         required: true
       responses:
@@ -590,6 +641,8 @@ paths:
                     properties:
                       persistFavorite:
                         $ref: '#/components/schemas/FavoriteTimelineResponse'
+                    required:
+                      - persistFavorite
                 required:
                   - data
           description: Indicates the favorite status was successfully updated.
@@ -630,6 +683,16 @@ paths:
                               type: string
                             headers:
                               type: object
+                            isImmutable:
+                              enum:
+                                - 'true'
+                                - 'false'
+                              type: string
+                          required:
+                            - filename
+                            - headers
+                      required:
+                        - hapi
         description: The timelines to import as a readable stream.
         required: true
       responses:
@@ -711,6 +774,10 @@ paths:
                     $ref: '#/components/schemas/ImportTimelines'
                     nullable: true
                   type: array
+              required:
+                - timelinesToInstall
+                - timelinesToUpdate
+                - prepackagedTimelines
         description: The timelines to install or update.
         required: true
       responses:
@@ -767,7 +834,6 @@ paths:
                     properties:
                       getOneTimeline:
                         $ref: '#/components/schemas/TimelineResponse'
-                        nullable: true
                 required:
                   - data
           description: The (template) timeline has been found
@@ -855,6 +921,14 @@ paths:
                         type: array
                       totalCount:
                         type: number
+                    required:
+                      - timelines
+                      - totalCount
+                      - defaultTimelineCoun
+                      - templateTimelineCount
+                      - favoriteCount
+                      - elasticTemplateTimelineCount
+                      - customTemplateTimelineCount
                 required:
                   - data
           description: Indicates that the (template) timelines were found and returned.
