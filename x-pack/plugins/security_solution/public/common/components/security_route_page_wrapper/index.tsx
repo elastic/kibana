@@ -43,7 +43,18 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
   redirectOnMissing,
 }) => {
   const link = useLinkInfo(pageName);
-  const UpsellPage = useUpsellingPage(pageName);
+  const UpsellingPage = useUpsellingPage(pageName);
+
+  // The upselling page is only returned when the license/product requirements are not met,
+  // if it is defined it must be rendered before anything else.
+  if (UpsellingPage) {
+    return (
+      <>
+        <SpyRoute pageName={pageName} />
+        <UpsellingPage />
+      </>
+    );
+  }
 
   const isAuthorized = link != null && !link.unauthorized;
   if (isAuthorized) {
@@ -52,15 +63,6 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
 
   if (redirectOnMissing && link == null) {
     return <Redirect to="" />; // redirects to the home page
-  }
-
-  if (UpsellPage) {
-    return (
-      <>
-        <SpyRoute pageName={pageName} />
-        <UpsellPage />
-      </>
-    );
   }
 
   return (
