@@ -38,10 +38,12 @@ export const OverviewGridItem = ({
     <MetricItem
       data={data}
       monitor={monitor}
-      medianDuration={medianDuration}
-      maxDuration={maxDuration}
-      avgDuration={avgDuration}
-      minDuration={minDuration}
+      stats={{
+        avgDuration,
+        maxDuration,
+        medianDuration,
+        minDuration,
+      }}
       onClick={onClick}
     />
   );
