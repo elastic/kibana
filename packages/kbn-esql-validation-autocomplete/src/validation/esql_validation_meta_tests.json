@@ -11212,17 +11212,17 @@
       "warning": []
     },
     {
-      "query": "row var = coalesce(cartesianPo5, cartesianPo5)",
+      "query": "row var = coalesce(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row coalesce(cartesianPo5, cartesianPo5)",
+      "query": "row coalesce(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = coalesce(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = coalesce(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -11237,7 +11237,7 @@
       "warning": []
     },
     {
-      "query": "row var = coalesce(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = coalesce(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -11257,17 +11257,17 @@
       "warning": []
     },
     {
-      "query": "row var = coalesce(geoPo5, geoPo5)",
+      "query": "row var = coalesce(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row coalesce(geoPo5, geoPo5)",
+      "query": "row coalesce(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = coalesce(to_geopoint(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = coalesce(to_geopoint(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -11282,7 +11282,7 @@
       "warning": []
     },
     {
-      "query": "row var = coalesce(to_geoshape(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = coalesce(to_geoshape(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -15047,17 +15047,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_append(cartesianPo5, cartesianPo5)",
+      "query": "row var = mv_append(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_append(cartesianPo5, cartesianPo5)",
+      "query": "row mv_append(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_append(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = mv_append(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -15072,7 +15072,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_append(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = mv_append(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -15110,17 +15110,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_append(geoPo5, geoPo5)",
+      "query": "row var = mv_append(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_append(geoPo5, geoPo5)",
+      "query": "row mv_append(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_append(to_geopoint(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = mv_append(to_geopoint(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -15135,7 +15135,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_append(to_geoshape(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = mv_append(to_geoshape(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -15711,17 +15711,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_count(cartesianPo5)",
+      "query": "row var = mv_count(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_count(cartesianPo5)",
+      "query": "row mv_count(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_count(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = mv_count(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -15736,7 +15736,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_count(to_cartesianshape(cartesianPo5))",
+      "query": "row var = mv_count(to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -15773,17 +15773,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_count(geoPo5)",
+      "query": "row var = mv_count(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_count(geoPo5)",
+      "query": "row mv_count(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_count(to_geopoint(geoPo5))",
+      "query": "row var = mv_count(to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -15798,7 +15798,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_count(to_geoshape(geoPo5))",
+      "query": "row var = mv_count(to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -16196,17 +16196,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_dedupe(cartesianPo5)",
+      "query": "row var = mv_dedupe(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_dedupe(cartesianPo5)",
+      "query": "row mv_dedupe(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_dedupe(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = mv_dedupe(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -16221,7 +16221,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_dedupe(to_cartesianshape(cartesianPo5))",
+      "query": "row var = mv_dedupe(to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -16258,17 +16258,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_dedupe(geoPo5)",
+      "query": "row var = mv_dedupe(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_dedupe(geoPo5)",
+      "query": "row mv_dedupe(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_dedupe(to_geopoint(geoPo5))",
+      "query": "row var = mv_dedupe(to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -16283,7 +16283,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_dedupe(to_geoshape(geoPo5))",
+      "query": "row var = mv_dedupe(to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -16616,17 +16616,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_first(cartesianPo5)",
+      "query": "row var = mv_first(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_first(cartesianPo5)",
+      "query": "row mv_first(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_first(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = mv_first(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -16641,7 +16641,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_first(to_cartesianshape(cartesianPo5))",
+      "query": "row var = mv_first(to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -16678,17 +16678,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_first(geoPo5)",
+      "query": "row var = mv_first(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_first(geoPo5)",
+      "query": "row mv_first(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_first(to_geopoint(geoPo5))",
+      "query": "row var = mv_first(to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -16703,7 +16703,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_first(to_geoshape(geoPo5))",
+      "query": "row var = mv_first(to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -17051,17 +17051,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_last(cartesianPo5)",
+      "query": "row var = mv_last(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_last(cartesianPo5)",
+      "query": "row mv_last(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_last(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = mv_last(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -17076,7 +17076,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_last(to_cartesianshape(cartesianPo5))",
+      "query": "row var = mv_last(to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -17113,17 +17113,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_last(geoPo5)",
+      "query": "row var = mv_last(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_last(geoPo5)",
+      "query": "row mv_last(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_last(to_geopoint(geoPo5))",
+      "query": "row var = mv_last(to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -17138,7 +17138,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_last(to_geoshape(geoPo5))",
+      "query": "row var = mv_last(to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -18276,17 +18276,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_slice(cartesianPo5, 5, 5)",
+      "query": "row var = mv_slice(cartesianPointField, 5, 5)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_slice(cartesianPo5, 5, 5)",
+      "query": "row mv_slice(cartesianPointField, 5, 5)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_slice(to_cartesianpoint(cartesianPo5), to_integer(true), to_integer(true))",
+      "query": "row var = mv_slice(to_cartesianpoint(cartesianPointField), to_integer(true), to_integer(true))",
       "error": [],
       "warning": []
     },
@@ -18301,7 +18301,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_slice(to_cartesianshape(cartesianPo5), to_integer(true), to_integer(true))",
+      "query": "row var = mv_slice(to_cartesianshape(cartesianPointField), to_integer(true), to_integer(true))",
       "error": [],
       "warning": []
     },
@@ -18336,17 +18336,17 @@
       "warning": []
     },
     {
-      "query": "row var = mv_slice(geoPo5, 5, 5)",
+      "query": "row var = mv_slice(geoPointField, 5, 5)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_slice(geoPo5, 5, 5)",
+      "query": "row mv_slice(geoPointField, 5, 5)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = mv_slice(to_geopoint(geoPo5), to_integer(true), to_integer(true))",
+      "query": "row var = mv_slice(to_geopoint(geoPointField), to_integer(true), to_integer(true))",
       "error": [],
       "warning": []
     },
@@ -18361,7 +18361,7 @@
       "warning": []
     },
     {
-      "query": "row var = mv_slice(to_geoshape(geoPo5), to_integer(true), to_integer(true))",
+      "query": "row var = mv_slice(to_geoshape(geoPointField), to_integer(true), to_integer(true))",
       "error": [],
       "warning": []
     },
@@ -21097,47 +21097,47 @@
       "warning": []
     },
     {
-      "query": "row var = st_contains(cartesianPo5, cartesianPo5)",
+      "query": "row var = st_contains(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_contains(cartesianPo5, cartesianPo5)",
+      "query": "row st_contains(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_contains(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row var = st_contains(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_contains(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row st_contains(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_contains(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_contains(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row st_contains(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_contains(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -21152,52 +21152,52 @@
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_contains(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(geoPo5, geoPo5)",
+      "query": "row var = st_contains(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_contains(geoPo5, geoPo5)",
+      "query": "row st_contains(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_geopoint(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_contains(to_geopoint(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row var = st_contains(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_contains(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row st_contains(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_geopoint(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_contains(to_geopoint(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_contains(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row st_contains(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_geoshape(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_contains(to_geoshape(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -21212,7 +21212,7 @@
       "warning": []
     },
     {
-      "query": "row var = st_contains(to_geoshape(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_contains(to_geoshape(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -21375,47 +21375,47 @@
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(cartesianPo5, cartesianPo5)",
+      "query": "row var = st_disjoint(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_disjoint(cartesianPo5, cartesianPo5)",
+      "query": "row st_disjoint(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_disjoint(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row var = st_disjoint(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_disjoint(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row st_disjoint(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_disjoint(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_disjoint(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row st_disjoint(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_disjoint(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -21430,52 +21430,52 @@
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_disjoint(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(geoPo5, geoPo5)",
+      "query": "row var = st_disjoint(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_disjoint(geoPo5, geoPo5)",
+      "query": "row st_disjoint(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_geopoint(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_disjoint(to_geopoint(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row var = st_disjoint(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_disjoint(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row st_disjoint(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_geopoint(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_disjoint(to_geopoint(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_disjoint(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row st_disjoint(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_geoshape(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_disjoint(to_geoshape(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -21490,7 +21490,7 @@
       "warning": []
     },
     {
-      "query": "row var = st_disjoint(to_geoshape(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_disjoint(to_geoshape(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -21653,32 +21653,32 @@
       "warning": []
     },
     {
-      "query": "row var = st_distance(cartesianPo5, cartesianPo5)",
+      "query": "row var = st_distance(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_distance(cartesianPo5, cartesianPo5)",
+      "query": "row st_distance(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_distance(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_distance(geoPo5, geoPo5)",
+      "query": "row var = st_distance(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_distance(geoPo5, geoPo5)",
+      "query": "row st_distance(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_distance(to_geopoint(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -21751,47 +21751,47 @@
       "warning": []
     },
     {
-      "query": "row var = st_intersects(cartesianPo5, cartesianPo5)",
+      "query": "row var = st_intersects(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_intersects(cartesianPo5, cartesianPo5)",
+      "query": "row st_intersects(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_intersects(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row var = st_intersects(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_intersects(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row st_intersects(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_intersects(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_intersects(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row st_intersects(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_intersects(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -21806,52 +21806,52 @@
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_intersects(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(geoPo5, geoPo5)",
+      "query": "row var = st_intersects(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_intersects(geoPo5, geoPo5)",
+      "query": "row st_intersects(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_geopoint(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_intersects(to_geopoint(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row var = st_intersects(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_intersects(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row st_intersects(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_geopoint(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_intersects(to_geopoint(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_intersects(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row st_intersects(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_geoshape(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_intersects(to_geoshape(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -21866,7 +21866,7 @@
       "warning": []
     },
     {
-      "query": "row var = st_intersects(to_geoshape(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_intersects(to_geoshape(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -22029,47 +22029,47 @@
       "warning": []
     },
     {
-      "query": "row var = st_within(cartesianPo5, cartesianPo5)",
+      "query": "row var = st_within(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_within(cartesianPo5, cartesianPo5)",
+      "query": "row st_within(cartesianPointField, cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_within(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row var = st_within(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_within(cartesianPo5, to_cartesianshape(\"POINT (30 10)\"))",
+      "query": "row st_within(cartesianPointField, to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_within(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row var = st_within(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_within(to_cartesianshape(\"POINT (30 10)\"), cartesianPo5)",
+      "query": "row st_within(to_cartesianshape(\"POINT (30 10)\"), cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_within(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -22084,52 +22084,52 @@
       "warning": []
     },
     {
-      "query": "row var = st_within(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))",
+      "query": "row var = st_within(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(geoPo5, geoPo5)",
+      "query": "row var = st_within(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_within(geoPo5, geoPo5)",
+      "query": "row st_within(geoPointField, geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_geopoint(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_within(to_geopoint(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row var = st_within(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_within(geoPo5, to_geoshape(\"POINT (30 10)\"))",
+      "query": "row st_within(geoPointField, to_geoshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_geopoint(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_within(to_geopoint(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row var = st_within(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_within(to_geoshape(\"POINT (30 10)\"), geoPo5)",
+      "query": "row st_within(to_geoshape(\"POINT (30 10)\"), geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_within(to_geoshape(geoPo5), to_geopoint(geoPo5))",
+      "query": "row var = st_within(to_geoshape(geoPointField), to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -22144,7 +22144,7 @@
       "warning": []
     },
     {
-      "query": "row var = st_within(to_geoshape(geoPo5), to_geoshape(geoPo5))",
+      "query": "row var = st_within(to_geoshape(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -22307,32 +22307,32 @@
       "warning": []
     },
     {
-      "query": "row var = st_x(cartesianPo5)",
+      "query": "row var = st_x(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_x(cartesianPo5)",
+      "query": "row st_x(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_x(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_x(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_x(geoPo5)",
+      "query": "row var = st_x(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_x(geoPo5)",
+      "query": "row st_x(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_x(to_geopoint(geoPo5))",
+      "query": "row var = st_x(to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -22410,32 +22410,32 @@
       "warning": []
     },
     {
-      "query": "row var = st_y(cartesianPo5)",
+      "query": "row var = st_y(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_y(cartesianPo5)",
+      "query": "row st_y(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_y(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = st_y(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_y(geoPo5)",
+      "query": "row var = st_y(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row st_y(geoPo5)",
+      "query": "row st_y(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = st_y(to_geopoint(geoPo5))",
+      "query": "row var = st_y(to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -23344,17 +23344,17 @@
       "warning": []
     },
     {
-      "query": "row var = to_cartesianpoint(cartesianPo5)",
+      "query": "row var = to_cartesianpoint(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row to_cartesianpoint(cartesianPo5)",
+      "query": "row to_cartesianpoint(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_cartesianpoint(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = to_cartesianpoint(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -23457,17 +23457,17 @@
       "warning": []
     },
     {
-      "query": "row var = to_cartesianshape(cartesianPo5)",
+      "query": "row var = to_cartesianshape(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row to_cartesianshape(cartesianPo5)",
+      "query": "row to_cartesianshape(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_cartesianshape(to_cartesianpoint(cartesianPo5))",
+      "query": "row var = to_cartesianshape(to_cartesianpoint(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -23482,7 +23482,7 @@
       "warning": []
     },
     {
-      "query": "row var = to_cartesianshape(to_cartesianshape(cartesianPo5))",
+      "query": "row var = to_cartesianshape(to_cartesianshape(cartesianPointField))",
       "error": [],
       "warning": []
     },
@@ -24413,17 +24413,17 @@
       "warning": []
     },
     {
-      "query": "row var = to_geopoint(geoPo5)",
+      "query": "row var = to_geopoint(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row to_geopoint(geoPo5)",
+      "query": "row to_geopoint(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_geopoint(to_geopoint(geoPo5))",
+      "query": "row var = to_geopoint(to_geopoint(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -24526,18 +24526,24 @@
       "warning": []
     },
     {
-      "query": "row var = to_geoshape(geoPo5)",
-      "error": [],
+      "query": "row var = to_geoshape(geoPointField)",
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
-      "query": "row to_geoshape(geoPo5)",
-      "error": [],
+      "query": "row to_geoshape(geoPointField)",
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
-      "query": "row var = to_geoshape(to_geopoint(geoPo5))",
-      "error": [],
+      "query": "row var = to_geoshape(to_geopoint(geoPointField))",
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -24551,8 +24557,10 @@
       "warning": []
     },
     {
-      "query": "row var = to_geoshape(to_geoshape(geoPo5))",
-      "error": [],
+      "query": "row var = to_geoshape(to_geoshape(geoPointField))",
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -25686,539 +25694,6 @@
     },
     {
       "query": "row nullVar = null | eval to_radians(nullVar)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(cartesianPo5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(cartesianPo5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(cartesianPo5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_cartesianpoint(cartesianPo5))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_cartesianshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(to_cartesianshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(to_cartesianshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_cartesianshape(cartesianPo5))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_datetime(\"2021-01-01T00:00:00Z\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(to_datetime(\"2021-01-01T00:00:00Z\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(to_datetime(\"2021-01-01T00:00:00Z\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_datetime(to_datetime(\"2021-01-01T00:00:00Z\")))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(5.5)",
-      "error": [
-        "Argument of [to_string] must be [boolean], found value [5.5] type [counter_double]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row to_string(5.5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(5.5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_double(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(geoPo5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(geoPo5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(geoPo5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_geopoint(geoPo5))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_geoshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(to_geoshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(to_geoshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_geoshape(geoPo5))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_integer(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_ip(\"127.0.0.1\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(to_ip(\"127.0.0.1\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(to_ip(\"127.0.0.1\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_ip(to_ip(\"127.0.0.1\")))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_string(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_version(\"1.0.0\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_string(to_version(\"1.0.0\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_str(to_version(\"1.0.0\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_string(to_version(\"a\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(counterDoubleField)",
-      "error": [
-        "Argument of [to_string] must be [boolean], found value [counterDoubleField] type [counter_double]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(*)",
-      "error": [
-        "Using wildcards (*) in to_string is not allowed"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(cartesianPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(cartesianPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(cartesianPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_cartesianpoint(cartesianPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(cartesianShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(cartesianShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(cartesianShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_cartesianshape(cartesianPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(datetimeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(datetimeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(datetimeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_datetime(datetimeField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(doubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(doubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(doubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_double(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(geoPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(geoPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(geoPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_geopoint(geoPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(geoShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(geoShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(geoShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_geoshape(geoPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(integerField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(integerField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(integerField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_integer(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(ipField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(ipField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(ipField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_ip(ipField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(keywordField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(keywordField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(keywordField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_string(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(longField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(longField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(longField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(textField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(textField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(textField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(unsignedLongField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(unsignedLongField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(unsignedLongField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(versionField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(versionField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_str(versionField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_string(to_version(keywordField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(booleanField, extraArg)",
-      "error": [
-        "Error: [to_string] function expects exactly one argument, got 2."
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort to_string(booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(null)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row nullVar = null | eval to_string(nullVar)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(\"2022\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_string(concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -35614,380 +35089,554 @@
       "warning": []
     },
     {
-      "query": "f",
+      "query": "row var = to_string(true)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row to_string(true)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_str(true)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_boolean(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(cartesianPointField)",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "Unknown column [cartesianPointField]"
       ],
       "warning": []
     },
     {
-      "query": "from ",
+      "query": "row to_string(cartesianPointField)",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "Unknown column [cartesianPointField]"
       ],
       "warning": []
     },
     {
-      "query": "from index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM \"index\"",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM \"\"\"index\"\"\"",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FrOm index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index, other_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index, other_index,.secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from ind*, other*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM *a_i*dex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM in*ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM *n*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM *n*ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i*d*x*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i*d*x",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i***x*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i****",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i**",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM index**",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM *ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM *ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM in*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM ind*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM *,-.*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM remote-*:indexes*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM remote-*:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM remote-ccs:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM a_index, remote-ccs:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from my-index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index,",
+      "query": "row var = to_str(cartesianPointField)",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "Unknown column [cartesianPointField]"
       ],
       "warning": []
     },
     {
-      "query": "FROM index\n, \tother_index\t,\n \t ",
+      "query": "row var = to_string(to_cartesianpoint(cartesianPointField))",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "Unknown column [cartesianPointField]"
       ],
       "warning": []
     },
     {
-      "query": "from assignment = 1",
-      "error": [
-        "SyntaxError: mismatched input '=' expecting <EOF>",
-        "Unknown index [assignment]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM `index`",
-      "error": [
-        "Unknown index [`index`]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from assignment = 1",
-      "error": [
-        "SyntaxError: mismatched input '=' expecting <EOF>",
-        "Unknown index [assignment]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM index, missingIndex",
-      "error": [
-        "Unknown index [missingIndex]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from average()",
-      "error": [
-        "Unknown index [average()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "fRom custom_function()",
-      "error": [
-        "Unknown index [custom_function()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM indexes*",
-      "error": [
-        "Unknown index [indexes*]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from numberField",
-      "error": [
-        "Unknown index [numberField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM policy",
-      "error": [
-        "Unknown index [policy]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
+      "query": "row var = to_string(to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index metadata _id, \t\n _index\n ",
+      "query": "row to_string(to_cartesianshape(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index (metadata _id)",
+      "query": "row var = to_str(to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_cartesianshape(cartesianPointField))",
       "error": [
-        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
+        "Unknown column [cartesianPointField]"
       ],
       "warning": []
     },
     {
-      "query": "from index [METADATA _id]",
+      "query": "row var = to_string(to_datetime(\"2021-01-01T00:00:00Z\"))",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index [METADATA _id]",
+      "query": "row to_string(to_datetime(\"2021-01-01T00:00:00Z\"))",
       "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
+      "warning": []
     },
     {
-      "query": "from index [metadata _id]",
+      "query": "row var = to_str(to_datetime(\"2021-01-01T00:00:00Z\"))",
       "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
+      "warning": []
     },
     {
-      "query": "from index [METADATA _id, _source]",
+      "query": "row var = to_string(to_datetime(to_datetime(\"2021-01-01T00:00:00Z\")))",
       "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
+      "warning": []
     },
     {
-      "query": "from remote-ccs:indexes [METADATA _id]",
+      "query": "row var = to_string(5.5)",
       "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
+      "warning": []
     },
     {
-      "query": "from *:indexes [METADATA _id]",
+      "query": "row to_string(5.5)",
       "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
+      "warning": []
     },
     {
-      "query": "from index [METADATA _id, _source2]",
+      "query": "row var = to_str(5.5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_double(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(geoPointField)",
       "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id, _source] [METADATA _id2]",
-      "error": [
-        "SyntaxError: mismatched input '[' expecting <EOF>"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from remote-ccs:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source2",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
+        "Unknown column [geoPointField]"
       ],
       "warning": []
     },
     {
-      "query": "from index metadata _id, _source METADATA _id2",
+      "query": "row to_string(geoPointField)",
       "error": [
-        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
+        "Unknown column [geoPointField]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = to_str(geoPointField)",
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_geopoint(geoPointField))",
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row to_string(to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_str(to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_geoshape(geoPointField))",
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row to_string(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_str(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_ip(\"127.0.0.1\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row to_string(to_ip(\"127.0.0.1\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_str(to_ip(\"127.0.0.1\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_ip(to_ip(\"127.0.0.1\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(\"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row to_string(\"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_str(\"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_string(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_version(\"1.0.0\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row to_string(to_version(\"1.0.0\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_str(to_version(\"1.0.0\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_string(to_version(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_boolean(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(counterDoubleField)",
+      "error": [
+        "Argument of [to_string] must be [boolean], found value [counterDoubleField] type [counter_double]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(*)",
+      "error": [
+        "Using wildcards (*) in to_string is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_cartesianpoint(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_cartesianshape(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(datetimeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(datetimeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(datetimeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_datetime(datetimeField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_double(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_geopoint(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_geoshape(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_ip(ipField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_string(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(unsignedLongField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_str(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = to_string(to_version(keywordField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(booleanField, extraArg)",
+      "error": [
+        "Error: [to_string] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort to_string(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_string(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(concat(\"20\", \"22\"))",
+      "error": [],
       "warning": []
     }
   ]

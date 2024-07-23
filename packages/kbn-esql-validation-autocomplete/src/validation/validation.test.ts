@@ -2245,11 +2245,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = coalesce(true, true)', []);
         testErrorsAndWarnings('row coalesce(true, true)', []);
         testErrorsAndWarnings('row var = coalesce(to_boolean(true), to_boolean(true))', []);
-        testErrorsAndWarnings('row var = coalesce(cartesianPo5, cartesianPo5)', []);
-        testErrorsAndWarnings('row coalesce(cartesianPo5, cartesianPo5)', []);
+        testErrorsAndWarnings('row var = coalesce(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row coalesce(cartesianPointField, cartesianPointField)', []);
 
         testErrorsAndWarnings(
-          'row var = coalesce(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = coalesce(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
@@ -2264,7 +2264,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = coalesce(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = coalesce(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
@@ -2283,9 +2283,12 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = coalesce(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row coalesce(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row var = coalesce(to_geopoint(geoPo5), to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = coalesce(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row coalesce(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings(
+          'row var = coalesce(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
 
         testErrorsAndWarnings(
           'row var = coalesce(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
@@ -2297,7 +2300,10 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = coalesce(to_geoshape(geoPo5), to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings(
+          'row var = coalesce(to_geoshape(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
         testErrorsAndWarnings('row var = coalesce(5)', []);
         testErrorsAndWarnings('row coalesce(5)', []);
         testErrorsAndWarnings('row var = coalesce(to_integer(true))', []);
@@ -3885,11 +3891,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_append(true, true)', []);
         testErrorsAndWarnings('row mv_append(true, true)', []);
         testErrorsAndWarnings('row var = mv_append(to_boolean(true), to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_append(cartesianPo5, cartesianPo5)', []);
-        testErrorsAndWarnings('row mv_append(cartesianPo5, cartesianPo5)', []);
+        testErrorsAndWarnings('row var = mv_append(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row mv_append(cartesianPointField, cartesianPointField)', []);
 
         testErrorsAndWarnings(
-          'row var = mv_append(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = mv_append(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
@@ -3904,7 +3910,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = mv_append(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = mv_append(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
@@ -3930,9 +3936,12 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row mv_append(5.5, 5.5)', []);
         testErrorsAndWarnings('row var = mv_append(to_double(true), to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_append(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row mv_append(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row var = mv_append(to_geopoint(geoPo5), to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_append(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row mv_append(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
 
         testErrorsAndWarnings(
           'row var = mv_append(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
@@ -3944,7 +3953,10 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_append(to_geoshape(geoPo5), to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geoshape(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
         testErrorsAndWarnings('row var = mv_append(5, 5)', []);
         testErrorsAndWarnings('row mv_append(5, 5)', []);
         testErrorsAndWarnings('row var = mv_append(to_integer(true), to_integer(true))', []);
@@ -4220,12 +4232,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_count(true)', []);
         testErrorsAndWarnings('row mv_count(true)', []);
         testErrorsAndWarnings('row var = mv_count(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_count(cartesianPo5)', []);
-        testErrorsAndWarnings('row mv_count(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = mv_count(to_cartesianpoint(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_count(cartesianPointField)', []);
+        testErrorsAndWarnings('row mv_count(cartesianPointField)', []);
+        testErrorsAndWarnings('row var = mv_count(to_cartesianpoint(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_count(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_count(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_count(to_cartesianshape(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_count(to_cartesianshape(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_count(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_count(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4240,12 +4252,12 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row mv_count(5.5)', []);
         testErrorsAndWarnings('row var = mv_count(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_count(geoPo5)', []);
-        testErrorsAndWarnings('row mv_count(geoPo5)', []);
-        testErrorsAndWarnings('row var = mv_count(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_count(geoPointField)', []);
+        testErrorsAndWarnings('row mv_count(geoPointField)', []);
+        testErrorsAndWarnings('row var = mv_count(to_geopoint(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_count(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_count(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_count(to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_count(to_geoshape(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_count(5)', []);
         testErrorsAndWarnings('row mv_count(5)', []);
         testErrorsAndWarnings('row var = mv_count(to_integer(true))', []);
@@ -4351,12 +4363,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_dedupe(true)', []);
         testErrorsAndWarnings('row mv_dedupe(true)', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(cartesianPo5)', []);
-        testErrorsAndWarnings('row mv_dedupe(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(cartesianPointField)', []);
+        testErrorsAndWarnings('row mv_dedupe(cartesianPointField)', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_dedupe(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianshape(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianshape(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_dedupe(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4371,12 +4383,12 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row mv_dedupe(5.5)', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(geoPo5)', []);
-        testErrorsAndWarnings('row mv_dedupe(geoPo5)', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(geoPointField)', []);
+        testErrorsAndWarnings('row mv_dedupe(geoPointField)', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_dedupe(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geoshape(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_dedupe(5)', []);
         testErrorsAndWarnings('row mv_dedupe(5)', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_integer(true))', []);
@@ -4478,12 +4490,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_first(true)', []);
         testErrorsAndWarnings('row mv_first(true)', []);
         testErrorsAndWarnings('row var = mv_first(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_first(cartesianPo5)', []);
-        testErrorsAndWarnings('row mv_first(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = mv_first(to_cartesianpoint(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_first(cartesianPointField)', []);
+        testErrorsAndWarnings('row mv_first(cartesianPointField)', []);
+        testErrorsAndWarnings('row var = mv_first(to_cartesianpoint(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_first(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_first(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_first(to_cartesianshape(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_first(to_cartesianshape(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_first(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_first(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4498,12 +4510,12 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row mv_first(5.5)', []);
         testErrorsAndWarnings('row var = mv_first(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_first(geoPo5)', []);
-        testErrorsAndWarnings('row mv_first(geoPo5)', []);
-        testErrorsAndWarnings('row var = mv_first(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_first(geoPointField)', []);
+        testErrorsAndWarnings('row mv_first(geoPointField)', []);
+        testErrorsAndWarnings('row var = mv_first(to_geopoint(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_first(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_first(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_first(to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_first(to_geoshape(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_first(5)', []);
         testErrorsAndWarnings('row mv_first(5)', []);
         testErrorsAndWarnings('row var = mv_first(to_integer(true))', []);
@@ -4599,12 +4611,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_last(true)', []);
         testErrorsAndWarnings('row mv_last(true)', []);
         testErrorsAndWarnings('row var = mv_last(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_last(cartesianPo5)', []);
-        testErrorsAndWarnings('row mv_last(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = mv_last(to_cartesianpoint(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_last(cartesianPointField)', []);
+        testErrorsAndWarnings('row mv_last(cartesianPointField)', []);
+        testErrorsAndWarnings('row var = mv_last(to_cartesianpoint(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_last(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_last(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_last(to_cartesianshape(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = mv_last(to_cartesianshape(cartesianPointField))', []);
         testErrorsAndWarnings('row var = mv_last(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_last(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4619,12 +4631,12 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row mv_last(5.5)', []);
         testErrorsAndWarnings('row var = mv_last(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_last(geoPo5)', []);
-        testErrorsAndWarnings('row mv_last(geoPo5)', []);
-        testErrorsAndWarnings('row var = mv_last(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_last(geoPointField)', []);
+        testErrorsAndWarnings('row mv_last(geoPointField)', []);
+        testErrorsAndWarnings('row var = mv_last(to_geopoint(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_last(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_last(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_last(to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings('row var = mv_last(to_geoshape(geoPointField))', []);
         testErrorsAndWarnings('row var = mv_last(5)', []);
         testErrorsAndWarnings('row mv_last(5)', []);
         testErrorsAndWarnings('row var = mv_last(to_integer(true))', []);
@@ -4949,11 +4961,11 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_slice(cartesianPo5, 5, 5)', []);
-        testErrorsAndWarnings('row mv_slice(cartesianPo5, 5, 5)', []);
+        testErrorsAndWarnings('row var = mv_slice(cartesianPointField, 5, 5)', []);
+        testErrorsAndWarnings('row mv_slice(cartesianPointField, 5, 5)', []);
 
         testErrorsAndWarnings(
-          'row var = mv_slice(to_cartesianpoint(cartesianPo5), to_integer(true), to_integer(true))',
+          'row var = mv_slice(to_cartesianpoint(cartesianPointField), to_integer(true), to_integer(true))',
           []
         );
 
@@ -4961,7 +4973,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_slice(to_cartesianshape("POINT (30 10)"), 5, 5)', []);
 
         testErrorsAndWarnings(
-          'row var = mv_slice(to_cartesianshape(cartesianPo5), to_integer(true), to_integer(true))',
+          'row var = mv_slice(to_cartesianshape(cartesianPointField), to_integer(true), to_integer(true))',
           []
         );
 
@@ -4981,11 +4993,11 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_slice(geoPo5, 5, 5)', []);
-        testErrorsAndWarnings('row mv_slice(geoPo5, 5, 5)', []);
+        testErrorsAndWarnings('row var = mv_slice(geoPointField, 5, 5)', []);
+        testErrorsAndWarnings('row mv_slice(geoPointField, 5, 5)', []);
 
         testErrorsAndWarnings(
-          'row var = mv_slice(to_geopoint(geoPo5), to_integer(true), to_integer(true))',
+          'row var = mv_slice(to_geopoint(geoPointField), to_integer(true), to_integer(true))',
           []
         );
 
@@ -4993,7 +5005,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_slice(to_geoshape("POINT (30 10)"), 5, 5)', []);
 
         testErrorsAndWarnings(
-          'row var = mv_slice(to_geoshape(geoPo5), to_integer(true), to_integer(true))',
+          'row var = mv_slice(to_geoshape(geoPointField), to_integer(true), to_integer(true))',
           []
         );
 
@@ -6248,41 +6260,44 @@ describe('validation logic', () => {
       });
 
       describe('st_contains', () => {
-        testErrorsAndWarnings('row var = st_contains(cartesianPo5, cartesianPo5)', []);
-        testErrorsAndWarnings('row st_contains(cartesianPo5, cartesianPo5)', []);
+        testErrorsAndWarnings(
+          'row var = st_contains(cartesianPointField, cartesianPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_contains(cartesianPointField, cartesianPointField)', []);
 
         testErrorsAndWarnings(
-          'row var = st_contains(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_contains(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_contains(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row var = st_contains(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_contains(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row st_contains(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_contains(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_contains(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_contains(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row var = st_contains(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_contains(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row st_contains(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_contains(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_contains(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
@@ -6297,26 +6312,32 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = st_contains(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_contains(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
-        testErrorsAndWarnings('row var = st_contains(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row st_contains(geoPo5, geoPo5)', []);
+        testErrorsAndWarnings('row var = st_contains(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row st_contains(geoPointField, geoPointField)', []);
         testErrorsAndWarnings(
-          'row var = st_contains(to_geopoint(geoPo5), to_geopoint(geoPo5))',
+          'row var = st_contains(to_geopoint(geoPointField), to_geopoint(geoPointField))',
           []
         );
-        testErrorsAndWarnings('row var = st_contains(geoPo5, to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row st_contains(geoPo5, to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings(
-          'row var = st_contains(to_geopoint(geoPo5), to_geoshape(geoPo5))',
+          'row var = st_contains(geoPointField, to_geoshape("POINT (30 10)"))',
           []
         );
-        testErrorsAndWarnings('row var = st_contains(to_geoshape("POINT (30 10)"), geoPo5)', []);
-        testErrorsAndWarnings('row st_contains(to_geoshape("POINT (30 10)"), geoPo5)', []);
+        testErrorsAndWarnings('row st_contains(geoPointField, to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings(
-          'row var = st_contains(to_geoshape(geoPo5), to_geopoint(geoPo5))',
+          'row var = st_contains(to_geopoint(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geoshape("POINT (30 10)"), geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_contains(to_geoshape("POINT (30 10)"), geoPointField)', []);
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geoshape(geoPointField), to_geopoint(geoPointField))',
           []
         );
 
@@ -6331,7 +6352,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = st_contains(to_geoshape(geoPo5), to_geoshape(geoPo5))',
+          'row var = st_contains(to_geoshape(geoPointField), to_geoshape(geoPointField))',
           []
         );
 
@@ -6464,41 +6485,44 @@ describe('validation logic', () => {
       });
 
       describe('st_disjoint', () => {
-        testErrorsAndWarnings('row var = st_disjoint(cartesianPo5, cartesianPo5)', []);
-        testErrorsAndWarnings('row st_disjoint(cartesianPo5, cartesianPo5)', []);
+        testErrorsAndWarnings(
+          'row var = st_disjoint(cartesianPointField, cartesianPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_disjoint(cartesianPointField, cartesianPointField)', []);
 
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_disjoint(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_disjoint(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row var = st_disjoint(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_disjoint(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row st_disjoint(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_disjoint(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row var = st_disjoint(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_disjoint(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row st_disjoint(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_disjoint(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
@@ -6513,26 +6537,32 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_disjoint(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
-        testErrorsAndWarnings('row var = st_disjoint(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row st_disjoint(geoPo5, geoPo5)', []);
+        testErrorsAndWarnings('row var = st_disjoint(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row st_disjoint(geoPointField, geoPointField)', []);
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_geopoint(geoPo5), to_geopoint(geoPo5))',
+          'row var = st_disjoint(to_geopoint(geoPointField), to_geopoint(geoPointField))',
           []
         );
-        testErrorsAndWarnings('row var = st_disjoint(geoPo5, to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row st_disjoint(geoPo5, to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_geopoint(geoPo5), to_geoshape(geoPo5))',
+          'row var = st_disjoint(geoPointField, to_geoshape("POINT (30 10)"))',
           []
         );
-        testErrorsAndWarnings('row var = st_disjoint(to_geoshape("POINT (30 10)"), geoPo5)', []);
-        testErrorsAndWarnings('row st_disjoint(to_geoshape("POINT (30 10)"), geoPo5)', []);
+        testErrorsAndWarnings('row st_disjoint(geoPointField, to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_geoshape(geoPo5), to_geopoint(geoPo5))',
+          'row var = st_disjoint(to_geopoint(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geoshape("POINT (30 10)"), geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_disjoint(to_geoshape("POINT (30 10)"), geoPointField)', []);
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geoshape(geoPointField), to_geopoint(geoPointField))',
           []
         );
 
@@ -6547,7 +6577,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = st_disjoint(to_geoshape(geoPo5), to_geoshape(geoPo5))',
+          'row var = st_disjoint(to_geoshape(geoPointField), to_geoshape(geoPointField))',
           []
         );
 
@@ -6680,18 +6710,21 @@ describe('validation logic', () => {
       });
 
       describe('st_distance', () => {
-        testErrorsAndWarnings('row var = st_distance(cartesianPo5, cartesianPo5)', []);
-        testErrorsAndWarnings('row st_distance(cartesianPo5, cartesianPo5)', []);
+        testErrorsAndWarnings(
+          'row var = st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_distance(cartesianPointField, cartesianPointField)', []);
 
         testErrorsAndWarnings(
-          'row var = st_distance(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
-        testErrorsAndWarnings('row var = st_distance(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row st_distance(geoPo5, geoPo5)', []);
+        testErrorsAndWarnings('row var = st_distance(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row st_distance(geoPointField, geoPointField)', []);
         testErrorsAndWarnings(
-          'row var = st_distance(to_geopoint(geoPo5), to_geopoint(geoPo5))',
+          'row var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))',
           []
         );
 
@@ -6746,41 +6779,44 @@ describe('validation logic', () => {
       });
 
       describe('st_intersects', () => {
-        testErrorsAndWarnings('row var = st_intersects(cartesianPo5, cartesianPo5)', []);
-        testErrorsAndWarnings('row st_intersects(cartesianPo5, cartesianPo5)', []);
+        testErrorsAndWarnings(
+          'row var = st_intersects(cartesianPointField, cartesianPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_intersects(cartesianPointField, cartesianPointField)', []);
 
         testErrorsAndWarnings(
-          'row var = st_intersects(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_intersects(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_intersects(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row var = st_intersects(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_intersects(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row st_intersects(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_intersects(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_intersects(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_intersects(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row var = st_intersects(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_intersects(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row st_intersects(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_intersects(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_intersects(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
@@ -6795,26 +6831,32 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = st_intersects(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_intersects(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
-        testErrorsAndWarnings('row var = st_intersects(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row st_intersects(geoPo5, geoPo5)', []);
+        testErrorsAndWarnings('row var = st_intersects(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row st_intersects(geoPointField, geoPointField)', []);
         testErrorsAndWarnings(
-          'row var = st_intersects(to_geopoint(geoPo5), to_geopoint(geoPo5))',
+          'row var = st_intersects(to_geopoint(geoPointField), to_geopoint(geoPointField))',
           []
         );
-        testErrorsAndWarnings('row var = st_intersects(geoPo5, to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row st_intersects(geoPo5, to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings(
-          'row var = st_intersects(to_geopoint(geoPo5), to_geoshape(geoPo5))',
+          'row var = st_intersects(geoPointField, to_geoshape("POINT (30 10)"))',
           []
         );
-        testErrorsAndWarnings('row var = st_intersects(to_geoshape("POINT (30 10)"), geoPo5)', []);
-        testErrorsAndWarnings('row st_intersects(to_geoshape("POINT (30 10)"), geoPo5)', []);
+        testErrorsAndWarnings('row st_intersects(geoPointField, to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings(
-          'row var = st_intersects(to_geoshape(geoPo5), to_geopoint(geoPo5))',
+          'row var = st_intersects(to_geopoint(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geoshape("POINT (30 10)"), geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_intersects(to_geoshape("POINT (30 10)"), geoPointField)', []);
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geoshape(geoPointField), to_geopoint(geoPointField))',
           []
         );
 
@@ -6829,7 +6871,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = st_intersects(to_geoshape(geoPo5), to_geoshape(geoPo5))',
+          'row var = st_intersects(to_geoshape(geoPointField), to_geoshape(geoPointField))',
           []
         );
 
@@ -6978,41 +7020,41 @@ describe('validation logic', () => {
       });
 
       describe('st_within', () => {
-        testErrorsAndWarnings('row var = st_within(cartesianPo5, cartesianPo5)', []);
-        testErrorsAndWarnings('row st_within(cartesianPo5, cartesianPo5)', []);
+        testErrorsAndWarnings('row var = st_within(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row st_within(cartesianPointField, cartesianPointField)', []);
 
         testErrorsAndWarnings(
-          'row var = st_within(to_cartesianpoint(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_within(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_within(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row var = st_within(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_within(cartesianPo5, to_cartesianshape("POINT (30 10)"))',
+          'row st_within(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_within(to_cartesianpoint(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_within(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_within(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row var = st_within(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row st_within(to_cartesianshape("POINT (30 10)"), cartesianPo5)',
+          'row st_within(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'row var = st_within(to_cartesianshape(cartesianPo5), to_cartesianpoint(cartesianPo5))',
+          'row var = st_within(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
@@ -7027,19 +7069,34 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'row var = st_within(to_cartesianshape(cartesianPo5), to_cartesianshape(cartesianPo5))',
+          'row var = st_within(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
-        testErrorsAndWarnings('row var = st_within(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row st_within(geoPo5, geoPo5)', []);
-        testErrorsAndWarnings('row var = st_within(to_geopoint(geoPo5), to_geopoint(geoPo5))', []);
-        testErrorsAndWarnings('row var = st_within(geoPo5, to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row st_within(geoPo5, to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = st_within(to_geopoint(geoPo5), to_geoshape(geoPo5))', []);
-        testErrorsAndWarnings('row var = st_within(to_geoshape("POINT (30 10)"), geoPo5)', []);
-        testErrorsAndWarnings('row st_within(to_geoshape("POINT (30 10)"), geoPo5)', []);
-        testErrorsAndWarnings('row var = st_within(to_geoshape(geoPo5), to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = st_within(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row st_within(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings(
+          'row var = st_within(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings(
+          'row var = st_within(geoPointField, to_geoshape("POINT (30 10)"))',
+          []
+        );
+        testErrorsAndWarnings('row st_within(geoPointField, to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings(
+          'row var = st_within(to_geopoint(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings(
+          'row var = st_within(to_geoshape("POINT (30 10)"), geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('row st_within(to_geoshape("POINT (30 10)"), geoPointField)', []);
+        testErrorsAndWarnings(
+          'row var = st_within(to_geoshape(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
 
         testErrorsAndWarnings(
           'row var = st_within(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
@@ -7051,7 +7108,10 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = st_within(to_geoshape(geoPo5), to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings(
+          'row var = st_within(to_geoshape(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
 
         testErrorsAndWarnings('row var = st_within(true, true)', [
           'Argument of [st_within] must be [cartesian_point], found value [true] type [boolean]',
@@ -7182,12 +7242,12 @@ describe('validation logic', () => {
       });
 
       describe('st_x', () => {
-        testErrorsAndWarnings('row var = st_x(cartesianPo5)', []);
-        testErrorsAndWarnings('row st_x(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = st_x(to_cartesianpoint(cartesianPo5))', []);
-        testErrorsAndWarnings('row var = st_x(geoPo5)', []);
-        testErrorsAndWarnings('row st_x(geoPo5)', []);
-        testErrorsAndWarnings('row var = st_x(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = st_x(cartesianPointField)', []);
+        testErrorsAndWarnings('row st_x(cartesianPointField)', []);
+        testErrorsAndWarnings('row var = st_x(to_cartesianpoint(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = st_x(geoPointField)', []);
+        testErrorsAndWarnings('row st_x(geoPointField)', []);
+        testErrorsAndWarnings('row var = st_x(to_geopoint(geoPointField))', []);
 
         testErrorsAndWarnings('row var = st_x(true)', [
           'Argument of [st_x] must be [cartesian_point], found value [true] type [boolean]',
@@ -7223,12 +7283,12 @@ describe('validation logic', () => {
       });
 
       describe('st_y', () => {
-        testErrorsAndWarnings('row var = st_y(cartesianPo5)', []);
-        testErrorsAndWarnings('row st_y(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = st_y(to_cartesianpoint(cartesianPo5))', []);
-        testErrorsAndWarnings('row var = st_y(geoPo5)', []);
-        testErrorsAndWarnings('row st_y(geoPo5)', []);
-        testErrorsAndWarnings('row var = st_y(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = st_y(cartesianPointField)', []);
+        testErrorsAndWarnings('row st_y(cartesianPointField)', []);
+        testErrorsAndWarnings('row var = st_y(to_cartesianpoint(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = st_y(geoPointField)', []);
+        testErrorsAndWarnings('row st_y(geoPointField)', []);
+        testErrorsAndWarnings('row var = st_y(to_geopoint(geoPointField))', []);
 
         testErrorsAndWarnings('row var = st_y(true)', [
           'Argument of [st_y] must be [cartesian_point], found value [true] type [boolean]',
@@ -7580,9 +7640,12 @@ describe('validation logic', () => {
       });
 
       describe('to_cartesianpoint', () => {
-        testErrorsAndWarnings('row var = to_cartesianpoint(cartesianPo5)', []);
-        testErrorsAndWarnings('row to_cartesianpoint(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = to_cartesianpoint(to_cartesianpoint(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = to_cartesianpoint(cartesianPointField)', []);
+        testErrorsAndWarnings('row to_cartesianpoint(cartesianPointField)', []);
+        testErrorsAndWarnings(
+          'row var = to_cartesianpoint(to_cartesianpoint(cartesianPointField))',
+          []
+        );
         testErrorsAndWarnings('row var = to_cartesianpoint("a")', []);
         testErrorsAndWarnings('row to_cartesianpoint("a")', []);
         testErrorsAndWarnings('row var = to_cartesianpoint(to_string(true))', []);
@@ -7630,15 +7693,21 @@ describe('validation logic', () => {
       });
 
       describe('to_cartesianshape', () => {
-        testErrorsAndWarnings('row var = to_cartesianshape(cartesianPo5)', []);
-        testErrorsAndWarnings('row to_cartesianshape(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = to_cartesianshape(to_cartesianpoint(cartesianPo5))', []);
+        testErrorsAndWarnings('row var = to_cartesianshape(cartesianPointField)', []);
+        testErrorsAndWarnings('row to_cartesianshape(cartesianPointField)', []);
+        testErrorsAndWarnings(
+          'row var = to_cartesianshape(to_cartesianpoint(cartesianPointField))',
+          []
+        );
         testErrorsAndWarnings(
           'row var = to_cartesianshape(to_cartesianshape("POINT (30 10)"))',
           []
         );
         testErrorsAndWarnings('row to_cartesianshape(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = to_cartesianshape(to_cartesianshape(cartesianPo5))', []);
+        testErrorsAndWarnings(
+          'row var = to_cartesianshape(to_cartesianshape(cartesianPointField))',
+          []
+        );
         testErrorsAndWarnings('row var = to_cartesianshape("a")', []);
         testErrorsAndWarnings('row to_cartesianshape("a")', []);
         testErrorsAndWarnings('row var = to_cartesianshape(to_string(true))', []);
@@ -7935,9 +8004,9 @@ describe('validation logic', () => {
       });
 
       describe('to_geopoint', () => {
-        testErrorsAndWarnings('row var = to_geopoint(geoPo5)', []);
-        testErrorsAndWarnings('row to_geopoint(geoPo5)', []);
-        testErrorsAndWarnings('row var = to_geopoint(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = to_geopoint(geoPointField)', []);
+        testErrorsAndWarnings('row to_geopoint(geoPointField)', []);
+        testErrorsAndWarnings('row var = to_geopoint(to_geopoint(geoPointField))', []);
         testErrorsAndWarnings('row var = to_geopoint("a")', []);
         testErrorsAndWarnings('row to_geopoint("a")', []);
         testErrorsAndWarnings('row var = to_geopoint(to_string(true))', []);
@@ -7977,12 +8046,18 @@ describe('validation logic', () => {
       });
 
       describe('to_geoshape', () => {
-        testErrorsAndWarnings('row var = to_geoshape(geoPo5)', []);
-        testErrorsAndWarnings('row to_geoshape(geoPo5)', []);
-        testErrorsAndWarnings('row var = to_geoshape(to_geopoint(geoPo5))', []);
+        testErrorsAndWarnings('row var = to_geoshape(geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row to_geoshape(geoPointField)', ['Unknown column [geoPointField]']);
+        testErrorsAndWarnings('row var = to_geoshape(to_geopoint(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = to_geoshape(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row to_geoshape(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = to_geoshape(to_geoshape(geoPo5))', []);
+        testErrorsAndWarnings('row var = to_geoshape(to_geoshape(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = to_geoshape("a")', []);
         testErrorsAndWarnings('row to_geoshape("a")', []);
         testErrorsAndWarnings('row var = to_geoshape(to_string(true))', []);
@@ -8335,152 +8410,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_radians(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval to_radians(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_radians(nullVar)', []);
-      });
-
-      describe('to_string', () => {
-        testErrorsAndWarnings('row var = to_string(true)', []);
-        testErrorsAndWarnings('row to_string(true)', []);
-        testErrorsAndWarnings('row var = to_str(true)', []);
-        testErrorsAndWarnings('row var = to_string(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = to_string(cartesianPo5)', []);
-        testErrorsAndWarnings('row to_string(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = to_str(cartesianPo5)', []);
-        testErrorsAndWarnings('row var = to_string(to_cartesianpoint(cartesianPo5))', []);
-        testErrorsAndWarnings('row var = to_string(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row to_string(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = to_str(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = to_string(to_cartesianshape(cartesianPo5))', []);
-        testErrorsAndWarnings('row var = to_string(to_datetime("2021-01-01T00:00:00Z"))', []);
-        testErrorsAndWarnings('row to_string(to_datetime("2021-01-01T00:00:00Z"))', []);
-        testErrorsAndWarnings('row var = to_str(to_datetime("2021-01-01T00:00:00Z"))', []);
-
-        testErrorsAndWarnings(
-          'row var = to_string(to_datetime(to_datetime("2021-01-01T00:00:00Z")))',
-          []
-        );
-
-        testErrorsAndWarnings('row var = to_string(5.5)', [
-          'Argument of [to_string] must be [boolean], found value [5.5] type [counter_double]',
-        ]);
-
-        testErrorsAndWarnings('row to_string(5.5)', []);
-        testErrorsAndWarnings('row var = to_str(5.5)', []);
-        testErrorsAndWarnings('row var = to_string(to_double(true))', []);
-        testErrorsAndWarnings('row var = to_string(geoPo5)', []);
-        testErrorsAndWarnings('row to_string(geoPo5)', []);
-        testErrorsAndWarnings('row var = to_str(geoPo5)', []);
-        testErrorsAndWarnings('row var = to_string(to_geopoint(geoPo5))', []);
-        testErrorsAndWarnings('row var = to_string(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row to_string(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = to_str(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = to_string(to_geoshape(geoPo5))', []);
-        testErrorsAndWarnings('row var = to_string(5)', []);
-        testErrorsAndWarnings('row to_string(5)', []);
-        testErrorsAndWarnings('row var = to_str(5)', []);
-        testErrorsAndWarnings('row var = to_string(to_integer(true))', []);
-        testErrorsAndWarnings('row var = to_string(to_ip("127.0.0.1"))', []);
-        testErrorsAndWarnings('row to_string(to_ip("127.0.0.1"))', []);
-        testErrorsAndWarnings('row var = to_str(to_ip("127.0.0.1"))', []);
-        testErrorsAndWarnings('row var = to_string(to_ip(to_ip("127.0.0.1")))', []);
-        testErrorsAndWarnings('row var = to_string("a")', []);
-        testErrorsAndWarnings('row to_string("a")', []);
-        testErrorsAndWarnings('row var = to_str("a")', []);
-        testErrorsAndWarnings('row var = to_string(to_string(true))', []);
-        testErrorsAndWarnings('row var = to_string(to_version("1.0.0"))', []);
-        testErrorsAndWarnings('row to_string(to_version("1.0.0"))', []);
-        testErrorsAndWarnings('row var = to_str(to_version("1.0.0"))', []);
-        testErrorsAndWarnings('row var = to_string(to_version("a"))', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(to_boolean(booleanField))', []);
-
-        testErrorsAndWarnings('from a_index | eval to_string(counterDoubleField)', [
-          'Argument of [to_string] must be [boolean], found value [counterDoubleField] type [counter_double]',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = to_string(*)', [
-          'Using wildcards (*) in to_string is not allowed',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = to_string(cartesianPointField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(cartesianPointField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(cartesianPointField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_string(to_cartesianpoint(cartesianPointField))',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | eval var = to_string(cartesianShapeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(cartesianShapeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(cartesianShapeField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_string(to_cartesianshape(cartesianPointField))',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | eval var = to_string(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(datetimeField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_string(to_datetime(datetimeField))',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval var = to_string(doubleField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(doubleField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(doubleField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(to_double(booleanField))', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(geoPointField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(geoPointField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(geoPointField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_string(to_geopoint(geoPointField))',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval var = to_string(geoShapeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(geoShapeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(geoShapeField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_string(to_geoshape(geoPointField))',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval var = to_string(integerField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(integerField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(integerField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(to_integer(booleanField))', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(ipField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(ipField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(ipField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(to_ip(ipField))', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(keywordField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(keywordField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(keywordField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(to_string(booleanField))', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(longField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(longField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(longField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(textField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(textField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(textField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(unsignedLongField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(unsignedLongField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(unsignedLongField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(versionField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(versionField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(versionField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_string(to_version(keywordField))', []);
-
-        testErrorsAndWarnings('from a_index | eval to_string(booleanField, extraArg)', [
-          'Error: [to_string] function expects exactly one argument, got 2.',
-        ]);
-
-        testErrorsAndWarnings('from a_index | sort to_string(booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(null)', []);
-        testErrorsAndWarnings('row nullVar = null | eval to_string(nullVar)', []);
-        testErrorsAndWarnings('from a_index | eval to_string("2022")', []);
-        testErrorsAndWarnings('from a_index | eval to_string(concat("20", "22"))', []);
       });
 
       describe('to_unsigned_long', () => {
@@ -14606,6 +14535,168 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats percentile(nullVar, nullVar)', [
           'Argument of [percentile] must be a constant, received [nullVar]',
         ]);
+      });
+
+      describe('to_string', () => {
+        testErrorsAndWarnings('row var = to_string(true)', []);
+        testErrorsAndWarnings('row to_string(true)', []);
+        testErrorsAndWarnings('row var = to_str(true)', []);
+        testErrorsAndWarnings('row var = to_string(to_boolean(true))', []);
+        testErrorsAndWarnings('row var = to_string(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row to_string(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = to_str(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = to_string(to_cartesianpoint(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = to_string(to_cartesianshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row to_string(to_cartesianshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = to_str(to_cartesianshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = to_string(to_cartesianshape(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = to_string(to_datetime("2021-01-01T00:00:00Z"))', []);
+        testErrorsAndWarnings('row to_string(to_datetime("2021-01-01T00:00:00Z"))', []);
+        testErrorsAndWarnings('row var = to_str(to_datetime("2021-01-01T00:00:00Z"))', []);
+
+        testErrorsAndWarnings(
+          'row var = to_string(to_datetime(to_datetime("2021-01-01T00:00:00Z")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = to_string(5.5)', []);
+
+        testErrorsAndWarnings('row to_string(5.5)', []);
+        testErrorsAndWarnings('row var = to_str(5.5)', []);
+        testErrorsAndWarnings('row var = to_string(to_double(true))', []);
+        testErrorsAndWarnings('row var = to_string(geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row to_string(geoPointField)', ['Unknown column [geoPointField]']);
+        testErrorsAndWarnings('row var = to_str(geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row var = to_string(to_geopoint(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row var = to_string(to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row to_string(to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = to_str(to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = to_string(to_geoshape(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row var = to_string(5)', []);
+        testErrorsAndWarnings('row to_string(5)', []);
+        testErrorsAndWarnings('row var = to_str(5)', []);
+        testErrorsAndWarnings('row var = to_string(to_integer(true))', []);
+        testErrorsAndWarnings('row var = to_string(to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row to_string(to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row var = to_str(to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row var = to_string(to_ip(to_ip("127.0.0.1")))', []);
+        testErrorsAndWarnings('row var = to_string("a")', []);
+        testErrorsAndWarnings('row to_string("a")', []);
+        testErrorsAndWarnings('row var = to_str("a")', []);
+        testErrorsAndWarnings('row var = to_string(to_string(true))', []);
+        testErrorsAndWarnings('row var = to_string(to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row to_string(to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = to_str(to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = to_string(to_version("a"))', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_boolean(booleanField))', []);
+
+        testErrorsAndWarnings('from a_index | eval to_string(counterDoubleField)', [
+          'Argument of [to_string] must be [boolean], found value [counterDoubleField] type [counter_double]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = to_string(*)', [
+          'Using wildcards (*) in to_string is not allowed',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = to_string(cartesianPointField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(cartesianPointField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(cartesianPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = to_string(to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = to_string(cartesianShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(cartesianShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(cartesianShapeField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = to_string(to_cartesianshape(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = to_string(datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(datetimeField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = to_string(to_datetime(datetimeField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = to_string(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_double(booleanField))', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(geoPointField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(geoPointField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(geoPointField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = to_string(to_geopoint(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = to_string(geoShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(geoShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(geoShapeField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = to_string(to_geoshape(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = to_string(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(integerField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_integer(booleanField))', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(ipField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(ipField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(ipField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_ip(ipField))', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_string(booleanField))', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(longField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(longField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(longField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(textField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(textField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(textField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(unsignedLongField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(unsignedLongField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(unsignedLongField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(versionField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(versionField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(versionField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_version(keywordField))', []);
+
+        testErrorsAndWarnings('from a_index | eval to_string(booleanField, extraArg)', [
+          'Error: [to_string] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort to_string(booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval to_string(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval to_string("2022")', []);
+        testErrorsAndWarnings('from a_index | eval to_string(concat("20", "22"))', []);
       });
     });
   });
