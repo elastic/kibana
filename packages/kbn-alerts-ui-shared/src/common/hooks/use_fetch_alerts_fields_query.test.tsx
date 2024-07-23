@@ -58,14 +58,14 @@ describe('useFetchAlertsFieldsQuery', () => {
   });
 
   it('should call the api only once', async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(
+    const { result, rerender, waitForValueToChange } = renderHook(
       () => useFetchAlertsFieldsQuery({ http: mockHttpClient, featureIds: ['apm'] }),
       {
         wrapper,
       }
     );
 
-    await waitForNextUpdate();
+    await waitForValueToChange(() => result.current.data);
 
     expect(mockHttpGet).toHaveBeenCalledTimes(1);
     expect(result.current.data).toEqual({
