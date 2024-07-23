@@ -744,20 +744,23 @@ class AgentPolicyService {
       );
     }
 
-    // Get updated agent policy with package policies and adjusted tamper protection
-    const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
-    if (!updatedAgentPolicy) {
-      throw new AgentPolicyNotFoundError('Copied agent policy not found');
-    }
+    const policyNeedsBump = baseAgentPolicy.package_policies || baseAgentPolicy.is_protected;
 
     // bump revision if agent policy is updated after creation
-    if (baseAgentPolicy.package_policies || baseAgentPolicy.is_protected) {
+    if (policyNeedsBump) {
       await this.bumpRevision(soClient, esClient, newAgentPolicy.id, {
         user: options?.user,
       });
     } else {
       await this.deployPolicy(soClient, newAgentPolicy.id);
     }
+
+    // Get updated agent policy with package policies and adjusted tamper protection
+    const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
+    if (!updatedAgentPolicy) {
+      throw new AgentPolicyNotFoundError('Copied agent policy not found');
+    }
+
     logger.debug(`Completed copy of agent policy ${id}`);
     return updatedAgentPolicy;
   }
