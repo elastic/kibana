@@ -30,6 +30,15 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await navigateToCasesApp(getPageObject, getService, owner);
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('add-custom-field');
+      await svlCommonScreenshots.takeScreenshot(
+        'security-cases-custom-fields',
+        screenshotDirectories,
+        1400,
+        700
+      );
+      await testSubjects.setValue('custom-field-label-input', 'my-field');
+      await testSubjects.click('common-flyout-save');
       await svlCommonScreenshots.takeScreenshot('security-cases-settings', screenshotDirectories);
       await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(
