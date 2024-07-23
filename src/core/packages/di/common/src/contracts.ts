@@ -26,7 +26,17 @@ export interface CoreDiServiceSetup {
  */
 export interface CoreDiServiceStart {
   /**
-   * The plugin-scoped container
+   * Dispose the current plugin scope
    */
-  getContainer(root?: interfaces.Container): interfaces.Container | undefined;
+  dispose(container?: interfaces.Container): void;
+
+  /**
+   * Fork the current plugin scope
+   */
+  fork(container?: interfaces.Container): interfaces.Container;
+
+  /**
+   * Get the plugin-scoped container
+   */
+  getContainer(container?: interfaces.Container): interfaces.Container | undefined;
 }
