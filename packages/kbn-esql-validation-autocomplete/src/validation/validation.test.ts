@@ -2479,6 +2479,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort coalesce(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval coalesce(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce("2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval coalesce(concat("20", "22"), concat("20", "22"))',
+          []
+        );
       });
 
       describe('concat', () => {
@@ -2667,6 +2673,19 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval date_diff(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_diff(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval date_diff("year", "2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval date_diff(textField, "2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff(textField, concat("20", "22"), concat("20", "22"))',
+          []
+        );
       });
 
       describe('date_extract', () => {
@@ -2734,6 +2753,22 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval date_extract(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_extract(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", "2022")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval date_extract(textField, "2022")', []);
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract(textField, concat("20", "22"))',
+          []
+        );
       });
 
       describe('date_format', () => {
@@ -2778,6 +2813,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort date_format(keywordField, datetimeField)', []);
         testErrorsAndWarnings('from a_index | eval date_format(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_format(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval date_format(keywordField, "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_format(keywordField, concat("20", "22"))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval date_format(textField, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval date_format(textField, concat("20", "22"))', []);
       });
 
       describe('date_parse', () => {
@@ -2865,6 +2909,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort date_trunc(1 year, datetimeField)', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(textField, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(textField, concat("20", "22"))', []);
       });
 
       describe('e', () => {
@@ -4067,6 +4115,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_append(booleanField, booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_append(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_append(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append("2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_append(concat("20", "22"), concat("20", "22"))',
+          []
+        );
       });
 
       describe('mv_avg', () => {
@@ -4289,6 +4343,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_count(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_count(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_count(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count("2022")', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(concat("20", "22"))', []);
       });
 
       describe('mv_dedupe', () => {
@@ -4414,6 +4470,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_dedupe(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_dedupe(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe("2022")', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(concat("20", "22"))', []);
       });
 
       describe('mv_first', () => {
@@ -4533,6 +4591,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_first(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_first(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_first(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first("2022")', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(concat("20", "22"))', []);
       });
 
       describe('mv_last', () => {
@@ -4652,6 +4712,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_last(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_last(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_last(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last("2022")', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(concat("20", "22"))', []);
       });
 
       describe('mv_max', () => {
@@ -4737,6 +4799,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_max(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_max(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_max(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max("2022")', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(concat("20", "22"))', []);
       });
 
       describe('mv_median', () => {
@@ -4872,6 +4936,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_min(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_min(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_min(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min("2022")', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(concat("20", "22"))', []);
       });
 
       describe('mv_slice', () => {
@@ -5205,6 +5271,15 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval mv_slice(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_slice(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice("2022", integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_slice(concat("20", "22"), integerField, integerField)',
+          []
+        );
       });
 
       describe('mv_sort', () => {
@@ -5254,6 +5329,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort mv_sort(booleanField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_sort(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort("2022", "asc")', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(concat("20", "22"), "asc")', []);
       });
 
       describe('mv_sum', () => {
@@ -7694,6 +7771,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_datetime(datetimeField)', []);
         testErrorsAndWarnings('from a_index | eval to_datetime(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_datetime(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval to_datetime("2022")', []);
+        testErrorsAndWarnings('from a_index | eval to_datetime(concat("20", "22"))', []);
       });
 
       describe('to_degrees', () => {
@@ -7851,6 +7930,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_double(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_double(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_double(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval to_double("2022")', []);
+        testErrorsAndWarnings('from a_index | eval to_double(concat("20", "22"))', []);
       });
 
       describe('to_geopoint', () => {
@@ -8043,6 +8124,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_integer(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_integer(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_integer(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval to_integer("2022")', []);
+        testErrorsAndWarnings('from a_index | eval to_integer(concat("20", "22"))', []);
       });
 
       describe('to_ip', () => {
@@ -8167,6 +8250,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_long(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_long(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_long(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval to_long("2022")', []);
+        testErrorsAndWarnings('from a_index | eval to_long(concat("20", "22"))', []);
       });
 
       describe('to_lower', () => {
@@ -8394,6 +8479,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_string(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_string(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_string(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval to_string("2022")', []);
+        testErrorsAndWarnings('from a_index | eval to_string(concat("20", "22"))', []);
       });
 
       describe('to_unsigned_long', () => {
@@ -8519,6 +8606,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_unsigned_long(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval to_unsigned_long(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_unsigned_long(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval to_unsigned_long("2022")', []);
+        testErrorsAndWarnings('from a_index | eval to_unsigned_long(concat("20", "22"))', []);
       });
 
       describe('to_upper', () => {
@@ -8697,11 +8786,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | stats var = avg(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats avg(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats avg(booleanField)', [
@@ -9308,11 +9397,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | stats var = sum(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats sum(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats sum(booleanField)', [
@@ -9922,11 +10011,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | stats var = median(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats median(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats median(booleanField)', [
@@ -10604,12 +10693,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats var = median_absolute_deviation(avg(integerField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
           ]
         );
 
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(booleanField)', [
@@ -11351,902 +11440,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats median_absolute_deviation(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats median_absolute_deviation(nullVar)', []);
       });
-
-      describe('percentile', () => {
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField))',
-          [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
-          ]
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField))',
-          [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
-          ]
-        );
-
-        testErrorsAndWarnings('from a_index | stats percentile(booleanField, , , , , , , , )', [
-          'Argument of [percentile] must be [integer], found value [booleanField] type [boolean]',
-        ]);
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | sort percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['SORT does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function percentile']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats percentile(null, null, null, null, null, null, null, null, null)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'row nullVar = null | stats percentile(nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar)',
-          []
-        );
-      });
-
       describe('max', () => {
         testErrorsAndWarnings('from a_index | stats var = max(doubleField)', []);
         testErrorsAndWarnings('from a_index | stats max(doubleField)', []);
@@ -12303,11 +11496,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | stats var = max(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats max(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats max(cartesianPointField)', [
@@ -12590,6 +11783,8 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats max("2022")', []);
+        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', []);
       });
 
       describe('min', () => {
@@ -12648,11 +11843,11 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | stats var = min(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats min(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats min(cartesianPointField)', [
@@ -12935,6 +12130,8 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats min("2022")', []);
+        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', []);
       });
 
       describe('count', () => {
@@ -13070,11 +12267,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats st_centroid_agg(cartesianPointField)', []);
 
         testErrorsAndWarnings('from a_index | stats var = st_centroid_agg(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats st_centroid_agg(avg(integerField))', [
-          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+          "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
         ]);
 
         testErrorsAndWarnings('from a_index | stats st_centroid_agg(booleanField)', [
@@ -13184,7 +12381,7 @@ describe('validation logic', () => {
       describe('top', () => {
         testErrorsAndWarnings(
           'from a_index | stats var = top(textField, integerField, textField)',
-          []
+          ['Argument of [=] must be a constant, received [top(textField,integerField,textField)]']
         );
 
         testErrorsAndWarnings('from a_index | stats top(textField, integerField, textField)', [
@@ -13223,6 +12420,40 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats top(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats top(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats var = top(textField, integerField, "asc")', []);
+
+        testErrorsAndWarnings('from a_index | stats top(textField, integerField, "asc")', [
+          'Argument of [top] must be a constant, received [integerField]',
+          'Argument of [top] must be a constant, received [keywordField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort top(textField, integerField, "asc")', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(textField, integerField, "asc")', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(textField, integerField, "asc") > 0', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(textField, integerField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(textField, integerField, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(textField, integerField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(textField, integerField, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
       });
 
       describe('weighted_avg', () => {
@@ -13320,16 +12551,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats var = weighted_avg(avg(integerField), avg(integerField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
           ]
         );
 
         testErrorsAndWarnings(
           'from a_index | stats weighted_avg(avg(integerField), avg(integerField))',
           [
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
-            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
           ]
         );
 
@@ -13369,6 +12600,798 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats weighted_avg(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats weighted_avg(nullVar, nullVar)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(doubleField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(doubleField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(doubleField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(doubleField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(doubleField, longField)) + weighted_avg(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(doubleField, longField)) + weighted_avg(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats weighted_avg(doubleField / 2, longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(doubleField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(doubleField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(doubleField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(doubleField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(doubleField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(doubleField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(doubleField, integerField)) + weighted_avg(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(doubleField, integerField)) + weighted_avg(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(doubleField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(doubleField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(doubleField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(longField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(longField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(longField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(longField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(longField, doubleField)) + weighted_avg(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(longField, doubleField)) + weighted_avg(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(longField, doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(longField, doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = weighted_avg(longField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats weighted_avg(longField, longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(longField, longField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats round(weighted_avg(longField, longField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = weighted_avg(longField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(longField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(longField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(longField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(longField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(longField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(longField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(longField, integerField)) + weighted_avg(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(longField, integerField)) + weighted_avg(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(longField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(longField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(longField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(integerField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(integerField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(integerField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(integerField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(integerField, doubleField)) + weighted_avg(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(integerField, doubleField)) + weighted_avg(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(integerField, doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(integerField, doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(integerField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(integerField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(integerField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(integerField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(integerField, longField)) + weighted_avg(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(integerField, longField)) + weighted_avg(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(integerField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(integerField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(integerField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(integerField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(integerField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(integerField, integerField)) + weighted_avg(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(integerField, integerField)) + weighted_avg(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(integerField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(integerField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), weighted_avg(integerField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(doubleField, longField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(doubleField, longField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(doubleField, integerField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(doubleField, integerField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(longField, doubleField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(longField, doubleField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(longField, longField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(longField, longField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(longField, integerField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(longField, integerField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(integerField, doubleField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(integerField, doubleField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(integerField, longField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(integerField, longField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(integerField, integerField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(integerField, integerField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(doubleField, longField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(doubleField, longField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(doubleField, longField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(doubleField, longField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(doubleField, integerField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(doubleField, integerField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(doubleField, integerField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(doubleField, integerField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(longField, doubleField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(longField, doubleField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(longField, doubleField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(longField, doubleField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(longField, longField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(longField, longField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(longField, longField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(longField, longField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(longField, integerField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(longField, integerField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(longField, integerField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(longField, integerField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(integerField, doubleField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(integerField, doubleField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(integerField, doubleField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(integerField, doubleField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(integerField, longField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(integerField, longField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(integerField, longField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(integerField, longField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(integerField, integerField)',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(integerField, integerField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(integerField, integerField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(integerField, integerField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
       });
 
       describe('bucket', () => {
@@ -13487,6 +13510,956 @@ describe('validation logic', () => {
             'Argument of [bucket] must be a constant, received [nullVar]',
           ]
         );
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", integerField, textField, textField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), integerField, textField, textField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", integerField, "2022", "2022")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), concat("20", "22"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", integerField, textField, "2022")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), integerField, textField, concat("20", "22"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket("2022", integerField, "2022", textField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), textField)',
+          []
+        );
+      });
+
+      describe.only('percentile', () => {
+        testErrorsAndWarnings(
+          'from a_index | stats var = percentile(doubleField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(doubleField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(doubleField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField / 2, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField / 2, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(doubleField, doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = percentile(avg(integerField), avg(integerField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(avg(integerField), avg(integerField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]",
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats percentile(booleanField, )', [
+          'Argument of [percentile] must be [double], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(doubleField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(doubleField, longField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(doubleField, longField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(doubleField, longField)) + percentile(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(doubleField, longField)) + percentile(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, longField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(doubleField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(doubleField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = percentile(doubleField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(doubleField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(doubleField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats percentile(doubleField / 2, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(doubleField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(longField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(longField, doubleField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(longField, doubleField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(longField, doubleField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(longField, doubleField)) + percentile(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(longField, doubleField)) + percentile(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(longField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(longField, doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(longField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(longField, longField)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(longField, longField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats round(percentile(longField, longField))', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(longField, longField)) + percentile(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(longField, longField)) + percentile(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var0 = percentile(longField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(longField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(longField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(longField, integerField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(longField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(longField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(longField, integerField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(longField, integerField)) + percentile(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(longField, integerField)) + percentile(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(longField, integerField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(longField, integerField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = percentile(integerField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats percentile(integerField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(integerField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(integerField, doubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(integerField, doubleField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), doubleField / 2',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(integerField, longField)', []);
+        testErrorsAndWarnings('from a_index | stats percentile(integerField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(integerField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(integerField, longField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(integerField, longField)) + percentile(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(integerField, longField)) + percentile(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(integerField, longField) by round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(integerField, longField) by var1 = round(doubleField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, longField) by round(doubleField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, longField) by var1 = round(doubleField / 2), ipField',
+          ['Argument of [=] must be a constant, received [percentile(integerField,longField)]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, longField) by round(doubleField / 2), doubleField / 2',
+          ['Argument of [percentile] must be a constant, received [longField]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, longField) by var1 = round(doubleField / 2), doubleField / 2',
+          ['Argument of [=] must be a constant, received [percentile(integerField,longField)]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats var = percentile(integerField, integerField)', [
+          'Argument of [=] must be a constant, received [percentile(integerField,integerField)]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats percentile(integerField, integerField)', [
+          'Argument of [percentile] must be a constant, received [integerField]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(integerField, integerField))',
+          [
+            'Argument of [=] must be a constant, received [round(percentile(integerField,integerField))]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(integerField, integerField))',
+          [
+            'Argument of [round] must be a constant, received [percentile(integerField,integerField)]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(percentile(integerField, integerField)) + percentile(integerField, integerField)',
+          [
+            'Argument of [=] must be a constant, received [round(percentile(integerField,integerField))+percentile(integerField,integerField)]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(percentile(integerField, integerField)) + percentile(integerField, integerField)',
+          [
+            'Argument of [+] must be a constant, received [round(percentile(integerField,integerField))]',
+            'Argument of [+] must be a constant, received [percentile(integerField,integerField)]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(integerField, integerField)',
+          ['Argument of [=] must be a constant, received [percentile(integerField,integerField)]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, integerField)',
+          ['Argument of [percentile] must be a constant, received [integerField]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField)',
+          ['Argument of [=] must be a constant, received [percentile(integerField,integerField)]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats percentile(integerField, integerField) by round(doubleField / 2)',
+          ['Argument of [percentile] must be a constant, received [integerField]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = percentile(integerField, integerField) by var1 = round(doubleField / 2)',
+          ['Argument of [=] must be a constant, received [percentile(integerField,integerField)]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, integerField) by round(doubleField / 2), ipField',
+          ['Argument of [percentile] must be a constant, received [integerField]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField) by var1 = round(doubleField / 2), ipField',
+          ['Argument of [=] must be a constant, received [percentile(integerField,integerField)]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), percentile(integerField, integerField) by round(doubleField / 2), doubleField / 2',
+          ['Argument of [percentile] must be a constant, received [integerField]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField) by var1 = round(doubleField / 2), doubleField / 2',
+          ['Argument of [=] must be a constant, received [percentile(integerField,integerField)]']
+        );
+
+        testErrorsAndWarnings('from a_index | sort percentile(doubleField, doubleField)', [
+          'SORT does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, doubleField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, doubleField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, longField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, longField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, integerField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(doubleField, integerField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(longField, doubleField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(longField, doubleField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(longField, longField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(longField, longField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(longField, integerField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(longField, integerField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(integerField, doubleField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(integerField, doubleField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(integerField, longField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(integerField, longField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(integerField, integerField)', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where percentile(integerField, integerField) > 0', [
+          'WHERE does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(doubleField, doubleField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = percentile(doubleField, doubleField) > 0',
+          ['EVAL does not support function percentile']
+        );
+
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, doubleField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, doubleField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(doubleField, longField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(doubleField, longField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, longField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, longField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(doubleField, integerField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = percentile(doubleField, integerField) > 0',
+          ['EVAL does not support function percentile']
+        );
+
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, integerField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(doubleField, integerField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(longField, doubleField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(longField, doubleField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(longField, doubleField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(longField, doubleField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(longField, longField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(longField, longField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(longField, longField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(longField, longField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(longField, integerField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(longField, integerField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(longField, integerField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(longField, integerField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(integerField, doubleField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = percentile(integerField, doubleField) > 0',
+          ['EVAL does not support function percentile']
+        );
+
+        testErrorsAndWarnings('from a_index | eval percentile(integerField, doubleField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(integerField, doubleField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(integerField, longField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(integerField, longField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(integerField, longField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(integerField, longField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = percentile(integerField, integerField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = percentile(integerField, integerField) > 0',
+          ['EVAL does not support function percentile']
+        );
+
+        testErrorsAndWarnings('from a_index | eval percentile(integerField, integerField)', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval percentile(integerField, integerField) > 0', [
+          'EVAL does not support function percentile',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats percentile(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats percentile(nullVar, nullVar)', [
+          'Argument of [percentile] must be a constant, received [nullVar]',
+        ]);
       });
     });
   });

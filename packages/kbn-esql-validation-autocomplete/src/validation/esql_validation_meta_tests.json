@@ -11685,6 +11685,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval coalesce(\"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = concat(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -12137,6 +12147,26 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_diff(\"year\", \"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(textField, \"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(textField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", to_datetime(\"2021-01-01T00:00:00Z\"))",
       "error": [],
       "warning": []
@@ -12225,6 +12255,26 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_extract(textField, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_extract(textField, concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = date_format(\"a\", to_datetime(\"2021-01-01T00:00:00Z\"))",
       "error": [],
       "warning": []
@@ -12294,6 +12344,26 @@
     },
     {
       "query": "row nullVar = null | eval date_format(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_format(keywordField, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_format(keywordField, concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_format(textField, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_format(textField, concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -12480,6 +12550,26 @@
     },
     {
       "query": "row nullVar = null | eval date_trunc(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(1 year, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(1 year, concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(textField, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(textField, concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -15348,6 +15438,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_append(\"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_avg(5.5)",
       "error": [],
       "warning": []
@@ -16071,6 +16171,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_count(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_count(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_dedupe(true)",
       "error": [],
       "warning": []
@@ -16477,6 +16587,16 @@
     },
     {
       "query": "row nullVar = null | eval mv_dedupe(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -16906,6 +17026,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_first(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_first(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_last(true)",
       "error": [],
       "warning": []
@@ -17331,6 +17461,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_last(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_last(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_max(true)",
       "error": [],
       "warning": []
@@ -17637,6 +17777,16 @@
     },
     {
       "query": "row nullVar = null | eval mv_max(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_max(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_max(concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -18101,6 +18251,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_min(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_min(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_slice(true, 5, 5)",
       "error": [],
       "warning": []
@@ -18525,6 +18685,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_slice(\"2022\", integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_slice(concat(\"20\", \"22\"), integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sort(true, \"asc\")",
       "error": [],
       "warning": []
@@ -18711,6 +18881,16 @@
     },
     {
       "query": "row nullVar = null | eval mv_sort(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort(\"2022\", \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort(concat(\"20\", \"22\"), \"asc\")",
       "error": [],
       "warning": []
     },
@@ -23668,6 +23848,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_datetime(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_datetime(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_degrees(5.5)",
       "error": [],
       "warning": []
@@ -24209,6 +24399,16 @@
     },
     {
       "query": "row nullVar = null | eval to_double(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_double(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_double(concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -24824,6 +25024,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_integer(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_integer(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_ip(to_ip(\"127.0.0.1\"))",
       "error": [],
       "warning": []
@@ -25233,6 +25443,16 @@
     },
     {
       "query": "row nullVar = null | eval to_long(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_long(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_long(concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -25993,6 +26213,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_string(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_string(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_unsigned_long(true)",
       "error": [],
       "warning": []
@@ -26389,6 +26619,16 @@
     },
     {
       "query": "row nullVar = null | eval to_unsigned_long(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_unsigned_long(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_unsigned_long(concat(\"20\", \"22\"))",
       "error": [],
       "warning": []
     },
@@ -26809,14 +27049,14 @@
     {
       "query": "from a_index | stats var = avg(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -27810,14 +28050,14 @@
     {
       "query": "from a_index | stats var = sum(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats sum(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -28811,14 +29051,14 @@
     {
       "query": "from a_index | stats var = median(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats median(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -29812,14 +30052,14 @@
     {
       "query": "from a_index | stats var = median_absolute_deviation(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats median_absolute_deviation(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -30716,1000 +30956,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField), avg(integerField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(booleanField, , , , , , , , )",
-      "error": [
-        "Argument of [percentile] must be [integer], found value [booleanField] type [boolean]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "SORT does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(integerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(intField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(counterIntegerField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(doubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(unsignedLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(longField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(counterLongField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval percentile(counterDoubleField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function percentile"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats percentile(null, null, null, null, null, null, null, null, null)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row nullVar = null | stats percentile(nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | stats var = max(doubleField)",
       "error": [],
       "warning": []
@@ -31807,14 +31053,14 @@
     {
       "query": "from a_index | stats var = max(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats max(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -32334,6 +31580,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats max(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = min(doubleField)",
       "error": [],
       "warning": []
@@ -32431,14 +31687,14 @@
     {
       "query": "from a_index | stats var = min(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats min(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -32958,6 +32214,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats min(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = count(textField)",
       "error": [],
       "warning": []
@@ -33148,14 +32414,14 @@
     {
       "query": "from a_index | stats var = st_centroid_agg(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats st_centroid_agg(avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -33355,7 +32621,9 @@
     },
     {
       "query": "from a_index | stats var = top(textField, integerField, textField)",
-      "error": [],
+      "error": [
+        "Argument of [=] must be a constant, received [top(textField,integerField,textField)]"
+      ],
       "warning": []
     },
     {
@@ -33423,6 +32691,68 @@
     {
       "query": "row nullVar = null | stats top(nullVar, nullVar, nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(textField, integerField, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(textField, integerField, \"asc\")",
+      "error": [
+        "Argument of [top] must be a constant, received [integerField]",
+        "Argument of [top] must be a constant, received [keywordField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort top(textField, integerField, \"asc\")",
+      "error": [
+        "SORT does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(textField, integerField, \"asc\")",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(textField, integerField, \"asc\") > 0",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(textField, integerField, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(textField, integerField, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(textField, integerField, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(textField, integerField, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
       "warning": []
     },
     {
@@ -33523,16 +32853,16 @@
     {
       "query": "from a_index | stats var = weighted_avg(avg(integerField), avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats weighted_avg(avg(integerField), avg(integerField))",
       "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]",
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [number]"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(integerField)] of type [double]"
       ],
       "warning": []
     },
@@ -33601,6 +32931,982 @@
     {
       "query": "row nullVar = null | stats weighted_avg(nullVar, nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(doubleField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(doubleField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(doubleField, longField)) + weighted_avg(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(doubleField, longField)) + weighted_avg(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(doubleField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(doubleField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(doubleField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(doubleField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(doubleField, integerField)) + weighted_avg(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(doubleField, integerField)) + weighted_avg(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(doubleField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(doubleField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(doubleField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(longField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(longField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(longField, doubleField)) + weighted_avg(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(longField, doubleField)) + weighted_avg(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(longField, doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(longField, doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(longField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(longField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(longField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(longField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(longField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(longField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(longField, integerField)) + weighted_avg(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(longField, integerField)) + weighted_avg(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(longField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(longField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(longField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(integerField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(integerField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(integerField, doubleField)) + weighted_avg(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(integerField, doubleField)) + weighted_avg(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(integerField, doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(integerField, doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(integerField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(integerField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(integerField, longField)) + weighted_avg(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(integerField, longField)) + weighted_avg(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(integerField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(integerField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(integerField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(integerField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(integerField, integerField)) + weighted_avg(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(integerField, integerField)) + weighted_avg(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(integerField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(integerField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), weighted_avg(integerField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = weighted_avg(integerField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(doubleField, longField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(doubleField, longField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(doubleField, integerField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(doubleField, integerField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(longField, doubleField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(longField, doubleField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(longField, longField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(longField, longField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(longField, integerField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(longField, integerField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(integerField, doubleField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(integerField, doubleField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(integerField, longField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(integerField, longField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(integerField, integerField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(integerField, integerField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(doubleField, longField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(doubleField, longField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(doubleField, longField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(doubleField, longField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(doubleField, integerField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(doubleField, integerField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(doubleField, integerField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(doubleField, integerField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(longField, doubleField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(longField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(longField, doubleField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(longField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(longField, longField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(longField, longField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(longField, longField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(longField, longField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(longField, integerField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(longField, integerField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(longField, integerField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(longField, integerField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(integerField, doubleField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(integerField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(integerField, doubleField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(integerField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(integerField, longField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(integerField, longField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(integerField, longField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(integerField, longField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(integerField, integerField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(integerField, integerField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(integerField, integerField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(integerField, integerField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
       "warning": []
     },
     {
@@ -33739,379 +34045,1242 @@
       "warning": []
     },
     {
-      "query": "f",
+      "query": "from a_index | stats bucket(\"2022\", 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", integerField, textField, textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", integerField, \"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", integerField, textField, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, concat(\"20\", \"22\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", integerField, \"2022\", textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), textField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(doubleField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(doubleField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(doubleField, doubleField)) + percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField / 2, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField / 2, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField / 2, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField, doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(avg(integerField), avg(integerField))",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from ",
+      "query": "from a_index | stats percentile(avg(integerField), avg(integerField))",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM \"index\"",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM \"\"\"index\"\"\"",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FrOm index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index, other_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index, other_index,.secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from ind*, other*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM *a_i*dex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM in*ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM *n*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM *n*ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i*d*x*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i*d*x",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i***x*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i****",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "FROM i**",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM index**",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM *ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM *ex*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM in*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM ind*ex",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM *,-.*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM remote-*:indexes*",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM remote-*:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM remote-ccs:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM a_index, remote-ccs:indexes",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "fRoM .secret_index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from my-index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index,",
+      "query": "from a_index | stats percentile(booleanField, )",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "Argument of [percentile] must be [double], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "FROM index\n, \tother_index\t,\n \t ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from assignment = 1",
-      "error": [
-        "SyntaxError: mismatched input '=' expecting <EOF>",
-        "Unknown index [assignment]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM `index`",
-      "error": [
-        "Unknown index [`index`]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from assignment = 1",
-      "error": [
-        "SyntaxError: mismatched input '=' expecting <EOF>",
-        "Unknown index [assignment]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM index, missingIndex",
-      "error": [
-        "Unknown index [missingIndex]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from average()",
-      "error": [
-        "Unknown index [average()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "fRom custom_function()",
-      "error": [
-        "Unknown index [custom_function()]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM indexes*",
-      "error": [
-        "Unknown index [indexes*]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from numberField",
-      "error": [
-        "Unknown index [numberField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "FROM policy",
-      "error": [
-        "Unknown index [policy]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
+      "query": "from a_index | stats var = percentile(doubleField, longField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index metadata _id, \t\n _index\n ",
+      "query": "from a_index | stats percentile(doubleField, longField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index (metadata _id)",
+      "query": "from a_index | stats var = round(percentile(doubleField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(doubleField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(doubleField, longField)) + percentile(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(doubleField, longField)) + percentile(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(doubleField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(doubleField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(doubleField, integerField)) + percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField / 2, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(doubleField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(doubleField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(doubleField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(longField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(longField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(longField, doubleField)) + percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(longField, doubleField)) + percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(longField, doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(longField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(longField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(longField, longField)) + percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(longField, longField)) + percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(longField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(longField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, longField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, longField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(longField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(longField, integerField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(longField, integerField)) + percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(longField, integerField)) + percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(longField, integerField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(longField, integerField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(longField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(longField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(integerField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(integerField, doubleField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(integerField, doubleField)) + percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(integerField, doubleField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, doubleField) by round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, doubleField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(integerField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(integerField, longField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(integerField, longField)) + percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(integerField, longField)) + percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(integerField, longField) by round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(integerField, longField) by var1 = round(doubleField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, longField) by round(doubleField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, longField) by var1 = round(doubleField / 2), ipField",
       "error": [
-        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
+        "Argument of [=] must be a constant, received [percentile(integerField,longField)]"
       ],
       "warning": []
     },
     {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from remote-ccs:indexes [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from *:indexes [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source2]",
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, longField) by round(doubleField / 2), doubleField / 2",
       "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id, _source] [METADATA _id2]",
-      "error": [
-        "SyntaxError: mismatched input '[' expecting <EOF>"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from remote-ccs:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source2",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
+        "Argument of [percentile] must be a constant, received [longField]"
       ],
       "warning": []
     },
     {
-      "query": "from index metadata _id, _source METADATA _id2",
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, longField) by var1 = round(doubleField / 2), doubleField / 2",
       "error": [
-        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
+        "Argument of [=] must be a constant, received [percentile(integerField,longField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = percentile(integerField, integerField)",
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(integerField, integerField)",
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(integerField, integerField))",
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(integerField,integerField))]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(integerField, integerField))",
+      "error": [
+        "Argument of [round] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(integerField, integerField)) + percentile(integerField, integerField)",
+      "error": [
+        "Argument of [=] must be a constant, received [round(percentile(integerField,integerField))+percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(percentile(integerField, integerField)) + percentile(integerField, integerField)",
+      "error": [
+        "Argument of [+] must be a constant, received [round(percentile(integerField,integerField))]",
+        "Argument of [+] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(integerField, integerField)",
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, integerField)",
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField)",
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(integerField, integerField) by round(doubleField / 2)",
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(integerField, integerField) by var1 = round(doubleField / 2)",
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, integerField) by round(doubleField / 2), ipField",
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField) by var1 = round(doubleField / 2), ipField",
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), percentile(integerField, integerField) by round(doubleField / 2), doubleField / 2",
+      "error": [
+        "Argument of [percentile] must be a constant, received [integerField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(doubleField), var0 = percentile(integerField, integerField) by var1 = round(doubleField / 2), doubleField / 2",
+      "error": [
+        "Argument of [=] must be a constant, received [percentile(integerField,integerField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort percentile(doubleField, doubleField)",
+      "error": [
+        "SORT does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(doubleField, doubleField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(doubleField, doubleField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(doubleField, longField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(doubleField, longField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(doubleField, integerField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(doubleField, integerField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(longField, doubleField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(longField, doubleField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(longField, longField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(longField, longField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(longField, integerField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(longField, integerField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(integerField, doubleField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(integerField, doubleField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(integerField, longField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(integerField, longField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(integerField, integerField)",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where percentile(integerField, integerField) > 0",
+      "error": [
+        "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(doubleField, doubleField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(doubleField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(doubleField, doubleField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(doubleField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(doubleField, longField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(doubleField, longField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(doubleField, longField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(doubleField, longField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(doubleField, integerField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(doubleField, integerField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(doubleField, integerField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(doubleField, integerField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(longField, doubleField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(longField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(longField, doubleField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(longField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(longField, longField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(longField, longField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(longField, longField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(longField, longField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(longField, integerField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(longField, integerField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(longField, integerField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(longField, integerField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(integerField, doubleField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(integerField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(integerField, doubleField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(integerField, doubleField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(integerField, longField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(integerField, longField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(integerField, longField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(integerField, longField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(integerField, integerField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = percentile(integerField, integerField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(integerField, integerField)",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval percentile(integerField, integerField) > 0",
+      "error": [
+        "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats percentile(nullVar, nullVar)",
+      "error": [
+        "Argument of [percentile] must be a constant, received [nullVar]"
       ],
       "warning": []
     }
