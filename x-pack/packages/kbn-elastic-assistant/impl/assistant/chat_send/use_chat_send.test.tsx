@@ -149,7 +149,6 @@ describe('use chat send', () => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
         conversationId: testProps.currentConversation?.title,
         role: 'user',
-
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
@@ -157,7 +156,6 @@ describe('use chat send', () => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
         conversationId: testProps.currentConversation?.title,
         role: 'assistant',
-
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
