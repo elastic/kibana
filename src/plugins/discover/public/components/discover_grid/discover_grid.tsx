@@ -32,7 +32,7 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
-      additionalRowLeadingControls={[
+      rowAdditionalLeadingControls={[
         {
           id: 'test1',
           headerAriaLabel: 'Additional row control header 1',

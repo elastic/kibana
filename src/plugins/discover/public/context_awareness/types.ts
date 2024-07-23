@@ -31,7 +31,7 @@ export interface Profile {
     params: RowIndicatorExtensionParams
   ) => UnifiedDataTableProps['getRowIndicator'] | undefined;
   getRowAdditionalLeadingControls: () =>
-    | UnifiedDataTableProps['additionalRowLeadingControls']
+    | UnifiedDataTableProps['rowAdditionalLeadingControls']
     | undefined;
   // Doc viewer
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;

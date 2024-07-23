@@ -41,7 +41,7 @@ Props description:
 | **configRowHeight** | (optional)number | Optional value for providing configuration setting for UnifiedDataTable rows height. |
 | **showMultiFields** | (optional)boolean | Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true. |
 | **maxDocFieldsDisplayed** | (optional)number | Optional value for providing configuration setting for maximum number of document fields to display in the table. Default is 50. |
-| **additionalRowLeadingControls** | (optional)RowControlColumn[] | Optional value for providing an list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select. |
+| **rowAdditionalLeadingControls** | (optional)RowControlColumn[] | Optional value for providing an list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select. |
 | **totalHits** | (optional)number | Number total hits from ES. |
 | **onFetchMoreRecords** | (optional)() => void | To fetch more. |
 | **externalAdditionalControls** | (optional)React.ReactNode | Optional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions. |

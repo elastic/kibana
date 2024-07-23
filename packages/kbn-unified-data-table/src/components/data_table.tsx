@@ -294,19 +294,19 @@ export interface UnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
-   * @deprecated Use only `additionalRowLeadingControls` instead
+   * @deprecated Use only `rowAdditionalLeadingControls` instead
    * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
    */
   externalControlColumns?: EuiDataGridControlColumn[];
   /**
-   * @deprecated Use only `additionalRowLeadingControls` instead
+   * @deprecated Use only `rowAdditionalLeadingControls` instead
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
   /**
    * Optional value to extend the list of default row actions
    */
-  additionalRowLeadingControls?: RowControlColumn[];
+  rowAdditionalLeadingControls?: RowControlColumn[];
   /**
    * Number total hits from ES
    */
@@ -413,7 +413,7 @@ export const UnifiedDataTable = ({
   headerRowHeightState,
   onUpdateHeaderRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
-  additionalRowLeadingControls,
+  rowAdditionalLeadingControls,
   dataView,
   loadingState,
   onFilter,
@@ -444,8 +444,8 @@ export const UnifiedDataTable = ({
   services,
   renderCustomGridBody,
   renderCustomToolbar,
-  externalControlColumns, // TODO: deprecate in favor of additionalRowLeadingControls
-  trailingControlColumns, // TODO: deprecate in favor of additionalRowLeadingControls
+  externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
+  trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
   totalHits,
   onFetchMoreRecords,
   renderDocumentView,
@@ -874,8 +874,8 @@ export const UnifiedDataTable = ({
       leadingColumns.unshift(colorIndicatorControlColumn);
     }
 
-    if (additionalRowLeadingControls?.length) {
-      leadingColumns.push(...getAdditionalRowControlColumns(additionalRowLeadingControls));
+    if (rowAdditionalLeadingControls?.length) {
+      leadingColumns.push(...getAdditionalRowControlColumns(rowAdditionalLeadingControls));
     }
 
     return leadingColumns;
@@ -884,7 +884,7 @@ export const UnifiedDataTable = ({
     controlColumnIds,
     externalControlColumns,
     getRowIndicator,
-    additionalRowLeadingControls,
+    rowAdditionalLeadingControls,
   ]);
 
   // const controlColumnsConfig = customControlColumnsConfiguration?.({
