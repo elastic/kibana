@@ -95,21 +95,21 @@ export const metadataSchema = z
   }))
   .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })))
   .superRefine((value, ctx) => {
-    if (value.limit < 0) {
+    if (value.limit < 1) {
       ctx.addIssue({
         path: ['limit'],
         code: z.ZodIssueCode.custom,
         message: 'limit should be greater than 1',
       });
     }
-    if (value.source.length < 0) {
+    if (value.source.length === 0) {
       ctx.addIssue({
         path: ['source'],
         code: z.ZodIssueCode.custom,
         message: 'source should not be empty',
       });
     }
-    if (value.destination.length < 0) {
+    if (value.destination.length === 0) {
       ctx.addIssue({
         path: ['destination'],
         code: z.ZodIssueCode.custom,
