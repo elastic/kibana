@@ -1092,7 +1092,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     disabledText: suppressionGroupByDisabledText,
                   }}
                 />
-                {!allJobsStarted && (
+                {isMlRule(ruleType) && !allJobsStarted && (
                   <EuiText size="xs" color="warning">
                     {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
                   </EuiText>
