@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
@@ -13,16 +13,16 @@ import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, omit, pick } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { AddWidgetMode } from '../../constants/add_widget_mode';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
+import { AddObservationUI } from '../add_observation_ui';
 import { AddWidgetUI } from '../add_widget_ui';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
 
 const containerClassName = css`
   overflow: auto;
-  padding: 24px 24px 0px 24px;
+  padding: 24px 24px 24px 24px;
 `;
 
 const scrollContainerClassName = css`
@@ -210,14 +210,14 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem grow={false} key={AddWidgetMode.Esql}>
-            <EuiButton data-test-subj="investigateAppInvestigateViewWithUserAddAnObservationChartButton">
-              {i18n.translate(
-                'xpack.investigateApp.investigateViewWithUser.addAnObservationChartButtonLabel',
-                { defaultMessage: 'Add an observation chart' }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
+          <AddObservationUI
+            filters={revision.parameters.filters}
+            query={revision.parameters.query}
+            timeRange={revision.parameters.timeRange}
+            onWidgetAdd={(widget) => {
+              return createWidgetRef.current(widget);
+            }}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
 
