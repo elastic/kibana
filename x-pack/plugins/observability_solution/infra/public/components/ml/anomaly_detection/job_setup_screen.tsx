@@ -31,7 +31,7 @@ import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
-import { useSourceContext } from '../../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
 import { FixedDatePicker } from '../../fixed_datepicker';
@@ -54,10 +54,10 @@ export const JobSetupScreen = (props: Props) => {
   const [partitionField, setPartitionField] = useState<string[] | null>(null);
   const host = useMetricHostsModuleContext();
   const kubernetes = useMetricK8sModuleContext();
+  const { metricsView } = useMetricsDataViewContext();
   const [filter, setFilter] = useState<string>('');
   const [filterQuery, setFilterQuery] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
-  const { createDerivedIndexPattern } = useSourceContext();
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
   const { euiTheme } = useEuiTheme();
 
@@ -95,11 +95,6 @@ export const JobSetupScreen = (props: Props) => {
     }
   }, [props.jobType, kubernetes.jobSummaries, host.jobSummaries]);
 
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
-
   const updateStart = useCallback((date: Moment) => {
     setStartDate(date);
   }, []);
@@ -135,9 +130,9 @@ export const JobSetupScreen = (props: Props) => {
   const onFilterChange = useCallback(
     (f: string) => {
       setFilter(f || '');
-      setFilterQuery(convertKueryToElasticSearchQuery(f, derivedIndexPattern) || '');
+      setFilterQuery(convertKueryToElasticSearchQuery(f, metricsView?.dataViewReference) || '');
     },
-    [derivedIndexPattern]
+    [metricsView?.dataViewReference]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -323,7 +318,7 @@ export const JobSetupScreen = (props: Props) => {
                     selectedOptions={
                       partitionField ? partitionField.map((p) => ({ label: p })) : undefined
                     }
-                    options={derivedIndexPattern.fields
+                    options={(metricsView?.fields ?? [])
                       .filter((f) => f.aggregatable && f.type === 'string')
                       .map((f) => ({ label: f.name }))}
                     onChange={onPartitionFieldChange}
@@ -358,7 +353,6 @@ export const JobSetupScreen = (props: Props) => {
                   }
                 >
                   <MetricsExplorerKueryBar
-                    derivedIndexPattern={derivedIndexPattern}
                     onSubmit={onFilterChange}
                     onChange={debouncedOnFilterChange}
                     value={filter}

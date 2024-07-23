@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyStringOrArray, dateType, summarySchema, groupingsSchema } from './common';
+import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
@@ -29,13 +29,16 @@ const objectiveSchema = t.intersection([
 const settingsSchema = t.type({
   syncDelay: durationType,
   frequency: durationType,
+  preventInitialBackfill: t.boolean,
 });
+
+const groupBySchema = allOrAnyStringOrArray;
 
 const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
 const tagsSchema = t.array(t.string);
 const sloIdSchema = t.string;
 
-const sloSchema = t.type({
+const sloDefinitionSchema = t.type({
   id: sloIdSchema,
   name: t.string,
   description: t.string,
@@ -49,24 +52,19 @@ const sloSchema = t.type({
   tags: tagsSchema,
   createdAt: dateType,
   updatedAt: dateType,
-  groupBy: allOrAnyStringOrArray,
+  groupBy: groupBySchema,
   version: t.number,
 });
-
-const sloWithSummarySchema = t.intersection([
-  sloSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema }),
-]);
 
 export {
   budgetingMethodSchema,
   objectiveSchema,
+  groupBySchema,
   occurrencesBudgetingMethodSchema,
   optionalSettingsSchema,
   settingsSchema,
+  sloDefinitionSchema,
   sloIdSchema,
-  sloSchema,
-  sloWithSummarySchema,
   tagsSchema,
   targetSchema,
   timeslicesBudgetingMethodSchema,

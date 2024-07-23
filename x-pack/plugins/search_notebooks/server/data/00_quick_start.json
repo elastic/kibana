@@ -70,7 +70,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": null,
    "id": "WHC3hHGW-wbI",
    "metadata": {
     "id": "WHC3hHGW-wbI"
@@ -96,7 +96,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": null,
    "id": "f38e0397",
    "metadata": {
     "colab": {
@@ -137,17 +137,39 @@
   },
   {
    "cell_type": "markdown",
-   "id": "1462ebd8",
-   "metadata": {
-    "id": "1462ebd8"
-   },
+   "id": "cb6ad7e9-0636-4cf3-a803-bf160fe16b33",
+   "metadata": {},
    "source": [
-    "Confirm that the client has connected with this test."
+    "### Enable Telemetry\n",
+    "\n",
+    "Knowing that you are using this notebook helps us decide where to invest our efforts to improve our products. We would like to ask you that you run the following code to let us gather anonymous usage statistics. See [telemetry.py](https://github.com/elastic/elasticsearch-labs/blob/main/telemetry/telemetry.py) for details. Thank you!"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
+   "execution_count": null,
+   "id": "3b04f442-729d-406d-b826-654483498df6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!curl -O -s https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/telemetry/telemetry.py\n",
+    "from telemetry import enable_telemetry\n",
+    "\n",
+    "client = enable_telemetry(client, \"00-quick-start\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d12b707c-e89d-4b43-bee5-edb1beb84839",
+   "metadata": {},
+   "source": [
+    "### Test the Client\n",
+    "Before you continue, confirm that the client has connected with this test."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
    "id": "25c618eb",
    "metadata": {
     "colab": {
@@ -161,7 +183,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "{'name': 'instance-0000000011', 'cluster_name': 'd1bd36862ce54c7b903e2aacd4cd7f0a', 'cluster_uuid': 'tIkh0X_UQKmMFQKSfUw-VQ', 'version': {'number': '8.9.0', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': '8aa461beb06aa0417a231c345a1b8c38fb498a0d', 'build_date': '2023-07-19T14:43:58.555259655Z', 'build_snapshot': False, 'lucene_version': '9.7.0', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}\n"
+      "{'name': 'instance-0000000000', 'cluster_name': 'a72482be54904952ba46d53c3def7740', 'cluster_uuid': 'g8BE52TtT32pGBbRzP_oKA', 'version': {'number': '8.12.2', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': '48a287ab9497e852de30327444b0809e55d46466', 'build_date': '2024-02-19T10:04:32.774273190Z', 'build_snapshot': False, 'lucene_version': '9.9.2', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}\n"
      ]
     }
    ],
@@ -195,7 +217,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 9,
    "id": "_OAahfg-tqrf",
    "metadata": {
     "colab": {
@@ -211,7 +233,7 @@
        "ObjectApiResponse({'acknowledged': True})"
       ]
      },
-     "execution_count": 5,
+     "execution_count": 9,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -232,7 +254,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 10,
    "id": "6bc95238",
    "metadata": {
     "id": "6bc95238"
@@ -244,7 +266,7 @@
        "ObjectApiResponse({'acknowledged': True, 'shards_acknowledged': True, 'index': 'book_index'})"
       ]
      },
-     "execution_count": 11,
+     "execution_count": 10,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -281,7 +303,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": 13,
    "id": "008d723e",
    "metadata": {
     "id": "008d723e"
@@ -290,10 +312,10 @@
     {
      "data": {
       "text/plain": [
-       "ObjectApiResponse({'took': 49, 'errors': False, 'items': [{'index': {'_index': 'book_index', '_id': 'HwOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 0, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'IAOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 1, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'IQOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 2, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'IgOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 3, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'IwOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 4, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'JAOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 5, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'JQOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 6, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'JgOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 7, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'JwOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 8, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'KAOa7osBiUNHLMdf3q2r', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 1, 'failed': 0}, '_seq_no': 9, '_primary_term': 1, 'status': 201}}]})"
+       "ObjectApiResponse({'errors': False, 'took': 88, 'items': [{'index': {'_index': 'book_index', '_id': 'caRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 0, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'cqRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 1, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'c6RpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 2, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'dKRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 3, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'daRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 4, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'dqRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 5, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'd6RpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 6, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'eKRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 7, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'eaRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 8, '_primary_term': 1, 'status': 201}}, {'index': {'_index': 'book_index', '_id': 'eqRpvY4BKY8PuI1qPluy', '_version': 1, 'result': 'created', 'forced_refresh': True, '_shards': {'total': 2, 'successful': 2, 'failed': 0}, '_seq_no': 9, '_primary_term': 1, 'status': 201}}]})"
       ]
      },
-     "execution_count": 12,
+     "execution_count": 13,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -330,7 +352,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 14,
    "id": "f12ce2c9",
    "metadata": {
     "id": "f12ce2c9"
@@ -369,7 +391,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
+   "execution_count": 15,
    "id": "Df7hwcIjYwMT",
    "metadata": {
     "colab": {
@@ -384,16 +406,16 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "ID: JwOa7osBiUNHLMdf3q2r\n",
+      "ID: eaRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2008-05-15\n",
       "Title: JavaScript: The Good Parts\n",
       "Summary: A deep dive into the parts of JavaScript that are essential to writing maintainable code\n",
       "Publisher: oreilly\n",
       "Reviews: 51\n",
       "Authors: ['douglas crockford']\n",
-      "Score: 0.80428284\n",
+      "Score: 0.8042828\n",
       "\n",
-      "ID: IwOa7osBiUNHLMdf3q2r\n",
+      "ID: daRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2015-03-27\n",
       "Title: You Don't Know JS: Up & Going\n",
       "Summary: Introduction to JavaScript and programming as a whole\n",
@@ -402,7 +424,7 @@
       "Authors: ['kyle simpson']\n",
       "Score: 0.6989136\n",
       "\n",
-      "ID: JAOa7osBiUNHLMdf3q2r\n",
+      "ID: dqRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2018-12-04\n",
       "Title: Eloquent JavaScript\n",
       "Summary: A modern introduction to programming\n",
@@ -411,25 +433,25 @@
       "Authors: ['marijn haverbeke']\n",
       "Score: 0.6796988\n",
       "\n",
-      "ID: HwOa7osBiUNHLMdf3q2r\n",
+      "ID: caRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2019-10-29\n",
       "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
       "Summary: A guide to pragmatic programming for software engineers and developers\n",
       "Publisher: addison-wesley\n",
       "Reviews: 30\n",
       "Authors: ['andrew hunt', 'david thomas']\n",
-      "Score: 0.62065494\n",
+      "Score: 0.6206549\n",
       "\n",
-      "ID: KAOa7osBiUNHLMdf3q2r\n",
+      "ID: eqRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2012-06-27\n",
       "Title: Introduction to the Theory of Computation\n",
       "Summary: Introduction to the theory of computation and complexity theory\n",
       "Publisher: cengage learning\n",
       "Reviews: 33\n",
       "Authors: ['michael sipser']\n",
-      "Score: 0.6008769\n",
+      "Score: 0.60087687\n",
       "\n",
-      "ID: JgOa7osBiUNHLMdf3q2r\n",
+      "ID: eKRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2011-05-13\n",
       "Title: The Clean Coder: A Code of Conduct for Professional Programmers\n",
       "Summary: A guide to professional conduct in the field of software engineering\n",
@@ -438,7 +460,7 @@
       "Authors: ['robert c. martin']\n",
       "Score: 0.571234\n",
       "\n",
-      "ID: JQOa7osBiUNHLMdf3q2r\n",
+      "ID: d6RpvY4BKY8PuI1qPluy\n",
       "Publication date: 1994-10-31\n",
       "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
       "Summary: Guide to design patterns that can be used in any object-oriented language\n",
@@ -447,32 +469,32 @@
       "Authors: ['erich gamma', 'richard helm', 'ralph johnson', 'john vlissides']\n",
       "Score: 0.56499225\n",
       "\n",
-      "ID: IQOa7osBiUNHLMdf3q2r\n",
+      "ID: c6RpvY4BKY8PuI1qPluy\n",
       "Publication date: 2020-04-06\n",
       "Title: Artificial Intelligence: A Modern Approach\n",
       "Summary: Comprehensive introduction to the theory and practice of artificial intelligence\n",
       "Publisher: pearson\n",
       "Reviews: 39\n",
       "Authors: ['stuart russell', 'peter norvig']\n",
-      "Score: 0.56054837\n",
+      "Score: 0.5605484\n",
       "\n",
-      "ID: IgOa7osBiUNHLMdf3q2r\n",
+      "ID: dKRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2008-08-11\n",
       "Title: Clean Code: A Handbook of Agile Software Craftsmanship\n",
       "Summary: A guide to writing code that is easy to read, understand and maintain\n",
       "Publisher: prentice hall\n",
       "Reviews: 55\n",
       "Authors: ['robert c. martin']\n",
-      "Score: 0.54226947\n",
+      "Score: 0.5422694\n",
       "\n",
-      "ID: IAOa7osBiUNHLMdf3q2r\n",
+      "ID: cqRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2019-05-03\n",
       "Title: Python Crash Course\n",
       "Summary: A fast-paced, no-nonsense guide to programming in Python\n",
       "Publisher: no starch press\n",
       "Reviews: 42\n",
       "Authors: ['eric matthes']\n",
-      "Score: 0.5254088\n"
+      "Score: 0.52540874\n"
      ]
     }
    ],
@@ -525,7 +547,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
+   "execution_count": 16,
    "id": "WoE0yTchfj3A",
    "metadata": {
     "id": "WoE0yTchfj3A"
@@ -536,16 +558,16 @@
      "output_type": "stream",
      "text": [
       "\n",
-      "ID: HwOa7osBiUNHLMdf3q2r\n",
+      "ID: caRpvY4BKY8PuI1qPluy\n",
       "Publication date: 2019-10-29\n",
       "Title: The Pragmatic Programmer: Your Journey to Mastery\n",
       "Summary: A guide to pragmatic programming for software engineers and developers\n",
       "Publisher: addison-wesley\n",
       "Reviews: 30\n",
       "Authors: ['andrew hunt', 'david thomas']\n",
-      "Score: 0.62065494\n",
+      "Score: 0.6206549\n",
       "\n",
-      "ID: JQOa7osBiUNHLMdf3q2r\n",
+      "ID: d6RpvY4BKY8PuI1qPluy\n",
       "Publication date: 1994-10-31\n",
       "Title: Design Patterns: Elements of Reusable Object-Oriented Software\n",
       "Summary: Guide to design patterns that can be used in any object-oriented language\n",
@@ -570,6 +592,14 @@
     "\n",
     "pretty_response(response)"
    ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d9edaa20-b8e8-4ce4-99b1-58b81de29dd5",
+   "metadata": {},
+   "outputs": [],
+   "source": []
   }
  ],
  "metadata": {
@@ -591,7 +621,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.10.3"
+   "version": "3.10.13"
   }
  },
  "nbformat": 4,

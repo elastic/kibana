@@ -51,8 +51,10 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.opsgenie',
           '.gen-ai',
           '.bedrock',
+          '.gemini',
           '.sentinelone',
           '.cases',
+          '.crowdstrike',
         ].sort()
       );
     });

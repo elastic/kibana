@@ -26,6 +26,7 @@ import {
   CodeBox,
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
+  IngestPipelinePanel,
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
@@ -37,6 +38,10 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { javaDefinition } from '../languages/java';
 import { languageDefinitions } from '../languages/languages';
 import { LanguageGrid } from '../languages/language_grid';
+
+import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../../common';
+
 import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
@@ -55,6 +60,8 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
   const assetBasePath = useAssetBasePath();
   const [selectedLanguage, setSelectedLanguage] =
     React.useState<LanguageDefinition>(javaDefinition);
+
+  const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { elasticsearchURL, cloudId } = useMemo(() => {
     return {
@@ -67,7 +74,10 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
     apiKey: clientApiKey,
     cloudId,
     indexName,
+    ingestPipeline: selectedPipeline,
   };
+
+  const { data: pipelineData } = useIngestPipelines();
 
   const apiIngestSteps: EuiContainedStepProps[] = [
     {
@@ -83,6 +93,14 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
               setSelectedLanguage={setSelectedLanguage}
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage.id}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IngestPipelinePanel
+              selectedPipeline={selectedPipeline}
+              setSelectedPipeline={setSelectedPipeline}
+              ingestPipelinesData={pipelineData?.pipelines}
+              defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}
             />
           </EuiFlexItem>
           <EuiFlexItem>

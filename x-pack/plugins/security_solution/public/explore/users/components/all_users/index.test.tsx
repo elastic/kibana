@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 
 import { UsersTable } from '.';
@@ -90,7 +89,7 @@ describe('Users Table Component', () => {
                 name: 'testUser',
                 lastSeen: '2019-04-08T18:35:45.064Z',
                 domain: 'test domain',
-                risk: RiskSeverity.critical,
+                risk: RiskSeverity.Critical,
               },
             ]}
             fakeTotalCount={50}
@@ -124,7 +123,7 @@ describe('Users Table Component', () => {
                 name: 'testUser',
                 lastSeen: '2019-04-08T18:35:45.064Z',
                 domain: 'test domain',
-                risk: RiskSeverity.critical,
+                risk: RiskSeverity.Critical,
               },
             ]}
             fakeTotalCount={50}

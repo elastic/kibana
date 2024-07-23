@@ -6,23 +6,19 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CreateSLOInput, SLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 
 interface SLOInspectResponse {
-  slo: SLOResponse;
-  pipeline: Record<string, any>;
+  slo: SLODefinitionResponse;
+  rollUpPipeline: Record<string, any>;
+  summaryPipeline: Record<string, any>;
   rollUpTransform: TransformPutTransformRequest;
   summaryTransform: TransformPutTransformRequest;
   temporaryDoc: Record<string, any>;
-}
-
-export interface UseInspectSLOResponse {
-  data: SLOInspectResponse | undefined;
-  isLoading: boolean;
-  isSuccess: boolean;
-  isError: boolean;
+  rollUpTransformCompositeQuery: string;
+  summaryTransformCompositeQuery: string;
 }
 
 export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) {
@@ -34,7 +30,7 @@ export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) 
       try {
         const body = JSON.stringify(slo);
         const response = await http.post<SLOInspectResponse>(
-          '/internal/api/observability/slos/_inspect',
+          '/internal/observability/slos/_inspect',
           {
             body,
             signal,

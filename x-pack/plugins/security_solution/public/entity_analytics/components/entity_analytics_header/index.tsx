@@ -88,7 +88,7 @@ export const EntityAnalyticsHeader = () => {
       onClick: () => {
         dispatch(
           hostsActions.updateHostRiskScoreSeverityFilter({
-            severitySelection: [RiskSeverity.critical],
+            severitySelection: [RiskSeverity.Critical],
             hostsType: HostsType.page,
           })
         );
@@ -111,7 +111,7 @@ export const EntityAnalyticsHeader = () => {
       onClick: () => {
         dispatch(
           usersActions.updateUserRiskScoreSeverityFilter({
-            severitySelection: [RiskSeverity.critical],
+            severitySelection: [RiskSeverity.Critical],
           })
         );
 
@@ -179,7 +179,7 @@ export const EntityAnalyticsHeader = () => {
                 <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
                   <span>
                     {hostsSeverityCount ? (
-                      <FormattedCount count={hostsSeverityCount[RiskSeverity.critical]} />
+                      <FormattedCount count={hostsSeverityCount[RiskSeverity.Critical]} />
                     ) : (
                       '-'
                     )}
@@ -205,7 +205,7 @@ export const EntityAnalyticsHeader = () => {
                 <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
                   <span>
                     {usersSeverityCount ? (
-                      <FormattedCount count={usersSeverityCount[RiskSeverity.critical]} />
+                      <FormattedCount count={usersSeverityCount[RiskSeverity.Critical]} />
                     ) : (
                       '-'
                     )}

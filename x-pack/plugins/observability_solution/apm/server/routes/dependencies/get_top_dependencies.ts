@@ -16,6 +16,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -25,6 +26,13 @@ interface Options {
   environment: string;
   offset?: string;
   kuery: string;
+  randomSampler: RandomSampler;
+}
+
+interface TopDependenciesForTimeRange {
+  stats: ConnectionStatsItemWithImpact[];
+  // to inform when the query used random sampler aggregation
+  sampled: boolean;
 }
 
 async function getTopDependenciesForTimeRange({
@@ -35,8 +43,9 @@ async function getTopDependenciesForTimeRange({
   environment,
   offset,
   kuery,
-}: Options): Promise<ConnectionStatsItemWithImpact[]> {
-  const statsItems = await getConnectionStats({
+  randomSampler,
+}: Options): Promise<TopDependenciesForTimeRange> {
+  const { statsItems, sampled } = await getConnectionStats({
     apmEventClient,
     start,
     end,
@@ -44,11 +53,15 @@ async function getTopDependenciesForTimeRange({
     filter: [...environmentQuery(environment), ...kqlQuery(kuery)],
     offset,
     collapseBy: 'downstream',
+    randomSampler,
   });
 
-  return getConnectionStatsItemsWithRelativeImpact(
-    statsItems.filter((item) => item.location.type !== NodeType.service)
-  );
+  return {
+    stats: getConnectionStatsItemsWithRelativeImpact(
+      statsItems.filter((item) => item.location.type !== NodeType.service)
+    ),
+    sampled,
+  };
 }
 
 export interface TopDependenciesResponse {
@@ -63,30 +76,30 @@ export interface TopDependenciesResponse {
       | null;
     location: Node;
   }>;
+  // to inform when the query used random sampler aggregation
+  sampled: boolean;
 }
 
-export async function getTopDependencies(
-  options: Options
-): Promise<TopDependenciesResponse> {
+export async function getTopDependencies(options: Options): Promise<TopDependenciesResponse> {
   const { offset, ...otherOptions } = options;
   const [currentDependencies, previousDependencies] = await Promise.all([
     getTopDependenciesForTimeRange(otherOptions),
-    offset
-      ? getTopDependenciesForTimeRange({ ...otherOptions, offset })
-      : Promise.resolve([]),
+    offset ? getTopDependenciesForTimeRange({ ...otherOptions, offset }) : Promise.resolve([]),
   ]);
 
   return {
-    dependencies: currentDependencies.map((dependency) => {
+    dependencies: currentDependencies.stats.map((dependency) => {
       const { stats, ...rest } = dependency;
-      const prev = previousDependencies.find(
-        (item): boolean => item.location.id === dependency.location.id
-      );
+      const prev = (
+        'stats' in previousDependencies ? previousDependencies.stats : previousDependencies
+      ).find((item): boolean => item.location.id === dependency.location.id);
+
       return {
         ...rest,
         currentStats: stats,
         previousStats: prev?.stats ?? null,
       };
     }),
+    sampled: currentDependencies.sampled,
   };
 }

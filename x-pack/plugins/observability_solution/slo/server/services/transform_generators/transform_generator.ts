@@ -10,35 +10,29 @@ import {
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
-  public abstract getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest;
+  public abstract getTransformParams(
+    slo: SLODefinition,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest>;
 
-  public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
+  public buildCommonRuntimeMappings(slo: SLODefinition, dataView?: DataView): MappingRuntimeFields {
     return {
-      'slo.id': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.id}')`,
-        },
-      },
-      'slo.revision': {
-        type: 'long',
-        script: {
-          source: `emit(${slo.revision})`,
-        },
-      },
+      ...(dataView?.getRuntimeMappings?.() ?? {}),
     };
   }
 
-  public buildDescription(slo: SLO): string {
+  public buildDescription(slo: SLODefinition): string {
     return `Rolled-up SLI data for SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}]`;
   }
 
   public buildCommonGroupBy(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp',
     extraGroupByFields = {}
   ) {
@@ -64,8 +58,6 @@ export abstract class TransformGenerator {
         : {};
 
     return {
-      'slo.id': { terms: { field: 'slo.id' } },
-      'slo.revision': { terms: { field: 'slo.revision' } },
       ...groupings,
       ...extraGroupByFields,
       // @timestamp field defined in the destination index
@@ -78,8 +70,26 @@ export abstract class TransformGenerator {
     };
   }
 
+  public async getIndicatorDataView({
+    dataViewService,
+    dataViewId,
+  }: {
+    dataViewService: DataViewsService;
+    dataViewId?: string;
+  }): Promise<DataView | undefined> {
+    let dataView: DataView | undefined;
+    if (dataViewId) {
+      try {
+        dataView = await dataViewService.get(dataViewId);
+      } catch (e) {
+        // If the data view is not found, we will continue without it
+      }
+    }
+    return dataView;
+  }
+
   public buildSettings(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp'
   ): TransformSettings {
     return {

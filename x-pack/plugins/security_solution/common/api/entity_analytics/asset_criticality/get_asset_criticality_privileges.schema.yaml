@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Get Asset Criticality Privileges Schema
-  version: 1.0.0
+  version: '1'
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality/privileges:
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: AssetCriticalityGetPrivileges
       summary: Get Asset Criticality Privileges
       responses:
@@ -20,11 +22,49 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'
+                $ref: '#/components/schemas/EntityAnalyticsPrivileges'
               example:
                 elasticsearch:
                   index:
-                    ".asset-criticality.asset-criticality-*":
+                    '.asset-criticality.asset-criticality-*':
                       read: true
                       write: false
                 has_all_required: false
+components:
+  schemas:
+    EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
+          type: object
+          properties:
+            elasticsearch:
+              type: object
+              properties:
+                cluster:
+                  type: object
+                  properties:
+                    manage_index_templates:
+                      type: boolean
+                    manage_transform:
+                      type: boolean
+                index:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      read:
+                        type: boolean
+                      write:
+                        type: boolean
+          required:
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges

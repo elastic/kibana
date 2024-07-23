@@ -15,7 +15,12 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SERVICE_KEY, SERVICE_PATH, INITIAL_REST_VERSION } from '../../constants';
+import {
+  SERVICE_KEY,
+  SERVICE_PATH,
+  INITIAL_REST_VERSION,
+  GET_DATA_VIEWS_DESCRIPTION,
+} from '../../constants';
 import { DataViewListItemRestResponse } from '../route_types';
 
 interface GetDataViewsArgs {
@@ -33,19 +38,8 @@ export const getDataViews = async ({
   return dataViewsService.getIdsWithTitle();
 };
 
-const dataViewListSchema = schema.arrayOf(
-  schema.object({
-    id: schema.string(),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    title: schema.string(),
-    type: schema.maybe(schema.string()),
-    typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    name: schema.maybe(schema.string()),
-  })
-);
-
 const getDataViewsRouteFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -54,12 +48,26 @@ const getDataViewsRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    const responseValidation = () => {
+      const dataViewListSchema = schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          namespaces: schema.maybe(schema.arrayOf(schema.string())),
+          title: schema.string(),
+          type: schema.maybe(schema.string()),
+          typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          name: schema.maybe(schema.string()),
+        })
+      );
+      return schema.object({ [serviceKey]: dataViewListSchema });
+    };
+
+    router.versioned.get({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
           request: {},
-          response: { 200: { body: schema.object({ [serviceKey]: dataViewListSchema }) } },
+          response: { 200: { body: responseValidation } },
         },
       },
       router.handleLegacyErrors(
@@ -95,4 +103,8 @@ const getDataViewsRouteFactory =
     );
   };
 
-export const registerGetDataViewsRoute = getDataViewsRouteFactory(SERVICE_PATH, SERVICE_KEY);
+export const registerGetDataViewsRoute = getDataViewsRouteFactory(
+  SERVICE_PATH,
+  SERVICE_KEY,
+  GET_DATA_VIEWS_DESCRIPTION
+);

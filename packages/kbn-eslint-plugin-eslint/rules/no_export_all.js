@@ -33,7 +33,7 @@ module.exports = {
   create: (context) => {
     return {
       ExportAllDeclaration(node) {
-        const services = /** @type ParserServices */ (context.parserServices);
+        const services = /** @type ParserServices */ (context.sourceCode.parserServices);
         const esNode = /** @type EsTreeExportAllDeclaration */ (node);
         const tsnode = /** @type ExportDeclaration */ (services.esTreeNodeToTSNodeMap.get(esNode));
 

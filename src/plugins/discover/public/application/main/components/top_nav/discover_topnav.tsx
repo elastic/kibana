@@ -7,35 +7,30 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
 import {
   useSavedSearch,
   useSavedSearchHasChanged,
   useSavedSearchInitial,
-} from '../../services/discover_state_provider';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+} from '../../state_management/discover_state_provider';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
-  updateQuery: (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => void;
   stateContainer: DiscoverStateContainer;
-  textBasedLanguageModeErrors?: Error;
-  textBasedLanguageModeWarning?: string;
+  esqlModeErrors?: Error;
+  esqlModeWarning?: string;
   onFieldEdited: () => Promise<void>;
   isLoading?: boolean;
   onCancelClick?: () => void;
@@ -44,9 +39,8 @@ export interface DiscoverTopNavProps {
 export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
-  updateQuery,
-  textBasedLanguageModeErrors,
-  textBasedLanguageModeWarning,
+  esqlModeErrors,
+  esqlModeWarning,
   onFieldEdited,
   isLoading,
   onCancelClick,
@@ -66,14 +60,13 @@ export const DiscoverTopNav = ({
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
+  const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    // always show the timepicker for text based languages
-    const isTextBased = isTextBasedQuery(query);
+    // always show the timepicker for ES|QL mode
     return (
-      isTextBased ||
-      (!isTextBased && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
     );
-  }, [dataView, query]);
+  }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -99,7 +92,7 @@ export const DiscoverTopNav = ({
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (dataView?.id) {
               const dataViewInstance = await data.dataViews.get(dataView.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: dataViewInstance,
                 },
@@ -157,7 +150,7 @@ export const DiscoverTopNav = ({
     }
   };
 
-  const onTextBasedSavedAndExit = useCallback(
+  const onEsqlSavedAndExit = useCallback(
     ({ onSave, onCancel }) => {
       onSaveSearch({
         savedSearch: stateContainer.savedSearchState.getState(),
@@ -241,7 +234,7 @@ export const DiscoverTopNav = ({
       {...topNavProps}
       appName="discover"
       indexPatterns={[dataView]}
-      onQuerySubmit={updateQuery}
+      onQuerySubmit={stateContainer.actions.onUpdateQuery}
       onCancel={onCancelClick}
       isLoading={isLoading}
       onSavedQueryIdChange={updateSavedQueryId}
@@ -263,11 +256,9 @@ export const DiscoverTopNav = ({
         shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
       }
       displayStyle="detached"
-      textBasedLanguageModeErrors={
-        textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
-      }
-      textBasedLanguageModeWarning={textBasedLanguageModeWarning}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+      textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
+      textBasedLanguageModeWarning={esqlModeWarning}
+      onTextBasedSavedAndExit={onEsqlSavedAndExit}
       prependFilterBar={
         searchBarCustomization?.PrependFilterBar ? (
           <searchBarCustomization.PrependFilterBar />

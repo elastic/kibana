@@ -17,6 +17,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
+  BareNote,
   PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
@@ -180,8 +181,8 @@ const combineFilters = (filters: Array<string | null>) =>
 
 const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
   const username = request.user?.username ?? UNAUTHENTICATED_USER;
-  const updatedBy = `siem-ui-timeline.attributes.updatedBy: ${username}`;
-  const createdBy = `siem-ui-timeline.attributes.createdBy: ${username}`;
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${username}"`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: "${username}"`;
   return combineFilters([updatedBy, createdBy]);
 };
 
@@ -610,13 +611,14 @@ export const copyTimeline = async (
 
   const copiedNotes = Promise.all(
     notes.map((_note) => {
+      const newNote: BareNote = {
+        ..._note,
+        timelineId: newTimelineId,
+      };
       return note.persistNote({
         request,
         noteId: null,
-        note: {
-          ..._note,
-          timelineId: newTimelineId,
-        },
+        note: newNote,
         overrideOwner: false,
       });
     })

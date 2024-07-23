@@ -6,29 +6,30 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
+import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
+import type {
+  EnableRiskEngineErrorResponse,
+  EnableRiskEngineResponse,
+} from '../../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
-import type {
-  EnableRiskEngineResponse,
-  EnableDisableRiskEngineErrorResponse,
-} from '../../../../server/lib/entity_analytics/types';
 export const ENABLE_RISK_ENGINE_MUTATION_KEY = ['POST', 'ENABLE_RISK_ENGINE'];
 
 export const useEnableRiskEngineMutation = (options?: UseMutationOptions<{}>) => {
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
   const { enableRiskEngine } = useEntityAnalyticsRoutes();
-  return useMutation<EnableRiskEngineResponse, EnableDisableRiskEngineErrorResponse>(
-    enableRiskEngine,
-    {
-      ...options,
-      mutationKey: ENABLE_RISK_ENGINE_MUTATION_KEY,
-      onSettled: (...args) => {
-        invalidateRiskEngineStatusQuery();
+  return useMutation<
+    EnableRiskEngineResponse,
+    { body: EnableRiskEngineErrorResponse | TaskManagerUnavailableResponse }
+  >(enableRiskEngine, {
+    ...options,
+    mutationKey: ENABLE_RISK_ENGINE_MUTATION_KEY,
+    onSettled: (...args) => {
+      invalidateRiskEngineStatusQuery();
 
-        if (options?.onSettled) {
-          options.onSettled(...args);
-        }
-      },
-    }
-  );
+      if (options?.onSettled) {
+        options.onSettled(...args);
+      }
+    },
+  });
 };

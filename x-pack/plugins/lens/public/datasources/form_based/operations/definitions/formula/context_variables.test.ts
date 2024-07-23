@@ -6,6 +6,13 @@
  */
 
 import type { FormBasedLayer } from '../../../../..';
+import {
+  INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
+  INTERVAL_OP_MISSING_TIME_RANGE,
+  INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+  TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
+  TIMERANGE_OP_MISSING_TIME_RANGE,
+} from '../../../../../user_messages_ids';
 import { createMockedIndexPattern } from '../../../mocks';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import {
@@ -49,7 +56,10 @@ describe('context variables', () => {
           )
         ).toEqual(
           expect.arrayContaining([
-            'Cannot compute an interval without a date histogram column configured',
+            {
+              uniqueId: INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
+              message: 'Cannot compute an interval without a date histogram column configured',
+            },
           ])
         );
       });
@@ -64,7 +74,14 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              uniqueId: INTERVAL_OP_MISSING_TIME_RANGE,
+              message: 'The current time range interval is not available',
+            },
+          ])
+        );
       });
 
       it('should return error if no targetBar is passed over', () => {
@@ -76,7 +93,14 @@ describe('context variables', () => {
             { fromDate: new Date().toISOString(), toDate: new Date().toISOString() },
             {}
           )
-        ).toEqual(expect.arrayContaining(['Missing "histogram:barTarget" value']));
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+              message: 'Missing "histogram:barTarget" value',
+            },
+          ])
+        );
       });
 
       it('should not return errors if all context is provided', () => {
@@ -107,7 +131,7 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toBeUndefined();
+        ).toHaveLength(0);
       });
     });
   });
@@ -123,7 +147,14 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              message: 'The current time range interval is not available',
+              uniqueId: TIMERANGE_OP_MISSING_TIME_RANGE,
+            },
+          ])
+        );
       });
 
       it('should return error if dataView is not time-based', () => {
@@ -138,7 +169,14 @@ describe('context variables', () => {
             {},
             100
           )
-        ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              message: 'The current dataView is not time based',
+              uniqueId: TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
+            },
+          ])
+        );
       });
     });
   });
@@ -147,7 +185,7 @@ describe('context variables', () => {
       it('should return no error even without context', () => {
         expect(
           nowOperation.getErrorMessage!(createLayer('now'), 'col1', createMockedIndexPattern())
-        ).toBeUndefined();
+        ).toHaveLength(0);
       });
     });
   });

@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should redirect to main page when trying to access invalid route', async () => {
         await PageObjects.common.navigateToUrl('discover', '#/invalid-route', {
           useActualUrl: true,
+          ensureCurrentUrl: false,
         });
         await PageObjects.header.awaitKibanaChrome();
 

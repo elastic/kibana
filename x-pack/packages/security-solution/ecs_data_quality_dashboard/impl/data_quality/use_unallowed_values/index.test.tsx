@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { getUnallowedValueRequestItems } from '../data_quality_panel/allowed_values/helpers';
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
 import { ERROR_LOADING_UNALLOWED_VALUES } from '../translations';
-import { EcsMetadata, UnallowedValueRequestItem } from '../types';
+import { UnallowedValueRequestItem } from '../types';
 import { useUnallowedValues, UseUnallowedValues } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { EcsFlatTyped } from '../constants';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();
@@ -26,7 +26,7 @@ const mockTelemetryEvents = {
 };
 const { toasts } = notificationServiceMock.createSetupContract();
 
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
@@ -37,10 +37,9 @@ const ContextWrapper: React.FC = ({ children }) => (
   </DataQualityProvider>
 );
 
-const ecsMetadata = EcsFlat as unknown as Record<string, EcsMetadata>;
 const indexName = 'auditbeat-custom-index-1';
 const requestItems = getUnallowedValueRequestItems({
-  ecsMetadata,
+  ecsMetadata: EcsFlatTyped,
   indexName,
 });
 

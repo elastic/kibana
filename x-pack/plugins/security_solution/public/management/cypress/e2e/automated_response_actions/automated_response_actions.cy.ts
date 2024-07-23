@@ -47,7 +47,7 @@ describe(
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
+            return createEndpointHost(policy.policy_ids[0]).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });
@@ -73,8 +73,7 @@ describe(
       login();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/169828
-    describe.skip('From alerts', () => {
+    describe('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
@@ -100,8 +99,8 @@ describe(
         visitRuleAlerts(ruleName);
         closeAllToasts();
 
-        changeAlertsFilter('process.name: "sshd"');
-        cy.getByTestSubj('expand-event').eq(0).click();
+        changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
+        cy.getByTestSubj('expand-event').first().click();
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 

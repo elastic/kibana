@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
+import { LocatorPublic } from '@kbn/share-plugin/common/url_service/locators';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { InfraWaffleMapNode } from '../../../../lib/lib';
+import { SerializableRecord } from '@kbn/utility-types';
+import { InfraWaffleMapNode } from '../../../../common/inventory/types';
 
-export const navigateToUptime = (
-  locators: LocatorClient,
-  nodeType: InventoryItemType,
-  node: InfraWaffleMapNode
-) => {
-  return locators.get(uptimeOverviewLocatorID)!.navigate({ [nodeType]: node.id, ip: node.ip });
+export const navigateToUptime = ({
+  uptimeLocator,
+  nodeType,
+  node,
+}: {
+  uptimeLocator: LocatorPublic<SerializableRecord>;
+  nodeType: InventoryItemType;
+  node: InfraWaffleMapNode;
+}) => {
+  return uptimeLocator.navigate({ [nodeType]: node.id, ip: node.ip });
 };

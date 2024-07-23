@@ -6,7 +6,7 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
@@ -17,6 +17,10 @@ import {
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
@@ -27,6 +31,7 @@ export interface ProfilingPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;
   profilingDataAccess: ProfilingDataAccessPluginSetup;
   security?: SecurityPluginSetup;
+  apmDataAccess?: ApmDataAccessPluginSetup;
 }
 
 export interface ProfilingPluginStartDeps {
@@ -37,6 +42,7 @@ export interface ProfilingPluginStartDeps {
   spaces?: SpacesPluginStart;
   profilingDataAccess: ProfilingDataAccessPluginStart;
   security?: SecurityPluginStart;
+  apmDataAccess?: ApmDataAccessPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

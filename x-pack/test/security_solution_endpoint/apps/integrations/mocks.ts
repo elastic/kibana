@@ -7,7 +7,7 @@
 
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common/types';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services/artifacts/types';
-import { InternalManifestSchema } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts';
+import { InternalUnifiedManifestBaseSchema } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts';
 import { TranslatedExceptionListItem } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts/lists';
 
 export interface AgentPolicyResponseType {
@@ -17,12 +17,12 @@ export interface AgentPolicyResponseType {
   _source: { data: FullAgentPolicy };
 }
 
-export interface InternalManifestSchemaResponseType {
+export interface InternalUnifiedManifestSchemaResponseType {
   _index: string;
   _id: string;
   _score: number;
   _source: {
-    'endpoint:user-artifact-manifest': InternalManifestSchema;
+    'endpoint:unified-user-artifact-manifest': InternalUnifiedManifestBaseSchema;
   };
 }
 

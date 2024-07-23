@@ -23,14 +23,15 @@ import {
 } from './column_types';
 import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import { hasField } from '../../pure_utils';
+import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
 
 export function getInvalidFieldMessage(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern?: IndexPattern
-): FieldBasedOperationErrorMessage[] | undefined {
+): FieldBasedOperationErrorMessage[] {
   if (!indexPattern) {
-    return;
+    return [];
   }
 
   const column = layer.columns[columnId] as FieldBasedIndexPatternColumn;
@@ -77,25 +78,29 @@ export function getInvalidFieldMessage(
       const wrongTypeFields =
         operationDefinition?.getNonTransferableFields?.(column, indexPattern) ?? fieldNames;
       return [
-        i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
-          defaultMessage:
-            '{count, plural, one {Field} other {Fields}} {invalidFields} {count, plural, one {is} other {are}} of the wrong type',
-          values: {
-            count: wrongTypeFields.length,
-            invalidFields: wrongTypeFields.join(', '),
-          },
-        }),
+        {
+          uniqueId: FIELD_WRONG_TYPE,
+          message: i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
+            defaultMessage:
+              '{count, plural, one {Field} other {Fields}} {invalidFields} {count, plural, one {is} other {are}} of the wrong type',
+            values: {
+              count: wrongTypeFields.length,
+              invalidFields: wrongTypeFields.join(', '),
+            },
+          }),
+        },
       ];
     }
   }
 
-  return undefined;
+  return [];
 }
 
 export const generateMissingFieldMessage = (
   missingFields: string[],
   columnId: string
 ): FieldBasedOperationErrorMessage => ({
+  uniqueId: FIELD_NOT_FOUND,
   message: (
     <FormattedMessage
       id="xpack.lens.indexPattern.fieldsNotFound"
@@ -121,13 +126,6 @@ export const generateMissingFieldMessage = (
     { id: 'embeddableBadge' },
   ],
 });
-
-export function combineErrorMessages(
-  errorMessages: Array<FieldBasedOperationErrorMessage[] | undefined>
-): FieldBasedOperationErrorMessage[] | undefined {
-  const messages = (errorMessages.filter(Boolean) as FieldBasedOperationErrorMessage[][]).flat();
-  return messages.length ? messages : undefined;
-}
 
 export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
   const field = indexPattern?.getFieldByName(name);

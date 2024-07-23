@@ -24,15 +24,9 @@ import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import {
-  ServerlessType,
-  getServerlessTypeFromCloudData,
-} from '../../../common/serverless';
+import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
 
-type ServiceMetadataIconsRaw = Pick<
-  TransactionRaw,
-  'kubernetes' | 'cloud' | 'container' | 'agent'
->;
+type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 
 export interface ServiceMetadataIcons {
   agentName?: string;
@@ -65,10 +59,7 @@ export async function getServiceMetadataIcons({
   start: number;
   end: number;
 }): Promise<ServiceMetadataIcons> {
-  const filter = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    ...rangeQuery(start, end),
-  ];
+  const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
 
   const params = {
     apm: {
@@ -81,21 +72,12 @@ export async function getServiceMetadataIcons({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [
-        KUBERNETES,
-        CLOUD_PROVIDER,
-        CONTAINER_ID,
-        AGENT_NAME,
-        CLOUD_SERVICE_NAME,
-      ],
+      _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
       query: { bool: { filter, should } },
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_metadata_icons',
-    params
-  );
+  const response = await apmEventClient.search('get_service_metadata_icons', params);
 
   if (response.hits.total.value === 0) {
     return {
@@ -116,10 +98,7 @@ export async function getServiceMetadataIcons({
     containerType = 'Docker';
   }
 
-  const serverlessType = getServerlessTypeFromCloudData(
-    cloud?.provider,
-    cloud?.service?.name
-  );
+  const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
 
   return {
     agentName: agent?.name,

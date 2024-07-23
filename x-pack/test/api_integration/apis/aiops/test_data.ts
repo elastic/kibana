@@ -25,18 +25,18 @@ import {
 
 import type { TestData } from './types';
 
-export const API_VERSIONS: ApiVersion[] = ['1', '2'];
+export const API_VERSIONS: ApiVersion[] = ['2'];
 
 export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {
     testName: 'ecommerce',
     esArchive: 'x-pack/test/functional/es_archives/ml/ecommerce',
     requestBody: {
-      baselineMax: 1561719083292,
-      baselineMin: 1560954147006,
-      deviationMax: 1562254538692,
-      deviationMin: 1561986810992,
-      end: 2147483647000,
+      baselineMax: 1687949483292,
+      baselineMin: 1687184547006,
+      deviationMax: 1688484938692,
+      deviationMin: 1688217210992,
+      end: 2273714047000,
       index: 'ft_ecommerce',
       searchQuery: '{"match_all":{}}',
       start: 0,

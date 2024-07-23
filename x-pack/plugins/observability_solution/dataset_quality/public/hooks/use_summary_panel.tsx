@@ -6,74 +6,82 @@
  */
 
 import createContainer from 'constate';
-import { useInterpret, useSelector } from '@xstate/react';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { IDataStreamsStatsClient } from '../services/data_streams_stats';
-import { createDatasetsSummaryPanelStateMachine } from '../state_machines/summary_panel';
+import { useSelector } from '@xstate/react';
+import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
+import { useDatasetQualityTable } from '.';
+import { useDatasetQualityContext } from '../components/dataset_quality/context';
+import { filterInactiveDatasets } from '../utils';
 
-interface SummaryPanelContextDeps {
-  dataStreamStatsClient: IDataStreamsStatsClient;
-  toasts: IToasts;
-}
+const useSummaryPanel = () => {
+  const { service } = useDatasetQualityContext();
+  const {
+    filteredItems,
+    isSizeStatsAvailable,
+    canUserMonitorDataset,
+    canUserMonitorAnyDataStream,
+  } = useDatasetQualityTable();
 
-const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextDeps) => {
-  const summaryPanelStateService = useInterpret(() =>
-    createDatasetsSummaryPanelStateMachine({
-      dataStreamStatsClient,
-      toasts,
-    })
-  );
+  const { timeRange } = useSelector(service, (state) => state.context.filters);
 
   /*
     Datasets Quality
   */
-  const datasetsQuality = useSelector(
-    summaryPanelStateService,
-    (state) => state.context.datasetsQuality
+
+  const datasetsQuality = {
+    percentages: filteredItems.map((item) => item.degradedDocs.percentage),
+  };
+
+  const isDatasetsQualityLoading = useSelector(service, (state) =>
+    state.matches('degradedDocs.fetching')
   );
-  const isDatasetsQualityLoading = useSelector(
-    summaryPanelStateService,
-    (state) =>
-      state.matches('datasetsQuality.fetching') ||
-      state.matches('datasetsQuality.retrying') ||
-      state.matches('datasetsActivity.fetching')
+
+  /*
+    User Authorization
+  */
+  const canUserMonitorAllFilteredDataStreams = filteredItems.every(
+    (item) => item.userPrivileges?.canMonitor ?? true
   );
+
+  const isUserAuthorizedForDataset =
+    canUserMonitorDataset && canUserMonitorAnyDataStream && canUserMonitorAllFilteredDataStreams;
 
   /*
     Datasets Activity
   */
-  const datasetsActivity = useSelector(
-    summaryPanelStateService,
-    (state) => state.context.datasetsActivity
-  );
-  const isDatasetsActivityLoading = useSelector(
-    summaryPanelStateService,
-    (state) =>
-      state.matches('datasetsActivity.fetching') || state.matches('datasetsActivity.retrying')
+  const datasetsActivity = {
+    total: filteredItems.length,
+    active: filterInactiveDatasets({
+      datasets: filteredItems,
+      timeRange,
+    }).length,
+  };
+
+  const isDatasetsActivityLoading = useSelector(service, (state) =>
+    state.matches('datasets.fetching')
   );
 
   /*
     Estimated Data
   */
-  const estimatedData = useSelector(
-    summaryPanelStateService,
-    (state) => state.context.estimatedData
+  const estimatedData = filteredItems.reduce(
+    (acc, curr) => acc + DataStreamStat.calculateFilteredSize(curr),
+    0
   );
+
   const isEstimatedDataLoading = useSelector(
-    summaryPanelStateService,
-    (state) => state.matches('estimatedData.fetching') || state.matches('estimatedData.retrying')
-  );
-  const isEstimatedDataDisabled = useSelector(summaryPanelStateService, (state) =>
-    state.matches('estimatedData.disabled')
+    service,
+    (state) => state.matches('datasets.fetching') || state.matches('degradedDocs.fetching')
   );
 
   return {
     datasetsQuality,
     isDatasetsQualityLoading,
 
+    isUserAuthorizedForDataset,
+
     isEstimatedDataLoading,
     estimatedData,
-    isEstimatedDataDisabled,
+    isEstimatedDataDisabled: !isSizeStatsAvailable,
 
     isDatasetsActivityLoading,
     datasetsActivity,

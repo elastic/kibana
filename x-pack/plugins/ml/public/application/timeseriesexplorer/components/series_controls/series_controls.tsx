@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectProps } from '@elastic/eui';
@@ -74,6 +74,7 @@ const getDefaultFieldConfig = (
 interface SeriesControlsProps {
   appStateHandler: Function;
   bounds: any;
+  direction?: 'column' | 'row';
   functionDescription?: string;
   job?: CombinedJob | MlJob;
   selectedDetectorIndex: number;
@@ -85,10 +86,11 @@ interface SeriesControlsProps {
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls: FC<SeriesControlsProps> = ({
+export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   appStateHandler,
   bounds,
   children,
+  direction = 'row',
   functionDescription,
   job,
   selectedDetectorIndex,
@@ -297,7 +299,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   return (
     <div data-test-subj="mlSingleMetricViewerSeriesControls">
-      <EuiFlexGroup>
+      <EuiFlexGroup direction={direction}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={

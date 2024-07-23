@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiBetaBadge } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import type { Ref, ReactElement, ComponentType, Dispatch, SetStateAction } from 'react';
-import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import type { Ref, ReactElement, ComponentType } from 'react';
+import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
@@ -42,9 +37,8 @@ import {
 } from './selectors';
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 import { initializeTimelineSettings } from '../../../store/actions';
-import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
+import { selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -97,7 +91,6 @@ interface BasicTimelineTab {
 type ActiveTimelineTabProps = BasicTimelineTab & {
   activeTimelineTab: TimelineTabs;
   showTimeline: boolean;
-  setConversationTitle: Dispatch<SetStateAction<string>>;
 };
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
@@ -107,12 +100,22 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     rowRenderers,
     timelineId,
     timelineType,
-    setConversationTitle,
     showTimeline,
   }) => {
-    const { hasAssistantPrivilege } = useAssistantAvailability();
-    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
-    const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
+    const { isTimelineEsqlEnabledByFeatureFlag, isEsqlAdvancedSettingEnabled } =
+      useEsqlAvailability();
+    const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
+      selectTimelineESQLSavedSearchId(state, timelineId)
+    );
+    const shouldShowESQLTab = useMemo(() => {
+      // disabling esql feature from feature flag should unequivocally hide the tab
+      // irrespective of the fact that the advanced setting is enabled or
+      // not or existing esql query is present or not
+      if (!isTimelineEsqlEnabledByFeatureFlag) {
+        return false;
+      }
+      return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
+    }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -135,33 +138,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    const getAssistantTab = useCallback(() => {
-      if (showTimeline) {
-        const AssistantTab = tabWithSuspense(lazy(() => import('./assistant')));
-        return (
-          <HideShowContainer
-            $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
-            isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
-            data-test-subj={`timeline-tab-content-security-assistant`}
-            css={css`
-              overflow: hidden !important;
-            `}
-          >
-            {activeTimelineTab === TimelineTabs.securityAssistant ? (
-              <AssistantTab
-                setConversationTitle={setConversationTitle}
-                shouldRefocusPrompt={
-                  showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
-                }
-              />
-            ) : null}
-          </HideShowContainer>
-        );
-      } else {
-        return null;
-      }
-    }, [activeTimelineTab, setConversationTitle, showTimeline]);
-
     /* Future developer -> why are we doing that
      * It is really expansive to re-render the QueryTab because the drag/drop
      * Therefore, we are only hiding its dom when switching to another tab
@@ -179,7 +155,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
+        {showTimeline && shouldShowESQLTab && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
             $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
@@ -216,7 +192,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        {hasAssistantPrivilege && !aiAssistantFlyoutMode ? getAssistantTab() : null}
       </>
     );
   }
@@ -226,15 +201,6 @@ ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
 const CountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const StyledEuiBetaBadge = styled(EuiBetaBadge)`
-  vertical-align: middle;
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-
-  &:hover {
-    cursor: pointer;
-  }
 `;
 
 const StyledEuiTab = styled(EuiTab)`
@@ -268,10 +234,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
-  const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
-  const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
-  const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
@@ -279,9 +241,24 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const getAppNotes = useMemo(() => getNotesSelector(), []);
   const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
   const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
+  const { isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag } =
+    useEsqlAvailability();
+
+  const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
+    selectTimelineESQLSavedSearchId(state, timelineId)
+  );
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
+  const shouldShowESQLTab = useMemo(() => {
+    // disabling esql feature from feature flag should unequivocally hide the tab
+    // irrespective of the fact that the advanced setting is enabled or
+    // not or existing esql query is present or not
+    if (!isTimelineEsqlEnabledByFeatureFlag) {
+      return false;
+    }
+    return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
+  }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
 
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
@@ -295,9 +272,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
 
   const isEnterprisePlus = useLicense().isEnterprise();
-
-  const [conversationTitle, setConversationTitle] = useState<string>(TIMELINE_CONVERSATION_TITLE);
-  const { reportAssistantInvoked } = useAssistantTelemetry();
 
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
@@ -345,16 +319,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     setActiveTab(TimelineTabs.session);
   }, [setActiveTab]);
 
-  const setSecurityAssistantAsActiveTab = useCallback(() => {
-    setActiveTab(TimelineTabs.securityAssistant);
-    if (activeTab !== TimelineTabs.securityAssistant) {
-      reportAssistantInvoked({
-        conversationId: conversationTitle,
-        invokedBy: TIMELINE_CONVERSATION_TITLE,
-      });
-    }
-  }, [activeTab, conversationTitle, reportAssistantInvoked, setActiveTab]);
-
   const setEsqlAsActiveTab = useCallback(() => {
     dispatch(
       initializeTimelineSettings({
@@ -384,7 +348,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {!isEsqlTabInTimelineDisabled && isEsqlSettingEnabled && (
+          {shouldShowESQLTab && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
               onClick={setEsqlAsActiveTab}
@@ -393,17 +357,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               key={TimelineTabs.esql}
             >
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
-              <StyledEuiBetaBadge
-                label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
-                size="s"
-                iconType="beaker"
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
-                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-                  />
-                }
-              />
             </StyledEuiTab>
           )}
           {timelineType === TimelineType.default && (
@@ -466,17 +419,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               </div>
             )}
           </StyledEuiTab>
-          {hasAssistantPrivilege && !aiAssistantFlyoutMode && (
-            <StyledEuiTab
-              data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
-              onClick={setSecurityAssistantAsActiveTab}
-              disabled={timelineType === TimelineType.template}
-              isSelected={activeTab === TimelineTabs.securityAssistant}
-              key={TimelineTabs.securityAssistant}
-            >
-              <span>{i18n.SECURITY_ASSISTANT}</span>
-            </StyledEuiTab>
-          )}
         </StyledEuiTabs>
       )}
 
@@ -487,7 +429,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         timelineId={timelineId}
         timelineType={timelineType}
         timelineDescription={timelineDescription}
-        setConversationTitle={setConversationTitle}
         showTimeline={showTimeline}
       />
     </>

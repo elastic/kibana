@@ -8,7 +8,6 @@
 import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
-  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -24,10 +23,7 @@ import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
-import {
-  ObservabilityAIAssistantRequestHandlerContext,
-  ObservabilityAIAssistantRouteHandlerResources,
-} from './routes/types';
+import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
 import {
   ObservabilityAIAssistantServerSetup,
@@ -38,10 +34,8 @@ import {
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
-import {
-  getObsAIAssistantConnectorType,
-  getObsAIAssistantConnectorAdapter,
-} from './rule_connector';
+import { initLangtrace } from './service/client/instrumentation/init_langtrace';
+import { aiAssistantCapabilities } from '../common/capabilities';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -57,6 +51,7 @@ export class ObservabilityAIAssistantPlugin
 
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
+    initLangtrace();
   }
   public setup(
     core: CoreSetup<
@@ -89,7 +84,7 @@ export class ObservabilityAIAssistantPlugin
             ],
             read: [],
           },
-          ui: ['show'],
+          ui: [aiAssistantCapabilities.show],
         },
         read: {
           disabled: true,
@@ -115,21 +110,23 @@ export class ObservabilityAIAssistantPlugin
       };
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
+    // Using once to make sure the same model ID is used during service init and Knowledge base setup
     const getModelId = once(async () => {
-      // Using once to make sure the same model ID is used during service init and Knowledge base setup
+      const defaultModelId = '.elser_model_2';
+      const [_, pluginsStart] = await core.getStartServices();
+      const license = await firstValueFrom(pluginsStart.licensing.license$);
+
+      if (!license.hasAtLeast('enterprise')) {
+        return defaultModelId;
+      }
 
       try {
         // Wait for the ML plugin's dependency on the internal saved objects client to be ready
-        const [_, pluginsStart] = await core.getStartServices();
-
         const { ml } = await core.plugins.onSetup('ml');
 
         if (!ml.found) {
           throw new Error('Could not find ML plugin');
         }
-
-        // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
-        await firstValueFrom(pluginsStart.licensing.license$);
 
         const elserModelDefinition = await (
           ml.contract as {
@@ -145,9 +142,7 @@ export class ObservabilityAIAssistantPlugin
         return elserModelDefinition.model_id;
       } catch (error) {
         this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
-
-        // Fallback to ELSER v2
-        return '.elser_model_2';
+        return defaultModelId;
       }
     });
 
@@ -161,55 +156,6 @@ export class ObservabilityAIAssistantPlugin
     service.register(registerFunctions);
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
-
-    const initResources = async (
-      request: KibanaRequest
-    ): Promise<ObservabilityAIAssistantRouteHandlerResources> => {
-      const [coreStart, pluginsStart] = await core.getStartServices();
-      const license = await firstValueFrom(pluginsStart.licensing.license$);
-      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-
-      const context: ObservabilityAIAssistantRequestHandlerContext = {
-        rac: routeHandlerPlugins.ruleRegistry.start().then((startContract) => {
-          return {
-            getAlertsClient() {
-              return startContract.getRacClientWithRequest(request);
-            },
-          };
-        }),
-        alerting: routeHandlerPlugins.alerting.start().then((startContract) => {
-          return {
-            getRulesClient() {
-              return startContract.getRulesClientWithRequest(request);
-            },
-          };
-        }),
-        core: Promise.resolve({
-          coreStart,
-          elasticsearch: {
-            client: coreStart.elasticsearch.client.asScoped(request),
-          },
-          uiSettings: {
-            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
-          },
-          savedObjects: {
-            client: savedObjectsClient,
-          },
-        }),
-        licensing: Promise.resolve({ license, featureUsage: pluginsStart.licensing.featureUsage }),
-      };
-
-      return {
-        request,
-        service,
-        context,
-        logger: this.logger.get('connector'),
-        plugins: routeHandlerPlugins,
-      };
-    };
-
-    plugins.actions.registerType(getObsAIAssistantConnectorType(initResources));
-    plugins.alerting.registerConnectorAdapter(getObsAIAssistantConnectorAdapter());
 
     registerServerRoutes({
       core,

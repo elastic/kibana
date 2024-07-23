@@ -5,7 +5,7 @@
  * 2.0.
  */
 import dedent from 'dedent';
-import { ChatFunctionClient } from '.';
+import { ChatFunctionClient, GET_DATA_ON_SCREEN_FUNCTION_NAME } from '.';
 import { FunctionVisibility } from '../../../common/functions/types';
 
 describe('chatFunctionClient', () => {
@@ -20,14 +20,9 @@ describe('chatFunctionClient', () => {
       });
 
       client = new ChatFunctionClient([]);
-      client.registerContext({
-        description: '',
-        name: 'core',
-      });
 
       client.registerFunction(
         {
-          contexts: ['core'],
           description: '',
           name: 'myFunction',
           parameters: {
@@ -53,7 +48,6 @@ describe('chatFunctionClient', () => {
           }),
           messages: [],
           signal: new AbortController().signal,
-          connectorId: '',
         });
       }).rejects.toThrowError(`Function arguments are invalid`);
 
@@ -93,9 +87,8 @@ describe('chatFunctionClient', () => {
 
       expect(functions[0]).toEqual({
         definition: {
-          contexts: ['core'],
           description: expect.any(String),
-          name: 'get_data_on_screen',
+          name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
           parameters: expect.any(Object),
           visibility: FunctionVisibility.AssistantOnly,
         },
@@ -110,10 +103,9 @@ describe('chatFunctionClient', () => {
 
       const result = await client.executeFunction({
         chat: jest.fn(),
-        name: 'get_data_on_screen',
+        name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],
-        connectorId: '',
         signal: new AbortController().signal,
       });
 

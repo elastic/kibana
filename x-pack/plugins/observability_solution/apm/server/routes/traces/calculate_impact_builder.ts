@@ -12,7 +12,5 @@ export function calculateImpactBuilder(sums?: Array<number | null>) {
   const min = Math.min(...sumValues);
 
   return (sum: number) =>
-    sum !== null && sum !== undefined
-      ? ((sum - min) / (max - min)) * 100 || 0
-      : 0;
+    sum !== null && sum !== undefined ? ((sum - min) / (max - min)) * 100 || 0 : 0;
 }

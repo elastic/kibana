@@ -9,15 +9,17 @@ import { partition } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type {
-  AlertSuppression,
-  AlertSuppressionCamel,
   InvestigationFields,
+  RequiredField,
+  RequiredFieldInput,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
@@ -29,7 +31,7 @@ import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { hasValidRuleType } from '../../rule_schema';
-import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -343,28 +345,6 @@ export const getInvalidConnectors = async (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
-export const convertAlertSuppressionToCamel = (
-  input: AlertSuppression | undefined
-): AlertSuppressionCamel | undefined =>
-  input
-    ? {
-        groupBy: input.group_by,
-        duration: input.duration,
-        missingFieldsStrategy: input.missing_fields_strategy,
-      }
-    : undefined;
-
-export const convertAlertSuppressionToSnake = (
-  input: AlertSuppressionCamel | undefined
-): AlertSuppression | undefined =>
-  input
-    ? {
-        group_by: input.groupBy,
-        duration: input.duration,
-        missing_fields_strategy: input.missingFieldsStrategy,
-      }
-    : undefined;
-
 /**
  * In ESS 8.10.x "investigation_fields" are mapped as string[].
  * For 8.11+ logic is added on read in our endpoints to migrate
@@ -388,3 +368,19 @@ export const migrateLegacyInvestigationFields = (
 
   return investigationFields;
 };
+
+/*
+  Computes the boolean "ecs" property value for each required field based on the ECS field map.
+  "ecs" property indicates whether the required field is an ECS field or not.
+*/
+export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]): RequiredField[] =>
+  (requiredFields ?? []).map((requiredFieldWithoutEcs) => {
+    const isEcsField = Boolean(
+      ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
+    );
+
+    return {
+      ...requiredFieldWithoutEcs,
+      ecs: isEcsField,
+    };
+  });

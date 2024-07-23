@@ -11,21 +11,22 @@ import { History } from 'history';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { Timeline } from '../../../../../shared/charts/timeline';
+import { css } from '@emotion/react';
+import { useTheme } from '../../../../../../hooks/use_theme';
+import {
+  VerticalLinesContainer,
+  TimelineAxisContainer,
+} from '../../../../../shared/charts/timeline';
 import { fromQuery, toQuery } from '../../../../../shared/links/url_helpers';
 import { getAgentMarks } from '../marks/get_agent_marks';
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
-import {
-  IWaterfall,
-  IWaterfallItem,
-} from './waterfall_helpers/waterfall_helpers';
+import { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 const Container = euiStyled.div`
   transition: 0.1s padding ease;
   position: relative;
-  overflow: hidden;
 `;
 
 const toggleFlyout = ({
@@ -62,39 +63,35 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   if (!entryId) {
     return 0;
   }
+
   let maxLevel = 1;
-  function countLevels(id: string, currentLevel: number) {
+  const visited = new Set<string>();
+  const queue: Array<{ id: string; level: number }> = [{ id: entryId, level: 1 }];
+
+  while (queue.length > 0) {
+    const { id, level } = queue.shift()!;
     const children = waterfall.childrenByParentId[id] || [];
-    if (children.length) {
-      children.forEach((child) => {
-        // Skip processing when a child node has the same ID as its parent
-        // to prevent infinite loop
-        if (child.id !== id) {
-          countLevels(child.id, currentLevel + 1);
-        }
-      });
-    } else {
-      if (maxLevel < currentLevel) {
-        maxLevel = currentLevel;
+
+    maxLevel = Math.max(maxLevel, level);
+    visited.add(id);
+
+    children.forEach((child) => {
+      if (child.id !== id && !visited.has(child.id)) {
+        queue.push({ id: child.id, level: level + 1 });
+        visited.add(child.id);
       }
-    }
+    });
   }
 
-  countLevels(entryId, 1);
   return maxLevel;
 }
-// level starts with 0
-const maxLevelOpen = 2;
 
-export function Waterfall({
-  waterfall,
-  waterfallItemId,
-  showCriticalPath,
-}: Props) {
+const MAX_DEPTH_OPEN_LIMIT = 2;
+
+export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Props) {
   const history = useHistory();
+  const theme = useTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
-  const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
-  const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
   const { duration } = waterfall;
 
@@ -131,49 +128,58 @@ export function Waterfall({
           })}
         />
       )}
-      <div>
-        <div style={{ display: 'flex' }}>
-          <EuiButtonEmpty
-            data-test-subj="apmWaterfallButton"
-            style={{ zIndex: 3, position: 'absolute' }}
-            iconType={isAccordionOpen ? 'fold' : 'unfold'}
-            onClick={() => {
-              setIsAccordionOpen((isOpen) => !isOpen);
-            }}
-          />
-          <Timeline
-            marks={[...agentMarks, ...errorMarks]}
-            xMax={duration}
-            height={waterfallHeight}
-            margins={timelineMargins}
-          />
-        </div>
-        <WaterfallItemsContainer>
-          {!waterfall.entryWaterfallTransaction ? null : (
-            <AccordionWaterfall
-              // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
-              key={`accordion_state_${isAccordionOpen}`}
-              isOpen={isAccordionOpen}
-              item={waterfall.entryWaterfallTransaction}
-              level={0}
-              waterfallItemId={waterfallItemId}
-              duration={duration}
-              waterfall={waterfall}
-              timelineMargins={timelineMargins}
-              onClickWaterfallItem={(
-                item: IWaterfallItem,
-                flyoutDetailTab: string
-              ) => toggleFlyout({ history, item, flyoutDetailTab })}
-              showCriticalPath={showCriticalPath}
-              maxLevelOpen={
-                waterfall.traceDocsTotal > 500
-                  ? maxLevelOpen
-                  : waterfall.traceDocsTotal
-              }
-            />
-          )}
-        </WaterfallItemsContainer>
+
+      <div
+        css={css`
+          display: flex;
+          position: sticky;
+          top: var(--euiFixedHeadersOffset, 0);
+          z-index: ${theme.eui.euiZLevel2};
+          background-color: ${theme.eui.euiColorEmptyShade};
+          border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
+        `}
+      >
+        <EuiButtonEmpty
+          data-test-subj="apmWaterfallButton"
+          css={css`
+            position: absolute;
+            z-index: ${theme.eui.euiZLevel2};
+          `}
+          iconType={isAccordionOpen ? 'fold' : 'unfold'}
+          onClick={() => {
+            setIsAccordionOpen((isOpen) => !isOpen);
+          }}
+        />
+        <TimelineAxisContainer
+          marks={[...agentMarks, ...errorMarks]}
+          xMax={duration}
+          margins={timelineMargins}
+        />
       </div>
+
+      <VerticalLinesContainer
+        marks={[...agentMarks, ...errorMarks]}
+        xMax={duration}
+        margins={timelineMargins}
+      />
+      <WaterfallItemsContainer>
+        {!waterfall.entryWaterfallTransaction ? null : (
+          <AccordionWaterfall
+            isOpen={isAccordionOpen}
+            waterfallItemId={waterfallItemId}
+            duration={duration}
+            waterfall={waterfall}
+            timelineMargins={timelineMargins}
+            onClickWaterfallItem={(item: IWaterfallItem, flyoutDetailTab: string) =>
+              toggleFlyout({ history, item, flyoutDetailTab })
+            }
+            showCriticalPath={showCriticalPath}
+            maxLevelOpen={
+              waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal
+            }
+          />
+        )}
+      </WaterfallItemsContainer>
 
       <WaterfallFlyout
         waterfallItemId={waterfallItemId}

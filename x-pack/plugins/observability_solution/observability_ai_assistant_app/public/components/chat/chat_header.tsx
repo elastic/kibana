@@ -138,8 +138,8 @@ export function ChatHeader({
                 onSaveTitle(e);
               }
             }}
-            onCancel={(previousTitle: string) => {
-              setNewTitle(previousTitle);
+            onCancel={() => {
+              setNewTitle(title);
             }}
           />
         </EuiFlexItem>

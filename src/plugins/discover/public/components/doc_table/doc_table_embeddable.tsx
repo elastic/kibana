@@ -17,7 +17,7 @@ import {
   MAX_ROWS_PER_PAGE_OPTION,
 } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embeddable_base';
+import { SavedSearchEmbeddableBase } from '../../embeddable/components/saved_search_embeddable_base';
 
 export interface DocTableEmbeddableProps extends Omit<DocTableProps, 'dataTestSubj'> {
   totalHitCount?: number;
@@ -29,7 +29,7 @@ export interface DocTableEmbeddableProps extends Omit<DocTableProps, 'dataTestSu
 
 export type DocTableEmbeddableSearchProps = Omit<
   DocTableEmbeddableProps,
-  'sampleSizeState' | 'isPlainRecord'
+  'sampleSizeState' | 'isEsqlMode'
 >;
 
 const DocTableWrapperMemoized = memo(DocTableWrapper);

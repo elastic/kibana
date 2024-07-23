@@ -29,10 +29,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
-    async clickCloseFlyoutButton() {
-      return testSubjects.click('euiFlyoutCloseButton');
-    },
-
     async getBetaBadgeExists() {
       return testSubjects.exists('infra-beta-badge');
     },

@@ -149,7 +149,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: agent.last_checkin_message ? agent.last_checkin_message : '-',
             },
             {
-              title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
+              title: i18n.translate('xpack.fleet.agentDetails.agentIdLabel', {
                 defaultMessage: 'Agent ID',
               }),
               description: agent.id,
@@ -198,6 +198,15 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   : '-',
             },
             {
+              title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
+                defaultMessage: 'Host ID',
+              }),
+              description:
+                typeof agent.local_metadata?.host?.id === 'string'
+                  ? agent.local_metadata.host.id
+                  : '-',
+            },
+            {
               title: i18n.translate('xpack.fleet.agentDetails.logLevel', {
                 defaultMessage: 'Logging level',
               }),
@@ -205,6 +214,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
                   ? agent.local_metadata.elastic.agent.log_level
                   : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.privilegeModeLabel', {
+                defaultMessage: 'Privilege mode',
+              }),
+              description:
+                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
+                    defaultMessage="Running as non-root"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Running as root"
+                  />
+                ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {

@@ -45,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
       await browser.setWindowSize(1600, 1200);
     });
 
@@ -53,7 +53,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('#Single Host Flyout', () => {
@@ -76,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
         });
 

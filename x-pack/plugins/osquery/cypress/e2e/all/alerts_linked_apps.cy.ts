@@ -18,9 +18,7 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
-// FLAKY: https://github.com/elastic/kibana/issues/180852
-// Failing: See https://github.com/elastic/kibana/issues/180852
-describe.skip(
+describe(
   'Alert Event Details',
   {
     tags: ['@ess', '@serverless'],

@@ -9,10 +9,11 @@ import React from 'react';
 
 import moment from 'moment';
 
-import { EuiComment, EuiText } from '@elastic/eui';
+import { EuiComment, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAvatar } from '@kbn/user-profile-components';
 
+import { css } from '@emotion/react';
 import { useUserProfile } from '../../hooks/use_user_profile';
 import type { Message as MessageType } from '../../types';
 
@@ -20,11 +21,22 @@ import { CopyActionButton } from './copy_action_button';
 
 type UserMessageProps = Pick<MessageType, 'content' | 'createdAt'>;
 
+const UserMessageCSS = css`
+  white-space: break-spaces;
+`;
+
 export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) => {
+  const { euiTheme } = useEuiTheme();
   const currentUserProfile = useUserProfile();
 
   return (
     <EuiComment
+      eventColor="subdued"
+      css={{
+        '.euiCommentEvent__body': {
+          backgroundColor: euiTheme.colors.ghost,
+        },
+      }}
       username={i18n.translate('xpack.searchPlayground.chat.message.user.name', {
         defaultMessage: 'You',
       })}
@@ -52,8 +64,9 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
           })}
         />
       }
+      data-test-subj="userMessage"
     >
-      <EuiText size="s">
+      <EuiText size="s" css={UserMessageCSS}>
         <p>{content}</p>
       </EuiText>
     </EuiComment>

@@ -14,6 +14,7 @@ import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
+import type { GetEndpointConsoleCommandsOptions } from '../../lib/console_commands_definition';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import React from 'react';
 import { enterConsoleCommand } from '../../../console/mocks';
@@ -33,7 +34,6 @@ import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using get-file action from response actions console', () => {
   let render: (
@@ -45,12 +45,21 @@ describe('When using get-file action from response actions console', () => {
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
   let endpointPrivileges: EndpointPrivileges;
+  let getConsoleCommandsOptions: GetEndpointConsoleCommandsOptions;
+  let mockedContext: AppContextTestRender;
 
   beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
+    mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
+
+    getConsoleCommandsOptions = {
+      agentType: 'endpoint',
+      endpointAgentId: 'a.b.c',
+      endpointCapabilities: [...ENDPOINT_CAPABILITIES],
+      endpointPrivileges,
+    };
 
     render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
       renderResult = mockedContext.render(
@@ -60,10 +69,8 @@ describe('When using get-file action from response actions console', () => {
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
-                  agentType: 'endpoint',
-                  endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...capabilities],
-                  endpointPrivileges,
+                  ...getConsoleCommandsOptions,
+                  endpointCapabilities: capabilities,
                 }),
               },
             };
@@ -123,7 +130,7 @@ describe('When using get-file action from response actions console', () => {
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
-        body: '{"endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
+        body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
         path: GET_FILE_ROUTE,
         version: '2023-10-31',
       });
@@ -182,11 +189,20 @@ describe('When using get-file action from response actions console', () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
     }) as ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
-    pendingDetailResponse.data.agents = ['a.b.c'];
+
+    pendingDetailResponse.data.command = 'get-file';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['not found'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['not found'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     pendingDetailResponse.data.outputs = {
-      'a.b.c': {
+      'agent-a': {
         type: 'json',
         content: {
           code: outputCode,
@@ -202,6 +218,59 @@ describe('When using get-file action from response actions console', () => {
         // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
         new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
+    });
+  });
+
+  describe('And agent type is SentinelOne', () => {
+    beforeEach(() => {
+      getConsoleCommandsOptions.agentType = 'sentinel_one';
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneGetFileEnabled: true,
+      });
+    });
+
+    it('should display error if feature flag is not enabled', async () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneGetFileEnabled: false,
+      });
+      await render();
+      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+        UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', 'get-file')
+      );
+    });
+
+    it('should call API with `agent_type` set to `sentinel_one`', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"sentinel_one","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should not look at `capabilities` to determine compatibility', async () => {
+      await render([]);
+      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalled();
+      });
+      expect(renderResult.queryByTestId('test-validationError-message')).toBeNull();
+    });
+
+    it('should display pending message', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('getFile-pending'));
+      });
     });
   });
 });

@@ -13,7 +13,6 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 
@@ -43,7 +42,6 @@ export const useObservedUserDetails = ({
   skip = false,
   startDate,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
-  const isNewUserDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
   const {
     loading,
     result: response,
@@ -81,9 +79,9 @@ export const useObservedUserDetails = ({
         from: startDate,
         to: endDate,
       },
-      filterQuery: isNewUserDetailsFlyoutEnabled ? NOT_EVENT_KIND_ASSET_FILTER : undefined,
+      filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     }),
-    [endDate, indexNames, startDate, userName, isNewUserDetailsFlyoutEnabled]
+    [endDate, indexNames, startDate, userName]
   );
 
   useEffect(() => {

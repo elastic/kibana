@@ -28,6 +28,8 @@ import {
   type WhereCommandContext,
   default as esql_parser,
   type MetaCommandContext,
+  type MetricsCommandContext,
+  IndexPatternContext,
 } from './antlr/esql_parser';
 import { default as ESQLParserListener } from './antlr/esql_parser_listener';
 import {
@@ -36,11 +38,13 @@ import {
   createOption,
   createLiteral,
   textExistsAndIsValid,
+  createSource,
+  createAstBaseItem,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import {
   collectAllSourceIdentifiers,
-  collectAllFieldsStatements,
+  collectAllFields,
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
@@ -52,7 +56,7 @@ import {
   getMatchField,
   getEnrichClauses,
 } from './ast_walker';
-import type { ESQLAst } from './types';
+import type { ESQLAst, ESQLAstMetricsCommand } from './types';
 
 export class AstListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -116,7 +120,7 @@ export class AstListener implements ESQLParserListener {
   exitRowCommand(ctx: RowCommandContext) {
     const command = createCommand('row', ctx);
     this.ast.push(command);
-    command.args.push(...collectAllFieldsStatements(ctx.fields()));
+    command.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**
@@ -141,13 +145,38 @@ export class AstListener implements ESQLParserListener {
   }
 
   /**
+   * Exit a parse tree produced by `esql_parser.metricsCommand`.
+   * @param ctx the parse tree
+   */
+  exitMetricsCommand(ctx: MetricsCommandContext): void {
+    const node: ESQLAstMetricsCommand = {
+      ...createAstBaseItem('metrics', ctx),
+      type: 'command',
+      args: [],
+      sources: ctx
+        .getTypedRuleContexts(IndexPatternContext)
+        .map((sourceCtx) => createSource(sourceCtx)),
+    };
+    this.ast.push(node);
+    const aggregates = collectAllFields(ctx.fields(0));
+    const grouping = collectAllFields(ctx.fields(1));
+    if (aggregates && aggregates.length) {
+      node.aggregates = aggregates;
+    }
+    if (grouping && grouping.length) {
+      node.grouping = grouping;
+    }
+    node.args.push(...node.sources, ...aggregates, ...grouping);
+  }
+
+  /**
    * Exit a parse tree produced by `esql_parser.evalCommand`.
    * @param ctx the parse tree
    */
   exitEvalCommand(ctx: EvalCommandContext) {
     const commandAst = createCommand('eval', ctx);
     this.ast.push(commandAst);
-    commandAst.args.push(...collectAllFieldsStatements(ctx.fields()));
+    commandAst.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**
@@ -160,7 +189,7 @@ export class AstListener implements ESQLParserListener {
 
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllFieldsStatements(ctx.fields(0)));
+      command.args.push(...collectAllFields(ctx.fields(0)));
     }
     if (ctx._grouping) {
       command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));

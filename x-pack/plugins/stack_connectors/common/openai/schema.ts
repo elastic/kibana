@@ -28,6 +28,9 @@ export const SecretsSchema = schema.object({ apiKey: schema.string() });
 // Run action schema
 export const RunActionParamsSchema = schema.object({
   body: schema.string(),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 const AIMessage = schema.object({
@@ -65,12 +68,15 @@ export const InvokeAIActionParamsSchema = schema.object({
         {
           name: schema.string(),
           description: schema.string(),
-          parameters: schema.object({
-            type: schema.string(),
-            properties: schema.object({}, { unknowns: 'allow' }),
-            additionalProperties: schema.boolean(),
-            $schema: schema.string(),
-          }),
+          parameters: schema.object(
+            {
+              type: schema.string(),
+              properties: schema.object({}, { unknowns: 'allow' }),
+              additionalProperties: schema.boolean(),
+              $schema: schema.string(),
+            },
+            { unknowns: 'allow' }
+          ),
         },
         // Not sure if this will include other properties, we should pass them if it does
         { unknowns: 'allow' }
@@ -96,6 +102,7 @@ export const InvokeAIActionParamsSchema = schema.object({
   temperature: schema.maybe(schema.number()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -116,6 +123,7 @@ export const StreamActionParamsSchema = schema.object({
   stream: schema.boolean({ defaultValue: false }),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const StreamingResponseSchema = schema.any();
@@ -140,7 +148,8 @@ export const RunActionResponseSchema = schema.object(
           message: schema.object(
             {
               role: schema.string(),
-              content: schema.maybe(schema.string()),
+              // nullable because message can contain function calls instead of final response when used with RAG
+              content: schema.maybe(schema.nullable(schema.string())),
             },
             { unknowns: 'ignore' }
           ),

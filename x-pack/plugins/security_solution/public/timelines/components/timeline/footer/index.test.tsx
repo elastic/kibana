@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -22,8 +22,8 @@ describe('Footer Timeline Component', () => {
   const itemsCount = 2;
 
   describe('rendering', () => {
-    test('it renders the default timeline footer', () => {
-      const wrapper = mount(
+    it('shoult render the default timeline footer', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -41,11 +41,11 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('FooterContainer').exists()).toBeTruthy();
+      expect(screen.getByTestId('timeline-footer')).toBeInTheDocument();
     });
 
-    test('it renders the loading panel at the beginning ', () => {
-      const wrapper = mount(
+    it('should render the loading panel at the beginning ', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -63,11 +63,11 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="LoadingPanelTimeline"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('LoadingPanelTimeline')).toBeInTheDocument();
     });
 
-    test('it renders the loadMore button if need to fetch more', () => {
-      const wrapper = mount(
+    it('should render the loadMore button if it needs to fetch more', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -85,11 +85,11 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="timeline-pagination"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('timeline-pagination')).toBeInTheDocument();
     });
 
-    test('it renders the Loading... in the more load button when fetching new data', () => {
-      const wrapper = shallow(
+    it('should render `Loading...` when fetching new data', () => {
+      render(
         <PagingControlComponent
           activePage={0}
           totalCount={30}
@@ -99,13 +99,12 @@ describe('Footer Timeline Component', () => {
         />
       );
 
-      const loadButton = wrapper.text();
-      expect(wrapper.find('[data-test-subj="LoadingPanelTimeline"]').exists()).toBeFalsy();
-      expect(loadButton).toContain('Loading...');
+      expect(screen.queryByTestId('LoadingPanelTimeline')).not.toBeInTheDocument();
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
-    test('it renders the Pagination in the more load button when fetching new data', () => {
-      const wrapper = shallow(
+    it('should render the Pagination in the more load button when fetching new data', () => {
+      render(
         <PagingControlComponent
           activePage={0}
           totalCount={30}
@@ -115,11 +114,11 @@ describe('Footer Timeline Component', () => {
         />
       );
 
-      expect(wrapper.find('[data-test-subj="timeline-pagination"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('timeline-pagination')).toBeInTheDocument();
     });
 
-    test('it does NOT render the loadMore button because there is nothing else to fetch', () => {
-      const wrapper = mount(
+    it('should NOT render the loadMore button because there is nothing else to fetch', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -137,11 +136,11 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="timeline-pagination"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('timeline-pagination')).not.toBeInTheDocument();
     });
 
-    test('it render popover to select new itemsPerPage in timeline', () => {
-      const wrapper = mount(
+    it('should render the popover to select new itemsPerPage in timeline', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -159,58 +158,14 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="timelineSizeRowPopover"] button').first().simulate('click');
-      expect(wrapper.find('[data-test-subj="timelinePickSizeRow"]').exists()).toBeTruthy();
-    });
-
-    test('it renders last updated when updated at is > 0', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FooterComponent
-            activePage={0}
-            updatedAt={updatedAt}
-            height={100}
-            id={TimelineId.test}
-            isLive={false}
-            isLoading={false}
-            itemsCount={itemsCount}
-            itemsPerPage={2}
-            itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangePage={loadMore}
-            totalCount={serverSideEventCount}
-          />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="fixed-width-last-updated"]').exists()).toBeTruthy();
-    });
-
-    test('it does NOT render last updated when updated at is 0', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FooterComponent
-            activePage={0}
-            updatedAt={0}
-            height={100}
-            id={TimelineId.test}
-            isLive={false}
-            isLoading={false}
-            itemsCount={itemsCount}
-            itemsPerPage={2}
-            itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangePage={loadMore}
-            totalCount={serverSideEventCount}
-          />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="fixed-width-last-updated"]').exists()).toBeFalsy();
+      fireEvent.click(screen.getByTestId('local-events-count-button'));
+      expect(screen.getByTestId('timelinePickSizeRow')).toBeInTheDocument();
     });
   });
 
   describe('Events', () => {
-    test('should call loadmore when clicking on the button load more', () => {
-      const wrapper = mount(
+    it('should call loadmore when clicking on the button load more', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -228,37 +183,12 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      wrapper.find('button[data-test-subj="pagination-button-next"]').first().simulate('click');
+      fireEvent.click(screen.getByTestId('pagination-button-next'));
       expect(loadMore).toBeCalled();
     });
 
-    // test('Should call onChangeItemsPerPage when you pick a new limit', () => {
-    //   const wrapper = mount(
-    //     <TestProviders>
-    //       <FooterComponent
-    //         activePage={0}
-    //         updatedAt={updatedAt}
-    //         height={100}
-    //         id={TimelineId.test}
-    //         isLive={false}
-    //         isLoading={false}
-    //         itemsCount={itemsCount}
-    //         itemsPerPage={1}
-    //         itemsPerPageOptions={[1, 5, 10, 20]}
-    //         onChangePage={loadMore}
-    //         totalCount={serverSideEventCount}
-    //       />
-    //     </TestProviders>
-    //   );
-
-    //   wrapper.find('[data-test-subj="timelineSizeRowPopover"] button').first().simulate('click');
-    //   wrapper.update();
-    //   wrapper.find('[data-test-subj="timelinePickSizeRow"] button').first().simulate('click');
-    //   expect(onChangeItemsPerPage).toBeCalled();
-    // });
-
-    test('it does render the auto-refresh message instead of load more button when stream live is on', () => {
-      const wrapper = mount(
+    it('should render the auto-refresh message instead of load more button when stream live is on', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -276,12 +206,12 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="paging-control"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="is-live-on-message"]').exists()).toBeTruthy();
+      expect(screen.queryByTestId('timeline-pagination')).not.toBeInTheDocument();
+      expect(screen.getByTestId('is-live-on-message')).toBeInTheDocument();
     });
 
-    test('it does render the load more button when stream live is off', () => {
-      const wrapper = mount(
+    it('should render the load more button when stream live is off', () => {
+      render(
         <TestProviders>
           <FooterComponent
             activePage={0}
@@ -299,8 +229,8 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="paging-control"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="is-live-on-message"]').exists()).toBeFalsy();
+      expect(screen.getByTestId('timeline-pagination')).toBeInTheDocument();
+      expect(screen.queryByTestId('is-live-on-message')).not.toBeInTheDocument();
     });
   });
 });

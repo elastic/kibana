@@ -21,16 +21,15 @@ import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpe
 
 import type { FieldsData } from '../types';
 import type {
-  BrowserField,
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { getSourcererScopeId } from '../../../../helpers';
+import { getFieldFormat } from '../get_field_format';
 
 export interface ThreatSummaryDescription {
-  browserField: BrowserField;
   data: FieldsData | undefined;
   eventId: string;
   index: number;
@@ -63,7 +62,6 @@ export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
-  browserField,
   data,
   eventId,
   index,
@@ -137,7 +135,7 @@ const EnrichmentSummaryComponent: React.FC<{
 
     const fieldsData: FieldsData = {
       field: field ?? '',
-      format: browserField?.format ?? '',
+      format: getFieldFormat(browserField) ?? '',
       type: browserField?.type ?? '',
       isObjectArray: eventData?.isObjectArray ?? false,
     };
@@ -179,7 +177,6 @@ const EnrichmentSummaryComponent: React.FC<{
                     scopeId={scopeId}
                     value={value}
                     data={fieldsData}
-                    browserField={browserField}
                     isDraggable={isDraggable}
                     isReadOnly={isReadOnly}
                   />
@@ -210,7 +207,6 @@ const EnrichmentSummaryComponent: React.FC<{
                     scopeId={scopeId}
                     value={value}
                     data={fieldsData}
-                    browserField={browserField}
                     isDraggable={isDraggable}
                     isReadOnly={isReadOnly}
                   />

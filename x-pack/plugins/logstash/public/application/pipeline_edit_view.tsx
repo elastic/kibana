@@ -41,7 +41,7 @@ const usePipeline = (
         if (e.status !== 403) {
           toasts.addDanger(
             i18n.translate('xpack.logstash.couldNotLoadPipelineErrorNotification', {
-              defaultMessage: `Couldn't load pipeline. Error: '{errStatusText}'.`,
+              defaultMessage: `Couldn't load pipeline. Error: ''{errStatusText}''.`,
               values: {
                 errStatusText: e.statusText,
               },

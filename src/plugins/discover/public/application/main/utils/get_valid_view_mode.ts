@@ -11,17 +11,17 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 /**
  * Returns a valid view mode
  * @param viewMode
- * @param isTextBasedQueryMode
+ * @param isEsqlMode
  */
 export const getValidViewMode = ({
   viewMode,
-  isTextBasedQueryMode,
+  isEsqlMode,
 }: {
   viewMode?: VIEW_MODE;
-  isTextBasedQueryMode: boolean;
+  isEsqlMode: boolean;
 }): VIEW_MODE | undefined => {
-  if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isTextBasedQueryMode) {
-    // only this mode is supported for text-based languages
+  if (viewMode === VIEW_MODE.PATTERN_LEVEL && isEsqlMode) {
+    // only this mode is supported for ES|QL languages
     return VIEW_MODE.DOCUMENT_LEVEL;
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -40,8 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // Intentionally setting as @skipInQA, keeping tests running in MKI that should block release
-  describe('@ess @serverless @skipInQA set_alert_tags', () => {
+  describe('@ess @serverless @serverlessQA set_alert_tags', () => {
     describe('validation checks', () => {
       it('should give errors when no alert ids are provided', async () => {
         const { body } = await supertest
@@ -50,9 +49,10 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setAlertTags({ tagsToAdd: [], tagsToRemove: [], ids: [] }))
           .expect(400);
 
-        expect(body).to.eql({
-          message: ['No alert ids were provided'],
-          status_code: 400,
+        expect(body).toEqual({
+          error: 'Bad Request',
+          message: '[request body]: ids: Array must contain at least 1 element(s)',
+          statusCode: 400,
         });
       });
 
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(setAlertTags({ tagsToAdd: ['test-1'], tagsToRemove: ['test-1'], ids: ['123'] }))
           .expect(400);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           message: [
             'Duplicate tags ["test-1"] were found in the tags_to_add and tags_to_remove parameters.',
           ],
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.hits.hits.map((alert) => {
-          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
+          expect(alert._source?.['kibana.alert.workflow_tags']).toEqual(['tag-1']);
         });
       });
 
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.hits.hits.map((alert) => {
-          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
+          expect(alert._source?.['kibana.alert.workflow_tags']).toEqual(['tag-1']);
         });
       });
 
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.hits.hits.map((alert) => {
-          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
+          expect(alert._source?.['kibana.alert.workflow_tags']).toEqual(['tag-1']);
         });
       });
 
@@ -225,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -246,7 +246,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.hits.hits.map((alert) => {
-          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql([]);
+          expect(alert._source?.['kibana.alert.workflow_tags']).toEqual([]);
         });
       });
     });

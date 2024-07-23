@@ -643,7 +643,7 @@
             ],
             "signature": [
               "{ [x: string]: ",
-              "ExpandedDetailType",
+              "ExpandedEventType",
               " | undefined; }"
             ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
@@ -1212,15 +1212,7 @@
             "section": "def-common.SortColumnTable",
             "text": "SortColumnTable"
           },
-          "[]; readonly title: string; readonly isLoading: boolean; readonly filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; readonly columns: (Pick<",
+          "[]; readonly title: string; readonly isLoading: boolean; readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -1242,7 +1234,15 @@
             "section": "def-common.ViewSelection",
             "text": "ViewSelection"
           },
-          "; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly defaultColumns: (Pick<",
+          "; readonly filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -1256,9 +1256,11 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
-          "ExpandedDetailType",
-          ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPage: number; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
+          " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
+          "AlertPageFilterType",
+          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
+          "ExpandedEventType",
+          ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1268,9 +1270,7 @@
           },
           "[]>; readonly sessionViewConfig: ",
           "SessionViewConfig",
-          " | null; readonly totalCount: number; readonly additionalFilters: Record<",
-          "AlertPageFilterType",
-          ", boolean>; }"
+          " | null; readonly totalCount: number; }"
         ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
         "deprecated": false,

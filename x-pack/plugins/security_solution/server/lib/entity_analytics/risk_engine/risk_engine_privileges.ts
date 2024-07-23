@@ -14,7 +14,7 @@ import type {
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import {
@@ -82,17 +82,17 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
  * @param getStartServices - Kibana's start services accessor
  * @param handler - The route handler to wrap
  **/
-export const withRiskEnginePrivilegeCheck = (
+export const withRiskEnginePrivilegeCheck = <P, Q, B>(
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
   handler: (
     context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest,
+    request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) => Promise<IKibanaResponse>
 ) => {
   return async (
     context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest,
+    request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) => {
     const [_, { security }] = await getStartServices();

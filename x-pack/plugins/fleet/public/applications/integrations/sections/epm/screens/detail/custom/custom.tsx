@@ -12,6 +12,7 @@ import { useLink, useUIExtension } from '../../../../../hooks';
 import type { PackageInfo } from '../../../../../types';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { ExtensionWrapper } from '../../../../../components';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -24,8 +25,8 @@ export const CustomViewPage: React.FC<Props> = memo(({ packageInfo }) => {
 
   return customViewExtension ? (
     <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>
+      <SideBarColumn grow={1} />
+      <EuiFlexItem grow={7}>
         <ExtensionWrapper>
           <customViewExtension.Component pkgkey={pkgkey} packageInfo={packageInfo} />
         </ExtensionWrapper>

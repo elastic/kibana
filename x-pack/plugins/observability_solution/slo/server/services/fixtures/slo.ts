@@ -10,7 +10,7 @@ import {
   ALL_VALUE,
   CreateSLOParams,
   HistogramIndicator,
-  sloSchema,
+  sloDefinitionSchema,
   SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
@@ -25,8 +25,8 @@ import {
   Indicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
-  SLO,
-  StoredSLO,
+  SLODefinition,
+  StoredSLODefinition,
 } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { twoMinute } from './duration';
@@ -154,7 +154,7 @@ export const createHistogramIndicator = (
   },
 });
 
-const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt' | 'version'> = {
+const defaultSLO: Omit<SLODefinition, 'id' | 'revision' | 'createdAt' | 'updatedAt' | 'version'> = {
   name: 'irrelevant',
   description: 'irrelevant',
   timeWindow: sevenDaysRolling(),
@@ -166,6 +166,7 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt' | 'ver
   settings: {
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
+    preventInitialBackfill: false,
   },
   tags: ['critical', 'k8s'],
   enabled: true,
@@ -188,16 +189,16 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
   ...params,
 });
 
-export const aStoredSLO = (slo: SLO): SavedObject<StoredSLO> => {
+export const aStoredSLO = (slo: SLODefinition): SavedObject<StoredSLODefinition> => {
   return {
     id: slo.id,
-    attributes: sloSchema.encode(slo),
+    attributes: sloDefinitionSchema.encode(slo),
     type: SO_SLO_TYPE,
     references: [],
   };
 };
 
-export const createSLO = (params: Partial<SLO> = {}): SLO => {
+export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition => {
   const now = new Date();
   return cloneDeep({
     ...defaultSLO,
@@ -210,7 +211,9 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
   });
 };
 
-export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}): SLO => {
+export const createSLOWithTimeslicesBudgetingMethod = (
+  params: Partial<SLODefinition> = {}
+): SLODefinition => {
   return createSLO({
     budgetingMethod: 'timeslices',
     objective: {
@@ -222,7 +225,9 @@ export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}
   });
 };
 
-export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
+export const createSLOWithCalendarTimeWindow = (
+  params: Partial<SLODefinition> = {}
+): SLODefinition => {
   return createSLO({
     timeWindow: weeklyCalendarAligned(),
     ...params,

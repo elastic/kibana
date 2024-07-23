@@ -103,7 +103,7 @@ export const legacyEmbeddableToApi = (
   /**
    * Performance tracking
    */
-  const onPhaseChange = new BehaviorSubject<PhaseEvent | undefined>(undefined);
+  const phase$ = new BehaviorSubject<PhaseEvent | undefined>(undefined);
 
   let loadingStartTime = 0;
   subscriptions.add(
@@ -132,7 +132,7 @@ export const legacyEmbeddableToApi = (
         })
       )
       .subscribe((statusOutput) => {
-        onPhaseChange.next(statusOutput);
+        phase$.next(statusOutput);
       })
   );
 
@@ -153,6 +153,7 @@ export const legacyEmbeddableToApi = (
   const panelDescription = inputKeyToSubject<string>('description');
 
   const defaultPanelTitle = outputKeyToSubject<string>('defaultTitle');
+  const defaultPanelDescription = outputKeyToSubject<string>('defaultDescription');
   const disabledActionIds = inputKeyToSubject<string[] | undefined>('disabledActions');
 
   function getSavedObjectId(input: { savedObjectId?: string }, output: { savedObjectId?: string }) {
@@ -251,7 +252,7 @@ export const legacyEmbeddableToApi = (
       dataLoading,
       blockingError,
 
-      onPhaseChange,
+      phase$,
 
       onEdit,
       isEditingEnabled,
@@ -275,6 +276,7 @@ export const legacyEmbeddableToApi = (
 
       setPanelDescription,
       panelDescription,
+      defaultPanelDescription,
 
       canLinkToLibrary: () => canLinkLegacyEmbeddable(embeddable),
       linkToLibrary: () => linkLegacyEmbeddable(embeddable),

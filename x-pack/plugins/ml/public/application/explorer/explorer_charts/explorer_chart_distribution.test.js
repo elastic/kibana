@@ -7,6 +7,7 @@
 
 import { chartData as mockChartData } from './__mocks__/mock_chart_data_rare';
 import seriesConfig from './__mocks__/mock_series_config_rare.json';
+import { BehaviorSubject } from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,17 +21,7 @@ const utilityProps = {
   timeBuckets: timeBucketsMock,
   chartTheme: kibanaContextMock.services.charts.theme.useChartsBaseTheme(),
   onPointerUpdate: jest.fn(),
-  cursor: {
-    x: 10432423,
-  },
-};
-
-const servicesMock = {
-  mlServices: {
-    mlFieldFormatService: {
-      getFieldFormat: jest.fn(),
-    },
-  },
+  cursor$: new BehaviorSubject({ isDataHistorgram: true, cursor: { x: 10432423 } }),
 };
 
 describe('ExplorerChart', () => {
@@ -54,10 +45,11 @@ describe('ExplorerChart', () => {
     };
 
     const wrapper = mountWithIntl(
-      <KibanaContextProvider services={servicesMock}>
+      <KibanaContextProvider services={kibanaContextMock.services}>
         <ExplorerChartDistribution
           mlSelectSeverityService={mlSelectSeverityServiceMock}
           tooltipService={mockTooltipService}
+          severity={0}
           {...utilityProps}
         />
       </KibanaContextProvider>
@@ -81,11 +73,12 @@ describe('ExplorerChart', () => {
     };
 
     const wrapper = mountWithIntl(
-      <KibanaContextProvider services={servicesMock}>
+      <KibanaContextProvider services={kibanaContextMock.services}>
         <ExplorerChartDistribution
           seriesConfig={config}
           mlSelectSeverityService={mlSelectSeverityServiceMock}
           tooltipService={mockTooltipService}
+          severity={0}
           {...utilityProps}
         />
       </KibanaContextProvider>
@@ -106,6 +99,7 @@ describe('ExplorerChart', () => {
     const config = {
       ...seriesConfig,
       chartData,
+      chartLimits: { min: 201039318, max: 625736376 },
     };
 
     const mockTooltipService = {
@@ -115,12 +109,13 @@ describe('ExplorerChart', () => {
 
     // We create the element including a wrapper which sets the width:
     return mountWithIntl(
-      <KibanaContextProvider services={servicesMock}>
+      <KibanaContextProvider services={kibanaContextMock.services}>
         <div style={{ width: '500px' }}>
           <ExplorerChartDistribution
             seriesConfig={config}
             mlSelectSeverityService={mlSelectSeverityServiceMock}
             tooltipService={mockTooltipService}
+            severity={0}
             {...utilityProps}
           />
         </div>
@@ -156,7 +151,7 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
     const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
-    expect([...xAxisTicks]).toHaveLength(1);
+    expect([...xAxisTicks]).toHaveLength(6);
     const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(5);
     const emphasizedAxisLabel = wrapper

@@ -379,7 +379,7 @@ export class DiscoverPageObject extends FtrService {
       })
     );
     // Remove control columns
-    return result.slice(2).join(' ');
+    return result.slice(await this.dataGrid.getControlColumnsCount()).join(' ');
   }
 
   public async getDocTableIndexLegacy(index: number) {
@@ -389,7 +389,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async getDocTableField(index: number, cellIdx: number = -1) {
     const isLegacyDefault = await this.useLegacyTable();
-    const usedDefaultCellIdx = isLegacyDefault ? 0 : 2;
+    const usedDefaultCellIdx = isLegacyDefault ? 0 : await this.dataGrid.getControlColumnsCount();
     const usedCellIdx = cellIdx === -1 ? usedDefaultCellIdx : cellIdx;
     if (isLegacyDefault) {
       const fields = await this.find.allByCssSelector(
@@ -431,12 +431,12 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.find('discoverDocTableFooter');
   }
 
-  public async isShowingDocViewer() {
-    return await this.testSubjects.exists('kbnDocViewer');
+  public isShowingDocViewer() {
+    return this.dataGrid.isShowingDocViewer();
   }
 
-  public async clickDocViewerTab(id: string) {
-    return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
+  public clickDocViewerTab(id: string) {
+    return this.dataGrid.clickDocViewerTab(id);
   }
 
   public async expectSourceViewerToExist() {
@@ -509,7 +509,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public showsErrorCallout() {
-    return this.testSubjects.existOrFail('discoverErrorCalloutTitle');
+    this.retry.try(async () => {
+      await this.testSubjects.existOrFail('discoverErrorCalloutTitle');
+    });
   }
 
   public getDiscoverErrorMessage() {
@@ -701,11 +703,11 @@ export class DiscoverPageObject extends FtrService {
    */
   public async validateDataViewReffsEquality() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const matches = currentUrl.matchAll(/index:[^,]*/g);
+    const matches = currentUrl.matchAll(/dataViewId:[^,]*/g);
     const indexes = [];
     for (const matchEntry of matches) {
       const [index] = matchEntry;
-      indexes.push(decodeURIComponent(index).replace('index:', '').replaceAll("'", ''));
+      indexes.push(decodeURIComponent(index).replace('dataViewId:', '').replaceAll("'", ''));
     }
 
     const first = indexes[0];

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   Filter,
   fromKueryExpression,
+  getKqlFieldNamesFromExpression,
   Query,
   TimeRange,
   toElasticsearchQuery,
@@ -32,11 +33,7 @@ import { getBoolFilter } from '../get_bool_filter';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { clearCache } from '../../../services/rest/call_api';
 import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
-import {
-  toBoolean,
-  toNumber,
-} from '../../../context/url_params_context/helpers';
-import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
+import { toBoolean, toNumber } from '../../../context/url_params_context/helpers';
 import { SearchQueryActions } from '../../../services/telemetry';
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
@@ -48,11 +45,8 @@ function useSearchBarParams(defaultKuery?: string) {
   const groupId = 'groupId' in path ? path.groupId : undefined;
   const environment = 'environment' in query ? query.environment : undefined;
   const refreshIntervalFromUrl =
-    'refreshInterval' in query
-      ? toNumber(query.refreshInterval)
-      : DEFAULT_REFRESH_INTERVAL;
-  const refreshPausedFromUrl =
-    'refreshPaused' in query ? query.refreshPaused : 'true';
+    'refreshInterval' in query ? toNumber(query.refreshInterval) : DEFAULT_REFRESH_INTERVAL;
+  const refreshPausedFromUrl = 'refreshPaused' in query ? query.refreshPaused : 'true';
 
   return {
     kuery: urlKuery
@@ -84,16 +78,12 @@ function useUrlTimeRange(defaultTimeRange: TimeRange) {
   return defaultTimeRange;
 }
 
-function getSearchBarPlaceholder(
-  searchbarPlaceholder?: string,
-  processorEvent?: UIProcessorEvent
-) {
+function getSearchBarPlaceholder(searchbarPlaceholder?: string, processorEvent?: UIProcessorEvent) {
   const examples = {
     transaction: 'transaction.duration.us > 300000',
     error: 'http.response.status_code >= 400',
     metric: 'process.pid = "1234"',
-    defaults:
-      'transaction.duration.us > 300000 AND http.response.status_code >= 400',
+    defaults: 'transaction.duration.us > 300000 AND http.response.status_code >= 400',
   };
   const example = examples[processorEvent || 'defaults'];
 
@@ -150,14 +140,8 @@ export function UnifiedSearchBar({
     telemetry,
   } = services;
 
-  const {
-    kuery,
-    serviceName,
-    environment,
-    groupId,
-    refreshPausedFromUrl,
-    refreshIntervalFromUrl,
-  } = useSearchBarParams(value);
+  const { kuery, serviceName, environment, groupId, refreshPausedFromUrl, refreshIntervalFromUrl } =
+    useSearchBarParams(value);
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
@@ -200,10 +184,7 @@ export function UnifiedSearchBar({
   const { urlParams } = useLegacyUrlParams();
   const processorEvent = useProcessorEvent();
   const { incrementTimeRangeId } = useTimeRangeId();
-  const searchbarPlaceholder = getSearchBarPlaceholder(
-    placeholder,
-    processorEvent
-  );
+  const searchbarPlaceholder = getSearchBarPlaceholder(placeholder, processorEvent);
 
   const customFilters =
     boolFilter ??
@@ -226,10 +207,7 @@ export function UnifiedSearchBar({
     incrementTimeRangeId();
   };
 
-  const onRefreshChange = ({
-    isPaused,
-    refreshInterval,
-  }: Partial<OnRefreshChangeProps>) => {
+  const onRefreshChange = ({ isPaused, refreshInterval }: Partial<OnRefreshChangeProps>) => {
     const existingQueryParams = toQuery(location.search);
     const updatedQueryParams = {
       ...existingQueryParams,
@@ -242,10 +220,7 @@ export function UnifiedSearchBar({
       search: fromQuery(updatedQueryParams),
     });
   };
-  const handleSubmit = (
-    payload: { dateRange: TimeRange; query?: Query },
-    isUpdate?: boolean
-  ) => {
+  const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
     let action = SearchQueryActions.Submit;
     if (dataView == null) {
       return;
@@ -255,16 +230,11 @@ export function UnifiedSearchBar({
     const { from: rangeFrom, to: rangeTo } = dateRange;
 
     try {
-      const res = convertKueryToEsQuery(
-        query?.query as string,
-        dataView as DataView
-      );
+      const res = convertKueryToEsQuery(query?.query as string, dataView as DataView);
       if (!res) {
         return;
       }
-      const kueryFields = getKueryFields([
-        fromKueryExpression(query?.query as string),
-      ]);
+      const kueryFields = getKqlFieldNamesFromExpression(query?.query as string);
 
       const existingQueryParams = toQuery(location.search);
       const updatedQueryWithTime = {

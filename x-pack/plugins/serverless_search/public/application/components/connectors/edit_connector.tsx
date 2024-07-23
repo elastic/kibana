@@ -103,7 +103,7 @@ export const EditConnector: React.FC = () => {
               <DeleteConnectorModal
                 closeDeleteModal={() => setDeleteModalIsOpen(false)}
                 connectorId={connector.id}
-                connectorName={connector.name || CONNECTOR_LABEL}
+                connectorName={connector.name}
                 onSuccess={() => navigateToUrl('./')}
               />
             )}
@@ -126,6 +126,7 @@ export const EditConnector: React.FC = () => {
               >
                 <EuiContextMenu
                   initialPanelId={0}
+                  data-test-subj="serverlessSearchEditConnectorContextMenu"
                   panels={[
                     {
                       id: 0,

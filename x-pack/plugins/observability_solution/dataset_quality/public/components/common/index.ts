@@ -6,4 +6,4 @@
  */
 
 export * from './integration_icon';
-export * from './types';
+export * from './insufficient_privileges';

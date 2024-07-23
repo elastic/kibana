@@ -114,7 +114,7 @@ export const bulkUpdateConversations = async (
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify({
           update: conversationsToUpdate,
           create: conversationsToCreate,
@@ -139,7 +139,13 @@ export const bulkUpdateConversations = async (
     toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
       title: i18n.translate('xpack.elasticAssistant.conversations.bulkActionsConversationsError', {
         defaultMessage: 'Error updating conversations {error}',
-        values: { error },
+        values: {
+          error: error.message
+            ? Array.isArray(error.message)
+              ? error.message.join(',')
+              : error.message
+            : error,
+        },
       }),
     });
   }

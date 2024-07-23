@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useReducer, useState } from 'react';
 import { chunk } from 'lodash';
@@ -21,18 +21,19 @@ import { getESQLNumericFieldStats } from '../../search_strategy/esql_requests/ge
 import { getESQLKeywordFieldStats } from '../../search_strategy/esql_requests/get_keyword_fields';
 import { getESQLDateFieldStats } from '../../search_strategy/esql_requests/get_date_field_stats';
 import { getESQLBooleanFieldStats } from '../../search_strategy/esql_requests/get_boolean_field_stats';
-import { getESQLExampleFieldValues } from '../../search_strategy/esql_requests/get_text_field_stats';
 
 export const useESQLFieldStatsData = <T extends Column>({
   searchQuery,
   columns: allColumns,
   filter,
   limit,
+  timeRange,
 }: {
   searchQuery?: AggregateQuery;
   columns?: T[];
   filter?: QueryDslQueryContainer;
   limit: number;
+  timeRange?: TimeRange;
 }) => {
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
 
@@ -94,6 +95,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR KEYWORD FIELDS
@@ -104,6 +106,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR BOOLEAN FIELDS
@@ -112,19 +115,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
-            }).then(addToProcessedFieldStats);
-
-            // GETTING STATS FOR TEXT FIELDS
-            await getESQLExampleFieldValues({
-              columns: columns.filter(
-                (f) =>
-                  f.secondaryType === 'text' ||
-                  f.secondaryType === 'geo_point' ||
-                  f.secondaryType === 'geo_shape'
-              ),
-              filter,
-              runRequest,
-              esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR DATE FIELDS
@@ -133,6 +124,7 @@ export const useESQLFieldStatsData = <T extends Column>({
               filter,
               runRequest,
               esqlBaseQuery,
+              timeRange,
             }).then(addToProcessedFieldStats);
           }
           setFetchState({

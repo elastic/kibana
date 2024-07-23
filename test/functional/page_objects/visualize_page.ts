@@ -447,7 +447,7 @@ export class VisualizePageObject extends FtrService {
     await this.testSubjects.setValue('savedObjectTitle', vizName);
 
     if (description) {
-      await this.testSubjects.setValue('viewDescription', description);
+      await this.testSubjects.setValue('savedObjectDescription', description);
     }
 
     const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');

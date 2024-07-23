@@ -12,6 +12,7 @@ import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -32,6 +33,7 @@ import {
 } from '@kbn/alerting-plugin/server/alerts_client/types';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
   RuleParams,
@@ -54,7 +56,6 @@ import {
   ExecutionTimeRange,
   Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -76,15 +77,20 @@ import {
   LogThresholdRuleTypeParams,
   positiveComparators,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
+import { Group } from '../../../../common/alerting/types';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
-export type LogThresholdAlert = Omit<ObservabilityLogsAlert, 'kibana.alert.evaluation.values'> & {
+export type LogThresholdAlert = Omit<
+  ObservabilityLogsAlert,
+  'kibana.alert.evaluation.values' | 'kibana.alert.group'
+> & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.values'?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
 };
 
 export type LogThresholdAlertReporter = (
@@ -169,11 +175,21 @@ export const createLogThresholdExecutor =
             alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
           };
 
+          const instances = alertInstanceId.split(',');
+          const groups =
+            alertInstanceId !== '*'
+              ? params.groupBy?.reduce<Group[]>((resultGroups, groupByItem, index) => {
+                  resultGroups.push({ field: groupByItem, value: instances[index].trim() });
+                  return resultGroups;
+                }, [])
+              : undefined;
+
           const payload = {
             [ALERT_EVALUATION_THRESHOLD]: threshold,
             [ALERT_EVALUATION_VALUE]: value,
             [ALERT_REASON]: reason,
             [ALERT_CONTEXT]: alertContext,
+            [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(rootLevelContext),
           };
 

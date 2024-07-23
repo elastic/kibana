@@ -19,5 +19,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
+    "@kbn/react-kibana-context-render",
   ]
 }

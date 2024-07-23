@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { MonacoEditorActionsProvider } from '../../containers/editor/monaco/monaco_editor_actions_provider';
 import { SenseEditor } from '../../models/sense_editor';
 
 export class EditorRegistry {
-  private inputEditor: SenseEditor | undefined;
+  private inputEditor: SenseEditor | MonacoEditorActionsProvider | undefined;
 
-  setInputEditor(inputEditor: SenseEditor) {
+  setInputEditor(inputEditor: SenseEditor | MonacoEditorActionsProvider) {
     this.inputEditor = inputEditor;
   }
 

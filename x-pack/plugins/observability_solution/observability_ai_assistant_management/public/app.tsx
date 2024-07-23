@@ -46,7 +46,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
       <RedirectToHomeIfUnauthorized coreStart={coreStart}>
         <I18nProvider>
           <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-            <AppContextProvider value={{ ...startDeps, ...coreStart, setBreadcrumbs }}>
+            <AppContextProvider value={{ setBreadcrumbs }}>
               <QueryClientProvider client={queryClient}>
                 <RouterProvider
                   history={history}

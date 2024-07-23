@@ -8,50 +8,61 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('main', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('deletes an index_pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response1 = await supertest
+          const response1 = await supertestWithoutAuth
             .post(config.path)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title,
               },
             });
 
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .get(`${config.path}/${response1.body[config.serviceKey].id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(response2.status).to.be(200);
 
-          const response3 = await supertest
+          const response3 = await supertestWithoutAuth
             .delete(`${config.path}/${response1.body[config.serviceKey].id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(response3.status).to.be(200);
 
-          const response4 = await supertest
+          const response4 = await supertestWithoutAuth
             .get(`${config.path}/${response1.body[config.serviceKey].id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(response4.status).to.be(404);
         });
@@ -59,27 +70,27 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns nothing', async () => {
         const title = `foo-${Date.now()}-${Math.random()}*`;
-        const response1 = await supertest
+        const response1 = await supertestWithoutAuth
 
           .post(config.path)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             [config.serviceKey]: {
               title,
             },
           });
 
-        await supertest
+        await supertestWithoutAuth
           .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
-        const response2 = await supertest
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
+        const response2 = await supertestWithoutAuth
           .delete(`${config.path}/${response1.body[config.serviceKey].id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
 
         // verify empty response
         expect(Object.keys(response2.body).length).to.be(0);

@@ -151,8 +151,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 5,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
       },
       id: 'foo_env-foo',
       payload: {
@@ -177,8 +176,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 4,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
       },
       id: 'foo_env-foo-2',
       payload: {
@@ -203,8 +201,7 @@ describe('Error count alert', () => {
         serviceName: 'bar',
         threshold: 2,
         triggerValue: 3,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
       },
       id: 'bar_env-bar',
       payload: {
@@ -274,15 +271,12 @@ describe('Error count alert', () => {
     services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
 
     await executor({ params });
-    [
-      'foo_env-foo_tx-name-foo',
-      'foo_env-foo-2_tx-name-foo-2',
-      'bar_env-bar_tx-name-bar',
-    ].forEach((instanceName) =>
-      expect(services.alertsClient.report).toHaveBeenCalledWith({
-        actionGroup: 'threshold_met',
-        id: instanceName,
-      })
+    ['foo_env-foo_tx-name-foo', 'foo_env-foo-2_tx-name-foo-2', 'bar_env-bar_tx-name-bar'].forEach(
+      (instanceName) =>
+        expect(services.alertsClient.report).toHaveBeenCalledWith({
+          actionGroup: 'threshold_met',
+          id: instanceName,
+        })
     );
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(3);
@@ -299,8 +293,7 @@ describe('Error count alert', () => {
         threshold: 2,
         transactionName: 'tx-name-foo',
         triggerValue: 5,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
       },
       id: 'foo_env-foo_tx-name-foo',
       payload: {
@@ -327,8 +320,7 @@ describe('Error count alert', () => {
         threshold: 2,
         transactionName: 'tx-name-foo-2',
         triggerValue: 4,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
       },
       id: 'foo_env-foo-2_tx-name-foo-2',
       payload: {
@@ -355,8 +347,7 @@ describe('Error count alert', () => {
         threshold: 2,
         transactionName: 'tx-name-bar',
         triggerValue: 3,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
       },
       id: 'bar_env-bar_tx-name-bar',
       payload: {
@@ -451,8 +442,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 5,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
       },
       id: 'foo_env-foo_error-key-foo',
       payload: {
@@ -477,8 +467,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 4,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
       },
       id: 'foo_env-foo-2_error-key-foo-2',
       payload: {
@@ -503,8 +492,7 @@ describe('Error count alert', () => {
         serviceName: 'bar',
         threshold: 2,
         triggerValue: 3,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
       },
       id: 'bar_env-bar_error-key-bar',
       payload: {
@@ -594,8 +582,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 5,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
       },
       id: 'foo_env-foo',
       payload: {
@@ -620,8 +607,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 4,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
       },
       id: 'foo_env-foo-2',
       payload: {
@@ -646,8 +632,7 @@ describe('Error count alert', () => {
         serviceName: 'bar',
         threshold: 2,
         triggerValue: 3,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
       },
       id: 'bar_env-bar',
       payload: {
@@ -717,15 +702,12 @@ describe('Error count alert', () => {
     services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
 
     await executor({ params });
-    [
-      'foo_ENVIRONMENT_NOT_DEFINED',
-      'foo_ENVIRONMENT_NOT_DEFINED',
-      'bar_env-bar',
-    ].forEach((instanceName) =>
-      expect(services.alertsClient.report).toHaveBeenCalledWith({
-        actionGroup: 'threshold_met',
-        id: instanceName,
-      })
+    ['foo_ENVIRONMENT_NOT_DEFINED', 'foo_ENVIRONMENT_NOT_DEFINED', 'bar_env-bar'].forEach(
+      (instanceName) =>
+        expect(services.alertsClient.report).toHaveBeenCalledWith({
+          actionGroup: 'threshold_met',
+          id: instanceName,
+        })
     );
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(3);
@@ -793,8 +775,7 @@ describe('Error count alert', () => {
         serviceName: 'bar',
         threshold: 2,
         triggerValue: 3,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
       },
       id: 'bar_env-bar',
       payload: {
@@ -819,12 +800,7 @@ describe('Error count alert', () => {
       threshold: 2,
       windowSize: 5,
       windowUnit: 'm',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'error.grouping_key',
-        'error.grouping_name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'error.grouping_key', 'error.grouping_name'],
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
@@ -894,8 +870,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 5,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
       },
       id: 'foo_env-foo_error-key-foo_error-name-foo',
       payload: {
@@ -922,8 +897,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 4,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
       },
       id: 'foo_env-foo-2_error-key-foo-2_error-name-foo2',
       payload: {
@@ -950,8 +924,7 @@ describe('Error count alert', () => {
         serviceName: 'bar',
         threshold: 2,
         triggerValue: 3,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
       },
       id: 'bar_env-bar_error-key-bar_error-name-bar',
       payload: {
@@ -1037,8 +1010,7 @@ describe('Error count alert', () => {
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 5,
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+        viewInAppUrl: 'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
       },
       id: 'foo_env-foo',
       payload: {

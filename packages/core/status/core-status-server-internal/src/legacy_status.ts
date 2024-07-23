@@ -106,7 +106,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.critical.toString()]: {
     id: 'red',
     state: 'red',
-    title: i18n.translate('core.status.redTitle', {
+    title: i18n.translate('core.status.critical.redTitle', {
       defaultMessage: 'Red',
     }),
     icon: 'danger',
@@ -116,7 +116,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.unavailable.toString()]: {
     id: 'red',
     state: 'red',
-    title: i18n.translate('core.status.redTitle', {
+    title: i18n.translate('core.status.unavailable.redTitle', {
       defaultMessage: 'Red',
     }),
     icon: 'danger',
@@ -126,7 +126,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.degraded.toString()]: {
     id: 'yellow',
     state: 'yellow',
-    title: i18n.translate('core.status.yellowTitle', {
+    title: i18n.translate('core.status.degraded.yellowTitle', {
       defaultMessage: 'Yellow',
     }),
     icon: 'warning',
@@ -136,7 +136,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.available.toString()]: {
     id: 'green',
     state: 'green',
-    title: i18n.translate('core.status.greenTitle', {
+    title: i18n.translate('core.status.available.greenTitle', {
       defaultMessage: 'Green',
     }),
     icon: 'success',

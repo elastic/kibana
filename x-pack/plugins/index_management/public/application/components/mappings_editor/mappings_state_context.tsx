@@ -13,7 +13,7 @@ import { State, Dispatch } from './types';
 const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
-export const StateProvider: React.FC = ({ children }) => {
+export const StateProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const initialState: State = {
     isValid: true,
     configuration: {
@@ -54,6 +54,13 @@ export const StateProvider: React.FC = ({ children }) => {
       term: '',
       result: [],
     },
+    filter: {
+      filteredFields: [],
+      selectedOptions: [],
+      selectedDataTypes: [],
+    },
+    inferenceToModelIdMap: {},
+    mappingViewFields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);

@@ -87,7 +87,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
 }
 
 async function postTelemetryV2OptIn(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   value: unknown,
   statusCode: number
 ): Promise<any> {

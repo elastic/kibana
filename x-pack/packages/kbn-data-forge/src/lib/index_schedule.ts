@@ -52,7 +52,7 @@ export async function indexSchedule(config: Config, client: Client, logger: Tool
 
     logger.info(
       `Indexing "${schedule.template}" events from ${startTs.toISOString()} to ${
-        end === false ? 'indefinatly' : end.toISOString()
+        end === false ? 'indefinitely' : end.toISOString()
       }`
     );
     await createEvents(

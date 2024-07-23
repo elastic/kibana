@@ -13,6 +13,10 @@ import type { caseApiV1 } from '../../../../../common/types/api';
 export const getTagsRoute = createCasesRoute({
   method: 'get',
   path: CASE_TAGS_URL,
+  routerOptions: {
+    access: 'public',
+    summary: `Get case tags`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

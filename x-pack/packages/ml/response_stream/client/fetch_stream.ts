@@ -44,7 +44,7 @@ export async function* fetchStream<B extends object, R extends Reducer<any, any>
   body?: B,
   ndjson = true,
   headers?: HttpFetchOptions['headers']
-): AsyncGenerator<[GeneratorError, ReducerAction<R> | Array<ReducerAction<R>> | undefined]> {
+): AsyncGenerator<[GeneratorError, ReducerAction<R> | undefined]> {
   let stream: Readonly<Response> | undefined;
 
   try {
@@ -112,7 +112,9 @@ export async function* fetchStream<B extends object, R extends Reducer<any, any>
             : parts
         ) as Array<ReducerAction<R>>;
 
-        yield [null, actions];
+        for (const action of actions) {
+          yield [null, action];
+        }
       } catch (error) {
         if (error.name !== 'AbortError') {
           yield [error.toString(), undefined];

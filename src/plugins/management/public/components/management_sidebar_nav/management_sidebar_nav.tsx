@@ -32,13 +32,16 @@ export const managementSidebarNav = ({
     const sortedManagementSections = sortBy(managementSections, 'order');
 
     return sortedManagementSections.reduce<Array<EuiSideNavItemType<any>>>((acc, section) => {
-      const apps = sortBy(section.getAppsEnabled(), 'order');
+      const apps = sortBy(
+        section.getAppsEnabled().filter((app) => !app.hideFromSidebar),
+        'order'
+      );
 
       if (apps.length) {
         if (!section.hideFromSidebar) {
           acc.push({
             ...createNavItem(section, {
-              items: appsToNavItems(apps.filter((app) => !app.hideFromSidebar)),
+              items: appsToNavItems(apps),
             }),
           });
         }

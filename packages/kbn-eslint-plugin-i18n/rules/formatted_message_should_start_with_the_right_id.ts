@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
@@ -22,7 +22,7 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
     fixable: 'code',
   },
   create(context) {
-    const { cwd, filename, getScope, sourceCode, report } = context;
+    const { cwd, filename, sourceCode, report } = context;
 
     return {
       JSXElement: (node: TSESTree.JSXElement) => {
@@ -45,7 +45,8 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
           idAttribute.value.value;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
         // Check if i18n has already been imported into the file
@@ -82,19 +83,13 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
               ? `${i18nAppId}.${oldI18nIdentifierArray.slice(2).join('.')}`
               : `${i18nAppId}.${oldI18nIdentifierArray.slice(1).join('.')}`;
 
-          const defaultMessageAttribute = openingElement.attributes.find(
-            (attribute) => 'name' in attribute && attribute.name.name === 'defaultMessage'
-          ) as TSESTree.JSXAttribute;
-
-          const defaultMessage =
-            (defaultMessageAttribute &&
-              'value' in defaultMessageAttribute &&
-              'value' &&
-              defaultMessageAttribute.value &&
-              'value' in defaultMessageAttribute.value &&
-              typeof defaultMessageAttribute.value.value === 'string' &&
-              defaultMessageAttribute.value.value) ||
-            '';
+          const existingProps =
+            openingElement.attributes
+              .filter((attr) => attr !== idAttribute)
+              .reduce(
+                (acc, curr) => acc + sourceCode.getText().slice(curr.range[0], curr.range[1]),
+                ''
+              ) || 'defaultMessage=""';
 
           report({
             node: node as any,
@@ -103,7 +98,7 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
               return [
                 fixer.replaceTextRange(
                   node.range,
-                  `<FormattedMessage id="${newI18nIdentifier}" defaultMessage="${defaultMessage}" />`
+                  `<FormattedMessage id="${newI18nIdentifier}" ${existingProps} />`
                 ),
                 !hasI18nImportLine && rangeToAddI18nImportLine
                   ? replaceMode === 'replace'

@@ -33,19 +33,10 @@ const COUNTRY_NAME = 'name';
 const SESSION_PER_COUNTRY = `__kbnjoin__cardinality_of_session.id__${PER_COUNTRY_LAYER_ID}`;
 const SESSION_PER_REGION = `__kbnjoin__cardinality_of_session.id__${PER_REGION_LAYER_ID}`;
 
-const label = i18n.translate(
-  'xpack.apm.serviceOverview.embeddedMap.session.metric.label',
-  {
-    defaultMessage: 'Sessions',
-  }
-);
-export async function getSessionMapLayerList(
-  maps: MapsStartApi | undefined,
-  dataViewId: string
-) {
-  const basemapLayerDescriptor =
-    await maps?.createLayerDescriptors?.createBasemapLayerDescriptor();
-
+const label = i18n.translate('xpack.apm.serviceOverview.embeddedMap.session.metric.label', {
+  defaultMessage: 'Sessions',
+});
+export function getSessionMapLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
   const sessionsByCountryLayer: VectorLayerDescriptor = {
     joins: [
       {
@@ -75,12 +66,9 @@ export async function getSessionMapLayerList(
     },
     style: getLayerStyle(SESSION_PER_COUNTRY, PalleteColors.BluetoRed),
     id: uuidv4(),
-    label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.sessionCountry.metric.label',
-      {
-        defaultMessage: 'Sessions per country',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.sessionCountry.metric.label', {
+      defaultMessage: 'Sessions per country',
+    }),
     minZoom: 0,
     maxZoom: 2,
     alpha: 0.75,
@@ -117,12 +105,9 @@ export async function getSessionMapLayerList(
     },
     style: getLayerStyle(SESSION_PER_REGION, PalleteColors.YellowtoRed),
     id: uuidv4(),
-    label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.sessionRegion.metric.label',
-      {
-        defaultMessage: 'Sessions per region',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.sessionRegion.metric.label', {
+      defaultMessage: 'Sessions per region',
+    }),
     minZoom: 1,
     maxZoom: 24,
     alpha: 0.75,
@@ -130,9 +115,5 @@ export async function getSessionMapLayerList(
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  return [
-    ...(basemapLayerDescriptor ? [basemapLayerDescriptor] : []),
-    sessionsByRegionLayer,
-    sessionsByCountryLayer,
-  ] as BaseLayerDescriptor[];
+  return [sessionsByRegionLayer, sessionsByCountryLayer] as BaseLayerDescriptor[];
 }

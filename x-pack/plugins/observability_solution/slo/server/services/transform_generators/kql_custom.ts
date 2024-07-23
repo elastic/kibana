@@ -8,18 +8,24 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
-import { InvalidTransformError } from '../../errors';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
-  SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
+  getSLOPipelineId,
   getSLOTransformId,
+  SLO_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
-import { KQLCustomIndicator, SLO } from '../../domain/models';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
+import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
+import { InvalidTransformError } from '../../errors';
+import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public async getTransformParams(
+    slo: SLODefinition,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -27,8 +33,8 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator),
-      this.buildDestination(),
+      await this.buildSource(slo, slo.indicator, dataViewService),
+      this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
@@ -36,24 +42,26 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
+  private async buildSource(
+    slo: SLODefinition,
+    indicator: KQLCustomIndicator,
+    dataViewService: DataViewsService
+  ) {
+    const dataView = await this.getIndicatorDataView({
+      dataViewService,
+      dataViewId: indicator.params.dataViewId,
+    });
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}/d`,
-                },
-              },
-            },
+            getFilterRange(slo, indicator.params.timestampField),
             getElasticsearchQueryOrThrow(indicator.params.filter),
           ],
         },
@@ -61,14 +69,14 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: KQLCustomIndicator) {
     const numerator = getElasticsearchQueryOrThrow(indicator.params.good);
     const denominator = getElasticsearchQueryOrThrow(indicator.params.total);
 
@@ -86,7 +94,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>_count',
               totalEvents: 'slo.denominator>_count',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),

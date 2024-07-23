@@ -31,13 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
       await PageObjects.observabilityLogsExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'

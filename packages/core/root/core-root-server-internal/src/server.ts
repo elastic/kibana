@@ -52,6 +52,7 @@ import type {
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -89,6 +90,7 @@ export class Server {
   private readonly customBranding: CustomBrandingService;
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
+  private readonly userProfile: UserProfileService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -138,6 +140,7 @@ export class Server {
     this.customBranding = new CustomBrandingService(core);
     this.userSettingsService = new UserSettingsService(core);
     this.security = new SecurityService(core);
+    this.userProfile = new UserProfileService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -192,7 +195,7 @@ export class Server {
       const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
 
       // setup i18n prior to any other service, to have translations ready
-      await this.i18n.preboot({ http: httpPreboot, pluginPaths });
+      const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
       this.capabilities.preboot({ http: httpPreboot });
 
@@ -200,7 +203,11 @@ export class Server {
 
       await this.status.preboot({ http: httpPreboot });
 
-      const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
+      const renderingPreboot = await this.rendering.preboot({
+        http: httpPreboot,
+        uiPlugins,
+        i18n: i18nPreboot,
+      });
 
       const httpResourcesPreboot = this.httpResources.preboot({
         http: httpPreboot,
@@ -249,7 +256,7 @@ export class Server {
     const environmentSetup = this.environment.setup();
 
     // Configuration could have changed after preboot.
-    await ensureValidConfiguration(this.configService);
+    await this.ensureValidConfiguration();
 
     const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
     const contextServiceSetup = this.context.setup({
@@ -258,6 +265,7 @@ export class Server {
     const executionContextSetup = this.executionContext.setup();
     const docLinksSetup = this.docLinks.setup();
     const securitySetup = this.security.setup();
+    const userProfileSetup = this.userProfile.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -324,6 +332,7 @@ export class Server {
       uiPlugins,
       customBranding: customBrandingSetup,
       userSettings: userSettingsServiceSetup,
+      i18n: i18nServiceSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -355,6 +364,7 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
+      userProfile: userProfileSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -375,6 +385,8 @@ export class Server {
 
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
+    const userProfileStart = this.userProfile.start();
+    this.userSettingsService.start({ userProfile: userProfileStart });
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
 
@@ -435,6 +447,7 @@ export class Server {
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
       security: securityStart,
+      userProfile: userProfileStart,
     };
 
     await this.plugins.start(this.coreStart);
@@ -470,6 +483,28 @@ export class Server {
     this.node.stop();
     this.deprecations.stop();
     this.security.stop();
+    this.userProfile.stop();
+  }
+
+  private async ensureValidConfiguration() {
+    try {
+      await ensureValidConfiguration(this.configService);
+    } catch (validationError) {
+      if (this.env.packageInfo.buildFlavor !== 'serverless') {
+        throw validationError;
+      }
+      // When running on serverless, we may allow unknown keys, but stripping them from the final config object.
+      this.configService.setGlobalStripUnknownKeys(true);
+      await ensureValidConfiguration(this.configService, {
+        logDeprecations: true,
+        stripUnknownKeys: true,
+      });
+      this.log
+        .get('config-validation')
+        .error(
+          `Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error: ${validationError}`
+        );
+    }
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {

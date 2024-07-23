@@ -19,11 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('landing page', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     it('has serverless side nav', async () => {
@@ -92,10 +88,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Pipeline creation', async () => {
+    describe('Pipelines', async () => {
+      beforeEach(async () => {
+        await svlSearchNavigation.navigateToLandingPage();
+      });
       it('can redirect to the pipeline creation index page', async () => {
-        await pageObjects.svlSearchLandingPage.pipeline.click();
+        await pageObjects.svlSearchLandingPage.pipeline.createPipeline();
         await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToCreatePipelinePage();
+      });
+      it('can redirect to the manage pipelines page', async () => {
+        await pageObjects.svlSearchLandingPage.pipeline.managePipeline();
+        await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToManagePipelinePage();
       });
     });
   });

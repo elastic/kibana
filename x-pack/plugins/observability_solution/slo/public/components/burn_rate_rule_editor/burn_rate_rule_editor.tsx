@@ -7,7 +7,7 @@
 
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
 
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +33,7 @@ export function BurnRateRuleEditor(props: Props) {
     sloId: ruleParams?.sloId,
   });
 
-  const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
+  const [selectedSlo, setSelectedSlo] = useState<SLODefinitionResponse | undefined>(undefined);
   const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
   const [dependencies, setDependencies] = useState<Dependency[]>(ruleParams?.dependencies || []);
 
@@ -47,7 +47,7 @@ export function BurnRateRuleEditor(props: Props) {
     });
   }, [initialSlo]);
 
-  const onSelectedSlo = (slo: SLOResponse | undefined) => {
+  const onSelectedSlo = (slo: SLODefinitionResponse | undefined) => {
     setSelectedSlo(slo);
     setWindowDefs(() => {
       return createDefaultWindows(slo);
@@ -111,7 +111,7 @@ export function BurnRateRuleEditor(props: Props) {
   );
 }
 
-function createDefaultWindows(slo: SLOResponse | undefined) {
+function createDefaultWindows(slo: SLODefinitionResponse | undefined) {
   const burnRateDefaults = slo ? BURN_RATE_DEFAULTS[slo.timeWindow.duration] : [];
   return burnRateDefaults.map((partialWindow) => createNewWindow(slo, partialWindow));
 }

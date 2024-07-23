@@ -19,6 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
     });
 
+    afterEach(async () => {
+      await PageObjects.lens.closeShareModal();
+    });
+
     after(async () => {
       await PageObjects.lens.setCSVDownloadDebugFlag(false);
     });
@@ -40,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.isShareable()).to.eql(false);
     });
 
-    it('should make the share button avaialble as soon as a valid configuration is generated', async () => {
+    it('should make the share button available as soon as a valid configuration is generated', async () => {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
@@ -51,50 +55,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should enable both download and URL sharing for valid configuration', async () => {
-      await PageObjects.lens.clickShareMenu();
+      await PageObjects.lens.clickShareModal();
 
-      expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
-      expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
-    });
-
-    it('should provide only snapshot url sharing if visualization is not saved yet', async () => {
-      await PageObjects.lens.openPermalinkShare();
-
-      const options = await PageObjects.lens.getAvailableUrlSharingOptions();
-      expect(options).eql(['snapshot']);
-    });
-
-    it('should basically work for snapshot', async () => {
-      const url = await PageObjects.lens.getUrl('snapshot');
-      await browser.openNewTab();
-
-      const [lensWindowHandler] = await browser.getAllWindowHandles();
-
-      await browser.navigateTo(url);
-      // check that it's the same configuration in the new URL when ready
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Average of bytes'
-      );
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(lensWindowHandler);
-    });
-
-    it('should provide also saved object url sharing if the visualization is shared', async () => {
-      await PageObjects.lens.save('ASavedVisualizationToShare');
-      await PageObjects.lens.openPermalinkShare();
-
-      const options = await PageObjects.lens.getAvailableUrlSharingOptions();
-      expect(options).eql(['snapshot', 'savedObject']);
+      expect(await PageObjects.lens.isShareActionEnabled('export'));
+      expect(await PageObjects.lens.isShareActionEnabled('link'));
     });
 
     it('should preserve filter and query when sharing', async () => {
       await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-
-      const url = await PageObjects.lens.getUrl('snapshot');
+      await PageObjects.lens.save('new');
+      const url = await PageObjects.lens.getUrl();
+      await PageObjects.lens.closeShareModal();
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();

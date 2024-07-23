@@ -21,15 +21,15 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
 
       // TODO: Use the client's built-in function rather than the transport when it's available
       try {
-        const { models } = await client.asCurrentUser.transport.request<{
-          models: InferenceAPIConfigResponse[];
+        const { endpoints } = await client.asCurrentUser.transport.request<{
+          endpoints: InferenceAPIConfigResponse[];
         }>({
           method: 'GET',
           path: `/_inference/_all`,
         });
 
         return response.ok({
-          body: models,
+          body: endpoints,
         });
       } catch (error) {
         return handleEsError({ error, response });

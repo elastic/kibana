@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@brokenInServerless t1_analyst', () => {
+      describe('@skipInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@brokenInServerless hunter', () => {
+      describe('@skipInServerless hunter', () => {
         const role = ROLES.hunter;
 
         beforeEach(async () => {

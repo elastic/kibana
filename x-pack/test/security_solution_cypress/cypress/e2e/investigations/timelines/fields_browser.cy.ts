@@ -6,14 +6,10 @@
  */
 
 import {
-  FIELDS_BROWSER_CATEGORIES_COUNT,
-  FIELDS_BROWSER_FIELDS_COUNT,
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER,
   FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER,
   FIELDS_BROWSER_MESSAGE_HEADER,
   FIELDS_BROWSER_FILTER_INPUT,
-  FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER,
-  FIELDS_BROWSER_CATEGORY_BADGE,
 } from '../../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../../screens/timeline';
 
@@ -22,11 +18,8 @@ import {
   addsHostGeoContinentNameToTimeline,
   closeFieldsBrowser,
   filterFieldsBrowser,
-  toggleCategoryFilter,
   removesMessageField,
   resetFields,
-  toggleCategory,
-  activateViewSelected,
 } from '../../../tasks/fields_browser';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
@@ -35,120 +28,81 @@ import { openTimelineFieldsBrowser } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
-const defaultHeaders = [
-  { id: '@timestamp' },
-  { id: 'message' },
-  { id: 'event.category' },
-  { id: 'event.action' },
-  { id: 'host.name' },
-  { id: 'source.ip' },
-  { id: 'destination.ip' },
-  { id: 'user.name' },
-];
-
-describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(hostsUrl('allHosts'));
-    openTimelineUsingToggle();
-    openTimelineFieldsBrowser();
-  });
-
-  describe('Fields Browser rendering', () => {
-    it('should display the expected count of categories and fields that match the filter input', () => {
-      const filterInput = 'host.mac';
-
-      filterFieldsBrowser(filterInput);
-
-      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT).should('have.text', '2');
-      cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', '2');
+describe(
+  'Fields Browser',
+  {
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'unifiedComponentsInTimelineDisabled',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      visitWithTimeRange(hostsUrl('allHosts'));
+      openTimelineUsingToggle();
+      openTimelineFieldsBrowser();
     });
 
-    it('should display only the selected fields when "view selected" option is enabled', () => {
-      activateViewSelected();
-      cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', `${defaultHeaders.length}`);
-      defaultHeaders.forEach((header) => {
-        cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked');
+    describe('Editing the timeline', () => {
+      it('should add/remove columns from the alerts table when the user checks/un-checks them', () => {
+        const filterInput = 'host.geo.c';
+
+        cy.log('removing the message column');
+
+        cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('exist');
+
+        removesMessageField();
+        closeFieldsBrowser();
+
+        cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('not.exist');
+
+        cy.log('add host.geo.city_name column');
+
+        cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('not.exist');
+
+        openTimelineFieldsBrowser();
+        filterFieldsBrowser(filterInput);
+        addsHostGeoCityNameToTimeline();
+        closeFieldsBrowser();
+
+        cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
+      });
+
+      it('should reset all fields in the timeline when `Reset Fields` is clicked', () => {
+        const filterInput = 'host.geo.c';
+
+        filterFieldsBrowser(filterInput);
+
+        cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
+
+        addsHostGeoContinentNameToTimeline();
+        closeFieldsBrowser();
+
+        cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('exist');
+
+        openTimelineFieldsBrowser();
+        resetFields();
+
+        cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
+
+        cy.log('restores focus to the Customize Columns button when `Reset Fields` is clicked');
+
+        cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
+
+        cy.log('restores focus to the Customize Columns button when Esc is pressed');
+
+        openTimelineFieldsBrowser();
+
+        cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{esc}');
+        cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
       });
     });
-
-    it('should create the category badge when it is selected', () => {
-      const category = 'host';
-      const categoryCheck = 'event';
-
-      cy.get(FIELDS_BROWSER_CATEGORY_BADGE(category)).should('not.exist');
-
-      toggleCategory(category);
-
-      cy.get(FIELDS_BROWSER_CATEGORY_BADGE(category)).should('exist');
-
-      toggleCategory(category);
-
-      cy.log('the category filter should contain the filtered category');
-
-      filterFieldsBrowser(category);
-      toggleCategoryFilter();
-
-      cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER).should('contain.text', category);
-
-      cy.log('non-matching categories should not be listed in the category filter');
-
-      cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER).should('not.contain.text', categoryCheck);
-    });
-  });
-
-  describe('Editing the timeline', () => {
-    it('should add/remove columns from the alerts table when the user checks/un-checks them', () => {
-      const filterInput = 'host.geo.c';
-
-      cy.log('removing the message column');
-
-      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('exist');
-
-      removesMessageField();
-      closeFieldsBrowser();
-
-      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('not.exist');
-
-      cy.log('add host.geo.city_name column');
-
-      cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('not.exist');
-
-      openTimelineFieldsBrowser();
-      filterFieldsBrowser(filterInput);
-      addsHostGeoCityNameToTimeline();
-      closeFieldsBrowser();
-
-      cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
-    });
-
-    it('should reset all fields in the timeline when `Reset Fields` is clicked', () => {
-      const filterInput = 'host.geo.c';
-
-      filterFieldsBrowser(filterInput);
-
-      cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
-
-      addsHostGeoContinentNameToTimeline();
-      closeFieldsBrowser();
-
-      cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('exist');
-
-      openTimelineFieldsBrowser();
-      resetFields();
-
-      cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
-
-      cy.log('restores focus to the Customize Columns button when `Reset Fields` is clicked');
-
-      cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
-
-      cy.log('restores focus to the Customize Columns button when Esc is pressed');
-
-      openTimelineFieldsBrowser();
-
-      cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{esc}');
-      cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
-    });
-  });
-});
+  }
+);

@@ -9,10 +9,9 @@ import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { SearchState } from '../../hooks/use_url_search_state';
+import type { SortField, SearchState } from '../../hooks/use_url_search_state';
 import type { Option } from '../slo_context_menu';
 import { ContextMenuItem, SLOContextMenu } from '../slo_context_menu';
-import type { SortField } from '../slo_list_search_bar';
 
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
@@ -94,6 +93,51 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
           value: 'error_budget_remaining',
           label: i18n.translate('xpack.slo.list.sortBy.errorBudgetRemaining', {
             defaultMessage: 'Error budget remaining',
+          }),
+        });
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.sortBy.fiveMinuteBurnRate', {
+        defaultMessage: '5m burn rate',
+      }),
+      checked: sortBy === 'burn_rate_5m',
+      value: 'burn_rate_5m',
+      onClick: () => {
+        handleChangeSortBy({
+          value: 'burn_rate_5m',
+          label: i18n.translate('xpack.slo.list.sortBy.fiveMinuteBurnRate', {
+            defaultMessage: '5m burn rate',
+          }),
+        });
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.sortBy.oneHourBurnRate', {
+        defaultMessage: '1h burn rate',
+      }),
+      checked: sortBy === 'burn_rate_1h',
+      value: 'burn_rate_1h',
+      onClick: () => {
+        handleChangeSortBy({
+          value: 'burn_rate_1h',
+          label: i18n.translate('xpack.slo.list.sortBy.oneHourBurnRate', {
+            defaultMessage: '1h burn rate',
+          }),
+        });
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.sortBy.oneDayBurnRate', {
+        defaultMessage: '1d burn rate',
+      }),
+      checked: sortBy === 'burn_rate_1d',
+      value: 'burn_rate_1d',
+      onClick: () => {
+        handleChangeSortBy({
+          value: 'burn_rate_1d',
+          label: i18n.translate('xpack.slo.list.sortBy.oneDayBurnRate', {
+            defaultMessage: '1d burn rate',
           }),
         });
       },

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
-import { lastValueFrom, Observable } from 'rxjs';
-import type { ObservabilityAIAssistantClient } from '../../service/client';
-import { type ChatCompletionChunkEvent, type Message, MessageRole } from '../../../common';
+import { lastValueFrom } from 'rxjs';
+import { MessageRole, ShortIdTable, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { FunctionCallChatFunction } from '../../service/types';
 
 export async function getRelevantFieldNames({
   index,
@@ -22,6 +22,7 @@ export async function getRelevantFieldNames({
   savedObjectsClient,
   chat,
   messages,
+  signal,
 }: {
   index: string | string[];
   start?: string;
@@ -30,19 +31,30 @@ export async function getRelevantFieldNames({
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   messages: Message[];
-  chat: (
-    name: string,
-    {}: Pick<
-      Parameters<ObservabilityAIAssistantClient['chat']>[1],
-      'functionCall' | 'functions' | 'messages'
-    >
-  ) => Promise<Observable<ChatCompletionChunkEvent>>;
-}): Promise<{ fields: string[] }> {
+  chat: FunctionCallChatFunction;
+  signal: AbortSignal;
+}): Promise<{ fields: string[]; stats: { analyzed: number; total: number } }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
+
+  const hasAnyHitsResponse = await esClient.search({
+    index,
+    _source: false,
+    track_total_hits: 1,
+    terminate_after: 1,
+  });
+
+  const hitCount =
+    typeof hasAnyHitsResponse.hits.total === 'number'
+      ? hasAnyHitsResponse.hits.total
+      : hasAnyHitsResponse.hits.total?.value ?? 0;
+
+  // all fields are empty in this case, so get them all
+  const includeEmptyFields = hitCount === 0;
 
   const fields = await dataViewsService.getFieldsForWildcard({
     pattern: castArray(index).join(','),
     allowNoIndex: true,
+    includeEmptyFields,
     indexFilter:
       start && end
         ? {
@@ -75,10 +87,18 @@ export async function getRelevantFieldNames({
 
   const groupedFields = groupBy(allFields, (field) => field.name);
 
+  const shortIdTable = new ShortIdTable();
+
+  const MAX_CHUNKS = 5;
+  const FIELD_NAMES_PER_CHUNK = 250;
+
+  const fieldNamesToAnalyze = fieldNames.slice(0, MAX_CHUNKS * FIELD_NAMES_PER_CHUNK);
+
   const relevantFields = await Promise.all(
-    chunk(fieldNames, 500).map(async (fieldsInChunk) => {
+    chunk(fieldNamesToAnalyze, FIELD_NAMES_PER_CHUNK).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
-        await chat('get_relevent_dataset_names', {
+        await chat('get_relevant_dataset_names', {
+          signal,
           messages: [
             {
               '@timestamp': new Date().toISOString(),
@@ -91,36 +111,39 @@ export async function getRelevantFieldNames({
             CIRCUMSTANCES include fields not mentioned in this list.`,
               },
             },
-            ...messages.slice(1),
+            // remove the system message and the function request
+            ...messages.slice(1, -1),
             {
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.User,
                 content: `This is the list:
 
-            ${fieldsInChunk.join('\n')}`,
+            ${fieldsInChunk
+              .map((field) => JSON.stringify({ field, id: shortIdTable.take(field) }))
+              .join('\n')}`,
               },
             },
           ],
           functions: [
             {
-              name: 'fields',
-              description: 'The fields you consider relevant to the conversation',
+              name: 'select_relevant_fields',
+              description: 'The IDs of the fields you consider relevant to the conversation',
               parameters: {
                 type: 'object',
                 properties: {
-                  fields: {
+                  fieldIds: {
                     type: 'array',
                     items: {
                       type: 'string',
                     },
                   },
                 },
-                required: ['fields'],
+                required: ['fieldIds'],
               } as const,
             },
           ],
-          functionCall: 'fields',
+          functionCall: 'select_relevant_fields',
         })
       ).pipe(concatenateChatCompletionChunks());
 
@@ -129,10 +152,16 @@ export async function getRelevantFieldNames({
       return chunkResponse.message?.function_call?.arguments
         ? (
             JSON.parse(chunkResponse.message.function_call.arguments) as {
-              fields: string[];
+              fieldIds: string[];
             }
-          ).fields
-            .filter((field) => fieldsInChunk.includes(field))
+          ).fieldIds
+            .map((fieldId) => {
+              const fieldName = shortIdTable.lookup(fieldId);
+              return fieldName ?? fieldId;
+            })
+            .filter((fieldName) => {
+              return fieldsInChunk.includes(fieldName);
+            })
             .map((field) => {
               const fieldDescriptors = groupedFields[field];
               return `${field}:${fieldDescriptors.map((descriptor) => descriptor.type).join(',')}`;
@@ -141,5 +170,8 @@ export async function getRelevantFieldNames({
     })
   );
 
-  return { fields: relevantFields.flat() };
+  return {
+    fields: relevantFields.flat(),
+    stats: { analyzed: fieldNamesToAnalyze.length, total: fieldNames.length },
+  };
 }

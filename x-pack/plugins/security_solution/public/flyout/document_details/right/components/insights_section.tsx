@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,20 +15,30 @@ import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { ExpandableSection } from './expandable_section';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 const KEY = 'insights';
 
 /**
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
-export const InsightsSection: FC = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+export const InsightsSection = memo(() => {
+  const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+  const { activeStep, isTourShown } = useTourContext();
+  const isGuidedOnboardingTourShown =
+    isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase;
+
+  const expanded =
+    useExpandSection({ title: KEY, defaultValue: false }) || isGuidedOnboardingTourShown;
 
   return (
     <ExpandableSection

@@ -7,18 +7,26 @@
  */
 
 import { isAbsolute } from 'path';
-import { RefResolver } from './ref_resolver';
-import { processDocument } from './process_document';
-import { BundleRefProcessor } from './document_processors/bundle_refs';
-import { createSkipNodeWithInternalPropProcessor } from './document_processors/skip_node_with_internal_prop';
-import { createModifyPartialProcessor } from './document_processors/modify_partial';
-import { createSkipInternalPathProcessor } from './document_processors/skip_internal_path';
-import { ResolvedDocument, ResolvedRef } from './types';
-import { createRemovePropsProcessor } from './document_processors/remove_props';
-import { createModifyRequiredProcessor } from './document_processors/modify_required';
-import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
-import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
+import { RefResolver } from './ref_resolver/ref_resolver';
+import { processDocument } from './process_document/process_document';
+import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_LABELS, X_MODIFY } from './known_custom_props';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
+import { ResolvedDocument } from './ref_resolver/resolved_document';
+import { ResolvedRef } from './ref_resolver/resolved_ref';
+import { createSkipNodeWithInternalPropProcessor } from './process_document/document_processors/skip_node_with_internal_prop';
+import { createSkipInternalPathProcessor } from './process_document/document_processors/skip_internal_path';
+import { createModifyPartialProcessor } from './process_document/document_processors/modify_partial';
+import { createModifyRequiredProcessor } from './process_document/document_processors/modify_required';
+import { createRemovePropsProcessor } from './process_document/document_processors/remove_props';
+import {
+  createFlattenFoldedAllOfItemsProcessor,
+  createMergeNonConflictingAllOfItemsProcessor,
+  createUnfoldSingleAllOfItemProcessor,
+} from './process_document/document_processors/reduce_all_of_items';
+import { createIncludeLabelsProcessor } from './process_document/document_processors/include_labels';
+import { BundleRefProcessor } from './process_document/document_processors/bundle_refs';
+import { RemoveUnusedComponentsProcessor } from './process_document/document_processors/remove_unused_components';
+import { insertRefByPointer } from '../utils/insert_by_json_pointer';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
@@ -26,8 +34,8 @@ export class SkipException extends Error {
   }
 }
 
-export interface BundledDocument extends ResolvedDocument {
-  bundledRefs: ResolvedRef[];
+interface BundleDocumentOptions {
+  includeLabels?: string[];
 }
 
 /**
@@ -44,7 +52,10 @@ export interface BundledDocument extends ResolvedDocument {
  * @param absoluteDocumentPath document's absolute path
  * @returns bundled document
  */
-export async function bundleDocument(absoluteDocumentPath: string): Promise<BundledDocument> {
+export async function bundleDocument(
+  absoluteDocumentPath: string,
+  options?: BundleDocumentOptions
+): Promise<ResolvedDocument> {
   if (!isAbsolute(absoluteDocumentPath)) {
     throw new Error(
       `bundleDocument expects an absolute document path but got "${absoluteDocumentPath}"`
@@ -64,15 +75,26 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     throw new SkipException(resolvedDocument.absolutePath, 'Document has no paths defined');
   }
 
-  const bundleRefsProcessor = new BundleRefProcessor(X_INLINE);
-  const removeUnusedComponentsProcessor = new RemoveUnusedComponentsProcessor();
-
-  await processDocument(resolvedDocument, refResolver, [
+  const defaultProcessors = [
     createSkipNodeWithInternalPropProcessor(X_INTERNAL),
     createSkipInternalPathProcessor('/internal'),
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
-    createRemovePropsProcessor([X_MODIFY, X_CODEGEN_ENABLED]),
+    createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED, X_LABELS]),
+    createFlattenFoldedAllOfItemsProcessor(),
+    createMergeNonConflictingAllOfItemsProcessor(),
+    createUnfoldSingleAllOfItemProcessor(),
+  ];
+
+  if (options?.includeLabels) {
+    defaultProcessors.push(createIncludeLabelsProcessor(options?.includeLabels));
+  }
+
+  const bundleRefsProcessor = new BundleRefProcessor(X_INLINE);
+  const removeUnusedComponentsProcessor = new RemoveUnusedComponentsProcessor();
+
+  await processDocument(resolvedDocument, refResolver, [
+    ...defaultProcessors,
     bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);
@@ -81,7 +103,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     removeUnusedComponentsProcessor.removeUnusedComponents(resolvedDocument.document.components);
   }
 
-  // If document.paths were removed by processors skip the document
+  // If document.paths was removed by processors skip the document
   if (!hasPaths(resolvedDocument.document as MaybeObjectWithPaths)) {
     throw new SkipException(
       resolvedDocument.absolutePath,
@@ -89,7 +111,9 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     );
   }
 
-  return { ...resolvedDocument, bundledRefs: bundleRefsProcessor.getBundledRefs() };
+  injectBundledRefs(resolvedDocument, bundleRefsProcessor.getBundledRefs());
+
+  return resolvedDocument;
 }
 
 interface MaybeObjectWithPaths {
@@ -102,4 +126,13 @@ function hasPaths(document: MaybeObjectWithPaths): boolean {
     document.paths !== null &&
     Object.keys(document.paths).length > 0
   );
+}
+
+function injectBundledRefs(
+  resolvedDocument: ResolvedDocument,
+  refs: IterableIterator<ResolvedRef>
+): void {
+  for (const ref of refs) {
+    insertRefByPointer(ref.pointer, ref.refNode, resolvedDocument.document);
+  }
 }

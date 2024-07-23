@@ -10,6 +10,7 @@ import type { BulkError } from './utils';
 import { transformBulkError, convertToSnakeCase, SiemResponseFactory } from './utils';
 import { responseMock } from './__mocks__';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { RuleResponseValidationError } from '../rule_management/logic/detection_rules_client/utils';
 
 describe('utils', () => {
   describe('transformBulkError', () => {
@@ -58,6 +59,24 @@ describe('utils', () => {
         error: { message: 'I have a type error', status_code: 400 },
       };
       expect(transformed).toEqual(expected);
+    });
+
+    test('it detects a RuleResponseValidationError and returns an error status of 500', () => {
+      const error = new RuleResponseValidationError({
+        ruleId: 'rule-1',
+        message: 'name: Required',
+      });
+
+      const expected: BulkError = {
+        rule_id: 'rule-1',
+        error: { message: 'name: Required', status_code: 500 },
+      };
+
+      /* Works when the ruleId is passed in. For example, when creating a rule with a user-set ruleId */
+      expect(transformBulkError('rule-1', error)).toEqual(expected);
+
+      /* Works when the ruleId is not passed in. For example, when creating a rule with a generated ruleId */
+      expect(transformBulkError(undefined, error)).toEqual(expected);
     });
   });
 

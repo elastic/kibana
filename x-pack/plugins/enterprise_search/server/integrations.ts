@@ -97,7 +97,7 @@ export const registerEnterpriseSearchIntegrations = (
             type: 'svg',
           },
         ],
-        id: connector.serviceType,
+        id: `${connector.serviceType}-${connector.name}`,
         isBeta: connector.isBeta,
         shipper: 'enterprise_search',
         title: connector.name,

@@ -44,9 +44,10 @@ interface TestDataExpectedWithoutSampleProbability {
     fieldName: string;
     fieldValue: string;
     logRate: string;
-    pValue: string;
+    pValue?: string;
     impact: string;
   }>;
+  columnSelectorPopover: string[];
   fieldSelectorPopover: string[];
   prompt: 'empty' | 'change-point';
 }
@@ -54,6 +55,7 @@ interface TestDataExpectedWithoutSampleProbability {
 export interface TestData {
   suiteTitle: string;
   analysisType: LogRateAnalysisType;
+  autoRun: boolean;
   dataGenerator: LogRateAnalysisDataGenerator;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;
@@ -62,6 +64,7 @@ export interface TestData {
   brushDeviationTargetTimestamp?: number;
   brushIntervalFactor: number;
   chartClickCoordinates: [number, number];
+  columnSelectorSearch: string;
   fieldSelectorSearch: string;
   fieldSelectorApplyAvailable: boolean;
   query?: string;

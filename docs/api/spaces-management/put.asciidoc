@@ -36,6 +36,9 @@ experimental[] Update an existing {kib} space.
   (Optional, string) Specifies the data-url encoded image to display in the space avatar. If specified, `initials` will not be displayed, and the `color` will be visible as the background color for transparent images.
   For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
 
+`solution`::
+  (Optional, string) The solution defined for the space. Can be one of `security`, `oblt`, `es`, `classic`.
+
 [[spaces-api-put-response-codes]]
 ==== Response codes
 

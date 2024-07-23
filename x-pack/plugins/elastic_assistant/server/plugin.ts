@@ -24,6 +24,7 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
+import { createGetElserId } from './ai_assistant_service/helpers';
 
 export class ElasticAssistantPlugin
   implements
@@ -53,6 +54,7 @@ export class ElasticAssistantPlugin
 
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
+      ml: plugins.ml,
       taskManager: plugins.taskManager,
       kibanaVersion: this.kibanaVersion,
       elasticsearchClientPromise: core
@@ -76,8 +78,8 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    // this.assistantService registerKBTask
-    registerRoutes(router, this.logger, plugins);
+    const getElserId = createGetElserId(plugins.ml);
+    registerRoutes(router, this.logger, getElserId);
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {

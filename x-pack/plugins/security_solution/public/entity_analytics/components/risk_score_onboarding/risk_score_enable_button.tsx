@@ -35,8 +35,8 @@ const RiskScoreEnableButtonComponent = ({
   };
 }) => {
   const spaceId = useSpaceId();
-  const { http, notifications, theme, dashboard } = useKibana().services;
-  const { renderDocLink, renderDashboardLink } = useRiskScoreToastContent(riskScoreEntity);
+  const { http, dashboard, ...startServices } = useKibana().services;
+  const { renderDocLink, renderDashboardLink } = useRiskScoreToastContent();
   const { fetch, isLoading } = useFetch(REQUEST_NAMES.ENABLE_RISK_SCORE, installRiskScoreModule);
   const isRiskEngineEnabled = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
@@ -44,27 +44,25 @@ const RiskScoreEnableButtonComponent = ({
     fetch({
       dashboard,
       http,
-      notifications,
       refetch,
       renderDashboardLink,
       renderDocLink,
       riskScoreEntity,
       spaceId,
-      theme,
       timerange,
+      startServices,
     });
   }, [
     dashboard,
     fetch,
     http,
-    notifications,
     refetch,
     renderDashboardLink,
     renderDocLink,
     riskScoreEntity,
     spaceId,
-    theme,
     timerange,
+    startServices,
   ]);
 
   return (

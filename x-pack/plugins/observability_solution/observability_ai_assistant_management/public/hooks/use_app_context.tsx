@@ -6,10 +6,10 @@
  */
 
 import { useContext } from 'react';
-import { AppContext, ContextValue } from '../context/app_context';
+import { AppContext, AppContextValue } from '../context/app_context';
 
 export const useAppContext = () => {
-  const ctx = useContext<ContextValue>(AppContext);
+  const ctx = useContext<AppContextValue>(AppContext);
   if (!ctx) {
     throw new Error('"useAppContext" can only be called inside of AppContext.Provider!');
   }

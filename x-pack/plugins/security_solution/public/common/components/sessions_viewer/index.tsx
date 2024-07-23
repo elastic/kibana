@@ -19,12 +19,10 @@ import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { SecurityCellActionsTrigger } from '../cell_actions';
 
@@ -38,7 +36,8 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
           bool: {
             // show sessions table results by filtering events where event.action is fork, exec, or end
             should: [
-              { term: { [EVENT_ACTION]: 'exec' } },
+              { term: { [EVENT_ACTION]: 'exec' } }, // exec event.action is used by Endpoint and Cloud Defend
+              { term: { [EVENT_ACTION]: 'executed' } }, // executed event.action is used by auditbeat
               { term: { [EVENT_ACTION]: 'fork' } },
               { term: { [EVENT_ACTION]: 'end' } },
             ],
@@ -51,6 +50,13 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
                 field: ENTRY_SESSION_ENTITY_ID_PROPERTY, // to exclude any records which have no entry_leader.entity_id
               },
             },
+          },
+        },
+      ],
+      must_not: [
+        {
+          term: {
+            [ENTRY_SESSION_ENTITY_ID_PROPERTY]: '',
           },
         },
       ],
@@ -77,7 +83,6 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   defaultColumns = sessionsHeaders,
 }) => {
   const dispatch = useDispatch();
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {
     if (filterQuery && filterQuery !== '') {
       return JSON.parse(filterQuery);
@@ -107,19 +112,12 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
       dataTableActions.initializeDataTableSettings({
         id: tableId,
         title: i18n.SESSIONS_TITLE,
-        defaultColumns: eventsDefaultModel.columns.map((c) =>
-          !tGridEnabled && c.initialWidth == null
-            ? {
-                ...c,
-                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-              }
-            : c
-        ),
+        defaultColumns: eventsDefaultModel.columns,
         showCheckboxes: true,
         selectAll: true,
       })
     );
-  }, [dispatch, tGridEnabled, tableId]);
+  }, [dispatch, tableId]);
 
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT =

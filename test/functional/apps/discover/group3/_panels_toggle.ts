@@ -211,13 +211,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
           hasTimeField: false,
         });
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
       checkPanelsToggle({ isChartAvailable: false, totalHits: '14,004' });
     });
 
-    describe('text-based with histogram chart', function () {
+    describe('ES|QL with histogram chart', function () {
       before(async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
@@ -230,7 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       checkPanelsToggle({ isChartAvailable: true, totalHits: '10' });
     });
 
-    describe('text-based with aggs chart', function () {
+    describe('ES|QL with aggs chart', function () {
       before(async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
@@ -248,7 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       checkPanelsToggle({ isChartAvailable: true, totalHits: '5' });
     });
 
-    describe('text-based without a time field', function () {
+    describe('ES|QL without a time field', function () {
       before(async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
@@ -259,6 +260,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
           hasTimeField: false,
         });
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });

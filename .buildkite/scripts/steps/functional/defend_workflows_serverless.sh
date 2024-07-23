@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
-source .buildkite/scripts/steps/functional/common_cypress.sh
 
 export JOB=kibana-defend-workflows-serverless-cypress
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}

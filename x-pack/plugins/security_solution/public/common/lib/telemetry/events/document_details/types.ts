@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/public';
 import type { TelemetryEventTypes } from '../../constants';
 
 export interface ReportDetailsFlyoutOpenedParams {
-  tableId: string;
+  location: string;
   panel: 'left' | 'right' | 'preview';
 }
 
 export interface ReportDetailsFlyoutTabClickedParams {
-  tableId: string;
+  location: string;
   panel: 'left' | 'right';
   tabId: string;
 }

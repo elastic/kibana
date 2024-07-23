@@ -8,22 +8,17 @@
 import React, { useState } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 
-type ExpressionColor =
-  | 'subdued'
-  | 'primary'
-  | 'success'
-  | 'accent'
-  | 'warning'
-  | 'danger';
+type ExpressionColor = 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
 interface Props {
   title: React.ReactNode;
   value: React.ReactNode;
   children?: React.ReactNode;
   color?: ExpressionColor;
+  dataTestSubj?: string;
 }
 
 export function PopoverExpression(props: Props) {
-  const { title, value, children, color } = props;
+  const { title, value, children, color, dataTestSubj } = props;
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   return (
@@ -33,6 +28,7 @@ export function PopoverExpression(props: Props) {
       closePopover={() => setPopoverOpen(false)}
       button={
         <EuiExpression
+          data-test-subj={dataTestSubj}
           description={title}
           value={value}
           isActive={popoverOpen}

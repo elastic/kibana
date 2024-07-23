@@ -136,27 +136,29 @@ function createDiscoverLocator(
     filters,
     dataViewSpec: {
       id: indexId,
-      title: slo.indicator.params.index,
+      title: slo.remote
+        ? `${slo.remote.remoteName}:${slo.indicator.params.index}`
+        : slo.indicator.params.index,
       timeFieldName,
     },
   };
 }
 
 export function getDiscoverLink(
-  discover: DiscoverStart,
   slo: SLOWithSummaryResponse,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  discover?: DiscoverStart
 ) {
   const config = createDiscoverLocator(slo, false, false, timeRange);
   return discover?.locator?.getRedirectUrl(config);
 }
 
 export function openInDiscover(
-  discover: DiscoverStart,
   slo: SLOWithSummaryResponse,
   showBad = false,
   showGood = false,
-  timeRange?: TimeRange
+  timeRange?: TimeRange,
+  discover?: DiscoverStart
 ) {
   const config = createDiscoverLocator(slo, showBad, showGood, timeRange);
   discover?.locator?.navigate(config);

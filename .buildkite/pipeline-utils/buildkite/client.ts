@@ -29,12 +29,19 @@ export interface BuildkiteGroup {
   steps: BuildkiteStep[];
 }
 
-export type BuildkiteStep = BuildkiteCommandStep | BuildkiteInputStep | BuildkiteTriggerStep;
+export type BuildkiteStep =
+  | BuildkiteCommandStep
+  | BuildkiteInputStep
+  | BuildkiteTriggerStep
+  | BuildkiteWaitStep;
 
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
   parallelism?: number;
+  concurrency?: number;
+  concurrency_group?: string;
+  concurrency_method?: 'eager' | 'ordered';
   agents:
     | {
         queue: string;
@@ -49,6 +56,7 @@ export interface BuildkiteCommandStep {
       };
   timeout_in_minutes?: number;
   key?: string;
+  cancel_on_build_failing?: boolean;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{
@@ -56,7 +64,7 @@ export interface BuildkiteCommandStep {
       limit: number;
     }>;
   };
-  env?: { [key: string]: string };
+  env?: { [key: string]: string | number };
 }
 
 interface BuildkiteInputTextField {
@@ -100,7 +108,7 @@ export interface BuildkiteInputStep {
       limit: number;
     }>;
   };
-  env?: { [key: string]: string };
+  env?: { [key: string]: string | number };
 }
 
 export interface BuildkiteTriggerStep {
@@ -136,6 +144,14 @@ export interface BuildkiteTriggerBuildParams {
   pull_request_base_branch?: string;
   pull_request_id?: string | number;
   pull_request_repository?: string;
+}
+
+export interface BuildkiteWaitStep {
+  wait: string;
+  if?: string;
+  allow_dependency_failure?: boolean;
+  continue_on_failure?: boolean;
+  branches?: string;
 }
 
 export class BuildkiteClient {
@@ -266,7 +282,7 @@ export class BuildkiteClient {
         hasRetries = true;
         const isPreemptionFailure =
           job.state === 'failed' &&
-          job.agent?.meta_data?.includes('spot=true') &&
+          job.agent?.meta_data?.some((el) => ['spot=true', 'gcp:preemptible=true'].includes(el)) &&
           job.exit_status === -1;
 
         if (!isPreemptionFailure) {

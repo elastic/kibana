@@ -582,6 +582,7 @@ describe('#filterEvent', () => {
     expect(filterEvent(event, [{ types: ['NO_MATCH', 'access'] }])).toBeFalsy();
     expect(filterEvent(event, [{ outcomes: ['NO_MATCH', 'success'] }])).toBeFalsy();
     expect(filterEvent(event, [{ spaces: ['NO_MATCH', 'default'] }])).toBeFalsy();
+    expect(filterEvent(event, [{ users: ['NO_MATCH', 'jdoe'] }])).toBeFalsy();
   });
 
   test('keeps event when one criteria per rule does not match', () => {
@@ -593,6 +594,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -600,6 +602,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -607,6 +610,7 @@ describe('#filterEvent', () => {
           types: ['NO_MATCH'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -614,6 +618,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['NO_MATCH'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -621,6 +626,15 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['NO_MATCH'],
+          users: ['jdoe'],
+        },
+        {
+          actions: ['http_request'],
+          categories: ['web'],
+          types: ['access'],
+          outcomes: ['success'],
+          spaces: ['default'],
+          users: ['NO_MATCH'],
         },
       ])
     ).toBeTruthy();
@@ -651,6 +665,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeTruthy();
@@ -681,6 +696,7 @@ describe('#filterEvent', () => {
           types: ['access', 'NO_MATCH'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeTruthy();
@@ -695,6 +711,7 @@ describe('#filterEvent', () => {
           types: ['NO_MATCH'],
           outcomes: ['NO_MATCH'],
           spaces: ['NO_MATCH'],
+          users: ['NO_MATCH'],
         },
         {
           actions: ['http_request'],
@@ -702,6 +719,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeFalsy();
@@ -732,6 +750,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeFalsy();

@@ -13,7 +13,9 @@ import {
   FLEET_ENDPOINT_PACKAGE,
 } from '../constants';
 
-export function policyHasFleetServer(agentPolicy: AgentPolicy) {
+export function policyHasFleetServer(
+  agentPolicy: Pick<AgentPolicy, 'package_policies' | 'has_fleet_server'>
+) {
   if (!agentPolicy.package_policies) {
     return false;
   }
@@ -41,4 +43,11 @@ function policyHasIntegration(agentPolicy: AgentPolicy, packageName: string) {
   }
 
   return agentPolicy.package_policies?.some((p) => p.package?.name === packageName);
+}
+
+export function getInheritedNamespace(agentPolicies: AgentPolicy[], defaultValue?: string): string {
+  if (agentPolicies.length === 1) {
+    return agentPolicies[0].namespace;
+  }
+  return defaultValue ?? 'default';
 }

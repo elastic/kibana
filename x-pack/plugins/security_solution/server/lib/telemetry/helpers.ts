@@ -306,8 +306,11 @@ export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
   telemetryLogger(logger, message, meta);
 };
 
-export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
-  return new TelemetryLoggerImpl(logger);
+export const newTelemetryLogger = (
+  logger: Logger,
+  mdc?: LogMeta | object | undefined
+): TelemetryLogger => {
+  return new TelemetryLoggerImpl(logger, mdc);
 };
 
 function obfuscateString(clusterId: string, toHash: string): string {
@@ -396,7 +399,8 @@ export class TelemetryTimelineFetcher {
       entities[0].id,
       entities[0].schema,
       this.timeFrame.startOfDay,
-      this.timeFrame.endOfDay
+      this.timeFrame.endOfDay,
+      entities[0].agentId || ''
     );
 
     const nodeIds = Array.isArray(tree) ? tree.map((node) => node?.id.toString()) : [];

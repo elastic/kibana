@@ -112,8 +112,6 @@ export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
       matchToken('paren.lparen', '{', 'json_root'),
     ],
     comments: [
-      // line comment indicated by #
-      matchTokens(['comment.punctuation', 'comment.line'], /(#)(.*$)/),
       // start a block comment indicated by /*
       matchToken('comment.punctuation', /\/\*/, 'block_comment'),
       // line comment indicated by //

@@ -11,6 +11,8 @@ src
  | code_actions         // => the quick fixes service logic
  | definitions          // => static assets to define all components behaviour of a ES|QL query: commands, functions, etc...
  | validation           // => the validation logic
+
+scripts                 // => scripts used to manage the validation engine code
 ```
 
 ### Basic usage
@@ -37,7 +39,7 @@ const myCallbacks = {
 const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", getAstAndSyntaxErrors, undefined, myCallbacks);
 ```
 
-If not all callbacks are available it is possible to gracefully degradate the validation experience with the `ignoreOnMissingCallbacks` option:
+If not all callbacks are available it is possible to gracefully degrade the validation experience with the `ignoreOnMissingCallbacks` option:
 
 ```js
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -45,12 +47,12 @@ import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define only the getSources callback
 const myCallbacks = {
-  getSources: async () => [{name: 'index', hidden: false}],
+  getSources: async () => [{ name: 'index', hidden: false }],
 };
 
 // ignore errors that might be triggered by the lack of some callbacks (i.e. "Unknown columns", etc...)
 const { errors, warnings } = await validateQuery(
-  "from index | stats 1 + avg(myColumn)",
+  'from index | stats 1 + avg(myColumn)',
   getAstAndSyntaxErrors,
   { ignoreOnMissingCallbacks: true },
   myCallbacks
@@ -59,7 +61,7 @@ const { errors, warnings } = await validateQuery(
 
 #### Autocomplete
 
-This is the complete logic for the ES|QL autocomplete language, it is completely indepedent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
+This is the complete logic for the ES|QL autocomplete language, it is completely independent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
 
 ```js
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -161,12 +163,12 @@ For instance to show contextual information on Hover the `getAstContext` functio
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { getAstContext } from '@kbn/esql-validation-autocomplete';
 
-const queryString = "from index2 | stats 1 + avg(myColumn)";
-const offset = queryString.indexOf("avg");
+const queryString = 'from index2 | stats 1 + avg(myColumn)';
+const offset = queryString.indexOf('avg');
 
 const astContext = getAstContext(queryString, getAstAndSyntaxErrors(queryString), offset);
 
-if(astContext.type === "function"){
+if (astContext.type === 'function') {
   const fnNode = astContext.node;
   const fnDefinition = getFunctionDefinition(fnNode.name);
 
@@ -174,7 +176,6 @@ if(astContext.type === "function"){
   console.log(getFunctionSignature(fnDefinition));
 }
 ```
-
 
 ### How does it work
 
@@ -206,14 +207,14 @@ The autocomplete/suggest task takes a query as input together with the current c
 Note that autocomplete works most of the time with incomplete/invalid queries, so some logic to manipulate the query into something valid (see the `EDITOR_MARKER` or the `countBracketsUnclosed` functions for more).
 
 Once the AST is produced there's a `getAstContext` function that finds the cursor position node (and its parent command), together with some hint like the type of current context: `expression`, `function`, `newCommand`, `option`.
-The most complex case is the `expression` as it can cover a moltitude of cases. The function is highly commented in order to identify the specific cases, but there's probably some obscure area still to comment/clarify.
+The most complex case is the `expression` as it can cover a multitude of cases. The function is highly commented in order to identify the specific cases, but there's probably some obscure area still to comment/clarify.
 
-### Adding new commands/options/functions/erc...
+### Adding new commands/options/functions/etc...
 
 To update the definitions:
-1. open either approriate definition file within the `definitions` folder and add a new entry to the relative array
-2. write new tests for validation and autocomplete
-  * if a new function is added tests are automatically generated fro both validation and autocomplete with some standard checks
-  * if a new function requires a new field types, make sure to add the new type to the initial part of the test file
-    * this will be automatically picked up by the test generator to produce new test cases
-  * if a new function requires a new type of test, make sure to write it manually
+
+1. open either appropriate definition file within the `definitions` folder and add a new entry to the relative array
+2. if you are adding a function, run `yarn maketests` to add a set of fundamental validation tests for the new definition. If any of the suggested tests are wrong, feel free to correct them by hand. If it seems like a general problem, open an issue with the details so that we can update the generator code.
+3. write new tests for validation and autocomplete
+
+- if a new function requires a new type of test, make sure to write it manually

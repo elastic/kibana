@@ -6,18 +6,33 @@
  * Side Public License, v 1.
  */
 
-export type ESQLAst = ESQLCommand[];
+export type ESQLAst = ESQLAstCommand[];
 
+export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
+
+export type ESQLAstNode = ESQLAstCommand | ESQLAstItem;
+
+/**
+ * Represents an *expression* in the AST.
+ */
 export type ESQLSingleAstItem =
-  | ESQLFunction
+  | ESQLFunction // "function call expression"
   | ESQLCommandOption
-  | ESQLSource
-  | ESQLColumn
+  | ESQLSource // "source identifier expression"
+  | ESQLColumn // "field identifier expression"
   | ESQLTimeInterval
-  | ESQLList
-  | ESQLLiteral
-  | ESQLCommandMode;
+  | ESQLList // "list expression"
+  | ESQLLiteral // "literal expression"
+  | ESQLCommandMode
+  | ESQLInlineCast // "inline cast expression"
+  | ESQLUnknownItem;
 
+export type ESQLAstField = ESQLFunction | ESQLColumn;
+
+/**
+ * An array of AST nodes represents different things in different contexts.
+ * For example, in command top level arguments it is treated as an "assignment expression".
+ */
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
 export interface ESQLLocation {
@@ -25,16 +40,22 @@ export interface ESQLLocation {
   max: number;
 }
 
-interface ESQLAstBaseItem {
-  name: string;
+export interface ESQLAstBaseItem<Name = string> {
+  name: Name;
   text: string;
   location: ESQLLocation;
   incomplete: boolean;
 }
 
-export interface ESQLCommand extends ESQLAstBaseItem {
+export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   type: 'command';
   args: ESQLAstItem[];
+}
+
+export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
+  sources: ESQLSource[];
+  aggregates?: ESQLAstField[];
+  grouping?: ESQLAstField[];
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
@@ -49,6 +70,27 @@ export interface ESQLCommandMode extends ESQLAstBaseItem {
 export interface ESQLFunction extends ESQLAstBaseItem {
   type: 'function';
   args: ESQLAstItem[];
+}
+
+export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
+  type: 'inlineCast';
+  value: ValueType;
+  castType: string;
+}
+
+/**
+ * This node represents something the AST generator
+ * didn't recognize in the ANTLR parse tree.
+ *
+ * It can show up if the AST generator code is out of sync
+ * with the ANTLR grammar or if there is some idiosyncrasy
+ * or bug in the parse tree.
+ *
+ * These nodes can be ignored for the purpose of validation
+ * and autocomplete, but they may be helpful in detecting bugs.
+ */
+export interface ESQLUnknownItem extends ESQLAstBaseItem {
+  type: 'unknown';
 }
 
 export interface ESQLTimeInterval extends ESQLAstBaseItem {
@@ -76,7 +118,8 @@ export type ESQLLiteral =
   | ESQLNumberLiteral
   | ESQLBooleanLiteral
   | ESQLNullLiteral
-  | ESQLStringLiteral;
+  | ESQLStringLiteral
+  | ESQLParamLiteral<string>;
 
 // @internal
 export interface ESQLNumberLiteral extends ESQLAstBaseItem {
@@ -106,6 +149,39 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
   value: string;
 }
 
+// @internal
+export interface ESQLParamLiteral<ParamType extends string = string> extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'param';
+  paramType: ParamType;
+  value: string | number;
+}
+
+/**
+ * *Unnamed* parameter is not named, just a question mark "?".
+ *
+ * @internal
+ */
+export type ESQLUnnamedParamLiteral = ESQLParamLiteral<'unnamed'>;
+
+/**
+ * *Named* parameter is a question mark followed by a name "?name".
+ *
+ * @internal
+ */
+export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
+  value: string;
+}
+
+/**
+ * *Positional* parameter is a question mark followed by a number "?1".
+ *
+ * @internal
+ */
+export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
+  value: number;
+}
+
 export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
@@ -113,10 +189,12 @@ export interface ESQLMessage {
   code: string;
 }
 
-export type AstProviderFn = (text: string | undefined) => Promise<{
-  ast: ESQLAst;
-  errors: EditorError[];
-}>;
+export type AstProviderFn = (text: string | undefined) =>
+  | Promise<{
+      ast: ESQLAst;
+      errors: EditorError[];
+    }>
+  | { ast: ESQLAst; errors: EditorError[] };
 
 export interface EditorError {
   startLineNumber: number;

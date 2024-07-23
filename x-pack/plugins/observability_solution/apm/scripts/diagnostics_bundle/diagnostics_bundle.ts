@@ -74,9 +74,7 @@ export async function initDiagnosticsBundle({
 }
 
 async function saveReportToFile(combinedReport: DiagnosticsBundle) {
-  const filename = `apm-diagnostics-${
-    combinedReport.kibanaVersion
-  }-${Date.now()}.json`;
+  const filename = `apm-diagnostics-${combinedReport.kibanaVersion}-${Date.now()}.json`;
   await fs.writeFile(filename, JSON.stringify(combinedReport, null, 2), {
     encoding: 'utf8',
     flag: 'w',
@@ -93,18 +91,13 @@ async function getApmIndices(kbnClientOpts: AxiosRequestConfig) {
     }>;
   }
 
-  const res = await axios.get<Response>(
-    '/internal/apm/settings/apm-index-settings',
-    kbnClientOpts
-  );
+  const res = await axios.get<Response>('/internal/apm/settings/apm-index-settings', kbnClientOpts);
 
   return Object.fromEntries(
-    res.data.apmIndexSettings.map(
-      ({ configurationName, defaultValue, savedValue }) => [
-        configurationName,
-        savedValue ?? defaultValue,
-      ]
-    )
+    res.data.apmIndexSettings.map(({ configurationName, defaultValue, savedValue }) => [
+      configurationName,
+      savedValue ?? defaultValue,
+    ])
   ) as APMIndices;
 }
 

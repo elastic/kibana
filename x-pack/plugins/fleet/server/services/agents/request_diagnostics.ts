@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
+import { SO_SEARCH_LIMIT, REQUEST_DIAGNOSTICS_TIMEOUT_MS } from '../../constants';
 
 import type { GetAgentsOptions } from '.';
 import { getAgents, getAgentsByKuery } from './crud';
@@ -19,8 +19,6 @@ import {
   RequestDiagnosticsActionRunner,
   requestDiagnosticsBatch,
 } from './request_diagnostics_action_runner';
-
-const REQUEST_DIAGNOSTICS_TIMEOUT_MS = 3 * 60 * 1000; // 3 hours;
 
 export async function requestDiagnostics(
   esClient: ElasticsearchClient,

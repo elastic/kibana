@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import type { OnBoardingDefaultSolution } from '../common';
 
 export interface CloudStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
-  CloudContextProvider: FC<{}>;
+  CloudContextProvider: FC<PropsWithChildren<unknown>>;
   /**
    * `true` when Kibana is running on Elastic Cloud.
    */
@@ -174,6 +175,15 @@ export interface CloudSetup {
    * @param contextProvider The React component from the Service Provider.
    */
   registerCloudService: (contextProvider: FC) => void;
+  /**
+   * Onboarding configuration
+   */
+  onboarding: {
+    /**
+     * The default solution selected during onboarding.
+     */
+    defaultSolution?: OnBoardingDefaultSolution;
+  };
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.

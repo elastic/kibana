@@ -17,6 +17,7 @@ import type {
   ObservabilityAIAssistantChatService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
+  DiscoveredDataset,
 } from './types';
 
 export type {
@@ -26,11 +27,14 @@ export type {
   ObservabilityAIAssistantChatService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
+  DiscoveredDataset,
 };
 
+export { aiAssistantCapabilities } from '../common/capabilities';
 export { AssistantAvatar } from './components/assistant_avatar';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
+export { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 
 export { createStorybookChatService, createStorybookService } from './storybook_mock';
 
@@ -56,16 +60,26 @@ export {
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../common/functions/visualize_esql';
 
-export { getAssistantSystemMessage } from './service/get_assistant_system_message';
-
-export { isSupportedConnectorType } from '../common';
-export { FunctionVisibility } from '../common';
+export {
+  isSupportedConnectorType,
+  FunctionVisibility,
+  MessageRole,
+  KnowledgeBaseEntryRole,
+  concatenateChatCompletionChunks,
+  StreamingChatResponseEventType,
+} from '../common';
+export type {
+  CompatibleJSONSchema,
+  Conversation,
+  Message,
+  KnowledgeBaseEntry,
+  FunctionDefinition,
+  ChatCompletionChunkEvent,
+  ShortIdTable,
+} from '../common';
 
 export type { TelemetryEventTypeWithPayload } from './analytics';
 export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetry_event_type';
-
-export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
-export { MessageRole, KnowledgeBaseEntryRole } from '../common';
 
 export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
 export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
@@ -83,6 +97,7 @@ export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
 } from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<

@@ -17,18 +17,14 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../hooks';
 import {
-  INDEX_NAME,
-  AGENTS_PREFIX,
-  FLEET_ENROLLMENT_API_PREFIX,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '../constants';
-import {
   AGENT_POLICY_MAPPINGS,
-  PACKAGE_POLICIES_MAPPINGS,
   AGENT_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
-} from '../../../../common/constants';
+  AGENTS_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  INGEST_SAVED_OBJECT_INDEX,
+} from '../constants';
 
 const NoWrapQueryStringInput = styled(QueryStringInput)`
   .kbnQueryBar__textarea {
@@ -38,29 +34,42 @@ const NoWrapQueryStringInput = styled(QueryStringInput)`
 
 interface Props {
   value: string;
-  fieldPrefix?: string;
+  indexPattern: string;
+  fieldPrefix: string;
   onChange: (newValue: string, submit?: boolean) => void;
   placeholder?: string;
-  indexPattern?: string;
   dataTestSubj?: string;
 }
 
-const getMappings = (indexPattern: string) => {
+const getMappings = (indexPattern: string, fieldPrefix: string) => {
   switch (indexPattern) {
-    case `.${AGENTS_PREFIX}`:
+    case AGENTS_INDEX:
       return AGENT_MAPPINGS;
-    case `.${AGENT_POLICY_SAVED_OBJECT_TYPE}`:
-      return AGENT_POLICY_MAPPINGS;
-    case `.${PACKAGE_POLICY_SAVED_OBJECT_TYPE}`:
-      return PACKAGE_POLICIES_MAPPINGS;
-    case `.${FLEET_ENROLLMENT_API_PREFIX}`:
+    // Saved Objects are stored in .kibana_ingest.
+    // Currently, the search bar is only used to query agent policies.
+    case INGEST_SAVED_OBJECT_INDEX:
+      switch (fieldPrefix) {
+        case AGENT_POLICY_SAVED_OBJECT_TYPE:
+          return AGENT_POLICY_MAPPINGS;
+        default:
+          return {};
+      }
+    case ENROLLMENT_API_KEYS_INDEX:
       return ENROLLMENT_API_KEY_MAPPINGS;
     default:
       return {};
   }
 };
 
-const getType = (type: string) => {
+const getFieldName = (indexPattern: string, fieldPrefix: string, name: string) => {
+  // Add Saved Object prefix if the field refers to a SO and is not already prefixed.
+  if (indexPattern !== INGEST_SAVED_OBJECT_INDEX || name.startsWith(fieldPrefix)) {
+    return name;
+  }
+  return `${fieldPrefix}.${name}`;
+};
+
+const getFieldType = (type: string) => {
   switch (type) {
     case 'keyword':
       return 'string';
@@ -88,9 +97,10 @@ const concatKeys = (obj: any, parentKey = '') => {
   }
   return result;
 };
+
 /** Exported for testing only **/
-export const getFieldSpecs = (indexPattern: string) => {
-  const mapping = getMappings(indexPattern);
+export const getFieldSpecs = (indexPattern: string, fieldPrefix: string) => {
+  const mapping = getMappings(indexPattern, fieldPrefix);
   // @ts-ignore-next-line
   const rawFields = concatKeys(mapping?.properties) || [];
   const fields = rawFields
@@ -100,8 +110,8 @@ export const getFieldSpecs = (indexPattern: string) => {
 
   const fieldSpecs: FieldSpec[] = fields.map((field) => {
     return {
-      name: field[0],
-      type: getType(field[1]),
+      name: getFieldName(indexPattern, fieldPrefix, field[0]),
+      type: getFieldType(field[1]),
       searchable: true,
       aggregatable: true,
       esTypes: [field[1]],
@@ -115,7 +125,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   fieldPrefix,
   onChange,
   placeholder,
-  indexPattern = INDEX_NAME,
+  indexPattern,
   dataTestSubj,
 }) => {
   const {
@@ -148,7 +158,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const fieldSpecs = getFieldSpecs(indexPattern);
+        const fieldSpecs = getFieldSpecs(indexPattern, fieldPrefix);
         const fieldsMap = data.dataViews.fieldArrayToMap(fieldSpecs);
         const newDataView = await data.dataViews.create(
           { title: indexPattern, fields: fieldsMap },

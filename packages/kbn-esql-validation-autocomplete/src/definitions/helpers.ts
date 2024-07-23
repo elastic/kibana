@@ -19,7 +19,7 @@ export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
-  return signatures.map(({ params, returnType, minParams, examples }) => {
+  return signatures.map(({ params, returnType, minParams }) => {
     // for functions with a minimum number of args, repeat the last arg multiple times
     // just make sure to compute the right number of args to add
     const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
@@ -30,7 +30,6 @@ export function getFunctionSignatures(
         .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
         withTypes ? `: ${returnType}` : ''
       }`,
-      examples,
     };
   });
 }
@@ -57,12 +56,16 @@ export function getCommandSignature(
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
-    declaration: `${name} ${printCommandArguments(signature, withTypes)} ${options.map(
+    declaration: `${name.toUpperCase()} ${printCommandArguments(
+      signature,
+      withTypes
+    )} ${options.map(
       (option) =>
-        `${option.wrapped ? option.wrapped[0] : ''}${option.name} ${printCommandArguments(
-          option.signature,
-          withTypes
-        )}${option.wrapped ? option.wrapped[1] : ''}`
+        `${
+          option.wrapped ? option.wrapped[0] : ''
+        }${option.name.toUpperCase()} ${printCommandArguments(option.signature, withTypes)}${
+          option.wrapped ? option.wrapped[1] : ''
+        }`
     )}`,
     examples,
   };
@@ -96,12 +99,10 @@ export function printArguments(
     name,
     type,
     optional,
-    reference,
   }: {
     name: string;
     type: string | string[];
     optional?: boolean;
-    reference?: string;
   },
   withTypes: boolean
 ): string {

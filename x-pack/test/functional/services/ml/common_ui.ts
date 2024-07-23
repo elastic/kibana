@@ -438,5 +438,18 @@ export function MachineLearningCommonUIProvider({
         }
       });
     },
+
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
+    async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
+      await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
+    },
   };
 }

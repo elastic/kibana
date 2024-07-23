@@ -16,32 +16,32 @@ import { validateBurnRateRule } from '../components/burn_rate_rule_editor/valida
 const sloBurnRateDefaultActionMessage = i18n.translate(
   'xpack.slo.rules.burnRate.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active with the following conditions:
+'{{rule.name}}' is active with the following conditions:
 
-- SLO: \\{\\{context.sloName\\}\\}'
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+- SLO: '{{context.sloName}}'
+- The burn rate over the last '{{context.longWindow.duration}}' is '{{context.longWindow.burnRate}}'
+- The burn rate over the last '{{context.shortWindow.duration}}' is '{{context.shortWindow.burnRate}}'
+- Threshold: '{{context.burnRateThreshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 const sloBurnRateDefaultRecoveryMessage = i18n.translate(
   'xpack.slo.rules.burnRate.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} has recovered.
+'{{rule.name}}' has recovered.
 
-- SLO: \\{\\{context.sloName\\}\\}'
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+- SLO: '{{context.sloName}}'
+- The burn rate over the last '{{context.longWindow.duration}}' is '{{context.longWindow.burnRate}}'
+- The burn rate over the last '{{context.shortWindow.duration}}' is '{{context.shortWindow.burnRate}}'
+- Threshold: '{{context.burnRateThreshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );

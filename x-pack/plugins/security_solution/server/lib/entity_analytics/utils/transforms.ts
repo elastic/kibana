@@ -14,11 +14,17 @@ import type {
   TransformPutTransformRequest,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../common/entity_analytics/risk_engine';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
   getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,
 } from '../../../../common/utils/risk_score_modules';
+import type { TransformOptions } from '../risk_score/configurations';
+import { getTransformOptions } from '../risk_score/configurations';
 
 export const getLegacyTransforms = async ({
   namespace,
@@ -107,51 +113,66 @@ const hasTransformStarted = (transformStats: TransformGetTransformStatsTransform
   return transformStats.state === 'indexing' || transformStats.state === 'started';
 };
 
-export const startTransform = async ({
-  esClient,
-  transformId,
-}: {
-  esClient: ElasticsearchClient;
-  transformId: string;
-}): Promise<TransformStartTransformResponse | void> => {
-  const transformStats = await esClient.transform.getTransformStats({
-    transform_id: transformId,
-  });
-  if (transformStats.count <= 0) {
-    throw new Error(
-      `Unable to find transform status for [${transformId}] while attempting to start`
-    );
-  }
-  if (hasTransformStarted(transformStats.transforms[0])) {
-    return;
-  }
-
-  return esClient.transform.startTransform({ transform_id: transformId });
-};
-
 export const scheduleTransformNow = async ({
   esClient,
   transformId,
 }: {
   esClient: ElasticsearchClient;
   transformId: string;
-}): Promise<TransformStartTransformResponse | void> => {
+}): Promise<void> => {
   const transformStats = await esClient.transform.getTransformStats({
     transform_id: transformId,
   });
   if (transformStats.count <= 0) {
     throw new Error(
-      `Unable to find transform status for [${transformId}] while attempting to schedule now`
+      `Unable to find transform status for [${transformId}] while attempting to schedule`
     );
   }
 
-  if (hasTransformStarted(transformStats.transforms[0])) {
-    await esClient.transform.scheduleNowTransform({
+  if (!hasTransformStarted(transformStats.transforms[0])) {
+    await esClient.transform.startTransform({
       transform_id: transformId,
     });
   } else {
-    await esClient.transform.startTransform({
+    await esClient.transform.scheduleNowTransform({
       transform_id: transformId,
+    });
+  }
+};
+
+/**
+ * Whenever we change the latest transform configuration, we must ensure we update the transform in environments where it has already been installed.
+ */
+const upgradeLatestTransformIfNeeded = async ({
+  esClient,
+  namespace,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  namespace: string;
+  logger: Logger;
+}): Promise<TransformStartTransformResponse | void> => {
+  const transformId = getLatestTransformId(namespace);
+  const latestIndex = getRiskScoreLatestIndex(namespace);
+  const timeSeriesIndex = getRiskScoreTimeSeriesIndex(namespace);
+
+  const response = await esClient.transform.getTransform({
+    transform_id: transformId,
+  });
+
+  const newConfig = getTransformOptions({
+    dest: latestIndex,
+    source: [timeSeriesIndex],
+  });
+
+  if (isTransformOutdated(response.transforms[0], newConfig)) {
+    logger.info(`Upgrading transform ${transformId}`);
+
+    const { latest: _unused, ...changes } = newConfig;
+
+    await esClient.transform.updateTransform({
+      transform_id: transformId,
+      ...changes,
     });
   }
 };
@@ -159,10 +180,30 @@ export const scheduleTransformNow = async ({
 export const scheduleLatestTransformNow = async ({
   namespace,
   esClient,
+  logger,
 }: {
   namespace: string;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }): Promise<void> => {
   const transformId = getLatestTransformId(namespace);
+
+  try {
+    await upgradeLatestTransformIfNeeded({ esClient, namespace, logger });
+  } catch (err) {
+    logger.error(
+      `There was an error upgrading the transform ${transformId}. Continuing with transform scheduling. ${err.message}`
+    );
+  }
+
   await scheduleTransformNow({ esClient, transformId });
 };
+
+/**
+ * Whitelist the transform fields that we can update.
+ */
+
+const isTransformOutdated = (
+  transform: TransformGetTransformTransformSummary,
+  newConfig: TransformOptions
+): boolean => transform._meta?.version !== newConfig._meta?.version;

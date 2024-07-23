@@ -35,18 +35,16 @@ export function ServiceAnomalyTimeseriesContextProvider({
 
   const license = useLicenseContext();
 
-  const mlCapabilities = core.application.capabilities.ml as
-    | { canGetJobs: boolean }
-    | undefined;
+  const mlCapabilities = core.application.capabilities.ml as { canGetJobs: boolean } | undefined;
 
-  const canGetAnomalies =
-    mlCapabilities?.canGetJobs && isActivePlatinumLicense(license);
+  const canGetAnomalies = mlCapabilities?.canGetJobs && isActivePlatinumLicense(license);
 
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
+    '/logs-services/{serviceName}'
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -57,31 +55,21 @@ export function ServiceAnomalyTimeseriesContextProvider({
       if (!transactionType || !canGetAnomalies) {
         return;
       }
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/anomaly_charts',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              start,
-              end,
-              transactionType,
-              environment: preferredEnvironment,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_charts', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      );
+          query: {
+            start,
+            end,
+            transactionType,
+            environment: preferredEnvironment,
+          },
+        },
+      });
     },
-    [
-      serviceName,
-      canGetAnomalies,
-      transactionType,
-      start,
-      end,
-      preferredEnvironment,
-    ]
+    [serviceName, canGetAnomalies, transactionType, start, end, preferredEnvironment]
   );
 
   return (

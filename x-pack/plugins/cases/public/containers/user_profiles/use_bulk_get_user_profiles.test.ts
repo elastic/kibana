@@ -19,7 +19,8 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mock;
 
-describe('useBulkGetUserProfiles', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/176335
+describe.skip('useBulkGetUserProfiles', () => {
   const props = {
     uids: userProfilesIds,
   };
@@ -112,5 +113,15 @@ describe('useBulkGetUserProfiles', () => {
     await waitFor(() => result.current.isError);
 
     expect(addError).toHaveBeenCalled();
+  });
+
+  it('does not call the bulkGetUserProfiles if the array of uids is empty', async () => {
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+
+    renderHook(() => useBulkGetUserProfiles({ uids: [] }), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    expect(spyOnBulkGetUserProfiles).not.toHaveBeenCalled();
   });
 });

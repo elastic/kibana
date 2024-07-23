@@ -17,7 +17,8 @@ import {
   ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-interface SuppressionTerm {
+
+export interface SuppressionTerm {
   field: string;
   value: string[] | number[] | null;
 }
@@ -33,7 +34,7 @@ export const getSuppressionAlertFields = ({
   fallbackTimestamp,
   instanceId,
 }: {
-  fields: Record<string, string | number> | undefined;
+  fields: Record<string, string | number | null> | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   suppressionTerms: SuppressionTerm[];

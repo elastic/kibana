@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import '../../mock/match_media';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -16,14 +15,6 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../../lib/kibana');
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    EuiScreenReaderOnly: () => <></>,
-  };
-});
 
 jest.mock('../../hooks/use_get_field_spec');
 
@@ -129,8 +120,8 @@ describe('EventFieldsBrowser', () => {
 
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
+          .find('tr.euiTableRow')
+          .find('td.euiTableRowCell')
           .at(1)
           .find('[data-euiicon-type]')
           .exists()
@@ -168,8 +159,8 @@ describe('EventFieldsBrowser', () => {
       );
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
+          .find('tr.euiTableRow')
+          .find('td.euiTableRowCell')
           .at(1)
           .find('[data-euiicon-type]')
           .last()
@@ -213,9 +204,7 @@ describe('EventFieldsBrowser', () => {
 
       expect(
         wrapper.find('[data-test-subj="field-name-cell"]').at(0).find('EuiToolTip').prop('content')
-      ).toContain(
-        'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
-      );
+      ).toContain('Date/time when the event originated.');
     });
   });
 });

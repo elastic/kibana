@@ -103,6 +103,7 @@ export function useFetchSloList({
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
           ...(filters && { filters }),
+          hideStale: true,
         },
         signal,
       });
@@ -114,6 +115,7 @@ export function useFetchSloList({
       if (String(error) === 'Error: Forbidden') {
         return false;
       }
+
       return failureCount < 4;
     },
     onSuccess: ({ results }: FindSLOResponse) => {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from '@kbn/core/public';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
@@ -76,17 +76,19 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
   );
 
   return ruleSummary ? (
-    <Rules
-      requestRefresh={requestRefresh}
-      refreshToken={refreshToken}
-      rule={rule}
-      ruleType={ruleType}
-      readOnly={readOnly}
-      ruleSummary={ruleSummary}
-      numberOfExecutions={numberOfExecutions}
-      isLoadingChart={isLoadingChart}
-      onChangeDuration={onChangeDuration}
-    />
+    <Suspense fallback={<CenterJustifiedSpinner />}>
+      <Rules
+        requestRefresh={requestRefresh}
+        refreshToken={refreshToken}
+        rule={rule}
+        ruleType={ruleType}
+        readOnly={readOnly}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={numberOfExecutions}
+        isLoadingChart={isLoadingChart}
+        onChangeDuration={onChangeDuration}
+      />
+    </Suspense>
   ) : (
     <CenterJustifiedSpinner />
   );

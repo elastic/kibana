@@ -31,11 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Infra pages', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     describe('Inventory page', function () {

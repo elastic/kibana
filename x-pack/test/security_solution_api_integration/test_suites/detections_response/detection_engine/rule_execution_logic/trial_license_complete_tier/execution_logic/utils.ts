@@ -10,10 +10,7 @@ import supertest from 'supertest';
 import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 
-export const getMetricsRequest = (
-  request: supertest.SuperTest<supertest.Test>,
-  reset: boolean = false
-) => {
+export const getMetricsRequest = (request: supertest.Agent, reset: boolean = false) => {
   return request
     .get(`/api/task_manager/metrics${reset ? '' : '?reset=false'}`)
     .set('kbn-xsrf', 'foo')
@@ -22,7 +19,7 @@ export const getMetricsRequest = (
 };
 
 export const getMetricsWithRetry = (
-  request: supertest.SuperTest<supertest.Test>,
+  request: supertest.Agent,
   retry: RetryService,
   reset: boolean = false,
   callback?: (metrics: NodeMetrics) => boolean

@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ExecutorType } from '../types';
 import { ExecutorParams, SubActionConnectorType } from './types';
@@ -80,7 +81,10 @@ export const buildExecutor = <
       try {
         action.schema.validate(subActionParams);
       } catch (reqValidationError) {
-        throw new Error(`Request validation failed (${reqValidationError})`);
+        throw createTaskRunError(
+          new Error(`Request validation failed (${reqValidationError})`),
+          TaskErrorSource.USER
+        );
       }
     }
 

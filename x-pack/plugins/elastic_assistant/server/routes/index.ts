@@ -8,8 +8,9 @@
 // Actions Connector Execute (LLM Wrapper)
 export { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 
-// Alerts Insights
-export { postAlertsInsightsRoute } from './insights/alerts/post_alerts_insights';
+// Attack Discovery
+export { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
+export { getAttackDiscoveryRoute } from './attack_discovery/get_attack_discovery';
 
 // Knowledge Base
 export { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';

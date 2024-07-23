@@ -78,7 +78,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     autoZoomDuration: PropTypes.number.isRequired,
     bounds: PropTypes.object.isRequired,
     chartWidth: PropTypes.number.isRequired,
+    chartHeight: PropTypes.number,
     lastRefresh: PropTypes.number.isRequired,
+    onRenderComplete: PropTypes.func,
     previousRefresh: PropTypes.number.isRequired,
     selectedJobId: PropTypes.string.isRequired,
     selectedDetectorIndex: PropTypes.number,
@@ -434,6 +436,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             }
 
             this.setState(stateUpdate);
+            if (this.props.onRenderComplete !== undefined) {
+              this.props.onRenderComplete();
+            }
           }
         };
 
@@ -748,6 +753,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       autoZoomDuration,
       bounds,
       chartWidth,
+      chartHeight,
       lastRefresh,
       selectedDetectorIndex,
       selectedJob,
@@ -794,6 +800,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       focusForecastData,
       focusAggregationInterval,
       svgWidth: chartWidth,
+      svgHeight: chartHeight,
       zoomFrom,
       zoomTo,
       zoomFromFocusLoaded,

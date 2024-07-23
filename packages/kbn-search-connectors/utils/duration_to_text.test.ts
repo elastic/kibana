@@ -14,6 +14,9 @@ describe('durationToText', () => {
   it('should correctly turn duration into text', () => {
     expect(durationToText(moment.duration(11005, 'seconds'))).toEqual('3h 3m 25s');
   });
+  it('should correctly turn days into hours', () => {
+    expect(durationToText(moment.duration(100980, 'seconds'))).toEqual('28h 3m 0s');
+  });
   it('should return -- for undefined', () => {
     expect(durationToText(undefined)).toEqual('--');
   });

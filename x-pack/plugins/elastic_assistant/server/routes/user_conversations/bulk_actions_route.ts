@@ -116,7 +116,7 @@ export const bulkActionConversationsRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       options: {
         tags: ['access:elasticAssistant'],
@@ -127,7 +127,7 @@ export const bulkActionConversationsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
@@ -175,10 +175,13 @@ export const bulkActionConversationsRoute = (
           }
 
           if (body.create && body.create.length > 0) {
+            const userFilter = authenticatedUser?.username
+              ? `name: "${authenticatedUser?.username}"`
+              : `id: "${authenticatedUser?.profile_uid}"`;
             const result = await dataClient?.findDocuments<EsConversationSchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
+              filter: `users:{ ${userFilter} } AND (${body.create
                 .map((c) => `title:${c.title}`)
                 .join(' OR ')})`,
               fields: ['title'],

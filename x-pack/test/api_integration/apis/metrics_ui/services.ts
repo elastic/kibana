@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateServicesData, generateServicesLogsOnlyData } from './helpers';
 import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
@@ -31,7 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
         packageVersion: version,
       });
     });
-    after(async () => apmSynthtraceKibanaClient.uninstallApmPackage());
+    after(async () => {
+      await apmSynthtraceKibanaClient.uninstallApmPackage();
+    });
 
     describe('with transactions', () => {
       before(async () =>
@@ -39,7 +41,9 @@ export default function ({ getService }: FtrProviderContext) {
           generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
         )
       );
-      after(async () => synthtraceApmClient.clean());
+      after(async () => {
+        await synthtraceApmClient.clean();
+      });
 
       it('returns no services with no data', async () => {
         const filters = JSON.stringify({
@@ -102,7 +106,9 @@ export default function ({ getService }: FtrProviderContext) {
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })
         )
       );
-      after(async () => synthtraceApmClient.clean());
+      after(async () => {
+        await synthtraceApmClient.clean();
+      });
       it('should return services with logs only data', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',

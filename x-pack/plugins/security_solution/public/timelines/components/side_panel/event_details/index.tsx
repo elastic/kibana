@@ -20,13 +20,15 @@ import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
-import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import {
+  EndpointIsolateSuccess,
+  HostIsolationPanel,
+} from '../../../../common/components/endpoint/host_isolation';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
@@ -80,7 +82,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   scopeId,
   isReadOnly,
 }) => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
   // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
   const useAssistant = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const currentSpaceId = useSpaceId();
@@ -122,7 +124,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     isAlert
       ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
       : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
-    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP
+    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+    isAssistantEnabled
   );
 
   const header = useMemo(

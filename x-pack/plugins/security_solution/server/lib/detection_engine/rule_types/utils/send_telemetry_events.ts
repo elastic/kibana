@@ -10,6 +10,7 @@ import type { TelemetryEvent } from '../../../telemetry/types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { SignalSource, SignalSourceHit } from '../types';
 import { TelemetryChannel } from '../../../telemetry/types';
+import { copyAllowlistedFields, filterList } from '../../../telemetry/filterlists';
 
 interface SearchResultSource {
   _source: SignalSource;
@@ -71,7 +72,11 @@ export function sendAlertTelemetryEvents(
     selectedEvents = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
   }
   try {
-    eventsTelemetry.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, selectedEvents);
+    const filtered = selectedEvents.map(
+      (event: TelemetryEvent): TelemetryEvent =>
+        copyAllowlistedFields(filterList.endpointAlerts, event)
+    );
+    eventsTelemetry.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, filtered);
   } catch (exc) {
     ruleExecutionLogger.error(`Queuing telemetry events failed: ${exc}`);
   }

@@ -33,11 +33,11 @@ describe('SeverityFilterGroup', () => {
         <SeverityFilterGroup
           selectedSeverities={[]}
           severityCount={{
-            [RiskSeverity.high]: 0,
-            [RiskSeverity.low]: 0,
-            [RiskSeverity.critical]: 0,
-            [RiskSeverity.moderate]: 0,
-            [RiskSeverity.unknown]: 0,
+            [RiskSeverity.High]: 0,
+            [RiskSeverity.Low]: 0,
+            [RiskSeverity.Critical]: 0,
+            [RiskSeverity.Moderate]: 0,
+            [RiskSeverity.Unknown]: 0,
           }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
@@ -58,11 +58,11 @@ describe('SeverityFilterGroup', () => {
         <SeverityFilterGroup
           selectedSeverities={[]}
           severityCount={{
-            [RiskSeverity.high]: 0,
-            [RiskSeverity.low]: 0,
-            [RiskSeverity.critical]: 0,
-            [RiskSeverity.moderate]: 0,
-            [RiskSeverity.unknown]: 0,
+            [RiskSeverity.High]: 0,
+            [RiskSeverity.Low]: 0,
+            [RiskSeverity.Critical]: 0,
+            [RiskSeverity.Moderate]: 0,
+            [RiskSeverity.Unknown]: 0,
           }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
@@ -81,18 +81,18 @@ describe('SeverityFilterGroup', () => {
       <TestProviders>
         <SeverityFilterGroup
           selectedSeverities={[
-            RiskSeverity.critical,
-            RiskSeverity.high,
-            RiskSeverity.moderate,
-            RiskSeverity.low,
-            RiskSeverity.unknown,
+            RiskSeverity.Critical,
+            RiskSeverity.High,
+            RiskSeverity.Moderate,
+            RiskSeverity.Low,
+            RiskSeverity.Unknown,
           ]}
           severityCount={{
-            [RiskSeverity.high]: 0,
-            [RiskSeverity.low]: 0,
-            [RiskSeverity.critical]: 0,
-            [RiskSeverity.moderate]: 0,
-            [RiskSeverity.unknown]: 0,
+            [RiskSeverity.High]: 0,
+            [RiskSeverity.Low]: 0,
+            [RiskSeverity.Critical]: 0,
+            [RiskSeverity.Moderate]: 0,
+            [RiskSeverity.Unknown]: 0,
           }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}

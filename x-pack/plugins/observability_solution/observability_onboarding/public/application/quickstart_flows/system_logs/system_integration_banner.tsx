@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 import {
-  SystemIntegrationError,
-  useInstallSystemIntegration,
-} from '../../../hooks/use_install_system_integration';
+  IntegrationInstallationError,
+  useInstallIntegrations,
+} from '../../../hooks/use_install_integrations';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import { PopoverTooltip } from '../shared/popover_tooltip';
 
@@ -28,29 +22,29 @@ export type SystemIntegrationBannerState = 'pending' | 'resolved' | 'rejected';
 export function SystemIntegrationBanner({
   onStatusChange,
 }: {
-  onStatusChange: (status: SystemIntegrationBannerState) => void;
+  onStatusChange?: (status: SystemIntegrationBannerState) => void;
 }) {
   const { navigateToAppUrl } = useKibanaNavigation();
   const [integrationVersion, setIntegrationVersion] = useState<string>();
-  const [error, setError] = useState<SystemIntegrationError>();
+  const [error, setError] = useState<IntegrationInstallationError>();
 
   const onIntegrationCreationSuccess = useCallback(
-    ({ version }: { version?: string }) => {
-      setIntegrationVersion(version);
-      onStatusChange('resolved');
+    ({ versions }: { versions?: string[] }) => {
+      setIntegrationVersion(versions?.[0]);
+      onStatusChange?.('resolved');
     },
     [onStatusChange]
   );
 
   const onIntegrationCreationFailure = useCallback(
-    (e: SystemIntegrationError) => {
+    (e: IntegrationInstallationError) => {
       setError(e);
-      onStatusChange('rejected');
+      onStatusChange?.('rejected');
     },
     [onStatusChange]
   );
 
-  const { performRequest, requestState } = useInstallSystemIntegration({
+  const { performRequest, requestState } = useInstallIntegrations({
     onIntegrationCreationSuccess,
     onIntegrationCreationFailure,
   });
@@ -72,12 +66,9 @@ export function SystemIntegrationBanner({
               <EuiLoadingSpinner size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
-              {i18n.translate(
-                'xpack.observability_onboarding.systemIntegration.installing',
-                {
-                  defaultMessage: 'Installing system integration',
-                }
-              )}
+              {i18n.translate('xpack.observability_onboarding.systemIntegration.installing', {
+                defaultMessage: 'Installing system integration',
+              })}
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -90,12 +81,9 @@ export function SystemIntegrationBanner({
     return (
       <EuiFlexItem>
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.observability_onboarding.systemIntegration.status.failed',
-            {
-              defaultMessage: 'System integration installation failed',
-            }
-          )}
+          title={i18n.translate('xpack.observability_onboarding.systemIntegration.status.failed', {
+            defaultMessage: 'System integration installation failed',
+          })}
           color="warning"
           iconType="warning"
           data-test-subj="obltOnboardingSystemLogsIntegrationInstallationFailed"
@@ -134,9 +122,7 @@ export function SystemIntegrationBanner({
                           }
                         )}
                       </EuiFlexItem>
-                      <EuiFlexItem
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
-                      >
+                      <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <FormattedMessage
                           id="xpack.observability_onboarding.systemIntegration.installed.tooltip.link"
                           defaultMessage="{learnMoreLink} about the data you can collect using the Systems integration."

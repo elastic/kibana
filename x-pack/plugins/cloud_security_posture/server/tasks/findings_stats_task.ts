@@ -11,7 +11,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SearchRequest } from '@kbn/data-plugin/common';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';

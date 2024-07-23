@@ -66,7 +66,8 @@ export async function getSignalsQueryMapFromThreatIndex(
     const signalMatch = signalsQueryMap.get(signalId);
 
     const threatQuery = {
-      id: threatHit._id,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      id: threatHit._id!,
       index: threatHit._index,
       field: decodedQuery.field,
       value: decodedQuery.value,

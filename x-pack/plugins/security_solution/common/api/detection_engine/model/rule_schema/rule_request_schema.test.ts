@@ -8,6 +8,7 @@
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
 import {
+  getCreateEqlRuleSchemaMock,
   getCreateEsqlRulesSchemaMock,
   getCreateMachineLearningRulesSchemaMock,
   getCreateNewTermsRulesSchemaMock,
@@ -1266,9 +1267,12 @@ describe('rules schema', () => {
     // behaviour common for multiple rule types
     const cases = [
       { ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() },
+      { ruleType: 'esql', ruleMock: getCreateEsqlRulesSchemaMock() },
       { ruleType: 'query', ruleMock: getCreateRulesSchemaMock() },
       { ruleType: 'saved_query', ruleMock: getCreateSavedQueryRulesSchemaMock() },
+      { ruleType: 'eql', ruleMock: getCreateEqlRuleSchemaMock() },
       { ruleType: 'new_terms', ruleMock: getCreateNewTermsRulesSchemaMock() },
+      { ruleType: 'machine_learning', ruleMock: getCreateMachineLearningRulesSchemaMock() },
     ];
 
     cases.forEach(({ ruleType, ruleMock }) => {

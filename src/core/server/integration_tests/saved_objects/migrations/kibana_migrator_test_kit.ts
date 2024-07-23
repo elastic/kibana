@@ -123,7 +123,7 @@ export const getEsClient = async ({
 
   // configure logging system
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
-  loggingSystem.upgrade(loggingConf);
+  await loggingSystem.upgrade(loggingConf);
 
   return await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
 };
@@ -148,7 +148,7 @@ export const getKibanaMigratorTestKit = async ({
 
   // configure logging system
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
-  loggingSystem.upgrade(loggingConf);
+  await loggingSystem.upgrade(loggingConf);
 
   const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
   const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
@@ -266,7 +266,8 @@ const getElasticsearchClient = async (
     logger: loggerFactory.get('elasticsearch'),
     type: 'data',
     agentFactoryProvider: new AgentManager(
-      loggerFactory.get('elasticsearch-service', 'agent-manager')
+      loggerFactory.get('elasticsearch-service', 'agent-manager'),
+      { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
   });
@@ -568,7 +569,7 @@ export const getCurrentVersionTypeRegistry = async ({
   await root.preboot();
   const coreSetup = await root.setup();
   const typeRegistry = coreSetup.savedObjects.getTypeRegistry();
-  root.shutdown(); // do not await for it, or we might block the tests
+  void root.shutdown(); // do not await for it, or we might block the tests
   return typeRegistry;
 };
 

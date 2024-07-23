@@ -5,20 +5,31 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { IntlShape, CustomFormats } from '@formatjs/intl';
 
-import { Formats } from './core/formats';
-
-export interface Translation {
+export interface TranslationInput {
   /**
    * Actual translated messages.
    */
-  messages: Record<string, string>;
+  messages: IntlShape['messages'];
   /**
    * Locale of the translated messages.
    */
-  locale?: string;
+  locale: IntlShape['locale'];
   /**
    * Set of options to the underlying formatter.
    */
-  formats?: Formats;
+  formats?: CustomFormats;
+}
+
+export interface Translation extends TranslationInput {
+  /**
+   * Default locale to fall back to when the translation is not found for the message id.
+   * Hardcoded to `en` for Kibana.
+   */
+  defaultLocale: IntlShape['defaultLocale'];
+  /**
+   * default formatter formats.
+   */
+  defaultFormats: IntlShape['formats'];
 }

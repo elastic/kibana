@@ -20,15 +20,11 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import {
-  AvailableFields$,
-  DataDocuments$,
-  RecordRawType,
-} from '../../services/discover_data_state_container';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { DiscoverAppStateProvider } from '../../state_management/discover_app_state_container';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -37,7 +33,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -46,22 +41,9 @@ const mockSearchBarCustomization: SearchBarCustomization = {
     .mockName('CustomDataViewPickerMock'),
 };
 
-const smartFields = [
-  new DataViewField({
-    name: 'mock_field',
-    type: 'mock_field',
-    searchable: false,
-    aggregatable: false,
-  }),
-];
-
-const additionalFieldGroups = {
-  smartFields,
-};
-
 const mockFieldListCustomisation: FieldListCustomization = {
   id: 'field_list',
-  additionalFieldGroups,
+  logsFieldsEnabled: true,
 };
 
 let mockUseCustomizations = false;
@@ -83,6 +65,15 @@ jest.mock('../../../../customizations', () => ({
     }
   }),
 }));
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -169,10 +160,6 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
       fetchStatus: FetchStatus.COMPLETE,
       result: hits,
     }) as DataDocuments$,
-    availableFields$: new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      fields: [] as string[],
-    }) as AvailableFields$,
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -326,11 +313,6 @@ describe('discover responsive sidebar', function () {
     expect(unmappedFieldsCount.exists()).toBe(false);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
 
-    expect(props.availableFields$.getValue()).toEqual({
-      fetchStatus: 'complete',
-      fields: ['extension'],
-    });
-
     expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
       '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
     );
@@ -388,11 +370,6 @@ describe('discover responsive sidebar', function () {
     expect(emptyFieldsCount.text()).toBe('20');
     expect(metaFieldsCount.text()).toBe('2');
     expect(unmappedFieldsCount.exists()).toBe(false);
-
-    expect(propsWithoutColumns.availableFields$.getValue()).toEqual({
-      fetchStatus: 'complete',
-      fields: ['bytes', 'extension', '_id', 'phpmemory'],
-    });
 
     expect(findTestSubject(compWithoutSelected, 'fieldListGrouped__ariaDescription').text()).toBe(
       '4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
@@ -515,54 +492,47 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should render correctly in the ES|QL mode', async () => {
-    const propsWithTextBasedMode = {
+    const propsWithEsqlMode = {
       ...props,
       columns: ['extension', 'bytes'],
       onAddFilter: undefined,
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: RecordRawType.PLAIN,
         result: getDataTableRecords(stubLogstashDataView),
-        textBasedQueryColumns: [
+        esqlQueryColumns: [
           { id: '1', name: 'extension', meta: { type: 'text' } },
           { id: '2', name: 'bytes', meta: { type: 'number' } },
           { id: '3', name: '@timestamp', meta: { type: 'date' } },
         ],
       }) as DataDocuments$,
     };
-    const compInTextBasedMode = await mountComponent(propsWithTextBasedMode, {
+    const compInEsqlMode = await mountComponent(propsWithEsqlMode, {
       query: { esql: 'FROM `index`' },
     });
 
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
-      compInTextBasedMode.update();
+      compInEsqlMode.update();
     });
 
-    expect(findTestSubject(compInTextBasedMode, 'indexPattern-add-field_btn').length).toBe(0);
+    expect(findTestSubject(compInEsqlMode, 'indexPattern-add-field_btn').length).toBe(0);
 
     const popularFieldsCount = findTestSubject(
-      compInTextBasedMode,
+      compInEsqlMode,
       'fieldListGroupedPopularFields-count'
     );
     const selectedFieldsCount = findTestSubject(
-      compInTextBasedMode,
+      compInEsqlMode,
       'fieldListGroupedSelectedFields-count'
     );
     const availableFieldsCount = findTestSubject(
-      compInTextBasedMode,
+      compInEsqlMode,
       'fieldListGroupedAvailableFields-count'
     );
-    const emptyFieldsCount = findTestSubject(
-      compInTextBasedMode,
-      'fieldListGroupedEmptyFields-count'
-    );
-    const metaFieldsCount = findTestSubject(
-      compInTextBasedMode,
-      'fieldListGroupedMetaFields-count'
-    );
+    const emptyFieldsCount = findTestSubject(compInEsqlMode, 'fieldListGroupedEmptyFields-count');
+    const metaFieldsCount = findTestSubject(compInEsqlMode, 'fieldListGroupedMetaFields-count');
     const unmappedFieldsCount = findTestSubject(
-      compInTextBasedMode,
+      compInEsqlMode,
       'fieldListGroupedUnmappedFields-count'
     );
 
@@ -575,7 +545,7 @@ describe('discover responsive sidebar', function () {
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
 
-    expect(findTestSubject(compInTextBasedMode, 'fieldListGrouped__ariaDescription').text()).toBe(
+    expect(findTestSubject(compInEsqlMode, 'fieldListGrouped__ariaDescription').text()).toBe(
       '2 selected fields. 3 available fields.'
     );
   });
@@ -786,7 +756,7 @@ describe('discover responsive sidebar', function () {
 
       const smartFieldsCount = findTestSubject(comp, 'fieldListGroupedSmartFields-count');
 
-      expect(smartFieldsCount.text()).toBe('1');
+      expect(smartFieldsCount.text()).toBe('2');
     });
   });
 });

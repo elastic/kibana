@@ -26,14 +26,16 @@ export function useGetPreviewData({
   groupBy,
   groupings,
   instanceId,
+  remoteName,
 }: {
   isValid: boolean;
   groupBy?: string;
   instanceId?: string;
+  remoteName?: string;
   groupings?: Record<string, unknown>;
   objective?: Objective;
   indicator: Indicator;
-  range: { start: number; end: number };
+  range: { from: Date; to: Date };
 }): UseGetPreviewData {
   const { http } = useKibana().services;
 
@@ -49,6 +51,7 @@ export function useGetPreviewData({
             groupBy,
             instanceId,
             groupings,
+            remoteName,
             ...(objective ? { objective } : null),
           }),
           signal,

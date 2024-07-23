@@ -50,6 +50,7 @@ function getPackagePolicy(name: string, policyId = '') {
     namespace: 'default',
     enabled: true,
     policy_id: policyId,
+    policy_ids: [policyId],
     inputs: [],
   };
 }
@@ -192,15 +193,17 @@ describe('createAgentPolicyWithPackages', () => {
 
   it('should call deploy policy once when create policy with system package', async () => {
     mockedAgentPolicyService.deployPolicy.mockClear();
-    mockedAgentPolicyService.create.mockImplementation((soClient, esClient, newPolicy, options) => {
-      if (!options?.skipDeploy) {
-        mockedAgentPolicyService.deployPolicy(soClientMock, 'new_id');
+    mockedAgentPolicyService.create.mockImplementation(
+      async (soClient, esClient, newPolicy, options) => {
+        if (!options?.skipDeploy) {
+          await mockedAgentPolicyService.deployPolicy(soClientMock, 'new_id');
+        }
+        return Promise.resolve({
+          ...newPolicy,
+          id: options?.id || 'new_id',
+        } as AgentPolicy);
       }
-      return Promise.resolve({
-        ...newPolicy,
-        id: options?.id || 'new_id',
-      } as AgentPolicy);
-    });
+    );
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,

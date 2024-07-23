@@ -1,0 +1,492 @@
+{
+  "id": "@kbn/alerts-grouping",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/alerts-grouping",
+        "id": "def-public.AlertsGrouping",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertsGrouping",
+        "description": [
+          "\nA coordinator component to show multiple alert tables grouped by one or more fields\n"
+        ],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/alerts-grouping",
+            "scope": "public",
+            "docId": "kibKbnAlertsGroupingPluginApi",
+            "section": "def-public.AlertsGroupingProps",
+            "text": "AlertsGroupingProps"
+          },
+          "<{}>> & { readonly type: (props: ",
+          {
+            "pluginId": "@kbn/alerts-grouping",
+            "scope": "public",
+            "docId": "kibKbnAlertsGroupingPluginApi",
+            "section": "def-public.AlertsGroupingProps",
+            "text": "AlertsGroupingProps"
+          },
+          "<{}>) => JSX.Element; }"
+        ],
+        "path": "packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGrouping.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-grouping",
+        "id": "def-public.useAlertsGroupingState",
+        "type": "Function",
+        "tags": [],
+        "label": "useAlertsGroupingState",
+        "description": [],
+        "signature": [
+          "(groupingId: string) => { grouping: ",
+          "GroupModel",
+          "; updateGrouping: (groupModel: Partial<",
+          "GroupModel",
+          "> | null) => void; }"
+        ],
+        "path": "packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.useAlertsGroupingState.$1",
+            "type": "string",
+            "tags": [],
+            "label": "groupingId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerts-grouping",
+        "id": "def-public.AlertsGroupingProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertsGroupingProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerts-grouping",
+            "scope": "public",
+            "docId": "kibKbnAlertsGroupingPluginApi",
+            "section": "def-public.AlertsGroupingProps",
+            "text": "AlertsGroupingProps"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-alerts-grouping/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.children",
+            "type": "Function",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nThe leaf component that will be rendered in the grouping panels"
+            ],
+            "signature": [
+              "(groupingFilters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-grouping",
+                "id": "def-public.AlertsGroupingProps.children.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "groupingFilters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-alerts-grouping/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.renderGroupPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "renderGroupPanel",
+            "description": [
+              "\nRender function for the group panel header"
+            ],
+            "signature": [
+              "GroupPanelRenderer",
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.getGroupStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getGroupStats",
+            "description": [
+              "\nA function that given the current grouping field and aggregation results, returns an array of\nstat items to be rendered in the group panel"
+            ],
+            "signature": [
+              "GetGroupStats",
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.defaultFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultFilters",
+            "description": [
+              "\nDefault search filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.globalFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "globalFilters",
+            "description": [
+              "\nGlobal search filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.takeActionItems",
+            "type": "Function",
+            "tags": [],
+            "label": "takeActionItems",
+            "description": [
+              "\nItems that will be rendered in the `Take Actions` menu"
+            ],
+            "signature": [
+              "((groupFilters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[], groupNumber: number) => JSX.Element[]) | undefined"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.defaultGroupingOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultGroupingOptions",
+            "description": [
+              "\nThe default fields available for grouping"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/grouping",
+                "scope": "common",
+                "docId": "kibKbnGroupingPluginApi",
+                "section": "def-common.GroupOption",
+                "text": "GroupOption"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.featureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "featureIds",
+            "description": [
+              "\nThe alerting feature ids this grouping covers"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.AlertConsumers",
+                "text": "AlertConsumers"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [
+              "\nTime filter start"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [
+              "\nTime filter end"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.globalQuery",
+            "type": "Object",
+            "tags": [],
+            "label": "globalQuery",
+            "description": [
+              "\nGlobal search query (i.e. from the KQL bar)"
+            ],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.loading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "loading",
+            "description": [
+              "\nExternal loading state"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.groupingId",
+            "type": "string",
+            "tags": [],
+            "label": "groupingId",
+            "description": [
+              "\nID used to retrieve the current grouping configuration from the state"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.getAggregationsByGroupingField",
+            "type": "Function",
+            "tags": [],
+            "label": "getAggregationsByGroupingField",
+            "description": [
+              "\nResolves an array of aggregations for a given grouping field"
+            ],
+            "signature": [
+              "(field: string) => ",
+              {
+                "pluginId": "@kbn/grouping",
+                "scope": "common",
+                "docId": "kibKbnGroupingPluginApi",
+                "section": "def-common.NamedAggregation",
+                "text": "NamedAggregation"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-grouping",
+                "id": "def-public.AlertsGroupingProps.getAggregationsByGroupingField.$1",
+                "type": "string",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-alerts-grouping/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerts-grouping",
+            "id": "def-public.AlertsGroupingProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [
+              "\nServices required for the grouping component"
+            ],
+            "signature": [
+              "{ notifications: ",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsStart",
+                "text": "NotificationsStart"
+              },
+              "; dataViews: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              },
+              "; http: ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-alerts-grouping/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

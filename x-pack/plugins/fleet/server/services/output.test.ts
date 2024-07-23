@@ -40,7 +40,7 @@ mockedAppContextService.getLogger.mockImplementation(() => {
   } as unknown as Logger;
 });
 
-mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
@@ -522,7 +522,7 @@ describe('Output Service', () => {
       it('should throw an error when preset: balanced is provided but config_yaml contains a reserved key', async () => {
         const soClient = getMockedSoClient({});
 
-        expect(
+        await expect(
           outputService.create(
             soClient,
             esClientMock,
@@ -879,7 +879,7 @@ describe('Output Service', () => {
           defaultOutputId: 'output-test',
         });
 
-        expect(
+        await expect(
           outputService.create(
             soClient,
             esClientMock,
@@ -1703,7 +1703,7 @@ describe('Output Service', () => {
         defaultOutputId: 'output-test',
       });
 
-      expect(
+      await expect(
         outputService.update(soClient, esClientMock, 'output-test', {
           is_default: true,
           is_default_monitoring: false,

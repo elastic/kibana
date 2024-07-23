@@ -15,12 +15,14 @@ import {
 export const OriginInterpreter: React.FC<OriginInterpreterStateMachineDependencies> = ({
   history,
   toasts,
+  ...startServices
 }) => {
   useInterpret(
     () =>
       createOriginInterpreterStateMachine({
         history,
         toasts,
+        ...startServices,
       }),
     { devTools: isDevMode() }
   );

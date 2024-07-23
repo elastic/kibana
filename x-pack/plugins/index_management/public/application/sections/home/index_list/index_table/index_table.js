@@ -374,24 +374,11 @@ export class IndexTable extends Component {
     return columnConfigs.map((columnConfig) => {
       const { name } = index;
       const { fieldName } = columnConfig;
-      if (fieldName === 'name') {
-        return (
-          <th
-            key={`${fieldName}-${name}`}
-            className="euiTableRowCell"
-            scope="row"
-            data-test-subj={`indexTableCell-${fieldName}`}
-          >
-            <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
-              <span className="eui-textLeft">{this.buildRowCell(index, columnConfig)}</span>
-            </div>
-          </th>
-        );
-      }
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
           truncateText={false}
+          setScopeRow={fieldName === 'name'}
           data-test-subj={`indexTableCell-${fieldName}`}
           className={'indTable__cell--' + fieldName}
           header={fieldName}
@@ -437,11 +424,11 @@ export class IndexTable extends Component {
           data-test-subj="indexTableRow"
           isSelected={this.isItemSelected(name)}
           isSelectable
+          hasSelection
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
             <EuiCheckbox
-              type="inList"
               id={`checkboxSelectIndex-${name}`}
               checked={this.isItemSelected(name)}
               onChange={() => {
@@ -708,7 +695,6 @@ export class IndexTable extends Component {
                         id="selectAllIndexes"
                         checked={this.areAllItemsSelected()}
                         onChange={this.toggleAll}
-                        type="inList"
                         aria-label={i18n.translate(
                           'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
                           {

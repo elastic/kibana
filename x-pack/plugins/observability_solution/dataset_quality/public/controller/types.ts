@@ -11,6 +11,7 @@ import {
   WithFilters,
   WithFlyoutOptions,
   WithTableOptions,
+  DegradedFields,
 } from '../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityController {
@@ -24,7 +25,19 @@ export type DatasetQualityTableOptions = Partial<
   Omit<WithTableOptions['table'], 'sort'> & { sort: TableSortOptions }
 >;
 
-export type DatasetQualityFlyoutOptions = Omit<WithFlyoutOptions['flyout'], 'datasetDetails'>;
+type DegradedFieldSortOptions = Omit<DegradedFields['table']['sort'], 'field'> & { field: string };
+
+export type DatasetQualityDegradedFieldTableOptions = Partial<
+  Omit<DegradedFields['table'], 'sort'> & {
+    sort: DegradedFieldSortOptions;
+  }
+>;
+
+export type DatasetQualityFlyoutOptions = Partial<
+  Omit<WithFlyoutOptions['flyout'], 'datasetDetails' | 'degradedFields'> & {
+    degradedFields: { table?: DatasetQualityDegradedFieldTableOptions };
+  }
+>;
 
 export type DatasetQualityFilterOptions = Partial<WithFilters['filters']>;
 

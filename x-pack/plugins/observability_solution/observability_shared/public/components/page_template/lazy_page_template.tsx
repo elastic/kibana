@@ -22,9 +22,9 @@ export function createLazyObservabilityPageTemplate({
   ...injectedDeps
 }: ObservabilityPageTemplateDependencies) {
   return (pageTemplateProps: LazyObservabilityPageTemplateProps) => {
-    const isSidebarEnabled = useObservable(isSidebarEnabled$);
+    const isSidebarEnabled = useObservable(isSidebarEnabled$, isSidebarEnabled$.getValue());
     const { showSolutionNav: showSolutionNavProp, ...props } = pageTemplateProps;
-    const showSolutionNav = !!showSolutionNavProp || isSidebarEnabled;
+    const showSolutionNav = Boolean(!!showSolutionNavProp || isSidebarEnabled);
 
     return (
       <React.Suspense fallback={null}>

@@ -9,7 +9,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter, groupByAuthorization } from './utils';
@@ -171,7 +171,7 @@ export class Authorization {
     return { authorized, unauthorized };
   }
 
-  private async logSavedObjects({
+  private logSavedObjects({
     entities,
     operation,
     error,

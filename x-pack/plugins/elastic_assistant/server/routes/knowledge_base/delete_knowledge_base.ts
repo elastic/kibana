@@ -8,7 +8,10 @@
 import { IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
+import {
+  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+} from '@kbn/elastic-assistant-common';
 import {
   DeleteKnowledgeBaseRequestParams,
   DeleteKnowledgeBaseResponse,
@@ -16,9 +19,9 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
+import { ESQL_RESOURCE } from './constants';
+import { getKbResource } from './get_kb_resource';
 
 /**
  * Delete Knowledge Base index, pipeline, and resources (collection of documents)
@@ -30,11 +33,9 @@ export const deleteKnowledgeBaseRoute = (
   router.versioned
     .delete({
       access: 'internal',
-      path: KNOWLEDGE_BASE,
+      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       options: {
-        // Note: Relying on current user privileges to scope an esClient.
-        // Add `access:kbnElasticAssistant` to limit API access to only users with assistant privileges
-        tags: [],
+        tags: ['access:elasticAssistant'],
       },
     })
     .addVersion(
@@ -53,18 +54,22 @@ export const deleteKnowledgeBaseRoute = (
         const telemetry = assistantContext.telemetry;
 
         try {
-          const kbResource =
-            request.params.resource != null
-              ? decodeURIComponent(request.params.resource)
-              : undefined;
+          const kbResource = getKbResource(request);
+          const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
-          // Get a scoped esClient for deleting the Knowledge Base index, pipeline, and documents
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const knowledgeBaseDataClient =
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+          if (!knowledgeBaseDataClient) {
+            return response.custom({ body: { success: false }, statusCode: 500 });
+          }
           const esStore = new ElasticsearchStore(
             esClient,
-            KNOWLEDGE_BASE_INDEX_PATTERN,
+            knowledgeBaseDataClient.indexTemplateAndPattern.alias,
             logger,
-            telemetry
+            telemetry,
+            'elserId', // Not needed for delete ops
+            kbResource,
+            knowledgeBaseDataClient
           );
 
           if (kbResource === ESQL_RESOURCE) {

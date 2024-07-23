@@ -27,6 +27,7 @@ export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
     'get-file': 'endpointResponseActionsConsole-commandList-Responseactions-get-file',
     execute: 'endpointResponseActionsConsole-commandList-Responseactions-execute',
     upload: 'endpointResponseActionsConsole-commandList-Responseactions-upload',
+    scan: 'endpointResponseActionsConsole-commandList-Responseactions-scan',
   };
 };
 

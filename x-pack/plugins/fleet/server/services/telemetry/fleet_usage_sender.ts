@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -17,14 +17,19 @@ import type { FleetUsage } from '../../collectors/register';
 
 import { appContextService } from '../app_context';
 
-import { fleetAgentsSchema, fleetUsagesSchema } from './fleet_usages_schema';
+import {
+  fleetAgentsSchema,
+  fleetUsagesSchema,
+  fleetIntegrationsSchema,
+} from './fleet_usages_schema';
 
 const FLEET_USAGES_EVENT_TYPE = 'fleet_usage';
 const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
+const FLEET_INTEGRATIONS_EVENT_TYPE = 'fleet_integrations';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.1.4';
+  private taskVersion = '1.1.7';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -70,8 +75,12 @@ export class FleetUsageSender {
     }
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
-      throwUnrecoverableError(new Error('Outdated task version for task: ' + taskInstance.id));
-      return;
+      appContextService
+        .getLogger()
+        .info(
+          `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+        );
+      return getDeleteTaskRunResult();
     }
     appContextService.getLogger().info('Running Fleet Usage telemetry send task');
 
@@ -83,25 +92,34 @@ export class FleetUsageSender {
       const {
         agents_per_version: agentsPerVersion,
         agents_per_output_type: agentsPerOutputType,
+        agents_per_privileges: agentsPerPrivileges,
         upgrade_details: upgradeDetails,
+        integrations_details: integrationsDetails,
         ...fleetUsageData
       } = usageData;
       appContextService
         .getLogger()
-        .debug('Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
+        .debug(() => 'Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
 
       core.analytics.reportEvent(FLEET_USAGES_EVENT_TYPE, fleetUsageData);
 
       appContextService
         .getLogger()
-        .debug('Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
+        .debug(() => 'Agents per privileges telemetry: ' + JSON.stringify(agentsPerPrivileges));
+      core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
+        agents_per_privileges: agentsPerPrivileges,
+      });
+
+      appContextService
+        .getLogger()
+        .debug(() => 'Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
       agentsPerVersion.forEach((byVersion) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { agents_per_version: byVersion });
       });
 
       appContextService
         .getLogger()
-        .debug('Agents per output type telemetry: ' + JSON.stringify(agentsPerOutputType));
+        .debug(() => 'Agents per output type telemetry: ' + JSON.stringify(agentsPerOutputType));
       agentsPerOutputType.forEach((byOutputType) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
           agents_per_output_type: byOutputType,
@@ -110,9 +128,18 @@ export class FleetUsageSender {
 
       appContextService
         .getLogger()
-        .debug('Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
+        .debug(() => 'Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
       upgradeDetails.forEach((upgradeDetailsObj) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { upgrade_details: upgradeDetailsObj });
+      });
+
+      appContextService
+        .getLogger()
+        .debug(() => 'Integrations details telemetry: ' + JSON.stringify(integrationsDetails));
+      integrationsDetails.forEach((integrationDetailsObj) => {
+        core.analytics.reportEvent(FLEET_INTEGRATIONS_EVENT_TYPE, {
+          integrations_details: integrationDetailsObj,
+        });
       });
     } catch (error) {
       appContextService
@@ -136,7 +163,9 @@ export class FleetUsageSender {
     this.wasStarted = true;
 
     try {
-      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
+      appContextService
+        .getLogger()
+        .info(`Task ${this.taskId} scheduled with interval ${this.interval}`);
 
       await this.taskManager.ensureScheduled({
         id: this.taskId,
@@ -165,6 +194,11 @@ export class FleetUsageSender {
     core.analytics.registerEventType({
       eventType: FLEET_AGENTS_EVENT_TYPE,
       schema: fleetAgentsSchema,
+    });
+
+    core.analytics.registerEventType({
+      eventType: FLEET_INTEGRATIONS_EVENT_TYPE,
+      schema: fleetIntegrationsSchema,
     });
   }
 }

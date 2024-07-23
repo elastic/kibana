@@ -10,11 +10,9 @@ import type {
   CheckPrivilegesResponse,
   CheckPrivilegesPayload,
 } from '@kbn/security-plugin/server';
-import type { RequestHandler } from '@kbn/core/server';
+import type { AuthenticatedUser, RequestHandler } from '@kbn/core/server';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { coreMock } from '@kbn/core/server/mocks';
 
@@ -85,7 +83,7 @@ describe('FleetAuthzRouter', () => {
     // @ts-expect-error type doesn't properly respect deeply mocked keys
     mockContext.securityStart.authz.actions.ui.get.mockImplementation((priv) => `ui:${priv}`);
 
-    mockContext.securityStart.authc.getCurrentUser.mockReturnValue({
+    mockContext.securityCoreStart.authc.getCurrentUser.mockReturnValue({
       username: 'foo',
       roles,
     } as unknown as AuthenticatedUser);

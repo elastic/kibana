@@ -36,7 +36,7 @@ export const installPrebuiltRulesFleetPackage = async ({
   retryService,
 }: {
   es: Client;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   version?: string;
   overrideExistingPackage: boolean;
   retryService: RetryService;

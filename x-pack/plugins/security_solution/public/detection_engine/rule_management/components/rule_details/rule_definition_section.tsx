@@ -24,8 +24,6 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FieldIcon } from '@kbn/react-field';
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type {
   AlertSuppressionMissingFieldsStrategy,
@@ -37,7 +35,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
-import { AlertSuppressionTechnicalPreviewBadge } from '../../../rule_creation_ui/components/description_step/alert_suppression_technical_preview_badge';
+import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
@@ -53,6 +51,7 @@ import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 import { useAlertSuppression } from '../../logic/use_alert_suppression';
+import { RequiredFieldIcon } from './required_field_icon';
 import {
   filtersStyles,
   queryStyles,
@@ -254,17 +253,14 @@ interface RequiredFieldsProps {
 
 const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
   const styles = useRequiredFieldsStyles();
+
   return (
     <EuiFlexGrid data-test-subj="requiredFieldsPropertyValue" gutterSize={'s'}>
       {requiredFields.map((rF, index) => (
         <EuiFlexItem grow={false} key={rF.name}>
           <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
             <EuiFlexItem grow={false}>
-              <FieldIcon
-                data-test-subj="field-type-icon"
-                type={castEsToKbnFieldTypeName(rF.type)}
-                label={rF.type}
-              />
+              <RequiredFieldIcon type={rF.type} data-test-subj="field-type-icon" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText
@@ -339,14 +335,6 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
   );
 };
 
-interface AlertSuppressionTitleProps {
-  title: string;
-}
-
-const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
-  return <AlertSuppressionTechnicalPreviewBadge label={title} />;
-};
-
 interface SuppressAlertsByFieldProps {
   fields: string[];
 }
@@ -382,7 +370,7 @@ const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyP
       : descriptionStepI18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
   return (
-    <EuiText size="s" data-test-subj="alertSuppressionSuppressionFieldPropertyValue">
+    <EuiText size="s" data-test-subj="alertSuppressionMissingFieldsPropertyValue">
       {missingFieldsDescription}
     </EuiText>
   );
@@ -672,7 +660,10 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionGroupByPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
+            <AlertSuppressionLabel
+              label={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL}
+              ruleType={rule.type}
+            />
           </span>
         ),
         description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
@@ -682,7 +673,10 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="alertSuppressionDurationPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
+          <AlertSuppressionLabel
+            label={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL}
+            ruleType={rule.type}
+          />
         </span>
       ),
       description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
@@ -691,8 +685,11 @@ const prepareDefinitionSectionListItems = (
     if ('missing_fields_strategy' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
-          <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
+          <span data-test-subj="alertSuppressionMissingFieldPropertyTitle">
+            <AlertSuppressionLabel
+              label={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL}
+              ruleType={rule.type}
+            />
           </span>
         ),
         description: (

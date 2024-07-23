@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React from 'react';
@@ -20,11 +14,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../../hooks/use_error_group_distribution_fetcher';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -118,11 +108,7 @@ export function MobileErrorsOverview() {
             },
           }
         ).then((response) => {
-          const currentPageGroupIds = orderBy(
-            response.errorGroups,
-            sortField,
-            sortDirection
-          )
+          const currentPageGroupIds = orderBy(response.errorGroups, sortField, sortDirection)
             .slice(page * pageSize, (page + 1) * pageSize)
             .map(({ groupId }) => groupId)
             .sort();
@@ -148,8 +134,7 @@ export function MobileErrorsOverview() {
       pageSize,
     ]
   );
-  const { requestId, mobileErrorGroupMainStatistics, currentPageGroupIds } =
-    errorGroupListData;
+  const { requestId, mobileErrorGroupMainStatistics, currentPageGroupIds } = errorGroupListData;
   const {
     data: mobileErrorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
     status: mobileErrorGroupDetailedStatisticsStatus,
@@ -167,10 +152,7 @@ export function MobileErrorsOverview() {
                 start,
                 end,
                 numBuckets: 20,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
+                offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
               body: {
                 groupIds: JSON.stringify(currentPageGroupIds),
@@ -202,16 +184,12 @@ export function MobileErrorsOverview() {
                     fetchStatus={status}
                     distribution={errorDistributionData}
                     height={150}
-                    title={i18n.translate(
-                      'xpack.apm.serviceDetails.metrics.errorRateChart.title',
-                      { defaultMessage: 'Error rate' }
-                    )}
-                    tip={i18n.translate(
-                      'xpack.apm.serviceDetails.metrics.errorRateChart.tip',
-                      {
-                        defaultMessage: `Error rate is measured in transactions per minute.`,
-                      }
-                    )}
+                    title={i18n.translate('xpack.apm.serviceDetails.metrics.errorRateChart.title', {
+                      defaultMessage: 'Error rate',
+                    })}
+                    tip={i18n.translate('xpack.apm.serviceDetails.metrics.errorRateChart.tip', {
+                      defaultMessage: `Error rate is measured in transactions per minute.`,
+                    })}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -245,10 +223,9 @@ export function MobileErrorsOverview() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Errors' }
-              )}
+              {i18n.translate('xpack.apm.serviceDetails.metrics.errorsList.title', {
+                defaultMessage: 'Errors',
+              })}
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
@@ -256,9 +233,7 @@ export function MobileErrorsOverview() {
           <MobileErrorGroupList
             mainStatistics={mobileErrorGroupMainStatistics}
             serviceName={serviceName}
-            detailedStatisticsLoading={isPending(
-              mobileErrorGroupDetailedStatisticsStatus
-            )}
+            detailedStatisticsLoading={isPending(mobileErrorGroupDetailedStatisticsStatus)}
             detailedStatistics={mobileErrorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
             initialSortField={sortField}

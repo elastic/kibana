@@ -11,11 +11,12 @@ import { map, skip, startWith } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useSearchSessionContext } from '../../../../hooks/use_search_session';
 import { parseDateRange } from '../../../../utils/datemath';
-import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
+import { useKibanaQuerySettings } from '../../../../hooks/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
-import { useMetricsDataViewContext } from './use_metrics_data_view';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import {
   HostsSearchPayload,
   useHostsUrlState,
@@ -52,7 +53,8 @@ const getDefaultTimestamps = () => {
 export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
-  const { dataView } = useMetricsDataViewContext();
+  const { metricsView } = useMetricsDataViewContext();
+  const { updateSearchSessionId } = useSearchSessionContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -85,6 +87,7 @@ export const useUnifiedSearch = () => {
         */
         validateQuery(params?.query ?? (queryStringService.getQuery() as Query));
         setSearch(params ?? {});
+        updateSearchSessionId();
       } catch (err) {
         /*
         / Persists in the state the params so they can be used in case the query bar is fixed by the user.
@@ -96,7 +99,7 @@ export const useUnifiedSearch = () => {
         setError(err);
       }
     },
-    [queryStringService, setSearch, validateQuery]
+    [queryStringService, setSearch, updateSearchSessionId, validateQuery]
   );
 
   const parsedDateRange = useMemo(() => {
@@ -116,13 +119,13 @@ export const useUnifiedSearch = () => {
 
   const buildQuery = useCallback(() => {
     return buildEsQuery(
-      dataView,
+      metricsView?.dataViewReference,
       searchCriteria.query,
       [...searchCriteria.filters, ...searchCriteria.panelFilters],
       kibanaQuerySettings
     );
   }, [
-    dataView,
+    metricsView?.dataViewReference,
     searchCriteria.query,
     searchCriteria.filters,
     searchCriteria.panelFilters,

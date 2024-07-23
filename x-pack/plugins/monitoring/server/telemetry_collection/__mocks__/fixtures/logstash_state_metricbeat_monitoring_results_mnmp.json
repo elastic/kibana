@@ -1,0 +1,1181 @@
+[
+  {
+  "hits" : {
+      "hits" : [
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "ZzNmX3cB1VO1nvgv9Wlp",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 125,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "stdin",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "file"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "clone",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "file"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "pipeline",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "file"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 1
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:01:58.852-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "cf37c6fa-2f1a-41e2-9a89-36b420a8b9a5"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "ujNxX3cB1VO1nvgvv3em",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 100,
+                    "workers" : 1,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "pipeline",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:13:45.947-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "bc6ef6f2-ecce-4328-96a2-002de41a144d"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "ODNtX3cB1VO1nvgvo3IK",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 1,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "pipeline",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 10
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.534-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "3193df5f-2a34-4fe3-816e-6b05999aa5ce"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "LDNtX3cB1VO1nvgvonIZ",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 6,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 6
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.322-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "602936f5-98a3-4f8c-9471-cf389a519f4b"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "LTNtX3cB1VO1nvgvonIZ",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 12,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 12
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.332-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "41258219-b129-4fad-a629-f244826281f8"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "LjNtX3cB1VO1nvgvonI3",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 7,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 7
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.335-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "18593052-c021-4158-860d-d8122981a0ac"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "LzNtX3cB1VO1nvgvonI3",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 10,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 10
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.337-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "8b300988-62cc-4bc6-9ee0-9194f3f78e27"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "MDNtX3cB1VO1nvgvonJL",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 8,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 8
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.339-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "802a5994-a03c-44b8-a650-47c0f71c2e48"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "MTNtX3cB1VO1nvgvonJL",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 4,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 4
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.468-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "6ab60531-fb6f-478c-9063-82f2b0af2bed"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "MjNtX3cB1VO1nvgvonJi",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 5,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 5
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.470-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "0ec4702d-b5e5-4c60-91e9-6fa6a836f0d1"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "MzNtX3cB1VO1nvgvonJi",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 2,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "pipeline",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 2
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.489-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "ddf882b7-be26-4a93-8144-0aeb35122651"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "NDNtX3cB1VO1nvgvonJ3",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 13,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 13
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.490-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "6070b400-5c10-4c5e-b5c5-a5bd9be6d321"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "NTNtX3cB1VO1nvgvonJ3",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 3,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 3
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.512-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "e73bc63d-561a-4acd-a0c4-d5f70c4603df"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "NjNtX3cB1VO1nvgvonKM",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 11,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 11
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.513-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "4207025c-9b00-4bea-a36c-6fbf2d3c215e"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "NzNtX3cB1VO1nvgvonKM",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 9,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    },
+                    "workers" : 9
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:09:16.533-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "72058ad1-68a1-45f6-a8e8-10621ffc7288"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "uDNxX3cB1VO1nvgvv3cb",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 125,
+                    "workers" : 16,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "file"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "file"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "stdout",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "file"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:13:45.932-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "c6785d63-6e5f-42c2-839d-5edf139b7c19"
+            ]
+          }
+        },
+        {
+          "_index" : ".monitoring-logstash-8-mb-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "uTNxX3cB1VO1nvgvv3cb",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash": {
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "state": {
+                  "pipeline" : {
+                    "batch_size" : 125,
+                    "workers" : 8,
+                    "representation" : {
+                      "graph" : {
+                        "vertices" : [
+                          {
+                            "config_name" : "generator",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "input"
+                          },
+                          {
+                            "config_name" : "sleep",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "filter"
+                          },
+                          {
+                            "config_name" : "pipeline",
+                            "meta" : {
+                              "source" : {
+                                "protocol" : "string"
+                              }
+                            },
+                            "plugin_type" : "output"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "metricset": {
+              "name": "node",
+              "period": 10000
+            },
+            "agent": {
+              "type": "metricbeat"
+            },
+            "timestamp" : "2021-02-01T16:13:45.945-0500"
+          },
+          "fields" : {
+            "logstash.node.state.pipeline.ephemeral_id" : [
+              "2fcd4161-e08f-4eea-818b-703ea3ec6389"
+            ]
+          }
+        }
+      ]
+  }
+}
+]

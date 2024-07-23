@@ -62,6 +62,9 @@ export function getBaseMappings(): IndexMapping {
       updated_at: {
         type: 'date',
       },
+      updated_by: {
+        type: 'keyword',
+      },
       created_at: {
         type: 'date',
       },

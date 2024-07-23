@@ -122,6 +122,15 @@ describe('Cloud Plugin', () => {
         expect(decodeCloudIdMock).toHaveBeenCalledWith('cloudId', expect.any(Object));
       });
 
+      it('exposes `onboarding.default_solution`', () => {
+        const { setup } = setupPlugin({
+          onboarding: {
+            default_solution: 'Elasticsearch',
+          },
+        });
+        expect(setup.onboarding.defaultSolution).toBe('es');
+      });
+
       describe('isServerlessEnabled', () => {
         it('is `true` when `serverless.projectId` is set', () => {
           const { setup } = setupPlugin({

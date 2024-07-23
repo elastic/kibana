@@ -10,7 +10,10 @@ import {
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
 import {
-  HttpStart,
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
+import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -19,11 +22,13 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -37,39 +42,40 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  discover: DiscoverSetup;
   share: SharePluginSetup;
+  fleet: FleetSetup;
+  security: SecurityPluginSetup;
+  cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
-  cloudExperiments?: CloudExperimentsPluginStart;
-  http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  discover: DiscoverStart;
+  share: SharePluginStart;
+  fleet: FleetStart;
+  security: SecurityPluginStart;
+  cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
-export interface ObservabilityOnboardingPluginContextValue {
-  core: CoreStart;
-  plugins: ObservabilityOnboardingPluginSetupDeps;
-  data: DataPublicPluginStart;
-  observability: ObservabilityPublicStart;
-  config: ConfigSchema;
-}
+export type ObservabilityOnboardingContextValue = CoreStart &
+  ObservabilityOnboardingPluginStartDeps & { config: ConfigSchema };
 
 export class ObservabilityOnboardingPlugin
-  implements
-    Plugin<
-      ObservabilityOnboardingPluginSetup,
-      ObservabilityOnboardingPluginStart
-    >
+  implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
 {
   private locators?: ObservabilityOnboardingPluginLocators;
 
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  public setup(
-    core: CoreSetup,
-    plugins: ObservabilityOnboardingPluginSetupDeps
-  ) {
+  public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
+    const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
@@ -77,7 +83,6 @@ export class ObservabilityOnboardingPlugin
 
     const pluginSetupDeps = plugins;
 
-    const isServerless = this.ctx.env.packageInfo.buildFlavor === 'serverless';
     // set xpack.observability_onboarding.ui.enabled: true
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
@@ -95,74 +100,28 @@ export class ObservabilityOnboardingPlugin
             core.getStartServices(),
           ]);
 
-          const { createCallApi } = await import(
-            './services/rest/create_call_api'
-          );
+          const { createCallApi } = await import('./services/rest/create_call_api');
 
           createCallApi(core);
-
-          const experimentalOnboardingFlowEnabled =
-            isServerless &&
-            !!(await (
-              corePlugins as ObservabilityOnboardingPluginStartDeps
-            ).cloudExperiments?.getVariation(
-              'observability_onboarding.experimental_onboarding_flow_enabled',
-              false
-            ));
 
           return renderApp({
             core: coreStart,
             deps: pluginSetupDeps,
             appMountParameters,
-            experimentalOnboardingFlowEnabled,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
+            context: {
+              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              stackVersion,
+            },
           });
         },
         visibleIn: [],
       });
-
-      // Register the experimental version of the onboarding app on a dedicated path `/app/experimental-onboarding` for testing
-      if (isServerless) {
-        core.application.register({
-          id: `${PLUGIN_ID}_EXPERIMENTAL`,
-          title: 'Observability Onboarding (Beta)',
-          appRoute: '/app/experimental-onboarding',
-          order: 8500,
-          euiIconType: 'logoObservability',
-          category: DEFAULT_APP_CATEGORIES.observability,
-          keywords: [],
-          async mount(appMountParameters: AppMountParameters) {
-            // Load application bundle and Get start service
-            const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all(
-              [import('./application/app'), core.getStartServices()]
-            );
-
-            const { createCallApi } = await import(
-              './services/rest/create_call_api'
-            );
-
-            createCallApi(core);
-
-            return renderApp({
-              core: coreStart,
-              deps: pluginSetupDeps,
-              appMountParameters,
-              experimentalOnboardingFlowEnabled: true,
-              corePlugins:
-                corePlugins as ObservabilityOnboardingPluginStartDeps,
-              config,
-            });
-          },
-          visibleIn: [],
-        });
-      }
     }
 
     this.locators = {
-      onboarding: plugins.share.url.locators.create(
-        new ObservabilityOnboardingLocatorDefinition()
-      ),
+      onboarding: plugins.share.url.locators.create(new ObservabilityOnboardingLocatorDefinition()),
     };
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
@@ -171,10 +130,7 @@ export class ObservabilityOnboardingPlugin
       locators: this.locators,
     };
   }
-  public start(
-    _core: CoreStart,
-    _plugins: ObservabilityOnboardingPluginStartDeps
-  ) {
+  public start(_core: CoreStart, _plugins: ObservabilityOnboardingPluginStartDeps) {
     return {
       locators: this.locators,
     };

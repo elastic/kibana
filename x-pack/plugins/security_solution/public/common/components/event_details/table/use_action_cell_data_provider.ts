@@ -38,7 +38,7 @@ export interface UseActionCellDataProvider {
   eventId?: string;
   field: string;
   fieldFormat?: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<BrowserField>;
   fieldType?: string;
   isObjectArray?: boolean;
   linkValue?: string | null;

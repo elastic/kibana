@@ -21,10 +21,10 @@ import {
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
 import {
-  addSignificantItemsGroupAction,
-  addSignificantItemsGroupHistogramAction,
-  updateLoadingStateAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+  addSignificantItemsGroup,
+  addSignificantItemsGroupHistogram,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
@@ -40,13 +40,12 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const groupingHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     requestBody,
     responseStream,
     logDebugMessage,
     logger,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async (
     significantCategories: SignificantItem[],
@@ -57,7 +56,7 @@ export const groupingHandlerFactory =
 
     function pushHistogramDataLoadingState() {
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
@@ -71,7 +70,7 @@ export const groupingHandlerFactory =
     }
 
     responseStream.push(
-      updateLoadingStateAction({
+      updateLoadingState({
         ccsWarning: false,
         loaded: stateHandler.loaded(),
         loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.groupingResults', {
@@ -82,24 +81,26 @@ export const groupingHandlerFactory =
     );
 
     try {
-      const { fields, itemSets } = await fetchFrequentItemSets(
-        client,
-        requestBody.index,
-        JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
-        significantTerms,
-        requestBody.timeFieldName,
-        requestBody.deviationMin,
-        requestBody.deviationMax,
+      const { fields, itemSets } = await fetchFrequentItemSets({
+        esClient,
         logger,
-        stateHandler.sampleProbability(),
-        responseStream.pushError,
-        abortSignal
-      );
+        emitError: responseStream.pushError,
+        abortSignal,
+        arguments: {
+          index: requestBody.index,
+          searchQuery: JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
+          significantItems: significantTerms,
+          timeFieldName: requestBody.timeFieldName,
+          deviationMin: requestBody.deviationMin,
+          deviationMax: requestBody.deviationMax,
+          sampleProbability: stateHandler.sampleProbability(),
+        },
+      });
 
       if (significantCategories.length > 0 && significantTerms.length > 0) {
         const { fields: significantCategoriesFields, itemSets: significantCategoriesItemSets } =
           await fetchTerms2CategoriesCounts(
-            client,
+            esClient,
             requestBody,
             JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
             significantTerms,
@@ -134,7 +135,7 @@ export const groupingHandlerFactory =
         const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
         if (maxItems > 1) {
-          responseStream.push(addSignificantItemsGroupAction(significantItemGroups, version));
+          responseStream.push(addSignificantItemsGroup(significantItemGroups));
         }
 
         stateHandler.loaded(PROGRESS_STEP_GROUPING, false);
@@ -162,27 +163,26 @@ export const groupingHandlerFactory =
             let cpgTimeSeries: NumericChartData;
             try {
               cpgTimeSeries = (
-                (await fetchHistogramsForFields(
-                  client,
-                  requestBody.index,
-                  histogramQuery,
-                  // fields
-                  [
-                    {
-                      fieldName: requestBody.timeFieldName,
-                      type: KBN_FIELD_TYPES.DATE,
-                      interval: overallTimeSeries.interval,
-                      min: overallTimeSeries.stats[0],
-                      max: overallTimeSeries.stats[1],
-                    },
-                  ],
-                  // samplerShardSize
-                  -1,
-                  undefined,
+                (await fetchHistogramsForFields({
+                  esClient,
                   abortSignal,
-                  stateHandler.sampleProbability(),
-                  RANDOM_SAMPLER_SEED
-                )) as [NumericChartData]
+                  arguments: {
+                    indexPattern: requestBody.index,
+                    query: histogramQuery,
+                    fields: [
+                      {
+                        fieldName: requestBody.timeFieldName,
+                        type: KBN_FIELD_TYPES.DATE,
+                        interval: overallTimeSeries.interval,
+                        min: overallTimeSeries.stats[0],
+                        max: overallTimeSeries.stats[1],
+                      },
+                    ],
+                    samplerShardSize: -1,
+                    randomSamplerProbability: stateHandler.sampleProbability(),
+                    randomSamplerSeed: RANDOM_SAMPLER_SEED,
+                  },
+                })) as [NumericChartData]
               )[0];
             } catch (e) {
               if (!isRequestAbortedError(e)) {
@@ -203,15 +203,6 @@ export const groupingHandlerFactory =
                   doc_count: 0,
                 };
 
-                if (version === '1') {
-                  return {
-                    key: o.key,
-                    key_as_string: o.key_as_string ?? '',
-                    doc_count_significant_term: current.doc_count,
-                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                  };
-                }
-
                 return {
                   key: o.key,
                   key_as_string: o.key_as_string ?? '',
@@ -221,20 +212,17 @@ export const groupingHandlerFactory =
               }) ?? [];
 
             responseStream.push(
-              addSignificantItemsGroupHistogramAction(
-                [
-                  {
-                    id: cpg.id,
-                    histogram,
-                  },
-                ],
-                version
-              )
+              addSignificantItemsGroupHistogram([
+                {
+                  id: cpg.id,
+                  histogram,
+                },
+              ])
             );
           }
         }, MAX_CONCURRENT_QUERIES);
 
-        groupHistogramQueue.push(significantItemGroups);
+        await groupHistogramQueue.push(significantItemGroups);
         await groupHistogramQueue.drain();
       }
     } catch (e) {

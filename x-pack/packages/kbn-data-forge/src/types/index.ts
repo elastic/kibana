@@ -120,6 +120,7 @@ export const ConfigRT = rt.type({
     reduceWeekendTrafficBy: rt.number,
     ephemeralProjectIds: rt.number,
     alignEventsToInterval: rt.boolean,
+    artificialIndexDelay: rt.number,
   }),
   schedule: rt.array(ScheduleRT),
 });
@@ -159,7 +160,7 @@ export interface Point {
 }
 
 export interface CliOptions {
-  config: string;
+  config?: string;
   lookback: string;
   eventsPerCycle: number;
   payloadSize: number;
@@ -170,7 +171,7 @@ export interface CliOptions {
   elasticsearchHost: string;
   elasticsearchUsername: string;
   elasticsearchPassword: string;
-  elasticsearchApiKey: undefined | string;
+  elasticsearchApiKey?: undefined | string;
   kibanaUrl: string;
   kibanaUsername: string;
   kibanaPassword: string;
@@ -179,4 +180,5 @@ export interface CliOptions {
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
+  scheduleEnd?: string;
 }

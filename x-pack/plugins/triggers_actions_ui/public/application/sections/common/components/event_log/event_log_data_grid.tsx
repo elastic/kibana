@@ -22,8 +22,8 @@ import {
   EuiDataGridCellPopoverElementProps,
   useEuiTheme,
   EuiToolTip,
+  EuiIconTip,
   EuiText,
-  EuiIcon,
 } from '@elastic/eui';
 import {
   IExecutionLog,
@@ -142,14 +142,18 @@ const columnsWithToolTipMap: Record<string, Record<string, string>> = {
 
 export const ColumnHeaderWithToolTip = ({ id }: { id: string }) => {
   return (
-    <EuiToolTip content={columnsWithToolTipMap[id].toolTip}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem>{columnsWithToolTipMap[id].display}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem>{columnsWithToolTipMap[id].display}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiIconTip
+          content={columnsWithToolTipMap[id].toolTip}
+          size="s"
+          color="subdued"
+          type="questionInCircle"
+          className="eui-alignTop"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

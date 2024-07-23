@@ -7,7 +7,7 @@
 
 import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { useBrowserRunOnceMonitors } from '../hooks/use_browser_run_once_monitors';
@@ -38,8 +38,9 @@ export const BrowserTestRunResult = ({
   });
 
   useEffect(() => {
+    const { coreStart, toasts } = kibanaService;
     if (retriesExceeded) {
-      kibanaService.toasts.addDanger(
+      toasts.addDanger(
         {
           text: FAILED_TO_SCHEDULE,
           title: toMountPoint(
@@ -47,7 +48,8 @@ export const BrowserTestRunResult = ({
               id="xpack.synthetics.manualTestRun.failedTest.name"
               defaultMessage="Manual test run failed for {name}"
               values={{ name }}
-            />
+            />,
+            coreStart
           ),
         },
         {

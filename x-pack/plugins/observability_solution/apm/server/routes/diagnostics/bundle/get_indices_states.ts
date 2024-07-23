@@ -32,46 +32,43 @@ export async function getIndicesStates({
 
   const fieldCaps = await getFieldCaps({ esClient, apmIndices });
 
-  const invalidFieldMappings = Object.values(
-    fieldCaps.fields[SERVICE_NAME] ?? {}
-  ).filter(({ type }): boolean => type !== 'keyword');
-
-  const items = indicesWithPipelineId.map(
-    ({ index, dataStream, pipelineId }) => {
-      const hasObserverVersionProcessor = pipelineId
-        ? ingestPipelines[pipelineId]?.processors?.some((processor) => {
-            return (
-              processor?.grok?.field === 'observer.version' &&
-              processor?.grok?.patterns[0] ===
-                '%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?'
-            );
-          })
-        : false;
-
-      const invalidFieldMapping = invalidFieldMappings.find((fieldMappings) =>
-        fieldMappings.indices?.includes(index)
-      );
-
-      const isValidFieldMappings = invalidFieldMapping === undefined;
-      const isValidIngestPipeline =
-        hasObserverVersionProcessor === true &&
-        validateIngestPipelineName(dataStream, pipelineId);
-
-      return {
-        isValid: isValidFieldMappings && isValidIngestPipeline,
-        fieldMappings: {
-          isValid: isValidFieldMappings,
-          invalidType: invalidFieldMapping?.type,
-        },
-        ingestPipeline: {
-          isValid: isValidIngestPipeline,
-          id: pipelineId,
-        },
-        index,
-        dataStream,
-      };
-    }
+  const invalidFieldMappings = Object.values(fieldCaps.fields[SERVICE_NAME] ?? {}).filter(
+    ({ type }): boolean => type !== 'keyword'
   );
+
+  const items = indicesWithPipelineId.map(({ index, dataStream, pipelineId }) => {
+    const hasObserverVersionProcessor = pipelineId
+      ? ingestPipelines[pipelineId]?.processors?.some((processor) => {
+          return (
+            processor?.grok?.field === 'observer.version' &&
+            processor?.grok?.patterns[0] ===
+              '%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?'
+          );
+        })
+      : false;
+
+    const invalidFieldMapping = invalidFieldMappings.find((fieldMappings) =>
+      fieldMappings.indices?.includes(index)
+    );
+
+    const isValidFieldMappings = invalidFieldMapping === undefined;
+    const isValidIngestPipeline =
+      hasObserverVersionProcessor === true && validateIngestPipelineName(dataStream, pipelineId);
+
+    return {
+      isValid: isValidFieldMappings && isValidIngestPipeline,
+      fieldMappings: {
+        isValid: isValidFieldMappings,
+        invalidType: invalidFieldMapping?.type,
+      },
+      ingestPipeline: {
+        isValid: isValidIngestPipeline,
+        id: pipelineId,
+      },
+      index,
+      dataStream,
+    };
+  });
 
   const invalidIndices = items.filter((item) => !item.isValid);
   const validIndices = items.filter((item) => item.isValid);
@@ -88,9 +85,10 @@ export function validateIngestPipelineName(
   }
 
   const indexTemplateNames = getApmIndexTemplateNames();
-  return indexTemplateNames.some(
-    (indexTemplateName) =>
-      dataStream.startsWith(indexTemplateName) &&
-      ingestPipelineId.startsWith(indexTemplateName)
-  );
+  return Object.values(indexTemplateNames)
+    .flat()
+    .some(
+      (indexTemplateName) =>
+        dataStream.startsWith(indexTemplateName) && ingestPipelineId.startsWith(indexTemplateName)
+    );
 }

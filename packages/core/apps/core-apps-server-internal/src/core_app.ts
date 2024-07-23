@@ -113,7 +113,10 @@ export class CoreAppsService {
       { path: '/', validate: false, options: { access: 'public' } },
       async (context, req, res) => {
         const { uiSettings } = await context.core;
-        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        let defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request: req });
+        if (!defaultRoute) {
+          defaultRoute = '/app/home';
+        }
         const basePath = httpSetup.basePath.get(req);
         const url = `${basePath}${defaultRoute}`;
 
@@ -192,7 +195,7 @@ export class CoreAppsService {
               body: schema.recordOf(schema.string(), schema.any()),
             },
             response: {
-              '200': { body: schema.object({ ok: schema.boolean() }) },
+              '200': { body: () => schema.object({ ok: schema.boolean() }) },
             },
           },
         },

@@ -9,20 +9,23 @@
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
+import { FieldListSerializedStateState } from './types';
 
 export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_FIELD_LIST_ACTION_ID,
+    grouping: [embeddableExamplesGrouping],
     getIconType: () => 'indexOpen',
     isCompatible: async ({ embeddable }) => {
       return apiCanAddNewPanel(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel({
+      embeddable.addNewPanel<FieldListSerializedStateState>({
         panelType: FIELD_LIST_ID,
       });
     },
@@ -31,5 +34,5 @@ export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) =
         defaultMessage: 'Field list',
       }),
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_FIELD_LIST_ACTION_ID);
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_FIELD_LIST_ACTION_ID);
 };

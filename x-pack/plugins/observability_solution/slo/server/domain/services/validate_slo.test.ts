@@ -103,6 +103,7 @@ describe('validateSLO', () => {
           settings: {
             frequency: sixHours(),
             syncDelay: oneMinute(),
+            preventInitialBackfill: false,
           },
         });
         expect(() => validateSLO(slo)).toThrowError('Invalid settings.frequency');
@@ -113,6 +114,7 @@ describe('validateSLO', () => {
           settings: {
             frequency: oneMinute(),
             syncDelay: sixHours(),
+            preventInitialBackfill: false,
           },
         });
         expect(() => validateSLO(slo)).toThrowError('Invalid settings.sync_delay');
@@ -132,12 +134,12 @@ describe('validateSLO', () => {
       expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_target');
     });
 
-    it("throws when 'objective.timeslice_target' is lte 0", () => {
+    it("throws when 'objective.timeslice_target' is lt 0", () => {
       const slo = createSLO({
         budgetingMethod: 'timeslices',
         objective: {
           target: 0.95,
-          timesliceTarget: 0,
+          timesliceTarget: -0.00001,
           timesliceWindow: new Duration(1, DurationUnit.Minute),
         },
       });

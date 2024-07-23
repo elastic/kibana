@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  createGetDynamicSettingsRoute,
+  createPostDynamicSettingsRoute,
+} from './settings/dynamic_settings';
 import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
@@ -95,6 +99,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsSuggestionsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,
+  createGetDynamicSettingsRoute,
+  createPostDynamicSettingsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

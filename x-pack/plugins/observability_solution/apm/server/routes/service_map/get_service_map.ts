@@ -11,10 +11,7 @@ import { APMConfig } from '../..';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { MlClient } from '../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import {
-  DEFAULT_ANOMALIES,
-  getServiceAnomalies,
-} from './get_service_anomalies';
+import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getServiceStats } from './get_service_stats';
 import { getTraceSampleIds } from './get_trace_sample_ids';
@@ -76,21 +73,21 @@ async function getConnectionData({
 
     logger.debug(`Executing scripted metric agg (${chunks.length} chunks)`);
 
-    const chunkedResponses = await withApmSpan(
-      'get_service_paths_from_all_trace_ids',
-      () =>
-        Promise.all(
-          chunks.map((traceIdsChunk) =>
-            getServiceMapFromTraceIds({
-              apmEventClient,
-              traceIds: traceIdsChunk,
-              start,
-              end,
-              terminateAfter: config.serviceMapTerminateAfter,
-              logger,
-            })
-          )
+    const chunkedResponses = await withApmSpan('get_service_paths_from_all_trace_ids', () =>
+      Promise.all(
+        chunks.map((traceIdsChunk) =>
+          getServiceMapFromTraceIds({
+            apmEventClient,
+            traceIds: traceIdsChunk,
+            start,
+            end,
+            terminateAfter: config.serviceMapTerminateAfter,
+            serviceMapMaxAllowableBytes: config.serviceMapMaxAllowableBytes,
+            numOfRequests: chunks.length,
+            logger,
+          })
         )
+      )
     );
 
     logger.debug('Received chunk responses');
@@ -98,9 +95,7 @@ async function getConnectionData({
     const mergedResponses = chunkedResponses.reduce((prev, current) => {
       return {
         connections: prev.connections.concat(current.connections),
-        discoveredServices: prev.discoveredServices.concat(
-          current.discoveredServices
-        ),
+        discoveredServices: prev.discoveredServices.concat(current.discoveredServices),
       };
     });
 

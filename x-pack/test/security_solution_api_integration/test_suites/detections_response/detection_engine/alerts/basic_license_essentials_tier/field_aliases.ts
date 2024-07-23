@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     name: string;
   }
 
-  describe('@ess @serverless Tests involving aliases of source indexes and the alerts index', () => {
+  describe('@ess @serverless @serverlessQA Tests involving aliases of source indexes and the alerts index', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
     });
@@ -39,12 +39,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createAlertsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {

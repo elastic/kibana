@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiIconTip,
   EuiSuperSelect,
+  type EuiSuperSelectOption,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
-import { useManagementLink } from '../../hooks/use_management_link';
 
 interface SummarizationModelProps {
-  selectedModel: LLMModel;
+  selectedModel?: LLMModel;
   onSelect: (model: LLMModel) => void;
   models: LLMModel[];
 }
@@ -38,7 +35,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   models,
   onSelect,
 }) => {
-  const managementLink = useManagementLink(selectedModel.connectorId);
+  const usageTracker = useUsageTracker();
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
 
@@ -46,7 +43,6 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       onSelect(newSelectedModel);
     }
   };
-
   const modelsOption: Array<EuiSuperSelectOption<string>> = useMemo(
     () =>
       models.map((model) => ({
@@ -95,6 +91,12 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
     [models]
   );
 
+  useEffect(() => {
+    usageTracker?.click(
+      `${AnalyticsEvents.modelSelected}_${selectedModel!.value || selectedModel!.connectorType}`
+    );
+  }, [usageTracker, selectedModel]);
+
   return (
     <EuiFormRow
       css={{ '.euiFormLabel': { display: 'flex', alignItems: 'center' } }}
@@ -102,45 +104,18 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         <>
           <FormattedMessage
             id="xpack.searchPlayground.sidebar.summarizationModel.label"
-            defaultMessage="Summarization Model"
+            defaultMessage="Model"
           />{' '}
-          <EuiIconTip
-            content={i18n.translate('xpack.searchPlayground.sidebar.summarizationModel.help', {
-              defaultMessage: 'The large language model used to summarize your documents.',
-            })}
-          />
         </>
       }
-      labelAppend={
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate(
-            'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip',
-            {
-              defaultMessage: 'Manage connector',
-            }
-          )}
-        >
-          <EuiButtonIcon
-            target="_blank"
-            href={managementLink}
-            data-test-subj="manageConnectorsLink"
-            iconType="wrench"
-            aria-label={i18n.translate(
-              'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
-              {
-                defaultMessage: 'Manage connector',
-              }
-            )}
-          />
-        </EuiToolTip>
-      }
+      fullWidth
     >
       <EuiSuperSelect
         data-test-subj="summarizationModelSelect"
         options={modelsOption}
-        valueOfSelected={getOptionValue(selectedModel)}
+        valueOfSelected={selectedModel && getOptionValue(selectedModel)}
         onChange={onChange}
+        fullWidth
       />
     </EuiFormRow>
   );

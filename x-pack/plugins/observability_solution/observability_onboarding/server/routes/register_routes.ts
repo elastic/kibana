@@ -6,6 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import {
   ServerRouteRepository,
@@ -48,12 +49,7 @@ export function registerRoutes({
     const { endpoint, options, handler, params } = route;
     const { pathname, method } = parseEndpoint(endpoint);
 
-    (
-      router[method] as RouteRegistrar<
-        typeof method,
-        ObservabilityOnboardingRequestHandlerContext
-      >
-    )(
+    (router[method] as RouteRegistrar<typeof method, ObservabilityOnboardingRequestHandlerContext>)(
       {
         path: pathname,
         validate: routeValidationObject,
@@ -73,6 +69,7 @@ export function registerRoutes({
           const data = (await handler({
             context,
             request,
+            response,
             logger,
             params: decodedParams,
             plugins,
@@ -90,6 +87,10 @@ export function registerRoutes({
 
           if (data === undefined) {
             return response.noContent();
+          }
+
+          if (data instanceof response.noContent().constructor) {
+            return data as IKibanaResponse;
           }
 
           return response.ok({ body: data });

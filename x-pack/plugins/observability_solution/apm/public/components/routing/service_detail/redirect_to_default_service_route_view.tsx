@@ -17,7 +17,16 @@ export function RedirectToDefaultServiceRouteView() {
 
   const search = qs.stringify(query);
 
-  return (
-    <Redirect to={{ pathname: `/services/${serviceName}/overview`, search }} />
-  );
+  return <Redirect to={{ pathname: `/services/${serviceName}/overview`, search }} />;
+}
+
+export function RedirectToDefaultLogsServiceRouteView() {
+  const {
+    path: { serviceName },
+    query,
+  } = useApmParams('/logs-services/{serviceName}/*');
+
+  const search = qs.stringify(query);
+
+  return <Redirect to={{ pathname: `/logs-services/${serviceName}/overview`, search }} />;
 }

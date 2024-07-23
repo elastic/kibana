@@ -11,6 +11,11 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
+import {
+  deleteIndexedEndpointHeartbeats,
+  indexEndpointHeartbeats,
+} from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import {
   getHostVmClient,
   createVm,
@@ -144,6 +149,7 @@ export const dataLoaders = (
 ): void => {
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
+  const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
   const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
@@ -216,12 +222,27 @@ export const dataLoaders = (
         withResponseActions,
         numResponseActions,
         alertIds,
+        isServerless,
       });
     },
 
     deleteIndexedEndpointHosts: async (indexedData: IndexedHostsAndAlertsResponse) => {
       const { kbnClient, esClient } = await stackServicesPromise;
       return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
+    },
+
+    indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
+      const { esClient, log } = await setupStackServicesUsingCypressConfig(config);
+      return (await indexEndpointHeartbeats(esClient, log, options.count, options.unbilledCount))
+        .data;
+    },
+
+    deleteIndexedEndpointHeartbeats: async (
+      data: IndexedEndpointHeartbeats['data']
+    ): Promise<null> => {
+      const { esClient } = await stackServicesPromise;
+      await deleteIndexedEndpointHeartbeats(esClient, data);
+      return null;
     },
 
     indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
@@ -277,8 +298,8 @@ export const dataLoaders = (
     }: {
       endpointAgentIds: string[];
     }): Promise<DeleteAllEndpointDataResponse> => {
-      const { esClient } = await stackServicesPromise;
-      return deleteAllEndpointData(esClient, endpointAgentIds);
+      const { esClient, log } = await stackServicesPromise;
+      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless);
     },
 
     /**
@@ -305,6 +326,8 @@ export const dataLoadersForRealEndpoints = (
   config: Cypress.PluginConfigOptions
 ): void => {
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
+  const isServerless = Boolean(config.env.IS_SERVERLESS);
+  const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
 
   on('task', {
     createSentinelOneHost: async () => {
@@ -392,7 +415,7 @@ ${s1Info.status}
       options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
       const { kbnClient, log, esClient } = await stackServicesPromise;
-
+      const isMkiEnvironment = isServerless && isCloudServerless;
       let retryAttempt = 0;
       const attemptCreateEndpointHost =
         async (): Promise<CreateAndEnrollEndpointHostCIResponse> => {
@@ -401,6 +424,7 @@ ${s1Info.status}
             const newHost = process.env.CI
               ? await createAndEnrollEndpointHostCI({
                   useClosestVersionMatch: true,
+                  isMkiEnvironment,
                   ...options,
                   log,
                   kbnClient,

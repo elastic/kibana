@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { disableExpandableFlyout } from '../../../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../../../../objects/rule';
 import { login } from '../../../../../tasks/login';
 import {
-  JSON_TEXT,
   TABLE_CELL,
   TABLE_ROWS,
   THREAT_DETAILS_VIEW,
-  ENRICHMENT_COUNT_NOTIFICATION,
   INDICATOR_MATCH_ENRICHMENT_SECTION,
   INVESTIGATION_TIME_ENRICHMENT_SECTION,
   THREAT_DETAILS_ACCORDION,
 } from '../../../../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../../../../screens/rule_details';
-import {
-  expandFirstAlert,
-  setEnrichmentDates,
-  viewThreatIntelTab,
-} from '../../../../../tasks/alerts';
+import { expandFirstAlert, setEnrichmentDates } from '../../../../../tasks/alerts';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { openJsonView, openThreatIndicatorDetails } from '../../../../../tasks/alerts_details';
 import { addsFieldsToTimeline, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
+import {
+  expandDocumentDetailsExpandableFlyoutLeftSection,
+  openTableTab,
+} from '../../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { filterTableTabTable } from '../../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
+import { DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS } from '../../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
+import { openThreatIntelligenceTab } from '../../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
+import { openInsightsTab } from '../../../../../tasks/expandable_flyout/alert_details_left_panel';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
@@ -35,8 +35,6 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
     cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     login();
-
-    disableExpandableFlyout();
   });
 
   after(() => {
@@ -71,39 +69,37 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
     });
   });
 
-  it('Displays persisted enrichments on the JSON view', () => {
-    const expectedEnrichment = [
-      {
-        'indicator.file.hash.md5': ['9b6c3518a91d23ed77504b5416bfb5b3'],
-        'matched.index': ['logs-ti_abusech.malware'],
-        'indicator.file.type': ['elf'],
-        'indicator.file.hash.tlsh': [
-          '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
-        ],
-        'feed.name': ['AbuseCH malware'],
-        'indicator.file.hash.ssdeep': [
-          '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
-        ],
-        'indicator.file.hash.sha256': [
-          'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-        ],
-        'indicator.first_seen': ['2021-03-10T08:02:14.000Z'],
-        'matched.field': ['myhash.mysha256'],
-        'indicator.type': ['file'],
-        'matched.type': ['indicator_match_rule'],
-        'matched.id': ['84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f'],
-        'matched.atomic': ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
-        'indicator.file.size': [80280],
-      },
-    ];
+  it('Displays persisted enrichments on the Table tab', () => {
+    const expectedEnrichment = {
+      'indicator.file.hash.md5': ['9b6c3518a91d23ed77504b5416bfb5b3'],
+      'matched.index': ['logs-ti_abusech.malware'],
+      'indicator.file.type': ['elf'],
+      'indicator.file.hash.tlsh': [
+        '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
+      ],
+      'feed.name': ['AbuseCH malware'],
+      'indicator.file.hash.ssdeep': [
+        '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
+      ],
+      'indicator.file.hash.sha256': [
+        'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+      ],
+      'indicator.first_seen': ['2021-03-10T08:02:14.000Z'],
+      'matched.field': ['myhash.mysha256'],
+      'indicator.type': ['file'],
+      'matched.type': ['indicator_match_rule'],
+      'matched.id': ['84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f'],
+      'matched.atomic': ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
+      'indicator.file.size': [80280],
+    };
 
     expandFirstAlert();
-    openJsonView();
+    openTableTab();
+    filterTableTabTable('threat.enrichments');
 
-    cy.get(JSON_TEXT).then((x) => {
-      const parsed = JSON.parse(x.text());
-      expect(parsed.fields['threat.enrichments']).to.deep.equal(expectedEnrichment);
-    });
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS).contains(
+      JSON.stringify(expectedEnrichment)
+    );
   });
 
   it('Displays threat indicator details on the threat intel tab', () => {
@@ -140,9 +136,10 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
     ];
 
     expandFirstAlert();
-    openThreatIndicatorDetails();
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    openInsightsTab();
+    openThreatIntelligenceTab();
 
-    cy.get(ENRICHMENT_COUNT_NOTIFICATION).should('have.text', '1');
     cy.get(THREAT_DETAILS_VIEW).within(() => {
       cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
       expectedThreatIndicatorData.forEach((row, index) => {
@@ -178,7 +175,9 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
       };
 
       expandFirstAlert();
-      viewThreatIntelTab();
+      expandDocumentDetailsExpandableFlyoutLeftSection();
+      openInsightsTab();
+      openThreatIntelligenceTab();
       setEnrichmentDates('08/05/2018 10:00 AM');
 
       cy.get(`${INDICATOR_MATCH_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)

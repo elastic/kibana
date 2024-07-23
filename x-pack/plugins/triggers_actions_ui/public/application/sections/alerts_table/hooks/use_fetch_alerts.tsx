@@ -36,7 +36,7 @@ export interface FetchAlertsArgs {
     pageIndex: number;
     pageSize: number;
   };
-  onLoaded?: () => void;
+  onLoaded?: (alerts: Alerts) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   runtimeMappings?: MappingRuntimeFields;
   sort: SortCombinations[];
@@ -63,7 +63,6 @@ export interface FetchAlertResp {
   getInspectQuery: GetInspectQuery;
   refetch: Refetch;
   totalAlerts: number;
-  updatedAt: number;
 }
 
 type AlertResponseState = Omit<FetchAlertResp, 'getInspectQuery' | 'refetch'>;
@@ -105,7 +104,6 @@ const initialAlertState: AlertStateReducer = {
     ecsAlertsData: [],
     totalAlerts: -1,
     isInitializing: true,
-    updatedAt: 0,
   },
 };
 
@@ -123,7 +121,6 @@ function alertReducer(state: AlertStateReducer, action: AlertActions) {
           totalAlerts: action.totalAlerts,
           oldAlertsData: action.oldAlertsData,
           ecsAlertsData: action.ecsAlertsData,
-          updatedAt: Date.now(),
         },
       };
     case 'resetPagination':
@@ -262,13 +259,13 @@ const useFetchAlerts = ({
                     totalAlerts,
                   });
                   dispatch({ type: 'loading', loading: false });
-                  onLoaded?.();
+                  onLoaded?.(alerts);
                   searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
                 dispatch({ type: 'loading', loading: false });
-                onLoaded?.();
+                onLoaded?.([]);
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
               },

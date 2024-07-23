@@ -3,13 +3,12 @@
 exports[`EnableMonitoringAlert component renders expected component 1`] = `
 <p>
   <strong>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Enable monitoring."
       id="xpack.logstash.enableMonitoringAlert.enableMonitoringTitle"
-      values={Object {}}
     />
   </strong>
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="In the {configFileName} file, set {monitoringConfigParam} and {monitoringUiConfigParam} to {trueValue}."
     id="xpack.logstash.enableMonitoringAlert.enableMonitoringDescription"
     values={

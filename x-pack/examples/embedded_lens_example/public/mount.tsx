@@ -10,6 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { StartDependencies } from './plugin';
 
 export const mount =
@@ -21,10 +22,11 @@ export const mount =
     const defaultDataView = await plugins.data.indexPatterns.getDefault();
     const { formula } = await plugins.lens.stateHelperApi();
 
-    const i18nCore = core.i18n;
+    const { analytics, i18n, theme } = core;
+    const startServices = { analytics, i18n, theme };
 
     const reactElement = (
-      <i18nCore.Context>
+      <KibanaRenderContextProvider {...startServices}>
         {defaultDataView && defaultDataView.isTimeBased() ? (
           <App core={core} plugins={plugins} defaultDataView={defaultDataView} formula={formula} />
         ) : (
@@ -36,7 +38,7 @@ export const mount =
             <p>This demo only works if your default index pattern is set and time based</p>
           </EuiCallOut>
         )}
-      </i18nCore.Context>
+      </KibanaRenderContextProvider>
     );
 
     render(reactElement, element);

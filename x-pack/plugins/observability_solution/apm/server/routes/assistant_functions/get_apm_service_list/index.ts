@@ -35,7 +35,7 @@ export async function getApmServiceList({
   randomSampler,
 }: {
   arguments: {
-    'service.environment'?: string | undefined;
+    serviceEnvironment?: string | undefined;
     healthStatus?: ServiceHealthStatus[] | undefined;
     start: string;
     end: string;
@@ -57,7 +57,7 @@ export async function getApmServiceList({
     documentType: ApmDocumentType.TransactionMetric,
     start,
     end,
-    environment: args['service.environment'] || ENVIRONMENT_ALL.value,
+    environment: args.serviceEnvironment || ENVIRONMENT_ALL.value,
     kuery: '',
     logger,
     randomSampler,
@@ -79,9 +79,7 @@ export async function getApmServiceList({
   });
 
   if (healthStatus && healthStatus.length) {
-    mappedItems = mappedItems.filter((item): boolean =>
-      healthStatus.includes(item.healthStatus)
-    );
+    mappedItems = mappedItems.filter((item): boolean => healthStatus.includes(item.healthStatus));
   }
 
   return mappedItems;

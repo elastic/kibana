@@ -22,8 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless find_rules', () => {
     beforeEach(async () => {
@@ -48,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       expect(body).to.eql({
         data: [expectedRule],
@@ -66,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
-      const expectedRule = updateUsername(getComplexRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getComplexRuleOutput(), await utils.getUsername());
       expect(body).to.eql({
         data: [expectedRule],
         page: 1,

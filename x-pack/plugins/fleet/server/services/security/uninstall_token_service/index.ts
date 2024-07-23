@@ -32,12 +32,11 @@ import type {
 
 import { isResponseError } from '@kbn/es-errors';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
 import type { AgentPolicySOAttributes } from '../../../types';
-
 import { UninstallTokenError } from '../../../../common/errors';
-
 import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
-
 import type {
   UninstallToken,
   UninstallTokenMetadata,
@@ -168,18 +167,37 @@ export interface UninstallTokenServiceInterface {
    *
    */
   checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError | null>;
+
+  scoped(spaceId?: string): UninstallTokenServiceInterface;
 }
 
 export class UninstallTokenService implements UninstallTokenServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
+  private isScoped = false;
 
-  constructor(private esoClient: EncryptedSavedObjectsClient) {}
+  constructor(
+    private esoClient: EncryptedSavedObjectsClient,
+    soClient?: SavedObjectsClientContract
+  ) {
+    if (soClient) {
+      this._soClient = soClient;
+      this.isScoped = true;
+    }
+  }
+
+  public scoped(spaceId?: string) {
+    return new UninstallTokenService(
+      this.esoClient,
+      appContextService.getInternalUserSOClientForSpaceId(spaceId)
+    );
+  }
 
   public async getToken(id: string): Promise<UninstallToken | null> {
-    const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
-
+    const namespacePrefix = this.soClient.getCurrentNamespace()
+      ? `${this.soClient.getCurrentNamespace()}:`
+      : '';
+    const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${namespacePrefix}${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
     const tokenObjects = await this.getDecryptedTokenObjects({ filter });
-
     return tokenObjects.length === 1
       ? this.convertTokenObjectToToken(
           await this.getPolicyIdNameDictionary([tokenObjects[0].attributes.policy_id]),
@@ -188,15 +206,28 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       : null;
   }
 
-  private prepareSearchString(str: string | undefined, wildcard: string): string | undefined {
+  private prepareSearchString(
+    str: string | undefined,
+    charactersToEscape: RegExp,
+    wildcard: string
+  ): string | undefined {
     const strWithoutSpecialCharacters = str
-      ?.split(/[^-\da-z]+/gi)
+      ?.replace(new RegExp(charactersToEscape, 'g'), '\\$&')
+      .split(/ +/gi)
       .filter((x) => x)
       .join(wildcard);
 
     return strWithoutSpecialCharacters
       ? wildcard + strWithoutSpecialCharacters + wildcard
       : undefined;
+  }
+
+  private prepareRegexpQuery(str: string | undefined): string | undefined {
+    return this.prepareSearchString(str, /[@#&*+()[\]{}|.?~"<]/, '.*');
+  }
+
+  private prepareQueryStringQuery(str: string | undefined): string | undefined {
+    return this.prepareSearchString(str, /[":*(){}\\<>]/, '*');
   }
 
   private async searchPoliciesByName(policyNameSearchString: string): Promise<string[]> {
@@ -217,10 +248,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     perPage = 20,
     excludedPolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse> {
-    const policyIdFilter = this.prepareSearchString(policyIdSearchTerm, '.*');
+    const policyIdFilter = this.prepareRegexpQuery(policyIdSearchTerm);
 
     let policyIdsFoundByName: string[] | undefined;
-    const policyNameSearchString = this.prepareSearchString(policyNameSearchTerm, '*');
+    const policyNameSearchString = this.prepareQueryStringQuery(policyNameSearchTerm);
     if (policyNameSearchString) {
       policyIdsFoundByName = await this.searchPoliciesByName(policyNameSearchString);
     }
@@ -249,8 +280,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         this.assertCreatedAt(_source.created_at);
         const policyId = _source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id;
 
+        const namespacePrefix = this.soClient.getCurrentNamespace()
+          ? `${this.soClient.getCurrentNamespace()}:`
+          : '';
         return {
-          id: _id.replace(`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
+          id: _id!.replace(`${namespacePrefix}${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
           policy_id: policyId,
           policy_name: policyIdNameDictionary[policyId] ?? null,
           created_at: _source.created_at,
@@ -343,6 +377,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         {
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
           perPage: SO_SEARCH_LIMIT,
+          namespaces: this.isScoped
+            ? [this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID]
+            : undefined,
           ...options,
         }
       );
@@ -352,7 +389,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       tokenObjects = result.saved_objects;
       break;
     }
-    tokensFinder.close();
+    await tokensFinder.close();
 
     return tokenObjects;
   }
@@ -388,7 +425,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     exclude?: AggregationsTermsExclude
   ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
-
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -438,7 +474,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     // sorting and paginating buckets is done here instead of ES,
     // because SO query doesn't support `bucket_sort`
     aggResults.sort((a, b) => getCreatedAt(b) - getCreatedAt(a));
-
     return aggResults.map((bucket) => bucket.latest.hits.hits[0]);
   }
 
@@ -497,7 +532,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     if (force) {
       const config = appContextService.getConfig();
       const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
-      asyncForEach(
+      await asyncForEach(
         chunk(policyIds, batchSize),
         async (policyIdsBatch) =>
           await agentPolicyService.deployPolicies(this.soClient, policyIdsBatch)
@@ -565,6 +600,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       await this.soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
         policyIdsBatch.map((policyId) => ({
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          initialNamespaces: this.soClient.getCurrentNamespace()
+            ? [this.soClient.getCurrentNamespace() as string]
+            : undefined,
           attributes: this.isEncryptionAvailable
             ? {
                 policy_id: policyId,

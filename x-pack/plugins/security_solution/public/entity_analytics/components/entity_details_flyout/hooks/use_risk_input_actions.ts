@@ -13,7 +13,7 @@ import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';

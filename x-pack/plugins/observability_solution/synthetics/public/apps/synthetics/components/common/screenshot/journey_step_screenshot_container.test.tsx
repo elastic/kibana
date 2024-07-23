@@ -69,7 +69,7 @@ describe('JourneyStepScreenshotContainer', () => {
       <JourneyStepScreenshotContainer checkGroup={checkGroup} />
     );
 
-    const img = getByAltText('First step');
+    const img = getByAltText('"First step", 1 of 2');
     const euiPopoverMessage =
       'You are in a dialog. Press Escape, or tap/click outside the dialog to close.';
     expect(queryByText(euiPopoverMessage)).toBeNull();
@@ -88,7 +88,7 @@ describe('JourneyStepScreenshotContainer', () => {
       <JourneyStepScreenshotContainer checkGroup={checkGroup} />
     );
 
-    const img = getByAltText('First step');
+    const img = getByAltText('"First step", 1 of 2');
     await waitFor(() => img);
     fireEvent.click(img);
 

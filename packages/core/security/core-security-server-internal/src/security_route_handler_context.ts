@@ -10,12 +10,13 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuditRequestHandlerContext,
 } from '@kbn/core-security-server';
 import type { InternalSecurityServiceStart } from './internal_contracts';
 
 export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerContext {
   #authc?: AuthcRequestHandlerContext;
-
+  #audit?: AuditRequestHandlerContext;
   constructor(
     private readonly securityStart: InternalSecurityServiceStart,
     private readonly request: KibanaRequest
@@ -25,8 +26,27 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
     if (this.#authc == null) {
       this.#authc = {
         getCurrentUser: () => this.securityStart.authc.getCurrentUser(this.request),
+        apiKeys: {
+          areAPIKeysEnabled: () => this.securityStart.authc.apiKeys.areAPIKeysEnabled(),
+          create: (createParams) =>
+            this.securityStart.authc.apiKeys.create(this.request, createParams),
+          update: (updateParams) =>
+            this.securityStart.authc.apiKeys.update(this.request, updateParams),
+          validate: (apiKeyParams) => this.securityStart.authc.apiKeys.validate(apiKeyParams),
+          invalidate: (apiKeyParams) =>
+            this.securityStart.authc.apiKeys.invalidate(this.request, apiKeyParams),
+        },
       };
     }
     return this.#authc;
+  }
+
+  public get audit() {
+    if (this.#audit == null) {
+      this.#audit = {
+        logger: this.securityStart.audit.asScoped(this.request),
+      };
+    }
+    return this.#audit;
   }
 }

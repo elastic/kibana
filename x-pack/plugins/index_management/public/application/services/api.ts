@@ -6,8 +6,10 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -253,7 +255,7 @@ export async function loadIndexStats(indexName: string) {
 }
 
 export async function loadIndexMapping(indexName: string) {
-  const response = await httpService.httpClient.get(
+  const response = await httpService.httpClient.get<MappingTypeMapping>(
     `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
   );
   return response;
@@ -404,7 +406,7 @@ export function loadIndex(indexName: string) {
 }
 
 export function useLoadIndexMappings(indexName: string) {
-  return useRequest({
+  return useRequest<MappingTypeMapping>({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'get',
   });
@@ -433,10 +435,25 @@ export function createIndex(indexName: string) {
     }),
   });
 }
+
 export function updateIndexMappings(indexName: string, newFields: Fields) {
   return sendRequest({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'put',
     body: JSON.stringify({ ...newFields }),
+  });
+}
+
+export function getInferenceEndpoints() {
+  return sendRequest<InferenceAPIConfigResponse[]>({
+    path: `${API_BASE_PATH}/inference/all`,
+    method: 'get',
+  });
+}
+
+export function useLoadInferenceEndpoints() {
+  return useRequest<InferenceAPIConfigResponse[]>({
+    path: `${API_BASE_PATH}/inference/all`,
+    method: 'get',
   });
 }

@@ -7,18 +7,15 @@
 
 import { after, before, expect, journey, step } from '@elastic/synthetics';
 import { SyntheticsServices } from './services/synthetics_services';
-import { recordVideo } from '../../helpers/record_video';
 import { cleanTestMonitors, enableMonitorManagedViaApi } from './services/add_monitor';
 import { addTestMonitorProject } from './services/add_monitor_project';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { SyntheticsMonitor } from '../../../common/runtime_types';
 
 journey('ProjectMonitorReadOnly', async ({ page, params }) => {
-  recordVideo(page);
-
   const services = new SyntheticsServices(params);
 
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   let originalMonitorConfiguration: SyntheticsMonitor | null;
 
   let monitorId: string;

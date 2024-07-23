@@ -11,7 +11,6 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 
 import type { Props as QueryTabContentComponentProps } from '.';
@@ -24,11 +23,14 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import { TimelineStatus } from '../../../../../../common/api/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { Direction } from '../../../../../../common/search_strategy';
 import * as helpers from '../../../../../common/lib/kuery';
 import { waitFor } from '@testing-library/react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -43,8 +45,8 @@ jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../../common/containers/sourcerer');
-jest.mock('../../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
@@ -55,6 +57,14 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');
+
+jest.mock('../../../../containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+}));
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;
@@ -90,6 +100,15 @@ describe('Timeline', () => {
 
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        if (feature === 'unifiedComponentsInTimelineDisabled') {
+          return true;
+        }
+        return allowedExperimentalValues[feature];
+      }
+    );
+
     props = {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
@@ -114,6 +133,8 @@ describe('Timeline', () => {
       timerangeKind: 'absolute',
       activeTab: TimelineTabs.query,
       show: true,
+      pinnedEventIds: {},
+      eventIdToNoteIds: {},
     };
   });
 

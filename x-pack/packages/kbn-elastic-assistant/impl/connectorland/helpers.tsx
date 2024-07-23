@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnector,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
+
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { PRECONFIGURED_CONNECTOR } from './translations';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 enum OpenAiProviderType {
@@ -30,16 +35,19 @@ interface GenAiConfig {
 export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiConfig | undefined => {
   if (!connector?.isPreconfigured) {
     const config = (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
-    if (config?.apiProvider === OpenAiProviderType.AzureAi) {
-      return {
-        ...config,
-        defaultModel: getAzureApiVersionParameter(config.apiUrl ?? ''),
-      };
-    }
+    const { apiProvider, apiUrl, defaultModel } = config ?? {};
 
-    return (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
+    return {
+      apiProvider,
+      apiUrl,
+      defaultModel:
+        apiProvider === OpenAiProviderType.AzureAi
+          ? getAzureApiVersionParameter(apiUrl ?? '')
+          : defaultModel,
+    };
   }
-  return undefined;
+
+  return undefined; // the connector is neither available nor editable
 };
 
 export const getActionTypeTitle = (actionType: ActionTypeModel): string => {
@@ -50,4 +58,19 @@ export const getActionTypeTitle = (actionType: ActionTypeModel): string => {
 const getAzureApiVersionParameter = (url: string): string | undefined => {
   const urlSearchParams = new URLSearchParams(new URL(url).search);
   return urlSearchParams.get('api-version') ?? undefined;
+};
+
+export const getConnectorTypeTitle = (
+  connector: ActionConnector | undefined,
+  actionTypeRegistry: ActionTypeRegistryContract
+) => {
+  if (!connector) {
+    return null;
+  }
+  const connectorTypeTitle =
+    getGenAiConfig(connector)?.apiProvider ??
+    getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+  const actionType = connector.isPreconfigured ? PRECONFIGURED_CONNECTOR : connectorTypeTitle;
+
+  return actionType;
 };

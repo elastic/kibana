@@ -23,13 +23,10 @@ export function EditButton({ onClick }: Props) {
       title={i18n.translate('xpack.apm.serviceGroups.tour.editGroups.title', {
         defaultMessage: 'Edit this service group',
       })}
-      content={i18n.translate(
-        'xpack.apm.serviceGroups.tour.editGroups.content',
-        {
-          defaultMessage:
-            'Use the edit option to change the name, query, or details of this service group.',
-        }
-      )}
+      content={i18n.translate('xpack.apm.serviceGroups.tour.editGroups.content', {
+        defaultMessage:
+          'Use the edit option to change the name, query, or details of this service group.',
+      })}
     >
       <EuiButton
         data-test-subj="apmEditButtonEditGroupButton"

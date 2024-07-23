@@ -9,7 +9,8 @@ import React, { useCallback, type SVGProps } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import type { IconType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { useKibana } from '../../../../lib/kibana/kibana_react';
 import { AddIntegrationsSteps } from '../types';
 import { useStepContext } from '../context/step_context';
 import { IntegrationsPageName } from './types';
@@ -135,7 +136,9 @@ const AddIntegrationPanel: React.FC<{
           <EuiIcon type={icon} size="xl" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <h4>{title}</h4>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
           <EuiText color="subdued" size="xs">
             {description}
           </EuiText>
@@ -151,32 +154,41 @@ const AddIntegrationPanel: React.FC<{
 });
 AddIntegrationPanel.displayName = 'AddIntegrationPanel';
 
-export const AddIntegrationButtons: React.FC = React.memo(() => (
-  <EuiFlexGroup direction="column" className="step-paragraph" gutterSize="m">
-    <EuiFlexItem grow={false}>
-      <AddIntegrationPanel
-        title={ADD_CLOUD_INTEGRATIONS_TITLE}
-        description={ADD_CLOUD_INTEGRATIONS_DESCRIPTION}
-        icon={CloudIntegrationsIcon}
-        buttonId={IntegrationsPageName.integrationsSecurityCloud}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <AddIntegrationPanel
-        title={ADD_EDR_XDR_INTEGRATIONS_TITLE}
-        description={ADD_EDR_XDR_INTEGRATIONS_DESCRIPTION}
-        icon={EdrXdrIntegrationsIcon}
-        buttonId={IntegrationsPageName.integrationsSecurityEdrXrd}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <AddIntegrationPanel
-        title={ADD_ALL_INTEGRATIONS_TITLE}
-        description={ADD_ALL_INTEGRATIONS_DESCRIPTION}
-        icon="logoSecurity"
-        buttonId={IntegrationsPageName.integrationsSecurity}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
+export const AddIntegrationButtons: React.FC = React.memo(() => {
+  const { integrationAssistant } = useKibana().services;
+  const { CreateIntegrationCardButton } = integrationAssistant?.components ?? {};
+  return (
+    <EuiFlexGroup direction="column" className="step-paragraph" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <AddIntegrationPanel
+          title={ADD_CLOUD_INTEGRATIONS_TITLE}
+          description={ADD_CLOUD_INTEGRATIONS_DESCRIPTION}
+          icon={CloudIntegrationsIcon}
+          buttonId={IntegrationsPageName.integrationsSecurityCloud}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AddIntegrationPanel
+          title={ADD_EDR_XDR_INTEGRATIONS_TITLE}
+          description={ADD_EDR_XDR_INTEGRATIONS_DESCRIPTION}
+          icon={EdrXdrIntegrationsIcon}
+          buttonId={IntegrationsPageName.integrationsSecurityEdrXrd}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AddIntegrationPanel
+          title={ADD_ALL_INTEGRATIONS_TITLE}
+          description={ADD_ALL_INTEGRATIONS_DESCRIPTION}
+          icon="logoSecurity"
+          buttonId={IntegrationsPageName.integrationsSecurity}
+        />
+      </EuiFlexItem>
+      {CreateIntegrationCardButton && (
+        <EuiFlexItem grow={false}>
+          <CreateIntegrationCardButton compressed />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+});
 AddIntegrationButtons.displayName = 'AddIntegrationButtons';

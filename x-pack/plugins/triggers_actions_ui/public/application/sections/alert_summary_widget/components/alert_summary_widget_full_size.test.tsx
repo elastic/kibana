@@ -29,6 +29,7 @@ describe('AlertSummaryWidgetFullSize', () => {
         <AlertSummaryWidgetFullSize
           chartProps={mockedChartProps}
           dependencyProps={dependencyProps}
+          timeZone="UTC"
           {...mockedAlertSummaryResponse}
           {...props}
         />
@@ -73,6 +74,17 @@ describe('AlertSummaryWidgetFullSize', () => {
     expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
     expect(
       alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSizeChartContainer')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should render AlertSummaryWidgetFullSize without stats', async () => {
+    const alertSummaryWidget = renderComponent({
+      hideStats: true,
+    });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
+    expect(
+      alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSizeStats')
     ).not.toBeInTheDocument();
   });
 });

@@ -29,9 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless read_rules', () => {
     describe('reading rules', () => {
@@ -52,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
@@ -65,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
@@ -80,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).to.eql(expectedRule);
@@ -108,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless @skipInQA should be able to a read a execute immediately action correctly', async () => {
+      it('@skipInServerless should be able to a read a execute immediately action correctly', async () => {
         // create connector/action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -135,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...expectedRule,
@@ -150,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(ruleWithActions);
       });
 
-      it('@brokenInServerless should be able to a read a scheduled action correctly', async () => {
+      it('@skipInServerless should be able to a read a scheduled action correctly', async () => {
         // create connector/action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -180,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...expectedRule,

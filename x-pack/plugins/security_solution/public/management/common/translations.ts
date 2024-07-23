@@ -93,6 +93,12 @@ export const CONSOLE_COMMANDS = {
           }
         ),
       },
+      processName: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.processName.arg.comment',
+          { defaultMessage: 'The process name to kill' }
+        ),
+      },
     },
   },
   suspendProcess: {
@@ -192,4 +198,44 @@ export const CONSOLE_COMMANDS = {
       },
     },
   },
+  scan: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.scan.about', {
+      defaultMessage: 'Scan the host for malware',
+    }),
+    args: {
+      path: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.scan.args.path.about',
+          {
+            defaultMessage: 'The absolute path to a file or directory to be scanned',
+          }
+        ),
+      },
+    },
+  },
+};
+
+export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
+  return {
+    title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {
+      defaultMessage: `Confirm {type}`,
+      values: { type: entryType },
+    }),
+    body: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.body', {
+      defaultMessage:
+        'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly. Select “Cancel” to revise your entry, or "Add" to continue with the entry in its current state.',
+    }),
+    confirmButton: i18n.translate(
+      'xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText',
+      {
+        defaultMessage: 'Add',
+      }
+    ),
+    cancelButton: i18n.translate(
+      'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+  };
 };

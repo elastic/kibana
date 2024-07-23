@@ -10,13 +10,12 @@ import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@ela
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
 import { Popover } from '../../common/popover';
-import { useMetricsDataViewContext } from '../../../hooks/use_metrics_data_view';
+import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
 import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 
 export const MetricsGrid = () => {
-  const { dataView } = useMetricsDataViewContext();
-
-  const charts = useMetricsCharts({ dataViewId: dataView?.id });
+  const { metricsView } = useMetricsDataViewContext();
+  const charts = useMetricsCharts({ dataViewId: metricsView?.dataViewReference.id });
 
   return (
     <>

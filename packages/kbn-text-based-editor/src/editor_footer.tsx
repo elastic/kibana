@@ -101,13 +101,13 @@ interface EditorFooterProps {
   };
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
-  detectTimestamp: boolean;
+  detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
   runQuery: () => void;
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
-  containerWidth: number;
+  measuredContainerWidth: number;
   hideRunQueryText?: boolean;
   disableSubmitAction?: boolean;
   editorIsInline?: boolean;
@@ -118,6 +118,7 @@ interface EditorFooterProps {
   hideQueryHistory?: boolean;
   refetchHistoryItems?: boolean;
   isInCompactMode?: boolean;
+  queryHasChanged?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -125,7 +126,7 @@ export const EditorFooter = memo(function EditorFooter({
   styles,
   errors,
   warnings,
-  detectTimestamp,
+  detectedTimestamp,
   onErrorClick,
   runQuery,
   updateQuery,
@@ -137,13 +138,13 @@ export const EditorFooter = memo(function EditorFooter({
   allowQueryCancellation,
   hideTimeFilterInfo,
   isHistoryOpen,
-  containerWidth,
   setIsHistoryOpen,
   hideQueryHistory,
   refetchHistoryItems,
   isInCompactMode,
+  queryHasChanged,
+  measuredContainerWidth,
 }: EditorFooterProps) {
-  const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
   const onUpdateAndSubmit = useCallback(
@@ -160,18 +161,13 @@ export const EditorFooter = memo(function EditorFooter({
     [runQuery, updateQuery]
   );
 
-  const shadowStyle = isInCompactMode
-    ? `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`
-    : 'none';
-
   return (
     <EuiFlexGroup
       gutterSize="none"
       responsive={false}
       direction="column"
       css={css`
-        width: ${containerWidth}px;
-        box-shadow: ${shadowStyle};
+        width: 100%;
       `}
     >
       <EuiFlexItem grow={false}>
@@ -199,7 +195,7 @@ export const EditorFooter = memo(function EditorFooter({
                 </EuiText>
               </EuiFlexItem>
               {/* If there is no space and no @timestamp detected hide the information */}
-              {(detectTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
+              {(detectedTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
                 <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                     <EuiFlexItem grow={false}>
@@ -211,11 +207,12 @@ export const EditorFooter = memo(function EditorFooter({
                         <p>
                           {isSpaceReduced
                             ? '@timestamp'
-                            : detectTimestamp
+                            : detectedTimestamp
                             ? i18n.translate(
                                 'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
                                 {
-                                  defaultMessage: '@timestamp found',
+                                  defaultMessage: '{detectedTimestamp} found',
+                                  values: { detectedTimestamp },
                                 }
                               )
                             : i18n.translate(
@@ -329,9 +326,15 @@ export const EditorFooter = memo(function EditorFooter({
                     >
                       <EuiButtonIcon
                         display="base"
-                        color="primary"
+                        color={queryHasChanged ? 'success' : 'primary'}
                         onClick={runQuery}
-                        iconType={allowQueryCancellation && isLoading ? 'cross' : 'refresh'}
+                        iconType={
+                          allowQueryCancellation && isLoading
+                            ? 'cross'
+                            : queryHasChanged
+                            ? 'play'
+                            : 'refresh'
+                        }
                         size="s"
                         isLoading={isLoading && !allowQueryCancellation}
                         isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
@@ -365,7 +368,7 @@ export const EditorFooter = memo(function EditorFooter({
           <QueryHistory
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmit}
-            containerWidth={containerWidth}
+            containerWidth={measuredContainerWidth}
             refetchHistoryItems={refetchHistoryItems}
             isInCompactMode={isInCompactMode}
           />

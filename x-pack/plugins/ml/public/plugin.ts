@@ -16,6 +16,7 @@ import type {
 import { BehaviorSubject, mergeMap } from 'rxjs';
 import { take } from 'rxjs';
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -50,6 +51,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
@@ -72,6 +74,7 @@ import type { ElasticModels } from './application/services/elastic_models_servic
 import type { MlApiServices } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
+import { getMlServices } from './embeddables/single_metric_viewer/get_services';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -86,6 +89,7 @@ export interface MlStartDependencies {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   maps?: MapsStartApi;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
@@ -178,6 +182,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
             maps: pluginsStart.maps,
+            observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
             presentationUtil: pluginsStart.presentationUtil,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
@@ -222,6 +227,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           const { capabilities } = coreStart.application;
           const mlCapabilities = capabilities.ml as MlCapabilities;
 
+          const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
+
           // register various ML plugin features which require a full license
           // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
           if (mlEnabled) {
@@ -236,7 +243,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerSearchLinks,
               registerCasesAttachments,
             } = await import('./register_helper');
-            registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, this.isServerless);
+            registerSearchLinks(
+              this.appUpdater$,
+              fullLicense,
+              mlCapabilities,
+              this.isServerless,
+              isEsqlEnabled
+            );
 
             if (
               pluginsSetup.triggersActionsUi &&
@@ -256,14 +269,15 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               );
             }
 
-            if (fullLicense) {
+            if (fullLicense && mlCapabilities.canGetMlInfo) {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
               if (this.enabledFeatures.ad) {
                 registerEmbeddables(pluginsSetup.embeddable, core);
 
                 if (pluginsSetup.cases) {
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                  const mlServices = await getMlServices(coreStart, pluginStart);
+                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart, mlServices);
                 }
 
                 if (pluginsSetup.maps) {

@@ -26,10 +26,9 @@ exports[`StatusTable renders when statuses is provided 1`] = `
         "align": "right",
         "isExpander": true,
         "name": <EuiScreenReaderOnly>
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Expand row"
             id="core.statusPage.statusTable.columns.expandRowHeader"
-            values={Object {}}
           />
         </EuiScreenReaderOnly>,
         "render": [Function],
@@ -38,7 +37,6 @@ exports[`StatusTable renders when statuses is provided 1`] = `
     ]
   }
   data-test-subj="statusBreakdown"
-  isExpandable={true}
   itemId={[Function]}
   itemIdToExpandedRowMap={Object {}}
   items={
@@ -58,7 +56,6 @@ exports[`StatusTable renders when statuses is provided 1`] = `
       },
     ]
   }
-  responsive={true}
   rowProps={[Function]}
   searchFormat="eql"
   sorting={

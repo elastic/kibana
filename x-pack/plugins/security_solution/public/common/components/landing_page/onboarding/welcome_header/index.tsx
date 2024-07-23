@@ -24,7 +24,7 @@ const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ produ
   const userName = useCurrentUser();
 
   // Full name could be null, user name should always exist
-  const name = userName?.fullName ?? userName?.username;
+  const name = userName?.fullName || userName?.username;
 
   const projectFeaturesUrl = useProjectFeaturesUrl();
 
@@ -52,7 +52,7 @@ const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ produ
           </EuiTitle>
         )}
         <EuiSpacer size="s" />
-        <span className={headerSubtitleClassNames}>{GET_STARTED_PAGE_SUBTITLE}</span>
+        <h1 className={headerSubtitleClassNames}>{GET_STARTED_PAGE_SUBTITLE}</h1>
         <EuiSpacer size="s" />
         <span className={headerDescriptionClassNames}>{GET_STARTED_PAGE_DESCRIPTION}</span>
         <CurrentPlan productTier={productTier} projectFeaturesUrl={projectFeaturesUrl} />

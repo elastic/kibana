@@ -19,8 +19,8 @@ import {
 } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { AboutSection } from './about_section';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../hooks/use_expand_section';
 
 jest.mock('../../../../common/components/link_to');
@@ -42,9 +42,9 @@ const renderAboutSection = (getFieldsData = mockGetFieldsData) => {
   };
   return render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <AboutSection />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 };

@@ -13,7 +13,7 @@ paths:
   /api/timeline/_prepackaged:
     post:
       operationId: installPrepackedTimelines
-      description: Installs prepackaged timelines.
+      summary: Installs prepackaged timelines.
       tags:
         - access:securitySolution
       requestBody:
@@ -41,7 +41,7 @@ paths:
                   items:
                     $ref: '../model/components.yaml#/components/schemas/SavedTimeline'
       responses:
-        200:
+        '200':
           description: Indicates the installation of prepackaged timelines was successful.
           content:
             application/json:
@@ -52,7 +52,7 @@ paths:
                     $ref: '../model/components.yaml#/components/schemas/ImportTimelineResult'
                 required:
                   - data
-        500:
+        '500':
           description: Indicates the installation of prepackaged timelines was unsuccessful.
           content:
             application:json:

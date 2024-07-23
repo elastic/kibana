@@ -8,6 +8,9 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -20,6 +23,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const rules = getService('rules');
   const toasts = getService('toasts');
+  const esClient = getService('es');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
 
   async function getAlertsByName(name: string) {
     const {
@@ -71,6 +76,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await nameInput.click();
   }
 
+  async function defineAPMErrorCountRule(ruleName: string) {
+    await pageObjects.triggersActionsUI.clickCreateAlertButton();
+    await testSubjects.click(`apm.error_rate-SelectOption`);
+    await testSubjects.setValue('ruleNameInput', ruleName);
+  }
+
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.click('test.always-firing-SelectOption');
@@ -82,6 +93,45 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   describe('create alert', function () {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    before(async () => {
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      apmSynthtraceEsClient = await getApmSynthtraceEsClient({
+        client: esClient,
+        packageVersion: version,
+      });
+      const opbeansJava = apm
+        .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
+        .instance('instance');
+
+      const opbeansNode = apm
+        .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
+        .instance('instance');
+
+      const events = timerange('now-15m', 'now')
+        .ratePerMinute(1)
+        .generator((timestamp) => {
+          return [
+            opbeansJava
+              .transaction({ transactionName: 'tx-java' })
+              .timestamp(timestamp)
+              .duration(100)
+              .failure()
+              .errors(opbeansJava.error({ message: 'a java error' }).timestamp(timestamp + 50)),
+
+            opbeansNode
+              .transaction({ transactionName: 'tx-node' })
+              .timestamp(timestamp)
+              .duration(100)
+              .success(),
+          ];
+        });
+
+      return Promise.all([apmSynthtraceEsClient.index(events)]);
+    });
+
+    after(() => apmSynthtraceEsClient.clean());
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -163,7 +213,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        `Rule '{{rule.name}}' is active for group '{{context.group}}':
+        `Rule {{rule.name}} is active for group {{context.group}}:
 
 - Value: {{context.value}}
 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
@@ -321,6 +371,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
+    // Related issue that this test is trying to prevent:
+    // https://github.com/elastic/kibana/issues/186969
+    it('should successfully show the APM error count rule flyout', async () => {
+      const ruleName = generateUniqueKey();
+      await defineAPMErrorCountRule(ruleName);
+
+      await testSubjects.existOrFail('apmServiceField');
+      await testSubjects.existOrFail('apmEnvironmentField');
+      await testSubjects.existOrFail('apmErrorGroupingKeyField');
+
+      await discardNewRuleCreation();
+    });
+
     it('should successfully test valid es_query alert', async () => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
@@ -339,6 +402,54 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('testQueryError');
 
       await discardNewRuleCreation();
+    });
+
+    it('should not do a type override when adding a second action', async () => {
+      // create a new rule
+      const ruleName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(ruleName);
+
+      // add server log action
+      await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="Serverlog#xyz"]'
+        )
+      ).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="webhook-test"]'
+        )
+      ).to.eql(false);
+
+      // click on add new action
+      await testSubjects.click('addAlertActionButton');
+      await find.existsByCssSelector('[data-test-subj="Serverlog#xyz"]');
+
+      // create webhook connector
+      await testSubjects.click('.webhook-alerting-ActionTypeSelectOption');
+      await testSubjects.click('createActionConnectorButton-1');
+      await testSubjects.setValue('nameInput', 'webhook-test');
+      await testSubjects.setValue('webhookUrlText', 'https://test.test');
+      await testSubjects.setValue('webhookUserInput', 'fakeuser');
+      await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
+      await testSubjects.click('saveActionButtonModal');
+
+      // checking the new one first to avoid flakiness. If the value is checked before the new one is added
+      // it might return a false positive
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="webhook-test"]'
+        )
+      ).to.eql(true);
+      // If it was overridden, the value would change to be empty
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="Serverlog#xyz"]'
+        )
+      ).to.eql(true);
+
+      await deleteConnectorByName('webhook-test');
     });
   });
 };

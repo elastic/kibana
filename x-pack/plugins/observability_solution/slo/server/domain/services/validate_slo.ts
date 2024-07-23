@@ -13,21 +13,21 @@ import {
   calendarAlignedTimeWindowSchema,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
-import { SLO } from '../models';
+import { SLODefinition } from '../models';
 
 /**
- * Asserts the SLO is valid from a business invariants point of view.
+ * Asserts the SLO Definition is valid from a business invariants point of view.
  * e.g. a 'target' objective requires a number between ]0, 1]
  * e.g. a 'timeslices' budgeting method requires an objective's timeslice_target to be defined.
  *
- * @param slo {SLO}
+ * @param slo {SLODefinition}
  */
-export function validateSLO(slo: SLO) {
+export function validateSLO(slo: SLODefinition) {
   if (!isValidId(slo.id)) {
     throw new IllegalArgumentError('Invalid id');
   }
 
-  if (!isValidTargetNumber(slo.objective.target)) {
+  if (!isValidObjectiveTarget(slo.objective.target)) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
 
@@ -48,7 +48,7 @@ export function validateSLO(slo: SLO) {
   if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
     if (
       slo.objective.timesliceTarget === undefined ||
-      !isValidTargetNumber(slo.objective.timesliceTarget)
+      !isValidTimesliceTarget(slo.objective.timesliceTarget)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_target');
     }
@@ -64,7 +64,7 @@ export function validateSLO(slo: SLO) {
   validateSettings(slo);
 }
 
-function validateSettings(slo: SLO) {
+function validateSettings(slo: SLODefinition) {
   if (!isValidFrequencySettings(slo.settings.frequency)) {
     throw new IllegalArgumentError('Invalid settings.frequency');
   }
@@ -76,12 +76,16 @@ function validateSettings(slo: SLO) {
 
 function isValidId(id: string): boolean {
   const MIN_ID_LENGTH = 8;
-  const MAX_ID_LENGTH = 36;
+  const MAX_ID_LENGTH = 48;
   return MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
 }
 
-function isValidTargetNumber(value: number): boolean {
+function isValidObjectiveTarget(value: number): boolean {
   return value > 0 && value < 1;
+}
+
+function isValidTimesliceTarget(value: number): boolean {
+  return value >= 0 && value <= 1;
 }
 
 function isValidRollingTimeWindowDuration(duration: Duration): boolean {

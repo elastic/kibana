@@ -13,8 +13,8 @@ import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { ISearchGeneric } from '@kbn/search-types';
 import {
-  ISearchGeneric,
   KibanaContext,
   EqlSearchStrategyResponse,
   EQL_SEARCH_STRATEGY,
@@ -58,6 +58,7 @@ export const getEqlFn = ({
     name,
     type: 'eql_raw_response',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.eql.help', {
       defaultMessage: 'Run Elasticsearch request',
     }),

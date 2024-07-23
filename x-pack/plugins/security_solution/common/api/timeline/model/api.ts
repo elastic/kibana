@@ -15,12 +15,31 @@ import { Direction } from '../../../search_strategy';
 import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 // TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import {
-  SavedObjectResolveAliasPurpose,
-  SavedObjectResolveAliasTargetId,
-  SavedObjectResolveOutcome,
-} from '../../detection_engine/model/rule_schema_legacy';
+
+/**
+ * Outcome is a property of the saved object resolve api
+ * will tell us info about the rule after 8.0 migrations
+ */
+export type SavedObjectResolveOutcome = runtimeTypes.TypeOf<typeof SavedObjectResolveOutcome>;
+export const SavedObjectResolveOutcome = runtimeTypes.union([
+  runtimeTypes.literal('exactMatch'),
+  runtimeTypes.literal('aliasMatch'),
+  runtimeTypes.literal('conflict'),
+]);
+
+export type SavedObjectResolveAliasTargetId = runtimeTypes.TypeOf<
+  typeof SavedObjectResolveAliasTargetId
+>;
+export const SavedObjectResolveAliasTargetId = runtimeTypes.string;
+
+export type SavedObjectResolveAliasPurpose = runtimeTypes.TypeOf<
+  typeof SavedObjectResolveAliasPurpose
+>;
+export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
+  runtimeTypes.literal('savedObjectConversion'),
+  runtimeTypes.literal('savedObjectImport'),
+]);
+
 import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([
@@ -44,6 +63,16 @@ export type BareNote = runtimeTypes.TypeOf<typeof BareNoteSchema>;
  * other saved objects.
  */
 export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
+
+export const BareNoteWithoutExternalRefsSchema = runtimeTypes.partial({
+  timelineId: unionWithNullType(runtimeTypes.string),
+  eventId: unionWithNullType(runtimeTypes.string),
+  note: unionWithNullType(runtimeTypes.string),
+  created: unionWithNullType(runtimeTypes.number),
+  createdBy: unionWithNullType(runtimeTypes.string),
+  updated: unionWithNullType(runtimeTypes.number),
+  updatedBy: unionWithNullType(runtimeTypes.string),
+});
 
 export const NoteRuntimeType = runtimeTypes.intersection([
   BareNoteSchema,
@@ -262,6 +291,8 @@ export enum RowRendererId {
   threat_match = 'threat_match',
   zeek = 'zeek',
 }
+
+export const RowRendererCount = Object.keys(RowRendererId).length;
 
 const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 

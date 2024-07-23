@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiSpacer,
+  EuiText,
   useEuiPaddingSize,
 } from '@elastic/eui';
 import styled from 'styled-components';
@@ -136,9 +137,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     ([newOperator]: OperatorOption[]): void => {
       const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
       handleError(false);
+      handleWarning(false);
       onChange(updatedEntry, index);
     },
-    [onChange, entry, handleError]
+    [onChange, entry, handleError, handleWarning]
   );
 
   const handleFieldMatchValueChange = useCallback(
@@ -374,8 +376,21 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
+  // show warning when a wildcard is detected with the IS operator
+  const getWildcardWithIsOperatorWarning = (): React.ReactNode => {
+    return (
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.lists.exceptions.builder.exceptionIsOperator.warningMessage.incorrectWildCardUsage"
+          defaultMessage="Change the operator to 'matches' to ensure wildcards run properly."
+        />{' '}
+        <EuiIconTip type="iInCircle" content={i18n.WILDCARD_WITH_IS_OPERATOR_TOOLTIP} />
+      </EuiText>
+    );
+  };
+
   // show this when wildcard with matches operator
-  const getEventFilterWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
+  const getWildcardPerformanceWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
       <p>
         {precedingWarning}{' '}
@@ -404,6 +419,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     switch (type) {
       case OperatorTypeEnum.MATCH:
         const value = typeof entry.value === 'string' ? entry.value : undefined;
+        const fieldMatchWarning = /[*?]/.test(value ?? '')
+          ? getWildcardWithIsOperatorWarning()
+          : undefined;
         return (
           <AutocompleteFieldMatchComponent
             autocompleteService={autocompleteService}
@@ -416,6 +434,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isClearable={false}
             indexPattern={indexPattern}
             onError={handleError}
+            onWarning={handleWarning}
+            warning={fieldMatchWarning}
             onChange={handleFieldMatchValueChange}
             isRequired
             data-test-subj="exceptionBuilderEntryFieldMatch"
@@ -460,9 +480,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             value: wildcardValue,
           });
           actualWarning =
-            warning === WILDCARD_WARNING && listType === 'endpoint_events'
-              ? getEventFilterWildcardWarningInfo(warning)
-              : warning;
+            warning === WILDCARD_WARNING ? getWildcardPerformanceWarningInfo(warning) : warning;
         }
 
         return (

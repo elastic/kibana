@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subscription } from 'rxjs';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -27,10 +27,17 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginStart } from '@kbn/index-management';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
+import type {
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+} from '@kbn/search-homepage/public';
+import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -47,6 +54,8 @@ import {
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  INFERENCE_ENDPOINTS_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
 import {
   CreatIndexLocatorDefinition,
@@ -55,15 +64,17 @@ import {
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
-import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
+import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
   SEARCH_INDICES_PATH,
   CRAWLERS_PATH,
-  PLAYGROUND_PATH,
 } from './applications/enterprise_search_content/routes';
 
+import { INFERENCE_ENDPOINTS_PATH } from './applications/enterprise_search_relevance/routes';
 import { docLinks } from './applications/shared/doc_links';
+import { setBreadcrumbHomeUrl } from './applications/shared/kibana_chrome/breadcrumbs_home';
+import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
@@ -75,7 +86,9 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 
 interface PluginsSetup {
   cloud?: CloudSetup;
+  licensing: LicensingPluginStart;
   home?: HomePublicPluginSetup;
+  searchHomepage?: SearchHomepagePluginSetup;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
 }
@@ -90,8 +103,11 @@ export interface PluginsStart {
   lens?: LensPublicStart;
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
+  navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
+  searchHomepage?: SearchHomepagePluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
 }
@@ -99,6 +115,8 @@ export interface PluginsStart {
 export interface ESConfig {
   elasticsearch_host: string;
 }
+
+export type UpdateSideNavDefinitionFn = (items: Partial<DynamicSideNavItems>) => void;
 
 const contentLinks: AppDeepLink[] = [
   {
@@ -122,16 +140,30 @@ const contentLinks: AppDeepLink[] = [
       defaultMessage: 'Web crawlers',
     }),
   },
+];
+
+const relevanceLinks: AppDeepLink[] = [
+  {
+    id: 'inferenceEndpoints',
+    path: `/${INFERENCE_ENDPOINTS_PATH}`,
+    title: i18n.translate(
+      'xpack.enterpriseSearch.navigation.relevanceInferenceEndpointsLinkLabel',
+      {
+        defaultMessage: 'Inference Endpoints',
+      }
+    ),
+  },
+];
+
+const applicationsLinks: AppDeepLink[] = [
   {
     id: 'playground',
     path: `/${PLAYGROUND_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
       defaultMessage: 'Playground',
     }),
+    visibleIn: ['sideNav', 'globalSearch'],
   },
-];
-
-const applicationsLinks: AppDeepLink[] = [
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
@@ -141,6 +173,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
+    visibleIn: ['globalSearch'],
   },
 ];
 
@@ -156,6 +189,7 @@ const appSearchLinks: AppDeepLink[] = [
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
+  private licenseSubscription: Subscription | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -204,7 +238,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.isSidebarEnabled = style === 'classic';
     });
 
-    return { core: coreStart, isSidebarEnabled: this.isSidebarEnabled, params, plugins };
+    return {
+      core: coreStart,
+      isSidebarEnabled: this.isSidebarEnabled,
+      params,
+      plugins,
+      updateSideNavDefinition: this.updateSideNavDefinition.bind(this),
+    };
   }
 
   private getPluginData() {
@@ -225,31 +265,58 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!config.ui?.enabled) {
       return;
     }
-    const { cloud, share } = plugins;
+    const { cloud, share, licensing } = plugins;
 
-    core.application.register({
-      appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
+    const useSearchHomepage =
+      plugins.searchHomepage && plugins.searchHomepage.isHomepageFeatureEnabled();
 
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
+    if (useSearchHomepage) {
+      const { app } = plugins.searchHomepage!;
+      core.application.register({
+        ...app,
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+        visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
+        mount: async (params: AppMountParameters) => {
+          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+          const { chrome, http } = kibanaDeps.core;
+          chrome.docTitle.change(app.title);
 
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchOverview } = await import(
-          './applications/enterprise_search_overview'
-        );
+          await this.getInitialData(http);
+          const pluginData = this.getPluginData();
 
-        return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
-      },
-      title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
-      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
-    });
+          const { renderApp } = await import('./applications');
+          const { SearchHomepage } = await import('./applications/search_homepage');
+
+          return renderApp(SearchHomepage, kibanaDeps, pluginData);
+        },
+      });
+      setBreadcrumbHomeUrl(app.appRoute);
+    } else {
+      core.application.register({
+        appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+        id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+        mount: async (params: AppMountParameters) => {
+          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+          const { chrome, http } = kibanaDeps.core;
+          chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
+
+          await this.getInitialData(http);
+          const pluginData = this.getPluginData();
+
+          const { renderApp } = await import('./applications');
+          const { EnterpriseSearchOverview } = await import(
+            './applications/enterprise_search_overview'
+          );
+
+          return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+        },
+        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+        visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
+      });
+    }
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
@@ -318,6 +385,27 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      appRoute: SEMANTIC_SEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: SEMANTIC_SEARCH_PLUGIN.LOGO,
+      id: SEMANTIC_SEARCH_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(SEMANTIC_SEARCH_PLUGIN.NAME);
+
+        this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchSemanticSearch } = await import('./applications/semantic_search');
+
+        return renderApp(EnterpriseSearchSemanticSearch, kibanaDeps, pluginData);
+      },
+      title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
       appRoute: AI_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: AI_SEARCH_PLUGIN.LOGO,
@@ -359,6 +447,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Applications, kibanaDeps, pluginData);
       },
       title: APPLICATIONS_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -380,6 +469,35 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
       title: ANALYTICS_PLUGIN.NAME,
+    });
+
+    this.licenseSubscription = licensing?.license$.subscribe((license: ILicense) => {
+      if (license.isActive && license.hasAtLeast('enterprise')) {
+        core.application.register({
+          appRoute: INFERENCE_ENDPOINTS_PLUGIN.URL,
+          category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+          deepLinks: relevanceLinks,
+          euiIconType: INFERENCE_ENDPOINTS_PLUGIN.LOGO,
+          id: INFERENCE_ENDPOINTS_PLUGIN.ID,
+          mount: async (params: AppMountParameters) => {
+            const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+            const { chrome, http } = kibanaDeps.core;
+            chrome.docTitle.change(INFERENCE_ENDPOINTS_PLUGIN.NAME);
+
+            await this.getInitialData(http);
+            const pluginData = this.getPluginData();
+
+            const { renderApp } = await import('./applications');
+            const { EnterpriseSearchRelevance } = await import(
+              './applications/enterprise_search_relevance'
+            );
+
+            return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
+          },
+          title: INFERENCE_ENDPOINTS_PLUGIN.NAME,
+          visibleIn: [],
+        });
+      }
     });
 
     core.application.register({
@@ -457,14 +575,27 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
 
     if (plugins.home) {
-      plugins.home.featureCatalogue.registerSolution({
-        description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
-        icon: 'logoEnterpriseSearch',
-        id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        order: 100,
-        path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-        title: SEARCH_PRODUCT_NAME,
-      });
+      if (useSearchHomepage) {
+        const { searchHomepage } = plugins;
+
+        plugins.home.featureCatalogue.registerSolution({
+          description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
+          icon: 'logoEnterpriseSearch',
+          id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+          order: 100,
+          path: searchHomepage!.app.appRoute,
+          title: SEARCH_PRODUCT_NAME,
+        });
+      } else {
+        plugins.home.featureCatalogue.registerSolution({
+          description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
+          icon: 'logoEnterpriseSearch',
+          id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+          order: 100,
+          path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+          title: SEARCH_PRODUCT_NAME,
+        });
+      }
 
       plugins.home.featureCatalogue.register({
         category: 'data',
@@ -520,7 +651,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start(core: CoreStart) {
+  private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
+
+  public start(core: CoreStart, plugins: PluginsStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
@@ -528,10 +661,25 @@ export class EnterpriseSearchPlugin implements Plugin {
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
 
+    import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
+      return plugins.navigation.addSolutionNavigation(
+        getNavigationTreeDefinition({
+          dynamicItems$: this.sideNavDynamicItems$,
+          isSearchHomepageEnabled: plugins.searchHomepage?.isHomepageFeatureEnabled() ?? false,
+        })
+      );
+    });
+
     // Return empty start contract rather than void in order for plugins
     // that depend on the enterprise search plugin to determine whether it is enabled or not
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.licenseSubscription?.unsubscribe();
+  }
+
+  private updateSideNavDefinition = (items: Partial<DynamicSideNavItems>) => {
+    this.sideNavDynamicItems$.next({ ...this.sideNavDynamicItems$.getValue(), ...items });
+  };
 }

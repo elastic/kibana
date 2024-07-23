@@ -13,15 +13,30 @@ import {
   flyoutIntegrationNameText,
   flyoutIntegrationVersionText,
 } from '../../../common/translations';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import { IntegrationIcon } from '../common';
 import { FieldsList } from './fields_list';
 import { IntegrationActionsMenu } from './integration_actions_menu';
+import { Integration } from '../../../common/data_streams_stats/integration';
+import { Dashboard } from '../../../common/api_types';
 
-export function IntegrationSummary({ integration }: { integration: Integration }) {
+export function IntegrationSummary({
+  integration,
+  dashboards,
+  dashboardsLoading,
+}: {
+  integration: Integration;
+  dashboards: Dashboard[];
+  dashboardsLoading: boolean;
+}) {
   const { name, version } = integration;
 
-  const integrationActionsMenu = <IntegrationActionsMenu integration={integration} />;
+  const integrationActionsMenu = (
+    <IntegrationActionsMenu
+      integration={integration}
+      dashboards={dashboards}
+      dashboardsLoading={dashboardsLoading}
+    />
+  );
   return (
     <FieldsList
       title={flyoutIntegrationDetailsText}
@@ -42,10 +57,12 @@ export function IntegrationSummary({ integration }: { integration: Integration }
               </EuiFlexGroup>
             </EuiBadge>
           ),
+          isLoading: false,
         },
         {
           fieldTitle: flyoutIntegrationVersionText,
           fieldValue: version,
+          isLoading: false,
         },
       ]}
     />

@@ -21,7 +21,7 @@ import type {
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
-import type { RunTimeMappings } from '../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';
@@ -46,6 +46,7 @@ import type {
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
+import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -365,11 +366,28 @@ export const useTimelineEventsHandler = ({
         ? activePage
         : 0;
 
+      /*
+       * optimization to avoid unnecessary network request when a field
+       * has already been fetched
+       *
+       */
+
+      let finalFieldRequest = fields;
+
+      const newFieldsRequested = fields.filter(
+        (field) => !prevRequest?.fieldRequested?.includes(field)
+      );
+      if (newFieldsRequested.length > 0) {
+        finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
+      } else {
+        finalFieldRequest = prevRequest?.fieldRequested ?? [];
+      }
+
       const currentRequest = {
         defaultIndex: indexNames,
         factoryQueryType: TimelineEventsQueries.all,
-        fieldRequested: fields,
-        fields,
+        fieldRequested: finalFieldRequest,
+        fields: finalFieldRequest,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,
@@ -482,11 +500,13 @@ export const useTimelineEvents = ({
     skip,
     timerangeKind,
   });
+  const { onLoad } = useFetchNotes();
 
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
-  }, [timelineSearchHandler]);
+    onLoad(timelineResponse.events);
+  }, [timelineSearchHandler, onLoad, timelineResponse.events]);
 
   return [dataLoadingState, timelineResponse];
 };

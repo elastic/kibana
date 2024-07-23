@@ -30,7 +30,8 @@ describe('partitionMissingFieldsEvents', () => {
             _index: 'index-0',
           },
         ],
-        ['agent.host', 'agent.type', 'agent.version']
+        ['agent.host', 'agent.type', 'agent.version'],
+        ['fields']
       )
     ).toEqual([
       [
@@ -83,7 +84,7 @@ describe('partitionMissingFieldsEvents', () => {
           },
         ],
         ['agent.host', 'agent.type', 'agent.version'],
-        ['event']
+        ['event', 'fields']
       )
     ).toEqual([
       [
@@ -113,6 +114,35 @@ describe('partitionMissingFieldsEvents', () => {
       ],
     ]);
   });
+  it('should partition when fields located in root of event', () => {
+    expect(
+      partitionMissingFieldsEvents(
+        [
+          {
+            'agent.host': 'host-1',
+            'agent.version': 2,
+          },
+          {
+            'agent.host': 'host-1',
+          },
+        ],
+        ['agent.host', 'agent.version'],
+        []
+      )
+    ).toEqual([
+      [
+        {
+          'agent.host': 'host-1',
+          'agent.version': 2,
+        },
+      ],
+      [
+        {
+          'agent.host': 'host-1',
+        },
+      ],
+    ]);
+  });
   it('should partition if two fields are empty', () => {
     expect(
       partitionMissingFieldsEvents(
@@ -125,7 +155,8 @@ describe('partitionMissingFieldsEvents', () => {
             _index: 'index-0',
           },
         ],
-        ['agent.host', 'agent.type', 'agent.version']
+        ['agent.host', 'agent.type', 'agent.version'],
+        ['fields']
       )
     ).toEqual([
       [],
@@ -152,7 +183,8 @@ describe('partitionMissingFieldsEvents', () => {
             _index: 'index-0',
           },
         ],
-        ['agent.host', 'agent.type', 'agent.version']
+        ['agent.host', 'agent.type', 'agent.version'],
+        ['fields']
       )
     ).toEqual([
       [],

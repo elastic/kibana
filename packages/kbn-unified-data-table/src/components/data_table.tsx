@@ -46,6 +46,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -84,6 +85,11 @@ import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
+import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
+import {
+  getColorIndicatorControlColumn,
+  type ColorIndicatorControlColumnParams,
+} from './custom_control_columns';
 
 export type SortOrder = [string, string];
 
@@ -153,7 +159,7 @@ export interface UnifiedDataTableProps {
   /**
    * Function to add a filter in the grid cell or document flyout
    */
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   /**
    * Function triggered when a column is resized by the user
    */
@@ -265,7 +271,7 @@ export interface UnifiedDataTableProps {
     theme: ThemeServiceStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
-    dataViewFieldEditor: DataViewFieldEditorStart;
+    dataViewFieldEditor?: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
     storage: Storage;
     data: DataPublicPluginStart;
@@ -338,6 +344,10 @@ export interface UnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
+   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
+   */
+  additionalFieldGroups?: AdditionalFieldGroups;
+  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -371,6 +381,21 @@ export interface UnifiedDataTableProps {
    * This data is sent directly to actions.
    */
   cellActionsMetadata?: Record<string, unknown>;
+  /**
+   * Optional extra props passed to the renderCellValue function/component.
+   */
+  cellContext?: EuiDataGridProps['cellContext'];
+  /**
+   *
+   * Custom cell Popover Render Component.
+   *
+   */
+  renderCellPopover?: EuiDataGridProps['renderCellPopover'];
+  /**
+   * When specified, this function will be called to determine the color of the row indicator.
+   * @param row
+   */
+  getRowIndicator?: ColorIndicatorControlColumnParams['getRowIndicator'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -430,6 +455,7 @@ export const UnifiedDataTable = ({
   rowsPerPageOptions,
   visibleCellActions,
   externalCustomRenderers,
+  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -438,6 +464,9 @@ export const UnifiedDataTable = ({
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
   enableComparisonMode,
+  cellContext,
+  renderCellPopover,
+  getRowIndicator,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -508,11 +537,13 @@ export const UnifiedDataTable = ({
       },
       valueToStringConverter,
       componentsTourSteps,
+      isPlainRecord,
     }),
     [
       componentsTourSteps,
       darkMode,
       dataView,
+      isPlainRecord,
       displayedRows,
       expandedDoc,
       isFilterActive,
@@ -590,7 +621,7 @@ export const UnifiedDataTable = ({
         useNewFieldsApi,
         shouldShowFieldHandler,
         closePopover: () => dataGridRef.current?.closeCellPopover(),
-        fieldFormats: services.fieldFormats,
+        fieldFormats,
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
@@ -601,10 +632,15 @@ export const UnifiedDataTable = ({
       useNewFieldsApi,
       shouldShowFieldHandler,
       maxDocFieldsDisplayed,
-      services.fieldFormats,
+      fieldFormats,
       externalCustomRenderers,
       isPlainRecord,
     ]
+  );
+
+  const renderCustomPopover = useMemo(
+    () => renderCellPopover ?? getCustomCellPopoverRenderer(),
+    [renderCellPopover]
   );
 
   /**
@@ -624,19 +660,21 @@ export const UnifiedDataTable = ({
   const editField = useMemo(
     () =>
       onFieldEdited
-        ? (fieldName: string) => {
-            closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
-              ctx: {
-                dataView,
-              },
-              fieldName,
-              onSave: async () => {
-                await onFieldEdited();
-              },
-            });
+        ? async (fieldName: string) => {
+            closeFieldEditor.current =
+              onFieldEdited &&
+              (await services?.dataViewFieldEditor?.openEditor({
+                ctx: {
+                  dataView,
+                },
+                fieldName,
+                onSave: async () => {
+                  await onFieldEdited();
+                },
+              }));
           }
         : undefined,
-    [dataView, onFieldEdited, services.dataViewFieldEditor]
+    [dataView, onFieldEdited, services?.dataViewFieldEditor]
   );
 
   const timeFieldName = dataView.timeFieldName;
@@ -730,7 +768,8 @@ export const UnifiedDataTable = ({
           uiSettings,
           toastNotifications,
         },
-        hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
+        hasEditDataViewPermission: () =>
+          Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
         valueToStringConverter,
         onFilter,
         editField,
@@ -799,6 +838,12 @@ export const UnifiedDataTable = ({
 
   const sorting = useMemo(() => {
     if (isSortEnabled) {
+      // in ES|QL mode, sorting is disabled when in Document view
+      // ideally we want the @timestamp column to be sortable server side
+      // but it needs discussion before moving forward like this
+      if (isPlainRecord && !columns.length) {
+        return undefined;
+      }
       return {
         columns: sortingColumns,
         onSort: onTableSort,
@@ -808,7 +853,7 @@ export const UnifiedDataTable = ({
       columns: sortingColumns,
       onSort: () => {},
     };
-  }, [isSortEnabled, sortingColumns, onTableSort]);
+  }, [isSortEnabled, sortingColumns, isPlainRecord, columns.length, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
@@ -816,10 +861,19 @@ export const UnifiedDataTable = ({
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
-    return externalControlColumns
+    const leadingColumns = externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
-  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns]);
+
+    if (getRowIndicator) {
+      const colorIndicatorControlColumn = getColorIndicatorControlColumn({
+        getRowIndicator,
+      });
+      leadingColumns.unshift(colorIndicatorControlColumn);
+    }
+
+    return leadingColumns;
+  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns, getRowIndicator]);
 
   const controlColumnsConfig = customControlColumnsConfiguration?.({
     controlColumns: getAllControlColumns(),
@@ -1008,6 +1062,7 @@ export const UnifiedDataTable = ({
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
+          data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
@@ -1023,6 +1078,7 @@ export const UnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
+              additionalFieldGroups={additionalFieldGroups}
               selectedDocs={selectedDocs}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
@@ -1055,6 +1111,8 @@ export const UnifiedDataTable = ({
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={customTrailingControlColumn}
+              cellContext={cellContext}
+              renderCellPopover={renderCustomPopover}
             />
           )}
         </div>

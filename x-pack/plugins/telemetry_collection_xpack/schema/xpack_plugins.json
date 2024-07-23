@@ -9782,6 +9782,18 @@
                 "description": "The total number of enrolled Fleet Server agents currently offline"
               }
             },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of unenrolled Fleet Server agents"
+              }
+            },
             "num_host_urls": {
               "type": "long",
               "_meta": {
@@ -15099,6 +15111,40 @@
           "type": "boolean",
           "_meta": {
             "description": "Indicates if at least one feature is disabled in at least one space. This is a signal that space-level feature controls are in use. This does not account for role-based (security) feature controls."
+          }
+        },
+        "solutions": {
+          "properties": {
+            "classic": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to classic."
+              }
+            },
+            "es": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to search."
+              }
+            },
+            "oblt": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to observability."
+              }
+            },
+            "security": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to security."
+              }
+            },
+            "unset": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces without solution set."
+              }
+            }
           }
         },
         "disabledFeatures": {

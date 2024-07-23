@@ -15,11 +15,11 @@ import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 
 export const createCase = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-  headers: Record<string, unknown> = {}
+  headers: Record<string, string | string[]> = {}
 ): Promise<Case> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
@@ -44,7 +44,7 @@ export const deleteCases = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseIDs: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };

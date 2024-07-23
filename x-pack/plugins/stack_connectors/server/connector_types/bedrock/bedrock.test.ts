@@ -20,6 +20,7 @@ import {
   DEFAULT_BEDROCK_MODEL,
   DEFAULT_BEDROCK_URL,
   DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
@@ -93,7 +94,7 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke',
+            path: '/model/anthropic.claude-3-5-sonnet-20240620-v1:0/invoke',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -104,7 +105,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
-          timeout: 120000,
+          timeout: DEFAULT_TIMEOUT_MS,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunApiLatestResponseSchema,
@@ -131,7 +132,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
-          timeout: 120000,
+          timeout: DEFAULT_TIMEOUT_MS,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -180,7 +181,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke-with-response-stream',
+            path: '/model/anthropic.claude-3-5-sonnet-20240620-v1:0/invoke-with-response-stream',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -197,6 +198,23 @@ describe('BedrockConnector', () => {
           responseSchema: StreamingResponseSchema,
           responseType: 'stream',
           data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
+        });
+      });
+
+      it('signal and timeout is properly passed to streamApi', async () => {
+        const signal = jest.fn();
+        const timeout = 180000;
+        await connector.invokeStream({ ...aiAssistantBody, timeout, signal });
+
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          responseType: 'stream',
+          data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
+          timeout,
+          signal,
         });
       });
 
@@ -362,7 +380,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
-          timeout: 120000,
+          timeout: DEFAULT_TIMEOUT_MS,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunApiLatestResponseSchema,
@@ -400,7 +418,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
-          timeout: 120000,
+          timeout: DEFAULT_TIMEOUT_MS,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunApiLatestResponseSchema,
@@ -440,7 +458,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
-          timeout: 120000,
+          timeout: DEFAULT_TIMEOUT_MS,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunApiLatestResponseSchema,
@@ -484,7 +502,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
-          timeout: 120000,
+          timeout: DEFAULT_TIMEOUT_MS,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunApiLatestResponseSchema,
@@ -502,7 +520,26 @@ describe('BedrockConnector', () => {
         });
         expect(response.message).toEqual(mockResponseString);
       });
+      it('signal and timeout is properly passed to runApi', async () => {
+        const signal = jest.fn();
+        const timeout = 180000;
+        await connector.invokeAI({ ...aiAssistantBody, timeout, signal });
 
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+          method: 'post',
+          responseSchema: RunApiLatestResponseSchema,
+          data: JSON.stringify({
+            ...JSON.parse(DEFAULT_BODY),
+            messages: [{ content: 'Hello world', role: 'user' }],
+            max_tokens: DEFAULT_TOKEN_LIMIT,
+            temperature: 0,
+          }),
+          timeout,
+          signal,
+        });
+      });
       it('errors during API calls are properly handled', async () => {
         // @ts-ignore
         connector.request = mockError;

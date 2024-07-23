@@ -53,7 +53,7 @@ const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createSt
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
-      ...kibanaStartMock.startContract(),
+      ...kibanaStartMock.startContract().services,
       cases: casesPluginMock.createStartContract(),
       application: { currentAppId$: from('mockedApp') },
       http: {
@@ -63,9 +63,6 @@ const mockKibana = () => {
       },
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
-      triggersActionsUi: {
-        ruleTypeRegistry,
-      },
     },
   });
 };
@@ -78,6 +75,7 @@ jest.mock('../../hooks/use_fetch_rule', () => {
       rule: {
         id: 'ruleId',
         name: 'ruleName',
+        consumer: 'logs',
       },
     }),
   };
@@ -98,7 +96,6 @@ const params = {
 const config: Subset<ConfigSchema> = {
   unsafe: {
     alertDetails: {
-      metrics: { enabled: true },
       uptime: { enabled: true },
     },
   },
@@ -139,7 +136,7 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
     expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsTabbedContent')).toBeTruthy();
-    expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alert-summary-container')).toBeFalsy();
     expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BudgetingMethod, Indicator, TimeWindow } from '@kbn/slo-schema';
+import { BudgetingMethod, Indicator, TimeWindowType } from '@kbn/slo-schema';
 
 export interface CreateSLOForm<IndicatorType = Indicator> {
   name: string;
@@ -13,7 +13,7 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
   indicator: IndicatorType;
   timeWindow: {
     duration: string;
-    type: TimeWindow;
+    type: TimeWindowType;
   };
   tags: string[];
   budgetingMethod: BudgetingMethod;
@@ -23,4 +23,7 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
     timesliceWindow?: string;
   };
   groupBy: string[] | string;
+  settings: {
+    preventInitialBackfill: boolean;
+  };
 }
