@@ -12,11 +12,11 @@ import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
 import { isValidSearch } from '../../common/options_list/is_valid_search';
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import {
   OptionsListSortingType,
   OPTIONS_LIST_DEFAULT_SORT,
 } from '../../common/options_list/suggestions_sorting';
-import { OptionsListSelection } from '../../common/options_list/types';
 import { OptionsListComponentState, OptionsListReduxState } from './types';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
@@ -24,11 +24,6 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
   allowExpensiveQueries: true,
   searchString: { value: '', valid: true },
 });
-
-export const getSelectionAsFieldType = (field: FieldSpec, key: string): OptionsListSelection => {
-  const storeAsNumber = field.type === 'number' || field.type === 'date';
-  return storeAsNumber ? +key : key;
-};
 
 export const optionsListReducers = {
   deselectOption: (

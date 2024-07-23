@@ -12,14 +12,16 @@ import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { OptionsListSelection } from '../../../common/options_list/types';
+import {
+  getSelectionAsFieldType,
+  OptionsListSelection,
+} from '../../../common/options_list/options_list_selections';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 import { OptionsListStrings } from './options_list_strings';
-import { getSelectionAsFieldType } from '../options_list_reducers';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;

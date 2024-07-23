@@ -44,7 +44,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
-import { OptionsListSelection } from '../../../common/options_list/types';
+import { OptionsListSelection } from '../../../common/options_list/options_list_selections';
 import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';

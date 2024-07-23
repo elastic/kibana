@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getSelectionAsFieldType } from '@kbn/controls-plugin/public/options_list/options_list_reducers';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get, isEmpty } from 'lodash';
 
-import { OptionsListRequestBody, OptionsListSelection } from '../../common/options_list/types';
+import {
+  getSelectionAsFieldType,
+  OptionsListSelection,
+} from '../../common/options_list/options_list_selections';
+import { OptionsListRequestBody } from '../../common/options_list/types';
 import { OptionsListValidationAggregationBuilder } from './types';
 
 /**
@@ -56,7 +59,7 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
       return validationAggregation;
     },
     parse: (rawEsResult, { fieldSpec }) => {
-      if (!fieldSpec) return;
+      if (!fieldSpec) return [];
 
       const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       const rawInvalidSuggestions = get(

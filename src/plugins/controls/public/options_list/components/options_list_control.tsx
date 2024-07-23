@@ -22,7 +22,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { OptionsListSelection } from '../../../common/options_list/types';
+import { OptionsListSelection } from '../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { ControlError } from '../../control_group/component/control_error_component';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';

@@ -7,10 +7,10 @@
  */
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import {
   OptionsListParsedSuggestions,
   OptionsListRequestBody,
-  OptionsListSelection,
 } from '../../common/options_list/types';
 
 export interface EsBucket {

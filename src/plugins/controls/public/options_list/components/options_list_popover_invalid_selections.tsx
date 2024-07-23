@@ -19,10 +19,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { getSelectionAsFieldType } from '../../../common/options_list/options_list_selections';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
-import { getSelectionAsFieldType } from '../options_list_reducers';
 
 export const OptionsListPopoverInvalidSelections = () => {
   const optionsList = useOptionsList();

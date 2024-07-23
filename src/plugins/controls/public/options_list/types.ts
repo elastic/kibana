@@ -9,9 +9,9 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import {
   OptionsListEmbeddableInput,
-  OptionsListSelection,
   OptionsListSuggestions,
 } from '../../common/options_list/types';
 import { ControlOutput } from '../types';

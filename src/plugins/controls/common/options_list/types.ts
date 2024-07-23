@@ -10,12 +10,11 @@ import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/co
 import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 import type { DataControlInput } from '../types';
+import { OptionsListSelection } from './options_list_selections';
 import { OptionsListSearchTechnique } from './suggestions_searching';
 import type { OptionsListSortingType } from './suggestions_sorting';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with OPTIONS_LIST_CONTROL_TYPE
-
-export type OptionsListSelection = string | number;
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;
