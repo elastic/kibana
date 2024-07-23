@@ -47,6 +47,11 @@ import type {
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
 }
+
+export function isStringType(type: unknown) {
+  return typeof type === 'string' && ['keyword', 'text'].includes(type);
+}
+
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
   return (
     typeof type === 'string' &&

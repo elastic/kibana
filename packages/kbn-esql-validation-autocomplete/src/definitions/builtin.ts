@@ -105,13 +105,13 @@ function createComparisonDefinition(
         {
           params: [
             { name: 'left', type },
-            { name: 'right', type: 'string' as const, constantOnly: true },
+            { name: 'right', type: 'text' as const, constantOnly: true },
           ],
           returnType: 'boolean' as const,
         },
         {
           params: [
-            { name: 'right', type: 'string' as const, constantOnly: true },
+            { name: 'left', type: 'text' as const, constantOnly: true },
             { name: 'right', type },
           ],
           returnType: 'boolean' as const,
@@ -419,8 +419,15 @@ const likeFunctions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'left', type: 'string' as const },
-          { name: 'right', type: 'string' as const },
+          { name: 'left', type: 'text' as const },
+          { name: 'right', type: 'text' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const },
+          { name: 'right', type: 'keyword' as const },
         ],
         returnType: 'boolean',
       },
@@ -479,7 +486,7 @@ const inFunctions: FunctionDefinition[] = [
     },
     {
       params: [
-        { name: 'left', type: 'date' },
+        { name: 'left', type: 'datetime' },
         { name: 'right', type: 'any[]' },
       ],
       returnType: 'boolean',

@@ -8,15 +8,17 @@
 
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition, FunctionParameterType } from './types';
+import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
 function createNumericAggDefinition({
   name,
   description,
+  returnType,
   args = [],
 }: {
   name: string;
   description: string;
+  returnType?: (numericType: FunctionParameterType) => FunctionReturnType;
   args?: Array<{
     name: string;
     type: FunctionParameterType;
@@ -41,7 +43,7 @@ function createNumericAggDefinition({
             constantOnly,
           })),
         ],
-        returnType: numericType,
+        returnType: returnType ? returnType(numericType) : numericType,
       })),
     ],
     examples: [
@@ -57,18 +59,28 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.avgDoc', {
       defaultMessage: 'Returns the average of the values in a field',
     }),
+    returnType: () => 'double' as FunctionReturnType,
   },
   {
     name: 'sum',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sumDoc', {
       defaultMessage: 'Returns the sum of the values in a field.',
     }),
+    returnType: (numericType: FunctionParameterType): FunctionReturnType => {
+      switch (numericType) {
+        case 'double':
+          return 'double';
+        default:
+          return 'long';
+      }
+    },
   },
   {
     name: 'median',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.medianDoc', {
       defaultMessage: 'Returns the 50% percentile.',
     }),
+    returnType: () => 'double' as FunctionReturnType,
   },
   {
     name: 'median_absolute_deviation',
@@ -79,17 +91,8 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           'Returns the median of each data point’s deviation from the median of the entire sample.',
       }
     ),
+    returnType: () => 'double' as FunctionReturnType,
   },
-  // {
-  //   name: 'percentile',
-  //   description: i18n.translate(
-  //     'kbn-esql-validation-autocomplete.esql.definitions.percentiletDoc',
-  //     {
-  //       defaultMessage: 'Returns the n percentile of a field.',
-  //     }
-  //   ),
-  //   args: [{ name: 'percentile', type: 'integer' as const, value: '90', constantOnly: true }],
-  // },
 ]
   .map(createNumericAggDefinition)
   .concat([
@@ -104,54 +107,24 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       type: 'agg',
       supportedCommands: ['stats', 'metrics'],
       signatures: [
-        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType) => ({
-          params: [
-            {
-              name: 'column',
-              type: numericType as FunctionParameterType,
-              noNestingFunctions: true,
-            },
-            {
-              name: 'percentile',
-              type: 'integer',
-              noNestingFunctions: true,
-              constantOnly: true,
-            },
-          ],
-          returnType: 'double',
-        })),
-        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType) => ({
-          params: [
-            {
-              name: 'number',
-              type: numericType as FunctionParameterType,
-              noNestingFunctions: true,
-            },
-            {
-              name: 'percentile',
-              type: 'double',
-              noNestingFunctions: true,
-              constantOnly: true,
-            },
-          ],
-          returnType: 'double',
-        })),
-        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType) => ({
-          params: [
-            {
-              name: 'number',
-              type: numericType as FunctionParameterType,
-              noNestingFunctions: true,
-            },
-            {
-              name: 'percentile',
-              type: 'long',
-              noNestingFunctions: true,
-              constantOnly: true,
-            },
-          ],
-          returnType: 'double',
-        })),
+        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType: FunctionParameterType) => {
+          return ESQL_COMMON_NUMERIC_TYPES.map((weightType: FunctionParameterType) => ({
+            params: [
+              {
+                name: 'column',
+                type: numericType,
+                noNestingFunctions: true,
+              },
+              {
+                name: 'percentile',
+                type: weightType,
+                noNestingFunctions: true,
+                constantOnly: true,
+              },
+            ],
+            returnType: 'double' as FunctionReturnType,
+          }));
+        }).flat(),
       ],
     },
     {
@@ -340,7 +313,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
             },
             {
               name: 'order',
-              type: 'string',
+              type: 'keyword',
               noNestingFunctions: true,
               optional: false,
               constantOnly: true,
@@ -367,24 +340,25 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       ),
       supportedCommands: ['stats', 'metrics'],
       signatures: [
-        {
-          // @TODO  @Q: Verify how can we support multiple numeric types
-          params: [
-            {
-              name: 'number',
-              type: 'double',
-              noNestingFunctions: true,
-              optional: false,
-            },
-            {
-              name: 'weight',
-              type: 'double',
-              noNestingFunctions: true,
-              optional: false,
-            },
-          ],
-          returnType: 'double',
-        },
+        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType: FunctionParameterType) => {
+          return ESQL_COMMON_NUMERIC_TYPES.map((weightType: FunctionParameterType) => ({
+            params: [
+              {
+                name: 'number',
+                type: numericType,
+                noNestingFunctions: true,
+                optional: false,
+              },
+              {
+                name: 'weight',
+                type: weightType,
+                noNestingFunctions: true,
+                optional: false,
+              },
+            ],
+            returnType: 'double' as FunctionReturnType,
+          }));
+        }).flat(),
       ],
       examples: [
         `from employees | stats w_avg = weighted_avg(salary, height) by languages | eval w_avg = round(w_avg)`,

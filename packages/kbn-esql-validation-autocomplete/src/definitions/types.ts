@@ -39,6 +39,7 @@ export type SupportedFieldType = typeof supportedFieldTypes[number];
 
 export type FunctionParameterType =
   | SupportedFieldType
+  | 'string'
   | 'null'
   | 'any'
   | 'chrono_literal'

@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import * as recast from 'recast';
 import { camelCase } from 'lodash';
-import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
+import { isNumericType, isStringType } from '@kbn/esql-ast/src/ast_helpers';
 import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { getParamAtPosition } from '../src/autocomplete/helper';
 import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
@@ -143,8 +143,9 @@ function generateImplicitDateCastingTestsForFunction(
   const allSignaturesWithDateParams = definition.signatures.filter((signature) =>
     signature.params.some(
       (param, i) =>
-        param.type === 'date' &&
-        !definition.signatures.some((def) => getParamAtPosition(def, i)?.type === 'string') // don't count parameters that already accept a string
+        param.type === 'datetime' ||
+        (param.type === 'date_period' &&
+          !definition.signatures.some((def) => isStringType(getParamAtPosition(def, i)?.type))) // don't count parameters that already accept a string
     )
   );
 
@@ -168,7 +169,7 @@ function generateImplicitDateCastingTestsForFunction(
                 ...signature,
                 params: mappedParams.map((param) =>
                   // overwrite dates with a string
-                  param.type === 'date' ? { ...param, name: '"2022"' } : param
+                  param.type === 'datetime' ? { ...param, name: '"2022"' } : param
                 ),
               },
             ],
@@ -189,7 +190,7 @@ function generateImplicitDateCastingTestsForFunction(
                 ...signature,
                 params: mappedParams.map((param) =>
                   // overwrite dates with a string
-                  param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
+                  param.type === 'datetime' ? { ...param, name: 'concat("20", "22")' } : param
                 ),
               },
             ],
@@ -967,8 +968,6 @@ function generateSortCommandTestsForAggFunction(
 const generateSortCommandTestsForGroupingFunction = generateSortCommandTestsForAggFunction;
 
 const fieldTypesToConstants: Record<SupportedFieldType, string> = {
-  // @TODO: verify
-  string: '"a"',
   text: '"a"',
   keyword: '"a"',
   double: '5.5',
@@ -979,7 +978,6 @@ const fieldTypesToConstants: Record<SupportedFieldType, string> = {
   counter_integer: '5',
   counter_long: '5',
   counter_double: '5.5',
-  date: 'now()',
   datetime: 'to_datetime("2021-01-01T00:00:00Z")',
   date_period: 'to_date_period("2021-01-01/2021-01-02")',
   boolean: 'true',
@@ -1033,13 +1031,12 @@ const toCartesianShapeSignature = evalFunctionDefinitions.find(
 )!;
 const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
+// @ts-expect-error
 const nestedFunctions: Record<SupportedFieldType, string> = {
   double: prepareNestedFunction(toDoubleSignature),
   integer: prepareNestedFunction(toInteger),
-  string: prepareNestedFunction(toStringSignature),
   text: prepareNestedFunction(toStringSignature),
   keyword: prepareNestedFunction(toStringSignature),
-  date: prepareNestedFunction(toDateSignature),
   boolean: prepareNestedFunction(toBooleanSignature),
   ip: prepareNestedFunction(toIpSignature),
   version: prepareNestedFunction(toVersionSignature),
@@ -1245,7 +1242,11 @@ function generateIncorrectlyTypedParameters(
       const fieldName = wrongFieldMapping[i].name;
       if (
         fieldName === 'doubleField' &&
-        signatures.every((signature) => getParamAtPosition(signature, i)?.type !== 'string')
+        signatures.every(
+          (signature) =>
+            getParamAtPosition(signature, i)?.type !== 'keyword' ||
+            getParamAtPosition(signature, i)?.type !== 'text'
+        )
       ) {
         return;
       }
