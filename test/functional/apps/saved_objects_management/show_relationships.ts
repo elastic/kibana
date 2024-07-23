@@ -11,10 +11,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/179977
-  describe.skip('saved objects relationships flyout', () => {
+  describe('saved objects relationships flyout', () => {
     beforeEach(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/show_relationships'
@@ -36,7 +36,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.savedObjects.clickRelationshipsByTitle('Dashboard with missing refs');
 
-      const invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
+      let invalidRelations: any[] = [];
+
+      await retry.waitFor('2 invalid relations to be found', async () => {
+        invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
+        return invalidRelations.length === 2;
+      });
 
       expect(invalidRelations).to.eql([
         {
