@@ -55,14 +55,14 @@ export function setupRoutes({
   defineBulkActionCspBenchmarkRulesRoute(router);
   defineGetCspBenchmarkRulesStatesRoute(router);
 
-  core.getStartServices().then(([coreStart]) => {
+  core.getStartServices().then(async ([coreStart]) => {
     const soClient = coreStart.savedObjects.createInternalRepository();
-    migrateCdrDataViews(soClient, logger);
+    await migrateCdrDataViews(soClient, logger);
   });
 
   core.http.registerOnPreRouting(async (request, response, toolkit) => {
     if (request.url.pathname === '/internal/cloud_security_posture/status') {
-      setupCdrDataView(
+      await setupCdrDataView(
         core,
         request,
         CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME,
@@ -71,7 +71,7 @@ export function setupRoutes({
         logger
       );
 
-      setupCdrDataView(
+      await setupCdrDataView(
         core,
         request,
         CDR_VULNERABILITIES_DATA_VIEW_NAME,

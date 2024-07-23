@@ -49,6 +49,7 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './fleet_integration/fleet_integration';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const chance = new Chance();
 
@@ -82,6 +83,7 @@ describe('Cloud Security Posture Plugin', () => {
       taskManager: taskManagerMock.createStart(),
       security: securityMock.createStart(),
       licensing: licensingMock.createStart(),
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
