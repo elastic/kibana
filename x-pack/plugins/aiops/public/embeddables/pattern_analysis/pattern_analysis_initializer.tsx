@@ -158,7 +158,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             >
               <FormattedMessage
                 id="xpack.aiops.embeddablePatternAnalysis.config.cancelButtonLabel"
-                defaultMessage="Close"
+                defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -178,7 +178,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             >
               <FormattedMessage
                 id="xpack.aiops.embeddablePatternAnalysis.config.applyAndCloseLabel"
-                defaultMessage="Save"
+                defaultMessage="Apply and close"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -224,17 +224,25 @@ export const FormControls: FC<{
       dataViews.get(dataViewId).then((dataView) => {
         const { dataViewFields, messageField } = getMessageField(dataView);
         setFields(dataViewFields);
-        if (formInput.fieldName !== undefined) {
-          const field = dataViewFields.find((f) => f.name === formInput.fieldName);
-          if (field !== undefined) {
-            setSelectedField(field);
-          }
-        } else if (messageField !== null) {
-          setSelectedField(messageField);
+        if (formInput.fieldName === undefined) {
+          // form input does not contain a field name, select the found message field
+          setSelectedField(messageField ?? null);
+          return;
         }
+
+        // otherwise, select the field from the form input
+        const field = dataViewFields.find((f) => f.name === formInput.fieldName);
+        setSelectedField(field ?? null);
       });
     },
     [dataViewId, dataViews, formInput, onChange]
+  );
+
+  useEffect(
+    function validateForm() {
+      onValidationChange(selectedField !== null);
+    },
+    [selectedField, formInput, onValidationChange]
   );
 
   useEffect(
