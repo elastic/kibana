@@ -1,5 +1,5 @@
 post:
-  summary: Pushes a case to an external service.
+  summary: Push a case to an external service
   description: >
     You must have `all` privileges for the **Actions and Connectors** feature in
     the **Management** section of the Kibana feature privileges. You must also

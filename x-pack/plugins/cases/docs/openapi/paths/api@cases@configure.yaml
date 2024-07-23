@@ -2,7 +2,7 @@ get:
   summary: Get case settings in the default space
   operationId: getCaseConfigurationDefaultSpace
   description: >
-    Retrieves setting details such as the closure type, custom fields, templatse, and the default connector for cases in the default space.
+    Get setting details such as the closure type, custom fields, templatse, and the default connector for cases in the default space.
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on where the cases were created.
