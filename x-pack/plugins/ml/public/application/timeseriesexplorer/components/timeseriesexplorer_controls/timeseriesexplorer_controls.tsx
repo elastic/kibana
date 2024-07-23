@@ -152,6 +152,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
         id: config.id,
         title: newTitle,
         description: newDescription,
+        forecastId,
         jobIds: [selectedJobId],
         selectedDetectorIndex,
         selectedEntities,
@@ -169,7 +170,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
         path,
       });
     },
-    [embeddable, selectedJobId, selectedDetectorIndex, selectedEntities]
+    [embeddable, selectedJobId, selectedDetectorIndex, selectedEntities, forecastId]
   );
 
   return (
