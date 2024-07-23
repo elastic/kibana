@@ -242,8 +242,8 @@ export class ApplicationService {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
-    if (injection.root.isBound(ApplicationServiceToken)) {
-      injection.root.getAll(ApplicationServiceToken);
+    if (injection.getContainer().isBound(ApplicationServiceToken)) {
+      injection.getContainer().getAll(ApplicationServiceToken);
     }
 
     this.overlayStart$.next(overlays);

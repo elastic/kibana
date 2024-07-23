@@ -72,9 +72,11 @@ export class PluginWrapper<
     this.instance = this.createPluginInstance();
 
     if (this.definition.module) {
-      setupContext.injection.load(this.definition.module);
-      setupContext.injection.load(createPluginInitializerModule(this.initializerContext));
-      setupContext.injection.load(createPluginSetupModule(setupContext));
+      const container = setupContext.injection.getContainer();
+
+      container.load(this.definition.module);
+      container.load(createPluginInitializerModule(this.initializerContext));
+      container.load(createPluginSetupModule(setupContext));
     }
 
     return this.instance?.setup(setupContext, plugins);

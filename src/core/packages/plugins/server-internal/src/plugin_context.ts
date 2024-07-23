@@ -300,7 +300,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
         deps.userProfile.registerUserProfileDelegate(delegate),
     },
     injection: {
-      load: deps.injection.load.bind(deps.injection, plugin.opaqueId),
+      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
     },
   };
 }
