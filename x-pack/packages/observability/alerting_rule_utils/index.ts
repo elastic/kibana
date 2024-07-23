@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface Group {
-  field: string;
-  value: string;
-}
+export { getEcsGroups, type Group } from './src/get_ecs_groups';

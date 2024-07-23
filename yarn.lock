@@ -5702,6 +5702,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-alerting-rule-utils@link:x-pack/packages/observability/alerting_rule_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-alerting-test-data@link:x-pack/packages/observability/alerting_test_data":
   version "0.0.0"
   uid ""
