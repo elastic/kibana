@@ -352,11 +352,17 @@ export class BaseRule {
           // update the alert's state with the new node states
           if (newAlertStates.length) {
             const alertId = node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid;
-            services.alertsClient?.report({
+            this.scopedLogger.info(
+              `alertsClient.report id=${alertId} actionGroup=default state=${JSON.stringify(
+                alertInstanceState
+              )}`
+            );
+            const { uuid } = services.alertsClient?.report({
               id: alertId,
               actionGroup: 'default',
               state: alertInstanceState,
             });
+            this.scopedLogger.info(`returned UUID ${uuid}`);
             this.executeActions(services, alertId, alertInstanceState, null, cluster);
             state.lastExecutedAction = currentUTC;
           }
