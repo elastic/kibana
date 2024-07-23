@@ -1036,6 +1036,13 @@ describe('autocomplete', () => {
       20
     );
 
+    testSuggestions(
+      'FROM index1 | EVAL var0 = f',
+      [...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true })],
+      undefined,
+      27
+    );
+
     // DISSECT field
     testSuggestions('FROM index1 | DISSECT b', getFieldNamesByType('string'), undefined, 23);
 
