@@ -14128,12 +14128,12 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats var0 = percentile(integerField, longField) by var1 = round(doubleField / 2)',
-          []
+          ['Argument of [=] must be a constant, received [percentile(integerField,longField)]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), percentile(integerField, longField) by round(doubleField / 2), ipField',
-          []
+          ['Argument of [percentile] must be a constant, received [longField]']
         );
 
         testErrorsAndWarnings(
