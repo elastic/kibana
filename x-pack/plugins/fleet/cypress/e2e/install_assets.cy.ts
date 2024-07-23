@@ -39,7 +39,6 @@ describe('Install unverified package assets', () => {
 
     // save mocking out the whole package response, but make it so that fleet server is always uninstalled
     cy.intercept('GET', '/api/fleet/epm/packages/fleet_server*', (req) => {
-      console.log('TATA');
       req.continue((res) => {
         if (res.body?.item?.installationInfo) {
           delete res.body.item.installationInfo;
