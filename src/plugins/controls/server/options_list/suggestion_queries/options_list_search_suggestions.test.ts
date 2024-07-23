@@ -10,12 +10,8 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { OptionsListRequestBody } from '../../../common/options_list/types';
-import { getExactMatchAggregationBuilder } from './options_list_exact_match';
+import * as ExactMatch from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
-
-jest.mock('./options_list_exact_match', () => ({
-  getExactMatchAggregationBuilder: jest.fn(),
-}));
 
 describe('options list type-specific search queries', () => {
   let rawSearchResponseMock: SearchResponse = {} as SearchResponse;
@@ -41,6 +37,7 @@ describe('options list type-specific search queries', () => {
 
   describe('suggestion aggregation', () => {
     test('for unsupported field types, return exact match search instead', () => {
+      const exactMatchSpy = jest.spyOn(ExactMatch, 'getExactMatchAggregationBuilder');
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'success',
@@ -49,7 +46,7 @@ describe('options list type-specific search queries', () => {
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
       getSearchSuggestionsAggregationBuilder(optionsListRequestBodyMock);
-      expect(getExactMatchAggregationBuilder).toBeCalled();
+      expect(exactMatchSpy).toBeCalled();
     });
 
     describe('string (keyword, text+keyword, or nested) field', () => {
@@ -459,6 +456,60 @@ describe('options list type-specific search queries', () => {
         `);
       });
     });
+
+    describe('numeric field', () => {
+      test('handles an invalid search', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          fieldName: 'bytes',
+          allowExpensiveQueries: true,
+          sort: { by: '_key', direction: 'asc' },
+          searchString: '123a',
+          fieldSpec: { type: 'number' } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock)).toEqual({});
+      });
+
+      test('creates exact match search on valid search string', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          fieldName: 'bytes',
+          allowExpensiveQueries: true,
+          sort: { by: '_key', direction: 'desc' },
+          searchString: '1234',
+          fieldSpec: { type: 'number' } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "suggestions": Object {
+              "aggs": Object {
+                "filteredSuggestions": Object {
+                  "terms": Object {
+                    "field": "bytes",
+                    "shard_size": 10,
+                  },
+                },
+              },
+              "filter": Object {
+                "term": Object {
+                  "bytes": Object {
+                    "case_insensitive": false,
+                    "value": "1234",
+                  },
+                },
+              },
+            },
+          }
+        `);
+      });
+    });
   });
 
   describe('suggestion parsing', () => {
@@ -665,6 +716,39 @@ describe('options list type-specific search queries', () => {
             "value": "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8",
           },
         ]
+      `);
+    });
+
+    test('parses numeric field result', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
+        fieldName: 'bytes',
+        allowExpensiveQueries: true,
+        searchString: '12345',
+        fieldSpec: { type: 'number' } as unknown as FieldSpec,
+      };
+      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+        optionsListRequestBodyMock
+      );
+      rawSearchResponseMock.aggregations = {
+        suggestions: {
+          filteredSuggestions: {
+            buckets: [{ doc_count: 5, key: 12345 }],
+          },
+        },
+      };
+
+      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
+        .toMatchInlineSnapshot(`
+        Object {
+          "suggestions": Array [
+            Object {
+              "docCount": 5,
+              "value": "12345",
+            },
+          ],
+          "totalCardinality": 1,
+        }
       `);
     });
   });
