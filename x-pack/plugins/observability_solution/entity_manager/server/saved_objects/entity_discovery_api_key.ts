@@ -11,7 +11,7 @@ export const SO_ENTITY_DISCOVERY_API_KEY_TYPE = 'entity-discovery-api-key';
 
 export const EntityDiscoveryApiKeyType: SavedObjectsType = {
   name: SO_ENTITY_DISCOVERY_API_KEY_TYPE,
-  hidden: false,
+  hidden: true,
   namespaceType: 'multiple-isolated',
   mappings: {
     dynamic: false,

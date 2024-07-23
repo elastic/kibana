@@ -12,6 +12,7 @@ import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../../li
 import { ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
 import { canDisableEntityDiscovery } from '../../lib/auth/privileges';
+import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
@@ -41,7 +42,9 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
             },
           });
         }
-        const soClient = (await context.core).savedObjects.client;
+        const soClient = (await context.core).savedObjects.getClient({
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+        });
 
         await uninstallBuiltInEntityDefinitions({
           soClient,
@@ -52,9 +55,11 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 
         server.logger.debug('reading entity discovery API key from saved object');
         const apiKey = await readEntityDiscoveryAPIKey(server);
+        // api key could be deleted outside of the apis, it does not affect the
+        // disablement flow
         if (apiKey) {
           await deleteEntityDiscoveryAPIKey(soClient);
-          await server.security.authc.apiKeys.invalidate(req, {
+          await server.security.authc.apiKeys.invalidateAsInternalUser({
             ids: [apiKey.id],
           });
         }

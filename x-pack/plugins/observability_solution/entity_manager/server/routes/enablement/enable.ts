@@ -19,6 +19,7 @@ import {
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
 import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
+import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
@@ -57,7 +58,9 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           });
         }
 
-        const soClient = (await context.core).savedObjects.client;
+        const soClient = (await context.core).savedObjects.getClient({
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+        });
         const existingApiKey = await readEntityDiscoveryAPIKey(server);
 
         if (existingApiKey !== undefined) {
@@ -65,7 +68,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 
           if (!isValid) {
             await deleteEntityDiscoveryAPIKey(soClient);
-            await server.security.authc.apiKeys.invalidate(req, {
+            await server.security.authc.apiKeys.invalidateAsInternalUser({
               ids: [existingApiKey.id],
             });
           }
