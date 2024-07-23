@@ -18,13 +18,10 @@ import * as i18n from './translations';
 export type UncommonProcessTableColumns = Array<Columns<HostsUncommonProcessesEdges>>;
 
 export const getHostNames = (hosts: HostEcs[]): string[] => {
-  if (hosts != null) {
-    return hosts
-      .filter((host) => host.name != null && host.name[0] != null)
-      .map((host) => (host.name != null && host.name[0] != null ? host.name[0] : ''));
-  } else {
-    return [];
-  }
+  if (!hosts) return [];
+  return hosts
+    .filter((host) => host.name != null && host.name[0] != null)
+    .map((host) => (host.name != null && host.name[0] != null ? host.name[0] : ''));
 };
 
 export const getUncommonColumns = (): UncommonProcessTableColumns => [
