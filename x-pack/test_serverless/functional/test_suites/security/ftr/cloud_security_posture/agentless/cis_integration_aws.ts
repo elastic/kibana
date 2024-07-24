@@ -32,14 +32,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const previousPackageVersion = '1.9.0';
 
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-
+      await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('Agentless CIS_AWS Single Account Launch Cloud formation', () => {
