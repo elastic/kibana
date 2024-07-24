@@ -30,7 +30,7 @@ export const CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.createFirstInferenceEndpointDescription',
   {
     defaultMessage:
-      "Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Set up tasks such as text embedding, completions, and reranking using simple, unique endpoints. Use Elastic's built-in models, connect to third-party services via API, or integrate models uploaded with Python.",
+      "Inference endpoints enable you to perform inference tasks using NLP models provided by third-party services or Elastic's built-in models like ELSER and E5. Set up tasks such as text embedding, completions, reranking, and more by using the Create Inference API.",
   }
 );
 
