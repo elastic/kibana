@@ -1,5 +1,5 @@
 get:
-  summary: Get the default data view in the default space
+  summary: Get the default data view
   operationId: getDefaultDataViewDefault
   tags:
     - data views
@@ -23,7 +23,7 @@ get:
           schema:
             $ref: '../components/schemas/400_response.yaml'
 post:
-  summary: Set the default data view in the default space
+  summary: Set the default data view
   operationId: setDefaultDatailViewDefault
   tags:
     - data views

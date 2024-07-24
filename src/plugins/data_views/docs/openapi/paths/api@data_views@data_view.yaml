@@ -1,5 +1,5 @@
 post:
-  summary: Create a data view in the default space
+  summary: Create a data view
   operationId: createDataViewDefaultw
   tags:
     - data views

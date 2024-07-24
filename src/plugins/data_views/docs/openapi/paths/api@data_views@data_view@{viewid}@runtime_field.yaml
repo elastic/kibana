@@ -1,5 +1,5 @@
 post:
-  summary: Create a runtime field in the default space
+  summary: Create a runtime field
   operationId: createRuntimeFieldDefault
   tags:
     - data views
@@ -36,7 +36,7 @@ post:
             type: object    
 
 put:
-  summary: Create or update a runtime field in the default space
+  summary: Create or update a runtime field
   operationId: createUpdateRuntimeFieldDefault
   tags:
     - data views

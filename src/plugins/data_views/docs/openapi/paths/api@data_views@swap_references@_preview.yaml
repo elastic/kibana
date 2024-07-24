@@ -1,5 +1,5 @@
 post:
-  summary: Preview a saved object reference swap in the default space
+  summary: Preview a saved object reference swap
   operationId: previewSwapDataViewsDefault
   description: >
     Preview the impact of swapping saved object references from one data view identifier to another.

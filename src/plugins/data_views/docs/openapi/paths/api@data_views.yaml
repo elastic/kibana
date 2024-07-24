@@ -1,5 +1,5 @@
 get:
-  summary: Get all data views in the default space
+  summary: Get all data views
   operationId: getAllDataViewsDefault
   tags:
     - data views

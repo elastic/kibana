@@ -1,5 +1,5 @@
 post:
-  summary: Update data view fields metadata in the default space
+  summary: Update data view fields metadata
   operationId: updateFieldsMetadataDefault
   description: >
     Update fields presentation metadata such as count, customLabel, customDescription, and format.

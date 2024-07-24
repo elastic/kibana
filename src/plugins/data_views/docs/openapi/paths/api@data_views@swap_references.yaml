@@ -1,5 +1,5 @@
 post:
-  summary: Swap saved object references in the default space
+  summary: Swap saved object references
   operationId: swapDataViewsDefault
   description: >
     Changes saved object references from one data view identifier to another.
