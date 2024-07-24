@@ -79,7 +79,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     solutionNavExperiment,
     selectedTabId: _selectedTabId,
     capabilities,
-    allowFeatureVisibility, // FIXME: handle this
+    allowFeatureVisibility,
     getUrlForApp,
     navigateToUrl,
     ...viewSpaceServices
@@ -102,6 +102,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     history,
     currentSelectedTabId: selectedTabId,
     isSolutionNavEnabled,
+    allowFeatureVisibility,
   });
 
   useEffect(() => {

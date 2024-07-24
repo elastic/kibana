@@ -38,6 +38,7 @@ export interface GetTabsProps {
     roles?: { view: boolean; save: boolean };
   };
   isSolutionNavEnabled: boolean;
+  allowFeatureVisibility: boolean;
 }
 
 export const getTabs = ({
@@ -47,6 +48,7 @@ export const getTabs = ({
   capabilities,
   roles,
   isSolutionNavEnabled,
+  allowFeatureVisibility,
 }: GetTabsProps): ViewSpaceTab[] => {
   const enabledFeatureCount = getEnabledFeatures(features, space).length;
   const totalFeatureCount = features.length;
@@ -54,7 +56,7 @@ export const getTabs = ({
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
   const canUserModifyRoles = Boolean(capabilities?.roles?.save);
 
-  const tabsDefinition = [
+  const tabsDefinition: ViewSpaceTab[] = [
     {
       id: TAB_ID_CONTENT,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.content.heading', {
@@ -62,7 +64,10 @@ export const getTabs = ({
       }),
       content: <ViewSpaceContent space={space} />,
     },
-    {
+  ];
+
+  if (allowFeatureVisibility) {
+    tabsDefinition.push({
       id: TAB_ID_FEATURES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.feature.heading', {
         defaultMessage: 'Feature visibility',
@@ -80,8 +85,8 @@ export const getTabs = ({
           isSolutionNavEnabled={isSolutionNavEnabled}
         />
       ),
-    },
-  ];
+    });
+  }
 
   if (canUserViewRoles) {
     tabsDefinition.push({
