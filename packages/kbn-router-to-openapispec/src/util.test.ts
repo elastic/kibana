@@ -212,9 +212,7 @@ describe('getXsrfHeaderForMethod', () => {
     { method: 'post', expected: headerParam() },
     { method: 'patch', expected: headerParam() },
     { method: 'delete', expected: headerParam() },
-    // { method: 'head', expected: [] },
-    // { method: 'connect', expected: [] },
-    // { method: 'trace', expected: [] },
+    { method: 'everything-else', expected: headerParam() },
   ])('$method', ({ method, expected }) => {
     expect(getXsrfHeaderForMethod(method as RouteMethod)).toEqual(expected);
   });
