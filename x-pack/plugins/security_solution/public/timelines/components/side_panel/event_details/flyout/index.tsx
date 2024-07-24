@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// TODO: DELETE FIND WHEN FOOTER IS MOVED TO FLYOUT FOLDER
+// TODO: DELETE FIND WHEN FOOTER IS MOVED TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export { FlyoutFooter } from './footer';

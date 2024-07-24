@@ -128,7 +128,6 @@ export const changeViewMode = actionCreator<{
   viewMode: ViewSelection;
 }>('CHANGE_ALERT_TABLE_VIEW_MODE');
 
-// TODO OLD FLYOUT REMOVE
 export const updateShowBuildingBlockAlertsFilter = actionCreator<{
   id: string;
   showBuildingBlockAlerts: boolean;

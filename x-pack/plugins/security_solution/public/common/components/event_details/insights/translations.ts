@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-// TODO: MOVE TO FLYOUT FOLDER
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.suppressedAlertsCountTechnicalPreview',
   {

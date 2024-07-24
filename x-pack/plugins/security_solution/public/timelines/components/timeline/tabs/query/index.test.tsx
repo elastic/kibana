@@ -8,6 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
@@ -109,9 +110,8 @@ describe('Timeline', () => {
       }
     );
 
-    // @ts-ignore
     props = {
-      activeTab: TimelineTabs.query,
+      dispatch: {} as Dispatch,
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
@@ -125,12 +125,13 @@ describe('Timeline', () => {
       kqlQueryLanguage: 'kuery',
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
-      show: true,
       showCallOutUnauthorizedMsg: false,
+      sort,
       start: startDate,
       status: TimelineStatus.active,
-      sort,
       timerangeKind: 'absolute',
+      activeTab: TimelineTabs.query,
+      show: true,
       pinnedEventIds: {},
       eventIdToNoteIds: {},
     };

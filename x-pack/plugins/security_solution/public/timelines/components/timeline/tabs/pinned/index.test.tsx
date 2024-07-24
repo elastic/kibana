@@ -8,6 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
@@ -129,16 +130,16 @@ describe('PinnedTabContent', () => {
       }
     );
 
-    // @ts-ignore
     props = {
+      dispatch: {} as Dispatch,
       columns: defaultHeaders,
       timelineId: TimelineId.test,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      pinnedEventIds: {},
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
       sort,
+      pinnedEventIds: {},
       eventIdToNoteIds: {},
     };
   });

@@ -293,6 +293,7 @@ In other use cases the message field can be used to concatenate different values
       },
     ]
   }
+  dispatch={Object {}}
   end="2018-03-24T03:33:52.253Z"
   eventIdToNoteIds={Object {}}
   filters={Array []}

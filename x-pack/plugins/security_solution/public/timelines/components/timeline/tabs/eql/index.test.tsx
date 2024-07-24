@@ -8,6 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
 
 import { defaultRowRenderers } from '../../body/renderers';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -84,19 +85,19 @@ describe('Timeline', () => {
       }
     );
 
-    // @ts-ignore
     props = {
+      dispatch: {} as Dispatch,
       activeTab: TimelineTabs.eql,
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
-      timelineId: TimelineId.test,
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
       start: startDate,
+      timelineId: TimelineId.test,
       timerangeKind: 'absolute',
       pinnedEventIds: {},
       eventIdToNoteIds: {},

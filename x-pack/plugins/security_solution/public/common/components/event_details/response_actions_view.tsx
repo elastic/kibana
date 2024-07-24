@@ -58,7 +58,7 @@ const EmptyResponseActions = () => {
   );
 };
 
-// TODO: MOVE TO FLYOUT FOLDER
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,

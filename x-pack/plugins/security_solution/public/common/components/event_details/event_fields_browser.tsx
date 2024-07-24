@@ -167,7 +167,7 @@ const useFieldBrowserPagination = () => {
  * attributes to every `<tr>`.
  */
 /** Renders a table view or JSON view of the `ECS` `data` */
-// TODO: MOVE TO FLYOUT FOLDER
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const EventFieldsBrowser = React.memo<Props>(
   ({
     browserFields,

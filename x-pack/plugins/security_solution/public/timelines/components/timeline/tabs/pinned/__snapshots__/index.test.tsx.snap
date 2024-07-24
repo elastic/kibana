@@ -158,6 +158,7 @@ In other use cases the message field can be used to concatenate different values
       },
     ]
   }
+  dispatch={Object {}}
   eventIdToNoteIds={Object {}}
   itemsPerPage={5}
   itemsPerPageOptions={
