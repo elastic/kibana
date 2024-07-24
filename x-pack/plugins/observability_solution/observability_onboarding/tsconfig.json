@@ -41,7 +41,6 @@
     "@kbn/discover-plugin",
     "@kbn/utility-types",
     "@kbn/spaces-plugin",
-    "@kbn/ebt",
     "@kbn/deeplinks-analytics"
   ],
   "exclude": [
