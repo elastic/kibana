@@ -9,7 +9,7 @@ import type { CoreStart, IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { aiopsLogRateAnalysisSchemaV2 } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
+import { aiopsLogRateAnalysisSchemaV3 } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import type { AiopsLicense } from '../../types';
@@ -36,13 +36,13 @@ export const defineRoute = (
     })
     .addVersion(
       {
-        version: '2',
+        version: '3',
         validate: {
           request: {
-            body: aiopsLogRateAnalysisSchemaV2,
+            body: aiopsLogRateAnalysisSchemaV3,
           },
         },
       },
-      routeHandlerFactory('2', license, logger, coreStart, usageCounter)
+      routeHandlerFactory('3', license, logger, coreStart, usageCounter)
     );
 };

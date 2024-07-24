@@ -33,7 +33,7 @@ const significantItem = schema.object({
   unique: schema.maybe(schema.boolean()),
 });
 
-export const aiopsLogRateAnalysisSchemaV2 = schema.object({
+export const aiopsLogRateAnalysisSchemaV3 = schema.object({
   start: schema.number(),
   end: schema.number(),
   searchQuery: schema.string(),
@@ -64,5 +64,5 @@ export const aiopsLogRateAnalysisSchemaV2 = schema.object({
   sampleProbability: schema.maybe(schema.number()),
 });
 
-export type AiopsLogRateAnalysisSchemaV2 = TypeOf<typeof aiopsLogRateAnalysisSchemaV2>;
+export type AiopsLogRateAnalysisSchemaV3 = TypeOf<typeof aiopsLogRateAnalysisSchemaV3>;
 export type AiopsLogRateAnalysisSchemaSignificantItem = TypeOf<typeof significantItem>;
