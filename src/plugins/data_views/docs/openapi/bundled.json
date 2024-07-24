@@ -22,14 +22,6 @@
       }
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ],
   "tags": [
     {
       "name": "data views",
@@ -37,911 +29,10 @@
     }
   ],
   "paths": {
-    "/s/{spaceId}/api/data_views": {
-      "get": {
-        "summary": "Get all data views",
-        "operationId": "getAllDataViews",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data_view": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "namespaces": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "typeMeta": {
-                            "type": "object"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "examples": {
-                  "getAllDataViewsResponse": {
-                    "$ref": "#/components/examples/get_data_views_response"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/data_view": {
-      "post": {
-        "summary": "Create a data view",
-        "operationId": "createDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/create_data_view_request_object"
-              },
-              "examples": {
-                "createDataViewRequest": {
-                  "$ref": "#/components/examples/create_data_view_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/data_view_response_object"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/data_view/{viewId}": {
-      "get": {
-        "summary": "Get a data view",
-        "operationId": "getDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/data_view_response_object"
-                },
-                "examples": {
-                  "getDataViewResponse": {
-                    "$ref": "#/components/examples/get_data_view_response"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a data view",
-        "operationId": "deleteDataView",
-        "description": "WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Indicates a successful call."
-          },
-          "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Update a data view",
-        "operationId": "updateDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/update_data_view_request_object"
-              },
-              "examples": {
-                "updateDataViewRequest": {
-                  "$ref": "#/components/examples/update_data_view_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/data_view_response_object"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/default": {
-      "get": {
-        "summary": "Get the default data view identifier",
-        "operationId": "getDefaultDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data_view_id": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "examples": {
-                  "getDefaultDataViewResponse": {
-                    "$ref": "#/components/examples/get_default_data_view_response"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Sets the default data view identifier",
-        "operationId": "setDefaultDatailView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "data_view_id"
-                ],
-                "properties": {
-                  "data_view_id": {
-                    "type": "string",
-                    "nullable": true,
-                    "description": "The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.\n"
-                  },
-                  "force": {
-                    "type": "boolean",
-                    "description": "Update an existing default data view identifier.",
-                    "default": false
-                  }
-                }
-              },
-              "examples": {
-                "setDefaultDataViewRequest": {
-                  "$ref": "#/components/examples/set_default_data_view_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "acknowledged": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/data_view/{viewId}/fields": {
-      "post": {
-        "summary": "Update data view fields metadata",
-        "operationId": "updateFieldsMetadata",
-        "description": "Update fields presentation metadata such as count, customLabel and format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "fields"
-                ],
-                "properties": {
-                  "fields": {
-                    "description": "The field object.",
-                    "type": "object"
-                  }
-                }
-              },
-              "examples": {
-                "updateFieldsMetadataRequest": {
-                  "$ref": "#/components/examples/update_field_metadata_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "acknowledged": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field": {
-      "post": {
-        "summary": "Create a runtime field",
-        "operationId": "createRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "runtimeField"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name for a runtime field.\n"
-                  },
-                  "runtimeField": {
-                    "type": "object",
-                    "description": "The runtime field definition object.\n"
-                  }
-                }
-              },
-              "examples": {
-                "createRuntimeFieldRequest": {
-                  "$ref": "#/components/examples/create_runtime_field_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Create or update a runtime field",
-        "operationId": "createUpdateRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
-            "name": "viewId",
-            "in": "path",
-            "description": "The ID of the data view fields you want to update.\n",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "runtimeField"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name for a runtime field.\n"
-                  },
-                  "runtimeField": {
-                    "type": "object",
-                    "description": "The runtime field definition object.\n"
-                  }
-                }
-              },
-              "examples": {
-                "updateRuntimeFieldRequest": {
-                  "$ref": "#/components/examples/create_runtime_field_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data_view": {
-                      "type": "object"
-                    },
-                    "fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}": {
-      "get": {
-        "summary": "Get a runtime field",
-        "operationId": "getRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/field_name"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data_view": {
-                      "type": "object"
-                    },
-                    "fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      }
-                    }
-                  }
-                },
-                "examples": {
-                  "getRuntimeFieldResponse": {
-                    "$ref": "#/components/examples/get_runtime_field_response"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a runtime field from a data view",
-        "operationId": "deleteRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/field_name"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          },
-          "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Update a runtime field",
-        "operationId": "updateRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "x-technical-preview": true,
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/field_name"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "runtimeField"
-                ],
-                "properties": {
-                  "runtimeField": {
-                    "type": "object",
-                    "description": "The runtime field definition object.\n\nYou can update following fields:\n\n- `type`\n- `script`\n"
-                  }
-                }
-              },
-              "examples": {
-                "updateRuntimeFieldRequest": {
-                  "$ref": "#/components/examples/update_runtime_field_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/swap_references": {
-      "post": {
-        "summary": "Swap saved object references",
-        "operationId": "swapDataViews",
-        "description": "Changes saved object references from one data view identifier to another. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/swap_data_view_request_object"
-              },
-              "examples": {
-                "swapDataViewRequest": {
-                  "$ref": "#/components/examples/swap_data_view_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "deleteStatus": {
-                      "type": "object",
-                      "properties": {
-                        "deletePerformed": {
-                          "type": "boolean"
-                        },
-                        "remainingRefs": {
-                          "type": "integer"
-                        }
-                      }
-                    },
-                    "result": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "A saved object identifier."
-                          },
-                          "type": {
-                            "type": "string",
-                            "description": "The saved object type."
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/s/{spaceId}/api/data_views/swap_references/_preview": {
-      "post": {
-        "summary": "Preview a saved object reference swap",
-        "operationId": "previewSwapDataViews",
-        "description": "Preview the impact of swapping saved object references from one data view identifier to another.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/swap_data_view_request_object"
-              },
-              "examples": {
-                "previewSwapDataViewRequest": {
-                  "$ref": "#/components/examples/preview_swap_data_view_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "result": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "A saved object identifier."
-                          },
-                          "type": {
-                            "type": "string",
-                            "description": "The saved object type."
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/data_views": {
       "get": {
         "summary": "Get all data views in the default space",
         "operationId": "getAllDataViewsDefault",
-        "x-technical-preview": true,
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1005,9 +96,7 @@
     "/api/data_views/data_view": {
       "post": {
         "summary": "Create a data view in the default space",
-        "operationId": "createDataViewDefault",
-        "x-technical-preview": true,
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "operationId": "createDataViewDefaultw",
         "tags": [
           "data views"
         ],
@@ -1059,8 +148,6 @@
       "get": {
         "summary": "Get a data view in the default space",
         "operationId": "getDataViewDefault",
-        "x-technical-preview": true,
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1100,7 +187,7 @@
       "delete": {
         "summary": "Delete a data view from the default space",
         "operationId": "deleteDataViewDefault",
-        "description": "WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "WARNING: When you delete a data view, it cannot be recovered.\n",
         "tags": [
           "data views"
         ],
@@ -1131,7 +218,6 @@
       "post": {
         "summary": "Update a data view in the default space",
         "operationId": "updateDataViewDefault",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1186,8 +272,7 @@
       "post": {
         "summary": "Update data view fields metadata in the default space",
         "operationId": "updateFieldsMetadataDefault",
-        "x-technical-preview": true,
-        "description": "Update fields presentation metadata such as count, customLabel, customDescription, and format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.\n",
+        "description": "Update fields presentation metadata such as count, customLabel, customDescription, and format.\n",
         "tags": [
           "data views"
         ],
@@ -1256,8 +341,6 @@
       "post": {
         "summary": "Create a runtime field in the default space",
         "operationId": "createRuntimeFieldDefault",
-        "x-technical-preview": true,
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1314,7 +397,6 @@
       "put": {
         "summary": "Create or update a runtime field in the default space",
         "operationId": "createUpdateRuntimeFieldDefault",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1400,8 +482,6 @@
       "get": {
         "summary": "Get a runtime field in the default space",
         "operationId": "getRuntimeFieldDefault",
-        "x-technical-preview": true,
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1455,7 +535,6 @@
       "delete": {
         "summary": "Delete a runtime field from a data view in the default space",
         "operationId": "deleteRuntimeFieldDefault",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1486,7 +565,6 @@
       "post": {
         "summary": "Update a runtime field in the default space",
         "operationId": "updateRuntimeFieldDefault",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -1543,11 +621,9 @@
       "get": {
         "summary": "Get the default data view in the default space",
         "operationId": "getDefaultDataViewDefault",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
-        "x-technical-preview": true,
         "responses": {
           "200": {
             "description": "Indicates a successful call.",
@@ -1584,11 +660,9 @@
       "post": {
         "summary": "Set the default data view in the default space",
         "operationId": "setDefaultDatailViewDefault",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
-        "x-technical-preview": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1786,59 +860,6 @@
     }
   },
   "components": {
-    "securitySchemes": {
-      "basicAuth": {
-        "type": "http",
-        "scheme": "basic"
-      },
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "Serverless APIs support only key-based authentication. You must create an API key and use the encoded value in the request header. For example: 'Authorization: ApiKey base64AccessApiKey'.\n"
-      }
-    },
-    "parameters": {
-      "space_id": {
-        "in": "path",
-        "name": "spaceId",
-        "description": "An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "default"
-        }
-      },
-      "kbn_xsrf": {
-        "schema": {
-          "type": "string"
-        },
-        "in": "header",
-        "name": "kbn-xsrf",
-        "description": "Cross-site request forgery protection",
-        "required": true
-      },
-      "view_id": {
-        "in": "path",
-        "name": "viewId",
-        "description": "An identifier for the data view.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
-        }
-      },
-      "field_name": {
-        "in": "path",
-        "name": "fieldName",
-        "description": "The name of the runtime field.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "hour_of_day"
-        }
-      }
-    },
     "examples": {
       "get_data_views_response": {
         "summary": "The get all data views API returns a list of data views.",
@@ -3058,19 +2079,6 @@
           "refresh_fields": true
         }
       },
-      "get_default_data_view_response": {
-        "summary": "The get default data view API returns the default data view identifier.",
-        "value": {
-          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
-        }
-      },
-      "set_default_data_view_request": {
-        "summary": "Set the default data view identifier.",
-        "value": {
-          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
-          "force": true
-        }
-      },
       "update_field_metadata_request": {
         "summary": "Update metadata for multiple fields.",
         "value": {
@@ -3726,6 +2734,19 @@
           }
         }
       },
+      "get_default_data_view_response": {
+        "summary": "The get default data view API returns the default data view identifier.",
+        "value": {
+          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+        }
+      },
+      "set_default_data_view_request": {
+        "summary": "Set the default data view identifier.",
+        "value": {
+          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "force": true
+        }
+      },
       "swap_data_view_request": {
         "summary": "Swap references from data view ID \"abcd-efg\" to \"xyz-123\" and remove the data view that is no longer referenced.",
         "value": {
@@ -4132,6 +3153,37 @@
             "type": "string",
             "description": "New saved object reference value to replace the old value."
           }
+        }
+      }
+    },
+    "parameters": {
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "description": "Cross-site request forgery protection",
+        "required": true
+      },
+      "view_id": {
+        "in": "path",
+        "name": "viewId",
+        "description": "An identifier for the data view.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+        }
+      },
+      "field_name": {
+        "in": "path",
+        "name": "fieldName",
+        "description": "The name of the runtime field.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "hour_of_day"
         }
       }
     }
