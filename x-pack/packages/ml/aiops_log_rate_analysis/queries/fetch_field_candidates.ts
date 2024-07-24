@@ -6,21 +6,29 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import { containsECSIdentifierFields, filterByECSFields } from '../ecs_fields';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
+import { containsECSIdentifierFields, filterByECSFields } from '../ecs_fields';
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
-import {
-  SUPPORTED_ES_FIELD_TYPES,
-  SUPPORTED_ES_FIELD_TYPES_TEXT,
-  TEXT_FIELD_WHITE_LIST,
-} from './fetch_index_info';
+// Supported field names for text fields for log rate analysis.
+// If we analyse all detected text fields, we might run into performance
+// issues with the `categorize_text` aggregation. Until this is resolved, we
+// rely on a predefined white list of supported text fields.
+export const TEXT_FIELD_WHITE_LIST = ['message', 'error.message'];
 
-interface FetchFieldCandidatesParams {
+export const SUPPORTED_ES_FIELD_TYPES = [
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.BOOLEAN,
+];
+
+export const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
+
+export interface FetchFieldCandidatesParams {
   esClient: ElasticsearchClient;
   abortSignal?: AbortSignal;
-  arguments: AiopsLogRateAnalysisSchema<'2'> & {
+  arguments: AiopsLogRateAnalysisSchema & {
     textFieldCandidatesOverrides: string[];
   };
 }

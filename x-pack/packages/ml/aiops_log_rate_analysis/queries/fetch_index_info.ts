@@ -7,30 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { ElasticsearchClient } from '@kbn/core/server';
-
-import type { AiopsLogRateAnalysisSchema } from '../api/schema';
-import { containsECSIdentifierFields, filterByECSFields } from '../ecs_fields';
+import { fetchFieldCandidates, type FetchFieldCandidatesParams } from './fetch_field_candidates';
 
 import { getTotalDocCountRequest } from './get_total_doc_count_request';
 
 // TODO Consolidate with duplicate `fetchPValues` in
 // `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
-
-// Supported field names for text fields for log rate analysis.
-// If we analyse all detected text fields, we might run into performance
-// issues with the `categorize_text` aggregation. Until this is resolved, we
-// rely on a predefined white list of supported text fields.
-export const TEXT_FIELD_WHITE_LIST = ['message', 'error.message'];
-
-export const SUPPORTED_ES_FIELD_TYPES = [
-  ES_FIELD_TYPES.KEYWORD,
-  ES_FIELD_TYPES.IP,
-  ES_FIELD_TYPES.BOOLEAN,
-];
-
-export const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
 
 export interface IndexInfo {
   keywordFieldCandidates: string[];
@@ -44,97 +26,35 @@ export const fetchIndexInfo = async ({
   esClient,
   abortSignal,
   arguments: args,
-}: {
-  esClient: ElasticsearchClient;
-  abortSignal?: AbortSignal;
-  arguments: AiopsLogRateAnalysisSchema & {
-    textFieldCandidatesOverrides?: string[];
-  };
-}): Promise<IndexInfo> => {
+}: FetchFieldCandidatesParams): Promise<IndexInfo> => {
   const { textFieldCandidatesOverrides = [], ...params } = args;
-  const { index } = params;
-  // Get all supported fields
-  const respMapping = await esClient.fieldCaps(
-    {
-      fields: '*',
-      filters: '-metadata,-parent',
-      include_empty_fields: false,
-      index,
-      index_filter: {
-        range: {
-          [params.timeFieldName]: {
-            gte: params.deviationMin,
-            lte: params.deviationMax,
-          },
-        },
-      },
-      types: [...SUPPORTED_ES_FIELD_TYPES, ...SUPPORTED_ES_FIELD_TYPES_TEXT],
-    },
-    { signal: abortSignal, maxRetries: 0 }
-  );
 
-  const allFieldNames: string[] = [];
-
-  const acceptableFields: Set<string> = new Set();
-  const acceptableTextFields: Set<string> = new Set();
-
-  Object.entries(respMapping.fields).forEach(([key, value]) => {
-    const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
-    const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
-    const isAggregatable = fieldTypes.some((type) => value[type].aggregatable);
-    const isTextField = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES_TEXT.includes(type));
-
-    // Check if fieldName is something we can aggregate on
-    if (isSupportedType && isAggregatable) {
-      acceptableFields.add(key);
-    }
-
-    if (isTextField && TEXT_FIELD_WHITE_LIST.includes(key)) {
-      acceptableTextFields.add(key);
-    }
-
-    allFieldNames.push(key);
-  });
-
-  // Get the total doc count for the baseline time range
-  const respBaselineTotalDocCount = await esClient.search(
-    getTotalDocCountRequest({ ...params, start: params.baselineMin, end: params.baselineMax }),
-    {
-      signal: abortSignal,
-      maxRetries: 0,
-    }
-  );
-
-  // Get the total doc count for the deviation time range
-  const respDeviationTotalDocCount = await esClient.search(
-    getTotalDocCountRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
-    {
-      signal: abortSignal,
-      maxRetries: 0,
-    }
-  );
-
-  const textFieldCandidatesOverridesWithKeywordPostfix = textFieldCandidatesOverrides.map(
-    (d) => `${d}.keyword`
-  );
-
-  let keywordFieldCandidates: string[] = [...acceptableFields].filter(
-    (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
-  );
-  const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
-    const fieldName = field.replace(new RegExp(/\.text$/), '');
-    return (
-      (!keywordFieldCandidates.includes(fieldName) &&
-        !keywordFieldCandidates.includes(`${fieldName}.keyword`)) ||
-      textFieldCandidatesOverrides.includes(field)
-    );
-  });
-
-  // Finally, check if the fields allow to identify the index as ECS.
-  // If that's the case, we'll only consider a set of ECS fields for the analysis.
-  if (containsECSIdentifierFields(keywordFieldCandidates)) {
-    keywordFieldCandidates = filterByECSFields(keywordFieldCandidates);
-  }
+  const [fieldCandidates, respBaselineTotalDocCount, respDeviationTotalDocCount] =
+    await Promise.all([
+      fetchFieldCandidates({
+        esClient,
+        abortSignal,
+        arguments: args,
+      }),
+      esClient.search(
+        getTotalDocCountRequest({ ...params, start: params.baselineMin, end: params.baselineMax }),
+        {
+          signal: abortSignal,
+          maxRetries: 0,
+        }
+      ),
+      esClient.search(
+        getTotalDocCountRequest({
+          ...params,
+          start: params.deviationMin,
+          end: params.deviationMax,
+        }),
+        {
+          signal: abortSignal,
+          maxRetries: 0,
+        }
+      ),
+    ]);
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;
@@ -142,8 +62,8 @@ export const fetchIndexInfo = async ({
     .value;
 
   return {
-    keywordFieldCandidates: keywordFieldCandidates.sort(),
-    textFieldCandidates: textFieldCandidates.sort(),
+    keywordFieldCandidates: fieldCandidates.selectedKeywordFieldCandidates.sort(),
+    textFieldCandidates: fieldCandidates.textFieldCandidates.sort(),
     baselineTotalDocCount,
     deviationTotalDocCount,
     zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,

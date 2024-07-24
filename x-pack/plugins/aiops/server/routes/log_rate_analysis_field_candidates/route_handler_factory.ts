@@ -80,7 +80,12 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
         return response.ok({ body: fieldCandidates });
       } catch (e) {
-        return response.badRequest();
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: 'Unable to fetch field candidates.',
+          },
+        });
       }
     });
   };
