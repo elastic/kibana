@@ -38,19 +38,6 @@ export function registerGrokSimulateRoute(framework: KibanaFramework) {
           body: grokdebuggerRequest.upstreamJSON,
         });
         const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(simulateResponseFromES);
-        console.log(
-          JSON.stringify(
-            {
-              req: request.body,
-              grokdebuggerRequest,
-              simulateResponseFromES,
-              grokdebuggerResponse,
-            },
-            null,
-            2
-          )
-        );
-
         return response.ok({
           body: grokdebuggerResponse,
         });
