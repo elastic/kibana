@@ -117,6 +117,7 @@ const getThreeWayDiffOutcome = ({
 export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolean => {
   return (
     diffCase === ThreeWayDiffOutcome.StockValueCanUpdate ||
-    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate
+    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
+    diffCase === ThreeWayDiffOutcome.MissingBaseCanUpdate
   );
 };

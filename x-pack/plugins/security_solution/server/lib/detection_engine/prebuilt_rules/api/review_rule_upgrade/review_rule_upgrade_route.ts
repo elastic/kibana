@@ -145,7 +145,9 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,
-          (fieldDiff) => fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate
+          (fieldDiff) =>
+            fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate &&
+            fieldDiff.diff_outcome !== ThreeWayDiffOutcome.MissingBaseNoUpdate
         ),
         num_fields_with_updates: ruleDiff.num_fields_with_updates,
         num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,
