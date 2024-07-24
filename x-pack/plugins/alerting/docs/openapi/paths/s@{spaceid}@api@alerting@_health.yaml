@@ -1,5 +1,5 @@
 get:
-  summary: Get the alerting framework health status
+  summary: Get the alerting framework health
   operationId: getAlertingHealth
   description: >
     You must have `read` privileges for the **Management > Stack Rules** feature

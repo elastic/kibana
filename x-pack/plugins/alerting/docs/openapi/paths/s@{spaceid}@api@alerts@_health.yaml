@@ -1,5 +1,5 @@
 get:
-  summary: Get the alerting framework health status
+  summary: Get the alerting framework health
   operationId: legacyGetAlertingHealth
   deprecated: true
   description: Deprecated in 7.13.0. Use the get alerting framework health API instead.
