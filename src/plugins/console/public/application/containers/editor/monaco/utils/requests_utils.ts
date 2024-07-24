@@ -139,12 +139,14 @@ const replaceVariables = (
   if (variableRegex.test(text)) {
     text = text.replaceAll(variableRegex, (match, key) => {
       const variable = variables.find(({ name }) => name === key);
+      const value = variable?.value;
 
-      if (isDataVariable && variable?.value) {
-        return isJsonString(variable?.value) ? variable?.value : `"${variable?.value}"`;
+      if (isDataVariable && value) {
+        // If the variable value is an object, add it as it is. Otherwise, surround it with quotes.
+        return isJsonString(value) ? value : `"${value}"`;
       }
 
-      return variable?.value ?? match;
+      return value ?? match;
     });
   }
   return text;
