@@ -136,7 +136,7 @@ const aggs = {
   },
   monitorTypeAggs: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}`,
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
       exclude: [''],
     },
