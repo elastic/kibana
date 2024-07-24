@@ -6,14 +6,14 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 
-const paramSchema = schema.object({
-  id: schema.string(),
-});
+import {
+  EnableRuleRequestParamsV1,
+  enableRuleRequestParamsSchemaV1,
+} from '../../../../../common/routes/rule/apis/enable';
 
 export const enableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -24,18 +24,19 @@ export const enableRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_enable`,
       options: {
         access: 'public',
-        summary: `Enable a rule`,
+        summary: 'Enable a rule',
       },
       validate: {
-        params: paramSchema,
+        params: enableRuleRequestParamsSchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
+        const params: EnableRuleRequestParamsV1 = req.params;
+
         try {
-          await rulesClient.enable({ id });
+          await rulesClient.enableRule(params);
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

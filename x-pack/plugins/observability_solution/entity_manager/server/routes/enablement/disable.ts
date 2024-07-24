@@ -6,16 +6,13 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
-import {
-  checkIfEntityDiscoveryAPIKeyIsValid,
-  deleteEntityDiscoveryAPIKey,
-  readEntityDiscoveryAPIKey,
-} from '../../lib/auth';
-import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
+import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../../lib/auth';
+import { ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
+import { canDisableEntityDiscovery } from '../../lib/auth/privileges';
+import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
@@ -33,23 +30,21 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
     },
     async (context, req, res) => {
       try {
-        server.logger.debug('reading entity discovery API key from saved object');
-        const apiKey = await readEntityDiscoveryAPIKey(server);
-
-        if (apiKey === undefined) {
-          return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_FOUND } });
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const canDisable = await canDisableEntityDiscovery(esClient);
+        if (!canDisable) {
+          return res.ok({
+            body: {
+              success: false,
+              reason: ERROR_USER_NOT_AUTHORIZED,
+              message:
+                'Current Kibana user does not have the required permissions to disable entity discovery',
+            },
+          });
         }
-
-        server.logger.debug('validating existing entity discovery API key');
-        const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
-
-        if (!isValid) {
-          return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_VALID } });
-        }
-
-        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-        const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-        const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+        const soClient = (await context.core).savedObjects.getClient({
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+        });
 
         await uninstallBuiltInEntityDefinitions({
           soClient,
@@ -58,10 +53,16 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           deleteData: req.query.deleteData,
         });
 
-        await deleteEntityDiscoveryAPIKey((await context.core).savedObjects.client);
-        await server.security.authc.apiKeys.invalidateAsInternalUser({
-          ids: [apiKey.id],
-        });
+        server.logger.debug('reading entity discovery API key from saved object');
+        const apiKey = await readEntityDiscoveryAPIKey(server);
+        // api key could be deleted outside of the apis, it does not affect the
+        // disablement flow
+        if (apiKey) {
+          await deleteEntityDiscoveryAPIKey(soClient);
+          await server.security.authc.apiKeys.invalidateAsInternalUser({
+            ids: [apiKey.id],
+          });
+        }
 
         return res.ok({ body: { success: true } });
       } catch (err) {
