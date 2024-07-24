@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { KeyValueDisplay } from '../key_value_display';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
@@ -184,6 +185,11 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
   ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
     const testId = useTestIdGenerator(dataTestSubj);
     const agentIds = agentId ? [agentId] : action.agents;
+    const { canGetRunningProcesses } = useUserPrivileges().endpointPrivileges;
+
+    if (!canGetRunningProcesses) {
+      return null;
+    }
 
     return (
       <div data-test-subj={dataTestSubj}>
@@ -203,7 +209,7 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
                     <ResponseActionFileDownloadLink
                       action={action}
                       agentId={id}
-                      canAccessFileDownloadLink={true}
+                      canAccessFileDownloadLink={canGetRunningProcesses}
                       data-test-subj={testId('download')}
                     />
                   }
