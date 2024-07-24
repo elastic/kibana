@@ -7,6 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import {
   EuiButton,
   EuiFieldText,
@@ -23,6 +25,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n-react';
+
+import { GenerateConfigButton } from '../../connector_detail/components/generate_config_button';
+import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
+import { DeploymentLogic } from '../../connector_detail/deployment_logic';
 
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
@@ -75,7 +81,8 @@ export const StartStep: React.FC<StartStepProps> = ({
   const [radioIdSelected, setRadioIdSelected] = useState(
     selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId
   );
-
+  const { generateConfiguration } = useActions(DeploymentLogic);
+  const { isGenerateLoading } = useValues(DeploymentLogic);
   useEffect(() => {
     setSelfManaged(radioIdSelected === selfManagedRadioButtonId ? true : false);
   }, [radioIdSelected]);
@@ -303,29 +310,48 @@ export const StartStep: React.FC<StartStepProps> = ({
               </EuiText>
               <EuiSpacer size="m" />
               {isNextStepEnabled ? (
-                <EuiButton
-                  data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-                  fill
-                  onClick={() => setCurrentStep(currentStep + 1)}
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
-                    { defaultMessage: 'Continue' }
-                  )}
-                </EuiButton>
+                <>
+                  <GeneratedConfigFields
+                    apiKey={{
+                      api_key: 'asd234fsdfsdfsd234',
+                      encoded: 'asdasd234fsdfsdf',
+                      id: 'string',
+                      name: 'my-api-key',
+                    }}
+                    connector={{
+                      api_key_id: 'asldkj234lkj23dasldkajasd234',
+                      api_key_secret_id: 'asdasd234fasdf',
+                    }}
+                    generateApiKey={() => {}}
+                    isGenerateLoading={false}
+                  />
+                  <EuiSpacer size="m" />
+                  <EuiButton
+                    data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+                    fill
+                    onClick={() => setCurrentStep(currentStep + 1)}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
+                      { defaultMessage: 'Continue' }
+                    )}
+                  </EuiButton>
+                </>
               ) : (
-                <EuiButton
-                  data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-                  iconType="sparkles"
-                  fill
-                  onClick={() => setNextStepEnabled(true)}
+                <GenerateConfigButton
+                  connectorId={''}
+                  generateConfiguration={() => {
+                    setNextStepEnabled(true);
+                    setTimeout(() => {
+                      window.scrollTo({
+                        behavior: 'smooth',
+                        top: window.innerHeight,
+                      });
+                    }, 100);
+                  }}
+                  isGenerateLoading={isGenerateLoading}
                   disabled={connectorSelected.name === '' || connectorName === ''}
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
-                    { defaultMessage: 'Generate configuration' }
-                  )}
-                </EuiButton>
+                />
               )}
             </EuiPanel>
           </EuiFlexItem>

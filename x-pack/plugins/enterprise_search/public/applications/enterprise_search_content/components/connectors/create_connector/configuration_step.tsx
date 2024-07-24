@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useValues, useActions } from 'kea';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,16 +17,23 @@ import {
   EuiTitle,
   EuiText,
   EuiButton,
+  EuiButtonEmpty,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 // import { FormattedMessage } from '@kbn/i18n-react';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
+
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
 interface ConfigurationStepProps {
   currentStep: number;
   isNextStepEnabled: boolean;
   setCurrentStep: Function;
   setNextStepEnabled: Function;
+  setSyncing: Function;
+  syncing: boolean;
   title: string;
 }
 
@@ -34,24 +43,60 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   setCurrentStep,
   isNextStepEnabled,
   setNextStepEnabled,
+  setSyncing,
+  syncing,
 }) => {
+  const { connector } = useValues(ConnectorViewLogic);
+
   return (
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+          <EuiPanel hasShadow={false} hasBorder paddingSize="l" style={{ position: 'relative' }}>
             <EuiTitle size="m">
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiButton
+            <ConnectorConfigurationComponent connector={connector} />
+            <EuiSpacer size="m" />
+            <EuiButtonEmpty
+              size="s"
               data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-              onClick={() => setNextStepEnabled(true)}
+              onClick={() => {
+                setNextStepEnabled(true);
+                setTimeout(() => {
+                  window.scrollTo({
+                    behavior: 'smooth',
+                    top: window.innerHeight,
+                  });
+                }, 100);
+              }}
             >
               {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
-                defaultMessage: 'Save',
+                defaultMessage: 'Simulates: Save',
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+              onClick={() => {
+                setSyncing(true);
+                setNextStepEnabled(true);
+                setTimeout(() => {
+                  window.scrollTo({
+                    behavior: 'smooth',
+                    top: window.innerHeight,
+                  });
+                }, 100);
+              }}
+            >
+              {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
+                defaultMessage: 'Simulates: Save and sync',
+              })}
+            </EuiButtonEmpty>
+            {syncing && (
+              <EuiProgress size="xs" position="absolute" style={{ top: 'calc(100% - 2px)' }} />
+            )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>

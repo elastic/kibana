@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 // import { useLocation } from 'react-router-dom';
 
 import { css } from '@emotion/react';
-// import { useValues } from 'kea';
 
 import { useValues, useActions } from 'kea';
 
@@ -52,6 +51,7 @@ export const CreateConnector: React.FC = () => {
   const { connectorTypes } = useValues(KibanaLogic);
   const allConnectors = connectorTypes.sort((a, b) => a.name.localeCompare(b.name)); // alphabetically ordered
   const { fetchConnector } = useActions(ConnectorViewLogic);
+  const [syncing, setSyncing] = useState(false);
   useEffect(() => {
     fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
   }, []);
@@ -165,6 +165,8 @@ export const CreateConnector: React.FC = () => {
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={finishUpStepComplete}
           setNextStepEnabled={setFinishUpStepComplete}
+          syncing={syncing}
+          setSyncing={setSyncing}
         />
       ),
       status: configurationStepStatus,
@@ -182,6 +184,8 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
             { defaultMessage: 'Finish up' }
           )}
+          syncing={syncing}
+          setSyncing={setSyncing}
         />
       ),
       status: finishUpStepStatus,
@@ -234,6 +238,8 @@ export const CreateConnector: React.FC = () => {
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={finishUpStepComplete}
           setNextStepEnabled={setFinishUpStepComplete}
+          syncing={syncing}
+          setSyncing={setSyncing}
         />
       ),
       status: configurationStepStatus,
@@ -250,6 +256,8 @@ export const CreateConnector: React.FC = () => {
             'xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel',
             { defaultMessage: 'Finish up' }
           )}
+          syncing={syncing}
+          setSyncing={setSyncing}
         />
       ),
       status: finishUpStepStatus,

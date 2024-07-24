@@ -38,17 +38,18 @@ import { i18n } from '@kbn/i18n';
 import connectorLogo from './assets/connector-logo.svg';
 
 interface FinishUpStepProps {
+  setSyncing: Function;
+  syncing: boolean;
   title: string;
 }
 
-export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
+export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setSyncing }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
   });
   const [hasData, setHasData] = useState(false);
-  const [syncing, setSyncing] = useState(false);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -107,7 +108,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                 <EuiSpacer size="xs" />
                 <EuiProgress
                   size="s"
-                  color="primary"
+                  color="success"
                   onClick={() => {
                     setHasData(true);
                     setSyncing(false);

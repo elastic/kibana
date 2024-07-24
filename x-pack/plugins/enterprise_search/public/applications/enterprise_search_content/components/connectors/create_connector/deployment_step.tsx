@@ -12,9 +12,9 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
   EuiText,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
 } from '@elastic/eui';
 
@@ -38,26 +38,23 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <ConnectorDeployment />
-      <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-          <EuiTitle size="m">
-            <h3>
-              {i18n.translate('xpack.enterpriseSearch.deploymentStep.h3.deploymentLabel', {
-                defaultMessage: 'Deployment',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiButton
-            data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-            onClick={() => setNextStepEnabled(true)}
-          >
-            {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
-              defaultMessage: 'Save',
-            })}
-          </EuiButton>
-        </EuiPanel>
-      </EuiFlexItem>
+      <EuiButtonEmpty
+        size="s"
+        data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
+        onClick={() => {
+          setNextStepEnabled(true);
+          setTimeout(() => {
+            window.scrollTo({
+              behavior: 'smooth',
+              top: window.innerHeight,
+            });
+          }, 100);
+        }}
+      >
+        {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
+          defaultMessage: 'Simulate: Connected',
+        })}
+      </EuiButtonEmpty>
       <EuiFlexItem>
         <EuiPanel
           hasShadow={false}
