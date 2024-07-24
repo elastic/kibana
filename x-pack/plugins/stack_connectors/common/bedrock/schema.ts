@@ -25,6 +25,7 @@ export const RunActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  raw: schema.maybe(schema.boolean()),
 });
 
 export const InvokeAIActionParamsSchema = schema.object({
@@ -42,11 +43,50 @@ export const InvokeAIActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  anthropicVersion: schema.maybe(schema.string()),
+  tools: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        description: schema.string(),
+        input_schema: schema.object({}, { unknowns: 'allow' }),
+      })
+    )
+  ),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
 });
+
+export const InvokeAIRawActionParamsSchema = schema.object({
+  messages: schema.arrayOf(
+    schema.object({
+      role: schema.string(),
+      content: schema.any(),
+    })
+  ),
+  model: schema.maybe(schema.string()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+  system: schema.maybe(schema.string()),
+  maxTokens: schema.maybe(schema.number()),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
+  anthropicVersion: schema.maybe(schema.string()),
+  timeout: schema.maybe(schema.number()),
+  tools: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        description: schema.string(),
+        input_schema: schema.object({}, { unknowns: 'allow' }),
+      })
+    )
+  ),
+});
+
+export const InvokeAIRawActionResponseSchema = schema.object({}, { unknowns: 'allow' });
 
 export const RunApiLatestResponseSchema = schema.object(
   {
