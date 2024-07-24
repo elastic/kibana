@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 
+import type { BoolQuery } from '@kbn/es-query';
 import {
   type GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsRequestBodyPayloadRT,
@@ -114,7 +115,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
 
         const assetCount = await getHostsCount({
           infraMetricsClient,
-          query: (query?.bool as Record<string, string>) ?? undefined,
+          query: (query?.bool as BoolQuery) ?? undefined,
           from,
           to,
         });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { BoolQuery } from '@kbn/es-query';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 
@@ -18,7 +18,7 @@ export async function getHostsCount({
   to,
 }: {
   infraMetricsClient: InfraMetricsClient;
-  query?: Record<string, unknown>;
+  query?: BoolQuery;
   kuery?: string;
   from: string;
   to: string;
@@ -33,7 +33,7 @@ export async function getHostsCount({
       },
     },
   ];
-  const queryFilter = (query?.filter as QueryDslQueryContainer[]) ?? [];
+  const queryFilter = query?.filter ?? [];
   const queryBool = query ?? {};
 
   const params = {
