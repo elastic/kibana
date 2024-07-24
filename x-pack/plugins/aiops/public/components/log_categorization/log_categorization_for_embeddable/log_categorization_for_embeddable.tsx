@@ -33,7 +33,6 @@ import { LoadingCategorization } from '../loading_categorization';
 import { useValidateFieldRequest } from '../use_validate_category_field';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
-// import { createAdditionalConfigHash, createDocumentStatsHash } from '../utils';
 import { FieldValidationCallout } from '../category_validation_callout';
 import { useActions } from '../category_table/use_actions';
 
@@ -88,14 +87,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   const { searchQuery } = useSearch({ dataView, savedSearch: savedSearch ?? null }, appState, true);
 
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  // const [currentDocumentStatsHash, setCurrentDocumentStatsHash] = useState<number | null>(null);
-  // const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
-  // const [currentAdditionalConfigsHash, setCurrentAdditionalConfigsHash] = useState<number | null>(
-  //   null
-  // );
-  // const [previousAdditionalConfigsHash, setPreviousAdditionalConfigsHash] = useState<number | null>(
-  //   null
-  // );
+
   const [loading, setLoading] = useState<boolean | null>(null);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [data, setData] = useState<{
@@ -116,11 +108,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   );
 
   const cancelRequest = useCallback(() => {
-    // console.log('cancelRequest');
-
     cancelWiderTimeRangeRequest();
     cancelValidationRequest();
     cancelCategorizationRequest();
+    setLoading(false);
   }, [cancelCategorizationRequest, cancelValidationRequest, cancelWiderTimeRangeRequest]);
 
   useEffect(
@@ -145,16 +136,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     false
   );
 
-  // useEffect(
-  //   function forceRefreshDataViewChange() {
-  //     if (currentDocumentStatsHash === null) {
-  //       forceRefresh();
-  //     }
-  //   },
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   [currentDocumentStatsHash, searchQuery]
-  // );
-
   const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {
       const filter = buildEmptyFilter(false, dataView.id);
@@ -176,51 +157,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     onAddFilter,
     undefined
   );
-
-  // useEffect(
-  //   function createDocumentStatHash() {
-  //     if (documentStats.documentCountStats === undefined) {
-  //       return;
-  //     }
-
-  //     const hash = createDocumentStatsHash(documentStats);
-  //     if (hash !== previousDocumentStatsHash) {
-  //       setCurrentDocumentStatsHash(hash);
-  //       setData(null);
-  //       setFieldValidationResult(null);
-  //     }
-  //   },
-  //   [documentStats, previousDocumentStatsHash]
-  // );
-
-  // useEffect(
-  //   function createAdditionalConfigHash2() {
-  //     if (!fieldName) {
-  //       return;
-  //     }
-
-  //     const hash = createAdditionalConfigHash([
-  //       dataView.name,
-  //       fieldName,
-  //       minimumTimeRangeOption,
-  //       randomSamplerMode,
-  //       String(randomSamplerProbability ?? ''),
-  //     ]);
-  //     if (hash !== previousAdditionalConfigsHash) {
-  //       setCurrentAdditionalConfigsHash(hash);
-  //       setData(null);
-  //       setFieldValidationResult(null);
-  //     }
-  //   },
-  //   [
-  //     dataView.name,
-  //     fieldName,
-  //     minimumTimeRangeOption,
-  //     previousAdditionalConfigsHash,
-  //     randomSamplerMode,
-  //     randomSamplerProbability,
-  //   ]
-  // );
 
   const loadCategories = useCallback(async () => {
     const { getIndexPattern, timeFieldName: timeField } = dataView;
@@ -287,8 +223,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           timeRange.useSubAgg ? additionalFilter : undefined
         ),
       ]);
-
-      // console.log('categories loaded');
 
       if (mounted.current !== true) {
         return;
@@ -377,15 +311,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           docCount,
         }))
       );
-      // console.log('triggerAnalysis');
 
       loadCategories();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      // loadCategories,
       randomSampler,
-      fieldValidationResult,
       documentStats.documentCountStats?.buckets,
       documentStats.totalCount,
       dataView.name,
@@ -399,6 +330,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   useEffect(
     function refreshTriggeredFromButton() {
       if (input.lastReloadRequestTime !== undefined) {
+        cancelRequest();
         forceRefresh();
       }
     },
