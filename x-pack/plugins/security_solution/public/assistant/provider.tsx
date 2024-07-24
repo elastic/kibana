@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
+import { useState } from 'react';
 import React, { useEffect } from 'react';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -21,7 +22,7 @@ import {
 
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Message } from '@kbn/elastic-assistant-common';
+import type { Message, PromptResponse } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useObservable } from 'react-use';
 import { APP_ID } from '../../common';
@@ -128,7 +129,7 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
     notifications.toasts
   );
   if (bulkResult && bulkResult.success) {
-    return true;
+    return bulkResult.attributes.results.created;
   }
 };
 
@@ -175,6 +176,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     notifications,
     storage,
   ]);
+  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
@@ -189,7 +191,12 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
         });
 
         if (res.total === 0) {
-          await createBasePrompts(notifications, http);
+          const createResults = await createBasePrompts(notifications, http);
+          if (createResults) {
+            setPrompts(createResults);
+          }
+        } else {
+          setPrompts(res.data);
         }
       }
     });
@@ -205,7 +212,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
-
+  if (prompts.length === 0) return null;
   return (
     <ElasticAssistantProvider
       actionTypeRegistry={actionTypeRegistry}
