@@ -107,20 +107,22 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                <EuiButton
-                  iconType="gear"
-                  data-test-subj="pluginsAiAssistantSelectionPageButton"
-                  onClick={() =>
-                    navigateToApp('management', {
-                      path: 'kibana/observabilityAiAssistantManagement',
-                    })
-                  }
-                >
-                  {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.manageSettingsButtonLabel',
-                    { defaultMessage: 'Manage Settings' }
-                  )}
-                </EuiButton>
+                {observabilityAIAssistantEnabled && (
+                  <EuiButton
+                    iconType="gear"
+                    data-test-subj="pluginsAiAssistantSelectionPageButton"
+                    onClick={() =>
+                      navigateToApp('management', {
+                        path: 'kibana/observabilityAiAssistantManagement',
+                      })
+                    }
+                  >
+                    {i18n.translate(
+                      'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.manageSettingsButtonLabel',
+                      { defaultMessage: 'Manage Settings' }
+                    )}
+                  </EuiButton>
+                )}
               </div>
             }
             display="plain"
@@ -176,18 +178,20 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                <EuiButton
-                  data-test-subj="pluginsAiAssistantSelectionPageButton"
-                  iconType="gear"
-                  onClick={() =>
-                    navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
-                  }
-                >
-                  {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
-                    { defaultMessage: 'Manage Settings' }
-                  )}
-                </EuiButton>
+                {securityAIAssistantEnabled && (
+                  <EuiButton
+                    data-test-subj="pluginsAiAssistantSelectionSecurityPageButton"
+                    iconType="gear"
+                    onClick={() =>
+                      navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
+                    }
+                  >
+                    {i18n.translate(
+                      'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
+                      { defaultMessage: 'Manage Settings' }
+                    )}
+                  </EuiButton>
+                )}
               </div>
             }
             display="plain"
