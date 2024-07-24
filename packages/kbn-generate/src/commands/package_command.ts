@@ -157,6 +157,7 @@ export const PackageCommand: GenerateCommand = {
       cache: false,
       cwd: REPO_ROOT,
       fix: true,
+
       extensions: ['.js', '.mjs', '.ts', '.tsx'],
     });
     await ESLint.outputFixes(await eslint.lintFiles([packageDir]));
