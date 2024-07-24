@@ -313,11 +313,28 @@ export const setup = async (caret = '/') => {
     );
   };
 
-  const assertSuggestions = async (query: string, expected: string[], opts?: SuggestOptions) => {
+  const assertSuggestions = async (
+    query: string,
+    expected: Array<string | PartialSuggestionWithText>,
+    opts?: SuggestOptions
+  ) => {
     const result = await suggest(query, opts);
     const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    expect(resultTexts).toEqual([...expected].sort());
+    const expectedTexts = expected
+      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+      .sort();
+
+    expect(resultTexts).toEqual(expectedTexts);
+
+    const expectedNonStringSuggestions = expected.filter(
+      (suggestion) => typeof suggestion !== 'string'
+    ) as PartialSuggestionWithText[];
+
+    for (const expectedSuggestion of expectedNonStringSuggestions) {
+      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+    }
   };
 
   return {
