@@ -79,7 +79,7 @@ export default function TextBasedLanguagesTransitionModal({
               {i18n.translate(
                 'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalHelpText',
                 {
-                  defaultMessage: 'Help us improve ES|QL',
+                  defaultMessage: 'Help us improve ES|QL.',
                 }
               )}
             </EuiText>

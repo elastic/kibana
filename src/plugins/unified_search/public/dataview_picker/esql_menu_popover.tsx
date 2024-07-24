@@ -31,18 +31,18 @@ export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
     panelItems.push(
-      <EuiContextMenuItem
-        key="open-docs"
-        icon="documentation"
-        data-test-subj="esql-open-docs"
-        onClick={() => {
-          // open the docs
-        }}
-      >
-        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.openDocs', {
-          defaultMessage: 'Open docs',
-        })}
-      </EuiContextMenuItem>,
+      // <EuiContextMenuItem
+      //   key="open-docs"
+      //   icon="documentation"
+      //   data-test-subj="esql-open-docs"
+      //   onClick={() => {
+      //     // open the docs
+      //   }}
+      // >
+      //   {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.openDocs', {
+      //     defaultMessage: 'Open docs',
+      //   })}
+      // </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="about"
         icon="iInCircle"
