@@ -21,6 +21,7 @@ export interface UseRefetchScopeQueryParams {
 /**
  * Hook to refetch data within specified scope
  */
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const useRefetchByScope = ({ scopeId }: UseRefetchScopeQueryParams) => {
   const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
   const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);

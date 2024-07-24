@@ -11,10 +11,8 @@ import { getPlaceholderObservable, getStreamObservable } from './stream_observab
 
 interface UseStreamProps {
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
-  isEnabledLangChain: boolean;
   isError: boolean;
   content?: string;
-  actionTypeId: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 interface UseStream {
@@ -33,17 +31,12 @@ interface UseStream {
  * A hook that takes a ReadableStreamDefaultReader and returns an object with properties and functions
  * that can be used to handle streaming data from a readable stream
  * @param content - the content of the message. If provided, the function will not use the reader to stream data.
- * @param actionTypeId - the actionTypeId of the connector type
  * @param refetchCurrentConversation - refetch the current conversation
- * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
- * @param isEnabledLangChain - indicates whether langchain is enabled or not
  * @param isError - indicates whether the reader response is an error message or not
  * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
  */
 export const useStream = ({
   content,
-  actionTypeId,
-  isEnabledLangChain,
   isError,
   reader,
   refetchCurrentConversation,
@@ -55,9 +48,9 @@ export const useStream = ({
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable({ actionTypeId, reader, setLoading, isEnabledLangChain, isError })
+        ? getStreamObservable({ reader, setLoading, isError })
         : getPlaceholderObservable(),
-    [content, isEnabledLangChain, isError, reader, actionTypeId]
+    [content, isError, reader]
   );
   const onCompleteStream = useCallback(
     (didAbort: boolean) => {
