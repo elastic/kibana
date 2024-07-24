@@ -6,14 +6,15 @@
  */
 
 import {
+  IngestProcessorContainer,
   MappingProperty,
   MappingPropertyBase,
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
-import { createMappingGapsDetection } from '@kbn/logs-optimization-plugin/common/detections/utils';
-import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
-import { MappingGapsDetection } from '../../../../common/detections/types';
+import { createMappingGapsDetection } from '../../../../common/detections/utils';
+import { NewestIndex } from '../../../../common/types';
+import { MappingGap, MappingGapsDetection } from '../../../../common/detections/types';
 
 const ecsAlikeMappings = {
   '@timestamp': ['timestamp', 'time', 'created_at', 'datetime', 'date'],
@@ -48,11 +49,16 @@ export class MappingEcsGapsDetection {
       );
 
       if (unmatchingFields.length > 0) {
+        const gaps = unmatchingFields.map((field) => ({
+          field,
+          target_field: this.identifySuggestedField(field),
+        }));
+
         return createMappingGapsDetection({
-          gaps: unmatchingFields.map((field) => ({
-            field,
-            suggestedField: this.identifySuggestedField(field),
-          })),
+          gaps,
+          tasks: {
+            processors: this.buildPipelineProcessors(gaps),
+          },
         });
       }
 
@@ -69,6 +75,17 @@ export class MappingEcsGapsDetection {
         return similarFieldNames?.includes(fieldName);
       }) ?? null
     );
+  }
+
+  private buildPipelineProcessors(gaps: MappingGap[]): IngestProcessorContainer[] {
+    return gaps
+      .filter((gap) => Boolean(gap.target_field))
+      .map(({ field, target_field: target }) => ({
+        rename: {
+          field,
+          target_field: target as string,
+        },
+      }));
   }
 }
 

@@ -9,10 +9,10 @@ import * as rt from 'io-ts';
 
 export const mappingGapRT = rt.type({
   field: rt.string,
-  suggestedField: rt.union([rt.string, rt.null]),
+  target_field: rt.union([rt.string, rt.null]),
 });
 
-const processorsRT = rt.record(rt.string, rt.unknown);
+const processorsRT = rt.record(rt.string, rt.any);
 
 export const mappingGapDetectionRT = rt.type({
   type: rt.literal('mapping_gap'),
@@ -35,6 +35,7 @@ export const fieldExtractionDetectionRT = rt.type({
 
 export const detectionRT = rt.union([mappingGapDetectionRT, fieldExtractionDetectionRT]);
 
+export type MappingGap = rt.TypeOf<typeof mappingGapRT>;
 export type MappingGapsDetection = rt.TypeOf<typeof mappingGapDetectionRT>;
 export type FieldExtractionDetection = rt.TypeOf<typeof fieldExtractionDetectionRT>;
 export type Detection = MappingGapsDetection | FieldExtractionDetection;
