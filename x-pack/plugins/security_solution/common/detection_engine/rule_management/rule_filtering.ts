@@ -106,7 +106,7 @@ export function convertRuleSearchTermToKQL(
 }
 
 export function convertRuleTagsToKQL(tags: string[]): string {
-  return `${TAGS_FIELD}:(${tags.map(prepareKQLStringParam).join(' AND ')})`;
+  return `${TAGS_FIELD}:(${tags.map(prepareKQLStringParam).join(' OR ')})`;
 }
 
 export function convertRuleTypesToKQL(ruleTypes: Type[]): string {

@@ -281,7 +281,7 @@ describe('Detections Rules API', () => {
         expect.objectContaining({
           method: 'GET',
           query: {
-            filter: 'alert.attributes.tags:("hello" AND "world")',
+            filter: 'alert.attributes.tags:("hello" OR "world")',
             page: 1,
             per_page: 20,
             sort_field: 'enabled',
@@ -310,7 +310,7 @@ describe('Detections Rules API', () => {
         expect.objectContaining({
           method: 'GET',
           query: {
-            filter: 'alert.attributes.tags:("hello" AND "world")',
+            filter: 'alert.attributes.tags:("hello" OR "world")',
             page: 1,
             per_page: 20,
             sort_field: 'updatedAt',
@@ -407,7 +407,7 @@ describe('Detections Rules API', () => {
           method: 'GET',
           query: {
             filter:
-              '(alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") AND alert.attributes.tags:("hello" AND "world")',
+              '(alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") AND alert.attributes.tags:("hello" OR "world")',
             page: 1,
             per_page: 20,
             sort_field: 'enabled',
