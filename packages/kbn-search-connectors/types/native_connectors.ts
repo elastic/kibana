@@ -4666,20 +4666,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.DROPDOWN,
-        label: i18n.translate('searchConnectors.nativeConnectors.sharepoint_server.configuration.authentication', {
-          defaultMessage: 'Authentication',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.authentication',
+          {
+            defaultMessage: 'Authentication',
+          }
+        ),
         options: [
           {
-            label: i18n.translate('searchConnectors.nativeConnectors.sharepoint_server.options.basicLabel', {
-              defaultMessage: 'Basic',
-            }),
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_server.options.basicLabel',
+              {
+                defaultMessage: 'Basic',
+              }
+            ),
             value: 'basic_auth',
           },
           {
-            label: i18n.translate('searchConnectors.nativeConnectors.sharepoint_server.options.ntlmLabel', {
-              defaultMessage: 'NTLM',
-            }),
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_server.options.ntlmLabel',
+              {
+                defaultMessage: 'NTLM',
+              }
+            ),
             value: 'ntlm_auth',
           },
         ],
