@@ -1868,7 +1868,7 @@
             "type": "boolean"
           },
           "host": {
-            "description": "The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. \n",
+            "description": "The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.\n",
             "type": "string"
           },
           "oauthTokenUrl": {
@@ -1876,7 +1876,7 @@
             "nullable": true
           },
           "port": {
-            "description": "The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. \n",
+            "description": "The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.\n",
             "type": "integer"
           },
           "secure": {
@@ -4004,7 +4004,7 @@
       },
       "is_preconfigured": {
         "type": "boolean",
-        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. \n",
+        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.\n",
         "example": false
       },
       "is_system_action": {
