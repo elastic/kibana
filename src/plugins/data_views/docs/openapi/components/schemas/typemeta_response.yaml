@@ -1,8 +1,6 @@
 type: object
 description: When you use rollup indices, contains the field list for the rollup data view API endpoints.
-required:
-  - aggs
-  - params
+nullable: true
 properties:
   aggs:
     type: object
