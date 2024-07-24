@@ -42,6 +42,7 @@ import {
   isSingleItem,
   nonNullable,
   getColumnExists,
+  findPreviousWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -93,13 +94,9 @@ import {
 import { FunctionParameter } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
-type GetDataSourceFn = (sourceName: string) => Promise<
-  | {
-      name: string;
-      dataStreams?: Array<{ name: string; title?: string }>;
-    }
-  | undefined
->;
+type GetDataStreamsForIntegrationFn = (
+  sourceName: string
+) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[]
@@ -182,9 +179,8 @@ export async function suggest(
   const charThatNeedMarkers = [',', ':'];
   if (
     (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    (context.triggerKind === 0 &&
-      unclosedRoundBrackets === 0 &&
-      getLastCharFromTrimmed(innerText) !== '_') ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
     (context.triggerCharacter === ' ' &&
       (isMathFunction(innerText, offset) ||
         isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
@@ -326,11 +322,13 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getDatastreamsForIntegrationRetriever(resourceRetriever?: ESQLCallbacks) {
+function getDatastreamsForIntegrationRetriever(
+  resourceRetriever?: ESQLCallbacks
+): GetDataStreamsForIntegrationFn {
   const helper = getSourcesHelper(resourceRetriever);
   return async (sourceName: string) => {
     const list = (await helper()) || [];
-    return list.find(({ name }) => name === sourceName);
+    return list.find(({ name }) => name === sourceName)?.dataStreams;
   };
 }
 
@@ -504,7 +502,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: GetSourceFn,
-  getDatastreamsForIntegration: GetDataSourceFn,
+  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -861,27 +859,31 @@ async function getExpressionSuggestionsByType(
       } else {
         const index = getSourcesFromCommands(commands, 'index');
         const canRemoveQuote = isNewExpression && innerText.includes('"');
+        // Function to add suggestions based on canRemoveQuote
+        const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
+          suggestions.push(
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions)
+          );
+        };
 
-        // This is going to be empty for simple indices, and not empty for integrations
         if (index && index.text && index.text !== EDITOR_MARKER) {
           const source = index.text.replace(EDITOR_MARKER, '');
-          const dataSource = await getDatastreamsForIntegration(source);
+          const dataStreams = await getDatastreamsForIntegration(source);
 
-          const newDefinitions = buildSourcesDefinitions(
-            dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
-          );
-          suggestions.push(
-            ...(canRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
-          );
+          if (dataStreams) {
+            // Integration name, suggest the datastreams
+            await addSuggestionsBasedOnQuote(
+              buildSourcesDefinitions(
+                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+              )
+            );
+          } else {
+            // Not an integration, just a partial source name
+            await addSuggestionsBasedOnQuote(await getSources());
+          }
         } else {
-          // FROM <suggest>
-          // @TODO: filter down the suggestions here based on other existing sources defined
-          const sourcesDefinitions = await getSources();
-          suggestions.push(
-            ...(canRemoveQuote
-              ? removeQuoteForSuggestedSources(sourcesDefinitions)
-              : sourcesDefinitions)
-          );
+          // FROM <suggest> or no index/text
+          await addSuggestionsBasedOnQuote(await getSources());
         }
       }
     }
@@ -1450,7 +1452,11 @@ async function getOptionArgsSuggestions(
   if (command.name === 'enrich') {
     if (option.name === 'on') {
       // if it's a new expression, suggest fields to match on
-      if (isNewExpression || (option && isAssignment(option.args[0]) && !option.args[1])) {
+      if (
+        isNewExpression ||
+        findPreviousWord(innerText) === 'ON' ||
+        (option && isAssignment(option.args[0]) && !option.args[1])
+      ) {
         const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
         if (policyName) {
           const policyMetadata = await getPolicyMetadata(policyName);
@@ -1483,7 +1489,7 @@ async function getOptionArgsSuggestions(
           innerText
         );
 
-        if (isNewExpression) {
+        if (isNewExpression || findPreviousWord(innerText) === 'WITH') {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyEnhancedVariables)));
         }
 
