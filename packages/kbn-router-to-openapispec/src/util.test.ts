@@ -213,7 +213,19 @@ describe('getXsrfHeaderForMethod', () => {
     { method: 'patch', expected: headerParam() },
     { method: 'delete', expected: headerParam() },
     { method: 'everything-else', expected: headerParam() },
-  ])('$method', ({ method, expected }) => {
-    expect(getXsrfHeaderForMethod(method as RouteMethod)).toEqual(expected);
+
+    { method: 'get, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'option, xsrfRequired: falses', options: { xsrfRequired: false }, expected: [] },
+    { method: 'put, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'post, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'patch, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'delete, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    {
+      method: 'everything-else, xsrfRequired: false',
+      options: { xsrfRequired: false },
+      expected: [],
+    },
+  ])('$method', ({ method, options, expected }) => {
+    expect(getXsrfHeaderForMethod(method as RouteMethod, options)).toEqual(expected);
   });
 });
