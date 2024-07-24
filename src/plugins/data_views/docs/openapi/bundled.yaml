@@ -19,7 +19,7 @@ tags:
 paths:
   /api/data_views:
     get:
-      summary: Get all data views in the default space
+      summary: Get all data views
       operationId: getAllDataViewsDefault
       tags:
         - data views
@@ -59,7 +59,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view:
     post:
-      summary: Create a data view in the default space
+      summary: Create a data view
       operationId: createDataViewDefaultw
       tags:
         - data views
@@ -89,7 +89,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}:
     get:
-      summary: Get a data view in the default space
+      summary: Get a data view
       operationId: getDataViewDefault
       tags:
         - data views
@@ -112,7 +112,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Delete a data view from the default space
+      summary: Delete a data view
       operationId: deleteDataViewDefault
       description: |
         WARNING: When you delete a data view, it cannot be recovered.
@@ -131,7 +131,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     post:
-      summary: Update a data view in the default space
+      summary: Update a data view
       operationId: updateDataViewDefault
       tags:
         - data views
@@ -162,7 +162,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/fields:
     post:
-      summary: Update data view fields metadata in the default space
+      summary: Update data view fields metadata
       operationId: updateFieldsMetadataDefault
       description: |
         Update fields presentation metadata such as count, customLabel, customDescription, and format.
@@ -204,7 +204,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
-      summary: Create a runtime field in the default space
+      summary: Create a runtime field
       operationId: createRuntimeFieldDefault
       tags:
         - data views
@@ -240,7 +240,7 @@ paths:
               schema:
                 type: object
     put:
-      summary: Create or update a runtime field in the default space
+      summary: Create or update a runtime field
       operationId: createUpdateRuntimeFieldDefault
       tags:
         - data views
@@ -296,7 +296,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
-      summary: Get a runtime field in the default space
+      summary: Get a runtime field
       operationId: getRuntimeFieldDefault
       tags:
         - data views
@@ -327,7 +327,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Delete a runtime field from a data view in the default space
+      summary: Delete a runtime field from a data view
       operationId: deleteRuntimeFieldDefault
       tags:
         - data views
@@ -344,7 +344,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     post:
-      summary: Update a runtime field in the default space
+      summary: Update a runtime field
       operationId: updateRuntimeFieldDefault
       tags:
         - data views
@@ -383,7 +383,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/default:
     get:
-      summary: Get the default data view in the default space
+      summary: Get the default data view
       operationId: getDefaultDataViewDefault
       tags:
         - data views
@@ -407,7 +407,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
     post:
-      summary: Set the default data view in the default space
+      summary: Set the default data view
       operationId: setDefaultDatailViewDefault
       tags:
         - data views
@@ -452,7 +452,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/swap_references:
     post:
-      summary: Swap saved object references in the default space
+      summary: Swap saved object references
       operationId: swapDataViewsDefault
       description: |
         Changes saved object references from one data view identifier to another. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
@@ -497,7 +497,7 @@ paths:
                           description: The saved object type.
   /api/data_views/swap_references/_preview:
     post:
-      summary: Preview a saved object reference swap in the default space
+      summary: Preview a saved object reference swap
       operationId: previewSwapDataViewsDefault
       description: |
         Preview the impact of swapping saved object references from one data view identifier to another.
