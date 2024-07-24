@@ -64,8 +64,23 @@ export const TryInConsoleButton = ({
     }
   };
 
+  const getAriaLabel = () => {
+    if (
+      consolePlugin?.openEmbeddedConsole !== undefined &&
+      consolePlugin?.isEmbeddedConsoleAvailable?.()
+    ) {
+      return i18n.translate('tryInConsole.embeddedConsoleButton', {
+        defaultMessage: 'Try the snipped in the Console - opens in embedded console',
+      });
+    }
+    return i18n.translate('tryInConsole.inNewTab.button', {
+      defaultMessage: 'Try the below snippet in Console - opens in a new tab',
+    });
+  };
+
   const commonProps = {
     'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
+    'aria-label': getAriaLabel(),
     onClick,
   };
   const iconType = showIcon ? 'popout' : undefined;

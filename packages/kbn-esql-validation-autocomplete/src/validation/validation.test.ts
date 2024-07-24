@@ -9202,6 +9202,32 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval max(booleanField) > 0', [
           'EVAL does not support function max',
         ]);
+        testErrorsAndWarnings('from a_index | stats var = max(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats max(ipField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(ipField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(ipField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(ipField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(ipField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(ipField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(ipField) > 0', [
+          'EVAL does not support function max',
+        ]);
       });
 
       describe('min', () => {
@@ -9372,6 +9398,32 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval min(booleanField) > 0', [
+          'EVAL does not support function min',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = min(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats min(ipField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(ipField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(ipField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(ipField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(ipField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(ipField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(ipField) > 0', [
           'EVAL does not support function min',
         ]);
       });
@@ -10551,6 +10603,42 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats weighted_avg(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | stats weighted_avg(nullVar, nullVar)', []);
+      });
+
+      describe('exp', () => {
+        testErrorsAndWarnings('row var = exp(5)', []);
+        testErrorsAndWarnings('row exp(5)', []);
+        testErrorsAndWarnings('row var = exp(to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = exp(true)', [
+          'Argument of [exp] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where exp(numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where exp(booleanField) > 0', [
+          'Argument of [exp] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = exp(to_integer(booleanField))', []);
+
+        testErrorsAndWarnings('from a_index | eval exp(booleanField)', [
+          'Argument of [exp] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(*)', [
+          'Using wildcards (*) in exp is not allowed',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval exp(numberField, extraArg)', [
+          'Error: [exp] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval exp(nullVar)', []);
       });
     });
   });

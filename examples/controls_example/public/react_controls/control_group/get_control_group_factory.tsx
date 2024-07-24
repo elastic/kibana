@@ -6,9 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  KeyboardSensor,
+  MeasuringStrategy,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -32,22 +49,21 @@ import {
   PublishesDataViews,
   PublishesFilters,
   PublishesTimeslice,
-  PublishingSubject,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { EuiFlexGroup } from '@elastic/eui';
 import { ControlRenderer } from '../control_renderer';
-import { DefaultControlApi } from '../types';
+import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
+import { deserializeControlGroup } from './serialization_utils';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { controlGroupFetch$, chaining$, controlFetch$ } from './control_fetch';
+import { ControlClone } from '../components/control_clone';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -62,7 +78,7 @@ export const getControlGroupEmbeddableFactory = (services: {
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi, setApi) => {
       const {
-        initialChildControlState: childControlState,
+        initialChildControlState,
         defaultControlGrow,
         defaultControlWidth,
         labelPosition,
@@ -71,12 +87,9 @@ export const getControlGroupEmbeddableFactory = (services: {
         ignoreParentSettings,
       } = initialState;
 
+      const controlsManager = initControlsManager(initialChildControlState);
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-      function getControlApi(controlUuid: string) {
-        return children$.value[controlUuid];
-      }
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
@@ -108,19 +121,16 @@ export const getControlGroupEmbeddableFactory = (services: {
         undefined
       );
 
-      const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
-        Object.keys(childControlState)
-          .map((key) => ({
-            id: key,
-            order: childControlState[key].order,
-            type: childControlState[key].type,
-          }))
-          .sort((a, b) => (a.order > b.order ? 1 : -1))
-      );
       const api = setApi({
+        ...controlsManager.api,
         controlFetch$: (controlUuid: string) =>
           controlFetch$(
-            chaining$(controlUuid, chainingSystem$, controlsInOrder$, getControlApi),
+            chaining$(
+              controlUuid,
+              chainingSystem$,
+              controlsManager.controlsInOrder$,
+              controlsManager.getControlApi
+            ),
             controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
           ),
         ignoreParentSettings$,
@@ -134,9 +144,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           return {} as unknown as ControlGroupRuntimeState;
         },
         dataLoading: dataLoading$,
-        children$: children$ as PublishingSubject<{
-          [key: string]: unknown;
-        }>,
         onEdit: async () => {
           openEditControlGroupFlyout(
             api,
@@ -154,34 +161,18 @@ export const getControlGroupEmbeddableFactory = (services: {
           i18n.translate('controls.controlGroup.displayName', {
             defaultMessage: 'Controls',
           }),
-        getSerializedStateForChild: (childId) => {
-          return { rawState: childControlState[childId] };
-        },
         serializeState: () => {
-          return serializeControlGroup(
-            children$.getValue(),
-            controlsInOrder$.getValue().map(({ id }) => id),
-            {
-              labelPosition: labelPosition$.getValue(),
+          const { panelsJSON, references } = controlsManager.serializeControls();
+          return {
+            rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              autoApplySelections: autoApplySelections$.getValue(),
-              ignoreParentSettings: ignoreParentSettings$.getValue(),
-            }
-          );
-        },
-        getPanelCount: () => {
-          return (Object.keys(children$.getValue()) ?? []).length;
-        },
-        addNewPanel: (panel) => {
-          // TODO: Add a new child control
-          return Promise.resolve(undefined);
-        },
-        removePanel: (panelId) => {
-          // TODO: Remove a child control
-        },
-        replacePanel: async (panelId, newPanel) => {
-          // TODO: Replace a child control
-          return Promise.resolve(panelId);
+              controlStyle: labelPosition$.getValue(), // Rename "labelPosition" to "controlStyle"
+              showApplySelections: !autoApplySelections$.getValue(),
+              ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
+              panelsJSON,
+            },
+            references,
+          };
         },
         grow,
         width,
@@ -238,7 +229,31 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const controlsInOrder = useStateFromPublishingSubject(controlsInOrder$);
+          const [controlsInOrder, controlStyle] = useBatchedPublishingSubjects(
+            controlsManager.controlsInOrder$,
+            labelPosition$
+          );
+
+          /** Handle drag and drop */
+          const sensors = useSensors(
+            useSensor(PointerSensor),
+            useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+          );
+          const [draggingId, setDraggingId] = useState<string | null>(null);
+          const onDragEnd = useCallback(
+            ({ over, active }: DragEndEvent) => {
+              const oldIndex = active?.data.current?.sortable.index;
+              const newIndex = over?.data.current?.sortable.index;
+              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+                controlsManager.controlsInOrder$.next(
+                  arrayMove([...controlsInOrder], oldIndex, newIndex)
+                );
+              }
+              (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
+              setDraggingId(null);
+            },
+            [controlsInOrder]
+          );
 
           useEffect(() => {
             return () => {
@@ -249,22 +264,47 @@ export const getControlGroupEmbeddableFactory = (services: {
           }, []);
 
           return (
-            <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
-              {controlsInOrder.map(({ id, type }) => (
-                <ControlRenderer
-                  key={id}
-                  maybeId={id}
-                  type={type}
-                  getParentApi={() => api}
-                  onApiAvailable={(controlApi) => {
-                    children$.next({
-                      ...children$.getValue(),
-                      [id]: controlApi,
-                    });
+            <EuiPanel
+              borderRadius="m"
+              paddingSize="none"
+              color={draggingId ? 'success' : 'transparent'}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
+                <DndContext
+                  onDragStart={({ active }) => setDraggingId(`${active.id}`)}
+                  onDragEnd={onDragEnd}
+                  onDragCancel={() => setDraggingId(null)}
+                  sensors={sensors}
+                  measuring={{
+                    droppable: {
+                      strategy: MeasuringStrategy.BeforeDragging,
+                    },
                   }}
-                />
-              ))}
-            </EuiFlexGroup>
+                >
+                  <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
+                    {controlsInOrder.map(({ id, type }) => (
+                      <ControlRenderer
+                        key={id}
+                        uuid={id}
+                        type={type}
+                        getParentApi={() => api}
+                        onApiAvailable={(controlApi) => {
+                          controlsManager.setControlApi(id, controlApi);
+                        }}
+                      />
+                    ))}
+                  </SortableContext>
+                  <DragOverlay>
+                    {draggingId ? (
+                      <ControlClone
+                        controlStyle={controlStyle}
+                        controlApi={controlsManager.getControlApi(draggingId)}
+                      />
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </EuiFlexGroup>
+            </EuiPanel>
           );
         },
       };
