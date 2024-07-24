@@ -13,6 +13,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
+import { registerAnalyticsContext } from './analytics';
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { isSolutionNavEnabled } from './experiments';
@@ -118,6 +119,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         spacesManager: this.spacesManager,
       });
     }
+
+    registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
 
     return { hasOnlyDefaultSpace };
   }
