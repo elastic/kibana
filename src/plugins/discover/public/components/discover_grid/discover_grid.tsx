@@ -16,10 +16,12 @@ import { useProfileAccessor } from '../../context_awareness';
 
 /**
  * Customized version of the UnifiedDataTable
- * @param props
  * @constructor
  */
-export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
+export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
+  rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  ...props
+}) => {
   const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
   const getRowIndicator = useMemo(() => {
     return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -29,8 +31,10 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
     'getRowAdditionalLeadingControls'
   );
   const rowAdditionalLeadingControls = useMemo(() => {
-    return getRowAdditionalLeadingControlsAccessor(() => undefined)({ dataView: props.dataView });
-  }, [getRowAdditionalLeadingControlsAccessor, props.dataView]);
+    return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
+      dataView: props.dataView,
+    });
+  }, [getRowAdditionalLeadingControlsAccessor, props.dataView, customRowAdditionalLeadingControls]);
 
   return (
     <UnifiedDataTable

@@ -25,13 +25,6 @@ export const actionsLabel = i18n.translate('xpack.logsExplorer.dataTable.header.
   defaultMessage: 'Actions',
 });
 
-export const actionsLabelLowerCase = i18n.translate(
-  'xpack.logsExplorer.dataTable.header.popover.actions.lowercase',
-  {
-    defaultMessage: 'actions',
-  }
-);
-
 export const actionFilterForText = (text: string) =>
   i18n.translate('xpack.logsExplorer.flyoutDetail.value.hover.filterFor', {
     defaultMessage: 'Filter for this {value}',
@@ -121,6 +114,13 @@ export const actionsHeaderTooltipExpandAction = i18n.translate(
   { defaultMessage: 'Expand log details' }
 );
 
+export const actionsHeaderAriaLabelDegradedAction = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumnHeader.degradedDocArialLabel',
+  {
+    defaultMessage: 'Access to degraded docs',
+  }
+);
+
 export const actionsHeaderTooltipDegradedAction = (
   <FormattedMessage
     id="xpack.logsExplorer.dataTable.controlColumn.actions.button.degradedDoc"
@@ -133,6 +133,13 @@ export const actionsHeaderTooltipDegradedAction = (
       ),
     }}
   />
+);
+
+export const actionsHeaderAriaLabelStacktraceAction = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumnHeader.stacktraceArialLabel',
+  {
+    defaultMessage: 'Access to available stacktraces',
+  }
 );
 
 export const actionsHeaderTooltipStacktraceAction = i18n.translate(

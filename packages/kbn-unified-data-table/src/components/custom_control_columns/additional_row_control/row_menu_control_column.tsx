@@ -60,14 +60,16 @@ export const RowMenuControlCell = ({
 
   const getControlComponent: (id: string) => React.FC<RowControlProps> = useCallback(
     (id) =>
-      ({ label, iconType, onClick }) => {
+      ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
         return (
           <EuiContextMenuItem
             key={id}
+            data-test-subj={dataTestSubj ?? `unifiedDataTable_remainingRowControl_${id}`}
+            disabled={disabled}
             icon={iconType}
-            data-test-subj={`unifiedDataTable_remainingRowControl_${id}`}
+            color={color}
             onClick={() => {
-              onClick(rowProps);
+              onClick?.(rowProps);
               setIsMoreActionsPopoverOpen(false);
             }}
           >

@@ -15,7 +15,6 @@ import {
   actionsHeaderTooltipParagraph,
   actionsHeaderTooltipStacktraceAction,
   actionsLabel,
-  actionsLabelLowerCase,
 } from '../../common/translations';
 import { TooltipButton } from './tooltip_button';
 import * as constants from '../../../../common/constants';
@@ -27,7 +26,7 @@ const spacingCSS = css`
 
 export const ActionsColumnTooltip = () => {
   return (
-    <TooltipButton displayText={actionsLabelLowerCase} popoverTitle={actionsLabel}>
+    <TooltipButton popoverTitle={actionsLabel}>
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
           <p>{actionsHeaderTooltipParagraph}</p>

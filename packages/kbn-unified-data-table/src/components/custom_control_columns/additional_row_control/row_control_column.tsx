@@ -44,20 +44,21 @@ export const RowControlCell = ({
 
   const Control: React.FC<RowControlProps> = useMemo(
     () =>
-      ({ label, iconType, onClick }) => {
+      ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
         return (
           <DataTableRowControl>
             <EuiToolTip content={label} delay="long">
               <EuiButtonIcon
+                data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${columnId}`}
+                disabled={disabled}
                 size="xs"
                 iconSize="s"
-                aria-label={label}
-                data-test-subj={`unifiedDataTable_rowControl_${columnId}`}
-                onClick={() => {
-                  onClick(rowProps);
-                }}
                 iconType={iconType}
-                color="text"
+                color={color ?? 'text'}
+                aria-label={label}
+                onClick={() => {
+                  onClick?.(rowProps);
+                }}
               />
             </EuiToolTip>
           </DataTableRowControl>
@@ -72,16 +73,18 @@ export const RowControlCell = ({
 export const getRowControlColumn = (
   rowControlColumn: RowControlColumn
 ): EuiDataGridControlColumn => {
-  const { id, headerAriaLabel, renderControl } = rowControlColumn;
+  const { id, headerAriaLabel, headerCellRender, renderControl } = rowControlColumn;
 
   return {
     id: `additionalRowControl_${id}`,
     width: 24,
-    headerCellRender: () => (
-      <EuiScreenReaderOnly>
-        <span>{headerAriaLabel}</span>
-      </EuiScreenReaderOnly>
-    ),
+    headerCellRender:
+      headerCellRender ??
+      (() => (
+        <EuiScreenReaderOnly>
+          <span>{headerAriaLabel}</span>
+        </EuiScreenReaderOnly>
+      )),
     rowCellRender: (props) => {
       return <RowControlCell {...props} renderControl={renderControl} />;
     },

@@ -887,15 +887,6 @@ export const UnifiedDataTable = ({
     rowAdditionalLeadingControls,
   ]);
 
-  // const controlColumnsConfig = customControlColumnsConfiguration?.({
-  //   controlColumns: getAllControlColumns(),
-  // });
-  //
-  // const customLeadingControlColumn =
-  //   controlColumnsConfig?.leadingControlColumns ?? leadingControlColumns;
-  // const customTrailingControlColumn =
-  //   controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
-
   const additionalControls = useMemo(() => {
     if (!externalAdditionalControls && !usedSelectedDocs.length) {
       return null;

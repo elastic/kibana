@@ -7,7 +7,12 @@
  */
 
 import type { ReactElement, FC } from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridColumn, IconType } from '@elastic/eui';
+import type {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+  IconType,
+  EuiButtonIconProps,
+} from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -70,34 +75,25 @@ export type CustomGridColumnsConfiguration = Record<
   (props: CustomGridColumnProps) => EuiDataGridColumn
 >;
 
-// TODO: remove types
-export interface ControlColumns {
-  select: EuiDataGridControlColumn;
-  openDetails: EuiDataGridControlColumn;
-}
-
-export interface ControlColumnsProps {
-  controlColumns: ControlColumns;
-}
-
-export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {
-  leadingControlColumns: EuiDataGridControlColumn[];
-  trailingControlColumns?: EuiDataGridControlColumn[];
-};
-
 export interface RowControlRowProps {
   rowIndex: number;
   record: DataTableRecord;
 }
 
 export interface RowControlProps {
+  'data-test-subj'?: string;
+  color?: EuiButtonIconProps['color'];
+  disabled?: boolean;
   label: string;
   iconType: IconType;
-  onClick: (props: RowControlRowProps) => void;
+  onClick: ((props: RowControlRowProps) => void) | undefined;
 }
+
+export type RowControlComponent = FC<RowControlProps>;
 
 export interface RowControlColumn {
   id: string;
   headerAriaLabel: string;
-  renderControl: (Control: FC<RowControlProps>, props: RowControlRowProps) => ReactElement;
+  headerCellRender?: EuiDataGridControlColumn['headerCellRender'];
+  renderControl: (Control: RowControlComponent, props: RowControlRowProps) => ReactElement;
 }
