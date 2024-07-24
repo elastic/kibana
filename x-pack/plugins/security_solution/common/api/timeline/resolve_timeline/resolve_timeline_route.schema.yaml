@@ -42,8 +42,8 @@ paths:
                     type: object
                     properties:
                       getOneTimeline:
-                        allOf:
-                          - $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                        nullable: true
         '400':
           description: The request is missing parameters
         '404':
