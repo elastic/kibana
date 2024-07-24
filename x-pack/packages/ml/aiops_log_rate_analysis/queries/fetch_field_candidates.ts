@@ -15,7 +15,7 @@ import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 // If we analyse all detected text fields, we might run into performance
 // issues with the `categorize_text` aggregation. Until this is resolved, we
 // rely on a predefined white list of supported text fields.
-export const TEXT_FIELD_WHITE_LIST = ['message', 'error.message'];
+export const TEXT_FIELD_SAFE_LIST = ['message', 'error.message'];
 
 export const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -83,7 +83,7 @@ export const fetchFieldCandidates = async ({
       acceptableFields.add(key);
     }
 
-    if (isTextField && TEXT_FIELD_WHITE_LIST.includes(key)) {
+    if (isTextField && TEXT_FIELD_SAFE_LIST.includes(key)) {
       acceptableTextFields.add(key);
     }
 

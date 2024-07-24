@@ -21,7 +21,7 @@ import type {
 } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/queries/fetch_field_candidates';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
-import { TEXT_FIELD_WHITE_LIST } from '@kbn/aiops-log-rate-analysis/queries/fetch_index_info';
+import { TEXT_FIELD_SAFE_LIST } from '@kbn/aiops-log-rate-analysis/queries/fetch_field_candidates';
 
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
@@ -66,7 +66,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
         controller.abort();
       });
 
-      const textFieldCandidatesOverrides = TEXT_FIELD_WHITE_LIST;
+      const textFieldCandidatesOverrides = TEXT_FIELD_SAFE_LIST;
 
       try {
         const fieldCandidates = await fetchFieldCandidates({
