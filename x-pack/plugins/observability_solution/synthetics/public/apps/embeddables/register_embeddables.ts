@@ -53,7 +53,7 @@ export const registerSyntheticsEmbeddables = (
     pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
       SYNTHETICS_MONITORS_EMBEDDABLE,
       () => {
-        return { width: 24, height: 12 };
+        return { width: 30, height: 12 };
       }
     );
   });

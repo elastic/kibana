@@ -48,7 +48,7 @@ export function createMonitorsOverviewPanelAction(
       }
     },
     getDisplayName: () =>
-      i18n.translate('xpack.synthetics.syntheticsEmbeddable.ariaLabel', {
+      i18n.translate('xpack.synthetics.syntheticsEmbeddable.monitors.ariaLabel', {
         defaultMessage: 'Monitors overview',
       }),
   };

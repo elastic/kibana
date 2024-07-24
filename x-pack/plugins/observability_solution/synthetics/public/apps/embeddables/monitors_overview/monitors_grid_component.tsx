@@ -41,6 +41,7 @@ export const StatusGridComponent = ({
 const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
   const dispatch = useDispatch();
   useEffect(() => {
+    if (!filters) return;
     dispatch(
       setOverviewPageStateAction({
         tags: filters.tags.map((tag) => tag.value),

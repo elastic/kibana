@@ -37,6 +37,32 @@ export function MonitorFiltersForm() {
           }
         />
         <FieldSelector
+          label={i18n.translate('xpack.synthetics.monitorEdit.syntheticsAvailability.tags', {
+            defaultMessage: 'Tags',
+          })}
+          placeholder={i18n.translate(
+            'xpack.synthetics.monitorEdit.syntheticsAvailability.tags.placeholder',
+            {
+              defaultMessage: 'Select tags',
+            }
+          )}
+          name="tags"
+          dataTestSubj="syntheticsAvailabilityTagsSelector"
+        />
+        <FieldSelector
+          label={i18n.translate('xpack.synthetics.monitorEdit.syntheticsAvailability.location', {
+            defaultMessage: 'Locations',
+          })}
+          placeholder={i18n.translate(
+            'xpack.synthetics.monitorEdit.syntheticsAvailability.location.placeholder',
+            {
+              defaultMessage: 'Select the locations',
+            }
+          )}
+          name="locations"
+          dataTestSubj="syntheticsAvailabilityLocationSelector"
+        />
+        <FieldSelector
           label={i18n.translate('xpack.synthetics.monitorEdit.syntheticsAvailability.project', {
             defaultMessage: 'Project',
           })}
@@ -50,17 +76,17 @@ export function MonitorFiltersForm() {
           dataTestSubj="syntheticsAvailabilityProjectSelector"
         />
         <FieldSelector
-          label={i18n.translate('xpack.synthetics.monitorEdit.syntheticsAvailability.tags', {
-            defaultMessage: 'Tags',
+          label={i18n.translate('xpack.synthetics.monitorEdit.syntheticsAvailability.type', {
+            defaultMessage: 'Monitor type',
           })}
           placeholder={i18n.translate(
-            'xpack.synthetics.monitorEdit.syntheticsAvailability.tags.placeholder',
+            'xpack.synthetics.monitorEdit.syntheticsAvailability.type.placeholder',
             {
-              defaultMessage: 'Select tags',
+              defaultMessage: 'Select the monitor type',
             }
           )}
-          name="tags"
-          dataTestSubj="syntheticsAvailabilityTagsSelector"
+          name="monitorTypes"
+          dataTestSubj="syntheticsAvailabilityProjectSelector"
         />
       </EuiFlexGroup>
     </EuiFlexGroup>

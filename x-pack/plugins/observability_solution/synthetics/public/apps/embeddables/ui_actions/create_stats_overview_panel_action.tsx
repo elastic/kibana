@@ -47,7 +47,7 @@ export function createStatusOverviewPanelAction(
       }
     },
     getDisplayName: () =>
-      i18n.translate('xpack.synthetics.syntheticsEmbeddable.ariaLabel', {
+      i18n.translate('xpack.synthetics.syntheticsEmbeddable.stats.ariaLabel', {
         defaultMessage: 'Monitors stats',
       }),
   };
