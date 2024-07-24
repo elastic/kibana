@@ -16,12 +16,13 @@ import {
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { reduce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { RunningProcessesActionResults } from '../../running_processes_action_results';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   isExecuteAction,
   isGetFileAction,
+  isProcessesAction,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
@@ -193,9 +194,24 @@ const OutputContent = memo<{
     );
   }
 
+  if (isProcessesAction(action)) {
+    return (
+      <EuiFlexGroup direction="column" data-test-subj={getTestId('processesDetails')}>
+        <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
+
+        <RunningProcessesActionResults
+          action={action}
+          data-test-subj="processesOutput"
+          textSize="xs"
+        />
+      </EuiFlexGroup>
+    );
+  }
+
   if (action.agentType === 'crowdstrike') {
     return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
   }
+
   return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
 });
 
@@ -208,10 +224,6 @@ export const ActionsLogExpandedTray = memo<{
   'data-test-subj'?: string;
 }>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
-
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
 
   const {
     hosts,
@@ -277,14 +289,11 @@ export const ActionsLogExpandedTray = memo<{
             [] as string[]
           ).join(', ') || emptyValue,
       },
-    ];
-
-    if (isSentinelOneV1Enabled) {
-      list.push({
+      {
         title: OUTPUT_MESSAGES.expandSection.agentType,
         description: getAgentTypeName(agentType) || emptyValue,
-      });
-    }
+      },
+    ];
 
     return list.map(({ title, description }) => {
       return {
@@ -296,17 +305,7 @@ export const ActionsLogExpandedTray = memo<{
         ),
       };
     });
-  }, [
-    agentType,
-    command,
-    comment,
-    completedAt,
-    getTestId,
-    hosts,
-    isSentinelOneV1Enabled,
-    parametersList,
-    startedAt,
-  ]);
+  }, [agentType, command, comment, completedAt, getTestId, hosts, parametersList, startedAt]);
 
   const outputList = useMemo(
     () => [
