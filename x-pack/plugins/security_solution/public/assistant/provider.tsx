@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
-import { useState } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
