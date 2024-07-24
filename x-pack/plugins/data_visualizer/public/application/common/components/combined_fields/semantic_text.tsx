@@ -49,7 +49,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
   );
 
   useEffect(() => {
-    setSelectedFieldOption(fieldOptions[0].value);
+    setSelectedFieldOption(fieldOptions[0].value ?? null);
   }, [fieldOptions]);
 
   useEffect(() => {
@@ -66,9 +66,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
   }, [http]);
 
   useEffect(() => {
-    if (inferenceServices.length === 0) return;
-    // @ts-expect-error odd type issue
-    setSelectedInference(inferenceServices[0].value);
+    setSelectedInference(String(inferenceServices[0]?.value) ?? undefined);
   }, [inferenceServices]);
 
   useEffect(() => {
@@ -85,6 +83,10 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
     }
     addCombinedField(
       (mappings: any) => {
+        if (renameToFieldOption === undefined || selectedFieldOption === undefined) {
+          return mappings;
+        }
+
         const newMappings = cloneDeep(mappings);
         newMappings.properties[renameToFieldOption ?? selectedFieldOption] = {
           type: 'semantic_text',
@@ -106,6 +108,10 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       }
     );
   };
+
+  const isInvalid = useMemo(() => {
+    return !selectedInference || !selectedFieldOption || !renameToFieldOption;
+  }, [selectedInference, selectedFieldOption, renameToFieldOption]);
 
   return (
     <>
@@ -130,7 +136,12 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
           })}
         >
           <EuiFieldText
-            placeholder="Placeholder text"
+            placeholder={i18n.translate(
+              'xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel.placeholder',
+              {
+                defaultMessage: 'Field name',
+              }
+            )}
             value={renameToFieldOption}
             onChange={(e) => setRenameToFieldOption(e.target.value)}
             aria-label="Use aria labels when no actual label is in use"
@@ -153,7 +164,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       <EuiSpacer size="s" />
 
       <EuiTextAlign textAlign="right">
-        <EuiButton size="s" fill disabled={false} onClick={onSubmit}>
+        <EuiButton size="s" fill disabled={isInvalid} onClick={onSubmit}>
           <FormattedMessage
             id="xpack.dataVisualizer.file.geoPointForm.submitButtonLabel"
             defaultMessage="Add"

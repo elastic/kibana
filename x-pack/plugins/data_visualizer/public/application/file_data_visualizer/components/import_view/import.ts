@@ -27,11 +27,8 @@ interface Config {
   createDataView: boolean;
   indexSettingsString: string;
   mappingsString: string;
-  originalMappingsString: string;
   pipelineString: string;
-  reuseIndex: boolean;
   pipelineId: string | null;
-  createNewPipeline: boolean;
 }
 
 export async function importData(props: Props, config: Config, setState: (state: unknown) => void) {
@@ -42,11 +39,8 @@ export async function importData(props: Props, config: Config, setState: (state:
     createDataView,
     indexSettingsString,
     mappingsString,
-    originalMappingsString,
     pipelineString,
-    reuseIndex,
     pipelineId,
-    createNewPipeline,
   } = config;
   const { format } = results;
 
@@ -154,11 +148,7 @@ export async function importData(props: Props, config: Config, setState: (state:
     index,
     settings,
     mappings,
-    pipeline as IngestPipeline,
-    createNewPipeline,
-    reuseIndex,
-    pipelineId ?? undefined,
-    reuseIndex ? originalMappingsString === mappingsString : false
+    pipeline as IngestPipeline
   );
 
   const timeFieldName = importer.getTimeField();
@@ -169,20 +159,14 @@ export async function importData(props: Props, config: Config, setState: (state:
     indexCreatedStatus: getSuccess(indexCreated),
   });
 
-  if (createNewPipeline) {
-    const pipelineCreated = initializeImportResp.pipelineId !== undefined;
-    if (indexCreated) {
-      setState({
-        ingestPipelineCreatedStatus: pipelineCreated
-          ? IMPORT_STATUS.COMPLETE
-          : IMPORT_STATUS.FAILED,
-        pipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
-      });
-    }
-    success = indexCreated && pipelineCreated;
-  } else {
-    success = indexCreated;
+  const pipelineCreated = initializeImportResp.pipelineId !== undefined;
+  if (indexCreated) {
+    setState({
+      ingestPipelineCreatedStatus: pipelineCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+      pipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
+    });
   }
+  success = indexCreated && pipelineCreated;
 
   if (success === false) {
     errors.push(initializeImportResp.error);
@@ -211,7 +195,7 @@ export async function importData(props: Props, config: Config, setState: (state:
     return;
   }
 
-  if (createDataView && reuseIndex === false) {
+  if (createDataView) {
     const dataViewName = dataView === '' ? index : dataView;
     const dataViewResp = await createKibanaDataView(dataViewName, dataViewsContract, timeFieldName);
     success = dataViewResp.success;

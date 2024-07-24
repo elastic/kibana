@@ -17,7 +17,6 @@ export enum IMPORT_STATUS {
   INCOMPLETE = 'incomplete',
   COMPLETE = 'complete',
   FAILED = 'danger',
-  SKIPPED = 'skipped',
 }
 
 export interface Statuses {
@@ -30,8 +29,7 @@ export interface Statuses {
   uploadProgress: number;
   uploadStatus: IMPORT_STATUS;
   createDataView: boolean;
-  createNewPipeline: boolean;
-  createNewIndex: boolean;
+  createPipeline: boolean;
   permissionCheckStatus: IMPORT_STATUS;
 }
 
@@ -46,8 +44,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     uploadProgress,
     uploadStatus,
     createDataView,
-    createNewPipeline,
-    createNewIndex,
+    createPipeline,
   } = statuses;
 
   let statusInfo = null;
@@ -73,7 +70,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   }
   if (
     ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE ||
-    (createNewPipeline === false && indexCreatedStatus === IMPORT_STATUS.COMPLETE)
+    (createPipeline === false && indexCreatedStatus === IMPORT_STATUS.COMPLETE)
   ) {
     completedStep = 3;
   }
@@ -163,7 +160,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       }
     );
     statusInfo =
-      createNewPipeline === true ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
+      createPipeline === true ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
   }
   if (completedStep >= 2) {
     createIndexTitle = i18n.translate(
@@ -179,7 +176,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       }
     );
     statusInfo =
-      createNewPipeline === true ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
+      createPipeline === true ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
   }
   if (completedStep >= 3) {
     createIngestPipelineTitle = i18n.translate(
@@ -242,10 +239,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
         : 'selected') as EuiStepStatus,
       onClick: () => {},
     },
-  ];
-
-  if (createNewIndex === true) {
-    steps.push({
+    {
       title: createIndexTitle,
       status: (indexCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
         ? indexCreatedStatus
@@ -253,11 +247,20 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
         ? 'selected'
         : 'incomplete') as EuiStepStatus,
       onClick: () => {},
-    });
-  }
+    },
+    {
+      title: uploadingDataTitle,
+      status: (uploadStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+        ? uploadStatus
+        : completedStep === 3 // Then show selected/incomplete states
+        ? 'selected'
+        : 'incomplete') as EuiStepStatus,
+      onClick: () => {},
+    },
+  ];
 
-  if (createNewPipeline === true) {
-    steps.push({
+  if (createPipeline === true) {
+    steps.splice(2, 0, {
       title: createIngestPipelineTitle,
       status: (ingestPipelineCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
         ? ingestPipelineCreatedStatus
@@ -280,32 +283,22 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     });
   }
 
-  steps.push({
-    title: uploadingDataTitle,
-    status: (uploadStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
-      ? uploadStatus
-      : completedStep === 3 // Then show selected/incomplete states
-      ? 'selected'
-      : 'incomplete') as EuiStepStatus,
-    onClick: () => {},
-  });
-
   return (
-    <>
+    <React.Fragment>
       <EuiStepsHorizontal steps={steps} style={{ backgroundColor: 'transparent' }} />
       {statusInfo && (
-        <>
+        <React.Fragment>
           <EuiSpacer size="m" />
           {statusInfo}
-        </>
+        </React.Fragment>
       )}
-    </>
+    </React.Fragment>
   );
 };
 
 const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
   return (
-    <>
+    <React.Fragment>
       <p>
         <FormattedMessage
           id="xpack.dataVisualizer.file.importProgress.uploadingDataDescription"
@@ -313,11 +306,11 @@ const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
         />
       </p>
       {progress < 100 && (
-        <>
+        <React.Fragment>
           <EuiSpacer size="s" />
           <EuiProgress value={progress} max={100} color="primary" size="s" />
-        </>
+        </React.Fragment>
       )}
-    </>
+    </React.Fragment>
   );
 };

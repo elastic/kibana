@@ -96,8 +96,6 @@ export const DocCountChart: FC<{
       if (dataReady === false && newData.some((d) => d.value > 0)) {
         setDataReady(true);
       }
-      // eslint-disable-next-line no-console
-      console.log(newData);
 
       setEventRateChartData(newData);
       setLastNonZeroTimeMs(findLastTimestamp(newData, BACK_FILL_BUCKETS));

@@ -32,11 +32,10 @@ export const importFileQuerySchema = schema.object({
 
 export const importFileBodySchema = schema.object({
   index: schema.string(),
-  reuseIndex: schema.maybe(schema.boolean()),
   data: schema.arrayOf(schema.any()),
   settings: schema.maybe(schema.any()),
   /** Mappings */
-  mappings: schema.maybe(schema.any()),
+  mappings: schema.any(),
   /** Ingest pipeline definition */
   ingestPipeline: schema.object({
     id: schema.maybe(schema.string()),

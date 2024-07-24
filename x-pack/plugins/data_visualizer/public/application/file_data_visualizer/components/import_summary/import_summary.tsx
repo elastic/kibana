@@ -16,28 +16,30 @@ import { Failures } from './failures';
 interface Props {
   index: string;
   dataView: string;
-  pipelineId: string;
+  ingestPipelineId: string;
   docCount: number;
   importFailures: DocFailure[];
   createDataView: boolean;
-  createNewPipeline: boolean;
+  createPipeline: boolean;
 }
 
 export const ImportSummary: FC<Props> = ({
   index,
   dataView,
-  pipelineId,
+  ingestPipelineId,
   docCount,
   importFailures,
   createDataView,
+  createPipeline,
 }) => {
   const items = createDisplayItems(
     index,
     dataView,
-    pipelineId,
+    ingestPipelineId,
     docCount,
     importFailures,
-    createDataView
+    createDataView,
+    createPipeline
   );
 
   return (
@@ -97,10 +99,11 @@ export const ImportSummary: FC<Props> = ({
 function createDisplayItems(
   index: string,
   dataView: string,
-  pipelineId: string,
+  ingestPipelineId: string,
   docCount: number,
   importFailures: DocFailure[],
-  createDataView: boolean
+  createDataView: boolean,
+  createPipeline: boolean
 ) {
   const items = [
     {
@@ -115,15 +118,6 @@ function createDisplayItems(
     {
       title: (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.importSummary.ingestPipelineTitle"
-          defaultMessage="Ingest pipeline"
-        />
-      ),
-      description: pipelineId,
-    },
-    {
-      title: (
-        <FormattedMessage
           id="xpack.dataVisualizer.file.importSummary.documentsIngestedTitle"
           defaultMessage="Documents ingested"
         />
@@ -132,8 +126,20 @@ function createDisplayItems(
     },
   ];
 
+  if (createPipeline) {
+    items.splice(1, 0, {
+      title: (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.importSummary.ingestPipelineTitle"
+          defaultMessage="Ingest pipeline"
+        />
+      ),
+      description: ingestPipelineId,
+    });
+  }
+
   if (createDataView) {
-    items.splice(2, 0, {
+    items.splice(1, 0, {
       title: (
         <FormattedMessage
           id="xpack.dataVisualizer.file.importSummary.dataViewTitle"
