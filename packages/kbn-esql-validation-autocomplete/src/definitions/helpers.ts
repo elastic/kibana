@@ -17,7 +17,7 @@ import type { CommandDefinition, FunctionDefinition } from './types';
  */
 export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
-  { withTypes, capitalize }: { withTypes: boolean; capitalize: boolean } = {
+  { withTypes, capitalize }: { withTypes: boolean; capitalize?: boolean } = {
     withTypes: true,
     capitalize: false,
   }

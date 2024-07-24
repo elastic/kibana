@@ -99,7 +99,7 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
         },
       ],
     },
-    { withTypes: false }
+    { withTypes: false, capitalize: false }
   )[0].declaration;
 }
 function getFieldMapping(
