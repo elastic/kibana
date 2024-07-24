@@ -35,7 +35,6 @@ const testProps = {
   setIsStreaming: jest.fn(),
   refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
-  isEnabledLangChain: false,
   isFetchingResponse: false,
   currentConversation,
   showAnonymizedValues,

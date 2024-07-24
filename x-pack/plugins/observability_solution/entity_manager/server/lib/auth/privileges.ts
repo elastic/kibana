@@ -21,7 +21,13 @@ export const requiredRunTimePrivileges = {
       privileges: ['read', 'view_index_metadata'],
     },
   ],
-  cluster: ['manage_transform', 'monitor_transform', 'manage_ingest_pipelines', 'monitor'],
+  cluster: [
+    'manage_transform',
+    'monitor_transform',
+    'manage_ingest_pipelines',
+    'monitor',
+    'manage_index_templates',
+  ],
   application: [
     {
       application: 'kibana-.kibana',
