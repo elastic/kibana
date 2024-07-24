@@ -105,4 +105,8 @@ describe('When using `withEndpointAuthz()`', () => {
       body: expect.any(EndpointAuthorizationError),
     });
   });
+
+  it.todo('should call additionalChecks callback if defined');
+
+  it.todo('should deny access if additinalChecks callback throws an error');
 });

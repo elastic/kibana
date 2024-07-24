@@ -58,12 +58,6 @@ export const ensureUserHasAuthzToFilesForAction = async (
   }
 
   if (!hasAccess) {
-    throw new EndpointAuthorizationError(
-      `${
-        message
-          ? ` ${message}`
-          : `Not authorized to access files for command [${agentType}] [${command}]`
-      }`
-    );
+    throw new EndpointAuthorizationError({ message });
   }
 };
