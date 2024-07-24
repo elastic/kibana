@@ -103,6 +103,7 @@ import {
   IndexPatternMap,
   GetCompatibleCellValueActions,
   UserMessage,
+  UseHandledMessage,
   IndexPatternRef,
   FramePublicAPI,
   AddUserMessages,
@@ -185,6 +186,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
+  overrideBadgeMessages?: (userMessages: UserMessage[]) => UseHandledMessage[];
 }
 
 export type LensByValueInput = {
@@ -610,6 +612,30 @@ export class Embeddable
 
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
+  private handleExternalUserMessage = (messages: UserMessage[]) => {
+    if (this.input.overrideBadgeMessages) {
+      // we need something else to better identify those errors
+      const messagesToHandle = messages.filter(
+        (message) =>
+          message.displayLocations.some((d) => d.id === 'embeddableBadge') &&
+          message.severity === 'error'
+      );
+
+      if (messagesToHandle.length > 0) {
+        const userHandledMessages = this.input.overrideBadgeMessages(messagesToHandle);
+        return userHandledMessages.map((userMessage, index) => {
+          const originalMessage = messagesToHandle[index];
+
+          return {
+            ...originalMessage,
+            ...userMessage,
+          };
+        });
+      }
+    }
+
+    return messages;
+  };
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     const userMessages: UserMessage[] = [];
     userMessages.push(
@@ -637,8 +663,9 @@ export class Embeddable
     );
 
     if (!this.savedVis) {
-      return userMessages;
+      return this.handleExternalUserMessage(userMessages);
     }
+
     const mergedSearchContext = this.getMergedSearchContext();
 
     const framePublicAPI: FramePublicAPI = {
@@ -683,10 +710,12 @@ export class Embeddable
       }) ?? [])
     );
 
-    return filterAndSortUserMessages(
-      [...userMessages, ...Object.values(this.additionalUserMessages)],
-      locationId,
-      filters ?? {}
+    return this.handleExternalUserMessage(
+      filterAndSortUserMessages(
+        [...userMessages, ...Object.values(this.additionalUserMessages)],
+        locationId,
+        filters ?? {}
+      )
     );
   };
 

@@ -32,6 +32,8 @@ import { act } from 'react-dom/test-utils';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { Visualization } from '../types';
 import { createMockDatasource, createMockVisualization } from '../mocks';
+import * as applicationUserMessages from '../app_plugin/get_application_user_messages';
+import { FIELD_NOT_FOUND } from '../user_messages_ids';
 
 jest.mock('@kbn/inspector-plugin/public', () => ({
   isAvailable: false,
@@ -270,6 +272,53 @@ describe('embeddable', () => {
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
+  });
+
+  it('should not call', async () => {
+    const getBadgeMessage = jest.fn(
+      (): ReturnType<NonNullable<LensEmbeddableInput['overrideBadgeMessages']>> => [
+        {
+          severity: 'warning',
+          longMessage: 'lmao',
+          hidePopoverIcon: true,
+        },
+      ]
+    );
+
+    jest.spyOn(applicationUserMessages, 'getApplicationUserMessages').mockReturnValue([
+      {
+        uniqueId: FIELD_NOT_FOUND,
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'embeddableBadge' }],
+        longMessage: 'lol',
+        shortMessage: '',
+      },
+    ]);
+
+    const embeddable = new Embeddable(getEmbeddableProps({}), {
+      overrideBadgeMessages: getBadgeMessage,
+    } as unknown as LensEmbeddableInput);
+
+    const getUserMessagesSpy = jest.spyOn(embeddable, 'getUserMessages');
+    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+
+    embeddable.render(mountpoint);
+
+    expect(getBadgeMessage).toHaveBeenCalled();
+
+    const finalMessages = getUserMessagesSpy.mock.results.at(-1)?.value;
+    expect(finalMessages).toEqual([
+      {
+        displayLocations: [{ id: 'embeddableBadge' }],
+        fixableInEditor: true,
+        hidePopoverIcon: true,
+        longMessage: 'lmao',
+        severity: 'warning',
+        shortMessage: '',
+        uniqueId: 'field_not_found',
+      },
+    ]);
   });
 
   it('should not render the vis if loaded saved object conflicts', async () => {
