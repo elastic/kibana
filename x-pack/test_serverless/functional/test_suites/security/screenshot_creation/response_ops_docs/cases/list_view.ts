@@ -62,11 +62,10 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     it('cases list screenshot', async () => {
