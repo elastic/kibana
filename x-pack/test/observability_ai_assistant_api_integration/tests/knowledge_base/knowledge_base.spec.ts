@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import http from 'http';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
 
@@ -27,11 +26,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 
   describe('Knowledge base', () => {
-    const requestHandler = (
-      request: http.IncomingMessage,
-      response: http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage }
-    ) => {};
-
     before(async () => {
       const config = {
         ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
