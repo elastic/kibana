@@ -36,43 +36,49 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
         {
           id: 'test1',
           headerAriaLabel: 'Additional row control header 1',
-          getRowControlParams: (params) => {
-            return {
-              label: 'Test 1',
-              iconType: pinnedItems[params.record.id] ? 'pinFilled' : 'pin',
-              onClick: ({ record }) => {
-                setPinnedItems((prev) => ({
-                  ...prev,
-                  [record.id]: !prev[record.id],
-                }));
-              },
-            };
+          renderControl: (Control, contextProps) => {
+            return (
+              <Control
+                label="Test 1"
+                iconType={pinnedItems[contextProps.record.id] ? 'pinFilled' : 'pin'}
+                onClick={() => {
+                  setPinnedItems((prev) => ({
+                    ...prev,
+                    [contextProps.record.id]: !prev[contextProps.record.id],
+                  }));
+                }}
+              />
+            );
           },
         },
         {
           id: 'test2',
           headerAriaLabel: 'Additional row control header 2',
-          getRowControlParams: () => {
-            return {
-              label: 'Test 2',
-              iconType: 'visBarVerticalStacked',
-              onClick: () => {
-                alert('Test 2 clicked');
-              },
-            };
+          renderControl: (Control, contextProps) => {
+            return (
+              <Control
+                label="Test 2"
+                iconType="visBarVerticalStacked"
+                onClick={() => {
+                  alert('Test 2 clicked');
+                }}
+              />
+            );
           },
         },
         {
           id: 'test',
           headerAriaLabel: 'Additional row control header 3',
-          getRowControlParams: () => {
-            return {
-              label: 'Test 3',
-              iconType: 'heart',
-              onClick: () => {
-                alert('Test 3 clicked');
-              },
-            };
+          renderControl: (Control, contextProps) => {
+            return (
+              <Control
+                label="Test 3"
+                iconType="heart"
+                onClick={() => {
+                  alert('Test 3 clicked');
+                }}
+              />
+            );
           },
         },
       ]}

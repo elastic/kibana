@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -22,12 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { DataTableRowControl } from '../../data_table_row_control';
-import { RowControlColumn } from '../../../types';
+import { RowControlColumn, RowControlContextProps, RowControlProps } from '../../../types';
 
 /**
  * Button under which all other additional row controls would be placed
  */
-export const AdditionalActionsRowControlButton = ({
+export const AdditionalActionsRowControlCell = ({
   columnId,
   rowIndex,
   setCellProps,
@@ -36,16 +36,19 @@ export const AdditionalActionsRowControlButton = ({
   rowControlColumns: RowControlColumn[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const toolTipRef = useRef<EuiToolTip>(null);
   const { expanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
   const record = useMemo(() => rows[rowIndex], [rows, rowIndex]);
+  const contextProps: RowControlContextProps = useMemo(
+    () => ({ rowIndex, record }),
+    [rowIndex, record]
+  );
+
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
 
   const buttonLabel = i18n.translate('unifiedDataTable.grid.additionalRowActions', {
     defaultMessage: 'Additional actions',
   });
 
-  // TODO: refactor to row classes
   useEffect(() => {
     if (record.isAnchor) {
       setCellProps({
@@ -55,17 +58,35 @@ export const AdditionalActionsRowControlButton = ({
       setCellProps({
         className: 'unifiedDataTable__cell--expanded',
       });
-    } else {
-      setCellProps({ className: undefined });
     }
   }, [expanded, record, setCellProps, isDarkMode]);
+
+  const getControlComponent: (id: string) => React.FC<RowControlProps> = useCallback(
+    (id) =>
+      ({ label, iconType, onClick }) => {
+        return (
+          <EuiContextMenuItem
+            key={id}
+            icon={iconType}
+            data-test-subj={`unifiedDataTable_remainingRowControl_${id}`}
+            onClick={() => {
+              onClick(contextProps);
+              setIsMoreActionsPopoverOpen(false);
+            }}
+          >
+            {label}
+          </EuiContextMenuItem>
+        );
+      },
+    [contextProps, setIsMoreActionsPopoverOpen]
+  );
 
   return (
     <EuiPopover
       id="remainingRowActionsPopover"
       button={
         <DataTableRowControl>
-          <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
+          <EuiToolTip content={buttonLabel} delay="long">
             <EuiButtonIcon
               size="xs"
               iconSize="s"
@@ -91,23 +112,8 @@ export const AdditionalActionsRowControlButton = ({
       <EuiContextMenuPanel
         size="s"
         items={rowControlColumns.map((rowControlColumn) => {
-          const { label, iconType, onClick } = rowControlColumn.getRowControlParams({
-            rowIndex,
-            record,
-          });
-          return (
-            <EuiContextMenuItem
-              key={rowControlColumn.id}
-              icon={iconType}
-              data-test-subj={`unifiedDataTable_remainingRowControl_${rowControlColumn.id}`}
-              onClick={() => {
-                onClick({ rowIndex, record });
-                setIsMoreActionsPopoverOpen(false);
-              }}
-            >
-              {label}
-            </EuiContextMenuItem>
-          );
+          const Control = getControlComponent(rowControlColumn.id);
+          return rowControlColumn.renderControl(Control, contextProps);
         })}
       />
     </EuiPopover>
@@ -130,7 +136,7 @@ export const getAdditionalActionsRowControlColumn = (
       </EuiScreenReaderOnly>
     ),
     rowCellRender: (props) => {
-      return <AdditionalActionsRowControlButton {...props} rowControlColumns={rowControlColumns} />;
+      return <AdditionalActionsRowControlCell {...props} rowControlColumns={rowControlColumns} />;
     },
   };
 };

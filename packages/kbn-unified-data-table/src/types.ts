@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ReactElement } from 'react';
+import type { ReactElement, FC } from 'react';
 import type { EuiDataGridCellValueElementProps, EuiDataGridColumn, IconType } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -85,19 +85,19 @@ export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {
   trailingControlColumns?: EuiDataGridControlColumn[];
 };
 
-export interface RowControlProps {
+export interface RowControlContextProps {
   rowIndex: number;
   record: DataTableRecord;
 }
 
-export interface RowControlParams {
+export interface RowControlProps {
   label: string;
   iconType: IconType;
-  onClick: (props: RowControlProps) => void;
+  onClick: (props: RowControlContextProps) => void;
 }
 
 export interface RowControlColumn {
   id: string;
   headerAriaLabel: string;
-  getRowControlParams: (props: RowControlProps) => RowControlParams;
+  renderControl: (Control: FC<RowControlProps>, props: RowControlContextProps) => ReactElement;
 }
