@@ -19,6 +19,7 @@ import type {
   SimpleSOAssetType,
   AssetSOObject,
   InstallResultStatus,
+  PackageMetadata,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -97,6 +98,7 @@ export interface GetInfoRequest {
 
 export interface GetInfoResponse {
   item: PackageInfo;
+  metadata?: PackageMetadata;
   // deprecated in 8.0
   response?: PackageInfo;
 }
