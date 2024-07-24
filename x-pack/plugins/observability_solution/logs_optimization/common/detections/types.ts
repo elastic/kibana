@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EsqlHit } from '../types';
+
 export interface IntegrationLikeDetection {
   type: 'integration_like';
   message: string;
@@ -19,6 +22,9 @@ interface MappingGap {
 export interface MappingGapsDetection {
   type: 'mapping_gap';
   gaps: MappingGap[];
+  tasks: {
+    processors?: IngestProcessorContainer[];
+  };
 }
 
 export interface FieldExtractionDetection {
@@ -26,6 +32,10 @@ export interface FieldExtractionDetection {
   sourceField: string;
   targetField: string;
   pattern: string;
+  documentSamples: EsqlHit[];
+  tasks: {
+    processors?: IngestProcessorContainer[];
+  };
 }
 
 export type Detection = IntegrationLikeDetection | MappingGapsDetection | FieldExtractionDetection;

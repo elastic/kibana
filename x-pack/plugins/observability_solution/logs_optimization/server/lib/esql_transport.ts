@@ -8,6 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { EsqlDocument, EsqlHit } from '@kbn/logs-optimization-plugin/common/types';
 
 interface EsqlResultColumn {
   name: string;
@@ -35,14 +36,6 @@ export class EsqlTransport {
       })
       .then(EsqlTable.create);
   }
-}
-
-type EsqlDocument = Record<string, string | null>;
-
-interface EsqlHit {
-  _id: string;
-  _index: string;
-  _source: EsqlDocument;
 }
 
 const ESQL_DOCUMENT_ID = 'esql_query_document';

@@ -6,12 +6,16 @@
  */
 
 import { EsqlTransport } from '@kbn/logs-optimization-plugin/server/lib/esql_transport';
-import first from 'lodash/first';
-import uniq from 'lodash/uniq';
 import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
+import {
+  IngestPipelineProcessor,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../../../common/constants';
 import { createFieldExtractionDetection } from '../../../../common/detections/utils';
 import { FieldExtractionDetection } from '../../../../common/detections/types';
+
+const TEMPORARY_TIMESTAMP_FIELD = 'detected_timestamp';
 
 export class TimestampExtractionDetection {
   constructor(private esqlTransport: EsqlTransport) {}
@@ -25,16 +29,21 @@ export class TimestampExtractionDetection {
     try {
       const esqlTable = await this.esqlTransport.query(this.buildQuery(index));
 
-      const esqlValues = esqlTable.getValues();
-      const esqlUniqueValues = uniq(esqlValues);
+      const esqlDocs = esqlTable.toDocuments();
+      const pattern = esqlDocs.hits.find((doc) => Boolean(doc._source.matched_pattern))?._source
+        .matched_pattern as string;
 
-      const canExtractTimestamp = esqlUniqueValues.length > 0;
+      const canExtractTimestamp = Boolean(pattern);
 
       if (canExtractTimestamp) {
         return createFieldExtractionDetection({
           sourceField: MESSAGE_FIELD,
           targetField: TIMESTAMP_FIELD,
-          pattern: first(esqlUniqueValues) as string,
+          pattern,
+          documentSamples: esqlDocs.hits,
+          tasks: {
+            processors: this.buildPipelineProcessors(pattern),
+          },
         });
       } else {
         return null;
@@ -48,6 +57,7 @@ export class TimestampExtractionDetection {
     return `FROM ${index.name}
             | WHERE ${MESSAGE_FIELD} IS NOT NULL
             | GROK ${MESSAGE_FIELD} "%{TIMESTAMP_ISO8601:timestamp_iso}"
+            | GROK ${MESSAGE_FIELD} "%{SYSLOGTIMESTAMP:timestamp_sys}"
             | GROK ${MESSAGE_FIELD} "%{DATESTAMP_RFC822:timestamp_rfc822}"
             | GROK ${MESSAGE_FIELD} "%{DATESTAMP_RFC2822:timestamp_rfc2822}"
             | GROK ${MESSAGE_FIELD} "%{DATESTAMP_EVENTLOG:timestamp_eventlog}"
@@ -56,17 +66,48 @@ export class TimestampExtractionDetection {
             | GROK ${MESSAGE_FIELD} "%{DATE_EU:timestamp_date_eu}"
             | GROK ${MESSAGE_FIELD} "%{DATE_US:timestamp_date_us}"
             | EVAL matched_pattern = CASE(
-                timestamp_iso IS NOT NULL, "%{TIMESTAMP_ISO8601:@timestamp}",
-                timestamp_rfc822 IS NOT NULL, "%{DATESTAMP_RFC822:@timestamp}",
-                timestamp_rfc2822 IS NOT NULL, "%{DATESTAMP_RFC2822:@timestamp}",
-                timestamp_eventlog IS NOT NULL, "%{DATESTAMP_EVENTLOG:@timestamp}",
-                timestamp_httpdate IS NOT NULL, "%{HTTPDATE:@timestamp}",
-                timestamp_other IS NOT NULL, "%{DATESTAMP_OTHER:@timestamp}",
-                timestamp_date_eu IS NOT NULL, "%{DATE_EU:@timestamp}",
-                timestamp_date_us IS NOT NULL, "%{DATE_US:@timestamp}",
-                null
+                timestamp_iso IS NOT NULL, "%{TIMESTAMP_ISO8601:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_sys IS NOT NULL, "%{SYSLOGTIMESTAMP:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_rfc822 IS NOT NULL, "%{DATESTAMP_RFC822:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_rfc2822 IS NOT NULL, "%{DATESTAMP_RFC2822:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_eventlog IS NOT NULL, "%{DATESTAMP_EVENTLOG:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_httpdate IS NOT NULL, "%{HTTPDATE:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_other IS NOT NULL, "%{DATESTAMP_OTHER:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_date_eu IS NOT NULL, "%{DATE_EU:${TEMPORARY_TIMESTAMP_FIELD}}",
+                timestamp_date_us IS NOT NULL, "%{DATE_US:${TEMPORARY_TIMESTAMP_FIELD}}",
+                ""
             )
-            | KEEP matched_pattern
+            | WHERE matched_pattern != ""
+            | DROP timestamp_*
+            | LIMIT 5
     `;
+  }
+
+  private buildPipelineProcessors(pattern: string): IngestProcessorContainer[] {
+    return [
+      {
+        grok: {
+          description: `Extract @timestamp field from ${MESSAGE_FIELD}`,
+          field: MESSAGE_FIELD,
+          patterns: [pattern],
+          ignore_failure: true,
+          ignore_missing: true,
+        },
+      },
+      {
+        date: {
+          field: TEMPORARY_TIMESTAMP_FIELD,
+          formats: ['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N'],
+          ignore_failure: true,
+        },
+      },
+      {
+        remove: {
+          field: TEMPORARY_TIMESTAMP_FIELD,
+          ignore_failure: true,
+          ignore_missing: true,
+        },
+      },
+    ];
   }
 }

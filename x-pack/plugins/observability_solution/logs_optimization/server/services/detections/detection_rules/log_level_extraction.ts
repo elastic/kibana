@@ -7,6 +7,7 @@
 
 import { EsqlTransport } from '@kbn/logs-optimization-plugin/server/lib/esql_transport';
 import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { LOG_LEVEL_FIELD, MESSAGE_FIELD } from '../../../../common/constants';
 import { createFieldExtractionDetection } from '../../../../common/detections/utils';
 import { FieldExtractionDetection } from '../../../../common/detections/types';
@@ -33,6 +34,10 @@ export class LogLevelExtractionDetection {
           sourceField: MESSAGE_FIELD,
           targetField: LOG_LEVEL_FIELD,
           pattern: LOG_LEVEL_PATTERN,
+          documentSamples: esqlDocs.hits,
+          tasks: {
+            processors: this.buildPipelineProcessors(LOG_LEVEL_PATTERN),
+          },
         });
       } else {
         return null;
@@ -52,7 +57,21 @@ export class LogLevelExtractionDetection {
             | WHERE ${MESSAGE_FIELD} IS NOT NULL
             | GROK ${MESSAGE_FIELD} ${JSON.stringify(LOG_LEVEL_PATTERN)}
             | WHERE ${LOG_LEVEL_FIELD} IS NOT NULL
-            | KEEP log.level
+            | LIMIT 5
     `;
+  }
+
+  private buildPipelineProcessors(pattern: string): IngestProcessorContainer[] {
+    return [
+      {
+        grok: {
+          description: `Extract log.level field from ${MESSAGE_FIELD}`,
+          field: MESSAGE_FIELD,
+          patterns: [pattern],
+          ignore_failure: true,
+          ignore_missing: true,
+        },
+      },
+    ];
   }
 }

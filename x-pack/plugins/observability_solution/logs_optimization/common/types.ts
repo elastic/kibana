@@ -10,3 +10,11 @@ import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyK
 export interface NewestIndex extends IndicesIndexState {
   name: string;
 }
+
+export type EsqlDocument = Record<string, string | null>;
+
+export interface EsqlHit {
+  _id: string;
+  _index: string;
+  _source: EsqlDocument;
+}
