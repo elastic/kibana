@@ -28,3 +28,6 @@ export const ESQL_NUMBER_TYPES = [
   'counter_integer',
   ...ESQL_NUMERIC_DECIMAL_TYPES,
 ] as const;
+
+export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
+export const ESQL_DATE_TYPES = ['datetime', 'date_period'] as const;

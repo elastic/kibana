@@ -13695,8 +13695,8 @@ describe('validation logic', () => {
           [
             'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
-            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
           ]
         );
 
@@ -13714,7 +13714,7 @@ describe('validation logic', () => {
             'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
             'Argument of [bucket] must be a constant, received [textField]',
-            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
           ]
         );
 
@@ -13731,7 +13731,7 @@ describe('validation logic', () => {
           [
             'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be [text], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [textField]',
           ]
         );

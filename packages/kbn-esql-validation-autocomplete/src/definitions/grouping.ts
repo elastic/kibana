@@ -7,8 +7,53 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionDefinition } from './types';
+import { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
+const groupingTypeTable: Array<
+  [
+    FunctionParameterType,
+    FunctionParameterType,
+    FunctionParameterType | null,
+    FunctionParameterType | null,
+    FunctionReturnType
+  ]
+> = [
+  // field   // bucket   //from    // to   //result
+  ['datetime', 'date_period', null, null, 'datetime'],
+  ['datetime', 'integer', 'datetime', 'datetime', 'datetime'],
+  // Modified time_duration to time_literal
+  ['datetime', 'time_literal', null, null, 'datetime'],
+  ['double', 'double', null, null, 'double'],
+  ['double', 'integer', 'double', 'double', 'double'],
+  ['double', 'integer', 'double', 'integer', 'double'],
+  ['double', 'integer', 'double', 'long', 'double'],
+  ['double', 'integer', 'integer', 'double', 'double'],
+  ['double', 'integer', 'integer', 'integer', 'double'],
+  ['double', 'integer', 'integer', 'long', 'double'],
+  ['double', 'integer', 'long', 'double', 'double'],
+  ['double', 'integer', 'long', 'integer', 'double'],
+  ['double', 'integer', 'long', 'long', 'double'],
+  ['integer', 'double', null, null, 'double'],
+  ['integer', 'integer', 'double', 'double', 'double'],
+  ['integer', 'integer', 'double', 'integer', 'double'],
+  ['integer', 'integer', 'double', 'long', 'double'],
+  ['integer', 'integer', 'integer', 'double', 'double'],
+  ['integer', 'integer', 'integer', 'integer', 'double'],
+  ['integer', 'integer', 'integer', 'long', 'double'],
+  ['integer', 'integer', 'long', 'double', 'double'],
+  ['integer', 'integer', 'long', 'integer', 'double'],
+  ['integer', 'integer', 'long', 'long', 'double'],
+  ['long', 'double', null, null, 'double'],
+  ['long', 'integer', 'double', 'double', 'double'],
+  ['long', 'integer', 'double', 'integer', 'double'],
+  ['long', 'integer', 'double', 'long', 'double'],
+  ['long', 'integer', 'integer', 'double', 'double'],
+  ['long', 'integer', 'integer', 'integer', 'double'],
+  ['long', 'integer', 'integer', 'long', 'double'],
+  ['long', 'integer', 'long', 'double', 'double'],
+  ['long', 'integer', 'long', 'integer', 'double'],
+  ['long', 'integer', 'long', 'long', 'double'],
+];
 export const groupingFunctionDefinitions: FunctionDefinition[] = [
   {
     name: 'bucket',
@@ -21,69 +66,18 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats'],
     supportedOptions: ['by'],
     signatures: [
-      {
-        params: [
-          { name: 'field', type: 'datetime' },
-          { name: 'buckets', type: 'time_literal', constantOnly: true },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          { name: 'field', type: 'integer' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-        ],
-        returnType: 'integer',
-      },
-      {
-        params: [
-          // @TODO: check for support for date_period, 'keyword',
-          { name: 'field', type: 'datetime' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startDate', type: 'text', constantOnly: true },
-          { name: 'endDate', type: 'text', constantOnly: true },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          // @TODO: check for support for date_period
-          { name: 'field', type: 'datetime' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startDate', type: 'datetime', constantOnly: true },
-          { name: 'endDate', type: 'datetime', constantOnly: true },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          // @TODO: check for support for date_period
-          { name: 'field', type: 'datetime' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startDate', type: 'string', constantOnly: true },
-          { name: 'endDate', type: 'datetime', constantOnly: true },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          // @TODO: check for support for date_period
-          { name: 'field', type: 'datetime' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startDate', type: 'datetime', constantOnly: true },
-          { name: 'endDate', type: 'string', constantOnly: true },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          { name: 'field', type: 'integer' },
-          { name: 'buckets', type: 'integer', constantOnly: true },
-          { name: 'startValue', type: 'integer', constantOnly: true },
-          { name: 'endValue', type: 'integer', constantOnly: true },
-        ],
-        returnType: 'integer',
-      },
+      ...groupingTypeTable.map((signature) => {
+        const [fieldType, bucketType, fromType, toType, resultType] = signature;
+        return {
+          params: [
+            { name: 'field', type: fieldType },
+            { name: 'buckets', type: bucketType, constantOnly: true },
+            ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
+            ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
+          ],
+          returnType: resultType,
+        };
+      }),
     ],
     examples: [
       'from index | eval hd = bucket(bytes, 1 hour)',
