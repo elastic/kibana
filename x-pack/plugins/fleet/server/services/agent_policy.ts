@@ -940,6 +940,7 @@ class AgentPolicyService {
     outputId: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
@@ -958,7 +959,7 @@ class AgentPolicyService {
     const packagePoliciesUsingOutput =
       await internalSoClientWithoutSpaceExtension.find<PackagePolicySOAttributes>({
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        fields: ['revision', 'output_id', 'namespaces'],
+        fields: ['output_id', 'namespaces', 'policy_ids'],
         searchFields: ['output_id'],
         search: escapeSearchQueryPhrase(outputId),
         perPage: SO_SEARCH_LIMIT,
@@ -983,7 +984,7 @@ class AgentPolicyService {
           type: SAVED_OBJECT_TYPE,
           id,
           fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
-          namespaces: ['*'],
+          ...(useSpaceAwareness ? { namespaces: ['*'] } : {}),
         }))
       );
 
