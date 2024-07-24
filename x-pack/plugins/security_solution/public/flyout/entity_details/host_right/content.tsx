@@ -71,6 +71,7 @@ export const HostPanelContent = ({
         observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
+      <EuiHorizontalRule />
       <InsightEntity
         // observedData={observedHost}
         hostName={hostName}

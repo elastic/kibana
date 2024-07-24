@@ -9,6 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { ExpandablePanel } from '../../../../shared/components/expandable_panel';
 
 export const MisconfigurationsOverview = ({
@@ -19,6 +20,22 @@ export const MisconfigurationsOverview = ({
   failedFindings: number;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+    if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
+    return [
+      {
+        key: 'passed',
+        count: passedFindingsStats,
+        color: 'green',
+      },
+      {
+        key: 'failed',
+        count: failedFindingsStats,
+        color: 'red',
+      },
+    ];
+  };
+
   return (
     <ExpandablePanel
       header={{
@@ -30,68 +47,74 @@ export const MisconfigurationsOverview = ({
         ),
         iconType: 'arrowStart',
       }}
-      //   content={{ loading, error }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
-      <EuiFlexGroup gutterSize="s">
-        {/* <EuiFlexItem></EuiFlexItem> */}
+      <EuiFlexGroup gutterSize="none">
         {passedFindings === 0 && failedFindings === 0 ? (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiText
-                css={css`
-                  font-size: ${euiTheme.size.l};
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
-              >
-                <b>{'-'}</b>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText
-                css={css`
-                  font-size: ${euiTheme.size.m};
-                  font-weight: ${euiTheme.font.weight.semiBold};
-                `}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.misconfigurations.noFindingsDescription"
-                  defaultMessage="No Findings"
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                <EuiText
+                  css={css`
+                    font-size: ${euiTheme.size.l};
+                    font-weight: ${euiTheme.font.weight.bold};
+                  `}
+                >
+                  <b>{'-'}</b>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  css={css`
+                    font-size: ${euiTheme.size.m};
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.insights.misconfigurations.noFindingsDescription"
+                    defaultMessage="No Findings"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         ) : (
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                <EuiText
+                  css={css`
+                    font-size: ${euiTheme.size.l};
+                    font-weight: ${euiTheme.font.weight.bold};
+                  `}
+                >
+                  {`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  css={css`
+                    font-size: ${euiTheme.size.m};
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.insights.misconfigurations.postureScoreDescription"
+                    defaultMessage="Posture score"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiText
-                css={css`
-                  font-size: ${euiTheme.size.l};
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
-              >
-                {`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText
-                css={css`
-                  font-size: ${euiTheme.size.m};
-                  font-weight: ${euiTheme.font.weight.semiBold};
-                `}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.misconfigurations.postureScoreDescription"
-                  defaultMessage="Posture score"
-                />
-              </EuiText>
+            <EuiFlexItem />
+            <EuiFlexItem grow={true}>
+              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem />
-          <EuiFlexItem>{'BAR COMPONENT HERE PLACE HOLDER'}</EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </ExpandablePanel>
   );
