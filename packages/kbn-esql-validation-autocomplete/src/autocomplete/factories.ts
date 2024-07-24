@@ -28,7 +28,7 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
-export const TIME_SYSTEM_PARAMS = ['?earliest', '?latest'];
+export const TIME_SYSTEM_PARAMS = ['?start', '?end'];
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -394,11 +394,39 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
 }
 
 export function getDateLiterals() {
-  return buildConstantsDefinitions(
-    TIME_SYSTEM_PARAMS,
-    i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
-      defaultMessage: 'Named parameter',
-    }),
-    '1A'
-  );
+  return [
+    ...buildConstantsDefinitions(
+      TIME_SYSTEM_PARAMS,
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
+        defaultMessage: 'Named parameter',
+      }),
+      '1A'
+    ),
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePickerLabel',
+        {
+          defaultMessage: 'Choose from the time picker',
+        }
+      ),
+      text: '',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+        {
+          defaultMessage: 'Click to choose',
+        }
+      ),
+      sortText: '1A',
+      command: {
+        id: 'esql.timepicker.choose',
+        title: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+          {
+            defaultMessage: 'Click to choose',
+          }
+        ),
+      },
+    } as SuggestionRawDefinition,
+  ];
 }
