@@ -5234,12 +5234,27 @@
           {
             "parentPluginId": "ruleRegistry",
             "id": "def-common.BrowserField.format",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "format",
             "description": [],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/common/types.ts",
             "deprecated": false,
