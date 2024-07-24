@@ -401,16 +401,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`row var = NOT "a" ${op} "?a"`, []);
         testErrorsAndWarnings(`row var = NOT "a" NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`row var = 5 ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [5] type [integer]`,
+          `Argument of [${op}] must be [text], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = 5 NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [5] type [integer]`,
+          `Argument of [not_${op}] must be [text], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [5] type [integer]`,
+          `Argument of [${op}] must be [text], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [5] type [integer]`,
+          `Argument of [not_${op}] must be [text], found value [5] type [integer]`,
         ]);
       }
 
@@ -604,14 +604,14 @@ describe('validation logic', () => {
         'Unknown column [missingField]',
       ]);
       testErrorsAndWarnings('from index | drop `any#Char$Field`', []);
-      testErrorsAndWarnings('from index | drop s*', []);
-      testErrorsAndWarnings('from index | drop s**Field', []);
+      testErrorsAndWarnings('from index | drop t*', []);
+      testErrorsAndWarnings('from index | drop t**Field', []);
       testErrorsAndWarnings('from index | drop *Field*', []);
-      testErrorsAndWarnings('from index | drop s*F*d', []);
+      testErrorsAndWarnings('from index | drop t*F*d', []);
       testErrorsAndWarnings('from index | drop *Field', []);
-      testErrorsAndWarnings('from index | drop s*Field', []);
-      testErrorsAndWarnings('from index | drop string*Field', []);
-      testErrorsAndWarnings('from index | drop s*, d*', []);
+      testErrorsAndWarnings('from index | drop t*Field', []);
+      testErrorsAndWarnings('from index | drop textField', []);
+      testErrorsAndWarnings('from index | drop s*, d*', ['Unknown column [s*]']);
       testErrorsAndWarnings('from index | drop m*', ['Unknown column [m*]']);
       testErrorsAndWarnings('from index | drop *m', ['Unknown column [*m]']);
       testErrorsAndWarnings('from index | drop d*m', ['Unknown column [d*m]']);
@@ -643,7 +643,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | mv_expand ', [
         "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
       ]);
-      for (const type of ['string', 'integer', 'datetime', 'boolean', 'ip']) {
+      for (const type of ['text', 'integer', 'datetime', 'boolean', 'ip']) {
         testErrorsAndWarnings(`from a_index | mv_expand ${type}Field`, []);
       }
 
@@ -697,8 +697,12 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index |eval doubleField + 1 | rename `doubleField + 1` as ', [
         "SyntaxError: missing ID_PATTERN at '<EOF>'",
       ]);
+      testErrorsAndWarnings('from a_index | rename key* as keywords', [
+        'Using wildcards (*) in RENAME is not allowed [key*]',
+        'Unknown column [keywords]',
+      ]);
       testErrorsAndWarnings('from a_index | rename s* as strings', [
-        'Using wildcards (*) in RENAME is not allowed [s*]',
+        'Unknown column [s*]',
         'Unknown column [strings]',
       ]);
       testErrorsAndWarnings('row a = 10 | rename a as `this``is fine`', []);
@@ -775,6 +779,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | grok textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
       ]);
+      // @TODO: investigate
       // Do not try to validate the grok pattern string
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | grok doubleField "%{firstWord}"', [
@@ -804,14 +809,14 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where (NOT (doubleField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
 
-        for (const type of ['string', 'double', 'datetime', 'boolean', 'ip']) {
+        for (const type of ['text', 'double', 'datetime', 'boolean', 'ip']) {
           testErrorsAndWarnings(
             `from a_index | where ${type}Field ${op} ${type}Field`,
             type !== 'boolean' || ['==', '!='].includes(op)
               ? []
               : [
-                  `Argument of [${op}] must be [double], found value [${type}Field] type [${type}]`,
-                  `Argument of [${op}] must be [double], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [datetime], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [datetime], found value [${type}Field] type [${type}]`,
                 ]
           );
         }
@@ -852,27 +857,27 @@ describe('validation logic', () => {
 
       // Skip these tests until the insensitive case equality gets restored back
       testErrorsAndWarnings.skip(`from a_index | where doubleField =~ 0`, [
-        'Argument of [=~] must be [string], found value [doubleField] type [double]',
-        'Argument of [=~] must be [string], found value [0] type [number]',
+        'Argument of [=~] must be [text], found value [doubleField] type [double]',
+        'Argument of [=~] must be [text], found value [0] type [number]',
       ]);
       testErrorsAndWarnings.skip(`from a_index | where NOT doubleField =~ 0`, [
-        'Argument of [=~] must be [string], found value [doubleField] type [double]',
-        'Argument of [=~] must be [string], found value [0] type [number]',
+        'Argument of [=~] must be [text], found value [doubleField] type [double]',
+        'Argument of [=~] must be [text], found value [0] type [number]',
       ]);
       testErrorsAndWarnings.skip(`from a_index | where (doubleField =~ 0)`, [
-        'Argument of [=~] must be [string], found value [doubleField] type [double]',
-        'Argument of [=~] must be [string], found value [0] type [number]',
+        'Argument of [=~] must be [text], found value [doubleField] type [double]',
+        'Argument of [=~] must be [text], found value [0] type [number]',
       ]);
       testErrorsAndWarnings.skip(`from a_index | where (NOT (doubleField =~ 0))`, [
-        'Argument of [=~] must be [string], found value [doubleField] type [double]',
-        'Argument of [=~] must be [string], found value [0] type [number]',
+        'Argument of [=~] must be [text], found value [doubleField] type [double]',
+        'Argument of [=~] must be [text], found value [0] type [number]',
       ]);
       testErrorsAndWarnings.skip(`from a_index | where 1 =~ 0`, [
-        'Argument of [=~] must be [string], found value [1] type [number]',
-        'Argument of [=~] must be [string], found value [0] type [number]',
+        'Argument of [=~] must be [text], found value [1] type [number]',
+        'Argument of [=~] must be [text], found value [0] type [number]',
       ]);
       testErrorsAndWarnings.skip(`from a_index | eval textField =~ 0`, [
-        `Argument of [=~] must be [string], found value [0] type [number]`,
+        `Argument of [=~] must be [text], found value [0] type [number]`,
       ]);
 
       for (const op of ['like', 'rlike']) {
@@ -881,16 +886,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where NOT textField ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | where NOT textField NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | where doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
         ]);
       }
 
@@ -1145,12 +1150,18 @@ describe('validation logic', () => {
               ]
         );
 
-        testErrorsAndWarnings(`from a_index | eval 1 ${op} "1"`, [
-          `Argument of [${op}] must be [double], found value [\"1\"] type [string]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | eval "1" ${op} 1`, [
-          `Argument of [${op}] must be [double], found value [\"1\"] type [string]`,
-        ]);
+        testErrorsAndWarnings(
+          `from a_index | eval 1 ${op} "1"`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
+            : [`Argument of [${op}] must be [double], found value [\"1\"] type [string]`]
+        );
+        testErrorsAndWarnings(
+          `from a_index | eval "1" ${op} 1`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
+            : [`Argument of [${op}] must be [double], found value [\"1\"] type [string]`]
+        );
         // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete
         // testErrorsAndWarnings(`from a_index | eval "2022" ${op} 1 day`, []);
       }
@@ -1174,16 +1185,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval NOT textField ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | eval NOT textField NOT ${op} "?a"`, []);
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [text], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [string], found value [doubleField] type [double]`,
+          `Argument of [not_${op}] must be [text], found value [doubleField] type [double]`,
         ]);
       }
       // test lists
@@ -2271,7 +2282,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = coalesce(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          [+'Unknown column [cartesianPointField]', +'Unknown column [cartesianPointField]']
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(

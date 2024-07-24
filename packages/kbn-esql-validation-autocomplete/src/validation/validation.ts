@@ -21,6 +21,7 @@ import {
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstField } from '@kbn/esql-ast/src/types';
+import { isStringType } from '@kbn/esql-ast/src/ast_helpers';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -880,6 +881,7 @@ function validateColumnForCommand(
 
       if (columnParamsWithInnerTypes.length) {
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
+          if (innerType === 'string' && isStringType(columnRef.type)) return false;
           return innerType !== 'any' && innerType !== columnRef.type;
         });
         if (hasSomeWrongInnerTypes) {

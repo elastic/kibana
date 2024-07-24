@@ -847,28 +847,28 @@
     {
       "query": "row var = 5 like \"?a\"",
       "error": [
-        "Argument of [like] must be [string], found value [5] type [integer]"
+        "Argument of [like] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "row var = 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [string], found value [5] type [integer]"
+        "Argument of [not_like] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 like \"?a\"",
       "error": [
-        "Argument of [like] must be [string], found value [5] type [integer]"
+        "Argument of [like] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [string], found value [5] type [integer]"
+        "Argument of [not_like] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -895,28 +895,28 @@
     {
       "query": "row var = 5 rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [string], found value [5] type [integer]"
+        "Argument of [rlike] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "row var = 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [string], found value [5] type [integer]"
+        "Argument of [not_rlike] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [string], found value [5] type [integer]"
+        "Argument of [rlike] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [string], found value [5] type [integer]"
+        "Argument of [not_rlike] must be [text], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -2434,12 +2434,12 @@
       "warning": []
     },
     {
-      "query": "from index | drop s*",
+      "query": "from index | drop t*",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index | drop s**Field",
+      "query": "from index | drop t**Field",
       "error": [],
       "warning": []
     },
@@ -2449,7 +2449,7 @@
       "warning": []
     },
     {
-      "query": "from index | drop s*F*d",
+      "query": "from index | drop t*F*d",
       "error": [],
       "warning": []
     },
@@ -2459,18 +2459,20 @@
       "warning": []
     },
     {
-      "query": "from index | drop s*Field",
+      "query": "from index | drop t*Field",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index | drop string*Field",
+      "query": "from index | drop textField",
       "error": [],
       "warning": []
     },
     {
       "query": "from index | drop s*, d*",
-      "error": [],
+      "error": [
+        "Unknown column [s*]"
+      ],
       "warning": []
     },
     {
@@ -2540,7 +2542,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | mv_expand stringField",
+      "query": "from a_index | mv_expand textField",
       "error": [],
       "warning": []
     },
@@ -2677,9 +2679,17 @@
       "warning": []
     },
     {
+      "query": "from a_index | rename key* as keywords",
+      "error": [
+        "Using wildcards (*) in RENAME is not allowed [key*]",
+        "Unknown column [keywords]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | rename s* as strings",
       "error": [
-        "Using wildcards (*) in RENAME is not allowed [s*]",
+        "Unknown column [s*]",
         "Unknown column [strings]"
       ],
       "warning": []
@@ -2967,7 +2977,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField > stringField",
+      "query": "from a_index | where textField > textField",
       "error": [],
       "warning": []
     },
@@ -2984,8 +2994,8 @@
     {
       "query": "from a_index | where booleanField > booleanField",
       "error": [
-        "Argument of [>] must be [double], found value [booleanField] type [boolean]",
-        "Argument of [>] must be [double], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]",
+        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3020,7 +3030,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField >= stringField",
+      "query": "from a_index | where textField >= textField",
       "error": [],
       "warning": []
     },
@@ -3037,8 +3047,8 @@
     {
       "query": "from a_index | where booleanField >= booleanField",
       "error": [
-        "Argument of [>=] must be [double], found value [booleanField] type [boolean]",
-        "Argument of [>=] must be [double], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]",
+        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3073,7 +3083,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField < stringField",
+      "query": "from a_index | where textField < textField",
       "error": [],
       "warning": []
     },
@@ -3090,8 +3100,8 @@
     {
       "query": "from a_index | where booleanField < booleanField",
       "error": [
-        "Argument of [<] must be [double], found value [booleanField] type [boolean]",
-        "Argument of [<] must be [double], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]",
+        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3126,7 +3136,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField <= stringField",
+      "query": "from a_index | where textField <= textField",
       "error": [],
       "warning": []
     },
@@ -3143,8 +3153,8 @@
     {
       "query": "from a_index | where booleanField <= booleanField",
       "error": [
-        "Argument of [<=] must be [double], found value [booleanField] type [boolean]",
-        "Argument of [<=] must be [double], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]",
+        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3179,7 +3189,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField == stringField",
+      "query": "from a_index | where textField == textField",
       "error": [],
       "warning": []
     },
@@ -3229,7 +3239,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField != stringField",
+      "query": "from a_index | where textField != textField",
       "error": [],
       "warning": []
     },
@@ -3617,47 +3627,47 @@
     {
       "query": "from a_index | where doubleField =~ 0",
       "error": [
-        "Argument of [=~] must be [string], found value [doubleField] type [double]",
-        "Argument of [=~] must be [string], found value [0] type [number]"
+        "Argument of [=~] must be [text], found value [doubleField] type [double]",
+        "Argument of [=~] must be [text], found value [0] type [number]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where NOT doubleField =~ 0",
       "error": [
-        "Argument of [=~] must be [string], found value [doubleField] type [double]",
-        "Argument of [=~] must be [string], found value [0] type [number]"
+        "Argument of [=~] must be [text], found value [doubleField] type [double]",
+        "Argument of [=~] must be [text], found value [0] type [number]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where (doubleField =~ 0)",
       "error": [
-        "Argument of [=~] must be [string], found value [doubleField] type [double]",
-        "Argument of [=~] must be [string], found value [0] type [number]"
+        "Argument of [=~] must be [text], found value [doubleField] type [double]",
+        "Argument of [=~] must be [text], found value [0] type [number]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where (NOT (doubleField =~ 0))",
       "error": [
-        "Argument of [=~] must be [string], found value [doubleField] type [double]",
-        "Argument of [=~] must be [string], found value [0] type [number]"
+        "Argument of [=~] must be [text], found value [doubleField] type [double]",
+        "Argument of [=~] must be [text], found value [0] type [number]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where 1 =~ 0",
       "error": [
-        "Argument of [=~] must be [string], found value [1] type [number]",
-        "Argument of [=~] must be [string], found value [0] type [number]"
+        "Argument of [=~] must be [text], found value [1] type [number]",
+        "Argument of [=~] must be [text], found value [0] type [number]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval textField =~ 0",
       "error": [
-        "Argument of [=~] must be [string], found value [0] type [number]"
+        "Argument of [=~] must be [text], found value [0] type [number]"
       ],
       "warning": []
     },
@@ -3684,28 +3694,28 @@
     {
       "query": "from a_index | where doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [string], found value [doubleField] type [double]"
+        "Argument of [like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where NOT doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [string], found value [doubleField] type [double]"
+        "Argument of [like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3732,28 +3742,28 @@
     {
       "query": "from a_index | where doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where NOT doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6710,14 +6720,14 @@
     {
       "query": "from a_index | eval 1 + \"1\"",
       "error": [
-        "Argument of [+] must be [double], found value [\"1\"] type [string]"
+        "Argument of [+] must be [date_period], found value [1] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" + 1",
       "error": [
-        "Argument of [+] must be [double], found value [\"1\"] type [string]"
+        "Argument of [+] must be [date_period], found value [1] type [integer]"
       ],
       "warning": []
     },
@@ -6746,14 +6756,14 @@
     {
       "query": "from a_index | eval 1 - \"1\"",
       "error": [
-        "Argument of [-] must be [double], found value [\"1\"] type [string]"
+        "Argument of [-] must be [date_period], found value [1] type [integer]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" - 1",
       "error": [
-        "Argument of [-] must be [double], found value [\"1\"] type [string]"
+        "Argument of [-] must be [date_period], found value [1] type [integer]"
       ],
       "warning": []
     },
@@ -6933,28 +6943,28 @@
     {
       "query": "from a_index | eval doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [string], found value [doubleField] type [double]"
+        "Argument of [like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval NOT doubleField like \"?a\"",
       "error": [
-        "Argument of [like] must be [string], found value [doubleField] type [double]"
+        "Argument of [like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_like] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6981,28 +6991,28 @@
     {
       "query": "from a_index | eval doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval NOT doubleField rlike \"?a\"",
       "error": [
-        "Argument of [rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [string], found value [doubleField] type [double]"
+        "Argument of [not_rlike] must be [text], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -9635,7 +9645,7 @@
       "query": "from a_index | eval textField = 5",
       "error": [],
       "warning": [
-        "Column [textField] of type text has been overwritten as new type: number"
+        "Column [textField] of type text has been overwritten as new type: integer"
       ]
     },
     {
@@ -11247,7 +11257,10 @@
     },
     {
       "query": "row var = coalesce(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {

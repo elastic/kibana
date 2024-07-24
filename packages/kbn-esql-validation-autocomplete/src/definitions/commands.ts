@@ -403,6 +403,8 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
+        // @TODO: investigate whether
+        // we can have multiple signatures here for keyword and text
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
@@ -420,6 +422,9 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
+        // @TODO: investigate whether
+        // we can have multiple signatures here for keyword and text
+        // see columnParamsWithInnerTypes
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
