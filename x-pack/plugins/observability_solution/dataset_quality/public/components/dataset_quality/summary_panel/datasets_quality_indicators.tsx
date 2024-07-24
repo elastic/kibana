@@ -44,7 +44,7 @@ export function DatasetsQualityIndicators() {
   const datasetsWithoutIgnoredField =
     datasetsActivity.total > 0 ? datasetsActivity.total - datasetsQuality.percentages.length : 0;
 
-  if (!isDatasetsQualityLoading) {
+  if (!isDatasetsQualityLoading && (numberOfDatasets || numberOfDocuments)) {
     onPageReady({
       key1: 'datasets',
       value1: numberOfDatasets,
