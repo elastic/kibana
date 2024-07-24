@@ -10,7 +10,6 @@ import { parseRef } from '../../../utils/parse_ref';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
 import { DocumentNode, PlainObjectNode, RefNode } from '../types/node';
 import { DocumentNodeProcessor } from './types/document_node_processor';
-import { TraverseDocumentNodeContext } from './types/traverse_document_node_context';
 
 /**
  * Helps to remove unused components.
@@ -31,12 +30,12 @@ export class RemoveUnusedComponentsProcessor implements DocumentNodeProcessor {
     this.refs.add(currentRefPointer);
   }
 
-  onNodeLeave(node: DocumentNode, context: TraverseDocumentNodeContext): void {
-    if (!context.isRootNode || context.parentContext || !hasSecurityRequirements(node)) {
+  // `security` entries implicitly refer security schemas
+  onNodeLeave(node: DocumentNode): void {
+    if (!hasSecurityRequirements(node)) {
       return;
     }
 
-    // Root level `security` entries implicitly refer security schemas
     for (const securityRequirementObj of node.security) {
       if (!isPlainObjectType(securityRequirementObj)) {
         continue;

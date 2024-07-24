@@ -54,21 +54,19 @@ export function createNamespaceComponentsProcessor(pointer: string): DocumentNod
     // `components.securitySchemes`. It means items in `security` implicitly reference
     // `components.securitySchemes` items which should be handled.
     onNodeLeave(node, context) {
-      if (!context.isRootNode || !isPlainObjectType(node)) {
-        return;
+      if ('security' in node && Array.isArray(node.security)) {
+        for (const securityRequirements of node.security) {
+          prefixObjectKeys(securityRequirements);
+        }
       }
 
       if (
+        context.isRootNode &&
+        isPlainObjectType(node) &&
         isPlainObjectType(node.components) &&
         isPlainObjectType(node.components.securitySchemes)
       ) {
         prefixObjectKeys(node.components.securitySchemes);
-      }
-
-      if (Array.isArray(node.security)) {
-        for (const securityRequirements of node.security) {
-          prefixObjectKeys(securityRequirements);
-        }
       }
     },
   };
