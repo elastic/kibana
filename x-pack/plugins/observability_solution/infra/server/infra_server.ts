@@ -31,13 +31,12 @@ import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
 import { initProcessListRoute } from './routes/process_list';
 import { initSnapshotRoute } from './routes/snapshot';
-import { initInfraMetricsRoute } from './routes/infra';
+import { initInfraAssetRoutes } from './routes/infra';
 import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
 import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
 import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
 import { type InfraServerPluginStartDeps } from './lib/adapters/framework';
-import { initInfraAssetCountRoute } from './routes/infra_hosts_count';
 
 export const initInfraServer = (
   libs: InfraBackendLibs,
@@ -68,8 +67,7 @@ export const initInfraServer = (
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);
-  initInfraMetricsRoute(libs);
-  initInfraAssetCountRoute(libs);
+  initInfraAssetRoutes(libs);
   initProfilingRoutes(libs);
   initServicesRoute(libs);
   initCustomDashboardsRoutes(libs.framework);

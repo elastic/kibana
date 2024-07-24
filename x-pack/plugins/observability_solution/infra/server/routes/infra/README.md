@@ -1,8 +1,8 @@
-# Infra Hosts API
-
-This API returns a list of hosts and their metrics.
+# Infra Assets API
 
 **POST /api/metrics/infra**
+
+This endpoint returns a list of hosts and their metrics.
 parameters:
 
 - type: asset type. 'host' is the only one supported now
@@ -112,4 +112,48 @@ Response
       }
    ]
 }
+```
+
+**POST /api/infra/{asset}/count**
+
+This endpoint returns the count of the hosts monitored with the system integration.
+parameters:
+
+- type: asset type. 'host' is the only one supported now
+- sourceId: sourceId to retrieve configuration such as index-pattern used to query the results
+- from: Start date
+- to: End date
+- (optional) query: filter
+
+The response includes:
+
+- count: number - the count of the hosts monitored with the system integration 
+
+## Examples
+
+Request
+
+```bash
+curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/infra/host/count' \
+--header 'kbn-xsrf: xxxx' \
+--header 'Content-Type: application/json' \
+--data '{
+   "query": {
+      "bool": {
+         "must": [],
+         "filter": [],
+         "should": [],
+         "must_not": []
+      }
+   },
+   "from": "2024-07-23T11:34:11.640Z",
+   "to": "2024-07-23T11:49:11.640Z",
+   "sourceId": "default"
+}'
+```
+
+Response
+
+```json
+{"type":"host","count":22}
 ```

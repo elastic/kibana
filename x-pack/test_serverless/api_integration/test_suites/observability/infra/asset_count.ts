@@ -36,8 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
     body: GetInfraAssetCountRequestBodyPayload;
     roleAuthc: RoleCredentials;
   }): Promise<GetInfraAssetCountResponsePayload | undefined> => {
+    const { assetType } = params;
     const response = await supertestWithoutAuth
-      .post(`/api/infra/${params.assetType}/count`)
+      .post(`/api/infra/${assetType}/count`)
       .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(body)
