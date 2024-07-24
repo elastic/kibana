@@ -61,7 +61,7 @@ export const significantItemsHandlerFactory =
     const significantCategories: SignificantItem[] = [];
 
     significantCategories.push(
-      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.significantItems?.filter(
         (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
       ) ?? [])
     );
@@ -69,7 +69,7 @@ export const significantItemsHandlerFactory =
     const significantTerms: SignificantItem[] = [];
 
     significantTerms.push(
-      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.significantItems?.filter(
         (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
       ) ?? [])
     );

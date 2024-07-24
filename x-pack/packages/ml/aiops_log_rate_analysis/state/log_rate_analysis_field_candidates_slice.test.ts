@@ -32,7 +32,7 @@ describe('fetchFieldCandidates', () => {
     const startParams: StartStreamParams = {
       http: mockHttp,
       endpoint: '/internal/aiops/log_rate_analysis',
-      apiVersion: '2',
+      apiVersion: '3',
       abortCtrl: { current: new AbortController() },
       body: {
         start: 0,

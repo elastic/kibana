@@ -315,7 +315,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     return {
       http,
       endpoint: '/internal/aiops/log_rate_analysis',
-      apiVersion: '2',
+      apiVersion: '3',
       abortCtrl,
       body: {
         start: earliest,
