@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { Header } from './header';
 import backgroundImageUrl from './background.svg';
-import { CustomHeaderSection } from './kubernetes_header';
+import { CustomHeaderSection } from './custom_header';
 import { customHeaderProps } from './constants';
 
 interface Props {
