@@ -1,7 +1,7 @@
 {
   "description": "OpenAPI Endpoint Exceptions Common",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "name": "@kbn/openapi-endpoint-exceptions-common",
+  "name": "@kbn/securitysolution-endpoint-exceptions-common",
   "private": true,
   "version": "1.0.0",
   "scripts": {
