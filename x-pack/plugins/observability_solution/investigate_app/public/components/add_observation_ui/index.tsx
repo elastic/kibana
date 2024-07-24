@@ -6,6 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import { GlobalWidgetParameters, OnWidgetAdd } from '@kbn/investigate-plugin/public';
@@ -15,6 +16,10 @@ import { EsqlWidgetPreview } from './esql_widget_preview';
 type Props = {
   onWidgetAdd: OnWidgetAdd;
 } & GlobalWidgetParameters;
+
+const emptyPreview = css`
+  padding: 36px 0px 36px 0px;
+`;
 
 export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -33,7 +38,7 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
 
   if (!isOpen) {
     return (
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" direction="row" alignItems="flexEnd">
         <EuiFlexItem grow={true}>
           <EuiButton
             data-test-subj="investigateAppAddObservationUIAddAnObservationChartButton"
@@ -95,7 +100,12 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
               </EuiFlexItem>
 
               {!isPreviewOpen ? (
-                <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+                <EuiFlexGroup
+                  direction="column"
+                  alignItems="center"
+                  gutterSize="l"
+                  className={emptyPreview}
+                >
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="image" size="xxl" />
                   </EuiFlexItem>
@@ -123,7 +133,7 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
               color="text"
@@ -136,19 +146,6 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
               {i18n.translate('xpack.investigateApp.addObservationUI.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              iconType="plusInCircle"
-              data-test-subj="investigateAppAddObservationUIAddAnObservationChartButton"
-            >
-              {i18n.translate(
-                'xpack.investigateApp.addObservationUI.addAnObservationChartButtonLabel',
-                { defaultMessage: 'Add an observation chart' }
-              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

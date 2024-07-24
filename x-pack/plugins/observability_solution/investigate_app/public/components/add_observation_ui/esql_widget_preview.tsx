@@ -67,6 +67,7 @@ function PreviewContainer({ children }: { children: React.ReactNode }) {
       alignItems="center"
       justifyContent="center"
       className={css`
+        padding: 24px 0px 24px 0px;
         width: 100%;
         overflow: auto;
         > div {
