@@ -18,12 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Search advanced settings', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
       await pageObjects.common.navigateToApp('settings');
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the page', async () => {

@@ -8,6 +8,8 @@ disabled:
   - x-pack/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
   - x-pack/test/fleet_api_integration/config.base.ts
+  - x-pack/test/functional_basic/apps/ml/config.base.ts
+  - x-pack/test/functional_basic/apps/transform/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -314,6 +316,7 @@ enabled:
   - x-pack/test/security_api_integration/saml.config.ts
   - x-pack/test/security_api_integration/saml.http2.config.ts
   - x-pack/test/security_api_integration/saml_cloud.config.ts
+  - x-pack/test/security_api_integration/chips.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts

@@ -62,13 +62,36 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (file.match(/jest.config.(t|j)s$/)) {
+        if (file.match(/(jest(\.integration)?)\.config\.(t|j)s$/)) {
           return false;
         }
 
-        return readFileSync(file)
-          .toString()
-          .match(/(testRunner)|(testFiles)/);
+        if (file.match(/mocks.ts$/)) {
+          return false;
+        }
+
+        const fileContent = readFileSync(file).toString();
+
+        if (fileContent.match(/(testRunner)|(testFiles)/)) {
+          // test config
+          return true;
+        }
+
+        if (fileContent.match(/(describe)|(defineCypressConfig)/)) {
+          // test file or Cypress config
+          return false;
+        }
+
+        // FTR config file should have default export
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const exports = require(file);
+          const defaultExport = exports.__esModule ? exports.default : exports;
+          return !!defaultExport;
+        } catch (err) {
+          log.debug(`Failed to load file: ${err.message}`);
+          return false;
+        }
       });
 
       const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
@@ -77,10 +100,14 @@ export async function runCheckFtrConfigsCli() {
       if (invalid.length) {
         const invalidList = invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n  - ');
         log.error(
-          `The following files look like FTR configs which are not listed in one of manifest files:\nstateful: ${manifestPaths.stateful}\nserverless: ${manifestPaths.serverless}\n  - ${invalidList}`
+          `The following files look like FTR configs which are not listed in one of manifest files:\n${invalidList}\n
+Make sure to add your new FTR config to the correct manifest file.\n
+Stateful tests:\n${(manifestPaths.stateful as string[]).join('\n')}\n
+Serverless tests:\n${(manifestPaths.serverless as string[]).join('\n')}
+          `
         );
         throw createFailError(
-          `Please add the listed paths to the correct manifest file. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
+          `Please add the listed paths to the correct manifest files. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
         );
       }
     },
