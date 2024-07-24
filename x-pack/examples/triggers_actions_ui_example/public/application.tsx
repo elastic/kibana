@@ -38,12 +38,9 @@ import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 
-import { RuleActionsSandbox } from './components/rule_form/rule_actions_sandbox';
-import { RuleDetailsSandbox } from './components/rule_form/rule_details_sandbox';
-
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
-  notification: CoreStart['notifications'];
+  notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
@@ -63,7 +60,7 @@ const TriggersActionsUiExampleApp = ({
   triggersActionsUi,
   http,
   application,
-  notification,
+  notifications,
   settings,
   docLinks,
   i18n,
@@ -194,7 +191,7 @@ const TriggersActionsUiExampleApp = ({
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
                     i18n,
                     theme,
@@ -220,7 +217,7 @@ const TriggersActionsUiExampleApp = ({
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
                     theme,
                     i18n,
@@ -234,24 +231,6 @@ const TriggersActionsUiExampleApp = ({
                   }}
                   returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rule_actions"
-            render={() => (
-              <Page title="Rule Actions">
-                <RuleActionsSandbox />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rule_details"
-            render={() => (
-              <Page title="Rule Details">
-                <RuleDetailsSandbox />
               </Page>
             )}
           />
@@ -287,7 +266,7 @@ export const renderApp = (
             <TriggersActionsUiExampleApp
               history={history}
               http={http}
-              notification={notifications}
+              notifications={notifications}
               application={application}
               docLinks={docLinks}
               i18n={i18n}

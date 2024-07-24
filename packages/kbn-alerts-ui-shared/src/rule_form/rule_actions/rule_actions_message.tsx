@@ -14,7 +14,7 @@ import { useRuleFormState } from '../hooks';
 import { ActionConnector, ActionConnectorMode, RuleAction, RuleUiAction } from '../../common';
 import { getSelectedActionGroup } from '../utils';
 
-interface RuleActionsMessageProps {
+export interface RuleActionsMessageProps {
   action: RuleUiAction;
   index: number;
   templateFields: ActionVariable[];

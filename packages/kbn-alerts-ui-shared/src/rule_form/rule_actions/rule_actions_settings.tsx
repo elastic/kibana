@@ -88,7 +88,7 @@ const actionGroupDisplay = ({
   return actionGroupName;
 };
 
-interface RuleActionsSettingsProps {
+export interface RuleActionsSettingsProps {
   action: RuleAction;
   producerId: string;
   onUseDefaultMessageChange: () => void;

@@ -378,6 +378,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   return (
     <EuiAccordion
       initialIsOpen
+      data-test-subj="ruleActionsItem"
       borders="all"
       style={{
         backgroundColor: subdued,
@@ -397,9 +398,16 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       }}
       extraAction={
         <EuiButtonIcon
+          data-test-subj="ruleActionsItemDeleteButton"
           style={{
             marginRight: euiTheme.size.l,
           }}
+          aria-label={i18n.translate(
+            'alertsUIShared.ruleActionsSystemActionsItem.deleteActionAriaLabel',
+            {
+              defaultMessage: 'delete action',
+            }
+          )}
           iconType="trash"
           color="danger"
           onClick={() => onDelete(action.uuid!)}

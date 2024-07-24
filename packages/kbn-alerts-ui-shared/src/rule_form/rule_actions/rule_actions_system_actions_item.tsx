@@ -7,6 +7,7 @@
  */
 
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { isEmpty, some } from 'lodash';
 import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import {
@@ -157,6 +158,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
 
   return (
     <EuiAccordion
+      data-test-subj="ruleActionsSystemActionsItem"
       initialIsOpen
       borders="all"
       style={{
@@ -177,9 +179,16 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       }}
       extraAction={
         <EuiButtonIcon
+          data-test-subj="ruleActionsSystemActionsItemDeleteActionButton"
           style={{
             marginRight: euiTheme.size.l,
           }}
+          aria-label={i18n.translate(
+            'alertsUIShared.ruleActionsSystemActionsItem.deleteActionAriaLabel',
+            {
+              defaultMessage: 'delete action',
+            }
+          )}
           iconType="trash"
           color="danger"
           onClick={() => onDelete(action.uuid!)}
@@ -187,7 +196,11 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       }
       buttonContentClassName="eui-fullWidth"
       buttonContent={
-        <EuiPanel color="subdued" paddingSize="m">
+        <EuiPanel
+          data-test-subj="ruleActionsSystemActionsItemAccordionButton"
+          color="subdued"
+          paddingSize="m"
+        >
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               {showActionGroupErrorIcon() ? (
@@ -235,6 +248,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       }
     >
       <EuiFlexGroup
+        data-test-subj="ruleActionsSystemActionsItemAccordionContent"
         direction="column"
         style={{
           padding: euiTheme.size.l,
