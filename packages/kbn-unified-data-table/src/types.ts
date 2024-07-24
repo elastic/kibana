@@ -85,7 +85,7 @@ export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {
   trailingControlColumns?: EuiDataGridControlColumn[];
 };
 
-export interface RowControlContextProps {
+export interface RowControlRowProps {
   rowIndex: number;
   record: DataTableRecord;
 }
@@ -93,11 +93,11 @@ export interface RowControlContextProps {
 export interface RowControlProps {
   label: string;
   iconType: IconType;
-  onClick: (props: RowControlContextProps) => void;
+  onClick: (props: RowControlRowProps) => void;
 }
 
 export interface RowControlColumn {
   id: string;
   headerAriaLabel: string;
-  renderControl: (Control: FC<RowControlProps>, props: RowControlContextProps) => ReactElement;
+  renderControl: (Control: FC<RowControlProps>, props: RowControlRowProps) => ReactElement;
 }

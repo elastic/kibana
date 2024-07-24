@@ -36,15 +36,15 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
         {
           id: 'test1',
           headerAriaLabel: 'Additional row control header 1',
-          renderControl: (Control, contextProps) => {
+          renderControl: (Control, rowProps) => {
             return (
               <Control
                 label="Test 1"
-                iconType={pinnedItems[contextProps.record.id] ? 'pinFilled' : 'pin'}
+                iconType={pinnedItems[rowProps.record.id] ? 'pinFilled' : 'pin'}
                 onClick={() => {
                   setPinnedItems((prev) => ({
                     ...prev,
-                    [contextProps.record.id]: !prev[contextProps.record.id],
+                    [rowProps.record.id]: !prev[rowProps.record.id],
                   }));
                 }}
               />
@@ -54,7 +54,7 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
         {
           id: 'test2',
           headerAriaLabel: 'Additional row control header 2',
-          renderControl: (Control, contextProps) => {
+          renderControl: (Control, rowProps) => {
             return (
               <Control
                 label="Test 2"
@@ -69,7 +69,7 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
         {
           id: 'test',
           headerAriaLabel: 'Additional row control header 3',
-          renderControl: (Control, contextProps) => {
+          renderControl: (Control, rowProps) => {
             return (
               <Control
                 label="Test 3"

@@ -22,12 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { DataTableRowControl } from '../../data_table_row_control';
-import { RowControlColumn, RowControlContextProps, RowControlProps } from '../../../types';
+import { RowControlColumn, RowControlRowProps, RowControlProps } from '../../../types';
 
 /**
- * Button under which all other additional row controls would be placed
+ * Menu button under which all other additional row controls would be placed
  */
-export const AdditionalActionsRowControlCell = ({
+export const RowMenuControlCell = ({
   columnId,
   rowIndex,
   setCellProps,
@@ -38,10 +38,7 @@ export const AdditionalActionsRowControlCell = ({
   const { euiTheme } = useEuiTheme();
   const { expanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
   const record = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const contextProps: RowControlContextProps = useMemo(
-    () => ({ rowIndex, record }),
-    [rowIndex, record]
-  );
+  const rowProps: RowControlRowProps = useMemo(() => ({ rowIndex, record }), [rowIndex, record]);
 
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
 
@@ -70,7 +67,7 @@ export const AdditionalActionsRowControlCell = ({
             icon={iconType}
             data-test-subj={`unifiedDataTable_remainingRowControl_${id}`}
             onClick={() => {
-              onClick(contextProps);
+              onClick(rowProps);
               setIsMoreActionsPopoverOpen(false);
             }}
           >
@@ -78,7 +75,7 @@ export const AdditionalActionsRowControlCell = ({
           </EuiContextMenuItem>
         );
       },
-    [contextProps, setIsMoreActionsPopoverOpen]
+    [rowProps, setIsMoreActionsPopoverOpen]
   );
 
   return (
@@ -113,18 +110,18 @@ export const AdditionalActionsRowControlCell = ({
         size="s"
         items={rowControlColumns.map((rowControlColumn) => {
           const Control = getControlComponent(rowControlColumn.id);
-          return rowControlColumn.renderControl(Control, contextProps);
+          return rowControlColumn.renderControl(Control, rowProps);
         })}
       />
     </EuiPopover>
   );
 };
 
-export const getAdditionalActionsRowControlColumn = (
+export const getRowMenuControlColumn = (
   rowControlColumns: RowControlColumn[]
 ): EuiDataGridControlColumn => {
   return {
-    id: 'additionalRowControl_moreActions',
+    id: 'additionalRowControl_menuControl',
     width: 24,
     headerCellRender: () => (
       <EuiScreenReaderOnly>
@@ -136,7 +133,7 @@ export const getAdditionalActionsRowControlColumn = (
       </EuiScreenReaderOnly>
     ),
     rowCellRender: (props) => {
-      return <AdditionalActionsRowControlCell {...props} rowControlColumns={rowControlColumns} />;
+      return <RowMenuControlCell {...props} rowControlColumns={rowControlColumns} />;
     },
   };
 };

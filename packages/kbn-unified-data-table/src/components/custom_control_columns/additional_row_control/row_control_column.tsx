@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { DataTableRowControl } from '../../data_table_row_control';
-import { RowControlColumn, RowControlContextProps, RowControlProps } from '../../../types';
+import { RowControlColumn, RowControlRowProps, RowControlProps } from '../../../types';
 
-export const AdditionalRowControlCell = ({
+export const RowControlCell = ({
   columnId,
   rowIndex,
   setCellProps,
@@ -28,10 +28,7 @@ export const AdditionalRowControlCell = ({
 }) => {
   const { expanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
   const record = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const contextProps: RowControlContextProps = useMemo(
-    () => ({ rowIndex, record }),
-    [rowIndex, record]
-  );
+  const rowProps: RowControlRowProps = useMemo(() => ({ rowIndex, record }), [rowIndex, record]);
 
   useEffect(() => {
     if (record.isAnchor) {
@@ -57,7 +54,7 @@ export const AdditionalRowControlCell = ({
                 aria-label={label}
                 data-test-subj={`unifiedDataTable_rowControl_${columnId}`}
                 onClick={() => {
-                  onClick(contextProps);
+                  onClick(rowProps);
                 }}
                 iconType={iconType}
                 color="text"
@@ -66,13 +63,13 @@ export const AdditionalRowControlCell = ({
           </DataTableRowControl>
         );
       },
-    [columnId, contextProps]
+    [columnId, rowProps]
   );
 
-  return renderControl(Control, contextProps);
+  return renderControl(Control, rowProps);
 };
 
-export const getAdditionalRowControlColumn = (
+export const getRowControlColumn = (
   rowControlColumn: RowControlColumn
 ): EuiDataGridControlColumn => {
   const { id, headerAriaLabel, renderControl } = rowControlColumn;
@@ -86,7 +83,7 @@ export const getAdditionalRowControlColumn = (
       </EuiScreenReaderOnly>
     ),
     rowCellRender: (props) => {
-      return <AdditionalRowControlCell {...props} renderControl={renderControl} />;
+      return <RowControlCell {...props} renderControl={renderControl} />;
     },
   };
 };

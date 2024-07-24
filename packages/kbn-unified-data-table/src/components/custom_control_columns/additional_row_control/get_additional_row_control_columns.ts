@@ -8,18 +8,18 @@
 
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import type { RowControlColumn } from '../../../types';
-import { getAdditionalRowControlColumn } from './additional_row_control_column';
-import { getAdditionalActionsRowControlColumn } from './additional_actions_row_control_column';
+import { getRowControlColumn } from './row_control_column';
+import { getRowMenuControlColumn } from './row_menu_control_column';
 
 export const getAdditionalRowControlColumns = (
   rowControlColumns: RowControlColumn[]
 ): EuiDataGridControlColumn[] => {
   if (rowControlColumns.length <= 2) {
-    return rowControlColumns.map(getAdditionalRowControlColumn);
+    return rowControlColumns.map(getRowControlColumn);
   }
 
   return [
-    getAdditionalRowControlColumn(rowControlColumns[0]),
-    getAdditionalActionsRowControlColumn(rowControlColumns.slice(1)),
+    getRowControlColumn(rowControlColumns[0]),
+    getRowMenuControlColumn(rowControlColumns.slice(1)),
   ];
 };
