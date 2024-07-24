@@ -1,14 +1,16 @@
 openapi: 3.0.0
 info:
-  version: '2023-10-31'
-  title: Asset Criticality Create Record Schema
+  version: '1'
+  title: Internal Asset Criticality Create Record Schema
 paths:
-  /api/asset_criticality:
+  /internal/asset_criticality:
     post:
       x-labels: [ess, serverless]
+      x-internal: true
       x-codegen-enabled: true
-      operationId: CreateAssetCriticalityRecord
-      summary: Create Criticality Record
+      operationId: InternalCreateAssetCriticalityRecord
+      summary: Deprecated Internal Create Criticality Record
+      deprecated: true
       requestBody:
         required: true
         content:
