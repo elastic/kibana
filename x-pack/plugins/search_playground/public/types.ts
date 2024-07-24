@@ -73,7 +73,7 @@ export interface ChatForm {
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { retriever: unknown }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
+  [ChatFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
@@ -203,6 +203,7 @@ export interface UseChatHelpers {
 }
 
 export interface LLMModel {
+  id: string;
   name: string;
   value?: string;
   showConnectorName?: boolean;
