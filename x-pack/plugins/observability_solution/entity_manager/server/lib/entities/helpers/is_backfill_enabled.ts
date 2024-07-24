@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { entityDefinition, SO_ENTITY_DEFINITION_TYPE } from './entity_definition';
-export {
-  EntityDiscoveryApiKeyType,
-  SO_ENTITY_DISCOVERY_API_KEY_TYPE,
-} from './entity_discovery_api_key';
+import { EntityDefinition } from '@kbn/entities-schema';
+
+export function isBackfillEnabled(definition: EntityDefinition) {
+  return definition.history.settings?.backfillSyncDelay != null;
+}
