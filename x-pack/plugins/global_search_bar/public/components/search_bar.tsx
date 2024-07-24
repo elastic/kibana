@@ -113,6 +113,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const loadSuggestions = useCallback(
     (term: string) => {
+      setIsLoading(false);
       return getSuggestions({
         searchTerm: term,
         searchableTypes,
