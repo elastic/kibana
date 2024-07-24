@@ -346,6 +346,8 @@ export const langChainExecute = async ({
   // Create an ElasticsearchStore for KB interactions
   const kbDataClient =
     (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+  const bedrockChatEnabled =
+    assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
   const esStore = new ElasticsearchStore(
     esClient,
     kbDataClient?.indexTemplateAndPattern?.alias ?? '',
@@ -368,6 +370,7 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
+    bedrockChatEnabled,
     assistantTools,
     conversationId,
     connectorId,
@@ -407,76 +410,47 @@ export const langChainExecute = async ({
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
 
-export interface CreateOrUpdateConversationWithParams {
-  logger: Logger;
+export interface CreateConversationWithParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   replacements: Replacements;
   conversationId?: string;
   promptId?: string;
   actionTypeId: string;
   connectorId: string;
-  actionsClient: PublicMethodsOf<ActionsClient>;
   newMessages?: Array<Pick<Message, 'content' | 'role'>>;
   model?: string;
-  responseLanguage?: string;
 }
-export const createOrUpdateConversationWithUserInput = async ({
-  logger,
+export const createConversationWithUserInput = async ({
   conversationsDataClient,
   replacements,
   conversationId,
   actionTypeId,
   promptId,
   connectorId,
-  actionsClient,
   newMessages,
   model,
-  responseLanguage,
-}: CreateOrUpdateConversationWithParams) => {
+}: CreateConversationWithParams) => {
   if (!conversationId) {
     if (newMessages && newMessages.length > 0) {
-      const title = await generateTitleForNewChatConversation({
-        message: newMessages[0],
-        actionsClient,
-        actionTypeId,
-        connectorId,
-        logger,
-        model,
-        responseLanguage,
-      });
-      if (title) {
-        return conversationsDataClient.createConversation({
-          conversation: {
-            title,
-            messages: newMessages.map((m) => ({
-              content: m.content,
-              role: m.role,
-              timestamp: new Date().toISOString(),
-            })),
-            replacements,
-            apiConfig: {
-              connectorId,
-              actionTypeId,
-              model,
-              defaultSystemPromptId: promptId,
-            },
+      return conversationsDataClient.createConversation({
+        conversation: {
+          title: NEW_CHAT,
+          messages: newMessages.map((m) => ({
+            content: m.content,
+            role: m.role,
+            timestamp: new Date().toISOString(),
+          })),
+          replacements,
+          apiConfig: {
+            connectorId,
+            actionTypeId,
+            model,
+            defaultSystemPromptId: promptId,
           },
-        });
-      }
+        },
+      });
     }
-    return;
   }
-  return updateConversationWithUserInput({
-    actionsClient,
-    actionTypeId,
-    connectorId,
-    conversationId,
-    conversationsDataClient,
-    logger,
-    replacements,
-    newMessages,
-    model,
-  });
 };
 
 export interface UpdateConversationWithParams {
