@@ -80,4 +80,4 @@ export const VIEW_SELECTION = {
 
 export type ViewSelectionTypes = keyof typeof VIEW_SELECTION;
 
-export type ViewSelection = typeof VIEW_SELECTION[ViewSelectionTypes];
+export type ViewSelection = (typeof VIEW_SELECTION)[ViewSelectionTypes];

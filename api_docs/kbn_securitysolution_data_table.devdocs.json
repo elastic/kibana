@@ -586,7 +586,23 @@
               "EuiDataGridColumn",
               ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
               "ColumnHeaderType",
-              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1218,7 +1234,23 @@
           "EuiDataGridColumn",
           ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1248,7 +1280,23 @@
           "EuiDataGridColumn",
           ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
