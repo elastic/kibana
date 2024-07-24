@@ -834,6 +834,7 @@ paths:
                     properties:
                       getOneTimeline:
                         $ref: '#/components/schemas/TimelineResponse'
+                        nullable: true
                 required:
                   - data
           description: The (template) timeline has been found
