@@ -131,6 +131,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             <IndexPatternSelect
               autoFocus={!dataViewId}
               fullWidth
+              compressed
               indexPatternId={dataViewId}
               placeholder={i18n.translate(
                 'xpack.aiops.embeddablePatternAnalysis.config.dataViewSelectorPlaceholder',
@@ -301,6 +302,7 @@ export const FormControls: FC<{
         categoryCount={undefined}
         minimumTimeRangeOption={formInput.minimumTimeRangeOption}
         setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+        compressed={true}
       />
 
       <EuiSpacer />
@@ -310,6 +312,7 @@ export const FormControls: FC<{
         reload={() => {}}
         calloutPosition="bottom"
         displayProbability={false}
+        compressed={true}
       />
     </>
   );

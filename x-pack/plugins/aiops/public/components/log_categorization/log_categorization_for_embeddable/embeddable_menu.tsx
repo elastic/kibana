@@ -109,12 +109,14 @@ interface PatternAnalysisSettingsProps {
   minimumTimeRangeOption: MinimumTimeRangeOption;
   setMinimumTimeRangeOption: (w: MinimumTimeRangeOption) => void;
   categoryCount: number | undefined;
+  compressed?: boolean;
 }
 
 export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
   minimumTimeRangeOption,
   setMinimumTimeRangeOption,
   categoryCount,
+  compressed = false,
 }) => {
   return (
     <>
@@ -171,6 +173,7 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
           options={minimumTimeRangeOptions}
           valueOfSelected={minimumTimeRangeOption}
           onChange={setMinimumTimeRangeOption}
+          compressed={compressed}
         />
       </EuiFormRow>
     </>

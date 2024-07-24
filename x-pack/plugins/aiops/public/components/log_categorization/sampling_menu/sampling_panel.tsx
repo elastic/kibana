@@ -21,6 +21,7 @@ interface Props {
   randomSampler: RandomSampler;
   displayProbability?: boolean;
   calloutPosition?: 'top' | 'bottom';
+  compressed?: boolean;
   reload: () => void;
 }
 
@@ -29,6 +30,7 @@ export const SamplingPanel: FC<Props> = ({
   reload,
   displayProbability = true,
   calloutPosition = 'top',
+  compressed = false,
 }) => {
   const samplingProbability = useObservable(
     randomSampler.getProbability$(),
@@ -82,6 +84,7 @@ export const SamplingPanel: FC<Props> = ({
       >
         <EuiSuperSelect
           fullWidth
+          compressed={compressed}
           data-test-subj="aiopsRandomSamplerOptionsSelect"
           options={RANDOM_SAMPLER_SELECT_OPTIONS}
           valueOfSelected={randomSamplerPreference}

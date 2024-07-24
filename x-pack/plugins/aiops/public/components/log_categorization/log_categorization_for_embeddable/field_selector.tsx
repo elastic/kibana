@@ -78,6 +78,7 @@ export const FieldSelector: FC<Props> = ({ fields, selectedField, setSelectedFie
     <EuiFormRow fullWidth data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow" label={label}>
       <EuiSuperSelect
         fullWidth
+        compressed
         aria-label={label}
         options={fieldOptions}
         valueOfSelected={selectedField ?? undefined}
