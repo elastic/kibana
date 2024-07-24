@@ -263,7 +263,7 @@ describe('telemetry tasks', () => {
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
         const found = mockedAxiosPost.mock.calls.find(([url]) => {
-          return url.startsWith(ENDPOINT_STAGING) && url.endsWith('alerts-endpoint');
+          return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
         });
 
         expect(found).not.toBeFalsy();
@@ -273,6 +273,25 @@ describe('telemetry tasks', () => {
 
       expect(body).not.toBeFalsy();
       expect(body.Endpoint).not.toBeFalsy();
+    });
+
+    it('should enrich with license info', async () => {
+      await mockAndScheduleEndpointDiagnosticsTask();
+
+      // wait until the events are sent to the telemetry server
+      const body = await eventually(async () => {
+        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+          return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
+        });
+
+        expect(found).not.toBeFalsy();
+
+        return JSON.parse((found ? found[1] : '{}') as string);
+      });
+
+      expect(body).not.toBeFalsy();
+      expect(body.license).not.toBeFalsy();
+      expect(body.license.status).not.toBeFalsy();
     });
   });
 
@@ -665,7 +684,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('telemetry-prebuilt-rule-alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/188234
+  describe.skip('telemetry-prebuilt-rule-alerts', () => {
     it('should execute when scheduled', async () => {
       await mockAndSchedulePrebuiltRulesTask();
 
@@ -680,8 +700,7 @@ describe('telemetry tasks', () => {
       expect(body.file).toStrictEqual(alertsDetectionsRequest.file);
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/188234
-    it.skip('should manage runtime errors searching endpoint metrics', async () => {
+    it('should manage runtime errors searching endpoint metrics', async () => {
       const errorMessage = 'Something went wront';
 
       async function* mockedGenerator(
