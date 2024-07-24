@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../page_objects';
 
+// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../../functional/config.base.js')

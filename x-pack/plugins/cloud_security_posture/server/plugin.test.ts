@@ -50,6 +50,7 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './fleet_integration/fleet_integration';
+
 const chance = new Chance();
 
 const mockRouteContext = {

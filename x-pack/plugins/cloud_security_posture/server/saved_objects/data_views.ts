@@ -59,7 +59,7 @@ const getDataViewSafe = async (
       currentIndexPatterns.includes(element)
     );
 
-    if (!allExist) migrateCdrDataViews(soClient, logger);
+    if (!allExist) await migrateCdrDataViews(soClient, logger);
 
     return dataView;
   } catch (e) {
