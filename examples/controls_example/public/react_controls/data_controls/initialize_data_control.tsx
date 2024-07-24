@@ -10,12 +10,7 @@ import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import {
-  DataView,
-  DataViewField,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  FieldSpec,
-} from '@kbn/data-views-plugin/common';
+import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE, FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
@@ -130,6 +125,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
       ...stateManager,
       ...editorStateManager,
     } as ControlStateManager<DefaultDataControlState & EditorState>;
+
     const initialState = (
       Object.keys(mergedStateManager) as Array<keyof DefaultDataControlState & EditorState>
     ).reduce((prev, key) => {

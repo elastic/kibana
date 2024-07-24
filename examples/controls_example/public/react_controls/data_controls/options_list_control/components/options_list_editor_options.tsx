@@ -6,24 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { EuiFormRow, EuiLoadingSpinner, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 
-import { Direction, EuiFormRow, EuiLoadingSpinner, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
-
-import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
   getCompatibleSearchTechniques,
   OptionsListSearchTechnique,
-} from '../../../common/options_list/suggestions_searching';
-import {
-  getCompatibleSortingTypes,
-  OptionsListSortBy,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from '../../../common/options_list/suggestions_sorting';
-import { pluginServices } from '../../services';
+} from '../../../../../common/options_list/suggestions_searching';
+import { ControlSettingTooltipLabel } from '../../../components/control_setting_tooltip_label';
+import { DataControlFactory } from '../../types';
+import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
+import { OptionsListControlState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
 
 const selectionOptions = [
   {
@@ -71,132 +65,119 @@ const allSearchOptions = [
   },
 ];
 
-interface OptionsListEditorState {
-  sortDirection: Direction;
-  runPastTimeout?: boolean;
-  searchTechnique?: OptionsListSearchTechnique;
-  singleSelect?: boolean;
-  hideExclude?: boolean;
-  hideExists?: boolean;
-  hideSort?: boolean;
-  sortBy: OptionsListSortBy;
-}
+export const OptionsListEditorOptions: DataControlFactory<OptionsListControlState>['CustomOptionsComponent'] =
+  ({ initialState, field, updateState }) => {
+    const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
+    const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
+      initialState.runPastTimeout ?? false
+    );
+    const [searchTechnique, setSearchTechnique] = useState<OptionsListSearchTechnique>(
+      initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
+    );
 
-export const OptionsListEditorOptions = ({
-  initialInput,
-  onChange,
-  fieldType,
-}: ControlEditorProps<OptionsListEmbeddableInput>) => {
-  const [state, setState] = useState<OptionsListEditorState>({
-    sortDirection: initialInput?.sort?.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction,
-    sortBy: initialInput?.sort?.by ?? OPTIONS_LIST_DEFAULT_SORT.by,
-    searchTechnique: initialInput?.searchTechnique,
-    runPastTimeout: initialInput?.runPastTimeout,
-    singleSelect: initialInput?.singleSelect,
-    hideExclude: initialInput?.hideExclude,
-    hideExists: initialInput?.hideExists,
-    hideSort: initialInput?.hideSort,
-  });
+    const compatibleSearchTechniques = useMemo(
+      () => getCompatibleSearchTechniques(field.type),
+      [field.type]
+    );
 
-  const { loading: waitingForAllowExpensiveQueries, value: allowExpensiveQueries } =
-    useAsync(async () => {
-      const { optionsList: optionsListService } = pluginServices.getServices();
-      return optionsListService.getAllowExpensiveQueries();
-    }, []);
+    const searchOptions = useMemo(() => {
+      return allSearchOptions.filter((searchOption) => {
+        return compatibleSearchTechniques.includes(searchOption.id as OptionsListSearchTechnique);
+      });
+    }, [compatibleSearchTechniques]);
 
-  const compatibleSearchTechniques = useMemo(
-    () => getCompatibleSearchTechniques(fieldType),
-    [fieldType]
-  );
+    useEffect(() => {
+      /**
+       * when field type changes, ensure that the selected search technique is still valid;
+       * if the selected search technique **isn't** valid, reset it to the default
+       */
+      const initialSearchTechniqueValid =
+        initialState.searchTechnique &&
+        compatibleSearchTechniques.includes(initialState.searchTechnique);
+      const currentSearchTechniqueValid = compatibleSearchTechniques.includes(searchTechnique);
 
-  const searchOptions = useMemo(() => {
-    return allSearchOptions.filter((searchOption) => {
-      return compatibleSearchTechniques.includes(searchOption.id as OptionsListSearchTechnique);
-    });
-  }, [compatibleSearchTechniques]);
+      if (initialSearchTechniqueValid) {
+        // reset back to initial state if possible on field change
+        setSearchTechnique(initialState.searchTechnique!);
+        updateState({ searchTechnique: initialState.searchTechnique });
+      } else if (currentSearchTechniqueValid) {
+        // otherwise, if the current selection is valid, send that to the parent editor state
+        updateState({ searchTechnique });
+      } else {
+        // finally, if neither the initial or current search technique is valid, revert to the default
+        setSearchTechnique(compatibleSearchTechniques[0]);
+        updateState({ searchTechnique: compatibleSearchTechniques[0] });
+      }
 
-  useEffect(() => {
-    // when field type changes, ensure that the selected sort type is still valid
-    if (!getCompatibleSortingTypes(fieldType).includes(state.sortBy)) {
-      onChange({ sort: OPTIONS_LIST_DEFAULT_SORT });
-      setState((s) => ({
-        ...s,
-        sortBy: OPTIONS_LIST_DEFAULT_SORT.by,
-        sortDirection: OPTIONS_LIST_DEFAULT_SORT.direction,
-      }));
-    }
-  }, [fieldType, onChange, state.sortBy]);
+      // Note: We only want to call this when compatible search techniques changes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [compatibleSearchTechniques]);
 
-  useEffect(() => {
-    // when field type changes, ensure that the selected search technique is still valid;
-    // if the selected search technique **isn't** valid, reset to the default
-    const searchTechnique =
-      initialInput?.searchTechnique &&
-      compatibleSearchTechniques.includes(initialInput.searchTechnique)
-        ? initialInput.searchTechnique
-        : compatibleSearchTechniques[0];
-    onChange({ searchTechnique });
-    setState((s) => ({
-      ...s,
-      searchTechnique,
-    }));
-  }, [compatibleSearchTechniques, onChange, initialInput]);
+    // const { loading: waitingForAllowExpensiveQueries, value: allowExpensiveQueries } =
+    //   useAsync(async () => {
+    //     const { optionsList: optionsListService } = pluginServices.getServices();
+    //     return optionsListService.getAllowExpensiveQueries();
+    //   }, []);
 
-  return (
-    <>
-      <EuiFormRow
-        label={OptionsListStrings.editor.getSelectionOptionsTitle()}
-        data-test-subj="optionsListControl__selectionOptionsRadioGroup"
-      >
-        <EuiRadioGroup
-          options={selectionOptions}
-          idSelected={state.singleSelect ? 'single' : 'multi'}
-          onChange={(id) => {
-            const newSingleSelect = id === 'single';
-            onChange({ singleSelect: newSingleSelect });
-            setState((s) => ({ ...s, singleSelect: newSingleSelect }));
-          }}
-        />
-      </EuiFormRow>
-      {waitingForAllowExpensiveQueries ? (
-        <EuiFormRow>
-          <EuiLoadingSpinner size="l" />
+    const waitingForAllowExpensiveQueries = false;
+    const allowExpensiveQueries = true;
+
+    return (
+      <>
+        <EuiFormRow
+          label={OptionsListStrings.editor.getSelectionOptionsTitle()}
+          data-test-subj="optionsListControl__selectionOptionsRadioGroup"
+        >
+          <EuiRadioGroup
+            options={selectionOptions}
+            idSelected={singleSelect ? 'single' : 'multi'}
+            onChange={(id) => {
+              const newSingleSelect = id === 'single';
+              setSingleSelect(newSingleSelect);
+              updateState({ singleSelect: newSingleSelect });
+            }}
+          />
         </EuiFormRow>
-      ) : (
-        allowExpensiveQueries &&
-        compatibleSearchTechniques.length > 1 && (
-          <EuiFormRow
-            label={OptionsListStrings.editor.getSearchOptionsTitle()}
-            data-test-subj="optionsListControl__searchOptionsRadioGroup"
-          >
-            <EuiRadioGroup
-              options={searchOptions}
-              idSelected={state.searchTechnique}
-              onChange={(id) => {
-                const searchTechnique = id as OptionsListSearchTechnique;
-                onChange({ searchTechnique });
-                setState((s) => ({ ...s, searchTechnique }));
-              }}
-            />
+        {waitingForAllowExpensiveQueries ? (
+          <EuiFormRow>
+            <EuiLoadingSpinner size="l" />
           </EuiFormRow>
-        )
-      )}
-      <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
-        <EuiSwitch
-          label={
-            <ControlSettingTooltipLabel
-              label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
-              tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
-            />
-          }
-          checked={Boolean(state.runPastTimeout)}
-          onChange={() => {
-            onChange({ runPastTimeout: !state.runPastTimeout });
-            setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
-          }}
-          data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
-        />
-      </EuiFormRow>
-    </>
-  );
-};
+        ) : (
+          allowExpensiveQueries &&
+          compatibleSearchTechniques.length > 1 && (
+            <EuiFormRow
+              label={OptionsListStrings.editor.getSearchOptionsTitle()}
+              data-test-subj="optionsListControl__searchOptionsRadioGroup"
+            >
+              <EuiRadioGroup
+                options={searchOptions}
+                idSelected={searchTechnique}
+                onChange={(id) => {
+                  const newSearchTechnique = id as OptionsListSearchTechnique;
+                  setSearchTechnique(newSearchTechnique);
+                  updateState({ searchTechnique: newSearchTechnique });
+                }}
+              />
+            </EuiFormRow>
+          )
+        )}
+        <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
+          <EuiSwitch
+            label={
+              <ControlSettingTooltipLabel
+                label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+                tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
+              />
+            }
+            checked={runPastTimeout}
+            onChange={() => {
+              const newRunPastTimeout = !runPastTimeout;
+              setRunPastTimeout(newRunPastTimeout);
+              updateState({ runPastTimeout: newRunPastTimeout });
+            }}
+            data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
+          />
+        </EuiFormRow>
+      </>
+    );
+  };

@@ -13,6 +13,8 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { DataControlApi, DefaultDataControlState } from '../types';
 
+export type OptionsListSelection = string | number;
+
 export interface OptionsListDisplaySettings {
   placeholder?: string;
   hideActionBar?: boolean;
@@ -26,7 +28,7 @@ export interface OptionsListControlState
     OptionsListDisplaySettings {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
-  selectedOptions?: string[];
+  selectedOptions?: OptionsListSelection[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
@@ -44,7 +46,7 @@ export interface OptionsListComponentState
 
 interface PublishesOptions {
   availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
-  invalidSelections$: PublishingSubject<Set<string>>;
+  invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
 

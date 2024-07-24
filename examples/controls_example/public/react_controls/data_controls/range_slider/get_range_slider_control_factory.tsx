@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import deepEqual from 'react-fast-compare';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
@@ -38,8 +38,9 @@ export const getRangesliderControlFactory = (
     isFieldCompatible: (field) => {
       return field.aggregatable && field.type === 'number';
     },
-    CustomOptionsComponent: ({ currentState, updateState, setControlEditorValid }) => {
-      const step = currentState.step ?? 1;
+    CustomOptionsComponent: ({ initialState, updateState, setControlEditorValid }) => {
+      const [step, setStep] = useState(initialState.step ?? 1);
+
       return (
         <>
           <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
@@ -47,6 +48,7 @@ export const getRangesliderControlFactory = (
               value={step}
               onChange={(event) => {
                 const newStep = event.target.valueAsNumber;
+                setStep(newStep);
                 updateState({ step: newStep });
                 setControlEditorValid(newStep > 0);
               }}

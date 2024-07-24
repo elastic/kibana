@@ -12,6 +12,7 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiPageTemplate,
+  EuiProvider,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -24,6 +25,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { ControlsExampleStartDeps } from '../plugin';
 import { ControlGroupRendererExamples } from './control_group_renderer_examples';
 import { ReactControlExample } from './react_control_example';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 const CONTROLS_AS_A_BUILDING_BLOCK = 'controls_as_a_building_block';
 const CONTROLS_REFACTOR_TEST = 'controls_refactor_test';
@@ -48,7 +50,7 @@ const App = ({
   }
 
   return (
-    <I18nProvider>
+    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
       <EuiPage>
         <EuiPageBody>
           <EuiPageSection>
@@ -78,7 +80,7 @@ const App = ({
           </EuiPageTemplate.Section>
         </EuiPageBody>
       </EuiPage>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

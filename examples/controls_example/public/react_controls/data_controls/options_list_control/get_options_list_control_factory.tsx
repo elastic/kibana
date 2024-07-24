@@ -41,7 +41,8 @@ import {
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
-import { OptionsListControlApi, OptionsListControlState } from './types';
+import { OptionsListControlApi, OptionsListControlState, OptionsListSelection } from './types';
+import { OptionsListEditorOptions } from './components/options_list_editor_options';
 
 export const getOptionsListControlFactory = ({
   core,
@@ -64,10 +65,7 @@ export const getOptionsListControlFactory = ({
         ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
       );
     },
-    CustomOptionsComponent: () => {
-      return <>Search techniques</>;
-      // return <OptionsListEditorOptions />;
-    },
+    CustomOptionsComponent: OptionsListEditorOptions,
     buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
       /** Serializable state - i.e. the state that is saved with the control */
       const searchTechnique$ = new BehaviorSubject<OptionsListSearchTechnique | undefined>(
@@ -75,7 +73,7 @@ export const getOptionsListControlFactory = ({
       );
       const runPastTimeout$ = new BehaviorSubject<boolean | undefined>(initialState.runPastTimeout);
       const singleSelect$ = new BehaviorSubject<boolean | undefined>(initialState.singleSelect);
-      const selections$ = new BehaviorSubject<string[] | undefined>(
+      const selections$ = new BehaviorSubject<OptionsListSelection[] | undefined>(
         initialState.selectedOptions ?? []
       );
       const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(
@@ -97,7 +95,7 @@ export const getOptionsListControlFactory = ({
       const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
 
       const availableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(undefined);
-      const invalidSelections$ = new BehaviorSubject<Set<string>>(new Set());
+      const invalidSelections$ = new BehaviorSubject<Set<OptionsListSelection>>(new Set());
       const totalCardinality$ = new BehaviorSubject<number>(0);
 
       const dataControl = initializeDataControl<
@@ -207,21 +205,20 @@ export const getOptionsListControlFactory = ({
         if (Object.hasOwn(result, 'error')) {
           dataControl.api.setBlockingError((result as { error: Error }).error);
           return;
+        } else if (dataControl.api.blockingError.getValue()) {
+          // otherwise,  if there was a previous error, clear it
+          dataControl.api.setBlockingError(undefined);
         }
 
-        // otherwise, fetch was successful so set all attributes from result
+        // fetch was successful so set all attributes from result
         const successResponse = result as OptionsListSuccessResponse;
         availableOptions$.next(successResponse.suggestions);
         totalCardinality$.next(successResponse.totalCardinality ?? 0);
         invalidSelections$.next(new Set(successResponse.invalidSelections ?? []));
 
         // reset the request size back to the minimum (if it's not already)
-        if (stateManager.requestSize.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE)
+        if (stateManager.requestSize.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {
           stateManager.requestSize.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
-
-        // if there was a previous error, clear it
-        if (dataControl.api.blockingError.getValue()) {
-          dataControl.api.setBlockingError(undefined);
         }
       });
 

@@ -40,7 +40,8 @@ export interface DataControlFactory<
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{
-    currentState: Partial<State>;
+    initialState: Omit<State, 'fieldName'>;
+    field: DataViewField;
     updateState: (newState: Partial<State>) => void;
     setControlEditorValid: (valid: boolean) => void;
   }>;
