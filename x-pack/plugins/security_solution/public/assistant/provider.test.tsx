@@ -224,7 +224,7 @@ describe('createConversations', () => {
     });
   });
 });
-describe.only('AssistantProvider', () => {
+describe('AssistantProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
