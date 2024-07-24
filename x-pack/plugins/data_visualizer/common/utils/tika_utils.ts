@@ -9,45 +9,45 @@ export function isTikaType(type: string) {
   return getTikaDisplayType(type).isTikaType;
 }
 
-export const getTikaDisplayType = (type: string): { isTikaType: boolean; type: string } => {
+export const getTikaDisplayType = (type: string): { isTikaType: boolean; label: string } => {
   switch (type) {
     case 'application/doc':
     case 'application/ms-doc':
     case 'application/msword':
     case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-      return { isTikaType: true, type: 'Microsoft Office Word document' };
+      return { isTikaType: true, label: 'Microsoft Office Word document' };
 
     case 'application/excel':
     case 'application/vnd.ms-excel':
     case 'application/x-excel':
     case 'application/x-msexcel':
     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-      return { isTikaType: true, type: 'Microsoft Office Excel document' };
+      return { isTikaType: true, label: 'Microsoft Office Excel document' };
 
     case 'application/mspowerpoint':
     case 'application/powerpoint':
     case 'application/vnd.ms-powerpoint':
     case 'application/x-mspowerpoint':
     case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-      return { isTikaType: true, type: 'Microsoft Office Power Point document' };
+      return { isTikaType: true, label: 'Microsoft Office Power Point document' };
 
     case 'application/vnd.oasis.opendocument.presentation':
     case 'application/vnd.oasis.opendocument.spreadsheet':
     case 'application/vnd.oasis.opendocument.text':
-      return { isTikaType: true, type: 'Open Document Format' };
+      return { isTikaType: true, label: 'Open Document Format' };
 
     case 'text/rtf':
     case 'application/rtf':
-      return { isTikaType: true, type: 'Rich Text Format' };
+      return { isTikaType: true, label: 'Rich Text Format' };
 
     case 'application/pdf':
-      return { isTikaType: true, type: 'PDF' };
+      return { isTikaType: true, label: 'PDF' };
 
     case 'text/plain':
     case 'text/plain; charset=UTF-8':
-      return { isTikaType: true, type: 'Plain text' };
+      return { isTikaType: true, label: 'Plain text' };
 
     default:
-      return { isTikaType: false, type };
+      return { isTikaType: false, label: type };
   }
 };
