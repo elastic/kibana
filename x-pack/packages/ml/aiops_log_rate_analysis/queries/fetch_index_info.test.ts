@@ -79,7 +79,6 @@ describe('fetch_index_info', () => {
       } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
 
       expect(keywordFieldCandidates).toEqual([
-        'agent.hostname',
         'agent.name',
         'agent.type',
         'agent.version',
