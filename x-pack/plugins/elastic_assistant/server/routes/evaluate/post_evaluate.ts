@@ -153,8 +153,6 @@ export const postEvaluateRoute = (
               actionTypeId: '.gen-ai',
               replacements: {},
               size: DEFAULT_SIZE,
-              isEnabledKnowledgeBase: true,
-              isEnabledRAGAlerts: true,
               conversationId: '',
             },
           };
@@ -163,8 +161,10 @@ export const postEvaluateRoute = (
           // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
           const enableKnowledgeBaseByDefault =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const bedrockChatEnabled =
+            assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
           const kbDataClient = enableKnowledgeBaseByDefault
-            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined
             : undefined;
           const kbIndex =
             enableKnowledgeBaseByDefault && kbDataClient != null
@@ -194,8 +194,8 @@ export const postEvaluateRoute = (
                 agentEvaluator: async (langChainMessages, exampleId) => {
                   const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                     actionsClient,
-                    isEnabledKnowledgeBase: true,
                     assistantTools,
+                    bedrockChatEnabled,
                     connectorId,
                     esClient,
                     esStore,

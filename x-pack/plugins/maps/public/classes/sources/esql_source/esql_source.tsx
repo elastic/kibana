@@ -11,7 +11,12 @@ import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getLimitFromESQLQuery,
+  getStartEndParams,
+  hasStartEndParams,
+} from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
@@ -112,11 +117,11 @@ export class ESQLSource
   }
 
   getApplyGlobalQuery() {
-    return this._descriptor.narrowByGlobalSearch;
+    return this._descriptor.narrowByGlobalSearch || hasStartEndParams(this._descriptor.esql);
   }
 
   async isTimeAware() {
-    return this._descriptor.narrowByGlobalTime;
+    return this._descriptor.narrowByGlobalTime || hasStartEndParams(this._descriptor.esql);
   }
 
   getApplyGlobalTime() {
@@ -183,6 +188,14 @@ export class ESQLSource
       filters.push(extentFilter);
     }
 
+    const timeRange = requestMeta.timeslice
+      ? {
+          from: new Date(requestMeta.timeslice.from).toISOString(),
+          to: new Date(requestMeta.timeslice.to).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : requestMeta.timeFilters;
+
     if (requestMeta.applyGlobalTime) {
       if (!this._descriptor.dateField) {
         throw new Error(
@@ -192,19 +205,18 @@ export class ESQLSource
           })
         );
       }
-      const timeRange = requestMeta.timeslice
-        ? {
-            from: new Date(requestMeta.timeslice.from).toISOString(),
-            to: new Date(requestMeta.timeslice.to).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : requestMeta.timeFilters;
       const timeFilter = getTime(undefined, timeRange, {
         fieldName: this._descriptor.dateField,
       });
+
       if (timeFilter) {
         filters.push(timeFilter);
       }
+    }
+
+    const namedParams = getStartEndParams(this._descriptor.esql, timeRange);
+    if (namedParams.length) {
+      params.params = namedParams;
     }
 
     params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
