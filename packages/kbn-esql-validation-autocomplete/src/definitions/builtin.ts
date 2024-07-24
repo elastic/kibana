@@ -472,7 +472,14 @@ const inFunctions: FunctionDefinition[] = [
     })),
     {
       params: [
-        { name: 'left', type: 'string' },
+        { name: 'left', type: 'keyword' },
+        { name: 'right', type: 'any[]' },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        { name: 'left', type: 'text' },
         { name: 'right', type: 'any[]' },
       ],
       returnType: 'boolean',

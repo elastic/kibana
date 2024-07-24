@@ -9635,14 +9635,14 @@
       "query": "from a_index | eval textField = 5",
       "error": [],
       "warning": [
-        "Column [textField] of type string has been overwritten as new type: number"
+        "Column [textField] of type text has been overwritten as new type: number"
       ]
     },
     {
       "query": "from a_index | eval doubleField = \"5\"",
       "error": [],
       "warning": [
-        "Column [doubleField] of type number has been overwritten as new type: string"
+        "Column [doubleField] of type double has been overwritten as new type: string"
       ]
     },
     {
@@ -9695,7 +9695,7 @@
     {
       "query": "from a_index | eval 1 + \"2\"",
       "error": [
-        "Argument of [+] must be [double], found value [\"2\"] type [string]"
+        "Argument of [+] must be [date_period], found value [1] type [integer]"
       ],
       "warning": []
     },
@@ -11213,17 +11213,26 @@
     },
     {
       "query": "row var = coalesce(cartesianPointField, cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row coalesce(cartesianPointField, cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = coalesce(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -11258,17 +11267,26 @@
     },
     {
       "query": "row var = coalesce(geoPointField, geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row coalesce(geoPointField, geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = coalesce(to_geopoint(geoPointField), to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -11283,7 +11301,10 @@
     },
     {
       "query": "row var = coalesce(to_geoshape(geoPointField), to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -11378,10 +11399,7 @@
     },
     {
       "query": "row var = coalesce(5.5, 5.5)",
-      "error": [
-        "Argument of [coalesce] must be [boolean], found value [5.5] type [counter_double]",
-        "Argument of [coalesce] must be [boolean], found value [5.5] type [counter_double]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -12153,7 +12171,10 @@
     },
     {
       "query": "from a_index | eval date_diff(\"year\", concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -12163,7 +12184,10 @@
     },
     {
       "query": "from a_index | eval date_diff(textField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -12261,7 +12285,9 @@
     },
     {
       "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_extract] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -12271,7 +12297,9 @@
     },
     {
       "query": "from a_index | eval date_extract(textField, concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_extract] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -12354,7 +12382,9 @@
     },
     {
       "query": "from a_index | eval date_format(keywordField, concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_format] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -12364,7 +12394,9 @@
     },
     {
       "query": "from a_index | eval date_format(textField, concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_format] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -12477,12 +12509,16 @@
     },
     {
       "query": "row var = date_trunc(\"a\", to_datetime(\"2021-01-01T00:00:00Z\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "row date_trunc(\"a\", to_datetime(\"2021-01-01T00:00:00Z\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12518,17 +12554,23 @@
     },
     {
       "query": "from a_index | eval var = date_trunc(textField, datetimeField)",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval date_trunc(textField, datetimeField)",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = date_trunc(textField, to_datetime(datetimeField))",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]"
+      ],
       "warning": []
     },
     {
@@ -12560,17 +12602,24 @@
     },
     {
       "query": "from a_index | eval date_trunc(1 year, concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval date_trunc(textField, \"2022\")",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval date_trunc(textField, concat(\"20\", \"22\"))",
-      "error": [],
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]",
+        "Argument of [date_trunc] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+      ],
       "warning": []
     },
     {
@@ -15048,17 +15097,26 @@
     },
     {
       "query": "row var = mv_append(cartesianPointField, cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_append(cartesianPointField, cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_append(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -15073,7 +15131,10 @@
     },
     {
       "query": "row var = mv_append(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]",
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -15093,10 +15154,7 @@
     },
     {
       "query": "row var = mv_append(5.5, 5.5)",
-      "error": [
-        "Argument of [mv_append] must be [boolean], found value [5.5] type [counter_double]",
-        "Argument of [mv_append] must be [boolean], found value [5.5] type [counter_double]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -15111,17 +15169,26 @@
     },
     {
       "query": "row var = mv_append(geoPointField, geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_append(geoPointField, geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_append(to_geopoint(geoPointField), to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -15136,7 +15203,10 @@
     },
     {
       "query": "row var = mv_append(to_geoshape(geoPointField), to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]",
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -15712,17 +15782,23 @@
     },
     {
       "query": "row var = mv_count(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_count(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_count(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -15737,7 +15813,9 @@
     },
     {
       "query": "row var = mv_count(to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -15757,9 +15835,7 @@
     },
     {
       "query": "row var = mv_count(5.5)",
-      "error": [
-        "Argument of [mv_count] must be [boolean], found value [5.5] type [counter_double]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -15774,17 +15850,23 @@
     },
     {
       "query": "row var = mv_count(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_count(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_count(to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -15799,7 +15881,9 @@
     },
     {
       "query": "row var = mv_count(to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -16197,17 +16281,23 @@
     },
     {
       "query": "row var = mv_dedupe(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_dedupe(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_dedupe(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -16222,7 +16312,9 @@
     },
     {
       "query": "row var = mv_dedupe(to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -16242,9 +16334,7 @@
     },
     {
       "query": "row var = mv_dedupe(5.5)",
-      "error": [
-        "Argument of [mv_dedupe] must be [boolean], found value [5.5] type [counter_double]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -16259,17 +16349,23 @@
     },
     {
       "query": "row var = mv_dedupe(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_dedupe(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_dedupe(to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -16284,7 +16380,9 @@
     },
     {
       "query": "row var = mv_dedupe(to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -16617,17 +16715,23 @@
     },
     {
       "query": "row var = mv_first(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_first(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_first(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -16642,7 +16746,9 @@
     },
     {
       "query": "row var = mv_first(to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -16662,9 +16768,7 @@
     },
     {
       "query": "row var = mv_first(5.5)",
-      "error": [
-        "Argument of [mv_first] must be [boolean], found value [5.5] type [counter_double]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -16679,17 +16783,23 @@
     },
     {
       "query": "row var = mv_first(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_first(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_first(to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -16704,7 +16814,9 @@
     },
     {
       "query": "row var = mv_first(to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -17052,17 +17164,23 @@
     },
     {
       "query": "row var = mv_last(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_last(cartesianPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_last(to_cartesianpoint(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -17077,7 +17195,9 @@
     },
     {
       "query": "row var = mv_last(to_cartesianshape(cartesianPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -17097,9 +17217,7 @@
     },
     {
       "query": "row var = mv_last(5.5)",
-      "error": [
-        "Argument of [mv_last] must be [boolean], found value [5.5] type [counter_double]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -17114,17 +17232,23 @@
     },
     {
       "query": "row var = mv_last(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_last(geoPointField)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_last(to_geopoint(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -17139,7 +17263,9 @@
     },
     {
       "query": "row var = mv_last(to_geoshape(geoPointField))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -18277,17 +18403,23 @@
     },
     {
       "query": "row var = mv_slice(cartesianPointField, 5, 5)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_slice(cartesianPointField, 5, 5)",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_slice(to_cartesianpoint(cartesianPointField), to_integer(true), to_integer(true))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -18302,7 +18434,9 @@
     },
     {
       "query": "row var = mv_slice(to_cartesianshape(cartesianPointField), to_integer(true), to_integer(true))",
-      "error": [],
+      "error": [
+        "Unknown column [cartesianPointField]"
+      ],
       "warning": []
     },
     {
@@ -18337,17 +18471,23 @@
     },
     {
       "query": "row var = mv_slice(geoPointField, 5, 5)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row mv_slice(geoPointField, 5, 5)",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_slice(to_geopoint(geoPointField), to_integer(true), to_integer(true))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -18362,7 +18502,9 @@
     },
     {
       "query": "row var = mv_slice(to_geoshape(geoPointField), to_integer(true), to_integer(true))",
-      "error": [],
+      "error": [
+        "Unknown column [geoPointField]"
+      ],
       "warning": []
     },
     {
@@ -18433,7 +18575,6 @@
     {
       "query": "row var = mv_slice(5.5, true, true)",
       "error": [
-        "Argument of [mv_slice] must be [boolean], found value [5.5] type [counter_double]",
         "Argument of [mv_slice] must be [integer], found value [true] type [boolean]",
         "Argument of [mv_slice] must be [integer], found value [true] type [boolean]"
       ],

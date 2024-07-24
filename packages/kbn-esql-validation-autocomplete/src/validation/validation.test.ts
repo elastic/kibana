@@ -1487,12 +1487,12 @@ describe('validation logic', () => {
       testErrorsAndWarnings(
         'from a_index | eval textField = 5',
         [],
-        ['Column [textField] of type string has been overwritten as new type: number']
+        ['Column [textField] of type text has been overwritten as new type: integer']
       );
       testErrorsAndWarnings(
         'from a_index | eval doubleField = "5"',
         [],
-        ['Column [doubleField] of type number has been overwritten as new type: string']
+        ['Column [doubleField] of type double has been overwritten as new type: string']
       );
     });
 
@@ -1674,7 +1674,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
       testErrorsAndWarnings('from a_index | eval 1 + "2"', [
         // just a counter-case to make sure the previous test is meaningful
-        'Argument of [+] must be [double], found value ["2"] type [string]',
+        'Argument of [+] must be [date_period], found value [1] type [integer]',
       ]);
       testErrorsAndWarnings(
         'from a_index | eval trim(to_double("23")::keyword::double::long::keyword::double)',
@@ -2245,12 +2245,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = coalesce(true, true)', []);
         testErrorsAndWarnings('row coalesce(true, true)', []);
         testErrorsAndWarnings('row var = coalesce(to_boolean(true), to_boolean(true))', []);
-        testErrorsAndWarnings('row var = coalesce(cartesianPointField, cartesianPointField)', []);
-        testErrorsAndWarnings('row coalesce(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row var = coalesce(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row coalesce(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = coalesce(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
@@ -2265,7 +2271,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = coalesce(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          [+'Unknown column [cartesianPointField]', +'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
@@ -2283,11 +2289,17 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = coalesce(geoPointField, geoPointField)', []);
-        testErrorsAndWarnings('row coalesce(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row var = coalesce(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row coalesce(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = coalesce(to_geopoint(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings(
@@ -2302,7 +2314,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = coalesce(to_geoshape(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings('row var = coalesce(5)', []);
         testErrorsAndWarnings('row coalesce(5)', []);
@@ -2328,10 +2340,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row coalesce(to_version("1.0.0"), to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = coalesce(to_version("a"), to_version("a"))', []);
 
-        testErrorsAndWarnings('row var = coalesce(5.5, 5.5)', [
-          'Argument of [coalesce] must be [boolean], found value [5.5] type [counter_double]',
-          'Argument of [coalesce] must be [boolean], found value [5.5] type [counter_double]',
-        ]);
+        testErrorsAndWarnings('row var = coalesce(5.5, 5.5)', []);
 
         testErrorsAndWarnings('from a_index | where coalesce(integerField) > 0', []);
 
@@ -2683,14 +2692,20 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
-          []
+          [
+            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          ]
         );
 
         testErrorsAndWarnings('from a_index | eval date_diff(textField, "2022", "2022")', []);
 
         testErrorsAndWarnings(
           'from a_index | eval date_diff(textField, concat("20", "22"), concat("20", "22"))',
-          []
+          [
+            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          ]
         );
       });
 
@@ -2767,14 +2782,15 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
-          []
+          [
+            'Argument of [date_extract] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          ]
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(textField, "2022")', []);
-        testErrorsAndWarnings(
-          'from a_index | eval date_extract(textField, concat("20", "22"))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval date_extract(textField, concat("20", "22"))', [
+          'Argument of [date_extract] must be [datetime], found value [concat("20", "22")] type [keyword]',
+        ]);
       });
 
       describe('date_format', () => {
@@ -2821,13 +2837,14 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval date_format(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_format(keywordField, "2022")', []);
 
-        testErrorsAndWarnings(
-          'from a_index | eval date_format(keywordField, concat("20", "22"))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval date_format(keywordField, concat("20", "22"))', [
+          'Argument of [date_format] must be [datetime], found value [concat("20", "22")] type [keyword]',
+        ]);
 
         testErrorsAndWarnings('from a_index | eval date_format(textField, "2022")', []);
-        testErrorsAndWarnings('from a_index | eval date_format(textField, concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval date_format(textField, concat("20", "22"))', [
+          'Argument of [date_format] must be [datetime], found value [concat("20", "22")] type [keyword]',
+        ]);
       });
 
       describe('date_parse', () => {
@@ -2879,8 +2896,12 @@ describe('validation logic', () => {
           []
         );
         testErrorsAndWarnings('row date_trunc(1 year, to_datetime("2021-01-01T00:00:00Z"))', []);
-        testErrorsAndWarnings('row var = date_trunc("a", to_datetime("2021-01-01T00:00:00Z"))', []);
-        testErrorsAndWarnings('row date_trunc("a", to_datetime("2021-01-01T00:00:00Z"))', []);
+        testErrorsAndWarnings('row var = date_trunc("a", to_datetime("2021-01-01T00:00:00Z"))', [
+          'Argument of [date_trunc] must be [time_literal], found value ["a"] type [string]',
+        ]);
+        testErrorsAndWarnings('row date_trunc("a", to_datetime("2021-01-01T00:00:00Z"))', [
+          'Argument of [date_trunc] must be [time_literal], found value ["a"] type [string]',
+        ]);
 
         testErrorsAndWarnings('row var = date_trunc(true, true)', [
           'Argument of [date_trunc] must be [time_literal], found value [true] type [boolean]',
@@ -2900,12 +2921,16 @@ describe('validation logic', () => {
           'Argument of [date_trunc] must be [datetime], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = date_trunc(textField, datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(textField, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = date_trunc(textField, datetimeField)', [
+          'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
+        ]);
+        testErrorsAndWarnings('from a_index | eval date_trunc(textField, datetimeField)', [
+          'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | eval var = date_trunc(textField, to_datetime(datetimeField))',
-          []
+          ['Argument of [date_trunc] must be [time_literal], found value [textField] type [text]']
         );
 
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, datetimeField, extraArg)', [
@@ -2916,9 +2941,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_trunc(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(textField, "2022")', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(textField, concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
+          'Argument of [date_trunc] must be [datetime], found value [concat("20", "22")] type [keyword]',
+        ]);
+        testErrorsAndWarnings('from a_index | eval date_trunc(textField, "2022")', [
+          'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
+        ]);
+        testErrorsAndWarnings('from a_index | eval date_trunc(textField, concat("20", "22"))', [
+          'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
+          'Argument of [date_trunc] must be [datetime], found value [concat("20", "22")] type [keyword]',
+        ]);
       });
 
       describe('e', () => {
@@ -3891,12 +3923,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_append(true, true)', []);
         testErrorsAndWarnings('row mv_append(true, true)', []);
         testErrorsAndWarnings('row var = mv_append(to_boolean(true), to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_append(cartesianPointField, cartesianPointField)', []);
-        testErrorsAndWarnings('row mv_append(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row var = mv_append(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_append(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = mv_append(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
@@ -3911,7 +3949,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = mv_append(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
@@ -3929,18 +3967,21 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_append(5.5, 5.5)', [
-          'Argument of [mv_append] must be [boolean], found value [5.5] type [counter_double]',
-          'Argument of [mv_append] must be [boolean], found value [5.5] type [counter_double]',
-        ]);
+        testErrorsAndWarnings('row var = mv_append(5.5, 5.5)', []);
 
         testErrorsAndWarnings('row mv_append(5.5, 5.5)', []);
         testErrorsAndWarnings('row var = mv_append(to_double(true), to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_append(geoPointField, geoPointField)', []);
-        testErrorsAndWarnings('row mv_append(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row var = mv_append(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_append(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = mv_append(to_geopoint(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings(
@@ -3955,7 +3996,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = mv_append(to_geoshape(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings('row var = mv_append(5, 5)', []);
         testErrorsAndWarnings('row mv_append(5, 5)', []);
@@ -4232,12 +4273,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_count(true)', []);
         testErrorsAndWarnings('row mv_count(true)', []);
         testErrorsAndWarnings('row var = mv_count(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_count(cartesianPointField)', []);
-        testErrorsAndWarnings('row mv_count(cartesianPointField)', []);
-        testErrorsAndWarnings('row var = mv_count(to_cartesianpoint(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_count(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_count(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = mv_count(to_cartesianpoint(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_count(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_count(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_count(to_cartesianshape(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_count(to_cartesianshape(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_count(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_count(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4246,18 +4295,22 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_count(5.5)', [
-          'Argument of [mv_count] must be [boolean], found value [5.5] type [counter_double]',
-        ]);
+        testErrorsAndWarnings('row var = mv_count(5.5)', []);
 
         testErrorsAndWarnings('row mv_count(5.5)', []);
         testErrorsAndWarnings('row var = mv_count(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_count(geoPointField)', []);
-        testErrorsAndWarnings('row mv_count(geoPointField)', []);
-        testErrorsAndWarnings('row var = mv_count(to_geopoint(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_count(geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_count(geoPointField)', ['Unknown column [geoPointField]']);
+        testErrorsAndWarnings('row var = mv_count(to_geopoint(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_count(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_count(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_count(to_geoshape(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_count(to_geoshape(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_count(5)', []);
         testErrorsAndWarnings('row mv_count(5)', []);
         testErrorsAndWarnings('row var = mv_count(to_integer(true))', []);
@@ -4363,12 +4416,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_dedupe(true)', []);
         testErrorsAndWarnings('row mv_dedupe(true)', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(cartesianPointField)', []);
-        testErrorsAndWarnings('row mv_dedupe(cartesianPointField)', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_dedupe(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_dedupe(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_dedupe(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianshape(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianshape(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_dedupe(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_dedupe(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4377,18 +4438,22 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_dedupe(5.5)', [
-          'Argument of [mv_dedupe] must be [boolean], found value [5.5] type [counter_double]',
-        ]);
+        testErrorsAndWarnings('row var = mv_dedupe(5.5)', []);
 
         testErrorsAndWarnings('row mv_dedupe(5.5)', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(geoPointField)', []);
-        testErrorsAndWarnings('row mv_dedupe(geoPointField)', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_dedupe(geoPointField)', ['Unknown column [geoPointField]']);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_dedupe(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_dedupe(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_dedupe(to_geoshape(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geoshape(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_dedupe(5)', []);
         testErrorsAndWarnings('row mv_dedupe(5)', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_integer(true))', []);
@@ -4490,12 +4555,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_first(true)', []);
         testErrorsAndWarnings('row mv_first(true)', []);
         testErrorsAndWarnings('row var = mv_first(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_first(cartesianPointField)', []);
-        testErrorsAndWarnings('row mv_first(cartesianPointField)', []);
-        testErrorsAndWarnings('row var = mv_first(to_cartesianpoint(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_first(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_first(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = mv_first(to_cartesianpoint(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_first(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_first(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_first(to_cartesianshape(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_first(to_cartesianshape(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_first(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_first(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4504,18 +4577,22 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_first(5.5)', [
-          'Argument of [mv_first] must be [boolean], found value [5.5] type [counter_double]',
-        ]);
+        testErrorsAndWarnings('row var = mv_first(5.5)', []);
 
         testErrorsAndWarnings('row mv_first(5.5)', []);
         testErrorsAndWarnings('row var = mv_first(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_first(geoPointField)', []);
-        testErrorsAndWarnings('row mv_first(geoPointField)', []);
-        testErrorsAndWarnings('row var = mv_first(to_geopoint(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_first(geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_first(geoPointField)', ['Unknown column [geoPointField]']);
+        testErrorsAndWarnings('row var = mv_first(to_geopoint(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_first(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_first(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_first(to_geoshape(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_first(to_geoshape(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_first(5)', []);
         testErrorsAndWarnings('row mv_first(5)', []);
         testErrorsAndWarnings('row var = mv_first(to_integer(true))', []);
@@ -4611,12 +4688,20 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_last(true)', []);
         testErrorsAndWarnings('row mv_last(true)', []);
         testErrorsAndWarnings('row var = mv_last(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = mv_last(cartesianPointField)', []);
-        testErrorsAndWarnings('row mv_last(cartesianPointField)', []);
-        testErrorsAndWarnings('row var = mv_last(to_cartesianpoint(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_last(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_last(cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row var = mv_last(to_cartesianpoint(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_last(to_cartesianshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_last(to_cartesianshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_last(to_cartesianshape(cartesianPointField))', []);
+        testErrorsAndWarnings('row var = mv_last(to_cartesianshape(cartesianPointField))', [
+          'Unknown column [cartesianPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_last(to_datetime("2021-01-01T00:00:00Z"))', []);
         testErrorsAndWarnings('row mv_last(to_datetime("2021-01-01T00:00:00Z"))', []);
 
@@ -4625,18 +4710,22 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_last(5.5)', [
-          'Argument of [mv_last] must be [boolean], found value [5.5] type [counter_double]',
-        ]);
+        testErrorsAndWarnings('row var = mv_last(5.5)', []);
 
         testErrorsAndWarnings('row mv_last(5.5)', []);
         testErrorsAndWarnings('row var = mv_last(to_double(true))', []);
-        testErrorsAndWarnings('row var = mv_last(geoPointField)', []);
-        testErrorsAndWarnings('row mv_last(geoPointField)', []);
-        testErrorsAndWarnings('row var = mv_last(to_geopoint(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_last(geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_last(geoPointField)', ['Unknown column [geoPointField]']);
+        testErrorsAndWarnings('row var = mv_last(to_geopoint(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_last(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row mv_last(to_geoshape("POINT (30 10)"))', []);
-        testErrorsAndWarnings('row var = mv_last(to_geoshape(geoPointField))', []);
+        testErrorsAndWarnings('row var = mv_last(to_geoshape(geoPointField))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings('row var = mv_last(5)', []);
         testErrorsAndWarnings('row mv_last(5)', []);
         testErrorsAndWarnings('row var = mv_last(to_integer(true))', []);
@@ -4961,12 +5050,16 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_slice(cartesianPointField, 5, 5)', []);
-        testErrorsAndWarnings('row mv_slice(cartesianPointField, 5, 5)', []);
+        testErrorsAndWarnings('row var = mv_slice(cartesianPointField, 5, 5)', [
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_slice(cartesianPointField, 5, 5)', [
+          'Unknown column [cartesianPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = mv_slice(to_cartesianpoint(cartesianPointField), to_integer(true), to_integer(true))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings('row var = mv_slice(to_cartesianshape("POINT (30 10)"), 5, 5)', []);
@@ -4974,7 +5067,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = mv_slice(to_cartesianshape(cartesianPointField), to_integer(true), to_integer(true))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings('row var = mv_slice(to_datetime("2021-01-01T00:00:00Z"), 5, 5)', []);
@@ -4993,12 +5086,16 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_slice(geoPointField, 5, 5)', []);
-        testErrorsAndWarnings('row mv_slice(geoPointField, 5, 5)', []);
+        testErrorsAndWarnings('row var = mv_slice(geoPointField, 5, 5)', [
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row mv_slice(geoPointField, 5, 5)', [
+          'Unknown column [geoPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = mv_slice(to_geopoint(geoPointField), to_integer(true), to_integer(true))',
-          []
+          ['Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings('row var = mv_slice(to_geoshape("POINT (30 10)"), 5, 5)', []);
@@ -5006,7 +5103,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = mv_slice(to_geoshape(geoPointField), to_integer(true), to_integer(true))',
-          []
+          ['Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings('row var = mv_slice(5, 5, 5)', []);
@@ -5043,7 +5140,6 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('row var = mv_slice(5.5, true, true)', [
-          'Argument of [mv_slice] must be [boolean], found value [5.5] type [counter_double]',
           'Argument of [mv_slice] must be [integer], found value [true] type [boolean]',
           'Argument of [mv_slice] must be [integer], found value [true] type [boolean]',
         ]);
