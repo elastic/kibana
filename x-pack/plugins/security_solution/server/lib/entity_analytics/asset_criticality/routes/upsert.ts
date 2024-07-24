@@ -11,7 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   CreateAssetCriticalityRecordRequestBody,
   InternalCreateAssetCriticalityRecordRequestBody,
-} from '../../../../../common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
+} from '../../../../../common/api/entity_analytics';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
