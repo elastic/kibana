@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:focal
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 ENV HOME=/home/vscode
