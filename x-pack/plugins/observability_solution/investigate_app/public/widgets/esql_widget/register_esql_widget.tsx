@@ -4,43 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo } from 'react';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
+import { i18n } from '@kbn/i18n';
 import type {
   EsqlWidgetParameters,
   GlobalWidgetParameters,
   WidgetRenderAPI,
 } from '@kbn/investigate-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import React, { useMemo } from 'react';
+import { ErrorMessage } from '../../components/error_message';
 import { ESQL_WIDGET_NAME } from '../../constants';
-import type { RegisterWidgetOptions } from '../register_widgets';
 import { useKibana } from '../../hooks/use_kibana';
-import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_suggestion';
 import { getDatatableFromEsqlResponse } from '../../utils/get_data_table_from_esql_response';
 import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrides';
-import { ErrorMessage } from '../../components/error_message';
+import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_suggestion';
+import type { RegisterWidgetOptions } from '../register_widgets';
 import { getDateHistogramResults } from './get_date_histogram_results';
 
 const lensClassName = css`
   height: 100%;
 `;
 
-export function EsqlWidget({
-  suggestion,
-  dataView,
-  esqlQuery,
-  columns,
-  allColumns,
-  values,
-  blocks,
-  dateHistogramResults,
-}: {
+interface Props {
   suggestion: Suggestion;
   dataView: DataView;
   esqlQuery: string;
@@ -54,7 +45,18 @@ export function EsqlWidget({
     values: ESQLSearchResponse['values'];
     groupingExpression: string;
   };
-}) {
+}
+
+export function EsqlWidget({
+  suggestion,
+  dataView,
+  esqlQuery,
+  columns,
+  allColumns,
+  values,
+  blocks,
+  dateHistogramResults,
+}: Props) {
   const {
     dependencies: {
       start: { lens },
@@ -81,20 +83,6 @@ export function EsqlWidget({
   const memoizedQueryObject = useMemo(() => {
     return { esql: esqlQuery };
   }, [esqlQuery]);
-
-  useEffect(() => {
-    if (datatable.columns.find((column) => column.name === 'message')) {
-      return blocks.publish([
-        {
-          id: 'pattern_analysis',
-          loading: false,
-          content: i18n.translate('xpack.investigateApp.esqlWidget.runPatternAnalysis', {
-            defaultMessage: 'Analyze log patterns',
-          }),
-        },
-      ]);
-    }
-  }, [blocks, datatable]);
 
   const initialColumns = useMemo(() => {
     const timestampColumn = datatable.columns.find((column) => column.name === '@timestamp');
