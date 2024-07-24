@@ -37,7 +37,7 @@ export const CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION = i18n.translate(
 export const START_WITH_PREPARED_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.startWithPreparedEndpointsLabel',
   {
-    defaultMessage: 'Get started quickly with our prepared built-in ML models:',
+    defaultMessage: 'Learn more about built-in NLP models:',
   }
 );
 
