@@ -8,7 +8,7 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { EntityManagerServerSetup } from '../../../types';
-import { canRunEntityDiscovery, requiredRunTimePrivileges } from '../privileges';
+import { canManageEntityDefinition, entityDefinitionRuntimePrivileges } from '../privileges';
 
 export interface EntityDiscoveryAPIKey {
   id: string;
@@ -45,7 +45,7 @@ export const checkIfEntityDiscoveryAPIKeyIsValid = async (
 
   server.logger.debug('validating API key has runtime privileges for entity discovery');
 
-  return canRunEntityDiscovery(esClient);
+  return canManageEntityDefinition(esClient);
 };
 
 export const generateEntityDiscoveryAPIKey = async (
@@ -55,7 +55,7 @@ export const generateEntityDiscoveryAPIKey = async (
   const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Entity discovery API key',
     role_descriptors: {
-      entity_discovery_admin: requiredRunTimePrivileges,
+      entity_discovery_admin: entityDefinitionRuntimePrivileges,
     },
     metadata: {
       description:
