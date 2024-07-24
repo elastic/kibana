@@ -15,7 +15,7 @@ import { ESQLLineTokens } from './esql_line_tokens';
 import { ESQLState } from './esql_state';
 
 import { ESQL_TOKEN_POSTFIX } from './constants';
-import { enrichTokensWithFunctionsMetadata } from './esql_token_helpers';
+import { addFunctionTokens, addNullsOrder } from './esql_token_helpers';
 
 const EOF = -1;
 
@@ -77,7 +77,8 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     // special treatment for functions
     // the previous custom Kibana grammar baked functions directly as tokens, so highlight was easier
     // The ES grammar doesn't have the token concept of "function"
-    const tokensWithFunctions = enrichTokensWithFunctionsMetadata(myTokens);
+    const tokensWithFunctions = addFunctionTokens(myTokens);
+    addNullsOrder(tokensWithFunctions);
 
     return new ESQLLineTokens(tokensWithFunctions, prevState.getLineNumber() + 1);
   }
