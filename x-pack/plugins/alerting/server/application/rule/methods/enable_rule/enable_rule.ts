@@ -25,10 +25,13 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { EnableRuleParams } from './types';
 import { enableRuleParamsSchema } from './schemas';
 
-export async function enable(context: RulesClientContext, { id }: EnableRuleParams): Promise<void> {
+export async function enableRule(
+  context: RulesClientContext,
+  { id }: EnableRuleParams
+): Promise<void> {
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.enable('${id}')`,
+    `rulesClient.enableRule('${id}')`,
     async () => await enableWithOCC(context, { id })
   );
 }

@@ -36,7 +36,7 @@ export const enableRuleRoute = (
         const params: EnableRuleRequestParamsV1 = req.params;
 
         try {
-          await rulesClient.enable(params);
+          await rulesClient.enableRule(params);
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

@@ -33,7 +33,7 @@ describe('enableRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_enable"`);
 
-    rulesClient.enable.mockResolvedValueOnce();
+    rulesClient.enableRule.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -47,8 +47,8 @@ describe('enableRuleRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.enable).toHaveBeenCalledTimes(1);
-    expect(rulesClient.enable.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.enableRule).toHaveBeenCalledTimes(1);
+    expect(rulesClient.enableRule.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -67,7 +67,7 @@ describe('enableRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.enable.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.enableRule.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

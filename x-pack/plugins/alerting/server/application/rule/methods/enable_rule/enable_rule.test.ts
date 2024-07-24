@@ -164,7 +164,7 @@ describe('enable()', () => {
 
   describe('authorization', () => {
     test('ensures user is authorised to enable this type of alert under the consumer', async () => {
-      await rulesClient.enable({ id: '1' });
+      await rulesClient.enableRule({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -180,7 +180,7 @@ describe('enable()', () => {
         new Error(`Unauthorized to enable a "myType" alert for "myApp"`)
       );
 
-      await expect(rulesClient.enable({ id: '1' })).rejects.toMatchInlineSnapshot(
+      await expect(rulesClient.enableRule({ id: '1' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to enable a "myType" alert for "myApp"]`
       );
 
@@ -195,7 +195,7 @@ describe('enable()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when enabling a rule', async () => {
-      await rulesClient.enable({ id: '1' });
+      await rulesClient.enableRule({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -210,7 +210,7 @@ describe('enable()', () => {
     test('logs audit event when not authorised to enable a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(rulesClient.enable({ id: '1' })).rejects.toThrow();
+      await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -233,7 +233,7 @@ describe('enable()', () => {
   });
 
   test('enables a rule', async () => {
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -295,7 +295,7 @@ describe('enable()', () => {
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -361,7 +361,7 @@ describe('enable()', () => {
       },
     });
 
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(rulesClientParams.getUserName).not.toHaveBeenCalled();
     expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
@@ -374,7 +374,7 @@ describe('enable()', () => {
       result: { id: '123', name: '123', api_key: 'abc' },
     });
 
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -426,7 +426,7 @@ describe('enable()', () => {
       throw new Error('no');
     });
     await expect(
-      async () => await rulesClient.enable({ id: '1' })
+      async () => await rulesClient.enableRule({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule - no"`);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
@@ -434,7 +434,7 @@ describe('enable()', () => {
   test('throws an error if API params do not match the schema', async () => {
     await expect(
       // @ts-ignore: this is what we are testing
-      async () => await rulesClient.enable({ id: 1 })
+      async () => await rulesClient.enableRule({ id: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error validating enable rule parameters - [id]: expected value of type [string] but got [number]"`
     );
@@ -444,7 +444,7 @@ describe('enable()', () => {
   test('falls back when failing to getDecryptedAsInternalUser', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'enable(): Failed to load API key of alert 1: Fail'
@@ -456,7 +456,7 @@ describe('enable()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('Fail to get'));
 
-    await expect(rulesClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to get"`
     );
     expect(rulesClientParams.getUserName).not.toHaveBeenCalled();
@@ -473,7 +473,7 @@ describe('enable()', () => {
     unsecuredSavedObjectsClient.update.mockReset();
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
 
-    await expect(rulesClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to update"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
@@ -482,7 +482,7 @@ describe('enable()', () => {
   });
 
   test('enables task when scheduledTaskId is defined and task exists', async () => {
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -497,7 +497,7 @@ describe('enable()', () => {
 
   test('throws error when enabling task fails', async () => {
     taskManager.bulkEnable.mockRejectedValueOnce(new Error('Failed to enable task'));
-    await expect(rulesClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to enable task"`
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -526,7 +526,7 @@ describe('enable()', () => {
       ownerId: null,
     });
     taskManager.get.mockRejectedValueOnce(new Error('Failed to get task!'));
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -584,7 +584,7 @@ describe('enable()', () => {
       params: {},
       ownerId: null,
     });
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -639,7 +639,7 @@ describe('enable()', () => {
       ownerId: null,
     });
     taskManager.get.mockResolvedValue({ ...mockTask, status: TaskStatus.Unrecognized });
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -686,7 +686,7 @@ describe('enable()', () => {
       attributes: { ...existingRule.attributes, scheduledTaskId: null },
     });
     taskManager.schedule.mockRejectedValueOnce(new Error('Fail to schedule'));
-    await expect(rulesClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to schedule"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
@@ -703,7 +703,7 @@ describe('enable()', () => {
     taskManager.schedule.mockRejectedValueOnce(
       Object.assign(new Error('Conflict!'), { statusCode: 409 })
     );
-    await rulesClient.enable({ id: '1' });
+    await rulesClient.enableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -746,7 +746,7 @@ describe('enable()', () => {
       new Error('Fail to update after scheduling task')
     );
 
-    await expect(rulesClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to update after scheduling task"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
@@ -779,7 +779,7 @@ describe('enable()', () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
       (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
 
-      await rulesClient.enable({ id: '1' });
+      await rulesClient.enableRule({ id: '1' });
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),

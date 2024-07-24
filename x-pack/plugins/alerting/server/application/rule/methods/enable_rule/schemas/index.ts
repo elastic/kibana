@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './enable_schemas';
+export * from './enable_rule_schemas';

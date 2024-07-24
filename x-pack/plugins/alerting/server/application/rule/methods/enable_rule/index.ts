@@ -7,4 +7,4 @@
 
 export type { EnableRuleParams } from './types';
 
-export { enable } from './enable';
+export { enableRule } from './enable_rule';
