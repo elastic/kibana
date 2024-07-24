@@ -203,11 +203,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when metric is invalid', async () => {
-        const invalidBody = { ...basePayload, metrics: [{ type: 'any' }] };
+        const invalidBody = { ...basePayload, metrics: ['any'] };
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx"'
+          '[request body]: Failed to validate: in metrics/0: "any" does not match expected type "cpu" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx"'
         );
       });
 
@@ -222,11 +222,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when range is not informed', async () => {
-        const invalidBody = { ...basePayload, range: undefined };
+        const invalidBody = { ...basePayload, from: undefined, to: undefined };
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in range: undefined does not match expected type { from: Date, to: Date }'
+          '[request body]: Failed to validate: in from: undefined does not match expected type Date in to: undefined does not match expected type Date'
         );
       });
     });

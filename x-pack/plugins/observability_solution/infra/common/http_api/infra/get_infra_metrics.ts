@@ -40,21 +40,19 @@ export const InfraAssetMetadataRT = rt.type({
   value: rt.union([rt.number, rt.string, rt.null]),
 });
 
-export const GetInfraMetricsRequestBodyPayloadRT = rt.exact(
-  rt.intersection([
-    rt.partial({
-      query: rt.UnknownRecord,
-    }),
-    rt.type({
-      type: rt.literal('host'),
-      limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
-      metrics: rt.array(InfraMetricTypeRT),
-      sourceId: rt.string,
-      from: dateRt,
-      to: dateRt,
-    }),
-  ])
-);
+export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
+  rt.partial({
+    query: rt.UnknownRecord,
+  }),
+  rt.type({
+    type: rt.literal('host'),
+    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
+    metrics: rt.array(InfraMetricTypeRT),
+    sourceId: rt.string,
+    from: dateRt,
+    to: dateRt,
+  }),
+]);
 
 export const InfraAssetMetricsItemRT = rt.intersection([
   rt.type({
