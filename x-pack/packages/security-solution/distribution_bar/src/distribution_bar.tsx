@@ -153,7 +153,12 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
     return (
       <div key={stat.key} css={partStyle} data-test-subj={`${dataTestSubj}__part`}>
         <div css={styles.tooltip}>
-          <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'} wrap={false}>
+          <EuiFlexGroup
+            gutterSize={'none'}
+            justifyContent={'flexEnd'}
+            wrap={false}
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <EuiBadge color={'hollow'} css={styles.tooltipBadgeLeft}>
                 {prettyNumber}
@@ -161,7 +166,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color={'hollow'} css={styles.tooltipBadgeRight}>
-                <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
+                <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiIcon type={'dot'} size={'s'} color={stat.color} />
                   </EuiFlexItem>
@@ -176,7 +181,12 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
   });
 
   return (
-    <EuiFlexGroup alignItems={'center'} css={styles.bar} data-test-subj={dataTestSubj}>
+    <EuiFlexGroup
+      alignItems={'center'}
+      css={styles.bar}
+      data-test-subj={dataTestSubj}
+      responsive={false}
+    >
       {parts.length ? parts : <EmptyBar data-test-subj={`${dataTestSubj}__emptyBar`} />}
     </EuiFlexGroup>
   );
