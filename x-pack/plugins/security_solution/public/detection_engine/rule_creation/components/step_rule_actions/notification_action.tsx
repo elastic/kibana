@@ -114,9 +114,7 @@ export function NotificationAction({
   const iconType = registeredAction?.iconClass ?? 'apps';
 
   const connector = connectors.find(({ id }) => id === action.id);
-  const connectorName = (isRuleAction
-    ? connector?.name
-    : registeredAction.actionTypeTitle) ?? '';
+  const connectorName = (isRuleAction ? connector?.name : registeredAction.actionTypeTitle) ?? '';
 
   return (
     <EuiFlexItem>
