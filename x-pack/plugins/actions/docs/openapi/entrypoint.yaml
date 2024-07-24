@@ -27,13 +27,13 @@ paths:
     $ref: paths/api@actions@connector_types.yaml
 # Deprecated endpoints:
   '/api/actions/action/{actionId}':
-    $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
+    $ref: 'paths/api@actions@action@{actionid}.yaml'
   '/api/actions':
-    $ref: 'paths/s@{spaceid}@api@actions.yaml'
+    $ref: 'paths/api@actions.yaml'
   '/api/actions/list_action_types':
-    $ref: 'paths/s@{spaceid}@api@actions@list_action_types.yaml'
+    $ref: 'paths/api@actions@list_action_types.yaml'
   '/api/actions/action/{actionId}/_execute':
-    $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}@_execute.yaml'
+    $ref: 'paths/api@actions@action@{actionid}@_execute.yaml'
 # Non-default space
   # '/s/{spaceId}/api/actions/connector':
   #   $ref: 'paths/s@{spaceid}@api@actions@connector.yaml'

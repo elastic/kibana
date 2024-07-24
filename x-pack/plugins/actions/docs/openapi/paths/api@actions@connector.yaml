@@ -1,6 +1,7 @@
 post:
-  summary: Create a connector
+  summary: Create a connector with a random ID
   operationId: createConnector
+  description: The connector identifier is randomly generated.
   tags:
     - connectors
   parameters:
