@@ -37,7 +37,7 @@ export const ML_ENTITY_FIELD_OPERATIONS = {
  * Union type of entity field operations
  */
 export type MlEntityFieldOperation =
-  typeof ML_ENTITY_FIELD_OPERATIONS[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
+  (typeof ML_ENTITY_FIELD_OPERATIONS)[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
 
 /**
  * Interface of an entity field

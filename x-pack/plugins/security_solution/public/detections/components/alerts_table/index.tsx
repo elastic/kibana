@@ -331,8 +331,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType: 'events',
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -356,7 +355,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
           <EuiDataGridContainer hideLastPage={false}>{AlertTable}</EuiDataGridContainer>
         </StatefulEventContext.Provider>
       </FullWidthFlexGroupTable>
-      {DetailsPanel}
     </div>
   );
 };
