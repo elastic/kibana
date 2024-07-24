@@ -22,6 +22,7 @@ import type {
 } from '../../../types';
 import { appContextService } from '../../../services';
 import { agentPolicyService, licenseService, outputService } from '../../../services';
+import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../common/constants';
 import { getAllowedOutputTypesForIntegration } from '../../../../common/services/output_helpers';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
@@ -56,7 +57,6 @@ export function removeFieldsFromInputSchema(
 }
 
 const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
-const LICENCE_FOR_OUTPUT_PER_INTEGRATION = 'enterprise';
 
 export function canUseMultipleAgentPolicies() {
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
@@ -75,11 +75,11 @@ export async function canUseOutputForIntegration(
   packageName: string,
   outputId: string
 ) {
-  const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
-  if (!hasEnterpriseLicence) {
+  const hasAllowedLicense = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
+  if (!hasAllowedLicense) {
     return {
       canUseOutputForIntegrationResult: false,
-      errorMessage: 'Output per integration is only available with an Enterprise license',
+      errorMessage: `Output per integration is only available with an ${LICENCE_FOR_OUTPUT_PER_INTEGRATION} license`,
     };
   }
 

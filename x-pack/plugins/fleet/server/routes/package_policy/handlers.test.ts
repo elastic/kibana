@@ -259,7 +259,7 @@ describe('When calling package policy', () => {
       });
     });
 
-    it('should throw if no enterprise license and output_id is provided', async () => {
+    it('should throw if no valid license and output_id is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
       const request = getCreateKibanaRequest({
         ...newPolicy,
@@ -270,12 +270,12 @@ describe('When calling package policy', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 400,
         body: {
-          message: 'Output per integration is only available with an Enterprise license',
+          message: 'Output per integration is only available with an enterprise license',
         },
       });
     });
 
-    it('should throw if enterprise license and an incompatible output_id for the package is given', async () => {
+    it('should throw if valid license and an incompatible output_id for the package is given', async () => {
       jest
         .spyOn(outputService, 'get')
         .mockResolvedValueOnce({ id: 'non-es-output', type: 'kafka' } as any);
@@ -295,7 +295,7 @@ describe('When calling package policy', () => {
       });
     });
 
-    it('should not throw if enterprise license and output_id is provided', async () => {
+    it('should not throw if valid license and output_id is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const request = getCreateKibanaRequest({
         ...newPolicy,
@@ -507,7 +507,7 @@ describe('When calling package policy', () => {
       });
     });
 
-    it('should throw if no enterprise license and output_id is provided', async () => {
+    it('should throw if no valid license and output_id is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
       const request = getUpdateKibanaRequest({
         output_id: 'some-output',
@@ -516,12 +516,12 @@ describe('When calling package policy', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 400,
         body: {
-          message: 'Output per integration is only available with an Enterprise license',
+          message: 'Output per integration is only available with an enterprise license',
         },
       });
     });
 
-    it('should throw if enterprise license and an incompatible output_id for the package is given', async () => {
+    it('should throw if valid license and an incompatible output_id for the package is given', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       jest
         .spyOn(outputService, 'get')
@@ -539,7 +539,7 @@ describe('When calling package policy', () => {
       });
     });
 
-    it('should not throw if enterprise license and output_id is provided', async () => {
+    it('should not throw if valid license and output_id is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const request = getUpdateKibanaRequest({
         output_id: 'some-output',
