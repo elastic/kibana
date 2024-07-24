@@ -53,4 +53,10 @@ export interface PatternAnalysisEmbeddableState extends SerializedTitles, Serial
   randomSamplerProbability: RandomSamplerProbability;
 }
 
+export interface PatternAnalysisEmbeddableInitialState
+  extends SerializedTitles,
+    SerializedTimeRange {
+  dataViewId?: string;
+}
+
 export type PatternAnalysisEmbeddableRuntimeState = PatternAnalysisEmbeddableState;

@@ -22,6 +22,7 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
   focusedPanelId: string,
   isNewPanel: boolean,
   patternAnalysisControlsApi: PatternAnalysisComponentApi,
+  deletePanel?: () => void,
   initialState?: PatternAnalysisEmbeddableState
 ): Promise<PatternAnalysisEmbeddableState> {
   const { overlays } = coreStart;
@@ -32,14 +33,15 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
   return new Promise(async (resolve, reject) => {
     try {
       const cancelChanges = () => {
-        // Reset to initialState in case user has changed the preview state
-        if (hasChanged && patternAnalysisControlsApi && initialState) {
+        if (isNewPanel && deletePanel) {
+          deletePanel();
+        } else if (hasChanged && patternAnalysisControlsApi && initialState) {
+          // Reset to initialState in case user has changed the preview state
           patternAnalysisControlsApi.updateUserInput(initialState);
         }
 
         flyoutSession.close();
         overlayTracker?.clearOverlays();
-        reject();
       };
 
       const update = async (nextUpdate: PatternAnalysisEmbeddableState) => {

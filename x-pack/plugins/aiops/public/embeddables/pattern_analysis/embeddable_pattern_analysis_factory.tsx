@@ -119,7 +119,9 @@ export const getPatternAnalysisEmbeddableFactory = (
       const blockingError = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await deps.data.dataViews.get(state.dataViewId),
+        await deps.data.dataViews.get(
+          state.dataViewId ?? (await deps.data.dataViews.getDefaultId())
+        ),
       ]);
 
       const api = buildApi(
@@ -145,6 +147,7 @@ export const getPatternAnalysisEmbeddableFactory = (
                 uuid,
                 false,
                 patternAnalysisControlsApi,
+                undefined,
                 serializePatternAnalysisChartState()
               );
 

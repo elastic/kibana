@@ -14,6 +14,10 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { AiopsPluginStartDeps } from '../types';
 import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
+import type {
+  PatternAnalysisEmbeddableApi,
+  PatternAnalysisEmbeddableInitialState,
+} from '../embeddables/pattern_analysis/types';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -56,18 +60,35 @@ export function createAddPatternAnalysisEmbeddableAction(
           '../embeddables/pattern_analysis/resolve_pattern_analysis_config_input'
         );
 
-        const initialState = await resolveEmbeddablePatternAnalysisUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          context.embeddable.uuid,
-          true
-        );
+        const initialState: PatternAnalysisEmbeddableInitialState = {
+          dataViewId: undefined,
+        };
 
-        presentationContainerParent.addNewPanel({
+        const embeddable = await presentationContainerParent.addNewPanel<
+          object,
+          PatternAnalysisEmbeddableApi
+        >({
           panelType: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
           initialState,
         });
+
+        if (!embeddable) {
+          return;
+        }
+
+        const deletePanel = () => {
+          presentationContainerParent.removePanel(embeddable.uuid);
+        };
+
+        resolveEmbeddablePatternAnalysisUserInput(
+          coreStart,
+          pluginStart,
+          context.embeddable,
+          embeddable.uuid,
+          true,
+          embeddable,
+          deletePanel
+        );
       } catch (e) {
         return Promise.reject();
       }
