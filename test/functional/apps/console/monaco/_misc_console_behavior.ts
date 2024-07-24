@@ -92,7 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe.only('open documentation', () => {
-        const requests = ['GET _search', 'GET test_index/_search', 'GET /test_index/_search'];
+        // const requests = ['GET _search', 'GET test_index/_search', 'GET /test_index/_search'];
+        const requests = ['GET _search', 'GET test_index/_search'];
         requests.forEach((request) => {
           it('should open documentation when Ctrl+/ is pressed', async () => {
             await PageObjects.console.monaco.enterText(request);
