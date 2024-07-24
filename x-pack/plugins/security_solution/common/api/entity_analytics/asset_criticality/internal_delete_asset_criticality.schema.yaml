@@ -1,14 +1,16 @@
 openapi: 3.0.0
 info:
-  version: '2023-10-31'
-  title: Asset Criticality Delete Record Schema
+  version: '1'
+  title: Internal Asset Criticality Delete Record Schema
 paths:
-  /api/asset_criticality:
+  /internal/asset_criticality:
     delete:
       x-labels: [ess, serverless]
+      x-internal: true
       x-codegen-enabled: true
-      operationId: DeleteAssetCriticalityRecord
-      summary: Delete Criticality Record
+      operationId: InternalDeleteAssetCriticalityRecord
+      summary: Deprecated Internal Delete Criticality Record
+      deprecated: true
       parameters:
         - name: id_value
           in: query

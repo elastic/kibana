@@ -1,14 +1,16 @@
 openapi: 3.0.0
 info:
-  version: '2023-10-31'
-  title: Asset Criticality Delete Record Schema
+  version: '1'
+  title: Internal Asset Criticality Get Record Schema
 paths:
-  /api/asset_criticality:
-    delete:
+  /internal/asset_criticality:
+    get:
       x-labels: [ess, serverless]
+      x-internal: true
       x-codegen-enabled: true
-      operationId: DeleteAssetCriticalityRecord
-      summary: Delete Criticality Record
+      operationId: InternalGetAssetCriticalityRecord
+      summary: Deprecated Internal Get Criticality Record
+      deprecated: true
       parameters:
         - name: id_value
           in: query
@@ -23,15 +25,14 @@ paths:
             $ref: './common.schema.yaml#/components/schemas/IdField'
           example: 'host.name'
           description: The field representing the ID.
-        - name: refresh
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [wait_for]
-          description: If 'wait_for' the request will wait for the index refresh.
       responses:
         '200':
           description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
         '400':
           description: Invalid request
+        '404':
+          description: Criticality record not found
