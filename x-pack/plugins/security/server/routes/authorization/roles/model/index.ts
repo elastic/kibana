@@ -6,8 +6,7 @@
  */
 
 export type { RolePayloadSchemaType } from './put_payload';
-export {
-  transformPutPayloadToElasticsearchRole,
-  getPutPayloadSchema,
-  getPostPayloadSchema,
-} from './put_payload';
+export { transformPutPayloadToElasticsearchRole, getPutPayloadSchema } from './put_payload';
+
+export { getPostPayloadSchema } from './post_payload';
+export type { RolesPayloadSchemaType } from './post_payload';
