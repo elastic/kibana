@@ -174,6 +174,12 @@ packages/core/execution-context/core-execution-context-server-mocks @elastic/kib
 packages/core/fatal-errors/core-fatal-errors-browser @elastic/kibana-core
 packages/core/fatal-errors/core-fatal-errors-browser-internal @elastic/kibana-core
 packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser-internal @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser-mocks @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server-internal @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server-mocks @elastic/kibana-core
 test/plugin_functional/plugins/core_history_block @elastic/kibana-core
 packages/core/http/core-http-browser @elastic/kibana-core
 packages/core/http/core-http-browser-internal @elastic/kibana-core
