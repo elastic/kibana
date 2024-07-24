@@ -13457,7 +13457,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+          ", \"columns\" | \"rows\">; cells: { column: number; row: number; }[]; relation?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -13633,7 +13633,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
+          ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -14212,10 +14212,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "savedSearch",
-              "path": "src/plugins/saved_search/public/plugin.ts"
-            },
-            {
               "plugin": "visualizations",
               "path": "src/plugins/visualizations/public/plugin.ts"
             },
@@ -14470,10 +14466,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/plugin.tsx"
-            },
-            {
-              "plugin": "discover",
-              "path": "src/plugins/discover/public/plugin.tsx"
             }
           ],
           "children": [
@@ -14864,6 +14856,10 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
+            },
+            {
+              "plugin": "investigateApp",
+              "path": "x-pack/plugins/observability_solution/investigate_app/public/widgets/embeddable_widget/register_embeddable_widget.tsx"
             },
             {
               "plugin": "dashboard",

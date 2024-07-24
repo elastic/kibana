@@ -18,8 +18,6 @@ export const ENTITY_EVENT_COMPONENT_TEMPLATE_V1 =
 
 // History constants
 export const ENTITY_HISTORY = 'history' as const;
-export const ENTITY_HISTORY_INDEX_TEMPLATE_V1 =
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_index_template` as const;
 export const ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_HISTORY}_base` as const;
 export const ENTITY_HISTORY_PREFIX_V1 =
@@ -29,8 +27,6 @@ export const ENTITY_HISTORY_INDEX_PREFIX_V1 =
 
 // Latest constants
 export const ENTITY_LATEST = 'latest' as const;
-export const ENTITY_LATEST_INDEX_TEMPLATE_V1 =
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_index_template` as const;
 export const ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1 =
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_base` as const;
 export const ENTITY_LATEST_PREFIX_V1 =
