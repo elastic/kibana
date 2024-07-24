@@ -898,6 +898,17 @@ describe('autocomplete', () => {
     });
   });
 
+  describe('values suggestions', () => {
+    testSuggestions('FROM a | WHERE tags == " "', [], ' ');
+    testSuggestions('FROM a | WHERE tags == "a"', [], undefined, 25);
+    testSuggestions('FROM a | EVAL tags == " "', [], ' ');
+    testSuggestions('FROM a | EVAL tags == "a"', [], undefined, 24);
+    testSuggestions('FROM a | STATS tags == " "', [], ' ');
+    testSuggestions('FROM a | STATS tags == "a"', [], undefined, 25);
+    testSuggestions('FROM a | GROK "a" "%{WORD:firstWord}"', [], undefined, 16);
+    testSuggestions('FROM a | DISSECT "a" "%{WORD:firstWord}"', [], undefined, 19);
+  });
+
   describe('callbacks', () => {
     it('should send the fields query without the last command', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
