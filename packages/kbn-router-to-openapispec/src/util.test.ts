@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { RouteMethod } from '@kbn/core-http-server';
 import { OpenAPIV3 } from 'openapi-types';
-import { buildGlobalTags, mergeResponseContent, prepareRoutes } from './util';
+import {
+  buildGlobalTags,
+  getXsrfHeaderForMethod,
+  mergeResponseContent,
+  prepareRoutes,
+} from './util';
 import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
@@ -183,5 +189,33 @@ describe('mergeResponseContent', () => {
         ['application/json+v2']: {},
       },
     });
+  });
+});
+
+describe('getXsrfHeaderForMethod', () => {
+  const headerParam = () => [
+    {
+      description: 'A required header to protect against CSRF attacks',
+      in: 'header',
+      name: 'kbn-xsrf',
+      required: true,
+      schema: {
+        example: 'true',
+        type: 'string',
+      },
+    },
+  ];
+  test.each([
+    { method: 'get', expected: [] },
+    { method: 'options', expected: [] },
+    { method: 'put', expected: headerParam() },
+    { method: 'post', expected: headerParam() },
+    { method: 'patch', expected: headerParam() },
+    { method: 'delete', expected: headerParam() },
+    // { method: 'head', expected: [] },
+    // { method: 'connect', expected: [] },
+    // { method: 'trace', expected: [] },
+  ])('$method', ({ method, expected }) => {
+    expect(getXsrfHeaderForMethod(method as RouteMethod)).toEqual(expected);
   });
 });
