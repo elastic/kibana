@@ -77,7 +77,6 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
                   onTextLangQueryChange={(nextQuery) => {
                     setIsPreviewOpen(true);
                     setEsqlQuery(nextQuery.esql);
-                    setSubmittedEsqlQuery(nextQuery.esql);
                   }}
                   onTextLangQuerySubmit={async (nextSubmittedQuery) => {
                     setSubmittedEsqlQuery(nextSubmittedQuery?.esql ?? '');
@@ -94,7 +93,6 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
                   isLoading={false}
                   disableSubmitAction
                   isDisabled={false}
-                  hideQueryHistory
                   hideTimeFilterInfo
                 />
               </EuiFlexItem>
