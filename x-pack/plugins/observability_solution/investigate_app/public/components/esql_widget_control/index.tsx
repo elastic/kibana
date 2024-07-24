@@ -35,8 +35,6 @@ export function EsqlWidgetControl({
   timeRange,
   query,
 }: EsqlWidgetControlProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const [esqlQuery, setEsqlQuery] = useState('FROM *');
 
   const [submittedEsqlQuery, setSubmittedEsqlQuery] = useState(esqlQuery);
@@ -88,11 +86,6 @@ export function EsqlWidgetControl({
           }}
           errors={undefined}
           warning={undefined}
-          expandCodeEditor={(expanded: boolean) => {
-            setIsExpanded(() => expanded);
-          }}
-          isCodeEditorExpanded={isExpanded}
-          hideMinimizeButton={false}
           editorIsInline
           hideRunQueryText
           isLoading={false}
