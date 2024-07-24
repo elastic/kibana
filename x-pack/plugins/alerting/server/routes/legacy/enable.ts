@@ -41,7 +41,7 @@ export const enableAlertRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         try {
-          await rulesClient.enable({ id });
+          await rulesClient.enableRule({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
