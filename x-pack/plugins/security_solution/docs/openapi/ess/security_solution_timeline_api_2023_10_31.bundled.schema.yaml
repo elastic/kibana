@@ -961,19 +961,28 @@ components:
       type: object
       properties:
         created:
+          nullable: true
           type: number
         createdBy:
+          nullable: true
           type: string
         eventId:
+          nullable: true
           type: string
         note:
+          nullable: true
           type: string
         timelineId:
+          nullable: true
           type: string
         updated:
+          nullable: true
           type: number
         updatedBy:
+          nullable: true
           type: string
+      required:
+        - timelineId
     ColumnHeaderResult:
       type: object
       properties:
@@ -1070,10 +1079,13 @@ components:
       type: object
       properties:
         favoriteDate:
+          nullable: true
           type: number
         fullName:
+          nullable: true
           type: string
         userName:
+          nullable: true
           type: string
     FilterTimelineResult:
       type: object
@@ -1179,8 +1191,10 @@ components:
       type: object
       properties:
         created:
+          nullable: true
           type: number
         createdBy:
+          nullable: true
           type: string
         eventId:
           type: string
@@ -1189,11 +1203,18 @@ components:
         timelineId:
           type: string
         updated:
+          nullable: true
           type: number
         updatedBy:
+          nullable: true
           type: string
         version:
           type: string
+      required:
+        - eventId
+        - pinnedEventId
+        - timelineId
+        - version
     QueryMatchResult:
       type: object
       properties:
@@ -1259,17 +1280,23 @@ components:
       properties:
         columns:
           $ref: '#/components/schemas/ColumnHeaderResult'
+          nullable: true
         created:
+          nullable: true
           type: number
         createdBy:
+          nullable: true
           type: string
         dataProviders:
           items:
             $ref: '#/components/schemas/DataProviderResult'
+          nullable: true
           type: array
         dataViewId:
+          nullable: true
           type: string
         dateRange:
+          nullable: true
           type: object
           properties:
             end:
@@ -1281,8 +1308,10 @@ components:
                 - type: string
                 - type: number
         description:
+          nullable: true
           type: string
         eqlOptions:
+          nullable: true
           type: object
           properties:
             eventCategoryField:
@@ -1292,48 +1321,67 @@ components:
             timestampField:
               type: string
         eventType:
+          nullable: true
           type: string
         excludedRowRendererIds:
           items:
             $ref: '#/components/schemas/RowRendererId'
+          nullable: true
           type: array
         favorite:
           items:
             $ref: '#/components/schemas/FavoriteTimelineResult'
+          nullable: true
           type: array
         filters:
           items:
             $ref: '#/components/schemas/FilterTimelineResult'
+          nullable: true
           type: array
         indexNames:
           items:
             type: string
+          nullable: true
           type: array
         kqlMode:
+          nullable: true
           type: string
         kqlQuery:
           $ref: '#/components/schemas/SerializedFilterQueryResult'
+          nullable: true
         savedQueryId:
+          nullable: true
+          type: string
+        savedSearchId:
+          nullable: true
           type: string
         sort:
           $ref: '#/components/schemas/Sort'
+          nullable: true
         status:
           enum:
             - active
             - draft
             - immutable
+          nullable: true
           type: string
         templateTimelineId:
+          nullable: true
           type: string
         templateTimelineVersion:
+          nullable: true
           type: number
         timelineType:
           $ref: '#/components/schemas/TimelineType'
+          nullable: true
         title:
+          nullable: true
           type: string
         updated:
+          nullable: true
           type: number
         updatedBy:
+          nullable: true
           type: string
     SerializedFilterQueryResult:
       type: object
@@ -1354,21 +1402,22 @@ components:
       type: object
       properties:
         columnId:
+          nullable: true
+          type: string
+        columnType:
+          nullable: true
           type: string
         sortDirection:
+          nullable: true
           type: string
     SortFieldTimeline:
       description: The field to sort the timelines by.
-      type: object
-      properties:
-        created:
-          type: string
-        description:
-          type: string
-        title:
-          type: string
-        updated:
-          type: string
+      enum:
+        - title
+        - description
+        - updated
+        - created
+      type: string
     TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
