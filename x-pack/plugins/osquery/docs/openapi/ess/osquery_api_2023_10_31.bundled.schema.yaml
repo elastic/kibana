@@ -70,16 +70,21 @@ paths:
     get:
       operationId: OsqueryGetLiveQueryResults
       parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+        - in: path
+          name: actionId
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
         - in: query
           name: query
           required: true
           schema:
             $ref: '#/components/schemas/GetLiveQueryResultsRequestQuery'
-        - in: path
-          name: query
-          required: true
-          schema:
-            $ref: '#/components/schemas/GetLiveQueryResultsRequestParams'
       responses:
         '200':
           content:
@@ -126,10 +131,10 @@ paths:
       operationId: OsqueryDeletePacks
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            $ref: '#/components/schemas/DeletePacksRequestQuery'
+            $ref: '#/components/schemas/PackId'
       responses:
         '200':
           content:
@@ -142,10 +147,10 @@ paths:
       operationId: OsqueryGetPacksDetails
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            $ref: '#/components/schemas/ReadPacksRequestQuery'
+            $ref: '#/components/schemas/PackId'
       responses:
         '200':
           content:
@@ -158,10 +163,10 @@ paths:
       operationId: OsqueryUpdatePacks
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            $ref: '#/components/schemas/UpdatePacksRequestParams'
+            $ref: '#/components/schemas/PackId'
       requestBody:
         content:
           application/json:
@@ -214,10 +219,10 @@ paths:
       operationId: OsqueryDeleteSavedQuery
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            $ref: '#/components/schemas/DeleteSavedQueryRequestQuery'
+            $ref: '#/components/schemas/SavedQueryId'
       responses:
         '200':
           content:
@@ -230,10 +235,10 @@ paths:
       operationId: OsqueryGetSavedQueryDetails
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            $ref: '#/components/schemas/ReadSavedQueryRequestQuery'
+            $ref: '#/components/schemas/SavedQueryId'
       responses:
         '200':
           content:
@@ -246,10 +251,10 @@ paths:
       operationId: OsqueryUpdateSavedQuery
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            $ref: '#/components/schemas/UpdateSavedQueryRequestParams'
+            $ref: '#/components/schemas/SavedQueryId'
       requestBody:
         content:
           application/json:
@@ -368,16 +373,6 @@ components:
     DefaultSuccessResponse:
       type: object
       properties: {}
-    DeletePacksRequestQuery:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/PackId'
-    DeleteSavedQueryRequestQuery:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/SavedQueryId'
     Description:
       type: string
     DescriptionOrUndefined:
@@ -441,13 +436,6 @@ components:
           $ref: '#/components/schemas/SortOrUndefined'
         sortOrder:
           $ref: '#/components/schemas/SortOrderOrUndefined'
-    GetLiveQueryResultsRequestParams:
-      type: object
-      properties:
-        actionId:
-          $ref: '#/components/schemas/Id'
-        id:
-          $ref: '#/components/schemas/Id'
     GetLiveQueryResultsRequestQuery:
       type: object
       properties:
@@ -524,16 +512,6 @@ components:
     QueryOrUndefined:
       $ref: '#/components/schemas/Query'
       nullable: true
-    ReadPacksRequestQuery:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/PackId'
-    ReadSavedQueryRequestQuery:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/SavedQueryId'
     Removed:
       type: boolean
     RemovedOrUndefined:
@@ -578,11 +556,6 @@ components:
           $ref: '#/components/schemas/ObjectQueries'
         shards:
           $ref: '#/components/schemas/Shards'
-    UpdatePacksRequestParams:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/PackId'
     UpdateSavedQueryRequestBody:
       type: object
       properties:
@@ -604,11 +577,6 @@ components:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
-    UpdateSavedQueryRequestParams:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/SavedQueryId'
     Version:
       type: string
     VersionOrUndefined:
