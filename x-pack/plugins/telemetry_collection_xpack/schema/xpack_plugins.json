@@ -7100,16 +7100,34 @@
     "cloud": {
       "properties": {
         "isCloudEnabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deployment running in Elastic Cloud (ESS or Serverless)?"
+          }
         },
         "trialEndDate": {
-          "type": "date"
+          "type": "date",
+          "_meta": {
+            "description": "End of the trial period"
+          }
         },
         "inTrial": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the organization during the trial period?"
+          }
         },
         "isElasticStaffOwned": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deploymend owned by an Elastician"
+          }
+        },
+        "organizationId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Elastic Cloud Organization ID that owns the deployment/project"
+          }
         },
         "deploymentId": {
           "type": "keyword",
@@ -7127,6 +7145,12 @@
           "type": "keyword",
           "_meta": {
             "description": "The Serverless Project type"
+          }
+        },
+        "orchestratorTarget": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Orchestrator Target where it is deployed (canary/non-canary)"
           }
         }
       }
