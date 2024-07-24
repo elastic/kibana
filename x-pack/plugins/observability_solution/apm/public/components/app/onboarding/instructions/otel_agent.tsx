@@ -179,6 +179,7 @@ export function OpenTelemetryInstructions({
       setting: 'OTEL_EXPORTER_OTLP_HEADERS',
       value: authHeaderValue,
       apiKey: apiKeyDetails?.apiKey,
+      notes: 'Python OpenTelemetry client requires header content to be url encoded, see [documentation]({documentationLink}) for details', 
     },
     {
       setting: 'OTEL_METRICS_EXPORTER',
