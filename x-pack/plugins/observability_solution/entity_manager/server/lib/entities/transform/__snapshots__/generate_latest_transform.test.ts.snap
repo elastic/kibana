@@ -48,15 +48,37 @@ Object {
         },
       },
       "entity.identity.event.category": Object {
-        "terms": Object {
-          "field": "event.category",
-          "size": 1,
+        "aggs": Object {
+          "top_metric": Object {
+            "top_metrics": Object {
+              "metrics": Object {
+                "field": "event.category",
+              },
+              "sort": "_score",
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "event.category",
+          },
         },
       },
       "entity.identity.log.logger": Object {
-        "terms": Object {
-          "field": "log.logger",
-          "size": 1,
+        "aggs": Object {
+          "top_metric": Object {
+            "top_metrics": Object {
+              "metrics": Object {
+                "field": "log.logger",
+              },
+              "sort": "_score",
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "log.logger",
+          },
         },
       },
       "entity.lastSeenTimestamp": Object {

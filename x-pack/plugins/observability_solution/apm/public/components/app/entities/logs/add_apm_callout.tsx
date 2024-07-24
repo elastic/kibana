@@ -20,11 +20,21 @@ import {
 } from '@elastic/eui';
 import { apmLight } from '@kbn/shared-svg';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useHistory } from 'react-router-dom';
+import { useKibana } from '../../../../context/kibana_context/use_kibana';
+import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 
 export function AddAPMCallOut() {
-  const { core } = useApmPluginContext();
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const history = useHistory();
+
+  function handleClick() {
+    services.telemetry.reportEntityInventoryAddData({
+      view: 'add_apm_cta',
+    });
+    history.push('/tutorial');
+  }
 
   return (
     <EuiPanel color="subdued" hasShadow={false}>
@@ -68,10 +78,7 @@ export function AddAPMCallOut() {
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <div>
-            <EuiButton
-              data-test-subj="apmAddApmCallOutButton"
-              href={core.http.basePath.prepend('/app/apm/tutorial')}
-            >
+            <EuiButton data-test-subj="apmAddApmCallOutButton" onClick={handleClick}>
               {i18n.translate('xpack.apm.logsServiceOverview.callout.addApm', {
                 defaultMessage: 'Add APM',
               })}
