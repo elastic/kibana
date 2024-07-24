@@ -74,7 +74,7 @@ export const significantItemsHandlerFactory =
       ) ?? [])
     );
 
-    let remainingFieldCandidates: string[];
+    let remainingKeywordFieldCandidates: string[];
     let remainingTextFieldCandidates: string[];
     let loadingStepSizePValues: number;
 
@@ -85,12 +85,12 @@ export const significantItemsHandlerFactory =
       loadingStepSizePValues = LOADED_FIELD_CANDIDATES;
     }
 
-    if (requestBody.overrides?.remainingFieldCandidates) {
-      keywordFieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
-      remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
+    if (requestBody.overrides?.remainingKeywordFieldCandidates) {
+      keywordFieldCandidates.push(...requestBody.overrides?.remainingKeywordFieldCandidates);
+      remainingKeywordFieldCandidates = requestBody.overrides?.remainingKeywordFieldCandidates;
       keywordFieldCandidatesCount = keywordFieldCandidates.length;
     } else {
-      remainingFieldCandidates = keywordFieldCandidates;
+      remainingKeywordFieldCandidates = keywordFieldCandidates;
     }
 
     if (requestBody.overrides?.remainingTextFieldCandidates) {
@@ -135,7 +135,9 @@ export const significantItemsHandlerFactory =
           return;
         }
 
-        remainingFieldCandidates = remainingFieldCandidates.filter((d) => !fieldNames.includes(d));
+        remainingKeywordFieldCandidates = remainingKeywordFieldCandidates.filter(
+          (d) => !fieldNames.includes(d)
+        );
 
         if (pValues.length > 0) {
           significantTerms.push(...pValues);
@@ -197,7 +199,7 @@ export const significantItemsHandlerFactory =
               },
             }
           ),
-          remainingFieldCandidates,
+          remainingKeywordFieldCandidates,
           remainingTextFieldCandidates,
         })
       );

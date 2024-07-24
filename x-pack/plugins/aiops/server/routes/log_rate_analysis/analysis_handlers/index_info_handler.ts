@@ -41,7 +41,7 @@ export const indexInfoHandlerFactory =
     let zeroDocsFallback = false;
 
     if (
-      !requestBody.overrides?.remainingFieldCandidates &&
+      !requestBody.overrides?.remainingKeywordFieldCandidates &&
       !requestBody.overrides?.remainingTextFieldCandidates
     ) {
       logDebugMessage('Fetch index information.');

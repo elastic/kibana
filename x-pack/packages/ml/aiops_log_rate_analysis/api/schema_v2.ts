@@ -54,7 +54,7 @@ export const aiopsLogRateAnalysisSchemaV2 = schema.object({
   overrides: schema.maybe(
     schema.object({
       loaded: schema.maybe(schema.number()),
-      remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
+      remainingKeywordFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
       remainingTextFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
       significantItems: schema.maybe(schema.arrayOf(significantItem)),
       regroupOnly: schema.maybe(schema.boolean()),

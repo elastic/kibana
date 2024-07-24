@@ -27,7 +27,7 @@ export interface StreamState {
   errors: string[];
   loaded: number;
   loadingState: string;
-  remainingFieldCandidates?: string[];
+  remainingKeywordFieldCandidates?: string[];
   remainingTextFieldCandidates?: string[];
   groupsMissing?: boolean;
   zeroDocsFallback: boolean;
@@ -98,7 +98,7 @@ export const logRateAnalysisResultsSlice = createSlice({
         ccsWarning: boolean;
         loaded: number;
         loadingState: string;
-        remainingFieldCandidates?: string[];
+        remainingKeywordFieldCandidates?: string[];
         remainingTextFieldCandidates?: string[];
         groupsMissing?: boolean;
       }>

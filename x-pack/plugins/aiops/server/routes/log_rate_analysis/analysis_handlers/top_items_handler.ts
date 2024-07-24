@@ -89,19 +89,19 @@ export const topItemsHandlerFactory =
 
     const fieldsToSample = new Set<string>();
 
-    let remainingFieldCandidates: string[];
+    let remainingKeywordFieldCandidates: string[];
     let loadingStepSizeTopTerms = PROGRESS_STEP_P_VALUES;
 
-    if (requestBody.overrides?.remainingFieldCandidates) {
-      keywordFieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
-      remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
+    if (requestBody.overrides?.remainingKeywordFieldCandidates) {
+      keywordFieldCandidates.push(...requestBody.overrides?.remainingKeywordFieldCandidates);
+      remainingKeywordFieldCandidates = requestBody.overrides?.remainingKeywordFieldCandidates;
       keywordFieldCandidatesCount = keywordFieldCandidates.length;
       loadingStepSizeTopTerms =
         LOADED_FIELD_CANDIDATES +
         PROGRESS_STEP_P_VALUES -
         (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
     } else {
-      remainingFieldCandidates = keywordFieldCandidates;
+      remainingKeywordFieldCandidates = keywordFieldCandidates;
     }
 
     logDebugMessage('Fetch p-values.');
@@ -129,7 +129,9 @@ export const topItemsHandlerFactory =
         return;
       }
 
-      remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
+      remainingKeywordFieldCandidates = remainingKeywordFieldCandidates.filter(
+        (d) => d !== fieldCandidate
+      );
 
       if (fetchedTopTerms.length > 0) {
         fetchedTopTerms.forEach((d) => {
@@ -154,7 +156,7 @@ export const topItemsHandlerFactory =
               },
             }
           ),
-          remainingFieldCandidates,
+          remainingKeywordFieldCandidates,
         })
       );
     }, MAX_CONCURRENT_QUERIES);
