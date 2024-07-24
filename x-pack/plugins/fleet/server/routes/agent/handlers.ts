@@ -20,6 +20,7 @@ import type {
   GetAgentUploadsResponse,
   PostAgentReassignResponse,
   PostRetrieveAgentsByActionsResponse,
+  Agent,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -45,6 +46,12 @@ import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics'
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/agents/namespace';
 
+function verifyNamespace(agent: Agent, namespace?: string) {
+  if (!isAgentInNamespace(agent, namespace)) {
+    throw new FleetNotFoundError(`${agent.id} not found in namespace`);
+  }
+}
+
 export const getAgentHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
   TypeOf<typeof GetOneAgentRequestSchema.query>
@@ -54,10 +61,7 @@ export const getAgentHandler: FleetRequestHandler<
     const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
 
     let agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
-
-    if (!isAgentInNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace())) {
-      throw new FleetNotFoundError(`${agent.id} not found in namespace`);
-    }
+    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
@@ -87,9 +91,7 @@ export const deleteAgentHandler: FleetRequestHandler<
 
   try {
     const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
-    if (!isAgentInNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace())) {
-      throw new FleetNotFoundError(`${agent.id} not found in namespace`);
-    }
+    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
 
     await AgentService.deleteAgent(esClient, request.params.agentId);
 
@@ -129,9 +131,7 @@ export const updateAgentHandler: FleetRequestHandler<
 
   try {
     const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
-    if (!isAgentInNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace())) {
-      throw new FleetNotFoundError(`${agent.id} not found in namespace`);
-    }
+    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
 
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
