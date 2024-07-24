@@ -26,6 +26,7 @@ export const getConnectorRoute = (
       options: {
         access: 'public',
         summary: `Get connector information`,
+        tags: ['oas-tag:connectors'],
         // description:
         //   'You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },

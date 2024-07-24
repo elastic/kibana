@@ -30,8 +30,8 @@ export const deleteActionRoute = (
       options: {
         access: 'public',
         summary: `Delete a connector`,
-        description:
-          'Deprecated in 7.13.0. Instead, use the delete connector API with the `api/actions/connector/<id>` path. WARNING: When you delete a connector, it cannot be recovered.',
+        description: 'WARNING: When you delete a connector, it cannot be recovered.',
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         params: paramSchema,

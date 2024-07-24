@@ -47,6 +47,7 @@ export const executeActionRoute = (
         description:
           'You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.',
         // You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         body: bodySchema,

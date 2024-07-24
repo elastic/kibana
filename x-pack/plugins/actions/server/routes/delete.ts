@@ -30,6 +30,7 @@ export const deleteActionRoute = (
         summary: `Delete a connector`,
         description: 'WARNING: When you delete a connector, it cannot be recovered.',
         // You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         params: paramSchema,

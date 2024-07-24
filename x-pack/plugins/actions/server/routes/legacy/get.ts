@@ -30,8 +30,8 @@ export const getActionRoute = (
       options: {
         access: 'public',
         summary: `Get connector information`,
-        description:
-          'Deprecated in 7.13.0. Instead, use the get connector API with the `api/actions/connector/<id>` path.',
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         params: paramSchema,

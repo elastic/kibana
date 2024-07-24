@@ -62,6 +62,7 @@ export const createActionRoute = (
       options: {
         access: 'public',
         summary: 'Create a connector',
+        tags: ['oas-tag:connectors'],
         // description:
         //   'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },

@@ -36,8 +36,8 @@ export const executeActionRoute = (
       options: {
         access: 'public',
         summary: `Run a connector`,
-        description:
-          'Deprecated in 7.13.0. Instead, use the run connector API with the `api/actions/connector/<id>/_execute` path.',
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         body: bodySchema,

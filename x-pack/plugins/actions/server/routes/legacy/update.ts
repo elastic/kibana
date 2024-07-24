@@ -36,8 +36,8 @@ export const updateActionRoute = (
       options: {
         access: 'public',
         summary: `Update a connector`,
-        description:
-          'Deprecated in 7.13.0. Instead, use the update connector API with the `api/actions/connector/<id>` path.',
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         body: bodySchema,

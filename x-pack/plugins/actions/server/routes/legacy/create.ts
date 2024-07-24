@@ -36,8 +36,8 @@ export const createActionRoute = (
       options: {
         access: 'public',
         summary: `Create a connector`,
-        description:
-          'Deprecated in 7.13.0. Instead, use the create connector API with the `/api/actions/connector` path.',
+        tags: ['oas-tag:connectors'],
+        deprecated: true,
       },
       validate: {
         body: bodySchema,
