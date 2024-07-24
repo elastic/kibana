@@ -129,6 +129,13 @@ export const eqlExecutor = async ({
 
       const { events, sequences } = response.hits;
 
+      console.error('SEQUENCES LENGTH', sequences?.length);
+
+      sequences?.forEach((sequence) => {
+        console.error('sequence length', sequence.events?.length);
+        console.error('sequence join keys length', sequence.join_keys?.length);
+      });
+
       if (events) {
         if (isAlertSuppressionActive) {
           await bulkCreateSuppressedAlertsInMemory({

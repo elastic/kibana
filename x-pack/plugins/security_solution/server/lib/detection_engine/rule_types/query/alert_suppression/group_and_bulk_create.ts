@@ -250,6 +250,8 @@ export const groupAndBulkCreate = async ({
         terms: Object.entries(bucket.key).map(([key, value]) => ({ field: key, value })),
       }));
 
+      console.error('SUPPRESSION BUCKETS', JSON.stringify(suppressionBuckets, null, 2));
+
       const wrappedAlerts = wrapSuppressedAlerts({
         suppressionBuckets,
         spaceId,

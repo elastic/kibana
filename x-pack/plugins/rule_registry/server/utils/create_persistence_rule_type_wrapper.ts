@@ -471,9 +471,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }, {});
 
                 // filter out alerts that were already suppressed
-                // alert was suppressed if its suppression ends is older than suppression end of existing alert
-                // if existing alert was created earlier during the same rule execution - then alerts can be counted as not suppressed yet
-                // as they are processed for the first against this existing alert
+                // alert was suppressed if its suppression ends is older
+                // than suppression end of existing alert
+                // if existing alert was created earlier during the same
+                // rule execution - then alerts can be counted as not suppressed yet
+                // as they are processed for the first time against this existing alert
                 const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
