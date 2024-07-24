@@ -225,21 +225,20 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('event.dataset', 'system.cpu');
         expect(resp.hits.hits[0]._source).not.property('container.cpu');
 
-        expect(resp.hits.hits[0]._source['kibana.alert.group'][0]).eql({
+        const alertGroups = (resp.hits.hits[0]._source as any)?.['kibana.alert.group'];
+        expect(alertGroups[0]).eql({
           field: 'host.name',
           value: 'host-0',
         });
-        expect(resp.hits.hits[0]._source['kibana.alert.group'][1]).eql({
+        expect(alertGroups[1]).eql({
           field: 'container.id',
           value: 'container-0',
         });
-        expect(resp.hits.hits[0]._source['kibana.alert.group'][2]).eql({
+        expect(alertGroups[2]).eql({
           field: 'event.dataset',
           value: 'system.cpu',
         });
-        expect(resp.hits.hits[0]._source['kibana.alert.group'][3].value).contain(
-          'kbn-data-forge-fake_hosts.fake_hosts'
-        );
+        expect(alertGroups[3].value).contain('kbn-data-forge-fake_hosts.fake_hosts');
         expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
