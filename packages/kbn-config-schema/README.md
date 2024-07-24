@@ -635,7 +635,7 @@ __Notes:__
 ## Extending object schemas
 
 It is possible to re-use / extend an existing `object` schema using the `extends` API.
-The API returns a new instance of `schema.object`, with a merge of tha additional properties
+The API returns a new instance of `schema.object`, with a merge of the additional properties
 on top of the source object's existing props.
 
 Note that `extends` only supports extending first-level properties. It's currently not possible to perform deep/nested extensions with a single call.
