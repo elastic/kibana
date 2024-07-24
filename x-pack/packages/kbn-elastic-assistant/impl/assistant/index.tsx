@@ -239,6 +239,11 @@ const AssistantComponent: React.FC<Props> = ({
   useEffect(() => {
     if (areConnectorsFetched && conversationsLoaded && Object.keys(conversations).length > 0) {
       setCurrentConversation((prev) => {
+        console.log('setCurrentConversation', {
+          currentConversationId,
+          conversations,
+          isAssistantEnabled,
+        });
         const nextConversation =
           (currentConversationId && conversations[currentConversationId]) ||
           (isAssistantEnabled &&
@@ -246,6 +251,7 @@ const AssistantComponent: React.FC<Props> = ({
               find(conversations, ['title', getLastConversationId(conversationTitle)]))) ||
           find(conversations, ['title', getLastConversationId(WELCOME_CONVERSATION_TITLE)]);
 
+        console.log('nextConversation', nextConversation);
         if (deepEqual(prev, nextConversation)) return prev;
 
         const conversationToReturn =
@@ -255,6 +261,7 @@ const AssistantComponent: React.FC<Props> = ({
             ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
           getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
+        console.log('conversationToReturn', conversationToReturn);
 
         if (
           prev &&
@@ -271,6 +278,8 @@ const AssistantComponent: React.FC<Props> = ({
         }
         return conversationToReturn;
       });
+    } else {
+      console.log('not setCurrentConversation');
     }
   }, [
     areConnectorsFetched,
@@ -638,6 +647,7 @@ const AssistantComponent: React.FC<Props> = ({
     ['SET_DEFAULT_CONNECTOR'],
     {
       mutationFn: async (payload) => {
+        console.log('mutationFn', allSystemPrompts);
         const apiConfig = getGenAiConfig(defaultConnector);
         return setApiConfig({
           conversation: payload,
@@ -647,6 +657,7 @@ const AssistantComponent: React.FC<Props> = ({
             actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
             provider: apiConfig?.apiProvider,
             model: apiConfig?.defaultModel,
+            defaultSystemPromptId: allSystemPrompts.find((sp) => sp.isNewConversationDefault)?.id,
           },
         });
       },
@@ -665,14 +676,15 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      if (areConnectorsFetched && currentConversation?.id === '') {
+      if (areConnectorsFetched && currentConversation?.id === '' && !isLoadingPrompts) {
+        console.log('useEffect to call mutate', { isLoadingPrompts, allSystemPrompts });
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);
         }
       }
     })();
-  }, [areConnectorsFetched, currentConversation, mutateAsync]);
+  }, [areConnectorsFetched, currentConversation, isLoadingPrompts, mutateAsync]);
 
   const handleCreateConversation = useCallback(async () => {
     const newChatExists = find(conversations, ['title', NEW_CHAT]);

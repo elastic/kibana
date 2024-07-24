@@ -47,7 +47,7 @@ export const useFetchPrompts = (payload?: UseFetchPromptsParams) => {
     API_VERSIONS.public.v1,
   ];
 
-  return useQuery<FindPromptsResponse, unknown, FindPromptsResponse>(
+  const heyhey = useQuery<FindPromptsResponse, unknown, FindPromptsResponse>(
     CACHING_KEYS,
     async () =>
       http.fetch(ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND, {
@@ -73,6 +73,8 @@ export const useFetchPrompts = (payload?: UseFetchPromptsParams) => {
       enabled: isAssistantEnabled,
     }
   );
+  console.log('heyhey', heyhey);
+  return heyhey;
 };
 
 export const getPrompts = async ({
