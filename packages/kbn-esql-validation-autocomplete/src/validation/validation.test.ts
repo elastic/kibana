@@ -6260,45 +6260,48 @@ describe('validation logic', () => {
       });
 
       describe('st_contains', () => {
-        testErrorsAndWarnings(
-          'row var = st_contains(cartesianPointField, cartesianPointField)',
-          []
-        );
-        testErrorsAndWarnings('row st_contains(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row var = st_contains(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row st_contains(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = st_contains(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_contains(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row st_contains(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_contains(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_contains(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row st_contains(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_contains(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
@@ -6313,32 +6316,42 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = st_contains(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
-        testErrorsAndWarnings('row var = st_contains(geoPointField, geoPointField)', []);
-        testErrorsAndWarnings('row st_contains(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row var = st_contains(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row st_contains(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_contains(to_geopoint(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings(
           'row var = st_contains(geoPointField, to_geoshape("POINT (30 10)"))',
-          []
+          ['Unknown column [geoPointField]']
         );
-        testErrorsAndWarnings('row st_contains(geoPointField, to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row st_contains(geoPointField, to_geoshape("POINT (30 10)"))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_contains(to_geopoint(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings(
           'row var = st_contains(to_geoshape("POINT (30 10)"), geoPointField)',
-          []
+          ['Unknown column [geoPointField]']
         );
-        testErrorsAndWarnings('row st_contains(to_geoshape("POINT (30 10)"), geoPointField)', []);
+        testErrorsAndWarnings('row st_contains(to_geoshape("POINT (30 10)"), geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_contains(to_geoshape(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings(
@@ -6353,7 +6366,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = st_contains(to_geoshape(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings('row var = st_contains(true, true)', [
@@ -6485,45 +6498,48 @@ describe('validation logic', () => {
       });
 
       describe('st_disjoint', () => {
-        testErrorsAndWarnings(
-          'row var = st_disjoint(cartesianPointField, cartesianPointField)',
-          []
-        );
-        testErrorsAndWarnings('row st_disjoint(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row var = st_disjoint(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row st_disjoint(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = st_disjoint(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_disjoint(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row st_disjoint(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_disjoint(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_disjoint(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row st_disjoint(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_disjoint(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
@@ -6538,32 +6554,42 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = st_disjoint(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
-        testErrorsAndWarnings('row var = st_disjoint(geoPointField, geoPointField)', []);
-        testErrorsAndWarnings('row st_disjoint(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row var = st_disjoint(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row st_disjoint(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_disjoint(to_geopoint(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings(
           'row var = st_disjoint(geoPointField, to_geoshape("POINT (30 10)"))',
-          []
+          ['Unknown column [geoPointField]']
         );
-        testErrorsAndWarnings('row st_disjoint(geoPointField, to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row st_disjoint(geoPointField, to_geoshape("POINT (30 10)"))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_disjoint(to_geopoint(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings(
           'row var = st_disjoint(to_geoshape("POINT (30 10)"), geoPointField)',
-          []
+          ['Unknown column [geoPointField]']
         );
-        testErrorsAndWarnings('row st_disjoint(to_geoshape("POINT (30 10)"), geoPointField)', []);
+        testErrorsAndWarnings('row st_disjoint(to_geoshape("POINT (30 10)"), geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_disjoint(to_geoshape(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings(
@@ -6578,7 +6604,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = st_disjoint(to_geoshape(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings('row var = st_disjoint(true, true)', [
@@ -6710,22 +6736,31 @@ describe('validation logic', () => {
       });
 
       describe('st_distance', () => {
-        testErrorsAndWarnings(
-          'row var = st_distance(cartesianPointField, cartesianPointField)',
-          []
-        );
-        testErrorsAndWarnings('row st_distance(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row var = st_distance(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row st_distance(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
-        testErrorsAndWarnings('row var = st_distance(geoPointField, geoPointField)', []);
-        testErrorsAndWarnings('row st_distance(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row var = st_distance(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row st_distance(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings('row var = st_distance(true, true)', [
@@ -6779,45 +6814,48 @@ describe('validation logic', () => {
       });
 
       describe('st_intersects', () => {
-        testErrorsAndWarnings(
-          'row var = st_intersects(cartesianPointField, cartesianPointField)',
-          []
-        );
-        testErrorsAndWarnings('row st_intersects(cartesianPointField, cartesianPointField)', []);
+        testErrorsAndWarnings('row var = st_intersects(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
+        testErrorsAndWarnings('row st_intersects(cartesianPointField, cartesianPointField)', [
+          'Unknown column [cartesianPointField]',
+          'Unknown column [cartesianPointField]',
+        ]);
 
         testErrorsAndWarnings(
           'row var = st_intersects(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_intersects(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row st_intersects(cartesianPointField, to_cartesianshape("POINT (30 10)"))',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_intersects(to_cartesianpoint(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_intersects(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row st_intersects(to_cartesianshape("POINT (30 10)"), cartesianPointField)',
-          []
+          ['Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
           'row var = st_intersects(to_cartesianshape(cartesianPointField), to_cartesianpoint(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
         testErrorsAndWarnings(
@@ -6832,32 +6870,42 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = st_intersects(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
-          []
+          ['Unknown column [cartesianPointField]', 'Unknown column [cartesianPointField]']
         );
 
-        testErrorsAndWarnings('row var = st_intersects(geoPointField, geoPointField)', []);
-        testErrorsAndWarnings('row st_intersects(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('row var = st_intersects(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
+        testErrorsAndWarnings('row st_intersects(geoPointField, geoPointField)', [
+          'Unknown column [geoPointField]',
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_intersects(to_geopoint(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings(
           'row var = st_intersects(geoPointField, to_geoshape("POINT (30 10)"))',
-          []
+          ['Unknown column [geoPointField]']
         );
-        testErrorsAndWarnings('row st_intersects(geoPointField, to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row st_intersects(geoPointField, to_geoshape("POINT (30 10)"))', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_intersects(to_geopoint(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
         testErrorsAndWarnings(
           'row var = st_intersects(to_geoshape("POINT (30 10)"), geoPointField)',
-          []
+          ['Unknown column [geoPointField]']
         );
-        testErrorsAndWarnings('row st_intersects(to_geoshape("POINT (30 10)"), geoPointField)', []);
+        testErrorsAndWarnings('row st_intersects(to_geoshape("POINT (30 10)"), geoPointField)', [
+          'Unknown column [geoPointField]',
+        ]);
         testErrorsAndWarnings(
           'row var = st_intersects(to_geoshape(geoPointField), to_geopoint(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings(
@@ -6872,7 +6920,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'row var = st_intersects(to_geoshape(geoPointField), to_geoshape(geoPointField))',
-          []
+          ['Unknown column [geoPointField]', 'Unknown column [geoPointField]']
         );
 
         testErrorsAndWarnings('row var = st_intersects(true, true)', [
