@@ -79,7 +79,7 @@ export const VIEW_YOUR_MODELS_LINK = i18n.translate(
 export const ELSER_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.addEmptyPrompt.elserDescription',
   {
-    defaultMessage: "ELSER is Elastic's sparse vector NLP model for English semantic search.",
+    defaultMessage: "ELSER is Elastic's sparse vector NLP model for semantic search in English.",
   }
 );
 
