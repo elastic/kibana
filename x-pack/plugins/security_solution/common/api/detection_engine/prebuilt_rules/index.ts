@@ -21,3 +21,5 @@ export * from './model/diff/rule_diff/rule_diff';
 export * from './model/diff/three_way_diff/three_way_diff_outcome';
 export * from './model/diff/three_way_diff/three_way_diff';
 export * from './model/diff/three_way_diff/three_way_diff_conflict';
+export * from './model/diff/three_way_diff/three_way_merge_outcome';
+

@@ -8,6 +8,7 @@
 import type { ThreeVersionsOf } from '../../../../../../../../common/api/detection_engine';
 import {
   ThreeWayDiffOutcome,
+  ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine';
@@ -28,6 +29,7 @@ describe('multiLineStringDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
         conflict: ThreeWayDiffConflict.NONE,
+        merge_outcome: ThreeWayMergeOutcome.Current,
       })
     );
   });
@@ -46,6 +48,7 @@ describe('multiLineStringDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
         conflict: ThreeWayDiffConflict.NONE,
+        merge_outcome: ThreeWayMergeOutcome.Current,
       })
     );
   });
@@ -64,6 +67,7 @@ describe('multiLineStringDiffAlgorithm', () => {
         merged_version: mockVersions.target_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
         conflict: ThreeWayDiffConflict.NONE,
+        merge_outcome: ThreeWayMergeOutcome.Target,
       })
     );
   });
@@ -82,6 +86,7 @@ describe('multiLineStringDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
         conflict: ThreeWayDiffConflict.NONE,
+        merge_outcome: ThreeWayMergeOutcome.Current,
       })
     );
   });
@@ -103,6 +108,7 @@ describe('multiLineStringDiffAlgorithm', () => {
           merged_version: expectedMergedVersion,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
           conflict: ThreeWayDiffConflict.SOLVABLE,
+          merge_outcome: ThreeWayMergeOutcome.Merged,
         })
       );
     });
@@ -121,6 +127,7 @@ describe('multiLineStringDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
           conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+          merge_outcome: ThreeWayMergeOutcome.Current,
         })
       );
     });
@@ -141,7 +148,8 @@ describe('multiLineStringDiffAlgorithm', () => {
           has_base_version: false,
           base_version: undefined,
           merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+          diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
           conflict: ThreeWayDiffConflict.NONE,
         })
       );
@@ -161,7 +169,8 @@ describe('multiLineStringDiffAlgorithm', () => {
           has_base_version: false,
           base_version: undefined,
           merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Target,
           conflict: ThreeWayDiffConflict.SOLVABLE,
         })
       );

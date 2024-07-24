@@ -14,9 +14,10 @@ import type {
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
-  ThreeWayDiffOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
+  ThreeWayDiffOutcome,
+  ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 /**
@@ -36,7 +37,7 @@ export const multiLineStringDiffAlgorithm = (
 
   const hasBaseVersion = baseVersion !== MissingVersion;
 
-  const { conflict, mergedVersion } = mergeVersions({
+  const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
     hasBaseVersion,
     baseVersion,
     currentVersion,
@@ -50,6 +51,7 @@ export const multiLineStringDiffAlgorithm = (
     current_version: currentVersion,
     target_version: targetVersion,
     merged_version: mergedVersion,
+    merge_outcome: mergeOutcome,
 
     diff_outcome: diffOutcome,
     conflict,
@@ -58,6 +60,7 @@ export const multiLineStringDiffAlgorithm = (
 };
 
 interface MergeResult {
+  mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: string;
   conflict: ThreeWayDiffConflict;
 }
@@ -78,33 +81,26 @@ const mergeVersions = ({
   diffOutcome,
 }: MergeArgs): MergeResult => {
   switch (diffOutcome) {
-    case ThreeWayDiffOutcome.StockValueNoUpdate: // Scenarios AAA and -AA
-    case ThreeWayDiffOutcome.CustomizedValueNoUpdate: // Scenario ABA
-    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: // Scenario ABB
+    // Scenario -AA is treated as scenario AAA:
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
+    case ThreeWayDiffOutcome.StockValueNoUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
       return {
         conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: currentVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Current,
       };
 
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
-      if (!hasBaseVersion) {
-        // Scenario -AB. Treated as scenario ABC, returns target
-        // version and marked as "SOLVABLE" conflict.
-        // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
-        return {
-          mergedVersion: targetVersion,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        };
-      }
-
-      // Scenario AAB
       return {
         conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: targetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }
 
-    // Scenario ABC
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       // TS does not realize that in ABC scenario, baseVersion cannot be missing
       // Missing baseVersion scenarios were handled as -AA and -AB.
@@ -116,11 +112,24 @@ const mergeVersions = ({
         ? {
             conflict: ThreeWayDiffConflict.NON_SOLVABLE,
             mergedVersion: currentVersion,
+            mergeOutcome: ThreeWayMergeOutcome.Current,
           }
         : {
             conflict: ThreeWayDiffConflict.SOLVABLE,
             mergedVersion: mergedVersion.result.join(''),
+            mergeOutcome: ThreeWayMergeOutcome.Merged,
           };
+    }
+
+    // Scenario -AB is treated as scenario ABC, but marked as
+    // SOLVABLE, and returns the target version as the merged version
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
+      return {
+        mergedVersion: targetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
+      };
     }
     default:
       return assertUnreachable(diffOutcome);

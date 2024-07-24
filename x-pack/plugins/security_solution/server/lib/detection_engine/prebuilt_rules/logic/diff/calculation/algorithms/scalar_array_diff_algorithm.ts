@@ -17,6 +17,7 @@ import {
   ThreeWayDiffOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
+  ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 /**
@@ -37,7 +38,8 @@ export const scalarArrayDiffAlgorithm = <TValue>(
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
   const hasBaseVersion = baseVersion !== MissingVersion;
-  const { conflict, mergedVersion } = mergeVersions({
+
+  const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
     hasBaseVersion,
     baseVersion: hasBaseVersion ? baseVersion : undefined,
     currentVersion,
@@ -51,6 +53,7 @@ export const scalarArrayDiffAlgorithm = <TValue>(
     current_version: currentVersion,
     target_version: targetVersion,
     merged_version: mergedVersion,
+    merge_outcome: mergeOutcome,
 
     diff_outcome: diffOutcome,
     conflict,
@@ -59,6 +62,7 @@ export const scalarArrayDiffAlgorithm = <TValue>(
 };
 
 interface MergeResult<TValue> {
+  mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: TValue[];
   conflict: ThreeWayDiffConflict;
 }
@@ -83,33 +87,26 @@ const mergeVersions = <TValue>({
   const dedupedTargetVersion = uniq(targetVersion);
 
   switch (diffOutcome) {
-    case ThreeWayDiffOutcome.StockValueNoUpdate: // Scenarios AAA and -AA
-    case ThreeWayDiffOutcome.CustomizedValueNoUpdate: // Scenario ABA
-    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: // Scenario ABB
+    // Scenario -AA is treated as scenario AAA:
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
+    case ThreeWayDiffOutcome.StockValueNoUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
       return {
         conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: dedupedCurrentVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Current,
       };
 
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
-      if (!hasBaseVersion) {
-        // Scenario -AB. Treated as scenario ABC, returns target
-        // version and marked as "SOLVABLE" conflict.
-        // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
-        return {
-          mergedVersion: targetVersion,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        };
-      }
-
-      // Scenario AAB
       return {
         conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: dedupedTargetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }
 
-    // Scenario ABC
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion as TValue[]);
       const removedCurrent = difference(dedupedBaseVersion, dedupedCurrentVersion);
@@ -125,6 +122,18 @@ const mergeVersions = <TValue>({
       return {
         conflict: ThreeWayDiffConflict.SOLVABLE,
         mergedVersion: merged,
+        mergeOutcome: ThreeWayMergeOutcome.Merged,
+      };
+    }
+
+    // Scenario -AB is treated as scenario ABC, but marked as
+    // SOLVABLE, and returns the target version as the merged version
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
+      return {
+        mergedVersion: targetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
       };
     }
     default:

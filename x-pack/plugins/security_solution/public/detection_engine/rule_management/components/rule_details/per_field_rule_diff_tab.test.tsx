@@ -9,6 +9,7 @@ import {
   KqlQueryType,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
+  ThreeWayMergeOutcome,
 } from '../../../../../common/api/detection_engine';
 import type { PartialRuleDiff } from '../../../../../common/api/detection_engine';
 import { TestProviders } from '../../../../common/mock';
@@ -21,6 +22,7 @@ const ruleFieldsDiffBaseFieldsMock = {
   conflict: ThreeWayDiffConflict.NONE,
   has_update: true,
   has_base_version: true,
+  merge_outcome: ThreeWayMergeOutcome.Target,
 };
 
 const ruleFieldsDiffMock: PartialRuleDiff = {
