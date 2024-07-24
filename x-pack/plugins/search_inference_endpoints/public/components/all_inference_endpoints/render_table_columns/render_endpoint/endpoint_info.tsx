@@ -41,12 +41,7 @@ export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => 
       ? serviceSettings.model
       : undefined;
 
-  const isEligibleForMITBadge =
-    modelId &&
-    endpoint.service === ServiceProviderKeys.elasticsearch &&
-    modelId in ELASTIC_MODEL_DEFINITIONS &&
-    ELASTIC_MODEL_DEFINITIONS[modelId].license === 'MIT' &&
-    ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl !== undefined;
+  const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
 
   return (
     <EuiFlexGroup gutterSize="s" wrap alignItems="center">

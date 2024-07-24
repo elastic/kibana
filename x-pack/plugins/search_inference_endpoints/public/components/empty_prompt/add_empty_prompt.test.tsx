@@ -20,7 +20,7 @@ describe('When empty prompt is loaded', () => {
   it('should display the description for creation of the first inference endpoint', () => {
     expect(
       screen.getByText(
-        /Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch/
+        /Inference endpoints enable you to perform inference tasks using NLP models provided by third-party services/
       )
     ).toBeInTheDocument();
   });
