@@ -308,7 +308,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                 sorting={tableSorting}
               />
               <FooterAction>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   {itemsPerRow &&
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
@@ -373,6 +373,7 @@ const FooterAction = styled(EuiFlexGroup).attrs(() => ({
   responsive: false,
 }))`
   margin-top: ${({ theme }) => theme.eui.euiSizeXS};
+  justify-content: space-between;
 `;
 
 FooterAction.displayName = 'FooterAction';
