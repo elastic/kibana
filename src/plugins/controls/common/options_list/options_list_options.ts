@@ -8,9 +8,9 @@
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-export type OptionsListSelection = string | number;
+export type OptionsListOption = string | number;
 
-export const getSelectionAsFieldType = (field: FieldSpec, key: string): OptionsListSelection => {
+export const getOptionAsFieldType = (field: FieldSpec, key: string): OptionsListOption => {
   const storeAsNumber = field.type === 'number' || field.type === 'date';
   return storeAsNumber ? +key : key;
 };

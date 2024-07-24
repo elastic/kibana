@@ -9,7 +9,7 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListSelection } from '../../common/options_list/options_list_selections';
+import { OptionsListOption } from '../../common/options_list/options_list_options';
 import {
   OptionsListEmbeddableInput,
   OptionsListSuggestions,
@@ -27,8 +27,8 @@ interface SearchString {
 // Component state is only used by public components.
 export interface OptionsListComponentState {
   availableOptions?: OptionsListSuggestions;
-  invalidSelections?: OptionsListSelection[];
-  validSelections?: OptionsListSelection[];
+  invalidSelections?: OptionsListOption[];
+  validSelections?: OptionsListOption[];
 
   allowExpensiveQueries: boolean;
   searchString: SearchString;

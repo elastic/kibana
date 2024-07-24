@@ -22,7 +22,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { OptionsListSelection } from '../../../common/options_list/options_list_selections';
+import { OptionsListOption } from '../../../common/options_list/options_list_options';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { ControlError } from '../../control_group/component/control_error_component';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
@@ -129,7 +129,7 @@ export const OptionsListControl = ({
               ) : (
                 <>
                   {selectedOptions?.length
-                    ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
+                    ? selectedOptions.map((value: OptionsListOption, i, { length }) => {
                         const text = `${fieldFormatter(value)}${
                           i + 1 === length ? '' : delimiter
                         } `;
