@@ -30,7 +30,9 @@ export async function updateBuiltInEntityDefinitions({
 
   const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
   if (!isValid) {
-    logger.debug(`Stored API key is not valid, skipping built-in definition upgrade`);
+    logger.error(
+      `Stored API key is not valid, skipping built-in definition upgrade. Re-enable Entity discovery to update privileges`
+    );
     return;
   }
 
@@ -55,6 +57,7 @@ export async function updateBuiltInEntityDefinitions({
       });
     }
 
+    // equality check to account for rollbacks
     if (semver.eq(latestDefinition.version, installedDefinition.version)) {
       logger.debug(
         `Built-in entity definition [${latestDefinition.version}] latest version v${latestDefinition.version} already installed`
