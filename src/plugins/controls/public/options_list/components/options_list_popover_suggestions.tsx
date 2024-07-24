@@ -203,11 +203,14 @@ export const OptionsListPopoverSuggestions = ({
             }
 
             setSelectableOptions(newSuggestions);
+            if (changedOption.key === 'exists-option') {
+              optionsList.dispatch.selectExists(!Boolean(existsSelected));
+              return;
+            }
+
             const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
             // the order of these checks matters, so be careful if rearranging them
-            if (key === 'exists-option') {
-              optionsList.dispatch.selectExists(!Boolean(existsSelected));
-            } else if (showOnlySelected || selectedOptionsSet.has(key)) {
+            if (showOnlySelected || selectedOptionsSet.has(key)) {
               optionsList.dispatch.deselectOption(key);
             } else if (singleSelect) {
               optionsList.dispatch.replaceSelection(key);

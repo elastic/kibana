@@ -169,6 +169,7 @@ describe('Options list popover', () => {
     test('clicking another option unselects "Exists"', async () => {
       const popover = await mountComponent({
         explicitInput: { existsSelected: true },
+        componentState: { field: { type: 'string' } as FieldSpec },
       });
       const woofOption = popover.getByTestId('optionsList-control-selection-woof');
       userEvent.click(woofOption);
@@ -186,6 +187,7 @@ describe('Options list popover', () => {
       const selections = ['woof', 'bark'];
       const popover = await mountComponent({
         explicitInput: { existsSelected: false, selectedOptions: selections },
+        componentState: { field: { type: 'number' } as FieldSpec },
       });
       const existsOption = popover.getByTestId('optionsList-control-selection-exists');
       let availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
