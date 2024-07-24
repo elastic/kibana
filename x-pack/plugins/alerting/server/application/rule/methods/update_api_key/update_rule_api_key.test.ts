@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -13,20 +13,20 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
-jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
@@ -77,7 +77,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-describe('updateApiKey()', () => {
+describe('updateRuleApiKey()', () => {
   let rulesClient: RulesClient;
   const existingAlert = {
     id: '1',
@@ -123,7 +123,7 @@ describe('updateApiKey()', () => {
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
     });
-    await rulesClient.updateApiKey({ id: '1' });
+    await rulesClient.updateRuleApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -184,7 +184,7 @@ describe('updateApiKey()', () => {
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
     });
-    await rulesClient.updateApiKey({ id: '1' });
+    await rulesClient.updateRuleApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -240,7 +240,7 @@ describe('updateApiKey()', () => {
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
     });
-    await rulesClient.updateApiKey({ id: '1' });
+    await rulesClient.updateRuleApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -288,9 +288,18 @@ describe('updateApiKey()', () => {
       throw new Error('no');
     });
     await expect(
-      async () => await rulesClient.updateApiKey({ id: '1' })
+      async () => await rulesClient.updateRuleApiKey({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error updating API key for rule: could not create API key - no"`
+    );
+  });
+
+  test('throws an error if API params do not match the schema', async () => {
+    await expect(
+      // @ts-ignore: this is what we are testing
+      async () => await rulesClient.updateRuleApiKey({ id: 1 })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating update api key parameters - [id]: expected value of type [string] but got [number]"`
     );
   });
 
@@ -301,7 +310,7 @@ describe('updateApiKey()', () => {
     });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
-    await rulesClient.updateApiKey({ id: '1' });
+    await rulesClient.updateRuleApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -346,7 +355,7 @@ describe('updateApiKey()', () => {
   test('swallows error when invalidate API key throws', async () => {
     bulkMarkApiKeysForInvalidationMock.mockImplementationOnce(() => new Error('Fail'));
 
-    await rulesClient.updateApiKey({ id: '1' });
+    await rulesClient.updateRuleApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
@@ -359,7 +368,7 @@ describe('updateApiKey()', () => {
   test('swallows error when getting decrypted object throws', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
-    await rulesClient.updateApiKey({ id: '1' });
+    await rulesClient.updateRuleApiKey({ id: '1' });
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'updateApiKey(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -373,9 +382,9 @@ describe('updateApiKey()', () => {
     });
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
 
-    await expect(rulesClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Fail"`
-    );
+    await expect(
+      rulesClient.updateRuleApiKey({ id: '1' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MjM0OmFiYw=='] },
@@ -385,8 +394,8 @@ describe('updateApiKey()', () => {
   });
 
   describe('authorization', () => {
-    test('ensures user is authorised to updateApiKey this type of alert under the consumer', async () => {
-      await rulesClient.updateApiKey({ id: '1' });
+    test('ensures user is authorised to updateRuleApiKey this type of alert under the consumer', async () => {
+      await rulesClient.updateRuleApiKey({ id: '1' });
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -397,13 +406,13 @@ describe('updateApiKey()', () => {
       });
     });
 
-    test('throws when user is not authorised to updateApiKey this type of alert', async () => {
+    test('throws when user is not authorised to updateRuleApiKey this type of alert', async () => {
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to updateApiKey a "myType" alert for "myApp"`)
+        new Error(`Unauthorized to updateRuleApiKey a "myType" alert for "myApp"`)
       );
 
-      await expect(rulesClient.updateApiKey({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to updateApiKey a "myType" alert for "myApp"]`
+      await expect(rulesClient.updateRuleApiKey({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to updateRuleApiKey a "myType" alert for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -417,7 +426,7 @@ describe('updateApiKey()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when updating the API key of a rule', async () => {
-      await rulesClient.updateApiKey({ id: '1' });
+      await rulesClient.updateRuleApiKey({ id: '1' });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -433,7 +442,7 @@ describe('updateApiKey()', () => {
     test('logs audit event when not authorised to update the API key of a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(rulesClient.updateApiKey({ id: '1' })).rejects.toThrow();
+      await expect(rulesClient.updateRuleApiKey({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
