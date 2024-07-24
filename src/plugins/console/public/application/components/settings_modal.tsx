@@ -320,6 +320,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
         >
           <EuiSwitch
             checked={isKeyboardShortcutsEnabled}
+            data-test-subj="enableKeyboardShortcuts"
             label={
               <FormattedMessage
                 defaultMessage="Enable keyboard shortcuts"
