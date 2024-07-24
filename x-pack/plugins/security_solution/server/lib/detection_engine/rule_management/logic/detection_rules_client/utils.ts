@@ -27,7 +27,7 @@ export const toggleRuleEnabledOnUpdate = async (
   }
 
   if (!existingRule.enabled && updatedRule.enabled) {
-    await rulesClient.enable({ id: existingRule.id });
+    await rulesClient.enableRule({ id: existingRule.id });
     return { enabled: true };
   }
 
