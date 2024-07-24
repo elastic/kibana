@@ -254,15 +254,12 @@ export function createCustomCallbackMocks(
   };
 }
 
-export function createSuggestContext(text: string, triggerCharacter?: string) {
+export function createCompletionContext(triggerCharacter?: string) {
   if (triggerCharacter) {
     return { triggerCharacter, triggerKind: 1 }; // any number is fine here
   }
-  const foundTriggerCharIndexes = triggerCharacters.map((char) => text.lastIndexOf(char));
-  const maxIndex = Math.max(...foundTriggerCharIndexes);
   return {
-    triggerCharacter: text[maxIndex],
-    triggerKind: 1,
+    triggerKind: 0,
   };
 }
 
