@@ -31,7 +31,7 @@ const addData = i18n.translate('xpack.apm.addDataContextMenu.link', {
 
 export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { tourState, setTourState } = useServiceEcoTour();
+  const { tourState, hideTour } = useServiceEcoTour();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const {
     core: {
@@ -95,7 +95,7 @@ export function AddDataContextMenu() {
   ];
 
   const handleTourClose = () => {
-    setTourState({ ...tourState, isTourActive: false });
+    hideTour();
     setPopoverOpen(false);
   };
   return (

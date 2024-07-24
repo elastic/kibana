@@ -32,7 +32,7 @@ import { useServiceEcoTour } from '../../../hooks/use_eco_tour';
 export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: string }) {
   const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
-  const { tourState, setTourState } = useServiceEcoTour();
+  const { tourState, showModal } = useServiceEcoTour();
 
   const {
     services: { entityManager },
@@ -57,6 +57,9 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
   const handleEnablement = async () => {
     if (isEntityManagerEnabled) {
       setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
+      if (tourState.isModalVisible === undefined) {
+        showModal(true);
+      }
       return;
     }
 
@@ -68,7 +71,7 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
         setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
 
         if (tourState.isModalVisible === undefined) {
-          setTourState({ ...tourState, isModalVisible: true });
+          showModal(true);
         }
         refetch();
       }

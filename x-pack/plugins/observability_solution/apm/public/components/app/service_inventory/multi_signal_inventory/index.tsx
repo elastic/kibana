@@ -149,7 +149,7 @@ export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
-  const { tourState, setTourState } = useServiceEcoTour();
+  const { tourState, hideModal } = useServiceEcoTour();
   const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
@@ -219,8 +219,8 @@ export function MultiSignalInventory() {
       )}
       <Welcome
         isModalVisible={tourState.isModalVisible ?? false}
-        onClose={() => setTourState({ ...tourState, isModalVisible: false })}
-        onConfirm={() => setTourState({ ...tourState, isModalVisible: false })}
+        onClose={() => hideModal()}
+        onConfirm={() => hideModal()}
       />
     </>
   );

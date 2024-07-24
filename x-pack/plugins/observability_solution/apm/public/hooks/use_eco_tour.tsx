@@ -19,6 +19,8 @@ export function useServiceEcoTour() {
 
   return {
     tourState,
-    setTourState,
+    hideModal: () => setTourState({ ...tourState, isModalVisible: false }),
+    showModal: () => setTourState({ ...tourState, isModalVisible: true }),
+    hideTour: () => setTourState({ ...tourState, isTourActive: false }),
   };
 }
