@@ -208,6 +208,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - $ref: '#/components/parameters/space_id'
         - in: query
           name: feature_id
@@ -348,6 +349,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         required: true
@@ -389,6 +391,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - $ref: '#/components/parameters/connector_id'
       responses:
         '200':
@@ -411,6 +414,7 @@ paths:
         - connectors
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/elastic_api_version'
         - $ref: '#/components/parameters/connector_id'
       responses:
         '204':
@@ -425,6 +429,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - $ref: '#/components/parameters/kbn_xsrf'
         - in: path
           name: connectorId
@@ -461,6 +466,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/connector_id'
       requestBody:
@@ -577,6 +583,8 @@ paths:
       operationId: getConnectors
       tags:
         - connectors
+      parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
       responses:
         '200':
           description: Indicates a successful call.
@@ -905,6 +913,16 @@ components:
       schema:
         type: string
         example: df770e30-8b8b-11ed-a780-3b746c987a81
+    elastic_api_version:
+      schema:
+        type: string
+        enum:
+          - '2023-10-31'
+        default: '2023-10-31'
+      in: header
+      name: elastic-api-version
+      description: In Elastic Serverless, indicates the version of the API to use.
+      required: true
     action_id:
       in: path
       name: actionId
@@ -1696,14 +1714,14 @@ components:
           type: boolean
         host:
           description: |
-            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
+            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
           type: string
         oauthTokenUrl:
           type: string
           nullable: true
         port:
           description: |
-            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
+            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
           type: integer
         secure:
           description: |
@@ -3267,7 +3285,7 @@ components:
     is_preconfigured:
       type: boolean
       description: |
-        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
+        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
       example: false
     is_system_action:
       type: boolean
@@ -3775,7 +3793,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.

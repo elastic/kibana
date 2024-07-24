@@ -492,6 +492,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_space_id'
         - in: query
           name: feature_id
@@ -663,6 +664,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
       requestBody:
         required: true
@@ -715,6 +717,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_connector_id'
       responses:
         '200':
@@ -740,6 +743,7 @@ paths:
         - connectors
       parameters:
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
+        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_connector_id'
       responses:
         '204':
@@ -757,6 +761,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
         - in: path
           name: connectorId
@@ -799,6 +804,7 @@ paths:
       tags:
         - connectors
       parameters:
+        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
         - $ref: '#/components/parameters/Connectors_connector_id'
       requestBody:
@@ -941,6 +947,8 @@ paths:
       operationId: getConnectors
       tags:
         - connectors
+      parameters:
+        - $ref: '#/components/parameters/Connectors_elastic_api_version'
       responses:
         '200':
           description: Indicates a successful call.
@@ -4073,6 +4081,7 @@ paths:
                 description: >-
                   Kibana's operational status. A minimal response is sent for
                   unauthorized users.
+          description: Overall status is OK and Kibana should be functioning normally.
         '503':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -4084,6 +4093,9 @@ paths:
                 description: >-
                   Kibana's operational status. A minimal response is sent for
                   unauthorized users.
+          description: >-
+            Kibana or some of it's essential services are unavailable. Kibana
+            may be degraded or unavailable.
       summary: Get Kibana's current status
       tags:
         - system
@@ -4166,6 +4178,16 @@ components:
       schema:
         type: string
         example: df770e30-8b8b-11ed-a780-3b746c987a81
+    Connectors_elastic_api_version:
+      schema:
+        type: string
+        enum:
+          - '2023-10-31'
+        default: '2023-10-31'
+      in: header
+      name: elastic-api-version
+      description: In Elastic Serverless, indicates the version of the API to use.
+      required: true
     Connectors_action_id:
       in: path
       name: actionId
@@ -5161,7 +5183,7 @@ components:
             The host name of the service provider. If the `service` is
             `elastic_cloud` (for Elastic Cloud notifications) or one of
             Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined.
+            ignored. If `service` is `other`, this property must be defined. 
           type: string
         oauthTokenUrl:
           type: string
@@ -5171,7 +5193,7 @@ components:
             The port to connect to on the service provider. If the `service` is
             `elastic_cloud` (for Elastic Cloud notifications) or one of
             Nodemailer's well-known email service providers, this property is
-            ignored. If `service` is `other`, this property must be defined.
+            ignored. If `service` is `other`, this property must be defined. 
           type: integer
         secure:
           description: >
@@ -6839,7 +6861,7 @@ components:
       type: boolean
       description: >
         Indicates whether it is a preconfigured connector. If true, the `config`
-        and `is_missing_secrets` properties are omitted from the response.
+        and `is_missing_secrets` properties are omitted from the response. 
       example: false
     Connectors_is_system_action:
       type: boolean
@@ -7390,7 +7412,7 @@ components:
             type: string
           description: >
             A list of "carbon copy" email addresses. Addresses can be specified
-            in `user@host-name` format or in name `<user@host-name>` format
+            in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
