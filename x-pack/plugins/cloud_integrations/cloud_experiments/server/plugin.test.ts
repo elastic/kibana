@@ -95,7 +95,7 @@ describe('Cloud Experiments server plugin', () => {
           build_sha_short: initializerContext.env.packageInfo.buildShaShort,
         },
         organization: {
-          key: 'FAKE_ID',
+          key: 'organization-id',
           trial_end_date: expect.any(Date),
           in_trial: false,
           is_elastic_staff: true,

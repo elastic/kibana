@@ -46,7 +46,7 @@ describe('MetadataService', () => {
     build_sha: 'abcdefghijklmnopqrstux',
     build_sha_short: 'abcde',
     project_type: 'project-type',
-    organizationKey: 'FAKE_ID',
+    organizationKey: 'organization-id',
     is_elastic_staff: true,
   };
 
@@ -62,7 +62,7 @@ describe('MetadataService', () => {
       project_type: 'project-type',
     },
     organization: {
-      key: 'FAKE_ID',
+      key: 'organization-id',
       is_elastic_staff: true,
     },
   };

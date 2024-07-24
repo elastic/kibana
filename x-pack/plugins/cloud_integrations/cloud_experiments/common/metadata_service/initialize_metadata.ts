@@ -33,8 +33,6 @@ export function initializeMetadata({
 }) {
   const offering = initializerContext.env.packageInfo.buildFlavor;
 
-  const orgId = 'FAKE_ID'; // TODO: Retrieve it when available
-
   metadataService.setup({
     instanceKey: cloud.serverless?.projectId || cloud.deploymentId,
     offering,
@@ -43,8 +41,8 @@ export function initializeMetadata({
     build_sha: initializerContext.env.packageInfo.buildSha,
     build_sha_short: initializerContext.env.packageInfo.buildShaShort,
     project_type: cloud.serverless.projectType,
-    // orchestrator_target: 'canary', // TODO: Retrieve this
-    organizationKey: orgId,
+    orchestrator_target: cloud.serverless.orchestratorTarget,
+    organizationKey: cloud.organizationId,
     trial_end_date: cloud.trialEndDate,
     is_elastic_staff: cloud.isElasticStaffOwned,
   });
