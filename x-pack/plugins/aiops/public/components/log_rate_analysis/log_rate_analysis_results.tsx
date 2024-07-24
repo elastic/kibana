@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { isEqual, uniq } from 'lodash';
+import { isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -24,7 +24,7 @@ import {
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
-import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
+import { cancelStream, startStream, type StartStreamParams } from '@kbn/ml-response-stream/client';
 import {
   clearAllRowState,
   useAppDispatch,
@@ -44,7 +44,9 @@ import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-r
 import {
   setCurrentAnalysisType,
   setCurrentAnalysisWindowParameters,
+  resetResults,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_field_candidates_slice';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -92,7 +94,7 @@ const resultsGroupedOffId = 'aiopsLogRateAnalysisGroupingOff';
 const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 const fieldFilterHelpText = i18n.translate('xpack.aiops.logRateAnalysis.page.fieldFilterHelpText', {
   defaultMessage:
-    'Deselect non-relevant fields to remove them from groups and click the Apply button to rerun the grouping.  Use the search bar to filter the list, then select/deselect multiple fields with the actions below.',
+    'Deselect non-relevant fields to remove them from the analysis and click the Apply button to rerun the analysis.  Use the search bar to filter the list, then select/deselect multiple fields with the actions below.',
 });
 const columnsFilterHelpText = i18n.translate(
   'xpack.aiops.logRateAnalysis.page.columnsFilterHelpText',
@@ -118,8 +120,8 @@ const columnSearchAriaLabel = i18n.translate('xpack.aiops.analysis.columnSelecto
 const columnsButton = i18n.translate('xpack.aiops.logRateAnalysis.page.columnsFilterButtonLabel', {
   defaultMessage: 'Columns',
 });
-const fieldsButton = i18n.translate('xpack.aiops.analysis.fieldFilterButtonLabel', {
-  defaultMessage: 'Filter fields',
+const fieldsButton = i18n.translate('xpack.aiops.analysis.fieldsButtonLabel', {
+  defaultMessage: 'Fields',
 });
 
 /**
@@ -172,6 +174,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   } = useAppSelector((s) => s.logRateAnalysis);
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.logRateAnalysisStream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
+  const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
   const { currentAnalysisType, currentAnalysisWindowParameters } = data;
 
   // Store the performance metric's start time using a ref
@@ -180,8 +183,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const abortCtrl = useRef(new AbortController());
 
   const [groupResults, setGroupResults] = useState<boolean>(false);
-  const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
-  const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
   );
@@ -202,14 +203,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   };
 
   const onFieldsFilterChange = (skippedFields: string[]) => {
-    setGroupSkipFields(skippedFields);
+    dispatch(resetResults());
     setOverrides({
       loaded: 0,
-      remainingFieldCandidates: [],
-      significantItems: data.significantItems.filter(
-        (d) => !skippedFields.includes(d.fieldName)
-      ) as AiopsLogRateAnalysisSchemaSignificantItem[],
-      regroupOnly: true,
+      remainingFieldCandidates: fieldCandidates.keywordFieldCandidates.filter(
+        (d) => !skippedFields.includes(d)
+      ),
+      regroupOnly: false,
     });
     startHandler(true, false);
   };
@@ -217,13 +217,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const onVisibleColumnsChange = (columns: ColumnNames[]) => {
     setSkippedColumns(columns);
   };
-
-  const { significantItems } = data;
-
-  useEffect(
-    () => setUniqueFieldNames(uniq(significantItems.map((d) => d.fieldName)).sort()),
-    [significantItems]
-  );
 
   function cancelHandler() {
     abortCtrl.current.abort();
@@ -267,12 +260,27 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
+  const fieldFilterUniqueItems = [
+    ...fieldCandidates.keywordFieldCandidates,
+    ...fieldCandidates.textFieldCandidates,
+  ].sort();
+  const fieldFilterUniqueSelectedItems = [
+    ...fieldCandidates.selectedKeywordFieldCandidates,
+    ...fieldCandidates.selectedTextFieldCandidates,
+  ];
+  const fieldFilterSkippedItems = fieldFilterUniqueItems.filter(
+    (d) => !fieldFilterUniqueSelectedItems.includes(d)
+  );
+  const fieldFilterButtonDisabled =
+    isRunning || fieldCandidates.isLoading || fieldFilterUniqueItems.length === 0;
+
   // Start handler clears possibly hovered or pinned
   // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
-      setOverrides(undefined);
-      setUniqueFieldNames([]);
+      setOverrides({
+        remainingFieldCandidates: fieldCandidates.selectedKeywordFieldCandidates,
+      });
     }
 
     // Reset grouping to false and clear all row selections when restarting the analysis.
@@ -290,8 +298,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setShouldStart(true);
   }
 
-  const startParams = useMemo(() => {
-    if (!chartWindowParameters) {
+  const startParams: StartStreamParams | undefined = useMemo(() => {
+    if (!chartWindowParameters || !earliest || !latest) {
       return undefined;
     }
 
@@ -342,6 +350,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   useEffect(() => {
     if (startParams) {
+      dispatch(fetchFieldCandidates(startParams));
       dispatch(setCurrentAnalysisType(analysisType));
       dispatch(setCurrentAnalysisWindowParameters(chartWindowParameters));
       dispatch(startStream(startParams));
@@ -369,7 +378,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   // Disable the grouping switch toggle only if no groups were found,
   // the toggle wasn't enabled already and no fields were selected to be skipped.
-  const disabledGroupResultsSwitch = !foundGroups && !groupResults && groupSkipFields.length === 0;
+  const disabledGroupResultsSwitch = !foundGroups && !groupResults;
 
   const toggleButtons = [
     {
@@ -421,13 +430,15 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <EuiFlexItem grow={false}>
           <FieldFilterPopover
             dataTestSubj="aiopsFieldFilterButton"
-            disabled={!groupResults || isRunning}
-            disabledApplyButton={isRunning}
+            disabled={fieldFilterButtonDisabled}
+            disabledApplyButton={fieldFilterButtonDisabled}
             disabledApplyTooltipContent={disabledFieldFilterApplyButtonTooltipContent}
             helpText={fieldFilterHelpText}
             itemSearchAriaLabel={fieldsButton}
             popoverButtonTitle={fieldsButton}
-            uniqueItemNames={uniqueFieldNames}
+            selectedItemLimit={1}
+            uniqueItemNames={fieldFilterUniqueItems}
+            initialSkippedItems={fieldFilterSkippedItems}
             onChange={onFieldsFilterChange}
           />
         </EuiFlexItem>

@@ -22,17 +22,17 @@ import { getTotalDocCountRequest } from './get_total_doc_count_request';
 // If we analyse all detected text fields, we might run into performance
 // issues with the `categorize_text` aggregation. Until this is resolved, we
 // rely on a predefined white list of supported text fields.
-const TEXT_FIELD_WHITE_LIST = ['message', 'error.message'];
+export const TEXT_FIELD_WHITE_LIST = ['message', 'error.message'];
 
-const SUPPORTED_ES_FIELD_TYPES = [
+export const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
   ES_FIELD_TYPES.IP,
   ES_FIELD_TYPES.BOOLEAN,
 ];
 
-const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
+export const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
 
-interface IndexInfo {
+export interface IndexInfo {
   keywordFieldCandidates: string[];
   textFieldCandidates: string[];
   baselineTotalDocCount: number;
@@ -57,7 +57,7 @@ export const fetchIndexInfo = async ({
   const respMapping = await esClient.fieldCaps(
     {
       fields: '*',
-      filters: '-metadata',
+      filters: '-metadata,-parent',
       include_empty_fields: false,
       index,
       index_filter: {

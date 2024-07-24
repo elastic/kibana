@@ -92,7 +92,6 @@ describe('fetch_index_info', () => {
         'client.ip',
         'cloud.availability_zone',
         'cloud.instance.id',
-        'cloud.instance.name',
         'cloud.machine.type',
         'cloud.project.id',
         'cloud.provider',

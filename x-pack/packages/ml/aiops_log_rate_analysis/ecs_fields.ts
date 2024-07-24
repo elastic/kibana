@@ -61,7 +61,6 @@ const ecsFields = [
   'cloud.provider', // Name of the cloud provider
   'cloud.region', // Region in which the host is running
   'cloud.instance.id', // Instance ID in the cloud environment
-  'cloud.instance.name', // Name of the cloud instance
   'cloud.machine.type', // Type of the cloud machine
   'container.id', // Unique identifier of the container
   'container.name', // Name of the container

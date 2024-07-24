@@ -10,25 +10,26 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { batch } from 'react-redux';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
+
 import { fetchStream } from './fetch_stream';
 import { DATA_THROTTLE_MS } from './constants';
+
+export interface StartStreamParams {
+  http: HttpSetup;
+  endpoint: string;
+  apiVersion?: string;
+  abortCtrl: React.MutableRefObject<AbortController>;
+  body?: AiopsLogRateAnalysisSchema;
+  headers?: HttpFetchOptions['headers'];
+}
 
 /**
  * Async thunk to start the stream.
  */
 export const startStream = createAsyncThunk(
   'stream/start',
-  async (
-    options: {
-      http: HttpSetup;
-      endpoint: string;
-      apiVersion?: string;
-      abortCtrl: React.MutableRefObject<AbortController>;
-      body?: any;
-      headers?: HttpFetchOptions['headers'];
-    },
-    thunkApi
-  ) => {
+  async (options: StartStreamParams, thunkApi) => {
     const { http, endpoint, apiVersion, abortCtrl, body, headers } = options;
 
     const fetchState = { isActive: true };
