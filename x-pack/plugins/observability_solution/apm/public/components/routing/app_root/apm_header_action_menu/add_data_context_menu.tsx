@@ -95,7 +95,7 @@ export function AddDataContextMenu() {
   ];
 
   const handleTourClose = () => {
-    setTourState({ shownBefore: true, isActive: false });
+    setTourState({ ...tourState, isTourActive: false });
     setPopoverOpen(false);
   };
   return (
@@ -103,7 +103,7 @@ export function AddDataContextMenu() {
       <EuiPopover
         id="integrations-menu"
         button={button}
-        isOpen={popoverOpen || tourState.isActive}
+        isOpen={popoverOpen || tourState.isTourActive}
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downRight"

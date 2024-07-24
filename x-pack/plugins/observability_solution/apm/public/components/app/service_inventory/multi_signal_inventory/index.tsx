@@ -218,9 +218,9 @@ export function MultiSignalInventory() {
         </>
       )}
       <Welcome
-        isModalVisible={!tourState.shownBefore && tourState.isActive}
-        onClose={() => setTourState({ shownBefore: true, isActive: false })}
-        onConfirm={() => setTourState({ shownBefore: true, isActive: true })}
+        isModalVisible={tourState.isModalVisible ?? false}
+        onClose={() => setTourState({ ...tourState, isModalVisible: false })}
+        onConfirm={() => setTourState({ ...tourState, isModalVisible: false })}
       />
     </>
   );

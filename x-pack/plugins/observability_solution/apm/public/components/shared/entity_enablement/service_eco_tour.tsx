@@ -30,7 +30,7 @@ export function ServiceEcoTour({
           </p>
         </EuiText>
       }
-      isStepOpen={tourState.isActive && !tourState.shownBefore}
+      isStepOpen={tourState.isTourActive}
       minWidth={200}
       onFinish={onFinish}
       step={1}

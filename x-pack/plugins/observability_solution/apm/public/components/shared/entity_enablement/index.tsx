@@ -67,8 +67,8 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
         setIsLoading(false);
         setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
 
-        if (!tourState.shownBefore) {
-          setTourState({ ...tourState, isActive: true });
+        if (tourState.isModalVisible === undefined) {
+          setTourState({ ...tourState, isModalVisible: true });
         }
         refetch();
       }

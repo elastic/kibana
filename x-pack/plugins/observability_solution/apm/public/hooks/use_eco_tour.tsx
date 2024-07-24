@@ -7,11 +7,11 @@
 
 import { useLocalStorage } from './use_local_storage';
 
-type TourState = 'shownBefore' | 'isActive';
+type TourState = 'isModalVisible' | 'isTourActive';
 
-const INITIAL_STATE: Record<TourState, boolean> = {
-  shownBefore: false,
-  isActive: false,
+const INITIAL_STATE: Record<TourState, boolean | undefined> = {
+  isModalVisible: undefined,
+  isTourActive: true,
 };
 
 export function useServiceEcoTour() {
