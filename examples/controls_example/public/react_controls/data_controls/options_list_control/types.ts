@@ -54,6 +54,5 @@ export type OptionsListComponentApi = OptionsListControlApi &
   PublishesOptions & {
     deselectOption: (key: string) => void;
     makeSelection: (key: string, showOnlySelected: boolean) => void;
-    allowExpensiveQueries$: PublishingSubject<boolean>;
     loadMoreSubject: BehaviorSubject<null>;
   };

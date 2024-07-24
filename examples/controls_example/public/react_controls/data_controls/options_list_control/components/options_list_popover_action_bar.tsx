@@ -50,7 +50,7 @@ export const OptionsListPopoverActionBar = ({
     api.invalidSelections$,
     api.totalCardinality$,
     api.fieldSpec,
-    api.allowExpensiveQueries$
+    api.parentApi.allowExpensiveQueries$
   );
 
   const compatibleSearchTechniques = useMemo(() => {

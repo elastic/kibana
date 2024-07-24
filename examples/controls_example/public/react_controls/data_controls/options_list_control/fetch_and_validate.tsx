@@ -31,8 +31,8 @@ export function fetchAndValidate$({
   services,
   stateManager,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews' | 'fieldSpec' | 'setBlockingError'> &
-    Pick<OptionsListComponentApi, 'loadMoreSubject' | 'allowExpensiveQueries$'> & {
+  api: Pick<OptionsListControlApi, 'dataViews' | 'fieldSpec' | 'setBlockingError' | 'parentApi'> &
+    Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       controlFetch$: Observable<ControlFetchContext>;
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
@@ -51,7 +51,7 @@ export function fetchAndValidate$({
     api.dataViews,
     api.fieldSpec,
     api.controlFetch$,
-    api.allowExpensiveQueries$,
+    api.parentApi.allowExpensiveQueries$,
     api.debouncedSearchString,
     stateManager.sort,
     stateManager.searchTechnique,

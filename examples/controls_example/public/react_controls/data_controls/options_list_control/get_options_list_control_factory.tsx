@@ -172,21 +172,6 @@ export const getOptionsListControlFactory = ({
           sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
 
-      /** Fetch the allowExpensiveQuries setting to determine how suggestion fetching happens */
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(false);
-      core.http
-        .get<{
-          allowExpensiveQueries: boolean;
-        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
-          version: '1',
-        })
-        .catch(() => {
-          return { allowExpensiveQueries: true }; // default to true on error
-        })
-        .then((result) => {
-          allowExpensiveQueries$.next(result.allowExpensiveQueries);
-        });
-
       /** Fetch the suggestions and perform validation */
       const loadMoreSubject = new BehaviorSubject<null>(null);
       const fetchSubscription = fetchAndValidate$({
@@ -196,7 +181,7 @@ export const getOptionsListControlFactory = ({
           loadMoreSubject,
           loadingSuggestions$,
           debouncedSearchString,
-          allowExpensiveQueries$,
+          parentApi: controlGroupApi,
           controlFetch$: controlGroupApi.controlFetch$(uuid),
         },
         stateManager,
@@ -316,7 +301,6 @@ export const getOptionsListControlFactory = ({
         totalCardinality$,
         availableOptions$,
         invalidSelections$,
-        allowExpensiveQueries$,
         deselectOption: (key: string) => {
           // delete from selections
           const selectedOptions = selections$.getValue() ?? [];

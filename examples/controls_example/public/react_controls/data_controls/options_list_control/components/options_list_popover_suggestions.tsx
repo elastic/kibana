@@ -40,8 +40,8 @@ export const OptionsListPopoverSuggestions = ({
     availableOptions,
     totalCardinality,
     loading,
-    allowExpensiveQueries,
     fieldFormatter,
+    allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
     stateManager.sort,
     stateManager.searchString,
@@ -53,8 +53,8 @@ export const OptionsListPopoverSuggestions = ({
     api.availableOptions$,
     api.totalCardinality$,
     api.dataLoading,
-    api.allowExpensiveQueries$,
-    api.fieldFormatter
+    api.fieldFormatter,
+    api.parentApi.allowExpensiveQueries$
   );
 
   const listRef = useRef<HTMLDivElement>(null);
