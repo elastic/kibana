@@ -31,9 +31,10 @@ export class ProxyHandler extends ProjectHandler {
     productTypes?: ProductType[],
     commit?: string
   ): Promise<Project | undefined> {
+    const region = process.env.REGION ? process.env.REGION : DEFAULT_REGION;
     const body: CreateProjectRequestBody = {
       name: projectName,
-      region_id: DEFAULT_REGION,
+      region_id: region,
     };
 
     if (productTypes) {
