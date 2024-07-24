@@ -10,7 +10,7 @@
 import { OpenAPIV3 } from 'openapi-types';
 import {
   getRequestValidation,
-  RouteMethod,
+  type RouteMethod,
   type RouteConfigOptionsBody,
   type RouterRoute,
   type RouteValidatorConfig,

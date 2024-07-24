@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RouteMethod } from '@kbn/core-http-server';
+import type { RouteMethod } from '@kbn/core-http-server';
 import { OpenAPIV3 } from 'openapi-types';
 import {
   buildGlobalTags,
