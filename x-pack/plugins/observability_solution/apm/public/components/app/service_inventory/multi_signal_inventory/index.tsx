@@ -6,7 +6,7 @@
  */
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -29,6 +29,8 @@ import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher
 import { NoEntitiesEmptyState } from './table/no_entities_empty_state';
 import { Welcome } from '../../../shared/entity_enablement/welcome_modal';
 import { useServiceEcoTour } from '../../../../hooks/use_eco_tour';
+import { useKibana } from '../../../../context/kibana_context/use_kibana';
+import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
@@ -145,6 +147,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
 
 export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
   const { tourState, setTourState } = useServiceEcoTour();
   const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
@@ -165,6 +168,12 @@ export function MultiSignalInventory() {
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_entities');
   }, []);
+
+  useEffect(() => {
+    if (data?.hasData) {
+      services.telemetry.reportEntityInventoryPageState({ state: 'available' });
+    }
+  }, [services.telemetry, data?.hasData]);
 
   return (
     <>

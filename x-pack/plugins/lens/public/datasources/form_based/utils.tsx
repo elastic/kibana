@@ -17,7 +17,6 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
-import { SearchRequest } from '@kbn/data-plugin/common';
 
 import {
   type SearchResponseWarning,
@@ -269,7 +268,7 @@ const accuracyModeEnabledWarning = (
 export function getSearchWarningMessages(
   state: FormBasedPersistedState,
   warning: SearchResponseWarning,
-  request: SearchRequest,
+  request: estypes.SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ): UserMessage[] {
