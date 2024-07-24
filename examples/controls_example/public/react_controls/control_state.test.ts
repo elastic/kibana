@@ -24,12 +24,12 @@ describe('state diffing', () => {
         return {
           rawState: {
             grow: true,
-            width: 'medium'
+            width: 'medium',
           } as DefaultControlState,
           references: [],
         };
       },
-      saveNotification$
+      saveNotification$,
     });
     const { comparators } = initializeDefaultControlApi(initialState);
     setWidth = comparators.width[1];
@@ -46,7 +46,7 @@ describe('state diffing', () => {
     setWidth('small');
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
     expect(unsavedChanges.value).toEqual({
-      width: 'small'
+      width: 'small',
     });
   });
 
