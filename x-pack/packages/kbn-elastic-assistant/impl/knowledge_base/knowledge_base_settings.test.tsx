@@ -40,8 +40,6 @@ jest.mock('../assistant_context', () => {
 const setUpdatedKnowledgeBaseSettings = jest.fn();
 const defaultProps = {
   knowledgeBase: {
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: false,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   setUpdatedKnowledgeBaseSettings,
