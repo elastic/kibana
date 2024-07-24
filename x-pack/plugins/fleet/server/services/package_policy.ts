@@ -1747,6 +1747,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           },
           policy_id: newPolicy.policy_id ?? agentPolicyId,
           policy_ids: newPolicy.policy_ids ?? [agentPolicyId],
+          output_id: newPolicy.output_id,
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
         };
