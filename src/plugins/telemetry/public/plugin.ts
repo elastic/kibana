@@ -22,8 +22,8 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-// import { ElasticV3BrowserShipper } from '@elastic/ebt';
-// import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
+import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 import { buildShipperHeaders, buildShipperUrl } from '@kbn/elastic-analytics-utils';
 
 import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
