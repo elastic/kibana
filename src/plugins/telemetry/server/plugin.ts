@@ -22,7 +22,7 @@ import {
   map,
 } from 'rxjs';
 
-import { ElasticV3ServerShipper } from '@kbn/ebt/shippers/elastic_v3/server';
+import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -38,6 +38,8 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { buildShipperHeaders, buildShipperUrl } from '@kbn/elastic-analytics-utils';
+
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import apm from 'elastic-apm-node';
@@ -175,6 +177,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       channelName: 'kibana-server',
       version: currentKibanaVersion,
       sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
+      buildShipperHeaders,
+      buildShipperUrl,
     });
 
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({

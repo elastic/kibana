@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnalyticsClient } from '@kbn/ebt/client';
+import { AnalyticsClient } from '@elastic/ebt/client';
 import { Subject } from 'rxjs';
 
 export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
@@ -21,6 +21,6 @@ export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
   shutdown: jest.fn(),
 };
 
-jest.doMock('@kbn/ebt/client', () => ({
+jest.doMock('@elastic/ebt/client', () => ({
   createAnalytics: () => analyticsClientMock,
 }));

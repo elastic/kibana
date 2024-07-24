@@ -22,8 +22,9 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ElasticV3BrowserShipper } from '@kbn/ebt/shippers/elastic_v3/browser';
-import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
+// import { ElasticV3BrowserShipper } from '@elastic/ebt';
+// import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
+import { buildShipperHeaders, buildShipperUrl } from '@kbn/elastic-analytics-utils';
 
 import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
 import type { TelemetryConfigLabels } from '../server/config';
@@ -196,6 +197,8 @@ export class TelemetryPlugin
       channelName: 'kibana-browser',
       version: currentKibanaVersion,
       sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
+      buildShipperHeaders,
+      buildShipperUrl,
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {

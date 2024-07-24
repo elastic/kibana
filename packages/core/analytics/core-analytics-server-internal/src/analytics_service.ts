@@ -7,8 +7,8 @@
  */
 
 import { of } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/ebt/client';
-import { createAnalytics } from '@kbn/ebt/client';
+import type { AnalyticsClient } from '@elastic/ebt/client';
+import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {

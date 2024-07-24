@@ -4738,10 +4738,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ebt@link:packages/analytics/ebt":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ecs-data-quality-dashboard-plugin@link:x-pack/plugins/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
@@ -4751,6 +4747,10 @@
   uid ""
 
 "@kbn/elastic-agent-utils@link:packages/kbn-elastic-agent-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/elastic-analytics-utils@link:packages/analytics/utils/elastic_analytics_utils":
   version "0.0.0"
   uid ""
 

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/elastic-analytics-utils",
+  "owner": "@elastic/kibana-core"
+}
