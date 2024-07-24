@@ -16,7 +16,7 @@ export interface ServicesHostNamesParams {
   limit: number;
 }
 
-export function createGetServicesHostNames(params: RegisterParams) {
+export function createGetHostNames(params: RegisterParams) {
   return async ({ from: timeFrom, to: timeTo, query, limit }: ServicesHostNamesParams) => {
     const { apmIndices, esClient } = await params.getResourcesForServices();
 

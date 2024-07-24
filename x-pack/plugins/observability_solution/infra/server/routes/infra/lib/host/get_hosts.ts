@@ -99,7 +99,7 @@ const getFilteredHostNames = async ({
       to,
       limit,
     }),
-    apmDataAccess.services.getServicesHostNames({
+    apmDataAccess.services.getHostNames({
       query,
       from: new Date(from).getTime(),
       to: new Date(to).getTime(),

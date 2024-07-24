@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../typings/**/*", "common/**/*", "server/**/*", "jest.config.js"],
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "server/**/*",
+    "utils/**/*",
+    "jest.config.js"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",

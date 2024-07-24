@@ -57,13 +57,13 @@ export const getAllHosts = async ({
               top_metrics: {
                 metrics: [
                   {
-                    field: 'host.os.name' as const,
+                    field: 'host.os.name',
                   },
                   {
-                    field: 'cloud.provider' as const,
+                    field: 'cloud.provider',
                   },
                   {
-                    field: 'host.ip' as const,
+                    field: 'host.ip',
                   },
                 ],
                 size: 1,

@@ -47,7 +47,7 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.exact(
     }),
     rt.type({
       type: rt.literal('host'),
-      limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(100)]),
+      limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
       metrics: rt.array(InfraMetricTypeRT),
       sourceId: rt.string,
       from: dateRt,

@@ -7,7 +7,7 @@
 
 import { APMIndices } from '..';
 import { getTypedSearch } from '../../utils/create_typed_es_client';
-import { createGetServicesHostNames } from './get_services_host_names';
+import { createGetHostNames } from './get_host_names';
 
 interface Resources {
   apmIndices: APMIndices;
@@ -19,6 +19,6 @@ export interface RegisterParams {
 
 export function registerServices(params: RegisterParams) {
   return {
-    getServicesHostNames: createGetServicesHostNames(params),
+    getHostNames: createGetHostNames(params),
   };
 }
