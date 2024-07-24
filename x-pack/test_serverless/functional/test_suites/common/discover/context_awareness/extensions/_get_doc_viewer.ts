@@ -9,12 +9,15 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
 
   describe('extension getDocViewer', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
+    });
     describe('ES|QL mode', () => {
       it('should render logs overview tab for logs data source', async () => {
         const state = kbnRison.encode({
