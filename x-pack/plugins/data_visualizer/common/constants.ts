@@ -29,7 +29,6 @@ export const FILE_FORMATS = {
   NDJSON: 'ndjson',
   SEMI_STRUCTURED_TEXT: 'semi_structured_text',
   TIKA: 'tika',
-  // XML: 'xml',
 };
 
 export const SUPPORTED_FIELD_TYPES = {
