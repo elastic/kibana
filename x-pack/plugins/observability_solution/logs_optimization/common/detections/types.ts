@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EsqlHit } from '../types';
+import * as rt from 'io-ts';
 
-export interface IntegrationLikeDetection {
-  type: 'integration_like';
-  message: string;
-  detectedIntegration: string;
-}
+export const mappingGapRT = rt.type({
+  field: rt.string,
+  suggestedField: rt.union([rt.string, rt.null]),
+});
 
-interface MappingGap {
-  field: string;
-  suggestedField: string | null;
-}
+const processorsRT = rt.record(rt.string, rt.unknown);
 
-export interface MappingGapsDetection {
-  type: 'mapping_gap';
-  gaps: MappingGap[];
-  tasks: {
-    processors?: IngestProcessorContainer[];
-  };
-}
+export const mappingGapDetectionRT = rt.type({
+  type: rt.literal('mapping_gap'),
+  gaps: rt.array(mappingGapRT),
+  tasks: rt.partial({
+    processors: processorsRT,
+  }),
+});
 
-export interface FieldExtractionDetection {
-  type: 'field_extraction';
-  sourceField: string;
-  targetField: string;
-  pattern: string;
-  documentSamples: EsqlHit[];
-  tasks: {
-    processors?: IngestProcessorContainer[];
-  };
-}
+export const fieldExtractionDetectionRT = rt.type({
+  type: rt.literal('field_extraction'),
+  sourceField: rt.string,
+  targetField: rt.string,
+  pattern: rt.string,
+  documentSamples: rt.record(rt.string, rt.unknown), // TODO: update types
+  tasks: rt.partial({
+    processors: processorsRT,
+  }),
+});
 
-export type Detection = IntegrationLikeDetection | MappingGapsDetection | FieldExtractionDetection;
+export const detectionRT = rt.union([mappingGapDetectionRT, fieldExtractionDetectionRT]);
+
+export type MappingGapsDetection = rt.TypeOf<typeof mappingGapDetectionRT>;
+export type FieldExtractionDetection = rt.TypeOf<typeof fieldExtractionDetectionRT>;
+export type Detection = MappingGapsDetection | FieldExtractionDetection;

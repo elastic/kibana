@@ -6,14 +6,33 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { createUseRecommendationsHook } from './hooks/use_recommendations';
+import { RecommendationsService } from './services/recommendations';
 import { LogsOptimizationClientPluginClass } from './types';
 
 export class LogsOptimizationPlugin implements LogsOptimizationClientPluginClass {
+  private recommendations: RecommendationsService;
+
+  constructor() {
+    this.recommendations = new RecommendationsService();
+  }
+
   public setup() {
+    this.recommendations.setup();
+
     return {};
   }
 
   public start(core: CoreStart) {
-    return {};
+    const { http } = core;
+
+    const recommendationsService = this.recommendations.start({ http });
+
+    const useRecommendations = createUseRecommendationsHook({ recommendationsService });
+
+    return {
+      getClient: recommendationsService.getClient,
+      useRecommendations,
+    };
   }
 }

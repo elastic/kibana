@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
+
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  Detection,
-  FieldExtractionDetection,
-  MappingGapsDetection,
-} from '@kbn/logs-optimization-plugin/common/detections/types';
 import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
+import { createRecommendation } from '@kbn/logs-optimization-plugin/common/recommendations/utils';
+import { Recommendation } from '@kbn/logs-optimization-plugin/common/recommendations';
 import { IDetectionsClient } from '../detections/types';
 import { IRecommendationsClient } from './types';
 
@@ -28,20 +25,18 @@ export class RecommendationsClient implements IRecommendationsClient {
     private readonly detectionsClient: IDetectionsClient
   ) {}
 
-  async getRecommendations({ dataset }) {
+  async getRecommendations({ dataset }: { dataset: string }): Promise<Recommendation[]> {
     const newestIndex = await this.getNewestIndex(dataset);
 
     if (!newestIndex) {
-      return { recommendations: [] };
+      return [];
     }
 
     const detections = await this.detectionsClient.detectFrom(newestIndex);
 
-    const recommendations = detections.map(createRecommendationFromDetection);
+    const recommendations = detections.map(createRecommendation);
 
-    return {
-      recommendations,
-    };
+    return recommendations;
   }
 
   // generateRecommendationsByDataset({ dataset }) {}
@@ -67,12 +62,3 @@ export class RecommendationsClient implements IRecommendationsClient {
     return new RecommendationsClient(logger, esClient, detectionsClient);
   }
 }
-
-const createRecommendationFromDetection = (detection: Detection) => {
-  return {
-    id: uuidv4(),
-    created_at: new Date().toISOString(),
-    status: 'pending',
-    detection,
-  };
-};

@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { FieldExtractionDetection, IntegrationLikeDetection, MappingGapsDetection } from './types';
+import { FieldExtractionDetection, MappingGapsDetection } from './types';
 
 export const createMappingGapsDetection = (
   params: Omit<MappingGapsDetection, 'type'>
 ): MappingGapsDetection => ({
   ...params,
   type: 'mapping_gap',
-});
-
-export const createIntegrationLikeDetection = (
-  params: Omit<IntegrationLikeDetection, 'type'>
-): IntegrationLikeDetection => ({
-  ...params,
-  type: 'integration_like',
 });
 
 export const createFieldExtractionDetection = (

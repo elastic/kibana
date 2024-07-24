@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreSetup, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { Recommendation } from '@kbn/logs-optimization-plugin/common/recommendations';
 import { DetectionsServiceStart } from '../detections';
 import { IDetectionsClient } from '../detections/types';
+import type { RecommendationsClient } from './recommendations_client';
 
 export interface RecommendationsServiceSetupDeps {
   getStartServices: CoreSetup['getStartServices'];
@@ -25,10 +26,10 @@ export interface RecommendationsServiceStart {
   getClient(
     esClient: ElasticsearchClient,
     detectionClient: IDetectionsClient
-  ): IRecommendationsClient;
-  getScopedClient(request: KibanaRequest): Promise<IRecommendationsClient>;
+  ): RecommendationsClient;
+  getScopedClient(request: KibanaRequest): Promise<RecommendationsClient>;
 }
 
 export interface IRecommendationsClient {
-  getRecommendations({ dataset }: { dataset: string }): unknown[]; // TODO: update types
+  getRecommendations({ dataset }: { dataset: string }): Promise<Recommendation[]>;
 }
