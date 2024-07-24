@@ -16,6 +16,7 @@ export interface TagsListProps {
   numberOfTagsToDisplay?: number;
   color?: EuiBadgeProps['color'];
   ignoreEmpty?: boolean;
+  disableExpand?: boolean;
 }
 
 const getFilterLabel = (tag: string) => {
@@ -33,6 +34,7 @@ const TagsList = ({
   numberOfTagsToDisplay = 3,
   onClick,
   color = 'hollow',
+  disableExpand = false,
 }: TagsListProps) => {
   const [toDisplay, setToDisplay] = useState(numberOfTagsToDisplay);
 
@@ -99,6 +101,9 @@ const TagsList = ({
             <EuiBadge
               color={color}
               onClick={() => {
+                if (disableExpand) {
+                  return;
+                }
                 setToDisplay(tags.length);
               }}
               onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {

@@ -28,6 +28,8 @@ export const CreateDebPackage: Task = {
       'amd64',
       '--deb-priority',
       'optional',
+      '--depends',
+      ' adduser',
     ]);
 
     await runFpm(config, log, build, 'deb', 'arm64', [
@@ -35,6 +37,8 @@ export const CreateDebPackage: Task = {
       'arm64',
       '--deb-priority',
       'optional',
+      '--depends',
+      ' adduser',
     ]);
   },
 };

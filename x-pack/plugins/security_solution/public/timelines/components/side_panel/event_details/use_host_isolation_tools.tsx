@@ -51,6 +51,7 @@ function hostIsolationReducer(state: HostIsolationStateReducer, action: HostIsol
   }
 }
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 const useHostIsolationTools = () => {
   const [
     { isolateAction, isHostIsolationPanelOpen, isIsolateActionSuccessBannerVisible },
