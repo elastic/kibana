@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { DataViewAttributes } from '@kbn/data-views-plugin/common';
-import { CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -69,7 +69,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const soClient = await kibanaServer.savedObjects;
       await pageObjects.common.navigateToApp('home');
 
-      const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
+      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
       expect(idDataViewExists).to.be(false);
 
@@ -89,7 +89,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('home');
 
       const soClient = await kibanaServer.savedObjects;
-      const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
+      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
       expect(idDataViewExists).to.be(false);
 
@@ -112,7 +112,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
       await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
       const soClient = await kibanaServer.savedObjects;
-      const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
+      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
 
       expect(idDataViewExists).to.be(false);
@@ -137,7 +137,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
       await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
       const soClient = await kibanaServer.savedObjects;
-      const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
+      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
 
       expect(idDataViewExists).to.be(false);
@@ -159,7 +159,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await cspSecurity.logout();
       await cspSecurity.login('csp_read_user');
       const soClient = await kibanaServer.savedObjects;
-      const expectedDataViewId = `${CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
+      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
       const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
 
       expect(idDataViewExists).to.be(false);

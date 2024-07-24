@@ -41,10 +41,10 @@ export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 
-export const CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME = 'Latest Cloud Security Misconfigurations';
-export const CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_NAME = 'Latest Cloud Security Misconfigurations';
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
   'security_solution_latest_misconfigurations';
-export const CDR_MISSCONFIGURATIONS_INDEX_PATTERN =
+export const CDR_MISCONFIGURATIONS_INDEX_PATTERN =
   'logs-*_latest_misconfigurations_cdr,logs-cloud_security_posture.findings_latest-default';
 
 export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
