@@ -17,6 +17,7 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
+import { getFunctionSignatures } from '../../definitions/helpers';
 
 export interface Integration {
   name: string;
@@ -142,7 +143,7 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: string[],
   ignored?: string[],
   option?: string
-) {
+): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
     : [_expectedReturnType];
@@ -203,13 +204,25 @@ export function getFunctionSignaturesByReturnType(
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map(({ type, name, signatures }) => {
+    .map<PartialSuggestionWithText>((definition) => {
+      const { type, name, signatures } = definition;
+
       if (type === 'builtin') {
-        return signatures.some(({ params }) => params.length > 1)
-          ? `${name.toUpperCase()} $0`
-          : name.toUpperCase();
+        return {
+          text: signatures.some(({ params }) => params.length > 1)
+            ? `${name.toUpperCase()} $0`
+            : name.toUpperCase(),
+          label: name.toUpperCase(),
+        };
       }
-      return `${name.toUpperCase()}($0)`;
+      const printedSignatures = getFunctionSignatures(definition, {
+        withTypes: true,
+        capitalize: true,
+      });
+      return {
+        text: `${name.toUpperCase()}($0)`,
+        label: printedSignatures[0].declaration,
+      };
     });
 }
 
