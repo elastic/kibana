@@ -81,10 +81,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
-  const valueOfSelected = useMemo(() => {
-    console.log('selectedPrompt?.id', selectedPrompt);
-    return selectedPrompt?.id;
-  }, [selectedPrompt?.id]);
+  const valueOfSelected = useMemo(() => selectedPrompt?.id, [selectedPrompt?.id]);
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
