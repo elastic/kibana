@@ -78,7 +78,6 @@ describe('<ComponentTemplateEdit />', () => {
     template: {
       settings: { number_of_shards: 1 },
     },
-    _kbnMeta: { usedBy: [], isManaged: false },
   };
 
   beforeEach(async () => {
@@ -166,27 +165,30 @@ describe('<ComponentTemplateEdit />', () => {
           }),
         })
       );
-      // Mapping rollout modal should not be opened if the component template is not managed by Fleet
+      // Mapping rollout modal should not be opened if the component template is not managed
       expect(coreStart.overlays.openModal).not.toBeCalled();
     });
   });
 
-  describe('managed by fleet', () => {
+  describe('can rollover linked datastreams', () => {
     const DATASTREAM_NAME = 'logs-test-default';
+    const CUSTOM_COMPONENT_TEMPLATE = 'comp-1@custom';
+    const ENCODED_CUSTOM_COMPONENT_TEMPLATE = encodeURIComponent(CUSTOM_COMPONENT_TEMPLATE);
+
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplateResponse(
-        COMPONENT_TEMPLATE_TO_EDIT.name,
+        ENCODED_CUSTOM_COMPONENT_TEMPLATE,
         Object.assign({}, COMPONENT_TEMPLATE_TO_EDIT, {
-          _meta: { managed_by: 'fleet' },
+          name: CUSTOM_COMPONENT_TEMPLATE,
         })
       );
 
-      httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(ENCODED_CUSTOM_COMPONENT_TEMPLATE, {
         data_streams: [DATASTREAM_NAME],
       });
 
       await act(async () => {
-        testBed = await setup(httpSetup);
+        testBed = await setup(httpSetup, '@custom');
       });
 
       testBed.component.update();
@@ -221,7 +223,7 @@ describe('<ComponentTemplateEdit />', () => {
       component.update();
 
       expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
         expect.anything()
       );
       expect(httpSetup.post).toHaveBeenLastCalledWith(
@@ -259,7 +261,7 @@ describe('<ComponentTemplateEdit />', () => {
       component.update();
 
       expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        `${API_BASE_PATH}/component_templates/${ENCODED_CUSTOM_COMPONENT_TEMPLATE}`,
         expect.anything()
       );
       expect(httpSetup.post).toHaveBeenLastCalledWith(
@@ -268,6 +270,77 @@ describe('<ComponentTemplateEdit />', () => {
       );
 
       expect(coreStart.overlays.openModal).not.toBeCalled();
+    });
+
+    it('should show mappings rollover modal on save if referenced index template is managed and packaged', async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_TO_EDIT.name,
+        Object.assign({}, COMPONENT_TEMPLATE_TO_EDIT, {
+          _meta: {},
+        })
+      );
+
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+        data_streams: [DATASTREAM_NAME],
+      });
+
+      httpRequestsMockHelpers.setLoadReferencedIndexTemplateMetaResponse(
+        COMPONENT_TEMPLATE_TO_EDIT.name,
+        {
+          package: {
+            name: 'security',
+          },
+          managed_by: 'security',
+          managed: true,
+        }
+      );
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
+      testBed.component.update();
+
+      httpRequestsMockHelpers.setPostDatastreamMappingsFromTemplate(
+        DATASTREAM_NAME,
+        {},
+        { message: 'Bad request', statusCode: 400 }
+      );
+      const { exists, actions, component, form, coreStart } = testBed;
+
+      await act(async () => {
+        form.setInputValue('versionField.input', '1');
+      });
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      await actions.completeStepSettings();
+      await actions.completeStepMappings();
+      await actions.completeStepAliases();
+
+      // Make sure the list of affected mappings is shown
+      expect(exists('affectedMappingsList')).toBe(true);
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
+        expect.anything()
+      );
+
+      expect(coreStart.overlays.openModal).toBeCalled();
     });
   });
 });

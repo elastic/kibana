@@ -32,7 +32,8 @@ processors:
       tag: script_convert_array_to_string
       lang: painless
       {% raw %}source: |
-        if (ctx.{% endraw %}{{ value.field }}{% raw %} instanceof ArrayList){
+        if (ctx.{% endraw %}{{ value.field.replaceAll('.', '?.') }}{% raw %} != null &&
+            ctx.{% endraw %}{{ value.field }}{% raw %} instanceof ArrayList){
             ctx.{% endraw %}{{ value.field }}{% raw %} = ctx.{% endraw %}{{ value.field }}{% raw %}[0];
         }{% endraw %}
   - {{ key }}:
