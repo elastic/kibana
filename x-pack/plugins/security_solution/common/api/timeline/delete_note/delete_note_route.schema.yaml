@@ -26,19 +26,19 @@ paths:
             schema:
               oneOf:
                 - type: object
+                  required: [noteId]
+                  nullable: true
                   properties:
                     noteId:
                       type: string
-                      nullable: true
-                  required: [noteId]
                 - type: object
+                  required: [noteIds]
                   properties:
                     noteIds:
                       type: array
+                      nullable: true
                       items:
                         type: string
-                        nullable: true
-                  required: [noteIds]
       responses:
         '200':
           description: Indicates the note was successfully deleted.
