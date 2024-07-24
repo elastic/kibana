@@ -8,7 +8,7 @@
 import type { CoreStart, IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { aiopsLogRateAnalysisSchemaV2 } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
+import { aiopsLogRateAnalysisSchemaV3 } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import type { AiopsLicense } from '../../types';
@@ -37,7 +37,7 @@ export const defineRoute = (
         version: '1',
         validate: {
           request: {
-            body: aiopsLogRateAnalysisSchemaV2,
+            body: aiopsLogRateAnalysisSchemaV3,
           },
         },
       },
