@@ -278,6 +278,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
+      dispatch(resetResults());
       setOverrides({
         remainingFieldCandidates: selectedKeywordFieldCandidates,
         remainingTextFieldCandidates: selectedTextFieldCandidates,
