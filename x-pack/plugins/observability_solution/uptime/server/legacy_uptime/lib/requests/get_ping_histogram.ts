@@ -84,7 +84,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   // @ts-expect-error upgrade typescript v5.1.6
   const buckets = result?.aggregations?.timeseries?.buckets ?? [];
 
-  const histogram = buckets.map((bucket: Pick<typeof buckets[0], 'key' | 'down' | 'up'>) => {
+  const histogram = buckets.map((bucket: Pick<(typeof buckets)[0], 'key' | 'down' | 'up'>) => {
     const x: number = bucket.key;
     const downCount = bucket.down.value || 0;
     const upCount = bucket.up.value || 0;

@@ -151,7 +151,7 @@ describe('tabifyAggResponse Integration', () => {
 
       function getTopAggregations(
         rawResp: typeof threeTermBuckets
-      ): typeof threeTermBuckets['aggregations'] {
+      ): (typeof threeTermBuckets)['aggregations'] {
         return !isSamplingEnabled(probability)
           ? rawResp.aggregations!
           : // @ts-ignore
