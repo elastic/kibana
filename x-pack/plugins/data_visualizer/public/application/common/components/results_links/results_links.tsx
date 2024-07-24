@@ -286,7 +286,7 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       )}
 
-      {results.format === FILE_FORMATS.TIKA ? (
+      {results.format === FILE_FORMATS.TIKA ? ( // !!!!!! can we detect that a semantic field has been created?
         <EuiFlexItem>
           <EuiCard
             hasBorder

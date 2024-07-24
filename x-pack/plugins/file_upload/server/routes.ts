@@ -327,9 +327,9 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /internal/file_upload/preview_index_time_range Predict the time range for an index using example documents
-   * @apiName PreviewIndexTimeRange
-   * @apiDescription Predict the time range for an index using example documents
+   * @api {post} /internal/file_upload/preview_tika_contents Returns the contents of a file using the attachment ingest processor
+   * @apiName PreviewTikaContents
+   * @apiDescription Preview the contents of a file using the attachment ingest processor
    */
   router.versioned
     .post({

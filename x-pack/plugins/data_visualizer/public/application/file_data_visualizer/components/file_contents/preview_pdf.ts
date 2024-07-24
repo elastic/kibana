@@ -7,17 +7,19 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 
+const URL = '/internal/file_upload/preview_pdf_contents';
+
 export async function previewPDF(http: HttpSetup, data: ArrayBuffer) {
-  const dd: string = [].reduce.call(
+  const dataString: string = [].reduce.call(
     new Uint8Array(data),
     (p, c) => {
       return p + String.fromCharCode(c);
     },
     ''
   ) as string;
-  const pdfBase64 = btoa(dd);
+  const pdfBase64 = btoa(dataString);
 
-  const { preview } = await http.fetch<any>('/internal/file_upload/preview_pdf_contents', {
+  const { preview } = await http.fetch<any>(URL, {
     method: 'POST',
     version: '1',
     body: JSON.stringify({

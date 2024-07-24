@@ -89,15 +89,10 @@ export async function analyzeTikaFile(
                 },
               },
             },
-            // content: {
-            //   // @ts-expect-error semantic_text not supported
-            //   type: 'semantic_text',
-            //   inference_id: 'test-elser',
-            // },
           },
         },
         ingest_pipeline: {
-          description: 'Ingest pipeline created by text structure finder',
+          description: 'Ingest pipeline created by file data visualizer',
           processors: [
             {
               attachment: {
@@ -105,12 +100,6 @@ export async function analyzeTikaFile(
                 remove_binary: true,
               },
             },
-            // {
-            //   set: {
-            //     field: 'content',
-            //     copy_from: 'attachment.content',
-            //   },
-            // },
           ],
         },
       },

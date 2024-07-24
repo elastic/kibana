@@ -65,6 +65,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
   };
 
   addCombinedField = (combinedField: CombinedField) => {
+    // !!!!!!!!!!!! replace this with addCombinedField2
     if (this.hasNameCollision(combinedField.combinedFieldName)) {
       throw new Error(getNameCollisionMsg(combinedField.combinedFieldName));
     }

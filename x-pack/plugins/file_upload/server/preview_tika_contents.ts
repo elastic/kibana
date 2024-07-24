@@ -9,19 +9,16 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { PreviewTikaResponse } from '../common/types';
 
 /**
- * Returns the start and end time range in epoch milliseconds for a given set of documents
+ * Returns the contents of a file using the attachment ingest processor
  * @param client IScopedClusterClient
- * @param timeField Time field name
- * @param pipeline ingest pipeline config
- * @param docs array of documents
- * @returns start and end time range in epoch milliseconds
+ * @param base64File bae64 encoded file
  */
 export async function previewTikaContents(
   client: IScopedClusterClient,
   base64File: string
 ): Promise<PreviewTikaResponse> {
   const pipeline = {
-    description: 'Ingest pipeline created by text structure finder',
+    description: '',
     processors: [
       {
         attachment: {
