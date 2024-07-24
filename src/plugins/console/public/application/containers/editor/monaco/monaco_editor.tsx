@@ -178,6 +178,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           theme: CONSOLE_THEME_ID,
         }}
         suggestionProvider={suggestionProvider}
+        enableFindAction={true}
       />
     </div>
   );
