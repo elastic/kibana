@@ -25,4 +25,4 @@ export const CHANGE_POINT_DETECTION_VIEW_TYPE = {
 } as const;
 
 export type ChangePointDetectionViewType =
-  typeof CHANGE_POINT_DETECTION_VIEW_TYPE[keyof typeof CHANGE_POINT_DETECTION_VIEW_TYPE];
+  (typeof CHANGE_POINT_DETECTION_VIEW_TYPE)[keyof typeof CHANGE_POINT_DETECTION_VIEW_TYPE];
