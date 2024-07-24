@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  describe('@ess @serverless Risk Scoring Preview API', function () {
+  describe('@ess @serverless Risk Scoring Preview API', () => {
     before(async () => {
       enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
