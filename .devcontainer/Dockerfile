@@ -46,7 +46,7 @@ RUN set -e ; \
   make -j $(nproc) > /dev/null ; \
   make install > /dev/null ; \
   rm -rf  "${OPENSSL_PATH}-${OPENSSL_VERSION}" ; \
-  chown -R 1000:0 "${OPENSSL_PATH}";
+  chown -R 1000:1000 "${OPENSSL_PATH}";
 
 WORKDIR ${KBN_DIR}
 
