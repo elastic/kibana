@@ -177,6 +177,7 @@ const ecsFields = [
 
   // User fields
   // https://www.elastic.co/guide/en/ecs/current/ecs-user.html
+  'user.name',
   'user.domain',
   'user.email',
   'user.roles',
