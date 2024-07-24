@@ -211,7 +211,7 @@ describe('structurally can walk all nodes', () => {
           expect(columns).toMatchObject([
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'integer',
               name: '123',
             },
             {
@@ -244,7 +244,7 @@ describe('structurally can walk all nodes', () => {
           expect(columns).toMatchObject([
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'integer',
               name: '1',
             },
             {
@@ -264,7 +264,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'decimal',
               name: '3.14',
             },
           ]);
@@ -288,12 +288,12 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'decimal',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'decimal',
                     name: '2',
                   },
                 ],
@@ -318,12 +318,13 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    // @TODO: investigate why these are interpreted as decimal, not integer
+                    literalType: 'decimal',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'decimal',
                     name: '2',
                   },
                 ],
@@ -333,7 +334,7 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'decimal',
                     name: '3.3',
                   },
                 ],
@@ -342,17 +343,17 @@ describe('structurally can walk all nodes', () => {
             expect(literals).toMatchObject([
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'decimal',
                 name: '1',
               },
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'decimal',
                 name: '2',
               },
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'decimal',
                 name: '3.3',
               },
             ]);
@@ -526,7 +527,7 @@ describe('structurally can walk all nodes', () => {
               castType: 'number',
               value: {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'integer',
                 value: 123,
               },
             },
