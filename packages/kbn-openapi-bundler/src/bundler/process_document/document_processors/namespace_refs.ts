@@ -86,6 +86,10 @@ function decorateRefBaseName(ref: string, prefix: string): string {
   return `${path}#${pointerParts.join('/')}/${prefix}_${refName}`;
 }
 
+const PARENTHESES_INFO_REGEX = /\(.+\)+/g;
+const SPACES_REGEX = /\s+/g;
+
 function normalizeNamespace(namespace: string): string {
-  return namespace.replaceAll(/[\s.]/g, '_');
+  // Using two replaceAll() to make sure there is no leading or trailing underscores
+  return namespace.replaceAll(PARENTHESES_INFO_REGEX, ' ').trim().replaceAll(SPACES_REGEX, '_');
 }
