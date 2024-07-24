@@ -6,17 +6,23 @@
  */
 
 import TestAgent from 'supertest/lib/agent';
-import { IEsSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
-import { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
-import type { SendOptions } from '../../../../../test/common/services/bsearch';
+import type { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
+import type { BsearchService, SendOptions } from '../../../../../test/common/services/bsearch';
 
-interface SecuritySolutionServerlessBsearch extends Omit<BsearchSecureService, 'send'> {
+export interface SecuritySolutionServerlessBsearch extends Omit<BsearchSecureService, 'send'> {
   send: <T extends IEsSearchResponse>(options: SendOptions) => Promise<T>;
 }
 
-export interface SecuritySolutionUtils {
+export interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
   createSuperTest: (role?: string) => Promise<TestAgent<any>>;
   createBsearch: (role?: string) => Promise<SecuritySolutionServerlessBsearch>;
+}
+
+export interface SecuritySolutionESSUtilsInterface {
+  getUsername: (role?: string) => Promise<string>;
+  createSuperTest: (role?: string) => Promise<TestAgent<any>>;
+  createBsearch: (role?: string) => Promise<BsearchService>;
 }

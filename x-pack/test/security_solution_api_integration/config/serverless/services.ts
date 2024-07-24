@@ -16,7 +16,7 @@ export const services = {
   ...serverlessServices,
   spaces: SpacesServiceProvider,
   bsearch: SecuritySolutionServerlessBsearchCreator,
-  bsearchSecure: BsearchSecureService,
+  secureBsearch: BsearchSecureService,
   securitySolutionUtils: SecuritySolutionServerlessUtils,
   supertest: SecuritySolutionServerlessSuperTest,
 };

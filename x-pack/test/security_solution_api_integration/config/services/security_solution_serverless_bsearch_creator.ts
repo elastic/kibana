@@ -7,7 +7,6 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// It is wrapper around supertest that injects Serverless auth headers for the admin user.
 export async function SecuritySolutionServerlessBsearchCreator({ getService }: FtrProviderContext) {
   const { createBsearch } = getService('securitySolutionUtils');
 

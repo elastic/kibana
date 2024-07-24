@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecuritySolutionUtils } from './types';
+import { FtrProviderContextWithSpaces as FtrProviderContext } from '../../ftr_provider_context_with_spaces';
+import { SecuritySolutionESSUtilsInterface } from './types';
 
 export function SecuritySolutionESSUtils({
   getService,
-}: FtrProviderContext): SecuritySolutionUtils {
+}: FtrProviderContext): SecuritySolutionESSUtilsInterface {
   const config = getService('config');
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');

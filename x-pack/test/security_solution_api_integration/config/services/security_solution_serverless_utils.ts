@@ -12,17 +12,17 @@ import type { SendOptions } from '../../../../../test/common/services/bsearch';
 import type { SendOptions as SecureBsearchSendOptions } from '../../../../test_serverless/shared/services/bsearch_secure';
 import type { RoleCredentials } from '../../../../test_serverless/shared/services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionUtils } from './types';
+import type { SecuritySolutionUtilsInterface } from './types';
 
 export function SecuritySolutionServerlessUtils({
   getService,
-}: FtrProviderContext): SecuritySolutionUtils {
+}: FtrProviderContext): SecuritySolutionUtilsInterface {
   const svlUserManager = getService('svlUserManager');
   const lifecycle = getService('lifecycle');
   const svlCommonApi = getService('svlCommonApi');
   const config = getService('config');
   const log = getService('log');
-  const SecureBsearch = getService('bsearchSecure');
+  const SecureBsearch = getService('secureBsearch');
 
   const rolesCredentials = new Map<string, RoleCredentials>();
   const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
@@ -81,7 +81,7 @@ export function SecuritySolutionServerlessUtils({
         const { supertest: _, ...rest } = sendOptions;
         const serverlessSendOptions: SecureBsearchSendOptions = {
           ...rest,
-          // We need super test without auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
+          // We need super test WITHOUT auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
           supertestWithoutAuth: supertest.agent(kbnUrl),
           apiKeyHeader,
           internalOrigin: 'Kibana',
