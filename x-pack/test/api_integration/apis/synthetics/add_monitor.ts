@@ -158,6 +158,22 @@ export default function ({ getService }: FtrProviderContext) {
       epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
     });
 
+    it('can enable retries', async () => {
+      // Delete a required property to make payload invalid
+      const maxAttempts = 2;
+      const newMonitor = {
+        max_attempts: maxAttempts,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [localLoc],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
+    });
+
     it('cannot create a invalid monitor without a monitor type', async () => {
       // Delete a required property to make payload invalid
       const newMonitor = {
