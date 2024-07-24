@@ -195,9 +195,15 @@ describe('mappingFromFieldMap', () => {
           properties: {
             action: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             kind: {
               type: 'keyword',
+              ignore_above: 1024,
+            },
+            original: {
+              type: 'keyword',
+              ignore_above: 1024,
             },
           },
         },

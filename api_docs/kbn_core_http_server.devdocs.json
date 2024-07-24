@@ -3884,6 +3884,10 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_datastream_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
               },
               {
@@ -7435,6 +7439,10 @@
               {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -13317,10 +13325,10 @@
             "id": "def-common.RouteValidatorFullConfigResponse.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: LazyValidator; }",
+            "label": "[statusCode: number]: { description?: string | undefined; bodyContentType?: string | undefined; body?: LazyValidator | undefined; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
+              "[statusCode: number]:  { description?: string | undefined; bodyContentType?: string | undefined; body?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -13328,7 +13336,7 @@
                 "section": "def-common.LazyValidator",
                 "text": "LazyValidator"
               },
-              "; }"
+              " | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
             "deprecated": false,
@@ -14110,6 +14118,10 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/routes/elu_history.ts"
+              },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
@@ -16450,6 +16462,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -16957,10 +16973,10 @@
             "id": "def-common.VersionedRouteResponseValidation.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[statusCode: number]: { bodyContentType?: string | undefined; body: VersionedResponseBodyValidation; }",
+            "label": "[statusCode: number]: { description?: string | undefined; bodyContentType?: string | undefined; body?: VersionedResponseBodyValidation | undefined; }",
             "description": [],
             "signature": [
-              "[statusCode: number]:  { bodyContentType?: string | undefined; body: ",
+              "[statusCode: number]:  { description?: string | undefined; bodyContentType?: string | undefined; body?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -16968,7 +16984,7 @@
                 "section": "def-common.VersionedResponseBodyValidation",
                 "text": "VersionedResponseBodyValidation"
               },
-              "; }"
+              " | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
