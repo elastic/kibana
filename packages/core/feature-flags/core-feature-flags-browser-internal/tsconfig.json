@@ -20,5 +20,7 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/logging",
     "@kbn/core-base-browser-mocks",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-injected-metadata-browser-mocks",
   ]
 }
