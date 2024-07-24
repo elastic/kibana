@@ -26,18 +26,24 @@ components:
       properties:
         columns:
           $ref: '#/components/schemas/ColumnHeaderResult'
+          nullable: true
         created:
           type: number
+          nullable: true
         createdBy:
           type: string
+          nullable: true
         dataProviders:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/DataProviderResult'
         dataViewId:
           type: string
+          nullable: true
         dateRange:
           type: object
+          nullable: true
           properties:
             end:
               oneOf:
@@ -49,8 +55,10 @@ components:
                 - type: number
         description:
           type: string
+          nullable: true
         eqlOptions:
           type: object
+          nullable: true
           properties:
             eventCategoryField:
               type: string
@@ -60,48 +68,67 @@ components:
               type: string
         eventType:
           type: string
+          nullable: true
         excludedRowRendererIds:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/RowRendererId'
         favorite:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/FavoriteTimelineResult'
         filters:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/FilterTimelineResult'
         kqlMode:
           type: string
+          nullable: true
         kqlQuery:
+          nullable: true
           $ref: '#/components/schemas/SerializedFilterQueryResult'
         indexNames:
           type: array
+          nullable: true
           items:
             type: string
+        savedSearchId:
+          type: string
+          nullable: true
         savedQueryId:
           type: string
+          nullable: true
         sort:
+          nullable: true
           $ref: '#/components/schemas/Sort'
         status:
           type: string
+          nullable: true
           enum:
             - active
             - draft
             - immutable
         title:
           type: string
+          nullable: true
         templateTimelineId:
           type: string
+          nullable: true
         templateTimelineVersion:
           type: number
+          nullable: true
         timelineType:
+          nullable: true
           $ref: '#/components/schemas/TimelineType'
         updated:
           type: number
+          nullable: true
         updatedBy:
           type: string
+          nullable: true
     TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
@@ -227,21 +254,29 @@ components:
           $ref: '#/components/schemas/DataProviderType'
     BareNote:
       type: object
+      required: [timelineId]
       properties:
         eventId:
           type: string
+          nullable: true
         note:
           type: string
+          nullable: true
         timelineId:
           type: string
+          nullable: true
         created:
           type: number
+          nullable: true
         createdBy:
           type: string
+          nullable: true
         updated:
           type: number
+          nullable: true
         updatedBy:
           type: string
+          nullable: true
     Note:
       allOf:
         - $ref: '#/components/schemas/BareNote'
@@ -296,10 +331,13 @@ components:
       properties:
         fullName:
           type: string
+          nullable: true
         userName:
           type: string
+          nullable: true
         favoriteDate:
           type: number
+          nullable: true
     FilterTimelineResult:
       type: object
       properties:
@@ -357,6 +395,7 @@ components:
               type: string
     PinnedEvent:
       type: object
+      required: [eventId, pinnedEventId, timelineId, version]
       properties:
         pinnedEventId:
           type: string
@@ -366,12 +405,16 @@ components:
           type: string
         created:
           type: number
+          nullable: true
         createdBy:
           type: string
+          nullable: true
         updated:
           type: number
+          nullable: true
         updatedBy:
           type: string
+          nullable: true
         version:
           type: string
     Sort:
@@ -379,20 +422,21 @@ components:
       properties:
         columnId:
           type: string
+          nullable: true
+        columnType:
+          type: string
+          nullable: true
         sortDirection:
           type: string
+          nullable: true
     SortFieldTimeline:
-      type: object
+      type: string
       description: The field to sort the timelines by.
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        updated:
-          type: string
-        created:
-          type: string
+      enum:
+        - title
+        - description
+        - updated
+        - created
     TimelineStatus:
       type: string
       enum:
