@@ -1923,7 +1923,8 @@
         "schema": {
           "oneOf": [
             {
-              "type": "string"
+              "type": "string",
+              "example": "my-category"
             },
             {
               "type": "array",
@@ -1933,8 +1934,7 @@
               "maxItems": 100
             }
           ]
-        },
-        "example": "my-category"
+        }
       },
       "defaultSearchOperator": {
         "in": "query",

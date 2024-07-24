@@ -4468,11 +4468,11 @@ components:
       schema:
         oneOf:
           - type: string
+            example: my-category
           - type: array
             items:
               type: string
             maxItems: 100
-      example: my-category
     Cases_defaultSearchOperator:
       in: query
       name: defaultSearchOperator
