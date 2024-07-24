@@ -26,33 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
   const basePayload: GetInfraMetricsRequestBodyPayload = {
     type: 'host',
     limit: 10,
-    metrics: [
-      {
-        type: 'cpu',
-      },
-      {
-        type: 'diskSpaceUsage',
-      },
-      {
-        type: 'memory',
-      },
-      {
-        type: 'memoryFree',
-      },
-      {
-        type: 'normalizedLoad1m',
-      },
-      {
-        type: 'rx',
-      },
-      {
-        type: 'tx',
-      },
-    ],
-    range: {
-      from: new Date(DATES['8.0.0'].logs_and_metrics.min).toISOString(),
-      to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
-    },
+    metrics: ['cpu', 'diskSpaceUsage', 'memory', 'memoryFree', 'normalizedLoad1m', 'rx', 'tx'],
+    from: new Date(DATES['8.0.0'].logs_and_metrics.min).toISOString(),
+    to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
     query: { bool: { must_not: [], filter: [], should: [], must: [] } },
     sourceId: 'default',
   };
@@ -111,11 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return all hosts if query params is not sent', async () => {
         const body: GetInfraMetricsRequestBodyPayload = {
           ...basePayload,
-          metrics: [
-            {
-              type: 'memory',
-            },
-          ],
+          metrics: ['memory'],
           query: undefined,
         };
 
@@ -154,11 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 3 hosts when filtered by "host.os.name=CentOS Linux"', async () => {
         const body: GetInfraMetricsRequestBodyPayload = {
           ...basePayload,
-          metrics: [
-            {
-              type: 'cpu',
-            },
-          ],
+          metrics: ['cpu'],
           query: { bool: { filter: [{ term: { 'host.os.name': 'CentOS Linux' } }] } },
         };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -174,11 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 0 hosts when filtered by "host.os.name=Ubuntu"', async () => {
         const body: GetInfraMetricsRequestBodyPayload = {
           ...basePayload,
-          metrics: [
-            {
-              type: 'cpu',
-            },
-          ],
+          metrics: ['cpu'],
           query: { bool: { filter: [{ term: { 'host.os.name': 'Ubuntu' } }] } },
         };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -191,11 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 0 hosts when filtered by not "host.name=gke-observability-8--observability-8--bc1afd95-nhhw"', async () => {
       const body: GetInfraMetricsRequestBodyPayload = {
         ...basePayload,
-        metrics: [
-          {
-            type: 'cpu',
-          },
-        ],
+        metrics: ['cpu'],
         query: {
           bool: {
             must_not: [
@@ -290,10 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return metrics for a host with alert count', async () => {
           const body: GetInfraMetricsRequestBodyPayload = {
             ...basePayload,
-            range: {
-              from: '2018-10-17T19:42:21.208Z',
-              to: '2018-10-17T19:58:03.952Z',
-            },
+            from: '2018-10-17T19:42:21.208Z',
+            to: '2018-10-17T19:58:03.952Z',
             limit: 1,
           };
           const response = await makeRequest({ body, expectedHTTPCode: 200 });

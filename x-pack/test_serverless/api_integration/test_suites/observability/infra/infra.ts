@@ -57,26 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               type: 'host',
               limit: 100,
-              metrics: [
-                {
-                  type: 'rx',
-                },
-                {
-                  type: 'tx',
-                },
-                {
-                  type: 'memory',
-                },
-                {
-                  type: 'cpu',
-                },
-                {
-                  type: 'diskSpaceUsage',
-                },
-                {
-                  type: 'memoryFree',
-                },
-              ],
+              metrics: ['rx', 'tx', 'memory', 'cpu', 'diskSpaceUsage', 'memoryFree'],
               query: {
                 bool: {
                   must: [],
