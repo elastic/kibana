@@ -398,7 +398,7 @@ export const DataTableCompareToolbarBtn = ({
       {isDisabled ? (
         <EuiToolTip
           content={i18n.translate('unifiedDataTable.compareSelectedRowsButtonDisabledTooltip', {
-            defaultMessage: 'Select not more than {limit} rows to compare',
+            defaultMessage: 'Comparison is limited to {limit} rows',
             values: { limit: MAX_SELECTED_DOCS_FOR_COMPARE },
           })}
         >
