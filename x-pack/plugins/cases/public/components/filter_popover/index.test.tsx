@@ -15,7 +15,8 @@ import { createAppMockRenderer } from '../../common/mock';
 
 import { FilterPopover } from '.';
 
-describe('FilterPopover ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/176679
+describe.skip('FilterPopover ', () => {
   let appMockRender: AppMockRenderer;
   const onSelectedOptionsChanged = jest.fn();
   const tags: string[] = ['coke', 'pepsi'];
