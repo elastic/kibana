@@ -14,10 +14,10 @@ export function ServiceEcoTour({
   children,
   onFinish,
 }: {
-  children: React.ReactNode;
+  children: React.ReactElement;
   onFinish: () => void;
 }) {
-  const { tourState, setTourState } = useServiceEcoTour();
+  const { tourState } = useServiceEcoTour();
 
   return (
     <EuiTourStep

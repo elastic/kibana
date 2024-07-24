@@ -105,7 +105,7 @@ export function Welcome({
         <EuiImage
           size="xl"
           src={servicesInventory}
-          alt={i18n.translate('xpack.apm.welcome.image.at,', {
+          alt={i18n.translate('xpack.apm.welcome.image.alt', {
             defaultMessage:
               'Image of the new experience of the service inventory, showing services detected from logs and APM-instrumented services',
           })}
