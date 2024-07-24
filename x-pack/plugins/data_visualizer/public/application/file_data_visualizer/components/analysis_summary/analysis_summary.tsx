@@ -135,6 +135,6 @@ function createDisplayItems(results: FindFileStructureResponse) {
 
 function getFormatLabel(results: FindFileStructureResponse) {
   return results.format === FILE_FORMATS.TIKA && results.document_type !== undefined
-    ? getTikaDisplayType(results.document_type)
+    ? getTikaDisplayType(results.document_type).type
     : results.format;
 }
