@@ -21,10 +21,10 @@ paths:
           application/json:
             schema:
               oneOf:
-                - type: object
+                - nullable: true
+                  type: object
                   properties:
                     noteId:
-                      nullable: true
                       type: string
                   required:
                     - noteId
@@ -32,8 +32,8 @@ paths:
                   properties:
                     noteIds:
                       items:
-                        nullable: true
                         type: string
+                      nullable: true
                       type: array
                   required:
                     - noteIds
