@@ -3884,6 +3884,10 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_datastream_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
               },
               {
@@ -14114,6 +14118,10 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/routes/elu_history.ts"
+              },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
