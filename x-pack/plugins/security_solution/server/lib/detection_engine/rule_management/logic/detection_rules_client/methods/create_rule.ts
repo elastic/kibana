@@ -42,7 +42,7 @@ export const createRule = async ({
   const ruleWithDefaults = applyRuleDefaults(rule);
 
   const payload = {
-    ...convertRuleResponseToAlertingRule(actionsClient, ruleWithDefaults),
+    ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),
     alertTypeId: ruleTypeMappings[rule.type],
     consumer: SERVER_APP_ID,
     enabled: rule.enabled ?? false,

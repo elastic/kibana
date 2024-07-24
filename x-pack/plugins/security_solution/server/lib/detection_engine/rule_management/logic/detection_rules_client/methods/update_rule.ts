@@ -58,7 +58,7 @@ export const updateRule = async ({
 
   const updatedRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(actionsClient, ruleWithUpdates),
+    data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
   });
 
   const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);

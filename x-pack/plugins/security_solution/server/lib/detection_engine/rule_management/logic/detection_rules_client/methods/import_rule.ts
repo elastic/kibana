@@ -61,7 +61,7 @@ export const importRule = async ({
 
     const updatedRule = await rulesClient.update({
       id: existingRule.id,
-      data: convertRuleResponseToAlertingRule(actionsClient, ruleWithUpdates),
+      data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
     });
     return convertAlertingRuleToRuleResponse(updatedRule);
   }

@@ -77,7 +77,7 @@ export const upgradePrebuiltRule = async ({
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(actionsClient, patchedRule),
+    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
   });
 
   return convertAlertingRuleToRuleResponse(patchedInternalRule);

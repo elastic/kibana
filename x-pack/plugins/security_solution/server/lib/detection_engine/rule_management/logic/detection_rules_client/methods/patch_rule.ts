@@ -59,7 +59,7 @@ export const patchRule = async ({
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(actionsClient, patchedRule),
+    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
   });
 
   const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);

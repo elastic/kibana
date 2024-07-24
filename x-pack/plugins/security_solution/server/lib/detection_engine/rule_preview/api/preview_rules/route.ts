@@ -122,8 +122,8 @@ export const previewRulesRoute = (
           }
 
           const internalRule = convertRuleResponseToAlertingRule(
-            actionsClient,
-            applyRuleDefaults(request.body)
+            applyRuleDefaults(request.body),
+            actionsClient
           );
           const previewRuleParams = internalRule.params;
 

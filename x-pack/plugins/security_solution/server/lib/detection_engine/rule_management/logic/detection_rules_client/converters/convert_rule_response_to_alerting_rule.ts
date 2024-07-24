@@ -40,8 +40,8 @@ type RuntimeFields =
   | 'execution_summary';
 
 export const convertRuleResponseToAlertingRule = (
-  actionsClient: ActionsClient,
-  rule: Omit<RuleResponse, RuntimeFields>
+  rule: Omit<RuleResponse, RuntimeFields>,
+  actionsClient: ActionsClient
 ): UpdateRuleData<RuleParams> => {
   const [ruleSystemActions, ruleActions] = separateActionsAndSystemAction(
     actionsClient,
