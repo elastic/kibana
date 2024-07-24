@@ -35,7 +35,7 @@ export const updateRuleApiKeyRoute = (
         const { id }: UpdateApiKeyParamsV1 = req.params;
 
         try {
-          await rulesClient.updateApiKey({ id });
+          await rulesClient.updateRuleApiKey({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

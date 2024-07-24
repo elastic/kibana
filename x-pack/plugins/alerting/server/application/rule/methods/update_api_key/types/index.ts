@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './update_api_key_types';
+export * from './update_rule_api_key_types';

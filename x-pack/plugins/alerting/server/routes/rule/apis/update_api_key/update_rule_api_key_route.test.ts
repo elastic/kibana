@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { updateRuleApiKeyRoute } from './update_rule_api_key_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
@@ -32,7 +32,7 @@ describe('updateRuleApiKeyRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_update_api_key"`);
 
-    rulesClient.updateApiKey.mockResolvedValueOnce();
+    rulesClient.updateRuleApiKey.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -46,8 +46,8 @@ describe('updateRuleApiKeyRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.updateApiKey).toHaveBeenCalledTimes(1);
-    expect(rulesClient.updateApiKey.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.updateRuleApiKey).toHaveBeenCalledTimes(1);
+    expect(rulesClient.updateRuleApiKey.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -66,7 +66,7 @@ describe('updateRuleApiKeyRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.updateApiKey.mockRejectedValue(
+    rulesClient.updateRuleApiKey.mockRejectedValue(
       new RuleTypeDisabledError('Fail', 'license_invalid')
     );
 

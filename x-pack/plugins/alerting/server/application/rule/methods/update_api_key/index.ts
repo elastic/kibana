@@ -8,4 +8,4 @@
 export type { updateApiKeyParamsSchema } from './schemas';
 export type { UpdateApiKeyParams } from './types';
 
-export { updateApiKey } from './update_api_key';
+export { updateRuleApiKey } from './update_rule_api_key';

@@ -17,13 +17,13 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { UpdateApiKeyParams } from './types';
 import { updateApiKeyParamsSchema } from './schemas';
 
-export async function updateApiKey(
+export async function updateRuleApiKey(
   context: RulesClientContext,
   { id }: UpdateApiKeyParams
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.updateApiKey('${id}')`,
+    `rulesClient.updateRuleApiKey('${id}')`,
     async () => await updateApiKeyWithOCC(context, { id })
   );
 }
