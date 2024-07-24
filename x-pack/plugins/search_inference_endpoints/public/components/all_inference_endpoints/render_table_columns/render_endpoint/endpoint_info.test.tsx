@@ -274,5 +274,4 @@ describe('RenderEndpoint component tests', () => {
       expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
     });
   });
- 
 });
