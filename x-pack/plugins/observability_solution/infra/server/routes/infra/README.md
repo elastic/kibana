@@ -115,7 +115,7 @@ Response
 }
 ```
 
-## **POST /api/infra/{asset}/count**
+## **POST /api/infra/{assetType}/count**
 
 This endpoint returns the count of the hosts monitored with the system integration.
 
