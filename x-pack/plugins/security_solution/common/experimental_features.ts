@@ -114,9 +114,9 @@ export const allowedExperimentalValues = Object.freeze({
   securitySolutionNotesEnabled: false,
 
   /**
-   * Enables entity and alert previews
+   * Disables entity and alert previews
    */
-  entityAlertPreviewEnabled: false,
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -127,6 +127,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: false,
+
+  /**
+   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
+   */
+  assistantBedrockChat: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
