@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -28,10 +28,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('keyboard shortcuts', () => {
       let tabCount = 1;
-
-      after(async () => {
+      afterEach(async () => {
         if (tabCount > 1) {
           await browser.closeCurrentWindow();
+          tabCount = 1;
           await browser.switchTab(0);
         }
       });
