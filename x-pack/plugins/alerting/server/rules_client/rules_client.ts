@@ -53,8 +53,8 @@ import {
   BulkEditOptions,
 } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
-import { updateApiKey } from './methods/update_api_key';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
+import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disable } from './methods/disable';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
@@ -165,7 +165,7 @@ export class RulesClient {
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
 
-  public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
+  public updateRuleApiKey = (params: { id: string }) => updateRuleApiKey(this.context, params);
 
   public enableRule = (params: EnableRuleParams) => enableRule(this.context, params);
   public disable = (options: { id: string; untrack?: boolean }) => disable(this.context, options);
