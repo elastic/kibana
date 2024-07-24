@@ -9202,6 +9202,32 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval max(booleanField) > 0', [
           'EVAL does not support function max',
         ]);
+        testErrorsAndWarnings('from a_index | stats var = max(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats max(ipField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(ipField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(ipField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(ipField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(ipField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(ipField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(ipField) > 0', [
+          'EVAL does not support function max',
+        ]);
       });
 
       describe('min', () => {
@@ -9372,6 +9398,32 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval min(booleanField) > 0', [
+          'EVAL does not support function min',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = min(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats min(ipField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(ipField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(ipField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(ipField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(ipField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(ipField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(ipField) > 0', [
           'EVAL does not support function min',
         ]);
       });
