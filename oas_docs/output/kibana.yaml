@@ -4265,6 +4265,32 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/Connectors_secrets_properties_gemini'
+    Connectors_create_connector_request_inference:
+      title: Create Inference API connector request
+      description: >-
+        The Inference API connector uses axios to send a POST request to Elastic
+        Inference Service.
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/Connectors_config_properties_inference'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .inference
+          example: .inference
+        name:
+          type: string
+          description: The display name for the connector.
+          example: my-connector
+        secrets:
+          $ref: '#/components/schemas/Connectors_secrets_properties_inference'
     Connectors_create_connector_request_cases_webhook:
       title: Create Webhook - Case Managment connector request
       description: >
@@ -4880,6 +4906,37 @@ components:
           description: >-
             The service account credentials JSON file. The service account
             should have Vertex AI user IAM role assigned to it.
+    Connectors_config_properties_inference:
+      title: Connector request properties for a Inference API connector
+      description: Defines properties for connectors when type is `.inference`.
+      type: object
+      required:
+        - provider
+        - inferenceConfig
+        - taskType
+      properties:
+        provider:
+          type: string
+          description: Provider supported by inference service.
+        taskType:
+          type: string
+          description: The type of inference task that the model performs.
+          default: completion
+        inferenceConfig:
+          type: string
+          description: The service account configuration. This will be
+            different per the selected provider.
+    Connectors_secrets_properties_inference:
+      title: Connector secrets properties for a Inference API connector
+      description: Defines secrets for connectors when type is `.inference`.
+      type: object
+      required:
+        - inferenceSecrets
+      properties:
+        inferenceSecrets:
+          type: object
+          description: The service account credentials configuration. This will be
+            different per the selected provider.
     Connectors_config_properties_cases_webhook:
       title: Connector request properties for Webhook - Case Management connector
       required:
@@ -5916,6 +5973,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Connectors_create_connector_request_bedrock'
         - $ref: '#/components/schemas/Connectors_create_connector_request_gemini'
+        - $ref: '#/components/schemas/Connectors_create_connector_request_inference'
         - $ref: >-
             #/components/schemas/Connectors_create_connector_request_cases_webhook
         - $ref: '#/components/schemas/Connectors_create_connector_request_d3security'
@@ -5947,6 +6005,7 @@ components:
         mapping:
           .bedrock: '#/components/schemas/Connectors_create_connector_request_bedrock'
           .gemini: '#/components/schemas/Connectors_create_connector_request_gemini'
+          .inference: '#/components/schemas/Connectors_create_connector_request_inference'
           .cases-webhook: >-
             #/components/schemas/Connectors_create_connector_request_cases_webhook
           .d3security: '#/components/schemas/Connectors_create_connector_request_d3security'
@@ -6022,6 +6081,39 @@ components:
           description: The type of connector.
           enum:
             - .gemini
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/Connectors_is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/Connectors_is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/Connectors_is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/Connectors_is_system_action'
+        name:
+          type: string
+          description: The display name for the connector.
+        referenced_by_count:
+          $ref: '#/components/schemas/Connectors_referenced_by_count'
+    Connectors_connector_response_properties_inference:
+      title: Connector response properties for a Inference API connector
+      type: object
+      required:
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/Connectors_config_properties_inference'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .inference
         id:
           type: string
           description: The identifier for the connector.
@@ -6905,6 +6997,20 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/Connectors_secrets_properties_gemini'
+    Connectors_update_connector_request_inference:
+      title: Update Inference API connector request
+      type: object
+      required:
+        - config
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/Connectors_config_properties_inference'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/Connectors_secrets_properties_inference'
     Connectors_update_connector_request_cases_webhook:
       title: Update Webhook - Case Managment connector request
       type: object
@@ -7195,6 +7301,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Connectors_update_connector_request_bedrock'
         - $ref: '#/components/schemas/Connectors_update_connector_request_gemini'
+        - $ref: '#/components/schemas/Connectors_update_connector_request_inference'
         - $ref: >-
             #/components/schemas/Connectors_update_connector_request_cases_webhook
         - $ref: '#/components/schemas/Connectors_update_connector_request_d3security'
@@ -7240,6 +7347,7 @@ components:
       enum:
         - .bedrock
         - .gemini
+        - .inference
         - .cases-webhook
         - .d3security
         - .email
@@ -10358,6 +10466,17 @@ components:
           minimum_license_required: enterprise
           supported_feature_ids:
             - generativeAIForSecurity
+          is_system_action_type: false
+        - id: .inference
+          name: Inference API
+          enabled: true
+          enabled_in_config: true
+          enabled_in_license: true
+          minimum_license_required: enterprise
+          supported_feature_ids:
+            - generativeAIForSecurity
+            - generativeAIForObservability
+            - generativeAIForSearchPlayground
           is_system_action_type: false
     Data_views_get_data_views_response:
       summary: The get all data views API returns a list of data views.

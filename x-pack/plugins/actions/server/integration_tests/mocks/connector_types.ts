@@ -27,6 +27,7 @@ export const connectorTypes: string[] = [
   '.gen-ai',
   '.bedrock',
   '.gemini',
+  '.inference',
   '.d3security',
   '.resilient',
   '.sentinelone',

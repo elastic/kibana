@@ -138,7 +138,7 @@ WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not 
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`, `.inference`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -278,6 +278,7 @@ A configuration URL that varies by connector:
 --
 * For an <<bedrock-action-type,{bedrock} connector>>, specifies the {bedrock} request URL.
 * For an <<gemini-action-type,{gemini} connector>>, specifies the {gemini} request URL.
+* For an <<inference-action-type,{inference} connector>>, specifies the Elastic {inference} request.
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
@@ -488,6 +489,9 @@ An API key secret that varies by connector:
 
 `xpack.actions.preconfigured.<connector-id>.secrets.credentialsJSON`::
 For an <<gemini-action-type,{gemini} connector>>, specifies the GCP service account credentials JSON file for authentication.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.credentialsJSON`::
+For an <<inference-action-type,{inference} connector>>, specifies the specific per provider credentials configuration for the provider authentication.
 +
 --
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI or Azure OpenAI API key for authentication.
