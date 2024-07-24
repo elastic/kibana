@@ -210,6 +210,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     mlSuppressionFields,
   } = useMLRuleConfig({ machineLearningJobId });
 
+  const isMlSuppressionIncomplete =
+    isMlRule(ruleType) && machineLearningJobId?.length && !allJobsStarted;
+
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
@@ -1092,7 +1095,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     disabledText: suppressionGroupByDisabledText,
                   }}
                 />
-                {isMlRule(ruleType) && !allJobsStarted && (
+                {isMlSuppressionIncomplete && (
                   <EuiText size="xs" color="warning">
                     {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
                   </EuiText>
