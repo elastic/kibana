@@ -80,4 +80,4 @@ const actions = {
 /**
  * Strongly-types the correlation between an `action` and its return.
  */
-export type CanvasShareableAction = ReturnType<typeof actions[keyof typeof actions]>;
+export type CanvasShareableAction = ReturnType<(typeof actions)[keyof typeof actions]>;

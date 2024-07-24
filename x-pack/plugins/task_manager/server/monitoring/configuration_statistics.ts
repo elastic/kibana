@@ -31,7 +31,7 @@ interface CapacityConfig extends JsonObject {
 
 export type ConfigStat = Pick<
   TaskManagerConfig,
-  'poll_interval' | 'claim_strategy' | typeof CONFIG_FIELDS_TO_EXPOSE[number]
+  'poll_interval' | 'claim_strategy' | (typeof CONFIG_FIELDS_TO_EXPOSE)[number]
 > &
   CapacityConfig;
 
