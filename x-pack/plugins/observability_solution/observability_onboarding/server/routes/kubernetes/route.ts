@@ -52,12 +52,13 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
-    await packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' });
-
     const [{ encoded: apiKeyEncoded }, elasticAgentVersion] = await Promise.all([
       createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding'),
       getAgentVersion(fleetPluginStart, kibanaVersion),
+      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
+      packageClient.ensureInstalledPackage({ pkgName: 'system' }),
     ]);
+
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
