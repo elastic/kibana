@@ -46,6 +46,20 @@ export enum ML_DETECTOR_RULE_OPERATOR {
 }
 
 /**
+ * Enum ML_DETECTOR_RULE_PARAMS
+ */
+export enum ML_DETECTOR_RULE_PARAMS {
+  FORCE_TIME_SHIFT = 'force_time_shift'
+}
+
+/**
+ * Enum ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT
+ */
+export enum ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT {
+  TIME_SHIFT_AMOUNT = 'time_shift_amount'
+}
+
+/**
  * List of detector functions which don't support rules with numeric conditions.
  */
 export const ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS = [
