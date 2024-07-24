@@ -9,52 +9,91 @@
 import React from 'react';
 
 import { render } from '@testing-library/react';
-import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
-import { OptionsListComponentState, OptionsListReduxState } from '../types';
-import { ControlOutput, OptionsListEmbeddableInput } from '../..';
-import { mockOptionsListEmbeddable } from '../../../common/mocks';
+import { OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import { OptionsListControl } from './options_list_control';
-import { BehaviorSubject } from 'rxjs';
+import { ControlStateManager } from '../../../types';
+import { getOptionsListMocks } from '../../mocks/api_mocks';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 describe('Options list control', () => {
-  const defaultProps = {
-    typeaheadSubject: new BehaviorSubject(''),
-    loadMoreSubject: new BehaviorSubject(10),
+  const mountComponent = ({
+    api,
+    displaySettings,
+    stateManager,
+  }: {
+    api: any;
+    displaySettings: any;
+    stateManager: any;
+  }) => {
+    return render(
+      <OptionsListControlContext.Provider
+        value={{
+          api: api as unknown as OptionsListComponentApi,
+          displaySettings,
+          stateManager: stateManager as unknown as ControlStateManager<OptionsListComponentState>,
+        }}
+      >
+        <OptionsListControl controlPanelClassName="controlPanel" />
+      </OptionsListControlContext.Provider>
+    );
   };
 
-  interface MountOptions {
-    componentState: Partial<OptionsListComponentState>;
-    explicitInput: Partial<OptionsListEmbeddableInput>;
-    output: Partial<ControlOutput>;
-  }
-
-  async function mountComponent(options?: Partial<MountOptions>) {
-    const optionsListEmbeddable = await mockOptionsListEmbeddable({
-      componentState: options?.componentState ?? {},
-      explicitInput: options?.explicitInput ?? {},
-      output: options?.output ?? {},
-    } as Partial<OptionsListReduxState>);
-
-    return render(
-      <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
-        <OptionsListControl {...defaultProps} />
-      </OptionsListEmbeddableContext.Provider>
-    );
-  }
-
   test('if exclude = false and existsSelected = true, then the option should read "Exists"', async () => {
-    const control = await mountComponent({
-      explicitInput: { id: 'testExists', exclude: false, existsSelected: true },
-    });
+    const mocks = getOptionsListMocks();
+    mocks.api.uuid = 'testExists';
+    mocks.stateManager.exclude.next(false);
+    mocks.stateManager.existsSelected.next(true);
+    const control = mountComponent(mocks);
     const existsOption = control.getByTestId('optionsList-control-testExists');
     expect(existsOption).toHaveTextContent('Exists');
   });
 
   test('if exclude = true and existsSelected = true, then the option should read "Does not exist"', async () => {
-    const control = await mountComponent({
-      explicitInput: { id: 'testDoesNotExist', exclude: true, existsSelected: true },
-    });
+    const mocks = getOptionsListMocks();
+    mocks.api.uuid = 'testDoesNotExist';
+    mocks.stateManager.exclude.next(true);
+    mocks.stateManager.existsSelected.next(true);
+    const control = mountComponent(mocks);
     const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
     expect(existsOption).toHaveTextContent('DOES NOT Exist');
+  });
+
+  describe('renders proper delimiter', () => {
+    test('keyword field', async () => {
+      const mocks = getOptionsListMocks();
+      mocks.api.uuid = 'testDelimiter';
+      mocks.api.availableOptions$.next([
+        { value: 'woof', docCount: 5 },
+        { value: 'bark', docCount: 10 },
+        { value: 'meow', docCount: 12 },
+      ]);
+      mocks.stateManager.selectedOptions.next(['woof', 'bark']);
+      mocks.api.fieldSpec.next({
+        name: 'Test keyword field',
+        type: 'keyword',
+      } as FieldSpec);
+      const control = mountComponent(mocks);
+      const selections = control.getByTestId('optionsListSelections');
+      expect(selections.textContent).toBe('woof,  bark ');
+    });
+  });
+
+  test('number field', async () => {
+    const mocks = getOptionsListMocks();
+    mocks.api.uuid = 'testDelimiter';
+    mocks.api.availableOptions$.next([
+      { value: 1, docCount: 5 },
+      { value: 2, docCount: 10 },
+      { value: 3, docCount: 12 },
+    ]);
+    mocks.stateManager.selectedOptions.next([1, 2]);
+    mocks.api.fieldSpec.next({
+      name: 'Test keyword field',
+      type: 'number',
+    } as FieldSpec);
+    const control = mountComponent(mocks);
+    const selections = control.getByTestId('optionsListSelections');
+    expect(selections.textContent).toBe('1;   2 ');
   });
 });

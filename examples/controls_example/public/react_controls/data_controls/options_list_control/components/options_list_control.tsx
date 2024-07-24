@@ -72,7 +72,7 @@ export const OptionsListControl = ({
       selectedOptionsCount: selectedOptions?.length,
       selectionDisplayNode: (
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
-          <EuiFlexItem className="optionsList__selections">
+          <EuiFlexItem className="optionsList__selections" data-test-subj="optionsListSelections">
             <div className="eui-textTruncate">
               {excludeSelected && (
                 <>
