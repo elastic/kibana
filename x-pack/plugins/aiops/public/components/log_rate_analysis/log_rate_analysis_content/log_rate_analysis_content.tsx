@@ -81,7 +81,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   );
   const loaded = useAppSelector((s) => s.logRateAnalysisResults.loaded);
   const analysisType = useAppSelector((s) => s.logRateAnalysis.analysisType);
-  const windowParameters = useAppSelector((s) => s.logRateAnalysis.windowParameters);
+  const windowParameters = useAppSelector((s) => s.logRateAnalysis.chartWindowParameters);
 
   // Window parameters stored in the url state use this components
   // `initialAnalysisStart` prop to set the initial params restore from url state.
