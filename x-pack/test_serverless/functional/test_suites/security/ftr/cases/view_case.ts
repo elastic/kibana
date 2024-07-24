@@ -37,12 +37,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Case View', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await svlCommonPage.forceLogout();
     });
 
     describe('page', () => {
