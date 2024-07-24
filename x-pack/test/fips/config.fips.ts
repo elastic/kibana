@@ -515,7 +515,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   for (const path of configPaths) {
     const config = await readConfigFile(require.resolve(path));
-    testFiles.push(...config.get('testFiles'));
+    testFiles.push(...config.get('testFiles', []));
   }
 
   return {
