@@ -114,6 +114,8 @@ export const withEndpointAuthz = <T>(
       try {
         await additionalChecks(context, request);
       } catch (err) {
+        logger.debug(() => stringify(err));
+
         return errorHandler(logger, response, err);
       }
     }

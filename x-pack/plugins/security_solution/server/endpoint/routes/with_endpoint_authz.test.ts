@@ -11,7 +11,7 @@ import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__'
 import type { EndpointApiNeededAuthz } from './with_endpoint_authz';
 import { withEndpointAuthz } from './with_endpoint_authz';
 import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
-import { EndpointAuthorizationError } from '../errors';
+import { EndpointAuthorizationError, NotFoundError } from '../errors';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 
 describe('When using `withEndpointAuthz()`', () => {
@@ -106,7 +106,36 @@ describe('When using `withEndpointAuthz()`', () => {
     });
   });
 
-  it.todo('should call additionalChecks callback if defined');
+  it('should call additionalChecks callback if defined', async () => {
+    const additionalChecks = jest.fn();
+    const routeContextMock = coreMock.createCustomRequestHandlerContext(mockContext);
+    await withEndpointAuthz(
+      { any: ['canGetRunningProcesses'] },
+      logger,
+      mockRequestHandler,
+      additionalChecks
+    )(routeContextMock, mockRequest, mockResponse);
 
-  it.todo('should deny access if additinalChecks callback throws an error');
+    expect(additionalChecks).toHaveBeenCalledWith(routeContextMock, mockRequest);
+    expect(mockRequestHandler).toHaveBeenCalled();
+  });
+
+  it('should deny access if additionalChecks callback throws an error', async () => {
+    const error = new NotFoundError('something happen');
+    const additionalChecks = jest.fn(async () => {
+      throw error;
+    });
+    const routeContextMock = coreMock.createCustomRequestHandlerContext(mockContext);
+    await withEndpointAuthz(
+      { any: ['canGetRunningProcesses'] },
+      logger,
+      mockRequestHandler,
+      additionalChecks
+    )(routeContextMock, mockRequest, mockResponse);
+
+    expect(mockRequestHandler).not.toHaveBeenCalled();
+    expect(mockResponse.notFound).toHaveBeenCalledWith({
+      body: error,
+    });
+  });
 });
