@@ -177,6 +177,10 @@ export const RESPONSE_ACTIONS_ZIP_PASSCODE: Readonly<Record<ResponseActionAgentT
 
 /**
  * Map of Agent Type to alert field that holds the Agent ID for that agent type
+ *
+ * FIXME:PT Delete this const and use new one
+ *
+ * @deprecated
  */
 export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
   Record<ResponseActionAgentType, string>
@@ -184,4 +188,21 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
   endpoint: 'agent.id',
   sentinel_one: 'observer.serial_number',
   crowdstrike: 'device.id',
+});
+
+/**
+ * Map of Agent Type to alert fields that holds the Agent ID for that agent type
+ */
+export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
+  Record<ResponseActionAgentType, string[]>
+> = Object.freeze({
+  endpoint: ['agent.id'],
+  sentinel_one: [
+    'sentinel_one.activity.agent.id',
+    'sentinel_one.threat.agent.id',
+    'sentinel_one.alert.agent.id',
+    'sentinel_one.agent.agent.id',
+    'observer.serial_number',
+  ],
+  crowdstrike: ['device.id'],
 });
