@@ -17,6 +17,7 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } fro
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHostFields } from './hooks/use_observed_host_fields';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { InsightEntity } from '../shared/components/insight_entity';
 
 interface HostPanelContentProps {
   observedHost: ObservedEntityData<HostItem>;
@@ -44,7 +45,6 @@ export const HostPanelContent = ({
   isPreviewMode,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
-
   return (
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
@@ -71,6 +71,16 @@ export const HostPanelContent = ({
         observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
+      <InsightEntity
+        // observedData={observedHost}
+        hostName={hostName}
+        contextID={contextID}
+        scopeId={scopeId}
+        isDraggable={isDraggable}
+        // observedFields={observedFields}
+        queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
+      />
     </FlyoutBody>
+    // TODO: ADD INSIGHT ENTITY HERE (CSP)
   );
 };
