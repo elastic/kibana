@@ -141,7 +141,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   isPreview?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
-  telemetry: AnalyticsServiceSetup;
+  telemetry?: AnalyticsServiceSetup;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

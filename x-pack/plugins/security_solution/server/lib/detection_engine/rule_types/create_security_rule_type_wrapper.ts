@@ -553,7 +553,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (!isPreview) {
+          if (!isPreview && telemetry) {
             sendAlertSuppressionTelemetryEvent({
               telemetry,
               suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
