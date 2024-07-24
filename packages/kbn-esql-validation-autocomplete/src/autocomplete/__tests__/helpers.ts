@@ -15,7 +15,7 @@ import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext } from '../types';
+import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 
 export interface Integration {
@@ -27,6 +27,13 @@ export interface Integration {
     title?: string;
   }>;
 }
+
+export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+
+export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
+  text: '',
+  label: 'Choose from the time picker',
+};
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
@@ -224,7 +231,7 @@ export function getLiteralsByType(_type: string | string[]) {
 
 export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return requestedType.includes('date') ? TIME_SYSTEM_PARAMS : [];
+  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
 
 export function createCustomCallbackMocks(
@@ -247,15 +254,12 @@ export function createCustomCallbackMocks(
   };
 }
 
-export function createSuggestContext(text: string, triggerCharacter?: string) {
+export function createCompletionContext(triggerCharacter?: string) {
   if (triggerCharacter) {
     return { triggerCharacter, triggerKind: 1 }; // any number is fine here
   }
-  const foundTriggerCharIndexes = triggerCharacters.map((char) => text.lastIndexOf(char));
-  const maxIndex = Math.max(...foundTriggerCharIndexes);
   return {
-    triggerCharacter: text[maxIndex],
-    triggerKind: 1,
+    triggerKind: 0,
   };
 }
 

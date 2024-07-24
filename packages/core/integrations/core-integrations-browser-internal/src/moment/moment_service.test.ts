@@ -7,18 +7,22 @@
  */
 
 import { momentMock } from './moment_service.test.mocks';
+
+import { BehaviorSubject } from 'rxjs';
 import { MomentService } from './moment_service';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { BehaviorSubject } from 'rxjs';
 
 describe('MomentService', () => {
   let service: MomentService;
+
   beforeEach(() => {
     momentMock.tz.setDefault.mockClear();
+    momentMock.tz.guess.mockClear();
     momentMock.weekdays.mockClear();
     momentMock.updateLocale.mockClear();
     service = new MomentService();
   });
+
   afterEach(() => service.stop());
 
   const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 100));
@@ -36,16 +40,6 @@ describe('MomentService', () => {
     expect(momentMock.updateLocale).toHaveBeenCalledWith('default-locale', { week: { dow: 0 } });
   });
 
-  it('does not set unknkown zone', async () => {
-    const tz$ = new BehaviorSubject('timezone/undefined');
-    const uiSettings = uiSettingsServiceMock.createSetupContract();
-    uiSettings.get$.mockReturnValueOnce(tz$);
-
-    service.start({ uiSettings });
-    await flushPromises();
-    expect(momentMock.tz.setDefault).not.toHaveBeenCalled();
-  });
-
   it('sets timezone when a zone is defined', async () => {
     const tz$ = new BehaviorSubject('tz3');
     const uiSettings = uiSettingsServiceMock.createSetupContract();
@@ -54,6 +48,22 @@ describe('MomentService', () => {
     service.start({ uiSettings });
     await flushPromises();
     expect(momentMock.tz.setDefault).toHaveBeenCalledWith('tz3');
+  });
+
+  it('set timezone with result of moment.tz.guess for unknown zone', async () => {
+    const tz$ = new BehaviorSubject('timezone/undefined');
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockReturnValueOnce(tz$);
+
+    const guessedTz = { guessed: true };
+    momentMock.tz.guess.mockReturnValue(guessedTz);
+
+    service.start({ uiSettings });
+    await flushPromises();
+
+    expect(momentMock.tz.guess).toHaveBeenCalledTimes(1);
+    expect(momentMock.tz.setDefault).toHaveBeenCalledTimes(1);
+    expect(momentMock.tz.setDefault).toHaveBeenCalledWith(guessedTz);
   });
 
   test('updates moment config', async () => {

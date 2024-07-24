@@ -148,7 +148,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('detection-rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/187719
+  describe.skip('detection-rules', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 
@@ -683,7 +684,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('telemetry-prebuilt-rule-alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/188234
+  describe.skip('telemetry-prebuilt-rule-alerts', () => {
     it('should execute when scheduled', async () => {
       await mockAndSchedulePrebuiltRulesTask();
 

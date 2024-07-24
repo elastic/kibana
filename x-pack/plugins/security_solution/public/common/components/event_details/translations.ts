@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const THREAT_INTEL = i18n.translate('xpack.securitySolution.alertDetails.threatIntel', {
-  defaultMessage: 'Threat Intel',
-});
-
 export const INVESTIGATION_GUIDE = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.investigationGuide',
   {
@@ -18,52 +14,8 @@ export const INVESTIGATION_GUIDE = i18n.translate(
   }
 );
 
-export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.overview', {
-  defaultMessage: 'Overview',
-});
-
-export const HIGHLIGHTED_FIELDS = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.highlightedFields',
-  {
-    defaultMessage: 'Highlighted fields',
-  }
-);
-
-export const HIGHLIGHTED_FIELDS_FIELD = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.highlightedFields.field',
-  {
-    defaultMessage: 'Field',
-  }
-);
-
-export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.highlightedFields.value',
-  {
-    defaultMessage: 'Value',
-  }
-);
-
-export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
-  {
-    defaultMessage: 'Alert prevalence',
-  }
-);
-
-export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip',
-  {
-    defaultMessage:
-      'The total count of alerts with the same value within the currently selected timerange. This value is not affected by additional filters.',
-  }
-);
-
 export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table', {
   defaultMessage: 'Table',
-});
-
-export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jsonView', {
-  defaultMessage: 'JSON',
 });
 
 export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.osqueryView', {
@@ -95,19 +47,6 @@ export const PLACEHOLDER = i18n.translate(
     defaultMessage: 'Filter by Field, Value, or Description...',
   }
 );
-
-export const VIEW_COLUMN = (field: string) =>
-  i18n.translate('xpack.securitySolution.eventDetails.viewColumnCheckboxAriaLabel', {
-    values: { field },
-    defaultMessage: 'View {field} column',
-  });
-
-export const NESTED_COLUMN = (field: string) =>
-  i18n.translate('xpack.securitySolution.eventDetails.nestedColumnCheckboxAriaLabel', {
-    values: { field },
-    defaultMessage:
-      'The {field} field is an object, and is broken down into nested fields which can be added as column',
-  });
 
 export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
   defaultMessage: 'Agent status',
@@ -146,10 +85,6 @@ export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.
   defaultMessage: 'Alert reason',
 });
 
-export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
-  defaultMessage: 'View all fields in table',
-});
-
 export const ENDPOINT_COMMANDS = Object.freeze({
   tried: (command: string) =>
     i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.tried', {
@@ -175,10 +110,6 @@ export const ENDPOINT_COMMANDS = Object.freeze({
 
 export const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {
   defaultMessage: 'summary',
-});
-
-export const TIMELINE_VIEW = i18n.translate('xpack.securitySolution.eventDetails.timelineView', {
-  defaultMessage: 'Timeline',
 });
 
 export const ALERT_SUMMARY_CONVERSATION_ID = i18n.translate(
