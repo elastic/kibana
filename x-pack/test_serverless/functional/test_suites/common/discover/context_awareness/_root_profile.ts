@@ -10,11 +10,14 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
 
   describe('root profile', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginAsViewer();
+    });
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp', async () => {

@@ -64,8 +64,9 @@ import {
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
-import { InternalCreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
-import { InternalDeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import { InternalCreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/internal_create_asset_criticality.gen';
+import { InternalDeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/internal_delete_asset_criticality.gen';
+import { InternalGetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/internal_get_asset_criticality.gen';
 import { ManageAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import {
@@ -167,7 +168,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       return supertest
         .post('/api/asset_criticality/bulk')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -195,7 +196,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       return supertest
         .post('/api/asset_criticality')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -231,7 +232,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       return supertest
         .delete('/api/asset_criticality')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
@@ -322,7 +323,7 @@ finalize it.
       return supertest
         .post('/api/asset_criticality/list')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
@@ -367,7 +368,7 @@ finalize it.
       return supertest
         .get('/api/asset_criticality')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
@@ -502,6 +503,14 @@ detection engine rules.
     internalDeleteAssetCriticalityRecord(props: InternalDeleteAssetCriticalityRecordProps) {
       return supertest
         .delete('/internal/asset_criticality')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    internalGetAssetCriticalityRecord(props: InternalGetAssetCriticalityRecordProps) {
+      return supertest
+        .get('/internal/asset_criticality')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -777,6 +786,9 @@ export interface InternalCreateAssetCriticalityRecordProps {
 }
 export interface InternalDeleteAssetCriticalityRecordProps {
   query: InternalDeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface InternalGetAssetCriticalityRecordProps {
+  query: InternalGetAssetCriticalityRecordRequestQueryInput;
 }
 export interface ManageAlertTagsProps {
   body: ManageAlertTagsRequestBodyInput;
