@@ -1,11 +1,8 @@
 get:
   summary: Get a runtime field
   operationId: getRuntimeField
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
-  x-technical-preview: true
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -37,11 +34,8 @@ get:
 delete:
   summary: Delete a runtime field from a data view
   operationId: deleteRuntimeField
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
-  x-technical-preview: true
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -59,11 +53,8 @@ delete:
 post:
   summary: Update a runtime field
   operationId: updateRuntimeField
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
-  x-technical-preview: true
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
