@@ -16,7 +16,7 @@ const allEvaFunctions = getFunctionSignaturesByReturnType(
   'stats',
   'any',
   {
-    evalMath: true,
+    scalar: true,
     grouping: false,
   },
   undefined,
@@ -78,7 +78,7 @@ describe('autocomplete.suggest', () => {
           [
             ...getFieldNamesByType(['number', 'date']),
             ...getFunctionSignaturesByReturnType('eval', ['datetime', 'number'], {
-              evalMath: true,
+              scalar: true,
             }),
           ].map((field) => `${field},`)
         );
@@ -86,30 +86,30 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
         await assertSuggestions('from a | stats round(round(/', [
           ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
         await assertSuggestions('from a | stats avg(round(/', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
         await assertSuggestions('from a | stats avg(/', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }),
         ]);
         await assertSuggestions('from a | stats round(avg(/', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
@@ -120,7 +120,7 @@ describe('autocomplete.suggest', () => {
         const expected = [
           ...getFieldNamesByType(['number', 'datetime', 'boolean', 'ip']),
           ...getFunctionSignaturesByReturnType('stats', ['number', 'datetime', 'boolean', 'ip'], {
-            evalMath: true,
+            scalar: true,
           }),
         ];
 
@@ -134,7 +134,7 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from a | stats avg(b/) by stringField', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }),
         ]);
       });
 
@@ -200,7 +200,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 =',
           ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
         ]);
       });
@@ -211,7 +211,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats avg(b) by numberField % /', [
           ...getFieldNamesByType('number'),
           '`avg(b)`',
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }),
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [

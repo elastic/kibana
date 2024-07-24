@@ -8205,7 +8205,6 @@ export const evalFunctionDefinitions = [
   eDefinition,
   endsWithDefinition,
   expDefinition,
-  expDefinition,
   floorDefinition,
   fromBase64Definition,
   greatestDefinition,

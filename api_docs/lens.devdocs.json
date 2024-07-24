@@ -11266,7 +11266,7 @@
         "label": "LensSavedObjectAttributes",
         "description": [],
         "signature": [
-          "{ title: string; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          "{ title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -11298,7 +11298,7 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[] | undefined; }; description?: string | undefined; references: ",
+          "[] | undefined; }; references: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
