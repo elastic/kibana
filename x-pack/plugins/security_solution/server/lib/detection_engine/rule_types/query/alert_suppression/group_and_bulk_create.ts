@@ -274,6 +274,7 @@ export const groupAndBulkCreate = async ({
           suppressionWindow,
           alertTimestampOverride: runOpts.alertTimestampOverride,
           experimentalFeatures,
+          ruleType: 'query',
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
