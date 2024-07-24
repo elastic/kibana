@@ -24,7 +24,13 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
   const getRowIndicator = useMemo(() => {
     return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
   }, [getRowIndicatorProvider, props.dataView]);
-  const [pinnedItems, setPinnedItems] = React.useState<Record<string, boolean>>({});
+
+  const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
+    'getRowAdditionalLeadingControls'
+  );
+  const rowAdditionalLeadingControls = useMemo(() => {
+    return getRowAdditionalLeadingControlsAccessor(() => undefined)({ dataView: props.dataView });
+  }, [getRowAdditionalLeadingControlsAccessor, props.dataView]);
 
   return (
     <UnifiedDataTable
@@ -32,56 +38,7 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
-      rowAdditionalLeadingControls={[
-        {
-          id: 'test1',
-          headerAriaLabel: 'Additional row control header 1',
-          renderControl: (Control, rowProps) => {
-            return (
-              <Control
-                label="Test 1"
-                iconType={pinnedItems[rowProps.record.id] ? 'pinFilled' : 'pin'}
-                onClick={() => {
-                  setPinnedItems((prev) => ({
-                    ...prev,
-                    [rowProps.record.id]: !prev[rowProps.record.id],
-                  }));
-                }}
-              />
-            );
-          },
-        },
-        {
-          id: 'test2',
-          headerAriaLabel: 'Additional row control header 2',
-          renderControl: (Control, rowProps) => {
-            return (
-              <Control
-                label="Test 2"
-                iconType="visBarVerticalStacked"
-                onClick={() => {
-                  alert('Test 2 clicked');
-                }}
-              />
-            );
-          },
-        },
-        {
-          id: 'test',
-          headerAriaLabel: 'Additional row control header 3',
-          renderControl: (Control, rowProps) => {
-            return (
-              <Control
-                label="Test 3"
-                iconType="heart"
-                onClick={() => {
-                  alert('Test 3 clicked');
-                }}
-              />
-            );
-          },
-        },
-      ]}
+      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       {...props}
     />
   );

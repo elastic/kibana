@@ -24,15 +24,19 @@ export interface RowIndicatorExtensionParams {
   dataView: DataView;
 }
 
+export interface RowControlsExtensionParams {
+  dataView: DataView;
+}
+
 export interface Profile {
   // Data grid
   getCellRenderers: () => CustomCellRenderer;
   getRowIndicatorProvider: (
     params: RowIndicatorExtensionParams
   ) => UnifiedDataTableProps['getRowIndicator'] | undefined;
-  getRowAdditionalLeadingControls: () =>
-    | UnifiedDataTableProps['rowAdditionalLeadingControls']
-    | undefined;
+  getRowAdditionalLeadingControls: (
+    params: RowControlsExtensionParams
+  ) => UnifiedDataTableProps['rowAdditionalLeadingControls'] | undefined;
   // Doc viewer
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
 }
