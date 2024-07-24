@@ -13,7 +13,7 @@ import type { AiopsAppDependencies } from '../..';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { PatternAnalysisEmbeddableInitializer } from './pattern_analysis_initializer';
-import type { PatternAnalysisEmbeddableState } from './types';
+import type { PatternAnalysisComponentApi, PatternAnalysisEmbeddableState } from './types';
 
 export async function resolveEmbeddablePatternAnalysisUserInput(
   coreStart: CoreStart,
@@ -21,14 +21,40 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
   parentApi: unknown,
   focusedPanelId: string,
   isNewPanel: boolean,
-  input?: PatternAnalysisEmbeddableState
+  patternAnalysisControlsApi: PatternAnalysisComponentApi,
+  initialState?: PatternAnalysisEmbeddableState
 ): Promise<PatternAnalysisEmbeddableState> {
   const { overlays } = coreStart;
 
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
+  let hasChanged = false;
   return new Promise(async (resolve, reject) => {
     try {
+      const cancelChanges = () => {
+        // Reset to initialState in case user has changed the preview state
+        if (hasChanged && patternAnalysisControlsApi && initialState) {
+          patternAnalysisControlsApi.updateUserInput(initialState);
+        }
+
+        flyoutSession.close();
+        overlayTracker?.clearOverlays();
+        reject();
+      };
+
+      const update = async (nextUpdate: PatternAnalysisEmbeddableState) => {
+        resolve(nextUpdate);
+        flyoutSession.close();
+        overlayTracker?.clearOverlays();
+      };
+
+      const preview = async (nextUpdate: PatternAnalysisEmbeddableState) => {
+        if (patternAnalysisControlsApi) {
+          patternAnalysisControlsApi.updateUserInput(nextUpdate);
+          hasChanged = true;
+        }
+      };
+
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <AiopsAppContext.Provider
@@ -40,17 +66,10 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
             }
           >
             <PatternAnalysisEmbeddableInitializer
-              initialInput={input}
-              onCreate={(update) => {
-                resolve(update);
-                flyoutSession.close();
-                overlayTracker?.clearOverlays();
-              }}
-              onCancel={() => {
-                reject();
-                flyoutSession.close();
-                overlayTracker?.clearOverlays();
-              }}
+              initialInput={initialState}
+              onCreate={update}
+              onCancel={cancelChanges}
+              onPreview={preview}
               isNewPanel={isNewPanel}
             />
           </AiopsAppContext.Provider>,
@@ -59,7 +78,7 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
         {
           ownFocus: true,
           size: 's',
-          type: 'overlay',
+          type: 'push',
           paddingSize: 'm',
           hideCloseButton: true,
           'data-test-subj': 'aiopsPatternAnalysisEmbeddableInitializer',

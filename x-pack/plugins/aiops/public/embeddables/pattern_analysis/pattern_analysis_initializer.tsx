@@ -45,6 +45,7 @@ export interface PatternAnalysisInitializerProps {
   initialInput?: Partial<PatternAnalysisEmbeddableRuntimeState>;
   onCreate: (props: PatternAnalysisEmbeddableRuntimeState) => void;
   onCancel: () => void;
+  onPreview: (update: PatternAnalysisEmbeddableRuntimeState) => Promise<void>;
   isNewPanel: boolean;
 }
 
@@ -52,6 +53,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   initialInput,
   onCreate,
   onCancel,
+  onPreview,
   isNewPanel,
 }) => {
   const {
@@ -88,6 +90,13 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
       dataViewId,
     };
   }, [formInput, dataViewId]);
+
+  useEffect(
+    function previewChanges() {
+      onPreview(updatedProps);
+    },
+    [onPreview, updatedProps]
+  );
 
   return (
     <>

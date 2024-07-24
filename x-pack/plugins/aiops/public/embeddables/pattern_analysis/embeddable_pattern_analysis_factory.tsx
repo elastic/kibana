@@ -144,6 +144,7 @@ export const getPatternAnalysisEmbeddableFactory = (
                 parentApi,
                 uuid,
                 false,
+                patternAnalysisControlsApi,
                 serializePatternAnalysisChartState()
               );
 
