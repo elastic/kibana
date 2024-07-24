@@ -12,15 +12,27 @@ import { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } f
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { indexFieldsProvider } from './search_strategy/index_fields';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
+import { ConfigSchema } from './config';
 
 export class TimelinesPlugin
   implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>
 {
   private readonly logger: Logger;
   private security?: SecurityPluginSetup;
+  private experimentalFeatures: ExperimentalFeatures;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+
+    const { features: experimentalFeatures } = parseExperimentalConfigValue(
+      initializerContext.config.get<ConfigSchema>().enableExperimental
+    );
+
+    this.experimentalFeatures = experimentalFeatures;
   }
 
   public setup(core: CoreSetup<StartPlugins, TimelinesPluginStart>, plugins: SetupPlugins) {
@@ -33,6 +45,7 @@ export class TimelinesPlugin
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
         depsStart.data,
         this.logger,
+        this.experimentalFeatures,
         this.security
       );
       const TimelineEqlSearchStrategy = timelineEqlSearchStrategyProvider(depsStart.data);
