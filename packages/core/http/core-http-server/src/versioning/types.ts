@@ -32,7 +32,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<Method>, 'access' | 'description'>;
+  options?: Omit<RouteConfigOptions<Method>, 'access' | 'description' | 'deprecated'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /**
@@ -82,6 +82,14 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * ```
    */
   description?: string;
+
+  /**
+   * Declares this operation to be deprecated. Consumers SHOULD refrain from usage
+   * of this route. This will be surfaced in OAS documentation.
+   *
+   * @default false
+   */
+  deprecated?: boolean;
 };
 
 /**
@@ -97,7 +105,7 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
 
 /**
  * A router, very similar to {@link IRouter} that will return an {@link VersionedRoute}
- * instead.
+ * instead
  *
  * @example
  * const versionedRoute = versionedRouter
@@ -266,10 +274,14 @@ export type VersionedResponseBodyValidation =
 export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
     /**
+     * A description of the response. This is required input for complete OAS documentation.
+     */
+    description?: string;
+    /**
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body: VersionedResponseBodyValidation;
+    body?: VersionedResponseBodyValidation;
   };
   unsafe?: { body?: boolean };
 }

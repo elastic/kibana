@@ -190,7 +190,8 @@ export function createTaskRunAggregator(
         (taskEvent: TaskLifecycleEvent) =>
           isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
       ),
-      map(() => new Date().toISOString())
+      map(() => new Date().toISOString()),
+      startWith(new Date().toISOString())
     ),
     // get the average ratio of polled tasks by their persistency
     taskPollingLifecycle.events.pipe(

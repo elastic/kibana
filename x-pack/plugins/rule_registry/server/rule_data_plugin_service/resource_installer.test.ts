@@ -567,6 +567,7 @@ describe('resourceInstaller', () => {
 
         it('gracefully fails on empty mappings', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          // @ts-expect-error wrong response type
           mockClusterClient.indices.simulateIndexTemplate.mockImplementation(async () => ({}));
 
           const { installer, indexInfo, logger } = setup(mockClusterClient);

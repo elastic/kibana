@@ -46,9 +46,9 @@ export async function getAgentsPerOutput(
 
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     esClient,
-    withAgentCount: true,
     page: 1,
     perPage: SO_SEARCH_LIMIT,
+    withAgentCount: true,
   });
 
   const outputTypes: { [key: string]: AgentsPerOutputType } = {};

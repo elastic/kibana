@@ -77,7 +77,7 @@ export const AlertsSummaryContent = ({
               <LinkToAlertsPage
                 kuery={`${assetIdField}:"${assetId}"`}
                 dateRange={dateRange}
-                data-test-subj="nfraAssetDetailsAlertsTabAlertsShowAllButton"
+                data-test-subj="infraAssetDetailsAlertsTabAlertsShowAllButton"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

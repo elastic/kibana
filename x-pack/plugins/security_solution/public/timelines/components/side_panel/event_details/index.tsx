@@ -25,8 +25,10 @@ import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import {
+  EndpointIsolateSuccess,
+  HostIsolationPanel,
+} from '../../../../common/components/endpoint/host_isolation';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,

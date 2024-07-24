@@ -4,5 +4,4 @@ description: An identifier for the space. If `/s/` and the identifier are omitte
 required: true
 schema:
   type: string
-  examples:
-    - default
+  example: default

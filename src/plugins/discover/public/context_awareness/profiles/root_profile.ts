@@ -7,7 +7,7 @@
  */
 
 import type { Profile } from '../types';
-import { AsyncProfileService } from '../profile_service';
+import { AsyncProfileProvider, AsyncProfileService } from '../profile_service';
 
 export enum SolutionType {
   Observability = 'oblt',
@@ -15,6 +15,8 @@ export enum SolutionType {
   Search = 'search',
   Default = 'default',
 }
+
+export type RootProfile = Profile;
 
 export interface RootProfileProviderParams {
   solutionNavId?: string | null;
@@ -24,7 +26,11 @@ export interface RootContext {
   solutionType: SolutionType;
 }
 
-export type RootProfile = Profile;
+export type RootProfileProvider = AsyncProfileProvider<
+  RootProfile,
+  RootProfileProviderParams,
+  RootContext
+>;
 
 export class RootProfileService extends AsyncProfileService<
   RootProfile,
@@ -38,5 +44,3 @@ export class RootProfileService extends AsyncProfileService<
     });
   }
 }
-
-export type RootProfileProvider = Parameters<RootProfileService['registerProvider']>[0];

@@ -20,9 +20,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { usePermissions } from '../../../hooks/use_permissions';
 import { useResetSlo } from '../../../hooks/use_reset_slo';
 import { useKibana } from '../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
@@ -44,7 +44,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   } = useKibana().services;
 
   const hasApmReadCapabilities = capabilities.apm.show;
-  const { hasWriteCapabilities } = useCapabilities();
+  const { data: permissions } = usePermissions();
 
   const { isDeletingSlo, isResettingSlo, removeDeleteQueryParam, removeResetQueryParam } =
     useGetQueryParams();
@@ -198,7 +198,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           items={[
             <EuiContextMenuItem
               key="edit"
-              disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+              disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
               icon="pencil"
               href={sloEditUrl}
               target={isRemote ? '_blank' : undefined}
@@ -214,7 +214,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="createBurnRateRule"
-              disabled={!hasWriteCapabilities || isRemote}
+              disabled={!permissions?.hasAllWriteRequested || isRemote}
               icon="bell"
               onClick={handleOpenRuleFlyout}
               data-test-subj="sloDetailsHeaderControlPopoverCreateRule"
@@ -226,7 +226,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="manageRules"
-              disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+              disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
               icon="gear"
               onClick={handleNavigateToRules}
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
@@ -262,7 +262,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             .concat(
               <EuiContextMenuItem
                 key="clone"
-                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
                 icon="copy"
                 onClick={handleClone}
                 data-test-subj="sloDetailsHeaderControlPopoverClone"
@@ -278,7 +278,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               <EuiContextMenuItem
                 key="delete"
                 icon="trash"
-                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
                 onClick={handleDelete}
                 data-test-subj="sloDetailsHeaderControlPopoverDelete"
                 toolTipContent={
@@ -293,7 +293,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               <EuiContextMenuItem
                 key="reset"
                 icon="refresh"
-                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
                 onClick={handleReset}
                 data-test-subj="sloDetailsHeaderControlPopoverReset"
                 toolTipContent={

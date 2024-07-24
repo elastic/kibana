@@ -10,7 +10,6 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import {
-  EMPTY_PLACEHOLDER,
   getCustomTableColumns,
   getEcsCompliantTableColumns,
   getIncompatibleValuesTableColumns,
@@ -117,31 +116,6 @@ describe('helpers', () => {
           expect(screen.queryByTestId('typePlaceholder')).not.toBeInTheDocument();
         });
       });
-
-      describe('when `type` is undefined', () => {
-        beforeEach(() => {
-          const withUndefinedType = {
-            ...eventCategory,
-            type: undefined, // <--
-          };
-          const columns = getEcsCompliantTableColumns();
-          const typeRender = columns[1].render;
-
-          render(
-            <TestProviders>
-              <>{typeRender != null && typeRender(withUndefinedType.type, withUndefinedType)}</>
-            </TestProviders>
-          );
-        });
-
-        test('it does NOT render the `type`', () => {
-          expect(screen.queryByTestId('type')).not.toBeInTheDocument();
-        });
-
-        test('it renders the placeholder', () => {
-          expect(screen.getByTestId('typePlaceholder')).toHaveTextContent(EMPTY_PLACEHOLDER);
-        });
-      });
     });
 
     describe('allowed values render()', () => {
@@ -228,35 +202,6 @@ describe('helpers', () => {
 
         test('it does NOT render the placeholder', () => {
           expect(screen.queryByTestId('emptyPlaceholder')).not.toBeInTheDocument();
-        });
-      });
-
-      describe('when `description` is undefined', () => {
-        const withUndefinedDescription = {
-          ...eventCategory,
-          description: undefined, // <--
-        };
-
-        beforeEach(() => {
-          const columns = getEcsCompliantTableColumns();
-          const descriptionRender = columns[3].render;
-
-          render(
-            <TestProviders>
-              <>
-                {descriptionRender != null &&
-                  descriptionRender(withUndefinedDescription.description, withUndefinedDescription)}
-              </>
-            </TestProviders>
-          );
-        });
-
-        test('it does NOT render the `description`', () => {
-          expect(screen.queryByTestId('description')).not.toBeInTheDocument();
-        });
-
-        test('it renders the placeholder', () => {
-          expect(screen.getByTestId('emptyPlaceholder')).toBeInTheDocument();
         });
       });
     });

@@ -34,10 +34,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
-    });
-
     describe('Inventory page', function () {
       this.tags('includeFirefox');
       before(async () => {

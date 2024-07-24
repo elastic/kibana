@@ -79,20 +79,19 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV2Enabled: true,
 
   /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: false,
+  responseActionsSentinelOneGetFileEnabled: true,
 
-  /**
-   * 8.15
-   * Enables use of agent status service to get agent status information
-   * for endpoint and third-party agents.
-   */
-  agentStatusClientEnabled: false,
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: false,
+
+  /** Enable the `processes` response actions for SentinelOne */
+  responseActionsSentinelOneProcessesEnabled: false,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
    * Enables scan response action on Endpoint
@@ -110,9 +109,14 @@ export const allowedExperimentalValues = Object.freeze({
   alertTypeEnabled: false,
 
   /**
-   * Disables expandable flyout
+   * Enables new notes
    */
-  expandableFlyoutDisabled: false,
+  securitySolutionNotesEnabled: false,
+
+  /**
+   * Disables entity and alert previews
+   */
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -120,13 +124,17 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: false,
 
   /**
+   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
+   */
+  assistantBedrockChat: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
 
@@ -151,6 +159,11 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
+   * Enables AI assistant on rule creation form when query has error
+   */
+  AIAssistantOnRuleCreationFormEnabled: false,
+
+  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
@@ -168,6 +181,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
+   * Enables alerts suppression for machine learning rules
+   */
+  alertSuppressionForMachineLearningRuleEnabled: false,
+
+  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: true,
@@ -182,34 +200,22 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
-  crowdstrikeDataInAnalyzerEnabled: false,
+  crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: false,
 
-  /**
-   * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
-   * This tab shows the JSON diff between the installed prebuilt rule
-   * version and the latest available version.
-   *
-   * Ticket: https://github.com/elastic/kibana/issues/169160
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
-   * Added: on Dec 06, 2023 in https://github.com/elastic/kibana/pull/172535
-   * Turned: on Dec 20, 2023 in https://github.com/elastic/kibana/pull/173368
-   * Expires: on Feb 20, 2024
-   */
-  jsonPrebuiltRulesDiffingEnabled: true,
   /*
    * Disables discover esql tab within timeline
    *
    */
   timelineEsqlTabDisabled: false,
   /*
-   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
    */
-  unifiedComponentsInTimelineEnabled: false,
+  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
@@ -218,15 +224,15 @@ export const allowedExperimentalValues = Object.freeze({
   analyzerDatePickersAndSourcererDisabled: false,
 
   /**
-   * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
+   * Enables an ability to customize Elastic prebuilt rules.
    *
-   * Ticket: https://github.com/elastic/kibana/issues/166489
+   * Ticket: https://github.com/elastic/kibana/issues/174168
    * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
-   * Added: on Feb 12, 2024 in https://github.com/elastic/kibana/pull/174564
-   * Turned: on Feb 23, 2024 in https://github.com/elastic/kibana/pull/177495
-   * Expires: on Apr 23, 2024
+   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
+   * Turned: TBD
+   * Expires: TBD
    */
-  perFieldPrebuiltRulesDiffingEnabled: true,
+  prebuiltRulesCustomizationEnabled: false,
 
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
@@ -236,12 +242,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
    */
-  unifiedManifestEnabled: false,
-
-  /**
-   *  Enables Security AI Assistant's Flyout mode
-   */
-  aiAssistantFlyoutMode: true,
+  unifiedManifestEnabled: true,
 
   /**
    * Enables the new modal for the value list items
@@ -249,14 +250,14 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
-
-  /**
    * Enables the manual rule run
    */
   manualRuleRunEnabled: false,
+
+  /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForEventFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

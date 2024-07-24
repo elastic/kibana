@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { getTaskClaimer } from './task_claimers';
 
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
@@ -27,6 +26,7 @@ export const DEFAULT_METRICS_RESET_INTERVAL = 30 * 1000; // 30 seconds
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
 export const CLAIM_STRATEGY_DEFAULT = 'default';
+export const CLAIM_STRATEGY_MGET = 'unsafe_mget';
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -164,11 +164,6 @@ export const configSchema = schema.object(
         config.monitored_stats_required_freshness < config.poll_interval
       ) {
         return `The specified monitored_stats_required_freshness (${config.monitored_stats_required_freshness}) is invalid, as it is below the poll_interval (${config.poll_interval})`;
-      }
-      try {
-        getTaskClaimer(config.claim_strategy);
-      } catch (err) {
-        return `The claim strategy is invalid: ${err.message}`;
       }
     },
   }

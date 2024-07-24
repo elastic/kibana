@@ -158,6 +158,26 @@ describe('When using scan action from response actions console', () => {
     );
   });
 
+  it('should work with a single `--comment` argument', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'scan --path="one/two" --comment "Scan folder"');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-pending').textContent).toEqual(
+        'File path scan is in progress.'
+      );
+    });
+  });
+
+  it('should work with `--help argument`', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'scan --help');
+
+    expect(renderResult.getByTestId('test-helpOutput').textContent).toEqual(
+      'AboutScan the host for malwareUsagescan --path [--comment]Examplescan --path "/full/path/to/folder" --comment "Scan folder for malware"Required parameters--path - The absolute path to a file or directory to be scannedOptional parameters--comment - A comment to go along with the action'
+    );
+  });
+
   it('should display pending message', async () => {
     await render();
     enterConsoleCommand(renderResult, 'scan --path="one/two"');

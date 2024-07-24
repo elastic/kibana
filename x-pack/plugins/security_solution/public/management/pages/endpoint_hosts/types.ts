@@ -71,12 +71,6 @@ export interface EndpointState {
   endpointsTotalError?: ServerApiError;
   /** Host isolation request state for a single endpoint */
   isolationRequestState: AsyncResourceState<ResponseActionApiResponse>;
-  /**
-   * Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view
-   * Getting pending endpoint actions is "supplemental" data, so there is no need to show other Async
-   * states other than Loaded
-   */
-  endpointPendingActions: AsyncResourceState<AgentIdsPendingActions>;
   // Metadata transform stats to checking transform state
   metadataTransformStats: AsyncResourceState<TransformStats[]>;
   isInitialized: boolean;

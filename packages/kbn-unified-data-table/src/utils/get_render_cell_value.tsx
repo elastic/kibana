@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -47,10 +47,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
 }) => {
-  /**
-   * memo is imperative here otherwise the cell will re-render on every hover on every cell
-   */
-  return memo(function UnifiedDataTableRenderCellValue({
+  return function UnifiedDataTableRenderCellValue({
     rowIndex,
     columnId,
     isDetails,
@@ -81,22 +78,24 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
-    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
+    const CustomCellRenderer = externalCustomRenderers?.[columnId];
+
+    if (CustomCellRenderer) {
       return (
         <span className={CELL_CLASS}>
-          {externalCustomRenderers[columnId]({
-            rowIndex,
-            columnId,
-            isDetails,
-            setCellProps,
-            isExpandable,
-            isExpanded,
-            colIndex,
-            row,
-            dataView,
-            fieldFormats,
-            closePopover,
-          })}
+          <CustomCellRenderer
+            rowIndex={rowIndex}
+            columnId={columnId}
+            isDetails={isDetails}
+            setCellProps={setCellProps}
+            isExpandable={isExpandable}
+            isExpanded={isExpanded}
+            colIndex={colIndex}
+            row={row}
+            dataView={dataView}
+            fieldFormats={fieldFormats}
+            closePopover={closePopover}
+          />
         </span>
       );
     }
@@ -149,7 +148,7 @@ export const getRenderCellValueFn = ({
         }}
       />
     );
-  });
+  };
 };
 
 /**

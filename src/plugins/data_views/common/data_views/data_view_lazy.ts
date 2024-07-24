@@ -157,7 +157,7 @@ export class DataViewLazy extends AbstractDataView {
       throw new CharacterNotAllowedInField('*', name);
     }
 
-    const { type, script, customLabel, format, popularity } = runtimeField;
+    const { type, script, customLabel, customDescription, format, popularity } = runtimeField;
 
     if (type === 'composite') {
       return this.addCompositeRuntimeField(name, runtimeField);
@@ -170,6 +170,7 @@ export class DataViewLazy extends AbstractDataView {
       { type, script },
       {
         customLabel,
+        customDescription,
         format,
         popularity,
       }
@@ -215,6 +216,7 @@ export class DataViewLazy extends AbstractDataView {
             runtimeFieldSpec,
             {
               customLabel: subField.customLabel,
+              customDescription: subField.customDescription,
               format: subField.format,
               popularity: subField.popularity,
             }
@@ -503,7 +505,6 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    // @ts-expect-error composite type is not yet supported by es client but it can be forced
     return this.runtimeFieldMap;
   }
 

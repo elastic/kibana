@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 import { MultiRowInput } from '../multi_row_input';
 
+import { useStartServices } from '../../../../hooks';
+
 import type { OutputFormInputsType } from './use_output_form';
 
 interface Props {
@@ -20,6 +22,7 @@ interface Props {
 
 export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (props) => {
   const { inputs } = props;
+  const { cloud } = useStartServices();
 
   return (
     <>
@@ -37,7 +40,7 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
         {...inputs.elasticsearchUrlInput.props}
         isUrl
         helpText={
-          inputs.elasticsearchUrlInput.props.disabled && (
+          cloud?.isServerlessEnabled && (
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.serverlessHostUrlsHelpText"
               defaultMessage="Custom host URLs are not allowed in serverless."

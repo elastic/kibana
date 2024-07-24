@@ -1,0 +1,76 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "my-example-logs",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "data_stream": {
+          "properties": {
+            "type": {
+              "type": "constant_keyword",
+              "value": "logs"
+            }
+          }
+        },
+        "log": {
+          "properties": {
+            "level": {
+              "type": "keyword"
+            }
+          }
+        },
+        "message": {
+          "type": "match_only_text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "my-example-metrics",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "data_stream": {
+          "properties": {
+            "type": {
+              "type": "constant_keyword",
+              "value": "metrics"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "duration": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

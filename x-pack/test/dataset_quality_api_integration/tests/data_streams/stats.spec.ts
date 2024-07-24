@@ -8,9 +8,7 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { DatasetQualityApiClientKey } from '../../common/config';
-import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { expectToReject } from '../../utils';
 import { cleanLogIndexTemplate, addIntegrationToLogIndexTemplate } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -25,20 +23,98 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         query: {
           type: 'logs',
+          datasetQuery: '-',
         },
       },
     });
   }
 
-  registry.when('Api Key privileges check', { config: 'basic' }, () => {
-    describe('when missing required privileges', () => {
-      it('fails with a 500 error', async () => {
-        const err = await expectToReject<DatasetQualityApiError>(
-          async () => await callApiAs('readUser')
-        );
+  async function ingestDocuments({
+    from = '2023-11-20T15:00:00.000Z',
+    to = '2023-11-20T15:01:00.000Z',
+    interval = '1m',
+    rate = 1,
+    dataset = 'synth.1',
+  }: { from?: string; to?: string; interval?: string; rate?: number; dataset?: string } = {}) {
+    await synthtrace.index([
+      timerange(from, to)
+        .interval(interval)
+        .rate(rate)
+        .generator((timestamp) =>
+          log
+            .create()
+            .message('This is a log message')
+            .timestamp(timestamp)
+            .dataset(dataset)
+            .defaults({
+              'log.file.path': '/my-service.log',
+            })
+        ),
+    ]);
+  }
 
-        expect(err.res.status).to.be(500);
-        expect(err.res.body.message).to.contain('unauthorized');
+  registry.when('Api Key privileges check', { config: 'basic' }, () => {
+    describe('index privileges', () => {
+      it('returns user authorization as false for noAccessUser', async () => {
+        const resp = await callApiAs('noAccessUser');
+
+        expect(resp.body.datasetUserPrivileges.canRead).to.be(false);
+        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
+        expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
+        expect(resp.body.dataStreamsStats).to.eql([]);
+      });
+
+      it('returns correct user privileges for an elevated user', async () => {
+        const resp = await callApiAs('adminUser');
+
+        expect(resp.body.datasetUserPrivileges).to.eql({
+          canRead: true,
+          canMonitor: true,
+          canViewIntegrations: true,
+        });
+      });
+
+      it('get empty stats for a readUser', async () => {
+        const resp = await callApiAs('readUser');
+
+        expect(resp.body.datasetUserPrivileges.canRead).to.be(true);
+        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
+        expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
+        expect(resp.body.dataStreamsStats).to.eql([]);
+      });
+
+      it('returns non empty stats for an authorized user', async () => {
+        await ingestDocuments();
+        const stats = await callApiAs('datasetQualityLogsUser');
+
+        expect(stats.body.dataStreamsStats[0].size).not.empty();
+        expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
+        expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
+      });
+
+      it('get list of privileged data streams for datasetQualityLogsUser', async () => {
+        // Index only one document to logs-test-1-default and logs-test-1-default data stream using synthtrace
+        await ingestDocuments({ dataset: 'test.1' });
+        await ingestDocuments({ dataset: 'test.2' });
+        const resp = await callApiAs('datasetQualityLogsUser');
+
+        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(true);
+        expect(
+          resp.body.dataStreamsStats
+            .map(({ name, userPrivileges: { canMonitor: hasPrivilege } }) => ({
+              name,
+              hasPrivilege,
+            }))
+            .filter(({ name }) => name.includes('test'))
+        ).to.eql([
+          { name: 'logs-test.1-default', hasPrivilege: true },
+          { name: 'logs-test.2-default', hasPrivilege: true },
+        ]);
+      });
+
+      after(async () => {
+        await synthtrace.clean();
+        await cleanLogIndexTemplate({ esClient: es });
       });
     });
 

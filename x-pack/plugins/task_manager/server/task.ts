@@ -328,6 +328,11 @@ export interface TaskInstance {
    * Optionally override the timeout defined in the task type for this specific task instance
    */
   timeoutOverride?: string;
+
+  /*
+   * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
+   */
+  partition?: number;
 }
 
 /**
@@ -426,6 +431,22 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId: string | null;
+
+  /*
+   * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
+   */
+  partition?: number;
+}
+
+export interface ConcreteTaskInstanceVersion {
+  /** The _id of the the document (not the SO id) */
+  esId: string;
+  /** The _seq_no of the document when using seq_no_primary_term on fetch */
+  seqNo?: number;
+  /** The _primary_term of the document when using seq_no_primary_term on fetch */
+  primaryTerm?: number;
+  /** The error found if trying to resolve the version info for this esId */
+  error?: string;
 }
 
 /**
@@ -449,4 +470,5 @@ export type SerializedConcreteTaskInstance = Omit<
   startedAt: string | null;
   retryAt: string | null;
   runAt: string;
+  partition?: number;
 };

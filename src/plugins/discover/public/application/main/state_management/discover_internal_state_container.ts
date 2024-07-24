@@ -73,6 +73,8 @@ export function getInternalStateContainer() {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
+        expandedDoc:
+          nextDataView?.id !== prevState.dataView?.id ? undefined : prevState.expandedDoc,
       }),
       setIsDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
         ...prevState,
@@ -130,6 +132,7 @@ export function getInternalStateContainer() {
       resetOnSavedSearchChange: (prevState: InternalState) => () => ({
         ...prevState,
         overriddenVisContextAfterInvalidation: undefined,
+        expandedDoc: undefined,
       }),
     },
     {},

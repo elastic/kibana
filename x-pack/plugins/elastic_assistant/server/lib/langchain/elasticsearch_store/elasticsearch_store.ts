@@ -17,6 +17,7 @@ import { Document } from 'langchain/document';
 import { VectorStore } from '@langchain/core/vectorstores';
 import * as uuid from 'uuid';
 
+import { Metadata } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ElasticsearchEmbeddings } from '../embeddings/elasticsearch_embeddings';
 import { FlattenedHit, getFlattenedHits } from './helpers/get_flattened_hits';
@@ -105,7 +106,7 @@ export class ElasticsearchStore extends VectorStore {
    * @returns Promise<string[]> of document IDs added to the store
    */
   addDocuments = async (
-    documents: Document[],
+    documents: Array<Document<Metadata>>,
     options?: Record<string, never>
   ): Promise<string[]> => {
     // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
@@ -126,7 +127,7 @@ export class ElasticsearchStore extends VectorStore {
 
     try {
       const response = await this.esClient.bulk({ refresh: true, operations });
-      this.logger.debug(`Add Documents Response:\n ${JSON.stringify(response)}`);
+      this.logger.debug(() => `Add Documents Response:\n ${JSON.stringify(response)}`);
 
       const errorIds = response.items.filter((i) => i.index?.error != null);
       operations.forEach((op, i) => {
@@ -145,7 +146,7 @@ export class ElasticsearchStore extends VectorStore {
   };
 
   addDocumentsViaDataClient = async (
-    documents: Document[],
+    documents: Array<Document<Metadata>>,
     options?: Record<string, never>
   ): Promise<string[]> => {
     if (!this.kbDataClient) {
@@ -267,11 +268,12 @@ export class ElasticsearchStore extends VectorStore {
       });
 
       this.logger.debug(
-        `Similarity search metadata source:\n${JSON.stringify(
-          results.map((r) => r?.metadata?.source ?? '(missing metadata.source)'),
-          null,
-          2
-        )}`
+        () =>
+          `Similarity search metadata source:\n${JSON.stringify(
+            results.map((r) => r?.metadata?.source ?? '(missing metadata.source)'),
+            null,
+            2
+          )}`
       );
 
       return results;

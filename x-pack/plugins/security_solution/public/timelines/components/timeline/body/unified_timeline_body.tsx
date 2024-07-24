@@ -8,8 +8,7 @@
 import type { ComponentProps, ReactElement } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { isEmpty } from 'lodash';
-import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
+import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
@@ -42,8 +41,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     updatedAt,
     trailingControlColumns,
     leadingControlColumns,
-    pinnedEventIds,
-    eventIdToNoteIds,
   } = props;
 
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
@@ -61,14 +58,15 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     });
   }, [events, pageInfo.activePage]);
 
-  const columnsHeader = useMemo(() => {
-    return isEmpty(columns) ? defaultUdtHeaders : columns;
-  }, [columns]);
+  const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">
-      <StyledTableFlexItem grow={false}>{header}</StyledTableFlexItem>
-      <StyledTableFlexItem className="unifiedTimelineBody" data-test-subj="unifiedTimelineBody">
+      <StyledUnifiedTableFlexItem grow={false}>{header}</StyledUnifiedTableFlexItem>
+      <StyledUnifiedTableFlexItem
+        className="unifiedTimelineBody"
+        data-test-subj="unifiedTimelineBody"
+      >
         <RootDragDropProvider>
           <UnifiedTimeline
             columns={columnsHeader}
@@ -91,11 +89,9 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             isTextBasedQuery={false}
             trailingControlColumns={trailingControlColumns}
             leadingControlColumns={leadingControlColumns}
-            pinnedEventIds={pinnedEventIds}
-            eventIdToNoteIds={eventIdToNoteIds}
           />
         </RootDragDropProvider>
-      </StyledTableFlexItem>
+      </StyledUnifiedTableFlexItem>
     </StyledTableFlexGroup>
   );
 };

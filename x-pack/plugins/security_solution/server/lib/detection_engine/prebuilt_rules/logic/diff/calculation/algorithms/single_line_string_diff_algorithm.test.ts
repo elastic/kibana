@@ -14,7 +14,7 @@ import {
 import { singleLineStringDiffAlgorithm } from './single_line_string_diff_algorithm';
 
 describe('singleLineStringDiffAlgorithm', () => {
-  it('returns current_version as merged output if there is no update', () => {
+  it('returns current_version as merged output if there is no update - scenario AAA', () => {
     const mockVersions: ThreeVersionsOf<string> = {
       base_version: 'A',
       current_version: 'A',
@@ -33,7 +33,7 @@ describe('singleLineStringDiffAlgorithm', () => {
     );
   });
 
-  it('returns current_version as merged output if current_version is different and there is no update', () => {
+  it('returns current_version as merged output if current_version is different and there is no update - scenario ABA', () => {
     const mockVersions: ThreeVersionsOf<string> = {
       base_version: 'A',
       current_version: 'B',
@@ -52,7 +52,7 @@ describe('singleLineStringDiffAlgorithm', () => {
     );
   });
 
-  it('returns target_version as merged output if current_version is the same and there is an update', () => {
+  it('returns target_version as merged output if current_version is the same and there is an update - scenario AAB', () => {
     const mockVersions: ThreeVersionsOf<string> = {
       base_version: 'A',
       current_version: 'A',
@@ -71,7 +71,7 @@ describe('singleLineStringDiffAlgorithm', () => {
     );
   });
 
-  it('returns current_version as merged output if current version is different but it matches the update', () => {
+  it('returns current_version as merged output if current version is different but it matches the update - scenario ABB', () => {
     const mockVersions: ThreeVersionsOf<string> = {
       base_version: 'A',
       current_version: 'B',
@@ -90,7 +90,7 @@ describe('singleLineStringDiffAlgorithm', () => {
     );
   });
 
-  it('returns current_version as merged output if all three versions are different', () => {
+  it('returns current_version as merged output if all three versions are different - scenario ABC', () => {
     const mockVersions: ThreeVersionsOf<string> = {
       base_version: 'A',
       current_version: 'B',
@@ -110,7 +110,7 @@ describe('singleLineStringDiffAlgorithm', () => {
   });
 
   describe('if base_version is missing', () => {
-    it('returns current_version as merged output if current_version and target_version are the same', () => {
+    it('returns current_version as merged output if current_version and target_version are the same - scenario -AA', () => {
       const mockVersions: ThreeVersionsOf<string> = {
         base_version: MissingVersion,
         current_version: 'A',
@@ -129,7 +129,7 @@ describe('singleLineStringDiffAlgorithm', () => {
       );
     });
 
-    it('returns target_version as merged output if current_version and target_version are different', () => {
+    it('returns target_version as merged output if current_version and target_version are different - scenario -AB', () => {
       const mockVersions: ThreeVersionsOf<string> = {
         base_version: MissingVersion,
         current_version: 'A',

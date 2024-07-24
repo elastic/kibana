@@ -17,6 +17,7 @@
 import { z } from 'zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
+import { SortOrder } from '../common_attributes.gen';
 import { ConversationResponse } from './common_attributes.gen';
 
 export type FindConversationsSortField = z.infer<typeof FindConversationsSortField>;
@@ -28,11 +29,6 @@ export const FindConversationsSortField = z.enum([
 ]);
 export type FindConversationsSortFieldEnum = typeof FindConversationsSortField.enum;
 export const FindConversationsSortFieldEnum = FindConversationsSortField.enum;
-
-export type SortOrder = z.infer<typeof SortOrder>;
-export const SortOrder = z.enum(['asc', 'desc']);
-export type SortOrderEnum = typeof SortOrder.enum;
-export const SortOrderEnum = SortOrder.enum;
 
 export type FindConversationsRequestQuery = z.infer<typeof FindConversationsRequestQuery>;
 export const FindConversationsRequestQuery = z.object({

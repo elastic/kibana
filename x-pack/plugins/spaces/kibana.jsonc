@@ -18,7 +18,9 @@
     "optionalPlugins": [
       "home",
       "management",
-      "usageCollection"
+      "usageCollection",
+      "cloud",
+      "cloudExperiments"
     ],
     "requiredBundles": [
       "esUiShared",

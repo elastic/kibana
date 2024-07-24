@@ -14,14 +14,7 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 
 ## Tools
 
-It is possible to validate the docs before bundling them with the following
-command:
-
-```bash
-npx swagger-cli validate entrypoint.yaml
-```
-
-Then you can generate the `bundled` files by running the following commands:
+Generate the `bundled` files by running the following commands:
 
 ```bash
 npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml

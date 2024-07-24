@@ -8,7 +8,6 @@
 import React from 'react';
 import { Theme } from '@elastic/charts';
 import { BoolQuery } from '@kbn/es-query';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   RecursivePartial,
   EuiFlexItem,
@@ -16,9 +15,7 @@ import {
   EuiFlexGroup,
   EuiTitle,
   EuiIconTip,
-  useEuiTheme,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -29,8 +26,6 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
-import { getAlertStartAnnotation } from './get_alert_start_annotation';
-import { DEFAULT_DATE_FORMAT } from './constants';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -45,8 +40,6 @@ function ThroughputChart({
   environment,
   start,
   end,
-  alertStart,
-  alertEnd,
   comparisonChartTheme,
   comparisonEnabled,
   offset,
@@ -62,8 +55,6 @@ function ThroughputChart({
   environment: string;
   start: string;
   end: string;
-  alertStart?: number;
-  alertEnd?: number;
   comparisonChartTheme: RecursivePartial<Theme>;
   comparisonEnabled: boolean;
   offset: string;
@@ -71,10 +62,6 @@ function ThroughputChart({
   kuery?: string;
   filters?: BoolQuery;
 }) {
-  const { euiTheme } = useEuiTheme();
-  const {
-    services: { uiSettings },
-  } = useKibana();
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
@@ -142,17 +129,6 @@ function ThroughputChart({
         ]
       : []),
   ];
-  const getThroughputChartAdditionalData = () => {
-    if (alertStart) {
-      return getAlertStartAnnotation({
-        alertStart,
-        alertEnd,
-        color: euiTheme.colors.danger,
-        dateFormat: (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT,
-      });
-    }
-    return [];
-  };
 
   const showTransactionTypeSelect = setTransactionType && transactionTypes;
 
@@ -214,7 +190,6 @@ function ThroughputChart({
           timeseries={timeseriesThroughput}
           yLabelFormat={asExactTransactionRate}
           timeZone={timeZone}
-          annotations={getThroughputChartAdditionalData()}
         />
       </EuiPanel>
     </EuiFlexItem>

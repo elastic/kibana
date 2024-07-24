@@ -9,6 +9,7 @@
 import {
   apiIsPresentationContainer,
   HasSerializedChildState,
+  HasSnapshottableState,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
@@ -38,8 +39,11 @@ const ON_STATE_CHANGE_DEBOUNCE = 100;
  */
 export const ReactEmbeddableRenderer = <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
   RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >,
   ParentApi extends HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>
 >({
   type,
@@ -95,11 +99,11 @@ export const ReactEmbeddableRenderer = <
        */
       return (async () => {
         const parentApi = getParentApi();
-        const factory = await getReactEmbeddableFactory<SerializedState, Api, RuntimeState>(type);
+        const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
         const subscriptions = new Subscription();
 
         const setApi = (
-          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, Api>
+          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
         ) => {
           const fullApi = {
             ...apiRegistration,
@@ -115,12 +119,16 @@ export const ReactEmbeddableRenderer = <
         const buildEmbeddable = async () => {
           const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
             SerializedState,
-            Api,
-            RuntimeState
+            RuntimeState,
+            Api
           >(uuid, factory, parentApi);
 
           const buildApi = (
-            apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
+            apiRegistration: BuildReactEmbeddableApiRegistration<
+              SerializedState,
+              RuntimeState,
+              Api
+            >,
             comparators: StateComparators<RuntimeState>
           ) => {
             if (onAnyStateChange) {
@@ -160,10 +168,10 @@ export const ReactEmbeddableRenderer = <
               unsavedChanges,
               resetUnsavedChanges,
               snapshotRuntimeState,
-            } as unknown as SetReactEmbeddableApiRegistration<SerializedState, Api>);
+            } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
             cleanupFunction.current = () => cleanup();
-            return fullApi;
+            return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 
           const { api, Component } = await factory.buildEmbeddable(
@@ -181,7 +189,6 @@ export const ReactEmbeddableRenderer = <
           } else {
             reportPhaseChange(false);
           }
-
           return { api, Component };
         };
 

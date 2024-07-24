@@ -28,8 +28,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          start: 1560297859000,
-          end: 1562975136000,
+          start: 1686528259000,
+          end: 1689205536000,
           success: true,
         },
       },
@@ -51,8 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          start: 1560298982000,
-          end: 1562973754000,
+          start: 1686529382000,
+          end: 1689204154000,
           success: true,
         },
       },

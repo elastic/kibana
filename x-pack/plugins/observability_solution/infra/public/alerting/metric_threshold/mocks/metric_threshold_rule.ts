@@ -87,6 +87,7 @@ export const buildMetricThresholdRule = (
       filterQuery:
         '{"bool":{"filter":[{"bool":{"should":[{"term":{"host.hostname":{"value":"Users-System.local"}}}],"minimum_should_match":1}},{"bool":{"should":[{"term":{"service.type":{"value":"system"}}}],"minimum_should_match":1}}]}}',
       groupBy: ['host.hostname'],
+      sourceId: 'sourceId',
     },
     monitoring: {
       run: {

@@ -58,7 +58,7 @@ export const TableRowDetails = ({
               <EuiIcon type="folderOpen" size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
+              <EuiTitle size="xxs" data-test-subj="docViewerRowDetailsTitle">
                 <h4>
                   {isEsqlMode && (
                     <FormattedMessage

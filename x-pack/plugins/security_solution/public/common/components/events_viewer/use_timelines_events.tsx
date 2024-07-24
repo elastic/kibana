@@ -35,6 +35,7 @@ import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
+import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
@@ -434,6 +435,8 @@ export const useTimelineEvents = ({
   timerangeKind,
   data,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+  const dispatch = useDispatch();
+
   const [loading, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     alertConsumers,
     dataViewId,
@@ -455,10 +458,15 @@ export const useTimelineEvents = ({
     data,
   });
 
+  const { onLoad } = useFetchNotes();
+
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
-  }, [timelineSearchHandler]);
+
+    // fetch notes for the events
+    onLoad(timelineResponse.events);
+  }, [dispatch, timelineResponse.events, timelineSearchHandler, onLoad]);
 
   return [loading, timelineResponse];
 };

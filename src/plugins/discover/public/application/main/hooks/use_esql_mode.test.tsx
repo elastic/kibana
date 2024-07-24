@@ -150,10 +150,11 @@ describe('useEsqlMode', () => {
     });
   });
 
-  test('changing an ES|QL query with same result columns should not change state when loading and finished', async () => {
+  test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
+    replaceUrlState.mockReset();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -166,7 +167,54 @@ describe('useEsqlMode', () => {
       ],
       query: { esql: 'from the-data-view-2' },
     });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: [],
+      });
+    });
+  });
+
+  test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern is the same', async () => {
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    stateContainer.dataState.data$.documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    replaceUrlState.mockReset();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      // non transformational command
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    replaceUrlState.mockReset();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      // non transformational command
+      query: { esql: 'from the-data-view-title2 | where field1 > 0' },
+    });
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: [],
+      });
+    });
   });
 
   test('only changing an ES|QL query with same result columns should not change columns', async () => {
@@ -268,7 +316,13 @@ describe('useEsqlMode', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: ['field1', 'field2'],
+      });
+    });
+    replaceUrlState.mockReset();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,

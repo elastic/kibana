@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Connectors
   description: OpenAPI schema for connectors in Serverless projects
@@ -31,6 +31,9 @@ components:
       type: apiKey
       in: header
       name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+      description: >
+        Serverless APIs support only key-based authentication.
+        You must create an API key and use the encoded value in the request header.
+        For example: 'Authorization: ApiKey base64AccessApiKey'.
 security:
   - apiKeyAuth: []

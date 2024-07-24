@@ -1,0 +1,12 @@
+# These pipeline steps constitute the quality gate for your service within the QA environment.
+# Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
+
+steps:
+  - label: ":rocket: control-plane e2e tests"
+    trigger: "ess-k8s-qa-e2e-tests-daily" # https://buildkite.com/elastic/ess-k8s-qa-e2e-tests-daily
+    build:
+      env:
+        REGION_ID: aws-eu-west-1
+        NAME_PREFIX: ci_test_kibana-promotion_
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"

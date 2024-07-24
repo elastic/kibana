@@ -12,7 +12,6 @@ import { mockGlobalState, TestProviders, createMockStore } from '../../../common
 import type { State } from '../../../common/store';
 import { DetailsPanel } from '.';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import type { ExpandedDetailTimeline } from '../../../../common/types';
@@ -61,25 +60,6 @@ describe('Details Panel Component', () => {
     [TimelineTabs.query]: {
       panelView: 'hostDetail',
       params: {},
-    },
-  };
-
-  const hostExpandedDetail: ExpandedDetailTimeline = {
-    [TimelineTabs.query]: {
-      panelView: 'hostDetail',
-      params: {
-        hostName: 'woohoo!',
-      },
-    },
-  };
-
-  const networkExpandedDetail: ExpandedDetailTimeline = {
-    [TimelineTabs.query]: {
-      panelView: 'networkDetail',
-      params: {
-        ip: 'woohoo!',
-        flowTarget: FlowTargetSourceDest.source,
-      },
     },
   };
 
@@ -286,91 +266,6 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
       expect(wrapper.find(EventDetailsPanel).props().isDraggable).toBeFalsy();
-    });
-  });
-
-  describe('DetailsPanel:HostDetails: rendering', () => {
-    beforeEach(() => {
-      mockUseSearchStrategy.mockReturnValue({
-        loading: true,
-        result: {
-          hostDetails: {
-            host: {},
-          },
-        },
-        error: undefined,
-        search: jest.fn(),
-        refetch: jest.fn(),
-        inspect: {},
-      });
-      const mockState = {
-        ...state,
-        timeline: {
-          ...state.timeline,
-          timelineById: {
-            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
-            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
-          },
-        },
-      };
-      mockState.timeline.timelineById[TimelineId.test].expandedDetail = hostExpandedDetail;
-      mockState.timeline.timelineById[TimelineId.active].expandedDetail = hostExpandedDetail;
-      store = createMockStore(mockState);
-    });
-
-    afterEach(() => {
-      mockUseSearchStrategy.mockReset();
-    });
-
-    test('it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <DetailsPanel {...mockProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('ExpandableHostDetails').first().render()).toMatchSnapshot();
-    });
-  });
-
-  describe('DetailsPanel:NetworkDetails: rendering', () => {
-    beforeEach(() => {
-      mockUseSearchStrategy.mockReturnValue({
-        loading: true,
-        result: {
-          networkDetails: {},
-        },
-        search: jest.fn(),
-        refetch: jest.fn(),
-        inspect: {},
-      });
-      const mockState = {
-        ...state,
-        timeline: {
-          ...state.timeline,
-          timelineById: {
-            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
-            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
-          },
-        },
-      };
-      mockState.timeline.timelineById[TimelineId.test].expandedDetail = networkExpandedDetail;
-      mockState.timeline.timelineById[TimelineId.active].expandedDetail = networkExpandedDetail;
-      store = createMockStore(mockState);
-    });
-
-    afterEach(() => {
-      mockUseSearchStrategy.mockReset();
-    });
-
-    test('it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <DetailsPanel {...mockProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('ExpandableNetworkDetails').render()).toMatchSnapshot();
     });
   });
 });

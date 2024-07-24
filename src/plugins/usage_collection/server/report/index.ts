@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { storeReport } from './store_report';
+export { storeUiReport } from './store_ui_report';
 export { reportSchema } from './schema';

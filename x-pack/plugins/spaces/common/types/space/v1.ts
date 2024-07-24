@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
+
 /**
  * A Space.
  */
@@ -62,7 +64,7 @@ export interface Space {
   /**
    * Solution selected for this space.
    */
-  solution?: 'security' | 'observability' | 'search' | 'classic';
+  solution?: OnBoardingDefaultSolution | 'classic';
 }
 
 /**
