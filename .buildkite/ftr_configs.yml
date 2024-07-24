@@ -96,9 +96,6 @@ disabled:
   - x-pack/test/security_functional/saml.http2.config.ts
   - x-pack/test/security_functional/oidc.http2.config.ts
 
-  # FIPS
-  - x-pack/test/fips/config.fips.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -600,5 +597,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
-fips:
-  - x-pack/test/fips/config.fips.ts

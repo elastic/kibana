@@ -60,12 +60,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     updateSnapshots: options.updateSnapshots,
   };
 
-  log.success(
-    `The current Node environment should have FIPS overrides: ${
-      process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true' ? 'true' : 'false'
-    }`
-  );
-
   for (const [i, path] of options.configs.entries()) {
     await log.indent(0, async () => {
       if (options.configs.length > 1) {
@@ -76,6 +70,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       const extendedSettingsOverrides = (vars: any) => {
         if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
           vars.esTestCluster.license = 'trial';
+          vars.suiteTags.exclude = ['skipFIPS'];
+          vars.esTestCluster.serverArgs.push('xpack.security.enabled=true');
         }
 
         return vars;

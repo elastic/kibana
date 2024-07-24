@@ -115,18 +115,13 @@ function getEnabledFtrConfigs(patterns?: string[]) {
       throw new Error('expected yaml file to parse to an object');
     }
 
-    let enabledConfigs = configs.enabled;
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
-      enabledConfigs = configs.fips;
-    }
-
-    if (!enabledConfigs) {
+    if (!configs.enabled) {
       throw new Error('expected yaml file to have an "enabled" key');
     }
 
     if (
-      !Array.isArray(enabledConfigs) ||
-      !enabledConfigs.every(
+      !Array.isArray(configs.enabled) ||
+      !configs.enabled.every(
         (p): p is string | { [configPath: string]: { queue: string } } =>
           typeof p === 'string' ||
           (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
@@ -143,7 +138,7 @@ function getEnabledFtrConfigs(patterns?: string[]) {
 
     const defaultQueue = configs.defaultQueue;
     const ftrConfigsByQueue = new Map<string, string[]>();
-    for (const enabled of enabledConfigs) {
+    for (const enabled of configs.enabled) {
       const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
       const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
 

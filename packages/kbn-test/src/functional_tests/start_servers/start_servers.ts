@@ -27,15 +27,11 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    log.success(
-      `The current Node environment should have FIPS overrides: ${
-        process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true' ? 'true' : 'false'
-      }`
-    );
-
     const extendedSettingsOverrides = (vars: any) => {
       if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
         vars.esTestCluster.license = 'trial';
+        vars.suiteTags.exclude = ['skipFIPS'];
+        vars.esTestCluster.serverArgs.push('xpack.security.enabled=true');
       }
 
       return vars;
