@@ -6,6 +6,7 @@ paths:
   /internal/osquery/privileges_check:
     get:
       x-labels: [serverless, ess]
+      x-codegen-enabled: true
       operationId: ReadPrivilegesCheck
       summary: Get Osquery privileges check
       responses:

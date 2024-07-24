@@ -11,7 +11,7 @@ paths:
       summary: Get assets
       parameters:
         - name: query
-          in: path
+          in: query
           required: true
           schema:
             $ref: './assets_status.schema.yaml#/components/schemas/AssetsRequestQuery'
@@ -32,7 +32,7 @@ paths:
       summary: Update assets
       parameters:
         - name: query
-          in: path
+          in: query
           required: true
           schema:
             $ref: './assets_status.schema.yaml#/components/schemas/AssetsRequestQuery'

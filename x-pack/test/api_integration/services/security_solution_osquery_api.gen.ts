@@ -49,8 +49,8 @@ import {
   OsqueryUpdateSavedQueryRequestParamsInput,
   OsqueryUpdateSavedQueryRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import { ReadAssetsStatusRequestParamsInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
-import { UpdateAssetsStatusRequestParamsInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
+import { ReadAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
+import { UpdateAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
@@ -203,17 +203,33 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     },
     readAssetsStatus(props: ReadAssetsStatusProps) {
       return supertest
-        .get(replaceParams('/internal/osquery/assets', props.params))
+        .get('/internal/osquery/assets')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    readInstallationStatus() {
+      return supertest
+        .get('/internal/osquery/status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    readPrivilegesCheck() {
+      return supertest
+        .get('/internal/osquery/privileges_check')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     updateAssetsStatus(props: UpdateAssetsStatusProps) {
       return supertest
-        .post(replaceParams('/internal/osquery/assets/update', props.params))
+        .post('/internal/osquery/assets/update')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
   };
 }
@@ -274,8 +290,8 @@ export interface OsqueryUpdateSavedQueryProps {
   body: OsqueryUpdateSavedQueryRequestBodyInput;
 }
 export interface ReadAssetsStatusProps {
-  params: ReadAssetsStatusRequestParamsInput;
+  query: ReadAssetsStatusRequestQueryInput;
 }
 export interface UpdateAssetsStatusProps {
-  params: UpdateAssetsStatusRequestParamsInput;
+  query: UpdateAssetsStatusRequestQueryInput;
 }

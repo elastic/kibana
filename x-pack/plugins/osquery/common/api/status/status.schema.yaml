@@ -6,6 +6,7 @@ paths:
   /internal/osquery/status:
     get:
       x-labels: [serverless, ess]
+      x-codegen-enabled: true
       operationId: ReadInstallationStatus
       summary: Get Osquery installation status
       responses:

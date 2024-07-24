@@ -74,16 +74,21 @@ paths:
       x-codegen-enabled: true
       x-labels: [serverless, ess]
       parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
         - name: query
           in: query
           required: true
           schema:
             $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestQuery'
-        - name: query
-          in: path
-          required: true
-          schema:
-            $ref: './get_live_query_results.schema.yaml#/components/schemas/GetLiveQueryResultsRequestParams'
       responses:
         '200':
           description: OK
