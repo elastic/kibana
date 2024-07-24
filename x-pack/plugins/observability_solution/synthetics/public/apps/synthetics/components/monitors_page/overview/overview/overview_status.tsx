@@ -19,7 +19,7 @@ function title(t?: number) {
   return t ?? '-';
 }
 
-export function OverviewStatus() {
+export function OverviewStatus({ titleAppend }: { titleAppend?: React.ReactNode }) {
   const { statusFilter } = useGetUrlParams();
 
   const {
@@ -92,9 +92,9 @@ export function OverviewStatus() {
   }, [status, statusFilter]);
 
   return (
-    <EmbeddablePanelWrapper title={headingText} loading={loading}>
+    <EmbeddablePanelWrapper title={headingText} loading={loading} titleAppend={titleAppend}>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xl">
+      <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiStat
             data-test-subj="xpack.uptime.synthetics.overview.status.up"

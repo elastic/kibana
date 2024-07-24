@@ -17,7 +17,7 @@ import { SyntheticsAppProps } from './synthetics_settings_context';
 import { storage, store } from '../state';
 
 export const SyntheticsSharedContext: React.FC<
-  SyntheticsAppProps & { reload$: Subject<boolean> }
+  SyntheticsAppProps & { reload$?: Subject<boolean> }
 > = ({ coreStart, setupPlugins, startPlugins, children, darkMode, reload$ }) => {
   return (
     <KibanaContextProvider

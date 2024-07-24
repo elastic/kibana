@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ShowSelectedFilters } from './show_selected_filters';
+import { useDispatch } from 'react-redux';
+import { ShowSelectedFilters } from '../common/show_selected_filters';
+import { setOverviewPageStateAction } from '../../synthetics/state';
 import { MonitorFilters } from './types';
 import { EmbeddablePanelWrapper } from '../../synthetics/components/common/components/embeddable_panel_wrapper';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
@@ -27,11 +29,28 @@ export const StatusGridComponent = ({
         'xpack.synthetics.statusOverviewComponent.embeddablePanelWrapper.monitorsLabel',
         { defaultMessage: 'Monitors' }
       )}
-      titleAppend={<ShowSelectedFilters filters={filters} />}
+      titleAppend={<ShowSelectedFilters filters={filters ?? {}} />}
     >
       <SyntheticsEmbeddableContext reload$={reload$}>
-        <OverviewGrid />
+        <MonitorsOverviewList filters={filters} />
       </SyntheticsEmbeddableContext>
     </EmbeddablePanelWrapper>
   );
+};
+
+const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(
+      setOverviewPageStateAction({
+        tags: filters.tags.map((tag) => tag.value),
+        locations: filters.locations.map((location) => location.value),
+        monitorTypes: filters.monitorTypes.map((monitorType) => monitorType.value),
+        monitorQueryIds: filters.monitorIds.map((monitorId) => monitorId.value),
+        projects: filters.projects.map((project) => project.value),
+      })
+    );
+  }, [dispatch, filters]);
+
+  return <OverviewGrid />;
 };

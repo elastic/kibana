@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiText,
+  EuiProgress,
 } from '@elastic/eui';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { useInfiniteScroll } from './use_infinite_scroll';
@@ -40,6 +41,7 @@ export const OverviewGrid = memo(() => {
     data: { monitors },
     flyoutConfig,
     loaded,
+    loading,
     pageState,
     groupBy: { field: groupField },
   } = useSelector(selectOverviewState);
@@ -94,7 +96,9 @@ export const OverviewGrid = memo(() => {
           <GroupFields />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
+      {loading && <EuiProgress size="xs" color="accent" />}
+      <EuiSpacer size="s" />
       <>
         {groupField === 'none' ? (
           loaded && currentMonitors.length ? (

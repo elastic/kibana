@@ -24,7 +24,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SYNTHETICS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -53,7 +53,7 @@ export const EmbeddablePanelWrapper: FC<{
 
       const state = {
         input: embeddableInput,
-        type: SYNTHETICS_OVERVIEW_EMBEDDABLE,
+        type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;

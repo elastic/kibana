@@ -88,7 +88,12 @@ export function FieldSelector({
                 isLoading={isLoading}
                 onChange={(selected: EuiComboBoxOptionOption[]) => {
                   if (selected.length) {
-                    field.onChange(selected);
+                    field.onChange(
+                      selected.map((option) => ({
+                        label: option.label,
+                        value: option.value,
+                      }))
+                    );
                     return;
                   }
                   field.onChange([]);
@@ -112,22 +117,12 @@ function createOptions(suggestions: Suggestion[] = []): Option[] {
     .sort((a, b) => String(a.label).localeCompare(b.label));
 }
 
-function createSelectedOptions(
-  selected:
-    | string[]
-    | Array<{
-        value: string;
-        label: string;
-      }> = [],
-  suggestions: Suggestion[] = []
-): Option[] {
+function createSelectedOptions(selected: Option[] = [], suggestions: Suggestion[] = []): Option[] {
   return selected.map((value) => {
-    if (typeof value === 'object') {
-      return value;
+    const suggestion = suggestions.find((s) => s.value === value.value);
+    if (!suggestion) {
+      return { label: value.value, value: value.value };
     }
-    const suggestion = suggestions.find((s) => s.value === value);
-    return suggestion
-      ? { label: suggestion.label, value: suggestion.value }
-      : { label: value, value };
+    return { label: suggestion.label, value: suggestion.value };
   });
 }

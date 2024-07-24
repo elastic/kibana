@@ -10,15 +10,19 @@ import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { MonitorFilters } from './types';
+import { MonitorFilters } from '../monitors_overview/types';
 import { ClientPluginsStart } from '../../../plugin';
 import { MonitorConfiguration } from './monitor_configuration';
 
-export async function openMonitorConfiguration(
-  coreStart: CoreStart,
-  pluginStart: ClientPluginsStart,
-  initialState?: { filters: MonitorFilters }
-): Promise<{ filters: MonitorFilters }> {
+export async function openMonitorConfiguration({
+  coreStart,
+  pluginStart,
+  initialState,
+}: {
+  coreStart: CoreStart;
+  pluginStart: ClientPluginsStart;
+  initialState?: { filters: MonitorFilters };
+}): Promise<{ filters: MonitorFilters }> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {

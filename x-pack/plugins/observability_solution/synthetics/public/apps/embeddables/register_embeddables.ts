@@ -9,21 +9,21 @@ import { CoreSetup } from '@kbn/core-lifecycle-browser';
 
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
 import { createMonitorsOverviewPanelAction } from './ui_actions/create_monitors_overview_panel_action';
-import { createStatusOverviewPanelAction } from './ui_actions/create_overview_panel_action';
+import { createStatusOverviewPanelAction } from './ui_actions/create_stats_overview_panel_action';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_OVERVIEW_EMBEDDABLE } from './constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from './constants';
 
 export const registerSyntheticsEmbeddables = (
   core: CoreSetup<ClientPluginsStart, unknown>,
   pluginsSetup: ClientPluginsSetup
 ) => {
   pluginsSetup.embeddable.registerReactEmbeddableFactory(
-    SYNTHETICS_OVERVIEW_EMBEDDABLE,
+    SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     async () => {
-      const { getStatusOverviewEmbeddableFactory } = await import(
-        './status_overview/status_overview_embeddable_factory'
+      const { getStatsOverviewEmbeddableFactory } = await import(
+        './stats_overview/stats_overview_embeddable_factory'
       );
-      return getStatusOverviewEmbeddableFactory(core.getStartServices);
+      return getStatsOverviewEmbeddableFactory(core.getStartServices);
     }
   );
 
@@ -40,12 +40,12 @@ export const registerSyntheticsEmbeddables = (
   const { uiActions, cloud, serverless } = pluginsSetup;
 
   // Initialize actions
-  const addStatsOverviewPanelAction = createStatusOverviewPanelAction();
-  const addMonitorsOverviewPanelAction = createMonitorsOverviewPanelAction();
+  const addStatsOverviewPanelAction = createStatusOverviewPanelAction(core.getStartServices);
+  const addMonitorsOverviewPanelAction = createMonitorsOverviewPanelAction(core.getStartServices);
 
   core.getStartServices().then(([_, pluginsStart]) => {
     pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
-      SYNTHETICS_OVERVIEW_EMBEDDABLE,
+      SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
       () => {
         return { width: 10, height: 8 };
       }

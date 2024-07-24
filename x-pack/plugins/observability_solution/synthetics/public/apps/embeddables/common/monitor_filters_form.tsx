@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FieldSelector } from '../common/field_selector';
+import { FieldSelector } from './field_selector';
 
 export function MonitorFiltersForm() {
   return (

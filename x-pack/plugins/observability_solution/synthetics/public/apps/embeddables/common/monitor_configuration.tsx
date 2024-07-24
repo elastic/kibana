@@ -20,8 +20,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm } from 'react-hook-form';
+import { MonitorFilters } from '../monitors_overview/types';
 import { MonitorFiltersForm } from './monitor_filters_form';
-import { MonitorFilters, MonitorFiltersForm } from './types';
 
 interface MonitorConfigurationProps {
   initialInput?: {
@@ -36,11 +36,13 @@ export function MonitorConfiguration({
   onCreate,
   onCancel,
 }: MonitorConfigurationProps) {
-  const methods = useForm<MonitorFiltersForm>({
+  const methods = useForm<MonitorFilters>({
     defaultValues: {
       monitorIds: [],
       projects: [],
       tags: [],
+      monitorTypes: [],
+      locations: [],
     },
     values: initialInput?.filters,
     mode: 'all',
@@ -48,15 +50,9 @@ export function MonitorConfiguration({
   const { getValues, formState } = methods;
 
   const onConfirmClick = () => {
-    const { monitorIds, projects, tags, monitorTypes, locations } = getValues();
+    const newFilters = getValues();
     onCreate({
-      filters: {
-        monitorIds,
-        locations,
-        projects: projects.map((project) => project.value),
-        tags: tags.map((tag) => tag.value),
-        monitorTypes,
-      },
+      filters: newFilters,
     });
   };
 

@@ -20,7 +20,7 @@ import {
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { MonitorFilters } from './types';
-import { StatusGridComponent } from './status_grid_component';
+import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
 
@@ -78,11 +78,15 @@ export const getMonitorsEmbeddableFactory = (
           onEdit: async () => {
             try {
               const { openMonitorConfiguration } = await import(
-                './monitors_overview_open_configuration'
+                '../common/monitors_open_configuration'
               );
 
-              const result = await openMonitorConfiguration(coreStart, pluginStart, {
-                filters: filters$.getValue(),
+              const result = await openMonitorConfiguration({
+                coreStart,
+                pluginStart,
+                initialState: {
+                  filters: filters$.getValue(),
+                },
               });
               filters$.next(result.filters);
             } catch (e) {

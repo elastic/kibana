@@ -11,14 +11,6 @@ interface Option {
 }
 
 export interface MonitorFilters {
-  projects: string[];
-  tags: string[];
-  monitorTypes: string[];
-  monitorIds: Option[];
-  locations: Option[];
-}
-
-export interface MonitorFiltersForm {
   projects: Option[];
   tags: Option[];
   monitorIds: Option[];
