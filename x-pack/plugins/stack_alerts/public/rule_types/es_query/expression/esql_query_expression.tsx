@@ -196,7 +196,6 @@ export const EsqlQueryExpression: React.FC<
           }}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
-          hideMinimizeButton={true}
           hideRunQueryText={true}
           isLoading={isLoading}
         />

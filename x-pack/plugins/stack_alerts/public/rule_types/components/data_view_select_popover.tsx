@@ -207,7 +207,6 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           setPopoverIsOpen={setDataViewPopoverOpen}
           onChangeDataView={onChangeDataView}
           onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
-          isTextBasedLangSelected={false}
         />
         {createDataView ? (
           <EuiPopoverFooter paddingSize="none">
