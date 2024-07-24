@@ -82,7 +82,7 @@ paths:
                       [
                         timelines,
                         totalCount,
-                        defaultTimelineCoun,
+                        defaultTimelineCount,
                         templateTimelineCount,
                         favoriteCount,
                         elasticTemplateTimelineCount,

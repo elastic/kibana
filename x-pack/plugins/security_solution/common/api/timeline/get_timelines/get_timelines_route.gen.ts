@@ -44,7 +44,7 @@ export const GetTimelinesResponse = z.object({
   data: z.object({
     timelines: z.array(TimelineResponse),
     totalCount: z.number(),
-    defaultTimelineCount: z.number().optional(),
+    defaultTimelineCount: z.number(),
     templateTimelineCount: z.number(),
     favoriteCount: z.number(),
     elasticTemplateTimelineCount: z.number(),

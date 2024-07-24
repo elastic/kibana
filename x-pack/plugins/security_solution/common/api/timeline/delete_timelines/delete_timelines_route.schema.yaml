@@ -50,6 +50,7 @@ paths:
                 properties:
                   data:
                     type: object
+                    required: [deleteTimeline]
                     properties:
                       deleteTimeline:
                         type: boolean

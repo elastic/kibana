@@ -51,6 +51,7 @@ paths:
                     properties:
                       persistTimeline:
                         type: object
+                        required: [timeline]
                         properties:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

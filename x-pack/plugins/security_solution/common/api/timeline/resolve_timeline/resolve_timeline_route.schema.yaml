@@ -40,6 +40,7 @@ paths:
                 properties:
                   data:
                     type: object
+                    required: [getOneTimeline]
                     properties:
                       getOneTimeline:
                         $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
