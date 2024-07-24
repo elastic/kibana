@@ -41,18 +41,22 @@ describe('Route utilities', () => {
     });
 
     it.each`
-      command                | authzKey
-      ${'get-file'}          | ${'canWriteFileOperations'}
-      ${'execute'}           | ${'canWriteExecuteOperations'}
-      ${'running-processes'} | ${'canGetRunningProcesses'}
-    `('should throw when user is not authorized to `$command`', async ({ command, authzKey }) => {
-      testSetupMock.setEndpointAuthz({ [authzKey]: false });
-      actionRequestMock.EndpointActions.data.command = command;
+      command                | authzKey                       | agentType
+      ${'get-file'}          | ${'canWriteFileOperations'}    | ${'endpoint'}
+      ${'execute'}           | ${'canWriteExecuteOperations'} | ${'endpoint'}
+      ${'running-processes'} | ${'canGetRunningProcesses'}    | ${'sentinel_one'}
+    `(
+      'should throw when user is not authorized to `$command` for $agentType',
+      async ({ command, authzKey, agentType }) => {
+        testSetupMock.setEndpointAuthz({ [authzKey]: false });
+        actionRequestMock.EndpointActions.data.command = command;
+        actionRequestMock.EndpointActions.input_type = agentType;
 
-      await expect(() =>
-        ensureUserHasAuthzToFilesForAction(testSetupMock.httpHandlerContextMock, httpRequestMock)
-      ).rejects.toThrow('Endpoint authorization failure');
-    });
+        await expect(() =>
+          ensureUserHasAuthzToFilesForAction(testSetupMock.httpHandlerContextMock, httpRequestMock)
+        ).rejects.toThrow('Endpoint authorization failure');
+      }
+    );
 
     it('should throw when response action is not supported by agent type', async () => {
       actionRequestMock.EndpointActions.input_type = 'sentinel_one';
@@ -60,7 +64,17 @@ describe('Route utilities', () => {
 
       await expect(() =>
         ensureUserHasAuthzToFilesForAction(testSetupMock.httpHandlerContextMock, httpRequestMock)
-      ).rejects.toThrow('Endpoint authorization failure');
+      ).rejects.toThrow('Response action [execute] not supported for agent type [sentinel_one]');
+    });
+
+    it('should throw when response action does not support access to files', async () => {
+      actionRequestMock.EndpointActions.data.command = 'running-processes';
+
+      await expect(() =>
+        ensureUserHasAuthzToFilesForAction(testSetupMock.httpHandlerContextMock, httpRequestMock)
+      ).rejects.toThrow(
+        'Response action [running-processes] for agent type [endpoint] does not support file downloads'
+      );
     });
   });
 });
