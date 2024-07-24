@@ -1,7 +1,7 @@
 [[data-views-api]]
 == Data views API
 
-experimental[] Manage data views, formerly known as {kib} index patterns.
+Manage data views, formerly known as {kib} index patterns.
 
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
