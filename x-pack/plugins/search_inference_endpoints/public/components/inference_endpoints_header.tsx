@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiLink, EuiText } from '@elastic/eui';
+import { EuiPageTemplate, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
 import { docLinks } from '../../common/doc_links';
@@ -22,7 +22,7 @@ export const InferenceEndpointsHeader: React.FC = () => {
         <EuiText>
           <p>
             {i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
-            <br />
+            <EuiSpacer size="s" />
             <EuiLink
               href={docLinks.createInferenceEndpoint}
               target="_blank"
