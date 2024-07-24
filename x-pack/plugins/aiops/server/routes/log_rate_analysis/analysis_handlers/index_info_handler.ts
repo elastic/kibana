@@ -40,7 +40,10 @@ export const indexInfoHandlerFactory =
 
     let zeroDocsFallback = false;
 
-    if (!requestBody.overrides?.remainingFieldCandidates) {
+    if (
+      !requestBody.overrides?.remainingFieldCandidates &&
+      !requestBody.overrides?.remainingTextFieldCandidates
+    ) {
       logDebugMessage('Fetch index information.');
       responseStream.push(
         updateLoadingState({

@@ -75,18 +75,29 @@ export const significantItemsHandlerFactory =
     );
 
     let remainingFieldCandidates: string[];
-    let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
+    let remainingTextFieldCandidates: string[];
+    let loadingStepSizePValues: number;
+
+    if (requestBody.overrides?.loaded) {
+      loadingStepSizePValues =
+        LOADED_FIELD_CANDIDATES + PROGRESS_STEP_P_VALUES - requestBody.overrides?.loaded;
+    } else {
+      loadingStepSizePValues = LOADED_FIELD_CANDIDATES;
+    }
 
     if (requestBody.overrides?.remainingFieldCandidates) {
       keywordFieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
       remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
       keywordFieldCandidatesCount = keywordFieldCandidates.length;
-      loadingStepSizePValues =
-        LOADED_FIELD_CANDIDATES +
-        PROGRESS_STEP_P_VALUES -
-        (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
     } else {
       remainingFieldCandidates = keywordFieldCandidates;
+    }
+
+    if (requestBody.overrides?.remainingTextFieldCandidates) {
+      textFieldCandidates.push(...requestBody.overrides?.remainingTextFieldCandidates);
+      remainingTextFieldCandidates = requestBody.overrides?.remainingTextFieldCandidates;
+    } else {
+      remainingTextFieldCandidates = textFieldCandidates;
     }
 
     logDebugMessage('Fetch p-values.');
@@ -135,17 +146,33 @@ export const significantItemsHandlerFactory =
         const { textFieldCandidates: fieldNames } = payload;
         queueItemLoadingStep = loadingStep * fieldNames.length;
 
-        const significantCategoriesForField = await fetchSignificantCategories({
-          esClient,
-          logger,
-          emitError: responseStream.pushError,
-          abortSignal,
-          arguments: {
-            ...requestBody,
-            fieldNames,
-            sampleProbability: stateHandler.sampleProbability(),
-          },
-        });
+        let significantCategoriesForField: Awaited<ReturnType<typeof fetchSignificantCategories>>;
+
+        try {
+          significantCategoriesForField = await fetchSignificantCategories({
+            esClient,
+            logger,
+            emitError: responseStream.pushError,
+            abortSignal,
+            arguments: {
+              ...requestBody,
+              fieldNames,
+              sampleProbability: stateHandler.sampleProbability(),
+            },
+          });
+        } catch (e) {
+          if (!isRequestAbortedError(e)) {
+            logger.error(
+              `Failed to fetch p-values for ${fieldNames.join()}, got: \n${e.toString()}`
+            );
+            responseStream.pushError(`Failed to fetch p-values for ${fieldNames.join()}.`);
+          }
+          return;
+        }
+
+        remainingTextFieldCandidates = remainingTextFieldCandidates.filter(
+          (d) => !fieldNames.includes(d)
+        );
 
         if (significantCategoriesForField.length > 0) {
           significantCategories.push(...significantCategoriesForField);
@@ -171,6 +198,7 @@ export const significantItemsHandlerFactory =
             }
           ),
           remainingFieldCandidates,
+          remainingTextFieldCandidates,
         })
       );
     }, MAX_CONCURRENT_QUERIES);

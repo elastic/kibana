@@ -40,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
         overrides = {
           loaded: 0,
           remainingFieldCandidates: [],
+          remainingTextFieldCandidates: [],
           significantItems: testData.expected
             .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
           regroupOnly: true,

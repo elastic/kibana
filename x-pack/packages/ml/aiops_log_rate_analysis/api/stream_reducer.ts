@@ -28,6 +28,7 @@ export interface StreamState {
   loaded: number;
   loadingState: string;
   remainingFieldCandidates?: string[];
+  remainingTextFieldCandidates?: string[];
   groupsMissing?: boolean;
   zeroDocsFallback: boolean;
 }
@@ -98,6 +99,7 @@ export const logRateAnalysisResultsSlice = createSlice({
         loaded: number;
         loadingState: string;
         remainingFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
         groupsMissing?: boolean;
       }>
     ) => {

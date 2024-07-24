@@ -209,6 +209,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       remainingFieldCandidates: fieldCandidates.keywordFieldCandidates.filter(
         (d) => !skippedFields.includes(d)
       ),
+      remainingTextFieldCandidates: fieldCandidates.textFieldCandidates.filter(
+        (d) => !skippedFields.includes(d)
+      ),
       regroupOnly: false,
     });
     startHandler(true, false);
@@ -225,16 +228,20 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   useEffect(() => {
     if (!isRunning) {
-      const { loaded, remainingFieldCandidates, groupsMissing } = data;
+      const { loaded, remainingFieldCandidates, remainingTextFieldCandidates, groupsMissing } =
+        data;
 
       if (
         loaded < 1 &&
         ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
+          (Array.isArray(remainingTextFieldCandidates) &&
+            remainingTextFieldCandidates.length > 0) ||
           groupsMissing)
       ) {
         setOverrides({
           loaded,
           remainingFieldCandidates,
+          remainingTextFieldCandidates,
           significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
         });
       } else if (loaded > 0) {
@@ -280,6 +287,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     if (!continueAnalysis) {
       setOverrides({
         remainingFieldCandidates: fieldCandidates.selectedKeywordFieldCandidates,
+        remainingTextFieldCandidates: fieldCandidates.selectedTextFieldCandidates,
       });
     }
 
