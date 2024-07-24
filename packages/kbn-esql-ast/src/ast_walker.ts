@@ -416,7 +416,7 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
   return clausesCtx
     .map((clause) => {
       const asToken = clause.getToken(esql_parser.AS, 0);
-      if (asToken) {
+      if (asToken && textExistsAndIsValid(asToken.getText())) {
         const fn = createOption(asToken.getText().toLowerCase(), clause);
         for (const arg of [clause._oldName, clause._newName]) {
           if (textExistsAndIsValid(arg.getText())) {

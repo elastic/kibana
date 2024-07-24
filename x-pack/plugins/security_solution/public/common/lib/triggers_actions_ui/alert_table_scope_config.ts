@@ -14,11 +14,11 @@ type KeysAlertTableId = PickKey<
   'alertsOnAlertsPage' | 'alertsOnRuleDetailsPage' | 'alertsOnCasePage' | 'alertsRiskInputs'
 >;
 
-type ValuesAlertTableId = typeof TableId[KeysAlertTableId];
+type ValuesAlertTableId = (typeof TableId)[KeysAlertTableId];
 
 type KeysAlertTableConfiguration = keyof typeof ALERTS_TABLE_REGISTRY_CONFIG_IDS;
 type ValuesAlertTableConfiguration =
-  typeof ALERTS_TABLE_REGISTRY_CONFIG_IDS[KeysAlertTableConfiguration];
+  (typeof ALERTS_TABLE_REGISTRY_CONFIG_IDS)[KeysAlertTableConfiguration];
 
 const ScopeIdLinkToAlertTableConfiguration: Record<
   ValuesAlertTableId,
