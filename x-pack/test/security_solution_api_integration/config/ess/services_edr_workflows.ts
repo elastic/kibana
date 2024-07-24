@@ -17,7 +17,6 @@ import {
   SecuritySolutionEndpointRegistryHelpers,
 } from '../../../common/services/security_solution';
 import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
-import { SecuritySolutionEdrWorkflowsEssSuperTest } from '../services/security_solution_edr_workflows_ess_supertest';
 
 export const services = {
   ...xPackAPIServices,
@@ -29,5 +28,4 @@ export const services = {
   endpointDataStreamHelpers: SecuritySolutionEndpointDataStreamHelpers,
   endpointRegistryHelpers: SecuritySolutionEndpointRegistryHelpers,
   securitySolutionUtils: SecuritySolutionESSUtils,
-  edrWorkflowsSupertest: SecuritySolutionEdrWorkflowsEssSuperTest,
 };

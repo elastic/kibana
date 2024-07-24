@@ -32,6 +32,7 @@ import {
 
 export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');
+  const utils = getService('securitySolutionUtils');
 
   const relatedEventsToGen = [
     { category: RelatedEventCategory.Driver, count: 2 },
@@ -59,8 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
     let adminSupertest: TestAgent;
 
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
+      adminSupertest = await utils.createSuperTest();
 
       resolverTrees = await resolver.createTrees(treeOptions);
       // we need tree2 for comparison tests

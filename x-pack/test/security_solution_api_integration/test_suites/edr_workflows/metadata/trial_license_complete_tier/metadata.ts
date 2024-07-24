@@ -41,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
   const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
@@ -49,9 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
     let t1AnalystSupertest: TestAgent;
 
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
-      t1AnalystSupertest = await supertest('t1_analyst');
+      adminSupertest = await utils.createSuperTest();
+      t1AnalystSupertest = await utils.createSuperTest('t1_analyst');
     });
 
     describe('list endpoints GET route', () => {

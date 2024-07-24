@@ -30,6 +30,7 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
+  const utils = getService('securitySolutionUtils');
 
   interface ApiCallsInterface {
     method: keyof Pick<TestAgent, 'post' | 'get'>;
@@ -164,11 +165,12 @@ export default function ({ getService }: FtrProviderContext) {
     let endpointOperationsAnalystSupertest: TestAgent;
     let platformEnginnerSupertest: TestAgent;
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
-      t1AnalystSupertest = await supertest(ROLE.t1_analyst);
-      endpointOperationsAnalystSupertest = await supertest(ROLE.endpoint_operations_analyst);
-      platformEnginnerSupertest = await supertest(ROLE.platform_engineer);
+      adminSupertest = await utils.createSuperTest();
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointOperationsAnalystSupertest = await utils.createSuperTest(
+        ROLE.endpoint_operations_analyst
+      );
+      platformEnginnerSupertest = await utils.createSuperTest(ROLE.platform_engineer);
 
       indexedData = await endpointTestResources.loadEndpointData();
       agentId = indexedData.hosts[0].agent.id;

@@ -25,8 +25,9 @@ export default ({ getService }: FtrProviderContext): void => {
     let supertest: TestAgent;
 
     before(async () => {
-      supertest = await utils.createSuperTest('admin');
+      supertest = await utils.createSuperTest();
     });
+
     describe('exporting lists', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);

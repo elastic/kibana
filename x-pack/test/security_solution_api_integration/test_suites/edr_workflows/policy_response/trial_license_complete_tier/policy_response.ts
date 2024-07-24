@@ -12,13 +12,13 @@ import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflo
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless Endpoint policy api', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
+      adminSupertest = await utils.createSuperTest();
     });
 
     describe('GET /api/endpoint/policy_response', () => {

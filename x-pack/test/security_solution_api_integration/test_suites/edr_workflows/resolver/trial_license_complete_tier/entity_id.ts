@@ -30,6 +30,7 @@ import {
 export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');
   const generator = new EndpointDocGenerator('resolver');
+  const utils = getService('securitySolutionUtils');
 
   const setEntityIDEmptyString = (event: Event) => {
     if (event.process?.entity_id) {
@@ -41,8 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     let adminSupertest: TestAgent;
 
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
+      adminSupertest = await utils.createSuperTest();
     });
 
     describe('entity api', () => {

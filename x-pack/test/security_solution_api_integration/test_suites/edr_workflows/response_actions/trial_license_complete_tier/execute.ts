@@ -20,6 +20,7 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const rolesUsersProvider = getService('rolesUsersProvider');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   describe('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
@@ -32,9 +33,10 @@ export default function ({ getService }: FtrProviderContext) {
       indexedData = await endpointTestResources.loadEndpointData();
       agentId = indexedData.hosts[0].agent.id;
 
-      const { supertest } = getService('edrWorkflowsSupertest');
-      t1AnalystSupertest = await supertest(ROLE.t1_analyst);
-      endpointOperationsAnalystSupertest = await supertest(ROLE.endpoint_operations_analyst);
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointOperationsAnalystSupertest = await utils.createSuperTest(
+        ROLE.endpoint_operations_analyst
+      );
     });
 
     after(async () => {
@@ -173,8 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
         await rolesUsersProvider.createUser({ name: username, password, roles: [username] });
 
-        const { supertest } = getService('edrWorkflowsSupertest');
-        customUsernameSupertest = await supertest(username);
+        customUsernameSupertest = await utils.createSuperTest(username);
 
         const {
           body: { data },

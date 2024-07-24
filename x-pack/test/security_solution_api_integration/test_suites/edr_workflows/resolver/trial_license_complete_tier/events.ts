@@ -28,6 +28,7 @@ import { compareArrays, HEADERS } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');
+  const utils = getService('securitySolutionUtils');
 
   const relatedEventsToGen = [
     { category: RelatedEventCategory.Driver, count: 2 },
@@ -57,8 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
     let adminSupertest: TestAgent;
 
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
+      adminSupertest = await utils.createSuperTest();
 
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree

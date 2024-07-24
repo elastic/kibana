@@ -13,14 +13,15 @@ import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflo
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless Resolver tests for the entity route', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
+      adminSupertest = await utils.createSuperTest();
     });
+
     describe('winlogbeat tests', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');

@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     let supertest: TestAgent;
 
     before(async () => {
-      supertest = await utils.createSuperTest('admin');
+      supertest = await utils.createSuperTest();
     });
 
     describe('patch lists', () => {

@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
     let supertest: TestAgent;
 
     before(async () => {
-      supertest = await utils.createSuperTest('admin');
+      supertest = await utils.createSuperTest();
     });
 
     describe('importing list items without an index', () => {

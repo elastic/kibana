@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
     let supertest: TestAgent;
 
     before(async () => {
-      supertest = await utils.createSuperTest('admin');
+      supertest = await utils.createSuperTest();
     });
     describe('find lists by size', () => {
       beforeEach(async () => {

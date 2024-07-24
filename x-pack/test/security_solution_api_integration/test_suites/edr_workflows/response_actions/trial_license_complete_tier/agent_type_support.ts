@@ -11,10 +11,11 @@ import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflo
 
 export default function ({ getService }: FtrProviderContext) {
   describe('@ess @serverless Response Actions support for sentinelOne agentType', function () {
+    const utils = getService('securitySolutionUtils');
+
     let adminSupertest: TestAgent;
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      adminSupertest = await supertest();
+      adminSupertest = await utils.createSuperTest();
     });
 
     describe('and the "responseActionsSentinelOneV1Enabled" feature flag is enabled', () => {

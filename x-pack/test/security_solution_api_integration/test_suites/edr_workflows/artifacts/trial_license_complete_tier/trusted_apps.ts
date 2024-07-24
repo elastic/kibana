@@ -22,6 +22,7 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
@@ -31,9 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
     let endpointPolicyManagerSupertest: TestAgent;
 
     before(async () => {
-      const { supertest } = getService('edrWorkflowsSupertest');
-      t1AnalystSupertest = await supertest(ROLE.t1_analyst);
-      endpointPolicyManagerSupertest = await supertest(ROLE.endpoint_policy_manager);
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointPolicyManagerSupertest = await utils.createSuperTest(ROLE.endpoint_policy_manager);
 
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
     });
@@ -276,8 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('@skipInServerless and user has authorization to read trusted apps', function () {
         let hunterSupertest: TestAgent;
         before(async () => {
-          const { supertest } = getService('edrWorkflowsSupertest');
-          hunterSupertest = await supertest(ROLE.hunter);
+          hunterSupertest = await utils.createSuperTest(ROLE.hunter);
         });
 
         for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
