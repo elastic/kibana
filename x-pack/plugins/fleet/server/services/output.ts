@@ -200,7 +200,7 @@ function validateOutputNotUsedInPolicy(
         dataOutputType
       )} output cannot be used with ${integrationName} integration in ${
         agentPolicy.name
-      }. Please create a new ElasticSearch output.`
+      }. Please create a new Elasticsearch output.`
     );
   }
 }

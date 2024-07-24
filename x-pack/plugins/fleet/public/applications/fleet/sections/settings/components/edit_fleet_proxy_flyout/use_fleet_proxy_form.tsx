@@ -33,7 +33,7 @@ const ConfirmTitle = () => (
 const ConfirmDescription: React.FunctionComponent = ({}) => (
   <FormattedMessage
     id="xpack.fleet.settings.fleetProxyFlyout.confirmModalText"
-    defaultMessage="This action will update agent policies using that proxies. This action can not be undone. Are you sure you wish to continue?"
+    defaultMessage="This action will update agent policies using this proxy. This action can not be undone. Are you sure you wish to continue?"
   />
 );
 

@@ -43,28 +43,3 @@ export async function getAgentAndPolicyCountForOutput(output: Output) {
 
   return { agentPolicyCount, agentCount };
 }
-
-export async function getAgentAndPolicyCount() {
-  const agentPolicies = await sendGetAgentPolicies({
-    perPage: 0,
-  });
-
-  if (agentPolicies.error) {
-    throw agentPolicies.error;
-  }
-  const agentPolicyCount = agentPolicies.data?.total ?? 0;
-
-  const agents = await sendGetAgents({
-    page: 1,
-    perPage: 0, // We only need the count here
-    showInactive: false,
-  });
-
-  if (agents.error) {
-    throw agents.error;
-  }
-
-  const agentCount = agents.data?.total ?? 0;
-
-  return { agentPolicyCount, agentCount };
-}
