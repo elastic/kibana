@@ -239,11 +239,6 @@ const AssistantComponent: React.FC<Props> = ({
   useEffect(() => {
     if (areConnectorsFetched && conversationsLoaded && Object.keys(conversations).length > 0) {
       setCurrentConversation((prev) => {
-        console.log('setCurrentConversation', {
-          currentConversationId,
-          conversations,
-          isAssistantEnabled,
-        });
         const nextConversation =
           (currentConversationId && conversations[currentConversationId]) ||
           (isAssistantEnabled &&
@@ -251,7 +246,6 @@ const AssistantComponent: React.FC<Props> = ({
               find(conversations, ['title', getLastConversationId(conversationTitle)]))) ||
           find(conversations, ['title', getLastConversationId(WELCOME_CONVERSATION_TITLE)]);
 
-        console.log('nextConversation', nextConversation);
         if (deepEqual(prev, nextConversation)) return prev;
 
         const conversationToReturn =
@@ -261,8 +255,14 @@ const AssistantComponent: React.FC<Props> = ({
             ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
           getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
-        console.log('conversationToReturn', conversationToReturn);
 
+        // updated selected system prompt
+        setEditingSystemPromptId(
+          getDefaultSystemPrompt({
+            allSystemPrompts,
+            conversation: conversationToReturn,
+          })?.id
+        );
         if (
           prev &&
           prev.id === conversationToReturn.id &&
@@ -278,10 +278,9 @@ const AssistantComponent: React.FC<Props> = ({
         }
         return conversationToReturn;
       });
-    } else {
-      console.log('not setCurrentConversation');
     }
   }, [
+    allSystemPrompts,
     areConnectorsFetched,
     conversationTitle,
     conversations,
@@ -647,7 +646,6 @@ const AssistantComponent: React.FC<Props> = ({
     ['SET_DEFAULT_CONNECTOR'],
     {
       mutationFn: async (payload) => {
-        console.log('mutationFn', allSystemPrompts);
         const apiConfig = getGenAiConfig(defaultConnector);
         return setApiConfig({
           conversation: payload,
@@ -677,7 +675,6 @@ const AssistantComponent: React.FC<Props> = ({
   useEffect(() => {
     (async () => {
       if (areConnectorsFetched && currentConversation?.id === '' && !isLoadingPrompts) {
-        console.log('useEffect to call mutate', { isLoadingPrompts, allSystemPrompts });
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);
@@ -803,6 +800,7 @@ const AssistantComponent: React.FC<Props> = ({
                     isSettingsModalVisible={isSettingsModalVisible}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     allSystemPrompts={allSystemPrompts}
+                    refetchConversations={refetchResults}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -835,6 +833,7 @@ const AssistantComponent: React.FC<Props> = ({
     handleOnSystemPromptSelectionChange,
     isSettingsModalVisible,
     isWelcomeSetup,
+    refetchResults,
   ]);
 
   return (

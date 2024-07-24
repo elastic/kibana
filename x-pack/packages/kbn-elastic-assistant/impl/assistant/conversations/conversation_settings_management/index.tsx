@@ -321,6 +321,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             conversationsSettingsBulkActions={conversationsSettingsBulkActions}
             http={http}
             isDisabled={isDisabled}
+            refetchResults={refetchConversations}
             selectedConversation={selectedConversation}
             setConversationSettings={setConversationSettings}
             setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
