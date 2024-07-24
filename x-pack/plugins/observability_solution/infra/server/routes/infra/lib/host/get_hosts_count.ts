@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { kqlQuery } from '@kbn/observability-plugin/server';
 import { BoolQuery } from '@kbn/es-query';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
@@ -13,13 +12,11 @@ import { HOST_NAME_FIELD } from '../../../../../common/constants';
 export async function getHostsCount({
   infraMetricsClient,
   query,
-  kuery,
   from,
   to,
 }: {
   infraMetricsClient: InfraMetricsClient;
   query?: BoolQuery;
-  kuery?: string;
   from: string;
   to: string;
 }) {
@@ -48,7 +45,6 @@ export async function getHostsCount({
           filter: [
             ...queryFilter,
             ...rangeQuery,
-            ...kqlQuery(kuery),
             {
               bool: {
                 should: [
