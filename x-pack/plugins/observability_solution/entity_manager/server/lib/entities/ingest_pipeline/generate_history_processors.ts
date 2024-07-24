@@ -26,7 +26,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }
 
   return definition.metadata.reduce((acc, def) => {
-    const destination = def.destination || def.source;
+    const destination = def.destination;
     const optionalFieldPath = destination.replaceAll('.', '?.');
     const next = `
       if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
