@@ -6,11 +6,16 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
+import { entityDefinitionWithBackfill } from '../helpers/fixtures/entity_definition_with_backfill';
 import { generateHistoryTransform } from './generate_history_transform';
 
 describe('generateHistoryTransform(definition)', () => {
-  it('should generate a valid latest transform', () => {
+  it('should generate a valid history transform', () => {
     const transform = generateHistoryTransform(entityDefinition);
+    expect(transform).toMatchSnapshot();
+  });
+  it('should generate a valid history backfill transform', () => {
+    const transform = generateHistoryTransform(entityDefinitionWithBackfill, true);
     expect(transform).toMatchSnapshot();
   });
 });

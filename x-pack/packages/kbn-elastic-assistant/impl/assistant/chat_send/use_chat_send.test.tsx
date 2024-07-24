@@ -63,7 +63,6 @@ describe('use chat send', () => {
       assistantTelemetry: {
         reportAssistantMessageSent,
       },
-      knowledgeBase: { isEnabledKnowledgeBase: false, isEnabledRAGAlerts: false },
     });
   });
   it('handleOnChatCleared clears the conversation', async () => {
@@ -150,8 +149,6 @@ describe('use chat send', () => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
         conversationId: testProps.currentConversation?.title,
         role: 'user',
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
@@ -159,8 +156,6 @@ describe('use chat send', () => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
         conversationId: testProps.currentConversation?.title,
         role: 'assistant',
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',

@@ -57,7 +57,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('setup Page', () => {
@@ -137,6 +136,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await createConnector();
         await createIndex();
         await browser.refresh();
+        await pageObjects.searchPlayground.session.clearSession();
         await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
       });
       it('loads successfully', async () => {
@@ -152,6 +152,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 (fn) => fn.function.name === 'title_conversation'
               ) === undefined
           );
+
+          await pageObjects.searchPlayground.session.expectSession();
 
           await pageObjects.searchPlayground.PlaygroundChatPage.sendQuestion();
 
@@ -179,6 +181,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('save selected fields between modes', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('loads a session from localstorage', async () => {
+          await pageObjects.searchPlayground.session.setSession();
+          await browser.refresh();
+          await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectPromptToBe(
+            'You are a fireman in london that helps answering question-answering tasks.'
+          );
         });
       });
 

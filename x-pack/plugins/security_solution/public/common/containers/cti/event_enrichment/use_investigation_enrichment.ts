@@ -27,6 +27,7 @@ export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
 const noEnrichments = { enrichments: [] };
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
   const { data, uiSettings } = useKibana().services;
