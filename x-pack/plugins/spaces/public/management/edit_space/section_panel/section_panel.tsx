@@ -12,7 +12,7 @@ import React, { Component, Fragment } from 'react';
 
 interface Props {
   iconType?: IconType;
-  title: string | ReactNode;
+  title?: string | ReactNode;
   dataTestSubj?: string;
 }
 
@@ -27,6 +27,10 @@ export class SectionPanel extends Component<Props, {}> {
   }
 
   public getTitle = () => {
+    if (!this.props.title) {
+      return null;
+    }
+
     return (
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -52,7 +56,7 @@ export class SectionPanel extends Component<Props, {}> {
   public getForm = () => {
     return (
       <Fragment>
-        <EuiSpacer />
+        {this.props.title ? <EuiSpacer /> : null}
         {this.props.children}
       </Fragment>
     );

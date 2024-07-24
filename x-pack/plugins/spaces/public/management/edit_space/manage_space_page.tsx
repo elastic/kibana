@@ -193,6 +193,9 @@ export class ManageSpacePage extends Component<Props, State> {
     return (
       <div data-test-subj="spaces-edit-page">
         <CustomizeSpace
+          title={i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
+            defaultMessage: 'General',
+          })}
           space={this.state.space}
           onChange={this.onSpaceChange}
           editingExistingSpace={this.editingExistingSpace()}
@@ -202,7 +205,14 @@ export class ManageSpacePage extends Component<Props, State> {
         {this.state.isSolutionNavEnabled && (
           <>
             <EuiSpacer size="l" />
-            <SolutionView space={this.state.space} onChange={this.onSpaceChange} />
+            <SolutionView
+              space={this.state.space}
+              onChange={this.onSpaceChange}
+              sectionTitle={i18n.translate(
+                'xpack.spaces.management.manageSpacePage.navigationTitle',
+                { defaultMessage: 'Navigation' }
+              )}
+            />
           </>
         )}
 

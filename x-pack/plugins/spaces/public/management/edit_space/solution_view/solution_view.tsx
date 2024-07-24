@@ -98,18 +98,14 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
+  sectionTitle?: string;
 }
 
-export const SolutionView: FunctionComponent<Props> = ({ space, onChange }) => {
+export const SolutionView: FunctionComponent<Props> = ({ space, onChange, sectionTitle }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <SectionPanel
-      title={i18n.translate('xpack.spaces.management.manageSpacePage.navigationTitle', {
-        defaultMessage: 'Navigation',
-      })}
-      dataTestSubj="navigationPanel"
-    >
+    <SectionPanel title={sectionTitle} dataTestSubj="navigationPanel">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">

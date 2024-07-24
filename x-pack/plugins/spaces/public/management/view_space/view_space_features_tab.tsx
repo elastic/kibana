@@ -20,7 +20,6 @@ import React, { useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
@@ -91,19 +90,14 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({
         </>
       )}
 
-      <SectionPanel
-        title={i18n.translate('xpack.spaces.management.manageSpacePage.featuresTitle', {
-          defaultMessage: 'Features',
-        })}
-        data-test-subj="enabled-features-panel"
-      >
+      <SectionPanel data-test-subj="enabled-features-panel">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
-                  id="xpack.spaces.management.viewSpaceFeatures.enableFeaturesInSpaceMessage"
-                  defaultMessage="Feature visibility"
+                  id="xpack.spaces.management.viewSpaceFeatures.featuresVisibility"
+                  defaultMessage="Set features visibility"
                 />
               </h3>
             </EuiTitle>
