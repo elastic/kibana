@@ -244,6 +244,8 @@ paths:
                     properties:
                       deleteTimeline:
                         type: boolean
+                    required:
+                      - deleteTimeline
                 required:
                   - data
           description: Indicates the timeline was successfully deleted.
@@ -327,6 +329,8 @@ paths:
                         properties:
                           timeline:
                             $ref: '#/components/schemas/TimelineResponse'
+                        required:
+                          - timeline
                     required:
                       - persistTimeline
                 required:
@@ -835,6 +839,8 @@ paths:
                       getOneTimeline:
                         $ref: '#/components/schemas/TimelineResponse'
                         nullable: true
+                    required:
+                      - getOneTimeline
                 required:
                   - data
           description: The (template) timeline has been found
@@ -925,7 +931,7 @@ paths:
                     required:
                       - timelines
                       - totalCount
-                      - defaultTimelineCoun
+                      - defaultTimelineCount
                       - templateTimelineCount
                       - favoriteCount
                       - elasticTemplateTimelineCount
