@@ -83,7 +83,7 @@ export const processVersionedRouter = (
         }
         parameters = [
           getVersionedHeaderParam(version, versions),
-          ...getXsrfHeaderForMethod(route.method as RouteMethod),
+          ...getXsrfHeaderForMethod(route.method as RouteMethod, route.options.options),
           ...pathObjects,
           ...queryObjects,
         ];

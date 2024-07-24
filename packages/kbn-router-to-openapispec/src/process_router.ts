@@ -44,7 +44,7 @@ export const processRouter = (
 
       const parameters: OpenAPIV3.ParameterObject[] = [
         getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
-        ...getXsrfHeaderForMethod(route.method),
+        ...getXsrfHeaderForMethod(route.method, route.options),
       ];
       if (validationSchemas) {
         let pathObjects: OpenAPIV3.ParameterObject[] = [];
