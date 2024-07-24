@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { OptionsListOption } from '../../common/options_list/options_list_options';
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import { pluginServices } from '../services';
 
 export const useFieldFormatter = ({
@@ -23,7 +23,7 @@ export const useFieldFormatter = ({
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
   const [fieldFormatter, setFieldFormatter] = useState(
-    () => (toFormat: OptionsListOption) => toFormat
+    () => (toFormat: OptionsListSelection) => toFormat
   );
 
   /**
@@ -37,7 +37,7 @@ export const useFieldFormatter = ({
       setFieldFormatter(
         () =>
           dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: OptionsListOption) => toFormat)
+          ((toFormat: OptionsListSelection) => toFormat)
       );
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);

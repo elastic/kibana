@@ -10,7 +10,7 @@ import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/co
 import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 import type { DataControlInput } from '../types';
-import { OptionsListOption } from './options_list_options';
+import { OptionsListSelection } from './options_list_selections';
 import { OptionsListSearchTechnique } from './suggestions_searching';
 import type { OptionsListSortingType } from './suggestions_sorting';
 
@@ -19,7 +19,7 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
-  selectedOptions?: OptionsListOption[];
+  selectedOptions?: OptionsListSelection[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
@@ -31,7 +31,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   exclude?: boolean;
 }
 
-export type OptionsListSuggestions = Array<{ value: OptionsListOption; docCount?: number }>;
+export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -39,7 +39,7 @@ export type OptionsListSuggestions = Array<{ value: OptionsListOption; docCount?
 export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
   totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
-  invalidSelections?: OptionsListOption[];
+  invalidSelections?: OptionsListSelection[];
 }
 
 /**

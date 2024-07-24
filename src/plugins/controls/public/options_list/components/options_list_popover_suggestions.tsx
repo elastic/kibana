@@ -13,9 +13,9 @@ import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/sele
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import {
-  getOptionAsFieldType,
-  OptionsListOption,
-} from '../../../common/options_list/options_list_options';
+  getSelectionAsFieldType,
+  OptionsListSelection,
+} from '../../../common/options_list/options_list_selections';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
@@ -69,11 +69,11 @@ export const OptionsListPopoverSuggestions = ({
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(
-    () => new Set<OptionsListOption>(selectedOptions),
+    () => new Set<OptionsListSelection>(selectedOptions),
     [selectedOptions]
   );
   const invalidSelectionsSet = useMemo(
-    () => new Set<OptionsListOption>(invalidSelections),
+    () => new Set<OptionsListSelection>(invalidSelections),
     [invalidSelections]
   );
   const suggestions = useMemo(() => {
@@ -208,7 +208,7 @@ export const OptionsListPopoverSuggestions = ({
               return;
             }
 
-            const key = getOptionAsFieldType(fieldSpec, changedOption.key);
+            const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
             // the order of these checks matters, so be careful if rearranging them
             if (showOnlySelected || selectedOptionsSet.has(key)) {
               optionsList.dispatch.deselectOption(key);

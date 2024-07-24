@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { getOptionAsFieldType } from '../../../common/options_list/options_list_options';
+import { getSelectionAsFieldType } from '../../../common/options_list/options_list_selections';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
@@ -97,7 +97,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           }
 
           setSelectableOptions(newSuggestions);
-          const key = getOptionAsFieldType(fieldSpec, changedOption.key);
+          const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
           optionsList.dispatch.deselectOption(key);
         }}
       >
