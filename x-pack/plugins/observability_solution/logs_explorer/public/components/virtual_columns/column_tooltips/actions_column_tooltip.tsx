@@ -26,7 +26,7 @@ const spacingCSS = css`
 
 export const ActionsColumnTooltip = () => {
   return (
-    <TooltipButton popoverTitle={actionsLabel}>
+    <TooltipButton popoverTitle={actionsLabel} displayText="&nbsp;">
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
           <p>{actionsHeaderTooltipParagraph}</p>

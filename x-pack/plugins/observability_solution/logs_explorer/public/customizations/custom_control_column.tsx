@@ -86,7 +86,6 @@ export const getRowAdditionalControlColumns =
       {
         id: 'connectedDegradedDocs',
         headerAriaLabel: actionsHeaderAriaLabelDegradedAction,
-        headerCellRender: ActionsColumnTooltip,
         renderControl: (Control, rowProps) => {
           return <DegradedDocs Control={Control} rowProps={rowProps} />;
         },
@@ -94,6 +93,7 @@ export const getRowAdditionalControlColumns =
       {
         id: 'connectedStacktraceDocs',
         headerAriaLabel: actionsHeaderAriaLabelStacktraceAction,
+        headerCellRender: ActionsColumnTooltip,
         renderControl: (Control, rowProps) => {
           return <Stacktrace Control={Control} rowProps={rowProps} />;
         },
