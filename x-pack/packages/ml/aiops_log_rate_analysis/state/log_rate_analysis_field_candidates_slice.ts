@@ -30,7 +30,7 @@ export const fetchFieldCandidates = createAsyncThunk(
     const { http, abortCtrl, body, headers } = options;
 
     // Get field candidates so we're able to populate the field selection dropdown.
-    const logRateAnalysisFieldCandidates = await http.post<FetchFieldCandidatesResponse>(
+    const fieldCandidates = await http.post<FetchFieldCandidatesResponse>(
       AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS_FIELD_CANDIDATES,
       {
         signal: abortCtrl.current.signal,
@@ -39,8 +39,32 @@ export const fetchFieldCandidates = createAsyncThunk(
         ...(body && Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
       }
     );
+    const {
+      keywordFieldCandidates,
+      textFieldCandidates,
+      selectedKeywordFieldCandidates,
+      selectedTextFieldCandidates,
+    } = fieldCandidates;
 
-    thunkApi.dispatch(setAllFieldCandidates(logRateAnalysisFieldCandidates));
+    const fieldFilterUniqueItems = [...keywordFieldCandidates, ...textFieldCandidates].sort();
+    const fieldFilterUniqueSelectedItems = [
+      ...selectedKeywordFieldCandidates,
+      ...selectedTextFieldCandidates,
+    ];
+    const fieldFilterSkippedItems = fieldFilterUniqueItems.filter(
+      (d) => !fieldFilterUniqueSelectedItems.includes(d)
+    );
+
+    thunkApi.dispatch(
+      setAllFieldCandidates({
+        fieldFilterUniqueItems,
+        fieldFilterSkippedItems,
+        keywordFieldCandidates,
+        textFieldCandidates,
+        selectedKeywordFieldCandidates,
+        selectedTextFieldCandidates,
+      })
+    );
   }
 );
 
@@ -51,16 +75,24 @@ export interface FetchFieldCandidatesResponse {
   selectedTextFieldCandidates: string[];
 }
 
-export interface FieldCandidatesState extends FetchFieldCandidatesResponse {
+export interface FieldCandidatesState {
   isLoading: boolean;
+  fieldFilterUniqueItems: string[];
+  fieldFilterSkippedItems: string[];
+  keywordFieldCandidates: string[];
+  textFieldCandidates: string[];
+  selectedKeywordFieldCandidates: string[];
+  selectedTextFieldCandidates: string[];
 }
 
 function getDefaultState(): FieldCandidatesState {
   return {
     isLoading: false,
+    fieldFilterUniqueItems: [],
+    fieldFilterSkippedItems: [],
     keywordFieldCandidates: [],
-    selectedKeywordFieldCandidates: [],
     textFieldCandidates: [],
+    selectedKeywordFieldCandidates: [],
     selectedTextFieldCandidates: [],
   };
 }
@@ -71,7 +103,7 @@ export const logRateAnalysisFieldCandidatesSlice = createSlice({
   reducers: {
     setAllFieldCandidates: (
       state: FieldCandidatesState,
-      action: PayloadAction<FetchFieldCandidatesResponse>
+      action: PayloadAction<Omit<FieldCandidatesState, 'isLoading'>>
     ) => {
       return { ...state, ...action.payload };
     },

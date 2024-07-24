@@ -202,16 +202,23 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     dispatch(clearAllRowState());
   };
 
+  const {
+    fieldFilterUniqueItems,
+    fieldFilterSkippedItems,
+    keywordFieldCandidates,
+    textFieldCandidates,
+    selectedKeywordFieldCandidates,
+    selectedTextFieldCandidates,
+  } = fieldCandidates;
+  const fieldFilterButtonDisabled =
+    isRunning || fieldCandidates.isLoading || fieldFilterUniqueItems.length === 0;
+
   const onFieldsFilterChange = (skippedFields: string[]) => {
     dispatch(resetResults());
     setOverrides({
       loaded: 0,
-      remainingFieldCandidates: fieldCandidates.keywordFieldCandidates.filter(
-        (d) => !skippedFields.includes(d)
-      ),
-      remainingTextFieldCandidates: fieldCandidates.textFieldCandidates.filter(
-        (d) => !skippedFields.includes(d)
-      ),
+      remainingFieldCandidates: keywordFieldCandidates.filter((d) => !skippedFields.includes(d)),
+      remainingTextFieldCandidates: textFieldCandidates.filter((d) => !skippedFields.includes(d)),
       regroupOnly: false,
     });
     startHandler(true, false);
@@ -267,27 +274,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
-  const fieldFilterUniqueItems = [
-    ...fieldCandidates.keywordFieldCandidates,
-    ...fieldCandidates.textFieldCandidates,
-  ].sort();
-  const fieldFilterUniqueSelectedItems = [
-    ...fieldCandidates.selectedKeywordFieldCandidates,
-    ...fieldCandidates.selectedTextFieldCandidates,
-  ];
-  const fieldFilterSkippedItems = fieldFilterUniqueItems.filter(
-    (d) => !fieldFilterUniqueSelectedItems.includes(d)
-  );
-  const fieldFilterButtonDisabled =
-    isRunning || fieldCandidates.isLoading || fieldFilterUniqueItems.length === 0;
-
   // Start handler clears possibly hovered or pinned
   // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
       setOverrides({
-        remainingFieldCandidates: fieldCandidates.selectedKeywordFieldCandidates,
-        remainingTextFieldCandidates: fieldCandidates.selectedTextFieldCandidates,
+        remainingFieldCandidates: selectedKeywordFieldCandidates,
+        remainingTextFieldCandidates: selectedTextFieldCandidates,
       });
     }
 
