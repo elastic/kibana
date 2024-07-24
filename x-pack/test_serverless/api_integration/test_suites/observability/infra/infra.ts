@@ -85,10 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
                   must_not: [],
                 },
               },
-              range: {
-                from: timeRange.from,
-                to: timeRange.to,
-              },
+              from: timeRange.from,
+              to: timeRange.to,
               sourceId: 'default',
             },
             roleAuthc

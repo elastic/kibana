@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -13,23 +13,17 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { INFRA_ALERT_FEATURE_ID } from '../../../../../common/constants';
-import { BUCKET_KEY, MAX_SIZE } from '../constants';
-import { InfraAlertsClient } from '../../../../lib/helpers/get_infra_alerts_client';
+import { BUCKET_KEY } from '../constants';
+import { GetHostParameters } from '../types';
 
 export async function getHostsAlertsCount({
   alertsClient,
   hostNamesShortList,
-  kuery,
   from,
   to,
-  maxNumHosts = MAX_SIZE,
-}: {
-  alertsClient: InfraAlertsClient;
+  limit,
+}: Pick<GetHostParameters, 'alertsClient' | 'from' | 'to' | 'limit'> & {
   hostNamesShortList: string[];
-  kuery?: string;
-  from: string;
-  to: string;
-  maxNumHosts?: number;
 }) {
   const rangeQuery = [
     {
@@ -52,7 +46,6 @@ export async function getHostsAlertsCount({
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
           ...rangeQuery,
-          ...kqlQuery(kuery),
         ],
       },
     },
@@ -60,7 +53,7 @@ export async function getHostsAlertsCount({
       hosts: {
         terms: {
           field: BUCKET_KEY,
-          size: maxNumHosts,
+          size: limit,
           order: {
             _key: 'asc',
           },

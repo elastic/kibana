@@ -8,33 +8,26 @@
 import { estypes } from '@elastic/elasticsearch';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import {
-  GetInfraMetricsRequestBodyPayload,
-  InfraAssetMetricType,
-} from '../../../../../common/http_api/infra';
+import { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 import { BUCKET_KEY } from '../constants';
 
 export const createFilters = ({
-  params,
-  extraFilter,
+  query,
+  to,
+  from,
   hostNamesShortList = [],
 }: {
-  params: GetInfraMetricsRequestBodyPayload;
+  query?: estypes.QueryDslQueryContainer;
+  to: string;
+  from: string;
   hostNamesShortList?: string[];
-  extraFilter?: estypes.QueryDslQueryContainer;
-}) => {
-  const extrafilterClause = extraFilter?.bool?.filter;
-
-  const extraFilterList = !!extrafilterClause
-    ? Array.isArray(extrafilterClause)
-      ? extrafilterClause
-      : [extrafilterClause]
-    : [];
+}): estypes.QueryDslQueryContainer[] => {
+  const filters = query ? [query] : [];
 
   return [
-    ...extraFilterList,
+    ...filters,
     ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
-    ...rangeQuery(new Date(params.range.from).getTime(), new Date(params.range.to).getTime()),
+    ...rangeQuery(new Date(from).getTime(), new Date(to).getTime()),
     {
       exists: {
         field: BUCKET_KEY,

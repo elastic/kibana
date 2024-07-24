@@ -40,18 +40,21 @@ export const InfraAssetMetadataRT = rt.type({
   value: rt.union([rt.number, rt.string, rt.null]),
 });
 
-export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
-  rt.partial({
-    query: rt.UnknownRecord,
-  }),
-  rt.type({
-    type: rt.literal('host'),
-    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(20)]),
-    metrics: rt.array(rt.type({ type: InfraMetricTypeRT })),
-    sourceId: rt.string,
-    range: RangeRT,
-  }),
-]);
+export const GetInfraMetricsRequestBodyPayloadRT = rt.exact(
+  rt.intersection([
+    rt.partial({
+      query: rt.UnknownRecord,
+    }),
+    rt.type({
+      type: rt.literal('host'),
+      limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(100)]),
+      metrics: rt.array(InfraMetricTypeRT),
+      sourceId: rt.string,
+      from: dateRt,
+      to: dateRt,
+    }),
+  ])
+);
 
 export const InfraAssetMetricsItemRT = rt.intersection([
   rt.type({
@@ -77,12 +80,10 @@ export type InfraAssetMetricsItem = rt.TypeOf<typeof InfraAssetMetricsItemRT>;
 
 export type GetInfraMetricsRequestBodyPayload = Omit<
   rt.TypeOf<typeof GetInfraMetricsRequestBodyPayloadRT>,
-  'limit' | 'range'
+  'limit' | 'from' | 'to'
 > & {
-  limit?: number;
-  range: {
-    from: string;
-    to: string;
-  };
+  limit: number;
+  from: string;
+  to: string;
 };
 export type GetInfraMetricsResponsePayload = rt.TypeOf<typeof GetInfraMetricsResponsePayloadRT>;

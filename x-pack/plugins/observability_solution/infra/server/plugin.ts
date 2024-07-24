@@ -176,18 +176,21 @@ export class InfraServerPlugin
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
-    const metricsClient = plugins.metricsDataAccess.client;
-    const getApmIndices = plugins.apmDataAccess.getApmIndices;
-    metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
-      const sourceConfiguration = await sources.getInfraSourceConfiguration(
-        options.savedObjectsClient,
-        'default'
-      );
-      return sourceConfiguration.configuration.metricAlias;
-    });
+    const apmDataAccess = plugins.apmDataAccess;
+    const metricsDataAccess = plugins.metricsDataAccess;
+
+    metricsDataAccess.client.setDefaultMetricIndicesHandler(
+      async (options: GetMetricIndicesOptions) => {
+        const sourceConfiguration = await sources.getInfraSourceConfiguration(
+          options.savedObjectsClient,
+          'default'
+        );
+        return sourceConfiguration.configuration.metricAlias;
+      }
+    );
     const sources = new InfraSources({
       config: this.config,
-      metricsClient,
+      metricsClient: metricsDataAccess.client,
     });
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),
@@ -222,8 +225,8 @@ export class InfraServerPlugin
       framework,
       sources,
       sourceStatus,
-      metricsClient,
-      getApmIndices,
+      metricsDataAccess,
+      apmDataAccess,
       ...domainLibs,
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),

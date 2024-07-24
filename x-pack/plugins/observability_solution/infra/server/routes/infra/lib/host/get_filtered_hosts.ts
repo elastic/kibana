@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import { GetHostsArgs } from '../types';
-import { BUCKET_KEY, MAX_SIZE } from '../constants';
-import { assertQueryStructure } from '../utils';
+import { estypes } from '@elastic/elasticsearch';
+import { GetHostParameters } from '../types';
+import { BUCKET_KEY } from '../constants';
 import { createFilters } from '../helpers/query';
 
-export const getFilteredHosts = async ({ infraMetricsClient, params }: GetHostsArgs) => {
-  assertQueryStructure(params.query);
-
-  return infraMetricsClient.search({
+export const getFilteredHosts = async ({
+  infraMetricsClient,
+  from,
+  to,
+  limit,
+  query,
+}: {
+  infraMetricsClient: GetHostParameters['infraMetricsClient'];
+  from: string;
+  to: string;
+  limit: number;
+  query: estypes.QueryDslQueryContainer;
+}) => {
+  const response = await infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
     body: {
@@ -21,14 +31,13 @@ export const getFilteredHosts = async ({ infraMetricsClient, params }: GetHostsA
       track_total_hits: false,
       query: {
         bool: {
-          ...params.query.bool,
-          filter: createFilters({ params, extraFilter: params.query }),
+          filter: createFilters({ from, to, query }),
         },
       },
       aggs: {
         nodes: {
           terms: {
-            size: params.limit ?? MAX_SIZE,
+            size: limit,
             field: BUCKET_KEY,
             order: {
               _key: 'asc',
@@ -38,4 +47,7 @@ export const getFilteredHosts = async ({ infraMetricsClient, params }: GetHostsA
       },
     },
   });
+
+  const { nodes } = response.aggregations ?? {};
+  return nodes?.buckets.map((p) => p.key as string) ?? [];
 };

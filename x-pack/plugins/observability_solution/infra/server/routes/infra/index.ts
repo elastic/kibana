@@ -51,7 +51,8 @@ export const initInfraMetricsRoute = (libs: InfraBackendLibs) => {
         const hosts = await getHosts({
           infraMetricsClient,
           alertsClient,
-          params,
+          apmDataAccess: libs.apmDataAccess,
+          ...params,
         });
 
         return response.ok({
