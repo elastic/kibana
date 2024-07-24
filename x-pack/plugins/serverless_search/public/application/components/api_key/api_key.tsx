@@ -128,6 +128,12 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                       fill
                       onClick={() => setIsFlyoutOpen(true)}
                       data-test-subj="new-api-key-button"
+                      aria-label={i18n.translate(
+                        'xpack.serverlessSearch.apiKey.newButton.ariaLabel',
+                        {
+                          defaultMessage: 'Add new API key',
+                        }
+                      )}
                     >
                       <EuiText size="s">
                         {i18n.translate('xpack.serverlessSearch.apiKey.newButtonLabel', {
@@ -145,6 +151,9 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                       href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
                       target="_blank"
                       data-test-subj="manage-api-keys-button"
+                      aria-label={i18n.translate('xpack.serverlessSearch.apiKey.manage.ariaLabel', {
+                        defaultMessage: 'Manage API keys',
+                      })}
                     >
                       {i18n.translate('xpack.serverlessSearch.apiKey.manageLabel', {
                         defaultMessage: 'Manage',

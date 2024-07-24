@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Manage Knowledge Base Entries API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z } from 'zod';

@@ -1494,6 +1494,7 @@ describe('The custom threshold alert type', () => {
   });
 
   describe('querying recovered alert with a count aggregator', () => {
+    beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
@@ -1509,12 +1510,13 @@ describe('The custom threshold alert type', () => {
               threshold,
             },
           ],
+          groupBy: ['host.name'],
         },
       });
-    test('alerts based on the doc_count value instead of the aggregatedValue', async () => {
+    test('generates viewInAppUrl for active alerts correctly', async () => {
       setEvaluationResults([
         {
-          '*': {
+          a: {
             ...customThresholdCountCriterion,
             comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.9],
@@ -1522,7 +1524,12 @@ describe('The custom threshold alert type', () => {
             timestamp: new Date().toISOString(),
             shouldFire: true,
             isNoData: false,
-            bucketKey: { groupBy0: 'a' },
+            bucketKey: { 'host.name': 'a' },
+            context: {
+              host: {
+                name: 'a',
+              },
+            },
           },
         },
       ]);
@@ -1539,8 +1546,110 @@ describe('The custom threshold alert type', () => {
       });
       await execute(COMPARATORS.GREATER_THAN, [0.9]);
       const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+      expect(services.alertsClient.setAlertData).toBeCalledTimes(1);
+      expect(services.alertsClient.setAlertData).toBeCalledWith({
+        context: {
+          alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/uuid-a',
+          viewInAppUrl: 'mockedViewInApp',
+          group: [
+            {
+              field: 'host.name',
+              value: 'a',
+            },
+          ],
+          host: {
+            name: 'a',
+          },
+          reason:
+            'Document count is 1, above the threshold of 0.9. (duration: 1 min, data view: mockedDataViewName, group: a)',
+          tags: [],
+          value: ['1'],
+          timestamp: expect.stringMatching(ISO_DATE_REGEX),
+        },
+        id: 'a',
+      });
+      expect(getViewInAppUrl).lastCalledWith({
+        dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+        groups: [
+          {
+            field: 'host.name',
+            value: 'a',
+          },
+        ],
+        logsExplorerLocator: undefined,
+        metrics: customThresholdCountCriterion.metrics,
+        startedAt: expect.stringMatching(ISO_DATE_REGEX),
+        searchConfiguration: {
+          index: {},
+          query: {
+            query: mockQuery,
+            language: 'kuery',
+          },
+        },
+      });
+    });
+
+    test('includes group by information in the recovered alert document', async () => {
+      setEvaluationResults([{}]);
+      const mockedSetContext = jest.fn();
+      services.alertsClient.getRecoveredAlerts.mockImplementation((params: any) => {
+        return [
+          {
+            alert: {
+              meta: [],
+              state: [],
+              context: {},
+              id: 'host-0',
+              getId: jest.fn().mockReturnValue('host-0'),
+              getUuid: jest.fn().mockReturnValue('mockedUuid'),
+              getStart: jest.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
+            },
+            hit: {
+              'host.name': 'host-0',
+            },
+          },
+        ];
+      });
+      services.alertFactory.done.mockImplementation(() => {
+        return {
+          getRecoveredAlerts: jest.fn().mockReturnValue([
+            {
+              setContext: mockedSetContext,
+              getId: jest.fn().mockReturnValue('mockedId'),
+            },
+          ]),
+        };
+      });
+      await execute(COMPARATORS.GREATER_THAN, [0.9]);
+      const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+      expect(services.alertsClient.setAlertData).toBeCalledTimes(1);
+      expect(services.alertsClient.setAlertData).toBeCalledWith({
+        context: {
+          alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mockedUuid',
+          viewInAppUrl: 'mockedViewInApp',
+          group: [
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+          ],
+          host: {
+            name: 'host-0',
+          },
+          timestamp: expect.stringMatching(ISO_DATE_REGEX),
+        },
+        id: 'host-0',
+        'host.name': 'host-0',
+      });
+      expect(getViewInAppUrl).toBeCalledTimes(1);
       expect(getViewInAppUrl).toBeCalledWith({
         dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+        groups: [
+          {
+            field: 'host.name',
+            value: 'host-0',
+          },
+        ],
         logsExplorerLocator: undefined,
         metrics: customThresholdCountCriterion.metrics,
         startedAt: expect.stringMatching(ISO_DATE_REGEX),
@@ -1638,7 +1747,7 @@ describe('The custom threshold alert type', () => {
     });
   });
 
-  describe('alerts with NO_DATA where one condtion is an aggregation and the other is a document count', () => {
+  describe('alerts with NO_DATA where one condition is an aggregation and the other is a document count', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
     const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>

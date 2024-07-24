@@ -12,6 +12,7 @@ import * as t from 'io-ts';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
@@ -423,7 +424,7 @@ export interface BrowserField {
   description?: string | null;
   example?: string | number | null;
   fields: Readonly<Record<string, Partial<BrowserField>>>;
-  format?: string;
+  format?: SerializedFieldFormat;
   indexes: string[];
   name: string;
   searchable: boolean;
