@@ -11,36 +11,37 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews } from '@kbn/presentation-publishing';
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, lastValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlGroupApi } from '../../control_group/types';
 import { DataControlApi } from '../types';
 
 export function hasNoResults$({
+  controlFetch$,
   data,
-  dataControlFetch$,
   dataViews$,
-  filters$,
+  rangeFilters$,
   ignoreParentSettings$,
   setIsLoading,
 }: {
+  controlFetch$: Observable<ControlFetchContext>;
   data: DataPublicPluginStart;
-  dataControlFetch$: ControlGroupApi['dataControlFetch$'];
   dataViews$?: PublishesDataViews['dataViews'];
-  filters$: DataControlApi['filters$'];
+  rangeFilters$: DataControlApi['filters$'];
   ignoreParentSettings$: ControlGroupApi['ignoreParentSettings$'];
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([filters$, ignoreParentSettings$, dataControlFetch$]).pipe(
+  return combineLatest([controlFetch$, rangeFilters$, ignoreParentSettings$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([filters, ignoreParentSettings, dataControlFetchContext]) => {
+    switchMap(async ([controlFetchContext, rangeFilters, ignoreParentSettings]) => {
       const dataView = dataViews$?.value?.[0];
-      const rangeFilter = filters?.[0];
+      const rangeFilter = rangeFilters?.[0];
       if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
         return false;
       }
@@ -54,7 +55,7 @@ export function hasNoResults$({
           data,
           dataView,
           rangeFilter,
-          ...dataControlFetchContext,
+          ...controlFetchContext,
         });
       } catch (error) {
         // Ignore error, validation is not required for control to function properly
@@ -71,7 +72,7 @@ async function hasNoResults({
   abortSignal,
   data,
   dataView,
-  unifiedSearchFilters,
+  filters,
   query,
   rangeFilter,
   timeRange,
@@ -79,7 +80,7 @@ async function hasNoResults({
   abortSignal: AbortSignal;
   data: DataPublicPluginStart;
   dataView: DataView;
-  unifiedSearchFilters?: Filter[];
+  filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
@@ -92,7 +93,7 @@ async function hasNoResults({
   // "has no results" or "has results" vs the actual count
   searchSource.setField('trackTotalHits', 1);
 
-  const allFilters = unifiedSearchFilters ? unifiedSearchFilters : [];
+  const allFilters = filters ? [...filters] : [];
   allFilters.push(rangeFilter);
   if (timeRange) {
     const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
