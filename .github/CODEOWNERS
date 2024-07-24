@@ -507,6 +507,7 @@ x-pack/plugins/integration_assistant @elastic/security-solution
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
+x-pack/plugins/observability_solution/investigate_app @elastic/obs-ai-assistant
 x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
@@ -944,6 +945,7 @@ packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
+packages/kbn-zod @elastic/kibana-core
 packages/kbn-zod-helpers @elastic/security-detection-rule-management
 ####
 ## Everything below this line overrides the default assignments for each package.
@@ -1602,6 +1604,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform

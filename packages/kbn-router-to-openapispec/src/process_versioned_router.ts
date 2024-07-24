@@ -15,6 +15,7 @@ import {
 import type { OpenAPIV3 } from 'openapi-types';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
+import { isReferenceObject } from './oas_converter/common';
 import type { OperationIdCounter } from './operation_id_counter';
 import {
   prepareRoutes,
@@ -24,6 +25,7 @@ import {
   getVersionedHeaderParam,
   getVersionedContentTypeString,
   extractTags,
+  mergeResponseContent,
 } from './util';
 
 export const processVersionedRouter = (
@@ -153,23 +155,40 @@ export const extractVersionedResponse = (
   const result: OpenAPIV3.ResponsesObject = {};
   const { unsafe, ...responses } = schemas.response;
   for (const [statusCode, responseSchema] of Object.entries(responses)) {
-    const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
-    const schema = converter.convert(maybeSchema);
-    const contentTypeString = getVersionedContentTypeString(
-      handler.options.version,
-      responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
-    );
-    result[statusCode] = {
-      ...result[statusCode],
-      content: {
-        ...((result[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+    let newContent: OpenAPIV3.ResponseObject['content'];
+    if (responseSchema.body) {
+      const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
+      const schema = converter.convert(maybeSchema);
+      const contentTypeString = getVersionedContentTypeString(
+        handler.options.version,
+        responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
+      );
+      newContent = {
         [contentTypeString]: {
           schema,
         },
-      },
+      };
+    }
+    result[statusCode] = {
+      ...result[statusCode],
+      description: responseSchema.description!,
+      ...mergeResponseContent(
+        ((result[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+        newContent
+      ),
     };
   }
   return result;
+};
+
+const mergeDescriptions = (
+  existing: undefined | string,
+  toAppend: OpenAPIV3.ResponsesObject[string]
+): string | undefined => {
+  if (!isReferenceObject(toAppend) && toAppend.description) {
+    return existing?.length ? `${existing}\n${toAppend.description}` : toAppend.description;
+  }
+  return existing;
 };
 
 const mergeVersionedResponses = (a: OpenAPIV3.ResponsesObject, b: OpenAPIV3.ResponsesObject) => {
@@ -178,6 +197,7 @@ const mergeVersionedResponses = (a: OpenAPIV3.ResponsesObject, b: OpenAPIV3.Resp
     const existing = (result[statusCode] as OpenAPIV3.ResponseObject) ?? {};
     result[statusCode] = {
       ...result[statusCode],
+      description: mergeDescriptions(existing.description, responseContent)!,
       content: Object.assign(
         {},
         existing.content,
