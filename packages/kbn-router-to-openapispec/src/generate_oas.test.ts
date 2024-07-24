@@ -45,7 +45,21 @@ describe('generateOpenApiDocument', () => {
 
     it('generates the expected OpenAPI document', () => {
       const [routers, versionedRouters] = createTestRouters({
-        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
+        routers: {
+          testRouter: {
+            routes: [
+              { method: 'get' },
+              { method: 'post' },
+              {
+                method: 'delete',
+                validationSchemas: {
+                  request: {},
+                  response: { [200]: { description: 'good response' } },
+                },
+              },
+            ],
+          },
+        },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
       });
       expect(

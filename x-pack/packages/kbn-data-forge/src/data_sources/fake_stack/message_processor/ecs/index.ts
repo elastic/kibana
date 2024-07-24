@@ -23,7 +23,7 @@ const components = [
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: MESSAGE_PROCESSOR,
+  name: `logs-${MESSAGE_PROCESSOR}@template`,
   template: { ...template, composed_of: components.map(({ name }) => name) },
   components,
 };
