@@ -1,9 +1,10 @@
 # Infra Assets API
 
-**POST /api/metrics/infra**
+## **POST /api/metrics/infra**
 
 This endpoint returns a list of hosts and their metrics.
-parameters:
+
+### Parameters:
 
 - type: asset type. 'host' is the only one supported now
 - metrics: list of metrics to be calculated and returned for each host
@@ -18,7 +19,7 @@ The response includes:
 - metrics: object containing name of the metric and value
 - metadata: object containing name of the metadata and value
 
-## Examples
+### Examples:
 
 Request
 
@@ -114,10 +115,11 @@ Response
 }
 ```
 
-**POST /api/infra/{asset}/count**
+## **POST /api/infra/{asset}/count**
 
 This endpoint returns the count of the hosts monitored with the system integration.
-parameters:
+
+### Parameters:
 
 - type: asset type. 'host' is the only one supported now
 - sourceId: sourceId to retrieve configuration such as index-pattern used to query the results
@@ -128,8 +130,9 @@ parameters:
 The response includes:
 
 - count: number - the count of the hosts monitored with the system integration 
+- type: string - the type of the asset **(currently only 'host' is supported)**
 
-## Examples
+### Examples:
 
 Request
 
