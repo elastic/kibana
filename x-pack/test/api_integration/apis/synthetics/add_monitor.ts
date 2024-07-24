@@ -159,7 +159,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can enable retries', async () => {
-      // Delete a required property to make payload invalid
       const maxAttempts = 2;
       const newMonitor = {
         max_attempts: maxAttempts,
