@@ -18,6 +18,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
       if (entry.entryType === 'measure' && entry.detail?.type === 'kibana:performance') {
         const target = entry?.name;
         const duration = entry.duration;
+        const customMetrics = entry.detail?.customMetrics ?? {};
 
         if (isDevMode) {
           if (!target) {
@@ -47,6 +48,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
           reportPerformanceMetricEvent(analytics, {
             eventName: entry.detail.eventName,
             duration,
+            ...customMetrics,
             meta: {
               target,
             },
