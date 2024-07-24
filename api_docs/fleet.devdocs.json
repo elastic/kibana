@@ -22168,6 +22168,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.GetInfoResponse.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "PackageMetadata",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.GetInfoResponse.response",
             "type": "CompoundType",
             "tags": [],
