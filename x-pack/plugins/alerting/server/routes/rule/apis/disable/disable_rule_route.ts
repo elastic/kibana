@@ -42,7 +42,7 @@ export const disableRuleRoute = (
         const disableParams = { id, untrack };
 
         try {
-          await rulesClient.disable(disableParams);
+          await rulesClient.disableRule(disableParams);
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

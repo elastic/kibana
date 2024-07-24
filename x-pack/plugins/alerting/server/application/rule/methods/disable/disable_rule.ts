@@ -18,13 +18,13 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { DisableRuleParams } from './types';
 import { disableRuleParamsSchema } from './schemas';
 
-export async function disable(
+export async function disableRule(
   context: RulesClientContext,
   { id, untrack = false }: DisableRuleParams
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.disable('${id}')`,
+    `rulesClient.disableRule('${id}')`,
     async () => await disableWithOCC(context, { id, untrack })
   );
 }

@@ -55,7 +55,7 @@ import {
 import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
-import { disable } from '../application/rule/methods/disable/disable';
+import { disableRule } from '../application/rule/methods/disable/disable_rule';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
 import { muteAll } from './methods/mute_all';
@@ -168,7 +168,7 @@ export class RulesClient {
   public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
 
   public enable = (options: { id: string }) => enable(this.context, options);
-  public disable = (params: DisableRuleParams) => disable(this.context, params);
+  public disableRule = (params: DisableRuleParams) => disableRule(this.context, params);
 
   public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);

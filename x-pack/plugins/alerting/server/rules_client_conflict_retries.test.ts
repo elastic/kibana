@@ -173,7 +173,7 @@ async function enable(success: boolean) {
 
 async function disable(success: boolean) {
   try {
-    await rulesClient.disable({ id: MockRuleId });
+    await rulesClient.disableRule({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }

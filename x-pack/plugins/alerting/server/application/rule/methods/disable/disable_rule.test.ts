@@ -107,7 +107,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-describe('disable()', () => {
+describe('disableRule()', () => {
   let rulesClient: RulesClient;
   const existingRule = {
     id: '1',
@@ -158,7 +158,7 @@ describe('disable()', () => {
 
   describe('authorization', () => {
     test('ensures user is authorised to disable this type of rule under the consumer', async () => {
-      await rulesClient.disable({ id: '1' });
+      await rulesClient.disableRule({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
@@ -173,7 +173,7 @@ describe('disable()', () => {
         new Error(`Unauthorized to disable a "myType" alert for "myApp"`)
       );
 
-      await expect(rulesClient.disable({ id: '1' })).rejects.toMatchInlineSnapshot(
+      await expect(rulesClient.disableRule({ id: '1' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to disable a "myType" alert for "myApp"]`
       );
 
@@ -188,7 +188,7 @@ describe('disable()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when disabling a rule', async () => {
-      await rulesClient.disable({ id: '1' });
+      await rulesClient.disableRule({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -203,7 +203,7 @@ describe('disable()', () => {
     test('logs audit event when not authorised to disable a rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(rulesClient.disable({ id: '1' })).rejects.toThrow();
+      await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -226,7 +226,7 @@ describe('disable()', () => {
   });
 
   test('disables a rule', async () => {
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -304,7 +304,7 @@ describe('disable()', () => {
       },
       ownerId: null,
     });
-    await rulesClient.disable({ id: '1', untrack: true });
+    await rulesClient.disableRule({ id: '1', untrack: true });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -393,7 +393,7 @@ describe('disable()', () => {
 
   test('disables the rule even if unable to retrieve task manager doc to generate untrack event log events', async () => {
     taskManager.get.mockRejectedValueOnce(new Error('Fail'));
-    await rulesClient.disable({ id: '1', untrack: true });
+    await rulesClient.disableRule({ id: '1', untrack: true });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -441,12 +441,12 @@ describe('disable()', () => {
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      `rulesClient.disable('1') - Could not write untrack events - Fail`
+      `rulesClient.disableRule('1') - Could not write untrack events - Fail`
     );
   });
 
   test('should not untrack rule alert if untrack is false', async () => {
-    await rulesClient.disable({ id: '1', untrack: false });
+    await rulesClient.disableRule({ id: '1', untrack: false });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -496,7 +496,7 @@ describe('disable()', () => {
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -548,7 +548,7 @@ describe('disable()', () => {
       },
     });
 
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
@@ -557,7 +557,7 @@ describe('disable()', () => {
   test('swallows error when failing to load decrypted saved object', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(taskManager.bulkDisable).toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
@@ -569,7 +569,7 @@ describe('disable()', () => {
   test('throws when unsecuredSavedObjectsClient update fails', async () => {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Failed to update'));
 
-    await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update"`
     );
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
@@ -579,18 +579,28 @@ describe('disable()', () => {
   test('throws when failing to disable task', async () => {
     taskManager.bulkDisable.mockRejectedValueOnce(new Error('Failed to disable task'));
 
-    await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to disable task"`
     );
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
-  test('throws if API params do not match the schema', async () => {
+  test('throws if id param does not match the schema', async () => {
     await expect(
       // @ts-ignore: this is what we are testing
-      rulesClient.disable({ id: 1 })
+      rulesClient.disableRule({ id: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error validating disable rule parameters - [id]: expected value of type [string] but got [number]"`
+    );
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
+  });
+
+  test('throws if untrack param does not match the schema', async () => {
+    await expect(
+      // @ts-ignore: this is what we are testing
+      rulesClient.disableRule({ id: '1', untrack: 'foo' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating disable rule parameters - [untrack]: expected value of type [boolean] but got [string]"`
     );
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
@@ -603,7 +613,7 @@ describe('disable()', () => {
         scheduledTaskId: 'task-123',
       },
     });
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disableRule({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -654,7 +664,7 @@ describe('disable()', () => {
       },
     });
     taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
-    await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to remove task"`
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -707,7 +717,7 @@ describe('disable()', () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
       (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
 
-      await rulesClient.disable({ id: '1' });
+      await rulesClient.disableRule({ id: '1' });
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),

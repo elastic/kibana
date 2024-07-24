@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { disable } from './disable';
+export { disableRule } from './disable_rule';
 export type { DisableRuleParams } from './types';
