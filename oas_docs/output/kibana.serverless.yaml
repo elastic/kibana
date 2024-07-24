@@ -278,7 +278,6 @@ paths:
       tags:
         - connectors
       parameters:
-        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
       requestBody:
         required: true
@@ -330,7 +329,6 @@ paths:
       tags:
         - connectors
       parameters:
-        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_connector_id'
       responses:
         '200':
@@ -355,7 +353,6 @@ paths:
         - connectors
       parameters:
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_connector_id'
       responses:
         '204':
@@ -372,7 +369,6 @@ paths:
       tags:
         - connectors
       parameters:
-        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
         - in: path
           name: connectorId
@@ -414,7 +410,6 @@ paths:
       tags:
         - connectors
       parameters:
-        - $ref: '#/components/parameters/Connectors_elastic_api_version'
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
         - $ref: '#/components/parameters/Connectors_connector_id'
       requestBody:
@@ -448,8 +443,6 @@ paths:
       operationId: getConnectors
       tags:
         - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_elastic_api_version'
       responses:
         '200':
           description: Indicates a successful call.
@@ -2674,16 +2667,6 @@ components:
       scheme: basic
       type: http
   parameters:
-    Connectors_elastic_api_version:
-      schema:
-        type: string
-        enum:
-          - '2023-10-31'
-        default: '2023-10-31'
-      in: header
-      name: elastic-api-version
-      description: In Elastic Serverless, indicates the version of the API to use.
-      required: true
     Connectors_kbn_xsrf:
       schema:
         type: string

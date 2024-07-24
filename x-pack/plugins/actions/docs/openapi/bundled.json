@@ -338,9 +338,6 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/elastic_api_version"
-          },
-          {
             "$ref": "#/components/parameters/space_id"
           },
           {
@@ -556,9 +553,6 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/elastic_api_version"
-          },
-          {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
@@ -626,9 +620,6 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/elastic_api_version"
-          },
-          {
             "$ref": "#/components/parameters/connector_id"
           }
         ],
@@ -667,9 +658,6 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/elastic_api_version"
-          },
-          {
             "$ref": "#/components/parameters/connector_id"
           }
         ],
@@ -692,9 +680,6 @@
           "connectors"
         ],
         "parameters": [
-          {
-            "$ref": "#/components/parameters/elastic_api_version"
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           },
@@ -752,9 +737,6 @@
           "connectors"
         ],
         "parameters": [
-          {
-            "$ref": "#/components/parameters/elastic_api_version"
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           },
@@ -941,11 +923,6 @@
         "operationId": "getConnectors",
         "tags": [
           "connectors"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/elastic_api_version"
-          }
         ],
         "responses": {
           "200": {
@@ -1448,19 +1425,6 @@
           "type": "string",
           "example": "df770e30-8b8b-11ed-a780-3b746c987a81"
         }
-      },
-      "elastic_api_version": {
-        "schema": {
-          "type": "string",
-          "enum": [
-            "2023-10-31"
-          ],
-          "default": "2023-10-31"
-        },
-        "in": "header",
-        "name": "elastic-api-version",
-        "description": "In Elastic Serverless, indicates the version of the API to use.",
-        "required": true
       },
       "action_id": {
         "in": "path",
