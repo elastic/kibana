@@ -52,6 +52,7 @@ export const CreateConnector: React.FC = () => {
   const allConnectors = connectorTypes.sort((a, b) => a.name.localeCompare(b.name)); // alphabetically ordered
   const { fetchConnector } = useActions(ConnectorViewLogic);
   const [syncing, setSyncing] = useState(false);
+  const { connector } = useValues(ConnectorViewLogic);
   useEffect(() => {
     fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
   }, []);
@@ -129,6 +130,7 @@ export const CreateConnector: React.FC = () => {
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={deploymentStepComplete}
           setNextStepEnabled={setDeploymentStepComplete}
+          connector={connector}
         />
       ),
       status: startStepStatus,
@@ -214,6 +216,7 @@ export const CreateConnector: React.FC = () => {
           setCurrentStep={setCurrentStep}
           isNextStepEnabled={configurationStepComplete}
           setNextStepEnabled={setConfigurationStepComplete}
+          connector={connector}
         />
       ),
       status: startStepStatus,

@@ -11,16 +11,20 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
+  EuiPopover,
   EuiRadio,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -32,6 +36,7 @@ import { DeploymentLogic } from '../../connector_detail/deployment_logic';
 
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
+import { ManualConfiguration } from './components/manual_configuration';
 
 interface StartStepProps {
   allConnectors: Array<{
@@ -60,6 +65,7 @@ interface StartStepProps {
   setNextStepEnabled: Function;
   setSelfManaged: Function;
   title: string;
+  connector:any;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -75,6 +81,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   setCurrentStep,
   isNextStepEnabled,
   setNextStepEnabled,
+  connector,
 }) => {
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
@@ -83,6 +90,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   );
   const { generateConfiguration } = useActions(DeploymentLogic);
   const { isGenerateLoading } = useValues(DeploymentLogic);
+
   useEffect(() => {
     setSelfManaged(radioIdSelected === selfManagedRadioButtonId ? true : false);
   }, [radioIdSelected]);
@@ -338,20 +346,32 @@ export const StartStep: React.FC<StartStepProps> = ({
                   </EuiButton>
                 </>
               ) : (
-                <GenerateConfigButton
-                  connectorId={''}
-                  generateConfiguration={() => {
-                    setNextStepEnabled(true);
-                    setTimeout(() => {
-                      window.scrollTo({
-                        behavior: 'smooth',
-                        top: window.innerHeight,
-                      });
-                    }, 100);
-                  }}
-                  isGenerateLoading={isGenerateLoading}
-                  disabled={connectorSelected.name === '' || connectorName === ''}
-                />
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <GenerateConfigButton
+                      connectorId={''}
+                      generateConfiguration={() => {
+                        setNextStepEnabled(true);
+                        setTimeout(() => {
+                          window.scrollTo({
+                            behavior: 'smooth',
+                            top: window.innerHeight,
+                          });
+                        }, 100);
+                      }}
+                      isGenerateLoading={isGenerateLoading}
+                      disabled={connectorSelected.name === '' || connectorName === ''}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ManualConfiguration
+                      isDisabled={connectorSelected.name === '' || connectorName === ''}
+                      connectorName={connectorName}
+                      setConnectorName={setConnectorName}
+                      connector={connector}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               )}
             </EuiPanel>
           </EuiFlexItem>
