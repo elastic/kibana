@@ -148,7 +148,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('detection-rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/187719
+  describe.skip('detection-rules', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 

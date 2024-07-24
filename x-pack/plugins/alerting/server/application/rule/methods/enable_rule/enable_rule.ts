@@ -7,31 +7,48 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule } from '../../types';
-import { resetMonitoringLastRun, getNextRun } from '../../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
-import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
-import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
-import { getRuleCircuitBreakerErrorMessage } from '../../../common';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RawRule, IntervalSchedule } from '../../../../types';
+import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
+import {
+  updateMeta,
+  createNewAPIKeySet,
+  scheduleTask,
+  migrateLegacyActions,
+} from '../../../../rules_client/lib';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { EnableRuleParams } from './types';
+import { enableRuleParamsSchema } from './schemas';
 
-export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
+export async function enableRule(
+  context: RulesClientContext,
+  { id }: EnableRuleParams
+): Promise<void> {
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.enable('${id}')`,
+    `rulesClient.enableRule('${id}')`,
     async () => await enableWithOCC(context, { id })
   );
 }
 
-async function enableWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function enableWithOCC(context: RulesClientContext, params: EnableRuleParams) {
   let existingApiKey: string | null = null;
   let attributes: RawRule;
   let version: string | undefined;
   let references: SavedObjectReference[];
 
+  try {
+    enableRuleParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating enable rule parameters - ${error.message}`);
+  }
+
+  const { id } = params;
   try {
     const decryptedAlert =
       await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
