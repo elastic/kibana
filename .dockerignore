@@ -1,0 +1,20 @@
+# This dockerignore file is used by the devcontainer and
+# is placed here since the Docker context is the root of the repository.
+#
+#
+# We mount the local machines ~/.cache to speed up Bazel without breaking links
+**/.bazelrc.cache
+**/bazel-*/
+**/.beats
+**/.chromium
+**/.es
+**/.eslintcache
+**/.native_modules
+**/.node_binaries
+**/.yarn-local-mirror
+**/build
+**/data
+**/dist
+# certain node_modules can target a different OS than the container
+**/node_modules
+**/target
