@@ -24,6 +24,13 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
   const [submittedEsqlQuery, setSubmittedEsqlQuery] = React.useState(esqlQuery);
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
+  const resetState = () => {
+    setIsExpanded(false);
+    setIsPreviewOpen(false);
+    setEsqlQuery('FROM *');
+    setSubmittedEsqlQuery('FROM *');
+  };
+
   if (!isOpen) {
     return (
       <EuiFlexGroup gutterSize="s">
@@ -65,6 +72,7 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
                   onTextLangQueryChange={(nextQuery) => {
                     setIsPreviewOpen(true);
                     setEsqlQuery(nextQuery.esql);
+                    setSubmittedEsqlQuery(nextQuery.esql);
                   }}
                   onTextLangQuerySubmit={async (nextSubmittedQuery) => {
                     setSubmittedEsqlQuery(nextSubmittedQuery?.esql ?? '');
@@ -85,34 +93,33 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
                   hideTimeFilterInfo
                 />
               </EuiFlexItem>
-              <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
-                {!isPreviewOpen ? (
-                  <>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="image" size="xxl" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <p>
-                        {i18n.translate(
-                          'xpack.investigateApp.addObservationUI.p.selectADataSourceLabel',
-                          { defaultMessage: 'Select a data source to generate a preview chart' }
-                        )}
-                      </p>
-                    </EuiFlexItem>
-                  </>
-                ) : (
-                  <EsqlWidgetPreview
-                    filters={filters}
-                    esqlQuery={submittedEsqlQuery}
-                    timeRange={timeRange}
-                    query={query}
-                    onWidgetAdd={(widget) => {
-                      setIsPreviewOpen(false);
-                      return onWidgetAdd(widget);
-                    }}
-                  />
-                )}
-              </EuiFlexGroup>
+
+              {!isPreviewOpen ? (
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="image" size="xxl" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <p>
+                      {i18n.translate(
+                        'xpack.investigateApp.addObservationUI.p.selectADataSourceLabel',
+                        { defaultMessage: 'Select a data source to generate a preview chart' }
+                      )}
+                    </p>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EsqlWidgetPreview
+                  filters={filters}
+                  esqlQuery={submittedEsqlQuery}
+                  timeRange={timeRange}
+                  query={query}
+                  onWidgetAdd={(widget) => {
+                    resetState();
+                    return onWidgetAdd(widget);
+                  }}
+                />
+              )}
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
@@ -122,10 +129,7 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
               color="text"
               data-test-subj="investigateAppAddObservationUICancelButton"
               onClick={() => {
-                setIsExpanded(false);
-                setIsPreviewOpen(false);
-                setEsqlQuery('FROM *');
-                setSubmittedEsqlQuery('FROM *');
+                resetState();
                 setIsOpen(false);
               }}
             >

@@ -121,7 +121,7 @@ export function EsqlWidgetPreview({
 
   const dateHistoResponse = useAbortableAsync(
     ({ signal }) => {
-      if (!queryResult.value || queryResult.loading || !selectedSuggestion) {
+      if (!queryResult.value?.query?.values || queryResult.loading || !selectedSuggestion) {
         return undefined;
       }
       return getDateHistogramResults({
