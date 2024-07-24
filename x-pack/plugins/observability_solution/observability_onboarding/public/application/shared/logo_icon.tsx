@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiIconProps } from '@elastic/eui';
+import { EuiAvatar, EuiAvatarProps, EuiIcon, EuiIconProps } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
@@ -46,6 +47,7 @@ function useIconForLogo(logo?: SupportedLogo): string | undefined {
   const {
     services: { http },
   } = useKibana();
+  if (!logo) return undefined;
   switch (logo) {
     case 'aws':
       return 'logoAWS';
@@ -66,10 +68,47 @@ function useIconForLogo(logo?: SupportedLogo): string | undefined {
   }
 }
 
-export function LogoIcon({ logo, size }: { logo: SupportedLogo; size?: EuiIconProps['size'] }) {
+function toAvatarSize(size?: EuiIconProps['size']): EuiAvatarProps['size'] {
+  switch (size) {
+    case 's':
+      return 's';
+    case 'm':
+      return 'm';
+    case 'l':
+      return 'l';
+    case 'xl':
+      return 'xl';
+    default:
+      return 'xl';
+  }
+}
+
+export function LogoIcon({
+  logo,
+  euiIconType,
+  isAvatar,
+  size,
+  className,
+}: {
+  logo?: SupportedLogo;
+  euiIconType?: EuiIconType;
+  isAvatar?: boolean;
+  size?: EuiIconProps['size'];
+  className?: string;
+}) {
   const iconType = useIconForLogo(logo);
-  if (iconType) {
-    return <EuiIcon type={iconType} size={size} />;
+  if (euiIconType && isAvatar)
+    return (
+      <EuiAvatar
+        color="subdued"
+        iconType={euiIconType}
+        name="logoIcon"
+        size={toAvatarSize(size)}
+        className={className}
+      />
+    );
+  if (iconType || euiIconType) {
+    return <EuiIcon type={euiIconType ?? iconType!} size={size} className={className} />;
   }
   return null;
 }

@@ -8,13 +8,21 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Wrapper } from '../shared/test_wrapper';
-import { KubernetesHeaderSection } from './kubernetes_header';
+import { CustomHeaderSection } from './kubernetes_header';
+import { headerContent } from './constants';
 
-describe('KubernetesHeaderSection', () => {
-  it('should render the section for /kubernetes', () => {
-    const { getByText } = render(<KubernetesHeaderSection />, {
-      wrapper: Wrapper({ location: '/kubernetes' }),
-    });
+describe('CustomHeaderSection', () => {
+  it('should render the section for logo text', () => {
+    const { getByText } = render(
+      <CustomHeaderSection
+        logo="kubernetes"
+        headlineCopy="Setting up Kubernetes with Elastic Agent"
+        captionCopy="This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host"
+      />,
+      {
+        wrapper: Wrapper({ location: '/kubernetes' }),
+      }
+    );
     expect(getByText('Return')).toBeInTheDocument();
     expect(getByText('Setting up Kubernetes with Elastic Agent')).toBeInTheDocument();
     expect(
@@ -24,16 +32,39 @@ describe('KubernetesHeaderSection', () => {
     );
   });
 
-  it('renders the secton for /kubernetes queries', () => {
-    const { getByText } = render(<KubernetesHeaderSection />, {
-      wrapper: Wrapper({ location: '/kubernetes?category=infra' }),
-    });
-    expect(getByText('Return')).toBeInTheDocument();
-    expect(getByText('Setting up Kubernetes with Elastic Agent')).toBeInTheDocument();
-    expect(
-      getByText(
-        'This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host'
-      )
+  it('should render the section for euiIconType text', () => {
+    const { getByText, getByRole } = render(
+      <CustomHeaderSection {...headerContent['/auto-detect']} />,
+      {
+        wrapper: Wrapper({ location: '/auto-detect?category=infra' }),
+      }
     );
+
+    const consoleIcon = getByRole('img');
+    expect(consoleIcon.getAttribute('data-icon-type')).toBe('consoleApp');
+
+    expect(getByText('Return')).toBeInTheDocument();
+    expect(getByText('Auto-detect logs and metrics')).toBeInTheDocument();
+    expect(getByText('This installation scans your host and auto-detects log and metric files.'));
   });
+
+  // it('renders the section for /kubernetes queries', () => {
+  //   const { getByText } = render(
+  //     <CustomHeaderSection
+  //       logo="kubernetes"
+  //       headlineCopy="Setting up Kubernetes with Elastic Agent"
+  //       captionCopy="This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host"
+  //     />,
+  //     {
+  //       wrapper: Wrapper({ location: '/kubernetes?category=infra' }),
+  //     }
+  //   );
+  //   expect(getByText('Return')).toBeInTheDocument();
+  //   expect(getByText('Setting up Kubernetes with Elastic Agent')).toBeInTheDocument();
+  //   expect(
+  //     getByText(
+  //       'This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host'
+  //     )
+  //   );
+  // });
 });

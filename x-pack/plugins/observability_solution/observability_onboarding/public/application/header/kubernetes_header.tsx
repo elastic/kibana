@@ -10,23 +10,35 @@ import {
   EuiFlexItem,
   EuiPageTemplate,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { BackButton } from '../shared/back_button';
 import { LogoIcon } from '../shared/logo_icon';
+import type { CustomHeaderSection } from './types';
 
-export function KubernetesHeaderSection() {
-  // const kubernetesLogo = useIconForLogo('kubernetes');
+export function CustomHeaderSection({
+  euiIconType,
+  logo,
+  headlineCopy,
+  captionCopy,
+}: CustomHeaderSection) {
   const theme = useEuiTheme();
   const shadow = useEuiShadow('s');
   return (
-    <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
+    <EuiPageTemplate.Section
+      css={css`
+        border-bottom: ${theme.euiTheme.border.thin};
+      `}
+      grow={false}
+      paddingSize="l"
+      restrictWidth
+    >
       <BackButton
         customLabel={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.button.returnButtonLabel',
@@ -35,7 +47,6 @@ export function KubernetesHeaderSection() {
           }
         )}
       />
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <div
@@ -45,7 +56,9 @@ export function KubernetesHeaderSection() {
             `}
           >
             <LogoIcon
-              logo="kubernetes"
+              euiIconType={euiIconType}
+              isAvatar={!!euiIconType}
+              logo={logo}
               size="xxl"
               css={css`
                 margin: 12px;
@@ -56,21 +69,13 @@ export function KubernetesHeaderSection() {
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                id="xpack.observability_onboarding.experimentalOnboardingFlow.header.text"
-                defaultMessage="Setting up Kubernetes with Elastic Agent"
-              />
-            </h1>
+          <EuiTitle size="l">
+            <h1>{headlineCopy}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <p>
-            <FormattedMessage
-              id="xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesDescription"
-              defaultMessage="This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host"
-            />
-          </p>
+          <EuiText size="m">
+            <p>{captionCopy}</p>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPageTemplate.Section>

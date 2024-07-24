@@ -10,15 +10,17 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { Header } from './header';
 import backgroundImageUrl from './background.svg';
-import { KubernetesHeaderSection } from './kubernetes_header';
+import { CustomHeaderSection } from './kubernetes_header';
+import { customHeaderProps } from './constants';
 
 interface Props {
   pathname: string;
 }
 
 export function HeaderSection({ pathname }: Props) {
-  if (pathname.startsWith('/kubernetes')) {
-    return <KubernetesHeaderSection />;
+  const customProps = customHeaderProps(pathname);
+  if (customProps) {
+    return <CustomHeaderSection {...customProps} />;
   }
   return (
     <EuiPageTemplate.Section
