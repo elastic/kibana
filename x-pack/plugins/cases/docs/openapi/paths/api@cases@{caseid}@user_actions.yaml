@@ -1,5 +1,5 @@
 get:
-  summary: Get case activity in the default space
+  summary: Get case activity
   description: >
     Returns all user activity for a case.
     Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find user actions API instead.

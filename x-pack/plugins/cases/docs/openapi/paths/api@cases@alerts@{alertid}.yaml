@@ -1,5 +1,5 @@
 get:
-  summary:  Get cases for an alert in the default space
+  summary:  Get cases for an alert
   operationId: getCasesByAlertDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the
