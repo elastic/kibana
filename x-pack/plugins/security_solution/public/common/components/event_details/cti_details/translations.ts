@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getRiskEntityTranslation } from '../../../../entity_analytics/components/risk_score/translations';
-import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 export * from '../../../../entity_analytics/components/risk_score/translations';
 
 export const FEED_NAME_PREPOSITION = i18n.translate(
@@ -46,13 +44,6 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
-  {
-    defaultMessage: 'This alert does not have supplemental threat intelligence data.',
-  }
-);
-
 export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noEnrichmentsFoundDescription',
   {
@@ -85,13 +76,6 @@ export const REFRESH = i18n.translate('xpack.securitySolution.alertDetails.refre
   defaultMessage: 'Refresh',
 });
 
-export const ENRICHED_DATA = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.enrichedDataTitle',
-  {
-    defaultMessage: 'Enriched data',
-  }
-);
-
 export const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentObjectValuesNotRendered',
   {
@@ -99,27 +83,3 @@ export const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
       'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
   }
 );
-
-export const CURRENT_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskLevel', {
-    defaultMessage: 'Current {riskEntity} risk level',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity, true),
-    },
-  });
-
-export const ORIGINAL_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.originalHostRiskLevel', {
-    defaultMessage: 'Original {riskEntity} risk level',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity, true),
-    },
-  });
-
-export const RISK_DATA_TITLE = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskDataTitle', {
-    defaultMessage: '{riskEntity} Risk Data',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
-    },
-  });
