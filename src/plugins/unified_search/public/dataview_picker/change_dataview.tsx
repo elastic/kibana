@@ -381,23 +381,40 @@ export function ChangeDataView({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiPopover
-                panelClassName="changeDataViewPopover"
-                button={createTrigger()}
-                panelProps={{
-                  ['data-test-subj']: 'changeDataViewPopover',
-                }}
-                isOpen={isPopoverOpen}
-                closePopover={() => setPopoverIsOpen(false)}
-                panelPaddingSize="none"
-                initialFocus={`#${searchListInputId}`}
-                display="block"
-                buffer={8}
-              >
-                <div css={styles.popoverContent}>
-                  <EuiContextMenuPanel size="s" items={getPanelItems()} />
-                </div>
-              </EuiPopover>
+              <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    padding: 11px;
+                    border-radius: ${euiTheme.border.radius.small} 0 0
+                      ${euiTheme.border.radius.small};
+                    background-color: ${euiTheme.colors.lightestShade};
+                    border: ${euiTheme.border.thin};
+                    border-right: 0;
+                  `}
+                >
+                  {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+                    defaultMessage: 'Data view',
+                  })}
+                </EuiFlexItem>
+                <EuiPopover
+                  panelClassName="changeDataViewPopover"
+                  button={createTrigger()}
+                  panelProps={{
+                    ['data-test-subj']: 'changeDataViewPopover',
+                  }}
+                  isOpen={isPopoverOpen}
+                  closePopover={() => setPopoverIsOpen(false)}
+                  panelPaddingSize="none"
+                  initialFocus={`#${searchListInputId}`}
+                  display="block"
+                  buffer={8}
+                >
+                  <div css={styles.popoverContent}>
+                    <EuiContextMenuPanel size="s" items={getPanelItems()} />
+                  </div>
+                </EuiPopover>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </>
         )}

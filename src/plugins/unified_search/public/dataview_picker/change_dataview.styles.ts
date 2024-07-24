@@ -24,6 +24,8 @@ export const changeDataViewStyles = ({
     trigger: {
       maxWidth: fullWidth ? undefined : MIN_WIDTH,
       border: theme.border.thin,
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
     },
     popoverContent: {
       width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], { minWidth: MIN_WIDTH }),

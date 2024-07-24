@@ -31,7 +31,8 @@ import {
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import {
-  EDITOR_INITIAL_HEIGHT_EXPANDED,
+  EDITOR_INITIAL_HEIGHT,
+  EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
@@ -77,7 +78,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [code, setCode] = useState<string>(queryString ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
-  const [editorHeight, setEditorHeight] = useState(EDITOR_INITIAL_HEIGHT_EXPANDED);
+  const [editorHeight, setEditorHeight] = useState(
+    editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
+  );
 
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
   const [measuredContentWidth, setMeasuredContentWidth] = useState(0);
