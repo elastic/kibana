@@ -91,8 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.monaco.getCurrentLineNumber()).to.be(4);
       });
 
-      describe.only('open documentation', () => {
-        // const requests = ['GET _search', 'GET test_index/_search', 'GET /test_index/_search'];
+      describe('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search'];
         requests.forEach((request) => {
           it('should open documentation when Ctrl+/ is pressed', async () => {
