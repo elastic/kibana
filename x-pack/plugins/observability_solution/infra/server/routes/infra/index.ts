@@ -19,7 +19,7 @@ import {
   GetInfraAssetCountRequestBodyPayloadRT,
   GetInfraAssetCountResponsePayloadRT,
   GetInfraAssetCountRequestParamsPayloadRT,
-} from '../../../common/http_api/get_hosts_count_api';
+} from '../../../common/http_api/asset_count_api';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
 import { getHosts } from './lib/host/get_hosts';
@@ -84,7 +84,9 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   );
 
   const validateCountBody = createRouteValidationFunction(GetInfraAssetCountRequestBodyPayloadRT);
-  const validateParams = createRouteValidationFunction(GetInfraAssetCountRequestParamsPayloadRT);
+  const validateCountParams = createRouteValidationFunction(
+    GetInfraAssetCountRequestParamsPayloadRT
+  );
 
   framework.registerRoute(
     {
@@ -92,7 +94,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       path: '/api/infra/{assetType}/count',
       validate: {
         body: validateCountBody,
-        params: validateParams,
+        params: validateCountParams,
       },
     },
     async (requestContext, request, response) => {

@@ -11,7 +11,7 @@ export * from './metrics_api';
 export * from './snapshot_api';
 export * from './host_details';
 export * from './infra';
-export * from './get_hosts_count_api';
+export * from './asset_count_api';
 
 /**
  * Exporting versioned APIs types
