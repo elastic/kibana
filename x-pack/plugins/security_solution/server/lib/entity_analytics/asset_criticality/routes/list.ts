@@ -15,8 +15,8 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import type { AssetCriticalityListResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
-import { ListAssetCriticalityQueryParams } from '../../../../../common/api/entity_analytics/asset_criticality';
+import type { FindAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
+import { FindAssetCriticalityRecordsRequestQuery } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
@@ -39,7 +39,7 @@ export const assetCriticalityPublicListRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(ListAssetCriticalityQueryParams),
+            query: buildRouteValidationWithZod(FindAssetCriticalityRecordsRequestQuery),
           },
         },
       },
@@ -81,7 +81,7 @@ export const assetCriticalityPublicListRoute = (
             },
           });
 
-          const body: AssetCriticalityListResponse = {
+          const body: FindAssetCriticalityRecordsResponse = {
             records,
             total,
             page,

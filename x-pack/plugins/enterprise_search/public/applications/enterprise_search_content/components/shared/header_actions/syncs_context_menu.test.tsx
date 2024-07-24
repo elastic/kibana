@@ -17,7 +17,7 @@ import {
   EuiResizeObserver,
 } from '@elastic/eui';
 
-import { IngestionStatus, IngestionMethod } from '@kbn/search-connectors';
+import { IngestionStatus, IngestionMethod, ConnectorStatus } from '@kbn/search-connectors';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../../common/types/api';
@@ -45,6 +45,7 @@ describe('SyncsContextMenu', () => {
     status: Status.SUCCESS,
     connector: {
       index_name: 'index_name',
+      status: ConnectorStatus.CONFIGURED,
     },
   };
 
@@ -117,7 +118,10 @@ describe('SyncsContextMenu', () => {
   });
 
   it('Cannot start a sync without an index name', () => {
-    setMockValues({ ...mockValues, connector: { index_name: null } });
+    setMockValues({
+      ...mockValues,
+      connector: { index_name: null, status: ConnectorStatus.CONFIGURED },
+    });
     const wrapper = mountWithIntl(<SyncsContextMenu />);
     const button = wrapper.find(
       'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
@@ -138,5 +142,14 @@ describe('SyncsContextMenu', () => {
         disabled: true,
       })
     );
+  });
+
+  it("Sync button is disabled when connector isn't configured", () => {
+    setMockValues({ ...mockValues, connector: { status: null } });
+    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const button = wrapper.find(
+      'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
+    );
+    expect(button.prop('disabled')).toEqual(true);
   });
 });
