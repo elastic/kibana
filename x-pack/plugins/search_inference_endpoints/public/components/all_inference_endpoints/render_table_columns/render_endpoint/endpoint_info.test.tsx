@@ -258,7 +258,7 @@ describe('RenderEndpoint component tests', () => {
   describe('with amazonbedrock service', () => {
     const mockEndpoint = {
       model_id: 'amazon-bedrock-1',
-      service: 'amazonbedrok',
+      service: 'amazonbedrock',
       service_settings: {
         region: 'us-west-1',
         provider: 'AMAZONTITAN',
