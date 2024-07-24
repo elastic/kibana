@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { StartStreamParams } from '@kbn/ml-response-stream/client';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import {
@@ -29,7 +28,7 @@ describe('fetchFieldCandidates', () => {
 
     mockHttp.post.mockResolvedValue(mockResponse);
 
-    const startParams: StartStreamParams = {
+    const startParams = {
       http: mockHttp,
       endpoint: '/internal/aiops/log_rate_analysis',
       apiVersion: '3',

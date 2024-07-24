@@ -24,7 +24,7 @@ import {
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
-import { cancelStream, startStream, type StartStreamParams } from '@kbn/ml-response-stream/client';
+import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 import {
   clearAllRowState,
   useAppDispatch,
@@ -307,7 +307,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setShouldStart(true);
   }
 
-  const startParams: StartStreamParams | undefined = useMemo(() => {
+  const startParams = useMemo(() => {
     if (!chartWindowParameters || !earliest || !latest) {
       return undefined;
     }
