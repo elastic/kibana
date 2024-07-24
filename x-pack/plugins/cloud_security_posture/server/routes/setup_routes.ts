@@ -7,15 +7,7 @@
 import { type CoreSetup, type Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import {
-  CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
-  CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME,
-  CDR_MISSCONFIGURATIONS_INDEX_PATTERN,
-  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
-  CDR_VULNERABILITIES_DATA_VIEW_NAME,
-  CDR_VULNERABILITIES_INDEX_PATTERN,
-  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-} from '../../common/constants';
+import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
@@ -30,7 +22,7 @@ import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
-import { migrateCdrDataViews, setupCdrDataView } from '../saved_objects/data_views';
+import { migrateCdrDataViews } from '../saved_objects/data_views';
 
 /**
  * 1. Registers routes
@@ -55,38 +47,21 @@ export function setupRoutes({
   defineBulkActionCspBenchmarkRulesRoute(router);
   defineGetCspBenchmarkRulesStatesRoute(router);
 
-  core.getStartServices().then(([coreStart]) => {
-    const soClient = coreStart.savedObjects.createInternalRepository();
-    migrateCdrDataViews(soClient, logger);
-  });
-
-  core.http.registerOnPreRouting(async (request, response, toolkit) => {
-    if (request.url.pathname === '/internal/cloud_security_posture/status') {
-      setupCdrDataView(
-        core,
-        request,
-        CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME,
-        CDR_MISSCONFIGURATIONS_INDEX_PATTERN,
-        CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
-        logger
-      );
-
-      setupCdrDataView(
-        core,
-        request,
-        CDR_VULNERABILITIES_DATA_VIEW_NAME,
-        CDR_VULNERABILITIES_INDEX_PATTERN,
-        CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
-        logger
-      );
-    }
-    return toolkit.next();
-  });
+  core
+    .getStartServices()
+    .then(([coreStart]) => {
+      const soClient = coreStart.savedObjects.createInternalRepository();
+      migrateCdrDataViews(soClient, logger);
+    })
+    .catch((err) => {
+      logger.error(`Failed to migrate CDR data views: ${err}`);
+    });
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
     async (context, request) => {
-      const [, { security, fleet }] = await core.getStartServices();
+      const [{ savedObjects }, { security, fleet, spaces, dataViews }] =
+        await core.getStartServices();
       const coreContext = await context.core;
       await fleet.fleetSetupCompleted();
 
@@ -111,6 +86,9 @@ export function setupRoutes({
         packagePolicyService: fleet.packagePolicyService,
         packageService: fleet.packageService,
         isPluginInitialized,
+        spaces: spaces?.spacesService,
+        dataViews,
+        internalSoClient: savedObjects.createInternalRepository(),
       };
     }
   );

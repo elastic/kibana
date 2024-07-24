@@ -5,21 +5,24 @@
  * 2.0.
  */
 import {
+  ElasticsearchClient,
   ISavedObjectsRepository,
   SavedObject,
-  type CoreSetup,
   type KibanaRequest,
   type Logger,
 } from '@kbn/core/server';
-
 import { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+
 import {
   CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME,
   CDR_MISSCONFIGURATIONS_INDEX_PATTERN,
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
+  CDR_VULNERABILITIES_DATA_VIEW_NAME,
   CDR_VULNERABILITIES_INDEX_PATTERN,
 } from '../../common/constants';
-import type { CspServerPluginStart, CspServerPluginStartDeps } from '../types';
 
 const PREVIOUS_VERSION_INDEX_PATTERNS = {
   [CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX]: [],
@@ -64,26 +67,26 @@ const getDataViewSafe = async (
   }
 };
 
-const getCurrentSpaceId = async (
-  startDeps: CspServerPluginStartDeps,
+const getCurrentSpaceId = (
+  spacesService: SpacesServiceStart | undefined,
   request: KibanaRequest
-): Promise<string> => {
-  return (await startDeps.spaces?.spacesService.getSpaceId(request)) || 'default';
+): string => {
+  return spacesService?.getSpaceId(request) || 'default';
 };
 
-export const setupCdrDataView = async (
-  core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
+export const installDataView = async (
+  esClient: ElasticsearchClient,
+  soClient: ISavedObjectsRepository,
+  spacesService: SpacesServiceStart | undefined,
+  dataViewsService: DataViewsServerPluginStart,
   request: KibanaRequest,
   dataViewName: string,
   indexPattern: string,
   dataViewId: string,
   logger: Logger
 ) => {
-  const [coreStart, startDeps] = await core.getStartServices();
-  const soClient = coreStart.savedObjects.createInternalRepository();
-
   try {
-    const currentSpaceId = await getCurrentSpaceId(startDeps, request);
+    const currentSpaceId = await getCurrentSpaceId(spacesService, request);
     const currentSpaceDataViewId = `${dataViewId}-${currentSpaceId}`;
 
     const isDataViewExists = await getDataViewSafe(
@@ -97,8 +100,8 @@ export const setupCdrDataView = async (
     if (isDataViewExists) return;
 
     logger.info(`Creating and saving data view with ID: ${currentSpaceDataViewId}`);
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const dataViewsClient = await startDeps.dataViews.dataViewsServiceFactory(
+    // const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const dataViewsClient = await dataViewsService.dataViewsServiceFactory(
       soClient,
       esClient,
       request,
@@ -120,6 +123,39 @@ export const setupCdrDataView = async (
   }
 };
 
+export const setupCdrDataViews = async (
+  esClient: ElasticsearchClient,
+  soClient: ISavedObjectsRepository,
+  spacesService: SpacesServiceStart | undefined,
+  dataViewsService: DataViewsServerPluginStart,
+  request: KibanaRequest,
+  logger: Logger
+) => {
+  installDataView(
+    esClient,
+    soClient,
+    spacesService,
+    dataViewsService,
+    request,
+    CDR_MISSCONFIGURATIONS_DATA_VIEW_NAME,
+    CDR_MISSCONFIGURATIONS_INDEX_PATTERN,
+    CDR_MISSCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+    logger
+  );
+
+  installDataView(
+    esClient,
+    soClient,
+    spacesService,
+    dataViewsService,
+    request,
+    CDR_VULNERABILITIES_DATA_VIEW_NAME,
+    CDR_VULNERABILITIES_INDEX_PATTERN,
+    CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
+    logger
+  );
+};
+
 const migrateIndexPattern = (previousIndexPattern: string, newPattern: string): string => {
   const previousPatternsArray = previousIndexPattern.split(',');
   const newPatternsArray = newPattern.split(',');
@@ -139,9 +175,9 @@ const migrateIndexPattern = (previousIndexPattern: string, newPattern: string): 
 export const migrateCdrDataViews = async (soClient: ISavedObjectsRepository, logger: Logger) => {
   logger.info('Migrating CDR data views');
   try {
-    Object.entries(PREVIOUS_VERSION_INDEX_PATTERNS).forEach(
-      ([dataViewID, oldIndexPAtternArray]) => {
-        oldIndexPAtternArray.map(async (oldIndexPattern) => {
+    const migrationPromises = Object.entries(PREVIOUS_VERSION_INDEX_PATTERNS).map(
+      async ([dataViewID, oldIndexPatternArray]) => {
+        const patternPromises = oldIndexPatternArray.map(async (oldIndexPattern) => {
           // Retrieve all data views with the old index pattern from all spaces
           const dataViews = await soClient.find<DataViewAttributes>({
             type: 'index-pattern',
@@ -151,7 +187,7 @@ export const migrateCdrDataViews = async (soClient: ISavedObjectsRepository, log
           });
 
           // For each data view with the old index pattern, update the index pattern to contain the new one
-          dataViews.saved_objects.map(async (dataView) => {
+          const updatePromises = dataViews.saved_objects.map(async (dataView) => {
             await soClient.update(
               'index-pattern',
               dataView.id,
@@ -162,15 +198,23 @@ export const migrateCdrDataViews = async (soClient: ISavedObjectsRepository, log
                   CURRENT_VERSION_INDEX_PATTERNS[dataViewID]
                 ),
                 timeFieldName: DATA_VIEW_TIME_FIELD,
+                managed: true,
               },
               {
                 namespace: dataView.namespaces![0],
               }
             );
           });
+
+          await Promise.all(updatePromises);
         });
+
+        await Promise.all(patternPromises);
       }
     );
+
+    // Ensure all migration promises are resolved
+    await Promise.all(migrationPromises);
   } catch (error) {
     logger.error('Failed to migrate CDR data views', error);
   }

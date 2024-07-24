@@ -41,6 +41,7 @@ import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 import {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -49,7 +50,6 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './fleet_integration/fleet_integration';
-
 const chance = new Chance();
 
 const mockRouteContext = {
@@ -82,6 +82,7 @@ describe('Cloud Security Posture Plugin', () => {
       taskManager: taskManagerMock.createStart(),
       security: securityMock.createStart(),
       licensing: licensingMock.createStart(),
+      dataViews: createIndexPatternsStartMock(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
