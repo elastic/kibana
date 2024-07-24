@@ -14,11 +14,23 @@ paths:
     get:
       x-labels: [ess, serverless]
       x-internal: true
-      operationId: AssetCriticalityGetRecord
+      operationId: InternalGetAssetCriticalityRecord
       summary: Deprecated Internal Get Criticality Record
+      deprecated: true
       parameters:
-        - $ref: './common.schema.yaml#/components/parameters/id_value'
-        - $ref: './common.schema.yaml#/components/parameters/id_field'
+        - name: id_value
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID value of the asset.
+        - name: id_field
+          in: query
+          required: true
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/IdField'
+          example: 'host.name'
+          description: The field representing the ID.
       responses:
         '200':
           description: Successful response
@@ -33,11 +45,23 @@ paths:
   /api/asset_criticality:
     get:
       x-labels: [ess, serverless]
-      operationId: AssetCriticalityGetRecord
+      x-codegen-enabled: true
+      operationId: GetAssetCriticalityRecord
       summary: Get Criticality Record
       parameters:
-        - $ref: './common.schema.yaml#/components/parameters/id_value'
-        - $ref: './common.schema.yaml#/components/parameters/id_field'
+        - name: id_value
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID value of the asset.
+        - name: id_field
+          in: query
+          required: true
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/IdField'
+          example: 'host.name'
+          description: The field representing the ID.
       responses:
         '200':
           description: Successful response

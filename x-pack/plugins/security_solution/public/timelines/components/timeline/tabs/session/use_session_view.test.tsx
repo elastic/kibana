@@ -239,9 +239,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
 
       expect(result.current).toHaveProperty('openEventDetailsPanel');
-      expect(result.current).toHaveProperty('shouldShowDetailsPanel');
       expect(result.current).toHaveProperty('SessionView');
-      expect(result.current).toHaveProperty('DetailsPanel');
 
       expect(result.current).not.toHaveProperty('Navigation');
       expect(result.current).not.toHaveProperty('onCloseOverlay');

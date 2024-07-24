@@ -84,6 +84,7 @@ const AlertRequired = rt.type({
 const AlertOptional = rt.partial({
   'event.action': schemaString,
   'event.kind': schemaString,
+  'event.original': schemaString,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.case_ids': schemaStringArray,
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
