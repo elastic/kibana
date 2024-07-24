@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { BoolQuery } from '@kbn/es-query';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { EVENT_MODULE, METRICSET_MODULE } from '../constants';
 
 export async function getHostsCount({
   infraMetricsClient,
@@ -20,16 +22,6 @@ export async function getHostsCount({
   from: string;
   to: string;
 }) {
-  const rangeQuery = [
-    {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-        },
-      },
-    },
-  ];
   const queryFilter = query?.filter ?? [];
   const queryBool = query ?? {};
 
@@ -44,20 +36,12 @@ export async function getHostsCount({
           ...queryBool,
           filter: [
             ...queryFilter,
-            ...rangeQuery,
+            ...rangeQuery(new Date(from).getTime(), new Date(to).getTime()),
             {
               bool: {
                 should: [
-                  {
-                    term: {
-                      'event.module': 'system',
-                    },
-                  },
-                  {
-                    term: {
-                      'metricset.module': 'system',
-                    },
-                  },
+                  ...termQuery(EVENT_MODULE, 'system'),
+                  ...termQuery(METRICSET_MODULE, 'system'),
                 ],
                 minimum_should_match: 1,
               },
