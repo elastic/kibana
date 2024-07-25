@@ -17,21 +17,21 @@ import { ChartContextMenu } from './chart_context_menu';
 import { ChartSelect } from './chart_select';
 import { ChartCollapse } from './chart_collapse';
 import * as i18n from './chart_select/translations';
-import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
+import { AlertsTreemapPanel } from '../alerts_treemap_panel';
 import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
-import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
-import { AlertsSummaryChartsPanel } from '../../../components/alerts_kpis/alerts_summary_charts_panel';
+import { AlertsHistogramPanel } from '../alerts_histogram_panel';
+import { AlertsSummaryChartsPanel } from '../alerts_summary_charts_panel';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
-} from '../../../components/alerts_kpis/common/config';
-import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
-import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
+} from '../common/config';
+import { AlertsCountPanel } from '../alerts_count_panel';
+import { GROUP_BY_LABEL } from '../common/translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import type { AddFilterProps } from '../../../components/alerts_kpis/common/types';
-import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
+import type { AddFilterProps } from '../common/types';
+import { createResetGroupByFieldAction } from '../alerts_histogram_panel/helpers';
 
 const TREND_CHART_HEIGHT = 240; // px
 const CHART_PANEL_HEIGHT = 375; // px

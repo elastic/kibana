@@ -7,10 +7,10 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
+import type { GroupBySelection } from '../../alerts_progress_bar_panel/types';
 import { TestProviders } from '../../../../../common/mock';
 import { ChartCollapse } from '.';
-import { useSummaryChartData } from '../../../../components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
+import { useSummaryChartData } from '../../alerts_summary_charts_panel/use_summary_chart_data';
 import * as mock from './mock_data';
 
 jest.mock('../../../../../common/lib/kibana');
@@ -19,7 +19,7 @@ jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../../../../components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
+jest.mock('../../alerts_summary_charts_panel/use_summary_chart_data');
 
 const defaultProps = {
   groupBySelection: 'host.name' as GroupBySelection,

@@ -12,10 +12,7 @@ import React from 'react';
 import { RESET_GROUP_BY_FIELDS } from '../../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../../common/components/chart_settings_popover/translations';
 import { INSPECT } from '../../../../../common/components/inspect/translations';
-import {
-  DEFAULT_STACK_BY_FIELD,
-  DEFAULT_STACK_BY_FIELD1,
-} from '../../../../components/alerts_kpis/common/config';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/config';
 import { TestProviders } from '../../../../../common/mock';
 import { ChartContextMenu } from '.';
 

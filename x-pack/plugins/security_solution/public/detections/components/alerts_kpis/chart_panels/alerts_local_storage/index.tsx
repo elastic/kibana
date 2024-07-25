@@ -24,14 +24,11 @@ import {
   VIEW_CATEGORY,
   GROUP_BY_SETTING_NAME,
 } from './constants';
-import {
-  DEFAULT_STACK_BY_FIELD,
-  DEFAULT_STACK_BY_FIELD1,
-} from '../../../../components/alerts_kpis/common/config';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/config';
 import type { AlertsSettings } from './types';
 import type { AlertViewSelection } from '../chart_select/helpers';
 import { CHARTS_ID, TREND_ID } from '../chart_select/helpers';
-import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
+import type { GroupBySelection } from '../../alerts_progress_bar_panel/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export const useAlertsLocalStorage = (): AlertsSettings => {

@@ -19,7 +19,7 @@ import { ChartPanels } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
-import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
+import { createResetGroupByFieldAction } from '../alerts_histogram_panel/helpers';
 
 jest.mock('./alerts_local_storage');
 jest.mock('../../../../sourcerer/containers');

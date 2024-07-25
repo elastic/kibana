@@ -9,24 +9,21 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { SecurityPageName } from '../../../../common/constants';
-import {
-  DEFAULT_STACK_BY_FIELD,
-  DEFAULT_STACK_BY_FIELD1,
-} from '../../../detections/components/alerts_kpis/common/config';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { ChartContextMenu } from '../../../detections/pages/detection_engine/chart_panels/chart_context_menu';
-import { ChartSelect } from '../../../detections/pages/detection_engine/chart_panels/chart_select';
-import { TREEMAP } from '../../../detections/pages/detection_engine/chart_panels/chart_select/translations';
-import { TestProviders } from '../../mock/test_providers';
+import { SecurityPageName } from '../../../../../common/constants';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ChartContextMenu } from '../chart_panels/chart_context_menu';
+import { ChartSelect } from '../chart_panels/chart_select';
+import { TREEMAP } from '../chart_panels/chart_select/translations';
+import { TestProviders } from '../../../../common/mock/test_providers';
 import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
-import { mockAlertSearchResponse } from '../alerts_treemap/lib/mocks/mock_alert_search_response';
+import { mockAlertSearchResponse } from '../../../../common/components/alerts_treemap/lib/mocks/mock_alert_search_response';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
-jest.mock('../../containers/use_global_time', () => {
-  const actual = jest.requireActual('../../containers/use_global_time');
+jest.mock('../../../../common/containers/use_global_time', () => {
+  const actual = jest.requireActual('../../../../common/containers/use_global_time');
   return {
     ...actual,
     useGlobalTime: jest
@@ -40,15 +37,15 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../lib/kibana', () => {
-  const originalModule = jest.requireActual('../../lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...originalModule,
     useUiSetting$: () => ['0,0.[000]'],
   };
 });
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
 
@@ -275,7 +272,7 @@ describe('AlertsTreemapPanel', () => {
   });
 
   it('renders the treemap when data is available and `isPanelExpanded` is true', async () => {
-    jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => {
+    jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
       return {
         useQueryAlerts: () => ({
           loading: true,

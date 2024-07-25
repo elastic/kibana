@@ -17,10 +17,7 @@ import type {
   AlertsByGroupingAgg,
   AlertsProgressBarData,
 } from '../alerts_progress_bar_panel/types';
-import type {
-  ChartCollapseAgg,
-  ChartCollapseData,
-} from '../../../pages/detection_engine/chart_panels/chart_collapse/types';
+import type { ChartCollapseAgg, ChartCollapseData } from '../chart_panels/chart_collapse/types';
 
 export type SummaryChartsAgg = Partial<
   AlertsBySeverityAgg | AlertsByTypeAgg | AlertsByGroupingAgg | ChartCollapseAgg | AlertsByRuleAgg
