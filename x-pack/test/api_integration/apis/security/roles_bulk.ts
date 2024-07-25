@@ -13,15 +13,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Roles Bulk', () => {
-    after(async () => {
-      await es.security.deleteRole({ name: 'bulk_role_1' });
-      await es.security.deleteRole({ name: 'bulk_role_2' });
-      await es.security.deleteRole({ name: 'bulk_role_with_privilege_1' });
-      await es.security.deleteRole({ name: 'bulk_role_with_privilege_2' });
-      await es.security.deleteRole({ name: 'bulk_role_valid' });
-      await es.security.deleteRole({ name: 'bulk_role_to_update_1' });
-      await es.security.deleteRole({ name: 'bulk_role_to_update_2' });
-    });
     describe('Create Roles', () => {
       it('should allow us to create empty roles', async () => {
         await supertest
@@ -338,6 +329,50 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
+      });
+    });
+
+    describe('Delete Roles', () => {
+      it('should delete the roles we created', async () => {
+        await supertest.delete('/api/security/role/bulk_role_1').set('kbn-xsrf', 'xxx').expect(204);
+        await supertest.delete('/api/security/role/bulk_role_2').set('kbn-xsrf', 'xxx').expect(204);
+        await supertest
+          .delete('/api/security/role/bulk_role_valid')
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+        await supertest
+          .delete('/api/security/role/bulk_role_with_privilege_1')
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+        await supertest
+          .delete('/api/security/role/bulk_role_with_privilege_2')
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+        await supertest
+          .delete('/api/security/role/bulk_role_to_update_1')
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+        await supertest
+          .delete('/api/security/role/bulk_role_to_update_2')
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+
+        const emptyRoles = await es.security.getRole(
+          { name: 'bulk_role_1,bulk_role_2' },
+          { ignore: [404] }
+        );
+        expect(emptyRoles).to.eql({});
+        const rolesWithPrivileges = await es.security.getRole(
+          { name: 'bulk_role_with_privilege_1,bulk_role_with_privilege_2,bulk_role_valid' },
+          { ignore: [404] }
+        );
+        expect(rolesWithPrivileges).to.eql({});
+
+        const rolesToUpdate = await es.security.getRole(
+          { name: 'bulk_role_to_update_1,bulk_role_to_update_2' },
+          { ignore: [404] }
+        );
+        expect(rolesToUpdate).to.eql({});
       });
     });
   });
