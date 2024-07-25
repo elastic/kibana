@@ -9,6 +9,7 @@ export type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
   RuleRegistrySearchRequestPagination,
-} from './search_strategy';
+  Alert as EcsFieldsResponse,
+} from '@kbn/alerting-types';
 export { BASE_RAC_ALERTS_API_PATH } from './constants';
 export type { BrowserFields, BrowserField } from './types';

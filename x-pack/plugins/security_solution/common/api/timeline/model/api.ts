@@ -15,12 +15,31 @@ import { Direction } from '../../../search_strategy';
 import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 // TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import {
-  SavedObjectResolveAliasPurpose,
-  SavedObjectResolveAliasTargetId,
-  SavedObjectResolveOutcome,
-} from '../../detection_engine/model/rule_schema_legacy';
+
+/**
+ * Outcome is a property of the saved object resolve api
+ * will tell us info about the rule after 8.0 migrations
+ */
+export type SavedObjectResolveOutcome = runtimeTypes.TypeOf<typeof SavedObjectResolveOutcome>;
+export const SavedObjectResolveOutcome = runtimeTypes.union([
+  runtimeTypes.literal('exactMatch'),
+  runtimeTypes.literal('aliasMatch'),
+  runtimeTypes.literal('conflict'),
+]);
+
+export type SavedObjectResolveAliasTargetId = runtimeTypes.TypeOf<
+  typeof SavedObjectResolveAliasTargetId
+>;
+export const SavedObjectResolveAliasTargetId = runtimeTypes.string;
+
+export type SavedObjectResolveAliasPurpose = runtimeTypes.TypeOf<
+  typeof SavedObjectResolveAliasPurpose
+>;
+export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
+  runtimeTypes.literal('savedObjectConversion'),
+  runtimeTypes.literal('savedObjectImport'),
+]);
+
 import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([
