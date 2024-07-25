@@ -9,7 +9,9 @@ import React from 'react';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiBetaBadge,
   EuiAccordion,
   EuiFormRow,
   EuiLink,
@@ -17,6 +19,9 @@ import {
   EuiSuperSelect,
   EuiText,
   useGeneratedHtmlId,
+  EuiFlexItem,
+  EuiFlexGroup,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
@@ -32,23 +37,54 @@ export const SetupTechnologySelector = ({
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const agentlessOptionBadge = (isDropDownDisplay: boolean) => {
+    const title = isDropDownDisplay ? (
+      <strong>
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
+          defaultMessage="Agentless"
+        />
+      </strong>
+    ) : (
+      <FormattedMessage
+        id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
+        defaultMessage="Agentless"
+      />
+    );
+    return (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+        <EuiFlexItem css={{ paddingTop: !isDropDownDisplay ? euiTheme.size.xs : undefined }}>
+          <EuiBetaBadge
+            label={i18n.translate(
+              'xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay.techPreviewBadge.label',
+              {
+                defaultMessage: 'Beta',
+              }
+            )}
+            size="m"
+            color="hollow"
+            tooltipContent={i18n.translate(
+              'xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay.techPreviewBadge.tooltip',
+              {
+                defaultMessage:
+                  'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   const options = [
     {
       value: SetupTechnology.AGENTLESS,
-      inputDisplay: (
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
-          defaultMessage="Agentless"
-        />
-      ),
+      inputDisplay: agentlessOptionBadge(false),
       dropdownDisplay: (
         <>
-          <strong>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
-              defaultMessage="Agentless"
-            />
-          </strong>
+          {agentlessOptionBadge(true)}
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
