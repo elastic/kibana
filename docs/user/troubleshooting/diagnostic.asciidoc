@@ -117,8 +117,8 @@ than `200 0K`, then the diagnostic tool might not work as intended. Check the po
 HTTP 401 `UNAUTHENTICATED`::
 Additional information in the error will usually indicate 
 that your `username:password` pair is invalid, or that your {es} `.security` 
-index is unavailable and you need to setup a temporary 
-<<file-realm,file-based realm>> user with `role:superuser` to authenticate.
+index is unavailable and you need to setup a temporary {es}
+{ref}/file-realm.html[file-based realm] user with `role:superuser` to authenticate.
 
 HTTP 403 `UNAUTHORIZED`::
 Your `username` is recognized but has insufficient permissions to run the 
