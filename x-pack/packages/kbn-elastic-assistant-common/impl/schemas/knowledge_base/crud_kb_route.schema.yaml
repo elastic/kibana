@@ -1,12 +1,13 @@
 openapi: 3.0.0
 info:
   title: KnowledgeBase API endpoints
-  version: '2023-10-31'
+  version: '1'
 paths:
   /internal/elastic_assistant/knowledge_base/{resource}:
     post:
-      operationId: CreateKnowledgeBase
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CreateKnowledgeBase
       summary: Create a KnowledgeBase
       description: Create a KnowledgeBase
       tags:
@@ -38,8 +39,9 @@ paths:
                   message:
                     type: string
     get:
-      operationId: ReadKnowledgeBase
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ReadKnowledgeBase
       description: Read a single KB
       summary: Read a KnowledgeBase
       tags:
@@ -64,6 +66,8 @@ paths:
                     type: boolean
                   index_exists:
                     type: boolean
+                  is_setup_available:
+                    type: boolean
                   is_setup_in_progress:
                     type: boolean
                   pipeline_exists:
@@ -82,8 +86,9 @@ paths:
                   message:
                     type: string
     delete:
-      operationId: DeleteKnowledgeBase
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DeleteKnowledgeBase
       description: Deletes KnowledgeBase with the `resource` field.
       summary: Deletes a KnowledgeBase
       tags:
