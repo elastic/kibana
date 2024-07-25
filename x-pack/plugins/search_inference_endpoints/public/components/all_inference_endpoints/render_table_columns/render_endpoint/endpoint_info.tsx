@@ -167,7 +167,6 @@ function amazonBedrockAttributes(endpoint: InferenceAPIConfigResponse) {
   return [
     region && `region: ${region}`,
     provider && `provider: ${provider}`,
-    model && `model: ${model}`,
   ]
     .filter(Boolean)
     .join(', ');

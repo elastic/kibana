@@ -270,8 +270,9 @@ describe('RenderEndpoint component tests', () => {
       render(<EndpointInfo endpoint={mockEndpoint} />);
 
       expect(screen.getByText('amazon-bedrock-1')).toBeInTheDocument();
+      expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
       expect(
-        screen.getByText('region: us-west-1, provider: amazontitan, model: model-bedrock-xyz')
+        screen.getByText('region: us-west-1, provider: amazontitan')
       ).toBeInTheDocument();
     });
   });
