@@ -71,7 +71,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
           vars.esTestCluster.license = 'trial';
           vars.suiteTags.exclude = ['skipFIPS'];
-          vars.esTestCluster.serverArgs.push('xpack.security.enabled=true');
+          vars.esTestCluster.serverArgs = ['xpack.security.enabled=true'];
+          vars.security.disableTestUser = false;
+          log.success(JSON.stringify(vars.esTestCluster.serverArgs));
         }
 
         return vars;
