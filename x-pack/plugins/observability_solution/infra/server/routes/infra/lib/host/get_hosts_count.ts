@@ -8,8 +8,7 @@
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { BoolQuery } from '@kbn/es-query';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
-import { HOST_NAME_FIELD } from '../../../../../common/constants';
-import { EVENT_MODULE, METRICSET_MODULE } from '../constants';
+import { HOST_NAME_FIELD, EVENT_MODULE, METRICSET_MODULE } from '../../../../../common/constants';
 
 export async function getHostsCount({
   infraMetricsClient,

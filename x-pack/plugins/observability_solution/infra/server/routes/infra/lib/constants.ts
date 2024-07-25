@@ -6,8 +6,6 @@
  */
 
 export const BUCKET_KEY = 'host.name';
-export const EVENT_MODULE = 'event.module';
-export const METRICSET_MODULE = 'metricset.module';
 export const METADATA_AGGREGATION_NAME = 'metadata';
 export const FILTER_AGGREGATION_SUB_AGG_NAME = 'result';
 
