@@ -146,9 +146,9 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
  * @param text
  * @returns
  */
-function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
+function countBracketsUnclosed(bracketType: '(' | '[' | '"', text: string) {
   const stack = [];
-  const closingBrackets = { '(': ')', '[': ']' };
+  const closingBrackets = { '(': ')', '[': ']', '"': '"' };
   for (const char of text) {
     if (char === bracketType) {
       stack.push(bracketType);
@@ -185,7 +185,7 @@ export async function suggest(
       (isMathFunction(innerText, offset) ||
         isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
   ) {
-    finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
+    finalText = `${innerText}${EDITOR_MARKER}`;
   }
   // if there are unclosed brackets, close them
   if (unclosedBrackets) {
