@@ -18,7 +18,7 @@ import { TREEMAP } from '../chart_panels/chart_select/translations';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
-import { mockAlertSearchResponse } from '../../../../common/components/alerts_treemap/lib/mocks/mock_alert_search_response';
+import { mockAlertSearchResponse } from './alerts_treemap/lib/mocks/mock_alert_search_response';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';

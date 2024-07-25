@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { Settings } from '@elastic/charts';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
+import { TestProviders } from '../../../../../common/mock';
 import {
   mockAlertSearchResponse,
   mockNoDataAlertSearchResponse,

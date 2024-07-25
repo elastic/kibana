@@ -14,7 +14,7 @@ import {
   RISK_SCORE_MEDIUM,
   RISK_SCORE_HIGH,
   RISK_SCORE_CRITICAL,
-} from '../../../../constants';
+} from '../../../../../../../common/constants';
 import { getFillColor, getRiskScorePalette, RISK_SCORE_STEPS } from '.';
 
 describe('getFillColor', () => {

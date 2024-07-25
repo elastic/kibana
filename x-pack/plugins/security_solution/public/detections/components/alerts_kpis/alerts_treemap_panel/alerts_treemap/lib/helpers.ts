@@ -13,7 +13,7 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
+import { firstNonNullValue } from '../../../../../../../common/endpoint/models/ecs_safety_helpers';
 
 import type { RawBucket } from '../types';
 

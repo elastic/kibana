@@ -15,7 +15,7 @@ import {
   RISK_SCORE_MEDIUM,
   RISK_SCORE_HIGH,
   RISK_SCORE_CRITICAL,
-} from '../../../../constants';
+} from '../../../../../../../common/constants';
 
 /**
  * The detection engine creates risk scores in the range 1 - 100.

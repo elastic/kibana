@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GenericBuckets } from '../../../../common/search_strategy/common';
+import type { GenericBuckets } from '../../../../../../common/search_strategy/common';
 
 export type RawBucket = GenericBuckets & {
   maxRiskSubAggregation?: {

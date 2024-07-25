@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertSearchResponse } from '../../../../../detections/containers/detection_engine/alerts/types';
+import type { AlertSearchResponse } from '../../../../../../containers/detection_engine/alerts/types';
 import type { AlertsTreeMapAggregation } from '../../types';
 
 export const mockAlertSearchResponse: AlertSearchResponse<unknown, AlertsTreeMapAggregation> = {

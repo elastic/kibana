@@ -13,10 +13,10 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
-import { useThemes } from '../charts/common';
-import { DraggableLegend } from '../charts/draggable_legend';
-import type { LegendItem } from '../charts/draggable_legend_item';
-import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
+import { useThemes } from '../../../../../common/components/charts/common';
+import { DraggableLegend } from '../../../../../common/components/charts/draggable_legend';
+import type { LegendItem } from '../../../../../common/components/charts/draggable_legend_item';
+import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
 import { getRiskScorePalette, RISK_SCORE_STEPS } from './lib/chart_palette';
 import { getFlattenedBuckets } from './lib/flatten/get_flattened_buckets';
 import { getFlattenedLegendItems } from './lib/legend/get_flattened_legend_items';

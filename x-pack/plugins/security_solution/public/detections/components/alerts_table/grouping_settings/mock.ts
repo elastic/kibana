@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockAlertSearchResponse } from '../../../../common/components/alerts_treemap/lib/mocks/mock_alert_search_response';
+import { mockAlertSearchResponse } from '../../alerts_kpis/alerts_treemap_panel/alerts_treemap/lib/mocks/mock_alert_search_response';
 
 export const getQuery = (
   selectedGroup: string,

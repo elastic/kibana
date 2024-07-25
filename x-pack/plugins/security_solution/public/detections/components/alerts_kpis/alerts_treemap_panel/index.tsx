@@ -18,7 +18,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import {
   AlertsTreemap,
   DEFAULT_MIN_CHART_HEIGHT,
-} from '../../../../common/components/alerts_treemap';
+} from './alerts_treemap';
 import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
@@ -29,8 +29,8 @@ import { InspectButtonContainer } from '../../../../common/components/inspect';
 import {
   DEFAULT_STACK_BY_FIELD0_SIZE,
   getAlertsRiskQuery,
-} from '../../../../common/components/alerts_treemap/query';
-import type { AlertsTreeMapAggregation } from '../../../../common/components/alerts_treemap/types';
+} from './alerts_treemap/query';
+import type { AlertsTreeMapAggregation } from './alerts_treemap/types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px

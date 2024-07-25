@@ -32,7 +32,7 @@ import styled from 'styled-components';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
-import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
+import { getGroupByFieldsOnClick } from '../../detections/components/alerts_kpis/alerts_treemap_panel/alerts_treemap/lib/helpers';
 import { useThemes } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
 import { EmptyPrompt } from '../../common/components/empty_prompt';

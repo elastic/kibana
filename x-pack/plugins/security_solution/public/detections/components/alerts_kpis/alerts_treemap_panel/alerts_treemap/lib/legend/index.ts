@@ -8,10 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
-import type { LegendItem } from '../../../charts/draggable_legend_item';
+import { firstNonNullValue } from '../../../../../../../../common/endpoint/models/ecs_safety_helpers';
+import type { LegendItem } from '../../../../../../../common/components/charts/draggable_legend_item';
 import { getFillColor } from '../chart_palette';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { escapeDataProviderId } from '../../../../../../../common/components/drag_and_drop/helpers';
 import { getLabel } from '../labels';
 import type { FlattenedBucket, RawBucket } from '../../types';
 

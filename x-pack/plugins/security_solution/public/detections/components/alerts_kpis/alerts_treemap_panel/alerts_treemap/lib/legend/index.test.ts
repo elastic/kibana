@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 
-import type { LegendItem } from '../../../charts/draggable_legend_item';
+import type { LegendItem } from '../../../../../../../common/components/charts/draggable_legend_item';
 import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
 import { bucketsWithStackByField1, maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
 import {
