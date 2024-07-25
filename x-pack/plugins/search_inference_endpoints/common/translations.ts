@@ -22,7 +22,7 @@ export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
   {
     defaultMessage:
-      'Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Set up tasks such as text embedding, completions, and reranking using simple, unique endpoints.',
+      'View and manage your deployed inference endpoints.',
   }
 );
 
