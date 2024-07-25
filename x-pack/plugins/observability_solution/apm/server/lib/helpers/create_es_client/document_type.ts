@@ -85,7 +85,7 @@ const documentTypeConfigMap = {
 } as const;
 
 type DocumentTypeConfigOf<TApmDocumentType extends ApmDocumentType> =
-  typeof documentTypeConfigMap[TApmDocumentType];
+  (typeof documentTypeConfigMap)[TApmDocumentType];
 
 export function getConfigForDocumentType<TApmDocumentType extends ApmDocumentType>(
   docType: TApmDocumentType
