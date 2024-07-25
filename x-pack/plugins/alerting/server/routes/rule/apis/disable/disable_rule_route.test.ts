@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { disableRuleRoute } from './disable_rule';
+import { disableRuleRoute } from './disable_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -33,7 +33,7 @@ describe('disableRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_disable"`);
 
-    rulesClient.disable.mockResolvedValueOnce();
+    rulesClient.disableRule.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -47,8 +47,8 @@ describe('disableRuleRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.disable).toHaveBeenCalledTimes(1);
-    expect(rulesClient.disable.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.disableRule).toHaveBeenCalledTimes(1);
+    expect(rulesClient.disableRule.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -68,7 +68,7 @@ describe('disableRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.disable.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.disableRule.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

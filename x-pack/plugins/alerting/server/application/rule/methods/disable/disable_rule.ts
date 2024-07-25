@@ -6,45 +6,42 @@
  */
 import type { SavedObjectReference } from '@kbn/core/server';
 
-import { RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
-import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
-import { RuleAttributes } from '../../data/rule/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import Boom from '@hapi/boom';
+import { RawRule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../../../../rules_client/lib';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { DisableRuleParams } from './types';
+import { disableRuleParamsSchema } from './schemas';
 
-export async function disable(
+export async function disableRule(
   context: RulesClientContext,
-  {
-    id,
-    untrack = false,
-  }: {
-    id: string;
-    untrack?: boolean;
-  }
+  { id, untrack = false }: DisableRuleParams
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.disable('${id}')`,
+    `rulesClient.disableRule('${id}')`,
     async () => await disableWithOCC(context, { id, untrack })
   );
 }
 
 async function disableWithOCC(
   context: RulesClientContext,
-  {
-    id,
-    untrack = false,
-  }: {
-    id: string;
-    untrack?: boolean;
-  }
+  { id, untrack = false }: DisableRuleParams
 ) {
   let attributes: RawRule;
   let version: string | undefined;
   let references: SavedObjectReference[];
+
+  try {
+    disableRuleParamsSchema.validate({ id, untrack });
+  } catch (error) {
+    throw Boom.badRequest(`Error validating disable rule parameters - ${error.message}`);
+  }
 
   try {
     const decryptedAlert =
