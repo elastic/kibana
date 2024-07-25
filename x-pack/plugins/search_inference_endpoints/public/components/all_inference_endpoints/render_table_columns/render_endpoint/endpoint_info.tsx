@@ -164,10 +164,7 @@ function amazonBedrockAttributes(endpoint: InferenceAPIConfigResponse) {
     'provider' in serviceSettings ? serviceSettings.provider.toLocaleLowerCase() : undefined;
   const model = 'model' in serviceSettings ? serviceSettings.model : undefined;
 
-  return [
-    region && `region: ${region}`,
-    provider && `provider: ${provider}`,
-  ]
+  return [region && `region: ${region}`, provider && `provider: ${provider}`]
     .filter(Boolean)
     .join(', ');
 }

@@ -271,9 +271,7 @@ describe('RenderEndpoint component tests', () => {
 
       expect(screen.getByText('amazon-bedrock-1')).toBeInTheDocument();
       expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
-      expect(
-        screen.getByText('region: us-west-1, provider: amazontitan')
-      ).toBeInTheDocument();
+      expect(screen.getByText('region: us-west-1, provider: amazontitan')).toBeInTheDocument();
     });
   });
 });
