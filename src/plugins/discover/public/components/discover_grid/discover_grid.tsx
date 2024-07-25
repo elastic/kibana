@@ -11,8 +11,13 @@ import {
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
+  SELECT_ROW,
+  OPEN_DETAILS,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
+
+// Temporary workaround to avoid UI changes in Discover for now
+const DEFAULT_SORTED_CONTROL_COLUMN_IDS = [OPEN_DETAILS, SELECT_ROW];
 
 /**
  * Customized version of the UnifiedDataTable
@@ -43,6 +48,12 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+      // TODO: remove after controls are swapped permanently https://github.com/elastic/kibana/issues/186808
+      controlColumnIds={
+        !props.controlColumnIds && !rowAdditionalLeadingControls
+          ? DEFAULT_SORTED_CONTROL_COLUMN_IDS
+          : props.controlColumnIds
+      }
       {...props}
     />
   );

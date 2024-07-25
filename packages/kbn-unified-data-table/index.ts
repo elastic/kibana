@@ -25,7 +25,7 @@ export { getRowsPerPageOptions } from './src/utils/rows_per_page';
 export { popularizeField } from './src/utils/popularize_field';
 
 export { useColumns } from './src/hooks/use_data_grid_columns';
-export { OPEN_DETAILS, SELECT_ROW } from './src/components/data_table_columns';
+export { OPEN_DETAILS, SELECT_ROW } from './src/components/data_table_columns'; // TODO: deprecate?
 export { DataTableRowControl } from './src/components/data_table_row_control';
 
 export type {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -20,43 +20,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { UnifiedDataTableContext } from '../../../table_context';
 import { DataTableRowControl } from '../../data_table_row_control';
-import { RowControlColumn, RowControlRowProps, RowControlProps } from '../../../types';
+import type { RowControlColumn, RowControlProps } from '../../../types';
+import { useControlColumn } from '../../../hooks/use_control_column';
 
 /**
  * Menu button under which all other additional row controls would be placed
  */
 export const RowMenuControlCell = ({
-  columnId,
-  rowIndex,
-  setCellProps,
   rowControlColumns,
+  ...props
 }: EuiDataGridCellValueElementProps & {
   rowControlColumns: RowControlColumn[];
 }) => {
+  const rowProps = useControlColumn(props);
   const { euiTheme } = useEuiTheme();
-  const { expanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
-  const record = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const rowProps: RowControlRowProps = useMemo(() => ({ rowIndex, record }), [rowIndex, record]);
-
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
 
   const buttonLabel = i18n.translate('unifiedDataTable.grid.additionalRowActions', {
     defaultMessage: 'Additional actions',
   });
-
-  useEffect(() => {
-    if (record.isAnchor) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--highlight',
-      });
-    } else if (expanded && record && expanded.id === record.id) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--expanded',
-      });
-    }
-  }, [expanded, record, setCellProps, isDarkMode]);
 
   const getControlComponent: (id: string) => React.FC<RowControlProps> = useCallback(
     (id) =>
@@ -90,7 +73,7 @@ export const RowMenuControlCell = ({
               size="xs"
               iconSize="s"
               aria-label={buttonLabel}
-              data-test-subj={`unifiedDataTable_rowControl_${columnId}`}
+              data-test-subj={`unifiedDataTable_rowControl_${props.columnId}`}
               onClick={() => {
                 setIsMoreActionsPopoverOpen(!isMoreActionsPopoverOpen);
               }}

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import {
   EuiCheckbox,
   EuiContextMenuItem,
@@ -23,28 +23,18 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '../table_context';
+import { useControlColumn } from '../hooks/use_control_column';
 
-export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
+  const { record, rowIndex } = useControlColumn(props);
   const { euiTheme } = useEuiTheme();
-  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
-    useContext(UnifiedDataTableContext);
-  const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const checked = useMemo(() => selectedDocs.includes(doc.id), [selectedDocs, doc.id]);
+  const { selectedDocs, setSelectedDocs } = useContext(UnifiedDataTableContext);
+  const checked = useMemo(() => selectedDocs.includes(record.id), [selectedDocs, record.id]);
 
   const toggleDocumentSelectionLabel = i18n.translate('unifiedDataTable.grid.selectDoc', {
     defaultMessage: `Select document ''{rowNumber}''`,
     values: { rowNumber: rowIndex + 1 },
   });
-
-  useEffect(() => {
-    if (expanded && doc && expanded.id === doc.id) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--selected',
-      });
-    } else {
-      setCellProps({ style: undefined });
-    }
-  }, [expanded, doc, setCellProps, isDarkMode]);
 
   return (
     <EuiFlexGroup
@@ -59,16 +49,16 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     >
       <EuiFlexItem grow={false}>
         <EuiCheckbox
-          id={doc.id}
+          id={record.id}
           aria-label={toggleDocumentSelectionLabel}
           checked={checked}
-          data-test-subj={`dscGridSelectDoc-${doc.id}`}
+          data-test-subj={`dscGridSelectDoc-${record.id}`}
           onChange={() => {
             if (checked) {
-              const newSelection = selectedDocs.filter((docId) => docId !== doc.id);
+              const newSelection = selectedDocs.filter((docId) => docId !== record.id);
               setSelectedDocs(newSelection);
             } else {
-              setSelectedDocs([...selectedDocs, doc.id]);
+              setSelectedDocs([...selectedDocs, record.id]);
             }
           }}
         />

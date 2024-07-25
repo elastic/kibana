@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiDataGridCellValueElementProps,
@@ -14,33 +14,17 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
-import { UnifiedDataTableContext } from '../../../table_context';
 import { DataTableRowControl } from '../../data_table_row_control';
-import { RowControlColumn, RowControlRowProps, RowControlProps } from '../../../types';
+import type { RowControlColumn, RowControlProps } from '../../../types';
+import { useControlColumn } from '../../../hooks/use_control_column';
 
 export const RowControlCell = ({
-  columnId,
-  rowIndex,
-  setCellProps,
   renderControl,
+  ...props
 }: EuiDataGridCellValueElementProps & {
   renderControl: RowControlColumn['renderControl'];
 }) => {
-  const { expanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
-  const record = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const rowProps: RowControlRowProps = useMemo(() => ({ rowIndex, record }), [rowIndex, record]);
-
-  useEffect(() => {
-    if (record.isAnchor) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--highlight',
-      });
-    } else if (expanded && record && expanded.id === record.id) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--expanded',
-      });
-    }
-  }, [expanded, record, setCellProps, isDarkMode]);
+  const rowProps = useControlColumn(props);
 
   const Control: React.FC<RowControlProps> = useMemo(
     () =>
@@ -49,7 +33,7 @@ export const RowControlCell = ({
           <DataTableRowControl>
             <EuiToolTip content={label} delay="long">
               <EuiButtonIcon
-                data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${columnId}`}
+                data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
                 disabled={disabled}
                 size="xs"
                 iconSize="s"
@@ -64,7 +48,7 @@ export const RowControlCell = ({
           </DataTableRowControl>
         );
       },
-    [columnId, rowProps]
+    [props.columnId, rowProps]
   );
 
   return renderControl(Control, rowProps);

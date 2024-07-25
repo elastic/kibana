@@ -64,6 +64,8 @@ import {
   getLeadControlColumns,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  SELECT_ROW,
+  OPEN_DETAILS,
 } from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
@@ -90,6 +92,8 @@ import {
   type ColorIndicatorControlColumnParams,
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
+
+const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 
 export type SortOrder = [string, string];
 
@@ -401,8 +405,6 @@ export interface UnifiedDataTableProps {
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
-
-const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 
 export const UnifiedDataTable = ({
   ariaLabelledBy,
@@ -860,9 +862,18 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
-      controlColumnIds.includes(id)
-    );
+    const defaultControlColumns = getLeadControlColumns(canSetExpandedDoc);
+    const internalControlColumns = controlColumnIds
+      ? // reorder the default controls as per controlColumnIds
+        controlColumnIds.reduce((acc, id) => {
+          const controlColumn = defaultControlColumns.find((col) => col.id === id);
+          if (controlColumn) {
+            acc.push(controlColumn);
+          }
+          return acc;
+        }, [] as EuiDataGridControlColumn[])
+      : defaultControlColumns;
+
     const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;

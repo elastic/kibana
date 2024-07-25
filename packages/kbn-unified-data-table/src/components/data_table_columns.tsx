@@ -68,7 +68,7 @@ const openDetails = {
 
 const select = {
   id: SELECT_ROW,
-  width: 24,
+  width: 26,
   rowCellRender: SelectButton,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
