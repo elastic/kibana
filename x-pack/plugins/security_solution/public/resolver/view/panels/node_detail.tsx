@@ -37,7 +37,6 @@ import { CubeForProcess } from './cube_for_process';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { useCubeAssets } from '../use_cube_assets';
 import { PanelLoading } from './panel_loading';
-import { StyledPanel } from '../styles';
 import { useLinkProps } from '../use_link_props';
 import { useFormattedDate } from './use_formatted_date';
 import { PanelContentError } from './panel_content_error';
@@ -61,17 +60,11 @@ export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: s
   );
 
   return nodeStatus === 'loading' ? (
-    <StyledPanel hasBorder>
-      <PanelLoading id={id} />
-    </StyledPanel>
+    <PanelLoading id={id} />
   ) : processEvent ? (
-    <StyledPanel hasBorder data-test-subj="resolver:panel:node-detail">
-      <NodeDetailView id={id} nodeID={nodeID} processEvent={processEvent} />
-    </StyledPanel>
+    <NodeDetailView id={id} nodeID={nodeID} processEvent={processEvent} />
   ) : (
-    <StyledPanel hasBorder>
-      <PanelContentError id={id} translatedErrorMessage={nodeDetailError} />
-    </StyledPanel>
+    <PanelContentError id={id} translatedErrorMessage={nodeDetailError} />
   );
 });
 
@@ -274,7 +267,7 @@ const NodeDetailView = memo(function ({
     },
   ];
   return (
-    <>
+    <div data-test-subj="resolver:panel:node-detail">
       <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
@@ -309,6 +302,6 @@ const NodeDetailView = memo(function ({
         columns={columns}
         sorting
       />
-    </>
+    </div>
   );
 });
