@@ -176,6 +176,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
   ]);
   const [prompts, setPrompts] = useState<PromptResponse[]>([]);
+  const [promptError, setPromptError] = useState<unknown | null>(null);
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
@@ -184,18 +185,22 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
         assistantAvailability.isAssistantEnabled &&
         assistantAvailability.hasAssistantPrivilege
       ) {
-        const res = await getPrompts({
-          http,
-          toasts: notifications.toasts,
-        });
+        try {
+          const res = await getPrompts({
+            http,
+            toasts: notifications.toasts,
+          });
 
-        if (res.total === 0) {
-          const createResults = await createBasePrompts(notifications, http);
-          if (createResults) {
-            setPrompts(createResults);
+          if (res.total === 0) {
+            const createResults = await createBasePrompts(notifications, http);
+            if (createResults) {
+              setPrompts(createResults);
+            }
+          } else {
+            setPrompts(res.data);
           }
-        } else {
-          setPrompts(res.data);
+        } catch (e) {
+          setPromptError(e);
         }
       }
     });
@@ -211,7 +216,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
-  if (prompts.length === 0) return null;
+  // Because our conversations need an assigned system prompt at create time,
+  // we want to make sure the prompts are there before creating the first conversation
+  // however if there is an error fetching the prompts, we don't want to block the app
+  if (prompts.length === 0 && promptError === null) return null;
   return (
     <ElasticAssistantProvider
       actionTypeRegistry={actionTypeRegistry}
