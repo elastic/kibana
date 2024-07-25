@@ -270,8 +270,7 @@ export class TaskManagerPlugin
     const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
-      startingMaxWorkers: this.config!.max_workers,
-      startingPollInterval: this.config!.poll_interval,
+      config: this.config!,
     });
 
     // Only poll for tasks if configured to run tasks
@@ -310,16 +309,17 @@ export class TaskManagerPlugin
       });
     }
 
-    createMonitoringStats(
+    createMonitoringStats({
       taskStore,
-      this.elasticsearchAndSOAvailability$!,
-      this.config!,
-      managedConfiguration,
-      this.logger,
-      this.adHocTaskCounter,
-      this.taskPollingLifecycle,
-      this.ephemeralTaskLifecycle
-    ).subscribe((stat) => this.monitoringStats$.next(stat));
+      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+      config: this.config!,
+      managedConfig: managedConfiguration,
+      logger: this.logger,
+      adHocTaskCounter: this.adHocTaskCounter,
+      taskDefinitions: this.definitions,
+      taskPollingLifecycle: this.taskPollingLifecycle,
+      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
+    }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
       config: this.config!,
