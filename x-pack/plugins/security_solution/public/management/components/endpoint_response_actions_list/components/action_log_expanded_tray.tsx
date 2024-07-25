@@ -87,7 +87,8 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   className: 'eui-yScrollWithShadows',
   gutterSize: 's',
 })`
-  max-height: 270px;
+  max-height: 40vh;
+  min-height: 270px;
   overflow-y: auto;
 `;
 
