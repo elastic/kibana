@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { getConnectorCompatibility, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ActionConnector,
@@ -88,12 +88,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
-  /* Future Developer
-   * We are excluding `UptimeConnectorFeatureId` because as this time Synthetics won't work
-   * with slack API on their UI, We need to add an ISSUE here so they can fix it
-   */
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
-    actionTypeModel && actionTypeModel.subtype && featureId !== UptimeConnectorFeatureId
+    actionTypeModel && actionTypeModel.subtype
       ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
           ...actionTypeRegistry.get(subtypeAction.id),
           name: subtypeAction.name,

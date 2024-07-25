@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Draft Timeline API
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/timeline/_draft:
+    post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: CleanDraftTimelines
+      summary: Retrieves a draft timeline or timeline template.
+      description: |
+        Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The type of timeline to create. Valid values are `default` and `template`.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [timelineType]
+              properties:
+                timelineType:
+                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+      responses:
+        '200':
+          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [persistTimeline]
+                    properties:
+                      persistTimeline:
+                        type: object
+                        required: [timeline]
+                        properties:
+                          timeline:
+                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+        '403':
+          description: Indicates that the user does not have the required permissions to create a draft timeline.
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+        '409':
+          description: Indicates that there is already a draft timeline with the given timelineId.
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
