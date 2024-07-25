@@ -59,10 +59,28 @@ describe('openModal', () => {
   const mockUseCasesAddToExistingCaseModal = useCasesAddToExistingCaseModal as jest.Mock;
   const mockOpenModal = jest.fn();
   const mockMount = jest.fn();
+
+  beforeAll(() => {
+    jest.useFakeTimers({ now: new Date('2024-01-01T00:00:00.000Z') });
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeEach(() => {
     mockUseCasesAddToExistingCaseModal.mockReturnValue({
       open: mockOpenModal,
     });
+
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -71,10 +89,12 @@ describe('openModal', () => {
         },
       },
     });
+
     (toMountPoint as jest.Mock).mockImplementation((node) => {
       ReactDOM.render(node, element);
       return mockMount;
     });
+
     jest.clearAllMocks();
     openModal(mockLensApi, 'myAppId', {} as unknown as CasesActionContextProps, getMockServices());
   });
@@ -84,13 +104,15 @@ describe('openModal', () => {
       expect(mockOpenModal).toHaveBeenCalled();
 
       const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
-      expect(getAttachments()).toEqual([
+      const res = getAttachments();
+
+      expect(res).toEqual([
         {
           persistableStateAttachmentState: {
             attributes: mockLensAttributes,
             timeRange: {
-              from: 'now-24h',
-              to: 'now',
+              from: '2023-12-31T00:00:00.000Z',
+              to: '2024-01-01T00:00:00.000Z',
             },
           },
           persistableStateAttachmentTypeId: '.lens',
