@@ -51,7 +51,7 @@ export function setupRoutes({
     .getStartServices()
     .then(([coreStart]) => {
       const soClient = coreStart.savedObjects.createInternalRepository();
-      migrateCdrDataViews(soClient, logger);
+      void migrateCdrDataViews(soClient, logger); // Marking the promise as ignored
     })
     .catch((err) => {
       logger.error(`Failed to migrate CDR data views: ${err}`);

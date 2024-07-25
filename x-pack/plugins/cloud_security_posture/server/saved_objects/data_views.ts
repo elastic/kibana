@@ -55,11 +55,15 @@ const getDataViewSafe = async (
     const currentIndexPatterns = dataView.attributes.title.split(',');
     const requiredIndexPatterns = indexPattern.split(',');
 
-    const allExist = requiredIndexPatterns.every((element) =>
-      currentIndexPatterns.includes(element)
-    );
-
-    if (!allExist) await migrateCdrDataViews(soClient, logger);
+    requiredIndexPatterns.every((element) => {
+      if (!currentIndexPatterns.includes(element)) {
+        logger.info(
+          `Data view ${currentSpaceDataViewId} has been edited. Migrating to new index pattern`
+        );
+        const updatedIndexPattern = mergeIndexPatterns(dataView.attributes.title, indexPattern);
+        migrateDataView(soClient, dataView, updatedIndexPattern);
+      }
+    });
 
     return dataView;
   } catch (e) {
@@ -131,7 +135,7 @@ export const setupCdrDataViews = async (
   request: KibanaRequest,
   logger: Logger
 ) => {
-  installDataView(
+  await installDataView(
     esClient,
     soClient,
     spacesService,
@@ -143,7 +147,7 @@ export const setupCdrDataViews = async (
     logger
   );
 
-  installDataView(
+  await installDataView(
     esClient,
     soClient,
     spacesService,
@@ -156,7 +160,7 @@ export const setupCdrDataViews = async (
   );
 };
 
-const migrateIndexPattern = (previousIndexPattern: string, newPattern: string): string => {
+export const mergeIndexPatterns = (previousIndexPattern: string, newPattern: string): string => {
   const previousPatternsArray = previousIndexPattern.split(',');
   const newPatternsArray = newPattern.split(',');
 
@@ -171,12 +175,30 @@ const migrateIndexPattern = (previousIndexPattern: string, newPattern: string): 
 
   return updatedIndexPattern;
 };
-
+export const migrateDataView = async (
+  soClient: ISavedObjectsRepository,
+  dataViewObject: SavedObject<DataViewAttributes>,
+  indexPattern: string
+) => {
+  await soClient.update(
+    'index-pattern',
+    dataViewObject.id,
+    {
+      ...dataViewObject.attributes,
+      title: mergeIndexPatterns(dataViewObject.attributes.title, indexPattern),
+      timeFieldName: DATA_VIEW_TIME_FIELD,
+      managed: true,
+    },
+    {
+      namespace: dataViewObject.namespaces![0],
+    }
+  );
+};
 export const migrateCdrDataViews = async (soClient: ISavedObjectsRepository, logger: Logger) => {
   logger.info('Migrating CDR data views');
   try {
     const migrationPromises = Object.entries(PREVIOUS_VERSION_INDEX_PATTERNS).map(
-      async ([dataViewID, oldIndexPatternArray]) => {
+      async ([dataViewId, oldIndexPatternArray]) => {
         const patternPromises = oldIndexPatternArray.map(async (oldIndexPattern) => {
           // Retrieve all data views with the old index pattern from all spaces
           const dataViews = await soClient.find<DataViewAttributes>({
@@ -188,22 +210,7 @@ export const migrateCdrDataViews = async (soClient: ISavedObjectsRepository, log
 
           // For each data view with the old index pattern, update the index pattern to contain the new one
           const updatePromises = dataViews.saved_objects.map(async (dataView) => {
-            await soClient.update(
-              'index-pattern',
-              dataView.id,
-              {
-                ...dataView.attributes,
-                title: migrateIndexPattern(
-                  dataView.attributes.title,
-                  CURRENT_VERSION_INDEX_PATTERNS[dataViewID]
-                ),
-                timeFieldName: DATA_VIEW_TIME_FIELD,
-                managed: true,
-              },
-              {
-                namespace: dataView.namespaces![0],
-              }
-            );
+            await migrateDataView(soClient, dataView, CURRENT_VERSION_INDEX_PATTERNS[dataViewId]);
           });
 
           await Promise.all(updatePromises);
