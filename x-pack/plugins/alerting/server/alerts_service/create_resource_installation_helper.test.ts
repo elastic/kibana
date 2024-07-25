@@ -20,7 +20,7 @@ import {
 } from './create_resource_installation_helper';
 import { retryUntil } from './test_utils';
 
-const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
+const logger: ReturnType<(typeof loggingSystemMock)['createLogger']> =
   loggingSystemMock.createLogger();
 
 const initFn = async (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
