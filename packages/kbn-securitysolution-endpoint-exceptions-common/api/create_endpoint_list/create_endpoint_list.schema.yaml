@@ -6,8 +6,8 @@ paths:
   /api/endpoint_list:
     post:
       x-labels: [serverless, ess]
-      operationId: CreateEndpointList
       x-codegen-enabled: true
+      operationId: CreateEndpointList
       summary: Creates an endpoint list
       description: Creates an endpoint list or does nothing if the list already exists
       tags:

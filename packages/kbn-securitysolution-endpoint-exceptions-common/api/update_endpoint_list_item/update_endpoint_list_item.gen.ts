@@ -45,10 +45,10 @@ export const UpdateEndpointListItemRequestBody = z.object({
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
-  os_types: ExceptionListItemOsTypeArray.optional(),
+  os_types: ExceptionListItemOsTypeArray.optional().default([]),
   tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),
-  comments: ExceptionListItemCommentArray.optional(),
+  comments: ExceptionListItemCommentArray.optional().default([]),
   _version: z.string().optional(),
 });
 export type UpdateEndpointListItemRequestBodyInput = z.input<

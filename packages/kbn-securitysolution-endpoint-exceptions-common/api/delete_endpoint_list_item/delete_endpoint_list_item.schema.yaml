@@ -6,8 +6,8 @@ paths:
   /api/endpoint_list/items:
     delete:
       x-labels: [serverless, ess]
-      operationId: DeleteEndpointListItem
       x-codegen-enabled: true
+      operationId: DeleteEndpointListItem
       summary: Deletes an endpoint list item
       tags:
         - Endpoint exceptions API

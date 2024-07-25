@@ -6,8 +6,8 @@ paths:
   /api/endpoint_list/items/_find:
     get:
       x-labels: [serverless, ess]
-      operationId: FindEndpointListItems
       x-codegen-enabled: true
+      operationId: FindEndpointListItems
       summary: Finds endpoint list items
       tags:
         - Endpoint exceptions API
