@@ -11,13 +11,10 @@ import { APIRoutes } from '../types';
 import { useKibana } from './use_kibana';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
 
-export const useQueryInferenceEndpoints = (): {
-  inferenceEndpoints: InferenceAPIConfigResponse[];
-  isLoading: boolean;
-} => {
+export const useQueryInferenceEndpoints = () => {
   const { services } = useKibana();
 
-  const { data, isLoading } = useQuery({
+  return useQuery({
     queryKey: [INFERENCE_ENDPOINTS_QUERY_KEY],
     queryFn: async () => {
       const response = await services.http.get<{
@@ -27,6 +24,4 @@ export const useQueryInferenceEndpoints = (): {
       return response.inference_endpoints;
     },
   });
-
-  return { inferenceEndpoints: data || [], isLoading };
 };
