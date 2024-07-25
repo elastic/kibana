@@ -73,7 +73,7 @@ export const RowMenuControlCell = ({
               size="xs"
               iconSize="s"
               aria-label={buttonLabel}
-              data-test-subj={`unifiedDataTable_rowControl_${props.columnId}`}
+              data-test-subj={`unifiedDataTable_${props.columnId}`}
               onClick={() => {
                 setIsMoreActionsPopoverOpen(!isMoreActionsPopoverOpen);
               }}
