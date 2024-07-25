@@ -162,7 +162,6 @@ function amazonBedrockAttributes(endpoint: InferenceAPIConfigResponse) {
   const region = 'region' in serviceSettings ? serviceSettings.region : undefined;
   const provider =
     'provider' in serviceSettings ? serviceSettings.provider.toLocaleLowerCase() : undefined;
-  const model = 'model' in serviceSettings ? serviceSettings.model : undefined;
 
   return [region && `region: ${region}`, provider && `provider: ${provider}`]
     .filter(Boolean)
