@@ -72,7 +72,7 @@ export async function getEntities({
     })
   ).hits.hits.map((hit) => hit._source as EntitiesRaw);
 
-  const serviceEntitiesHistoryMetrics = entities.length
+  const serviceEntitiesHistoryMetricsMap = entities.length
     ? await getServiceEntitiesHistoryMetrics({
         start,
         end,
@@ -92,7 +92,7 @@ export async function getEntities({
       entity: {
         ...entity.entity,
         // History metrics undefined means that for the selected time range there was no ingestion happening.
-        metrics: serviceEntitiesHistoryMetrics?.[entity.entity.id] || {
+        metrics: serviceEntitiesHistoryMetricsMap?.[entity.entity.id] || {
           latency: null,
           logErrorRate: null,
           failedTransactionRate: null,

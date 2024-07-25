@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EntityMetrics } from '../../../common/entities/types';
 import {
   ENTITY_ID,
   ENTITY_METRICS_FAILED_TRANSACTION_RATE,
@@ -56,16 +57,23 @@ export async function getServiceEntitiesHistoryMetrics({
     },
   });
 
-  return response.aggregations?.entityIds.buckets.reduce((acc, currBucket) => {
-    return {
-      ...acc,
-      [currBucket.key]: {
-        latency: currBucket.latency.value,
-        logErrorRate: currBucket.logErrorRate.value,
-        logRate: currBucket.logRate.value,
-        throughput: currBucket.throughput.value,
-        failedTransactionRate: currBucket.failedTransactionRate.value,
-      },
-    };
-  }, {});
+  if (!response.aggregations) {
+    return {};
+  }
+
+  return response.aggregations.entityIds.buckets.reduce<Record<string, EntityMetrics>>(
+    (acc, currBucket) => {
+      return {
+        ...acc,
+        [currBucket.key]: {
+          latency: currBucket.latency.value ?? null,
+          logErrorRate: currBucket.logErrorRate.value ?? null,
+          logRate: currBucket.logRate.value ?? null,
+          throughput: currBucket.throughput.value ?? null,
+          failedTransactionRate: currBucket.failedTransactionRate.value ?? null,
+        },
+      };
+    },
+    {}
+  );
 }
