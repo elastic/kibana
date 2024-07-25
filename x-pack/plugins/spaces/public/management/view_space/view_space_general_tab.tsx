@@ -8,6 +8,7 @@
 import { EuiButton, EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 
+import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
 import { CustomizeSpace } from '../edit_space/customize_space';
 import { SpaceValidator } from '../lib';
@@ -21,6 +22,8 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space }) => {
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
 
+  const { spacesManager } = useViewSpaceServices();
+
   const validator = new SpaceValidator();
 
   const onChangeSpaceSettings = (updatedSpace: Partial<Space>) => {
@@ -28,8 +31,27 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space }) => {
     setIsDirty(true);
   };
 
-  const onUpdateSpace = () => {
-    window.alert('not yet implemented'); // FIXME
+  // TODO handle create space
+
+  const onUpdateSpace = async () => {
+    const { id, name, disabledFeatures } = spaceSettings;
+    if (!id) {
+      throw new Error(`Can not update space without id field!`);
+    }
+    if (!name) {
+      throw new Error(`Can not update space without name field!`);
+    }
+
+    // TODO cancel previous request, if there is one pending
+    await spacesManager.updateSpace({
+      id,
+      name,
+      disabledFeatures: disabledFeatures ?? [],
+      ...spaceSettings,
+    });
+
+    // TODO error handling
+    setIsDirty(false);
   };
 
   const onCancel = () => {

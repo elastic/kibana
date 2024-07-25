@@ -46,7 +46,9 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({
   const [spaceFeatures, setSpaceFeatures] = useState<Partial<Space>>(space); // space details as seen in the Feature Visibility UI, possibly with unsaved changes
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
 
-  const { capabilities, getUrlForApp, http, overlays, navigateToUrl } = useViewSpaceServices();
+  const { capabilities, getUrlForApp, http, overlays, navigateToUrl, spacesManager } =
+    useViewSpaceServices();
+
   useUnsavedChangesPrompt({
     hasUnsavedChanges: isDirty,
     http,
@@ -71,8 +73,27 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({
     setSpaceFeatures({ ...updatedSpace, id: space.id });
   };
 
-  const onUpdateSpace = () => {
-    window.alert('not yet implemented'); // FIXME
+  // TODO handle create space
+
+  const onUpdateSpace = async () => {
+    const { id, name, disabledFeatures } = spaceFeatures;
+    if (!id) {
+      throw new Error(`Can not update space without id field!`);
+    }
+    if (!name) {
+      throw new Error(`Can not update space without name field!`);
+    }
+
+    // TODO cancel previous request, if there is one pending
+    await spacesManager.updateSpace({
+      id,
+      name,
+      disabledFeatures: disabledFeatures ?? [],
+      ...spaceFeatures,
+    });
+
+    // TODO error handling
+    setIsDirty(false);
   };
 
   const onCancel = () => {
