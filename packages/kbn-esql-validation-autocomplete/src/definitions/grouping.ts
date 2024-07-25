@@ -19,10 +19,10 @@ const groupingTypeTable: Array<
   ]
 > = [
   // field   // bucket   //from    // to   //result
-  ['datetime', 'date_period', null, null, 'datetime'],
-  ['datetime', 'integer', 'datetime', 'datetime', 'datetime'],
+  ['date', 'date_period', null, null, 'date'],
+  ['date', 'integer', 'date', 'date', 'date'],
   // Modified time_duration to time_literal
-  ['datetime', 'time_literal', null, null, 'datetime'],
+  ['date', 'time_literal', null, null, 'date'],
   ['double', 'double', null, null, 'double'],
   ['double', 'integer', 'double', 'double', 'double'],
   ['double', 'integer', 'double', 'integer', 'double'],

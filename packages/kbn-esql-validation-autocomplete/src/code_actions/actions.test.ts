@@ -23,7 +23,7 @@ function getCallbackMocks() {
         : /unsupported_index/.test(query)
         ? [{ name: 'unsupported_field', type: 'unsupported' }]
         : [
-            ...['string', 'number', 'datetime', 'boolean', 'ip'].map((type) => ({
+            ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
               name: `${type}Field`,
               type,
             })),

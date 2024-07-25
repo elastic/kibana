@@ -242,7 +242,7 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'datetime', 'date_period'].includes(argType);
+  return ['string', 'date', 'date', 'date_period'].includes(argType);
 }
 
 /**
@@ -274,7 +274,7 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
   ['string[]', 'string'],
   ['keyword[]', 'keyword'],
   ['text[]', 'text'],
-  ['datetime[]', 'datetime'],
+  ['datetime[]', 'date'],
   ['date_period[]', 'date_period'],
   ['boolean[]', 'boolean'],
   ['any[]', 'any'],

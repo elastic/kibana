@@ -19,7 +19,7 @@ export const supportedFieldTypes = [
   'counter_integer',
   'counter_long',
   'counter_double',
-  'datetime',
+  'date',
   'date_period',
   'text',
   'keyword',
@@ -70,7 +70,7 @@ export type FunctionReturnType =
   | 'counter_integer'
   | 'counter_long'
   | 'counter_double'
-  | 'datetime'
+  | 'date'
   | 'date_period'
   | 'time_duration'
   | 'any'

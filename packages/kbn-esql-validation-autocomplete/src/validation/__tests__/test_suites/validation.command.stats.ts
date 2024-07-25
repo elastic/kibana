@@ -221,34 +221,32 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               const { expectErrors } = await setup();
 
               await expectErrors(
-                'from index | stats by bucket(datetimeField, 1 + 30 / 10, "", "")',
+                'from index | stats by bucket(dateField, 1 + 30 / 10, "", "")',
                 []
               );
               await expectErrors(
-                'from index | stats by bucket(datetimeField, 1 + 30 / 10, concat("", ""), "")',
-                [
-                  'Argument of [bucket] must be [datetime], found value [concat("", "")] type [keyword]',
-                ]
+                'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+                ['Argument of [bucket] must be [date], found value [concat("", "")] type [keyword]']
               );
             });
 
             test('errors', async () => {
               const { expectErrors } = await setup();
 
-              await expectErrors('from index | stats by bucket(datetimeField, pi(), "", "")', [
+              await expectErrors('from index | stats by bucket(dateField, pi(), "", "")', [
                 'Argument of [bucket] must be [integer], found value [pi()] type [double]',
               ]);
 
               await expectErrors(
-                'from index | stats by bucket(datetimeField, abs(doubleField), "", "")',
+                'from index | stats by bucket(dateField, abs(doubleField), "", "")',
                 ['Argument of [bucket] must be a constant, received [abs(doubleField)]']
               );
               await expectErrors(
-                'from index | stats by bucket(datetimeField, abs(length(doubleField)), "", "")',
+                'from index | stats by bucket(dateField, abs(length(doubleField)), "", "")',
                 ['Argument of [bucket] must be a constant, received [abs(length(doubleField))]']
               );
               await expectErrors(
-                'from index | stats by bucket(datetimeField, doubleField, textField, textField)',
+                'from index | stats by bucket(dateField, doubleField, textField, textField)',
                 [
                   'Argument of [bucket] must be a constant, received [doubleField]',
                   'Argument of [bucket] must be a constant, received [textField]',

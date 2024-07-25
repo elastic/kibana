@@ -882,7 +882,7 @@ describe('autocomplete', () => {
         [
           ...[...TIME_SYSTEM_PARAMS].map((t) => `${t},`),
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
-          ...getFunctionSignaturesByReturnType('eval', 'datetime', { scalar: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }, undefined, [
             'date_trunc',
           ]).map((t) => `${t},`),
           ...getFieldNamesByType('date').map((t) => `${t},`),

@@ -41,8 +41,8 @@
       "type": "counter_double"
     },
     {
-      "name": "datetimeField",
-      "type": "datetime"
+      "name": "dateField",
+      "type": "date"
     },
     {
       "name": "datePeriodField",
@@ -477,8 +477,8 @@
     {
       "query": "row var = false > false",
       "error": [
-        "Argument of [>] must be [datetime], found value [false] type [boolean]",
-        "Argument of [>] must be [datetime], found value [false] type [boolean]"
+        "Argument of [>] must be [date], found value [false] type [boolean]",
+        "Argument of [>] must be [date], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -527,8 +527,8 @@
     {
       "query": "row var = false >= false",
       "error": [
-        "Argument of [>=] must be [datetime], found value [false] type [boolean]",
-        "Argument of [>=] must be [datetime], found value [false] type [boolean]"
+        "Argument of [>=] must be [date], found value [false] type [boolean]",
+        "Argument of [>=] must be [date], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -577,8 +577,8 @@
     {
       "query": "row var = false < false",
       "error": [
-        "Argument of [<] must be [datetime], found value [false] type [boolean]",
-        "Argument of [<] must be [datetime], found value [false] type [boolean]"
+        "Argument of [<] must be [date], found value [false] type [boolean]",
+        "Argument of [<] must be [date], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -627,8 +627,8 @@
     {
       "query": "row var = false <= false",
       "error": [
-        "Argument of [<=] must be [datetime], found value [false] type [boolean]",
-        "Argument of [<=] must be [datetime], found value [false] type [boolean]"
+        "Argument of [<=] must be [date], found value [false] type [boolean]",
+        "Argument of [<=] must be [date], found value [false] type [boolean]"
       ],
       "warning": []
     },
@@ -749,7 +749,7 @@
     {
       "query": "row var = now() + now()",
       "error": [
-        "Argument of [+] must be [date_period], found value [now()] type [datetime]"
+        "Argument of [+] must be [date_period], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -766,7 +766,7 @@
     {
       "query": "row var = now() - now()",
       "error": [
-        "Argument of [-] must be [date_period], found value [now()] type [datetime]"
+        "Argument of [-] must be [date_period], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -783,8 +783,8 @@
     {
       "query": "row var = now() * now()",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
-        "Argument of [*] must be [double], found value [now()] type [datetime]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -801,8 +801,8 @@
     {
       "query": "row var = now() / now()",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
-        "Argument of [/] must be [double], found value [now()] type [datetime]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -819,8 +819,8 @@
     {
       "query": "row var = now() % now()",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
-        "Argument of [%] must be [double], found value [now()] type [datetime]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -995,14 +995,14 @@
     {
       "query": "row 1 year + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 year] type [duration]"
+        "Argument of [+] must be [date], found value [1 year] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 year",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -1010,7 +1010,7 @@
     {
       "query": "row var = now() / 1 year",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -1018,7 +1018,7 @@
     {
       "query": "row var = now() % 1 year",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -1060,14 +1060,14 @@
     {
       "query": "row 1 years + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 years] type [duration]"
+        "Argument of [+] must be [date], found value [1 years] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 years",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -1075,7 +1075,7 @@
     {
       "query": "row var = now() / 1 years",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -1083,7 +1083,7 @@
     {
       "query": "row var = now() % 1 years",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -1125,14 +1125,14 @@
     {
       "query": "row 1 quarter + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 quarter] type [duration]"
+        "Argument of [+] must be [date], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 quarter",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -1140,7 +1140,7 @@
     {
       "query": "row var = now() / 1 quarter",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -1148,7 +1148,7 @@
     {
       "query": "row var = now() % 1 quarter",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -1190,14 +1190,14 @@
     {
       "query": "row 1 quarters + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 quarters] type [duration]"
+        "Argument of [+] must be [date], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 quarters",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -1205,7 +1205,7 @@
     {
       "query": "row var = now() / 1 quarters",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -1213,7 +1213,7 @@
     {
       "query": "row var = now() % 1 quarters",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -1255,14 +1255,14 @@
     {
       "query": "row 1 month + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 month] type [duration]"
+        "Argument of [+] must be [date], found value [1 month] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 month",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -1270,7 +1270,7 @@
     {
       "query": "row var = now() / 1 month",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -1278,7 +1278,7 @@
     {
       "query": "row var = now() % 1 month",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -1320,14 +1320,14 @@
     {
       "query": "row 1 months + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 months] type [duration]"
+        "Argument of [+] must be [date], found value [1 months] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 months",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -1335,7 +1335,7 @@
     {
       "query": "row var = now() / 1 months",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -1343,7 +1343,7 @@
     {
       "query": "row var = now() % 1 months",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -1385,14 +1385,14 @@
     {
       "query": "row 1 week + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 week] type [duration]"
+        "Argument of [+] must be [date], found value [1 week] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 week",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -1400,7 +1400,7 @@
     {
       "query": "row var = now() / 1 week",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -1408,7 +1408,7 @@
     {
       "query": "row var = now() % 1 week",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -1450,14 +1450,14 @@
     {
       "query": "row 1 weeks + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 weeks] type [duration]"
+        "Argument of [+] must be [date], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 weeks",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -1465,7 +1465,7 @@
     {
       "query": "row var = now() / 1 weeks",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -1473,7 +1473,7 @@
     {
       "query": "row var = now() % 1 weeks",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -1515,14 +1515,14 @@
     {
       "query": "row 1 day + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 day] type [duration]"
+        "Argument of [+] must be [date], found value [1 day] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 day",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -1530,7 +1530,7 @@
     {
       "query": "row var = now() / 1 day",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -1538,7 +1538,7 @@
     {
       "query": "row var = now() % 1 day",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -1580,14 +1580,14 @@
     {
       "query": "row 1 days + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 days] type [duration]"
+        "Argument of [+] must be [date], found value [1 days] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 days",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -1595,7 +1595,7 @@
     {
       "query": "row var = now() / 1 days",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -1603,7 +1603,7 @@
     {
       "query": "row var = now() % 1 days",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -1645,14 +1645,14 @@
     {
       "query": "row 1 hour + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 hour] type [duration]"
+        "Argument of [+] must be [date], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 hour",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -1660,7 +1660,7 @@
     {
       "query": "row var = now() / 1 hour",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -1668,7 +1668,7 @@
     {
       "query": "row var = now() % 1 hour",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -1710,14 +1710,14 @@
     {
       "query": "row 1 hours + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 hours] type [duration]"
+        "Argument of [+] must be [date], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 hours",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -1725,7 +1725,7 @@
     {
       "query": "row var = now() / 1 hours",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -1733,7 +1733,7 @@
     {
       "query": "row var = now() % 1 hours",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -1775,14 +1775,14 @@
     {
       "query": "row 1 minute + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 minute] type [duration]"
+        "Argument of [+] must be [date], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 minute",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -1790,7 +1790,7 @@
     {
       "query": "row var = now() / 1 minute",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -1798,7 +1798,7 @@
     {
       "query": "row var = now() % 1 minute",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -1840,14 +1840,14 @@
     {
       "query": "row 1 minutes + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 minutes] type [duration]"
+        "Argument of [+] must be [date], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 minutes",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -1855,7 +1855,7 @@
     {
       "query": "row var = now() / 1 minutes",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -1863,7 +1863,7 @@
     {
       "query": "row var = now() % 1 minutes",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -1905,14 +1905,14 @@
     {
       "query": "row 1 second + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 second] type [duration]"
+        "Argument of [+] must be [date], found value [1 second] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 second",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -1920,7 +1920,7 @@
     {
       "query": "row var = now() / 1 second",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -1928,7 +1928,7 @@
     {
       "query": "row var = now() % 1 second",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -1970,14 +1970,14 @@
     {
       "query": "row 1 seconds + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 seconds] type [duration]"
+        "Argument of [+] must be [date], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 seconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -1985,7 +1985,7 @@
     {
       "query": "row var = now() / 1 seconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -1993,7 +1993,7 @@
     {
       "query": "row var = now() % 1 seconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -2035,14 +2035,14 @@
     {
       "query": "row 1 millisecond + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 millisecond] type [duration]"
+        "Argument of [+] must be [date], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 millisecond",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -2050,7 +2050,7 @@
     {
       "query": "row var = now() / 1 millisecond",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -2058,7 +2058,7 @@
     {
       "query": "row var = now() % 1 millisecond",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -2100,14 +2100,14 @@
     {
       "query": "row 1 milliseconds + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 milliseconds] type [duration]"
+        "Argument of [+] must be [date], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "row var = now() * 1 milliseconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -2115,7 +2115,7 @@
     {
       "query": "row var = now() / 1 milliseconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -2123,7 +2123,7 @@
     {
       "query": "row var = now() % 1 milliseconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -2270,12 +2270,12 @@
       "warning": []
     },
     {
-      "query": "from index | keep keywordField, doubleField, integerField, datetimeField",
+      "query": "from index | keep keywordField, doubleField, integerField, dateField",
       "error": [],
       "warning": []
     },
     {
-      "query": "from index | keep `keywordField`, `doubleField`, `integerField`, `datetimeField`",
+      "query": "from index | keep `keywordField`, `doubleField`, `integerField`, `dateField`",
       "error": [],
       "warning": []
     },
@@ -2297,7 +2297,7 @@
       "warning": []
     },
     {
-      "query": "from index | keep missingField, doubleField, datetimeField",
+      "query": "from index | keep missingField, doubleField, dateField",
       "error": [
         "Unknown column [missingField]"
       ],
@@ -2316,21 +2316,21 @@
       "warning": []
     },
     {
-      "query": "from index | project textField, doubleField, datetimeField",
+      "query": "from index | project textField, doubleField, dateField",
       "error": [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
-      "query": "from index | PROJECT textField, doubleField, datetimeField",
+      "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
         "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
-      "query": "from index | project missingField, doubleField, datetimeField",
+      "query": "from index | project missingField, doubleField, dateField",
       "error": [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
@@ -2407,7 +2407,7 @@
       "warning": []
     },
     {
-      "query": "from index | drop textField, doubleField, datetimeField",
+      "query": "from index | drop textField, doubleField, dateField",
       "error": [],
       "warning": []
     },
@@ -2422,7 +2422,7 @@
       "warning": []
     },
     {
-      "query": "from index | drop missingField, doubleField, datetimeField",
+      "query": "from index | drop missingField, doubleField, dateField",
       "error": [
         "Unknown column [missingField]"
       ],
@@ -2552,7 +2552,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | mv_expand datetimeField",
+      "query": "from a_index | mv_expand dateField",
       "error": [],
       "warning": []
     },
@@ -2987,15 +2987,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField > datetimeField",
+      "query": "from a_index | where dateField > dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | where booleanField > booleanField",
       "error": [
-        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3040,15 +3040,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField >= datetimeField",
+      "query": "from a_index | where dateField >= dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | where booleanField >= booleanField",
       "error": [
-        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3093,15 +3093,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField < datetimeField",
+      "query": "from a_index | where dateField < dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | where booleanField < booleanField",
       "error": [
-        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3146,15 +3146,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField <= datetimeField",
+      "query": "from a_index | where dateField <= dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | where booleanField <= booleanField",
       "error": [
-        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -3199,7 +3199,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField == datetimeField",
+      "query": "from a_index | where dateField == dateField",
       "error": [],
       "warning": []
     },
@@ -3249,7 +3249,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField != datetimeField",
+      "query": "from a_index | where dateField != dateField",
       "error": [],
       "warning": []
     },
@@ -4100,42 +4100,42 @@
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField IS NULL",
+      "query": "from a_index | where dateField IS NULL",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField IS null",
+      "query": "from a_index | where dateField IS null",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField is null",
+      "query": "from a_index | where dateField is null",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField is NULL",
+      "query": "from a_index | where dateField is NULL",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField IS NOT NULL",
+      "query": "from a_index | where dateField IS NOT NULL",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField IS NOT null",
+      "query": "from a_index | where dateField IS NOT null",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField IS not NULL",
+      "query": "from a_index | where dateField IS not NULL",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where datetimeField Is nOt NuLL",
+      "query": "from a_index | where dateField Is nOt NuLL",
       "error": [],
       "warning": []
     },
@@ -4951,37 +4951,37 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField IS NULL",
+      "query": "from a_index | eval dateField IS NULL",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField IS null",
+      "query": "from a_index | eval dateField IS null",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField is null",
+      "query": "from a_index | eval dateField is null",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField is NULL",
+      "query": "from a_index | eval dateField is NULL",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField IS NOT NULL",
+      "query": "from a_index | eval dateField IS NOT NULL",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField IS NOT null",
+      "query": "from a_index | eval dateField IS NOT null",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField IS not NULL",
+      "query": "from a_index | eval dateField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -5849,15 +5849,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField > datetimeField",
+      "query": "from a_index | eval dateField > dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval booleanField > booleanField",
       "error": [
-        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -5883,21 +5883,21 @@
     {
       "query": "from a_index | eval doubleField > \"2022\"",
       "error": [
-        "Argument of [>] must be [datetime], found value [doubleField] type [double]"
+        "Argument of [>] must be [date], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField > keywordField",
+      "query": "from a_index | eval dateField > keywordField",
       "error": [
-        "Argument of [>] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [>] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval keywordField > datetimeField",
+      "query": "from a_index | eval keywordField > dateField",
       "error": [
-        "Argument of [>] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [>] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
@@ -5911,17 +5911,17 @@
     {
       "query": "from a_index | eval textField > now()",
       "error": [
-        "Argument of [>] must be [datetime], found value [textField] type [text]"
+        "Argument of [>] must be [date], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField > \"2022\"",
+      "query": "from a_index | eval dateField > \"2022\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval \"2022\" > datetimeField",
+      "query": "from a_index | eval \"2022\" > dateField",
       "error": [],
       "warning": []
     },
@@ -5938,14 +5938,14 @@
     {
       "query": "from a_index | eval booleanField > \"true\"",
       "error": [
-        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" > booleanField",
       "error": [
-        "Argument of [>] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -5995,15 +5995,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField >= datetimeField",
+      "query": "from a_index | eval dateField >= dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval booleanField >= booleanField",
       "error": [
-        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6029,21 +6029,21 @@
     {
       "query": "from a_index | eval doubleField >= \"2022\"",
       "error": [
-        "Argument of [>=] must be [datetime], found value [doubleField] type [double]"
+        "Argument of [>=] must be [date], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField >= keywordField",
+      "query": "from a_index | eval dateField >= keywordField",
       "error": [
-        "Argument of [>=] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [>=] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval keywordField >= datetimeField",
+      "query": "from a_index | eval keywordField >= dateField",
       "error": [
-        "Argument of [>=] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [>=] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
@@ -6057,17 +6057,17 @@
     {
       "query": "from a_index | eval textField >= now()",
       "error": [
-        "Argument of [>=] must be [datetime], found value [textField] type [text]"
+        "Argument of [>=] must be [date], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField >= \"2022\"",
+      "query": "from a_index | eval dateField >= \"2022\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval \"2022\" >= datetimeField",
+      "query": "from a_index | eval \"2022\" >= dateField",
       "error": [],
       "warning": []
     },
@@ -6084,14 +6084,14 @@
     {
       "query": "from a_index | eval booleanField >= \"true\"",
       "error": [
-        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" >= booleanField",
       "error": [
-        "Argument of [>=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [>=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6141,15 +6141,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField < datetimeField",
+      "query": "from a_index | eval dateField < dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval booleanField < booleanField",
       "error": [
-        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6175,21 +6175,21 @@
     {
       "query": "from a_index | eval doubleField < \"2022\"",
       "error": [
-        "Argument of [<] must be [datetime], found value [doubleField] type [double]"
+        "Argument of [<] must be [date], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField < keywordField",
+      "query": "from a_index | eval dateField < keywordField",
       "error": [
-        "Argument of [<] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [<] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval keywordField < datetimeField",
+      "query": "from a_index | eval keywordField < dateField",
       "error": [
-        "Argument of [<] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [<] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
@@ -6203,17 +6203,17 @@
     {
       "query": "from a_index | eval textField < now()",
       "error": [
-        "Argument of [<] must be [datetime], found value [textField] type [text]"
+        "Argument of [<] must be [date], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField < \"2022\"",
+      "query": "from a_index | eval dateField < \"2022\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval \"2022\" < datetimeField",
+      "query": "from a_index | eval \"2022\" < dateField",
       "error": [],
       "warning": []
     },
@@ -6230,14 +6230,14 @@
     {
       "query": "from a_index | eval booleanField < \"true\"",
       "error": [
-        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" < booleanField",
       "error": [
-        "Argument of [<] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6287,15 +6287,15 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField <= datetimeField",
+      "query": "from a_index | eval dateField <= dateField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval booleanField <= booleanField",
       "error": [
-        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6321,21 +6321,21 @@
     {
       "query": "from a_index | eval doubleField <= \"2022\"",
       "error": [
-        "Argument of [<=] must be [datetime], found value [doubleField] type [double]"
+        "Argument of [<=] must be [date], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField <= keywordField",
+      "query": "from a_index | eval dateField <= keywordField",
       "error": [
-        "Argument of [<=] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [<=] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval keywordField <= datetimeField",
+      "query": "from a_index | eval keywordField <= dateField",
       "error": [
-        "Argument of [<=] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [<=] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
@@ -6349,17 +6349,17 @@
     {
       "query": "from a_index | eval textField <= now()",
       "error": [
-        "Argument of [<=] must be [datetime], found value [textField] type [text]"
+        "Argument of [<=] must be [date], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField <= \"2022\"",
+      "query": "from a_index | eval dateField <= \"2022\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval \"2022\" <= datetimeField",
+      "query": "from a_index | eval \"2022\" <= dateField",
       "error": [],
       "warning": []
     },
@@ -6376,14 +6376,14 @@
     {
       "query": "from a_index | eval booleanField <= \"true\"",
       "error": [
-        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" <= booleanField",
       "error": [
-        "Argument of [<=] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [<=] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -6433,7 +6433,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField == datetimeField",
+      "query": "from a_index | eval dateField == dateField",
       "error": [],
       "warning": []
     },
@@ -6464,21 +6464,21 @@
     {
       "query": "from a_index | eval doubleField == \"2022\"",
       "error": [
-        "Argument of [==] must be [datetime], found value [doubleField] type [double]"
+        "Argument of [==] must be [date], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField == keywordField",
+      "query": "from a_index | eval dateField == keywordField",
       "error": [
-        "Argument of [==] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [==] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval keywordField == datetimeField",
+      "query": "from a_index | eval keywordField == dateField",
       "error": [
-        "Argument of [==] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [==] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
@@ -6492,17 +6492,17 @@
     {
       "query": "from a_index | eval textField == now()",
       "error": [
-        "Argument of [==] must be [datetime], found value [textField] type [text]"
+        "Argument of [==] must be [date], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField == \"2022\"",
+      "query": "from a_index | eval dateField == \"2022\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval \"2022\" == datetimeField",
+      "query": "from a_index | eval \"2022\" == dateField",
       "error": [],
       "warning": []
     },
@@ -6572,7 +6572,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField != datetimeField",
+      "query": "from a_index | eval dateField != dateField",
       "error": [],
       "warning": []
     },
@@ -6603,21 +6603,21 @@
     {
       "query": "from a_index | eval doubleField != \"2022\"",
       "error": [
-        "Argument of [!=] must be [datetime], found value [doubleField] type [double]"
+        "Argument of [!=] must be [date], found value [doubleField] type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField != keywordField",
+      "query": "from a_index | eval dateField != keywordField",
       "error": [
-        "Argument of [!=] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [!=] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval keywordField != datetimeField",
+      "query": "from a_index | eval keywordField != dateField",
       "error": [
-        "Argument of [!=] must be [datetime], found value [keywordField] type [keyword]"
+        "Argument of [!=] must be [date], found value [keywordField] type [keyword]"
       ],
       "warning": []
     },
@@ -6631,17 +6631,17 @@
     {
       "query": "from a_index | eval textField != now()",
       "error": [
-        "Argument of [!=] must be [datetime], found value [textField] type [text]"
+        "Argument of [!=] must be [date], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField != \"2022\"",
+      "query": "from a_index | eval dateField != \"2022\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval \"2022\" != datetimeField",
+      "query": "from a_index | eval \"2022\" != dateField",
       "error": [],
       "warning": []
     },
@@ -6681,7 +6681,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval datetimeField in (\"2023-12-12\", \"2024-12-12\", date_parse(\"yyyy-MM-dd\", \"2025-12-12\"))",
+      "query": "from a_index | eval dateField in (\"2023-12-12\", \"2024-12-12\", date_parse(\"yyyy-MM-dd\", \"2025-12-12\"))",
       "error": [],
       "warning": []
     },
@@ -6713,7 +6713,7 @@
     {
       "query": "from a_index | eval now() + now()",
       "error": [
-        "Argument of [+] must be [date_period], found value [now()] type [datetime]"
+        "Argument of [+] must be [date_period], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -6749,7 +6749,7 @@
     {
       "query": "from a_index | eval now() - now()",
       "error": [
-        "Argument of [-] must be [date_period], found value [now()] type [datetime]"
+        "Argument of [-] must be [date_period], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -6785,8 +6785,8 @@
     {
       "query": "from a_index | eval now() * now()",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
-        "Argument of [*] must be [double], found value [now()] type [datetime]"
+        "Argument of [*] must be [double], found value [now()] type [date]",
+        "Argument of [*] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -6822,8 +6822,8 @@
     {
       "query": "from a_index | eval now() / now()",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
-        "Argument of [/] must be [double], found value [now()] type [datetime]"
+        "Argument of [/] must be [double], found value [now()] type [date]",
+        "Argument of [/] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -6859,8 +6859,8 @@
     {
       "query": "from a_index | eval now() % now()",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
-        "Argument of [%] must be [double], found value [now()] type [datetime]"
+        "Argument of [%] must be [double], found value [now()] type [date]",
+        "Argument of [%] must be [double], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -7210,36 +7210,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 year",
+      "query": "from a_index | eval var = dateField - 1 year",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 YEAR",
+      "query": "from a_index | eval var = dateField - 1 YEAR",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Year",
+      "query": "from a_index | eval var = dateField - 1 Year",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 year",
+      "query": "from a_index | eval var = dateField + 1 year",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 year + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 year] type [duration]"
+        "Argument of [+] must be [date], found value [1 year] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 year",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -7247,7 +7247,7 @@
     {
       "query": "from a_index | eval var = now() / 1 year",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -7255,7 +7255,7 @@
     {
       "query": "from a_index | eval var = now() % 1 year",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 year] type [duration]"
       ],
       "warning": []
@@ -7280,36 +7280,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 years",
+      "query": "from a_index | eval var = dateField - 1 years",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 YEARS",
+      "query": "from a_index | eval var = dateField - 1 YEARS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Years",
+      "query": "from a_index | eval var = dateField - 1 Years",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 years",
+      "query": "from a_index | eval var = dateField + 1 years",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 years + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 years] type [duration]"
+        "Argument of [+] must be [date], found value [1 years] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 years",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -7317,7 +7317,7 @@
     {
       "query": "from a_index | eval var = now() / 1 years",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -7325,7 +7325,7 @@
     {
       "query": "from a_index | eval var = now() % 1 years",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 years] type [duration]"
       ],
       "warning": []
@@ -7350,36 +7350,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 quarter",
+      "query": "from a_index | eval var = dateField - 1 quarter",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 QUARTER",
+      "query": "from a_index | eval var = dateField - 1 QUARTER",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Quarter",
+      "query": "from a_index | eval var = dateField - 1 Quarter",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 quarter",
+      "query": "from a_index | eval var = dateField + 1 quarter",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 quarter + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 quarter] type [duration]"
+        "Argument of [+] must be [date], found value [1 quarter] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 quarter",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -7387,7 +7387,7 @@
     {
       "query": "from a_index | eval var = now() / 1 quarter",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -7395,7 +7395,7 @@
     {
       "query": "from a_index | eval var = now() % 1 quarter",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 quarter] type [duration]"
       ],
       "warning": []
@@ -7420,36 +7420,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 quarters",
+      "query": "from a_index | eval var = dateField - 1 quarters",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 QUARTERS",
+      "query": "from a_index | eval var = dateField - 1 QUARTERS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Quarters",
+      "query": "from a_index | eval var = dateField - 1 Quarters",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 quarters",
+      "query": "from a_index | eval var = dateField + 1 quarters",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 quarters + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 quarters] type [duration]"
+        "Argument of [+] must be [date], found value [1 quarters] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 quarters",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -7457,7 +7457,7 @@
     {
       "query": "from a_index | eval var = now() / 1 quarters",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -7465,7 +7465,7 @@
     {
       "query": "from a_index | eval var = now() % 1 quarters",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 quarters] type [duration]"
       ],
       "warning": []
@@ -7490,36 +7490,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 month",
+      "query": "from a_index | eval var = dateField - 1 month",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MONTH",
+      "query": "from a_index | eval var = dateField - 1 MONTH",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Month",
+      "query": "from a_index | eval var = dateField - 1 Month",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 month",
+      "query": "from a_index | eval var = dateField + 1 month",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 month + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 month] type [duration]"
+        "Argument of [+] must be [date], found value [1 month] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 month",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -7527,7 +7527,7 @@
     {
       "query": "from a_index | eval var = now() / 1 month",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -7535,7 +7535,7 @@
     {
       "query": "from a_index | eval var = now() % 1 month",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 month] type [duration]"
       ],
       "warning": []
@@ -7560,36 +7560,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 months",
+      "query": "from a_index | eval var = dateField - 1 months",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MONTHS",
+      "query": "from a_index | eval var = dateField - 1 MONTHS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Months",
+      "query": "from a_index | eval var = dateField - 1 Months",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 months",
+      "query": "from a_index | eval var = dateField + 1 months",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 months + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 months] type [duration]"
+        "Argument of [+] must be [date], found value [1 months] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 months",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -7597,7 +7597,7 @@
     {
       "query": "from a_index | eval var = now() / 1 months",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -7605,7 +7605,7 @@
     {
       "query": "from a_index | eval var = now() % 1 months",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 months] type [duration]"
       ],
       "warning": []
@@ -7630,36 +7630,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 week",
+      "query": "from a_index | eval var = dateField - 1 week",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 WEEK",
+      "query": "from a_index | eval var = dateField - 1 WEEK",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Week",
+      "query": "from a_index | eval var = dateField - 1 Week",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 week",
+      "query": "from a_index | eval var = dateField + 1 week",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 week + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 week] type [duration]"
+        "Argument of [+] must be [date], found value [1 week] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 week",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -7667,7 +7667,7 @@
     {
       "query": "from a_index | eval var = now() / 1 week",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -7675,7 +7675,7 @@
     {
       "query": "from a_index | eval var = now() % 1 week",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 week] type [duration]"
       ],
       "warning": []
@@ -7700,36 +7700,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 weeks",
+      "query": "from a_index | eval var = dateField - 1 weeks",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 WEEKS",
+      "query": "from a_index | eval var = dateField - 1 WEEKS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Weeks",
+      "query": "from a_index | eval var = dateField - 1 Weeks",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 weeks",
+      "query": "from a_index | eval var = dateField + 1 weeks",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 weeks + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 weeks] type [duration]"
+        "Argument of [+] must be [date], found value [1 weeks] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 weeks",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -7737,7 +7737,7 @@
     {
       "query": "from a_index | eval var = now() / 1 weeks",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -7745,7 +7745,7 @@
     {
       "query": "from a_index | eval var = now() % 1 weeks",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 weeks] type [duration]"
       ],
       "warning": []
@@ -7770,36 +7770,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 day",
+      "query": "from a_index | eval var = dateField - 1 day",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 DAY",
+      "query": "from a_index | eval var = dateField - 1 DAY",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Day",
+      "query": "from a_index | eval var = dateField - 1 Day",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 day",
+      "query": "from a_index | eval var = dateField + 1 day",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 day + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 day] type [duration]"
+        "Argument of [+] must be [date], found value [1 day] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 day",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -7807,7 +7807,7 @@
     {
       "query": "from a_index | eval var = now() / 1 day",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -7815,7 +7815,7 @@
     {
       "query": "from a_index | eval var = now() % 1 day",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 day] type [duration]"
       ],
       "warning": []
@@ -7840,36 +7840,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 days",
+      "query": "from a_index | eval var = dateField - 1 days",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 DAYS",
+      "query": "from a_index | eval var = dateField - 1 DAYS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Days",
+      "query": "from a_index | eval var = dateField - 1 Days",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 days",
+      "query": "from a_index | eval var = dateField + 1 days",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 days + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 days] type [duration]"
+        "Argument of [+] must be [date], found value [1 days] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 days",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -7877,7 +7877,7 @@
     {
       "query": "from a_index | eval var = now() / 1 days",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -7885,7 +7885,7 @@
     {
       "query": "from a_index | eval var = now() % 1 days",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 days] type [duration]"
       ],
       "warning": []
@@ -7910,36 +7910,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 hour",
+      "query": "from a_index | eval var = dateField - 1 hour",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 HOUR",
+      "query": "from a_index | eval var = dateField - 1 HOUR",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Hour",
+      "query": "from a_index | eval var = dateField - 1 Hour",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 hour",
+      "query": "from a_index | eval var = dateField + 1 hour",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 hour + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 hour] type [duration]"
+        "Argument of [+] must be [date], found value [1 hour] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 hour",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -7947,7 +7947,7 @@
     {
       "query": "from a_index | eval var = now() / 1 hour",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -7955,7 +7955,7 @@
     {
       "query": "from a_index | eval var = now() % 1 hour",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 hour] type [duration]"
       ],
       "warning": []
@@ -7980,36 +7980,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 hours",
+      "query": "from a_index | eval var = dateField - 1 hours",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 HOURS",
+      "query": "from a_index | eval var = dateField - 1 HOURS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Hours",
+      "query": "from a_index | eval var = dateField - 1 Hours",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 hours",
+      "query": "from a_index | eval var = dateField + 1 hours",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 hours + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 hours] type [duration]"
+        "Argument of [+] must be [date], found value [1 hours] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 hours",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -8017,7 +8017,7 @@
     {
       "query": "from a_index | eval var = now() / 1 hours",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -8025,7 +8025,7 @@
     {
       "query": "from a_index | eval var = now() % 1 hours",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 hours] type [duration]"
       ],
       "warning": []
@@ -8050,36 +8050,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 minute",
+      "query": "from a_index | eval var = dateField - 1 minute",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MINUTE",
+      "query": "from a_index | eval var = dateField - 1 MINUTE",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Minute",
+      "query": "from a_index | eval var = dateField - 1 Minute",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 minute",
+      "query": "from a_index | eval var = dateField + 1 minute",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 minute + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 minute] type [duration]"
+        "Argument of [+] must be [date], found value [1 minute] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 minute",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -8087,7 +8087,7 @@
     {
       "query": "from a_index | eval var = now() / 1 minute",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -8095,7 +8095,7 @@
     {
       "query": "from a_index | eval var = now() % 1 minute",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 minute] type [duration]"
       ],
       "warning": []
@@ -8120,36 +8120,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 minutes",
+      "query": "from a_index | eval var = dateField - 1 minutes",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MINUTES",
+      "query": "from a_index | eval var = dateField - 1 MINUTES",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Minutes",
+      "query": "from a_index | eval var = dateField - 1 Minutes",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 minutes",
+      "query": "from a_index | eval var = dateField + 1 minutes",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 minutes + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 minutes] type [duration]"
+        "Argument of [+] must be [date], found value [1 minutes] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 minutes",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -8157,7 +8157,7 @@
     {
       "query": "from a_index | eval var = now() / 1 minutes",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -8165,7 +8165,7 @@
     {
       "query": "from a_index | eval var = now() % 1 minutes",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 minutes] type [duration]"
       ],
       "warning": []
@@ -8190,36 +8190,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 second",
+      "query": "from a_index | eval var = dateField - 1 second",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 SECOND",
+      "query": "from a_index | eval var = dateField - 1 SECOND",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Second",
+      "query": "from a_index | eval var = dateField - 1 Second",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 second",
+      "query": "from a_index | eval var = dateField + 1 second",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 second + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 second] type [duration]"
+        "Argument of [+] must be [date], found value [1 second] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 second",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -8227,7 +8227,7 @@
     {
       "query": "from a_index | eval var = now() / 1 second",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -8235,7 +8235,7 @@
     {
       "query": "from a_index | eval var = now() % 1 second",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 second] type [duration]"
       ],
       "warning": []
@@ -8260,36 +8260,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 seconds",
+      "query": "from a_index | eval var = dateField - 1 seconds",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 SECONDS",
+      "query": "from a_index | eval var = dateField - 1 SECONDS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Seconds",
+      "query": "from a_index | eval var = dateField - 1 Seconds",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 seconds",
+      "query": "from a_index | eval var = dateField + 1 seconds",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 seconds + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 seconds] type [duration]"
+        "Argument of [+] must be [date], found value [1 seconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 seconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -8297,7 +8297,7 @@
     {
       "query": "from a_index | eval var = now() / 1 seconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -8305,7 +8305,7 @@
     {
       "query": "from a_index | eval var = now() % 1 seconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 seconds] type [duration]"
       ],
       "warning": []
@@ -8330,36 +8330,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 millisecond",
+      "query": "from a_index | eval var = dateField - 1 millisecond",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MILLISECOND",
+      "query": "from a_index | eval var = dateField - 1 MILLISECOND",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Millisecond",
+      "query": "from a_index | eval var = dateField - 1 Millisecond",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 millisecond",
+      "query": "from a_index | eval var = dateField + 1 millisecond",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 millisecond + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 millisecond] type [duration]"
+        "Argument of [+] must be [date], found value [1 millisecond] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 millisecond",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -8367,7 +8367,7 @@
     {
       "query": "from a_index | eval var = now() / 1 millisecond",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -8375,7 +8375,7 @@
     {
       "query": "from a_index | eval var = now() % 1 millisecond",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 millisecond] type [duration]"
       ],
       "warning": []
@@ -8400,36 +8400,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 milliseconds",
+      "query": "from a_index | eval var = dateField - 1 milliseconds",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MILLISECONDS",
+      "query": "from a_index | eval var = dateField - 1 MILLISECONDS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Milliseconds",
+      "query": "from a_index | eval var = dateField - 1 Milliseconds",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 milliseconds",
+      "query": "from a_index | eval var = dateField + 1 milliseconds",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 milliseconds + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 milliseconds] type [duration]"
+        "Argument of [+] must be [date], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 milliseconds",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -8437,7 +8437,7 @@
     {
       "query": "from a_index | eval var = now() / 1 milliseconds",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -8445,7 +8445,7 @@
     {
       "query": "from a_index | eval var = now() % 1 milliseconds",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 milliseconds] type [duration]"
       ],
       "warning": []
@@ -8470,36 +8470,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 ms",
+      "query": "from a_index | eval var = dateField - 1 ms",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MS",
+      "query": "from a_index | eval var = dateField - 1 MS",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Ms",
+      "query": "from a_index | eval var = dateField - 1 Ms",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 ms",
+      "query": "from a_index | eval var = dateField + 1 ms",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 ms + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 ms] type [duration]"
+        "Argument of [+] must be [date], found value [1 ms] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 ms",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
@@ -8507,7 +8507,7 @@
     {
       "query": "from a_index | eval var = now() / 1 ms",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
@@ -8515,7 +8515,7 @@
     {
       "query": "from a_index | eval var = now() % 1 ms",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 ms] type [duration]"
       ],
       "warning": []
@@ -8540,36 +8540,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 s",
+      "query": "from a_index | eval var = dateField - 1 s",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 S",
+      "query": "from a_index | eval var = dateField - 1 S",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 S",
+      "query": "from a_index | eval var = dateField - 1 S",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 s",
+      "query": "from a_index | eval var = dateField + 1 s",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 s + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 s] type [duration]"
+        "Argument of [+] must be [date], found value [1 s] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 s",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
@@ -8577,7 +8577,7 @@
     {
       "query": "from a_index | eval var = now() / 1 s",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
@@ -8585,7 +8585,7 @@
     {
       "query": "from a_index | eval var = now() % 1 s",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 s] type [duration]"
       ],
       "warning": []
@@ -8610,36 +8610,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 m",
+      "query": "from a_index | eval var = dateField - 1 m",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 M",
+      "query": "from a_index | eval var = dateField - 1 M",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 M",
+      "query": "from a_index | eval var = dateField - 1 M",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 m",
+      "query": "from a_index | eval var = dateField + 1 m",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 m + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 m] type [duration]"
+        "Argument of [+] must be [date], found value [1 m] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 m",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
@@ -8647,7 +8647,7 @@
     {
       "query": "from a_index | eval var = now() / 1 m",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
@@ -8655,7 +8655,7 @@
     {
       "query": "from a_index | eval var = now() % 1 m",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 m] type [duration]"
       ],
       "warning": []
@@ -8680,36 +8680,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 h",
+      "query": "from a_index | eval var = dateField - 1 h",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 H",
+      "query": "from a_index | eval var = dateField - 1 H",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 H",
+      "query": "from a_index | eval var = dateField - 1 H",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 h",
+      "query": "from a_index | eval var = dateField + 1 h",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 h + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 h] type [duration]"
+        "Argument of [+] must be [date], found value [1 h] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 h",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
@@ -8717,7 +8717,7 @@
     {
       "query": "from a_index | eval var = now() / 1 h",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
@@ -8725,7 +8725,7 @@
     {
       "query": "from a_index | eval var = now() % 1 h",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 h] type [duration]"
       ],
       "warning": []
@@ -8750,36 +8750,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 d",
+      "query": "from a_index | eval var = dateField - 1 d",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 D",
+      "query": "from a_index | eval var = dateField - 1 D",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 D",
+      "query": "from a_index | eval var = dateField - 1 D",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 d",
+      "query": "from a_index | eval var = dateField + 1 d",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 d + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 d] type [duration]"
+        "Argument of [+] must be [date], found value [1 d] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 d",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
@@ -8787,7 +8787,7 @@
     {
       "query": "from a_index | eval var = now() / 1 d",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
@@ -8795,7 +8795,7 @@
     {
       "query": "from a_index | eval var = now() % 1 d",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 d] type [duration]"
       ],
       "warning": []
@@ -8820,36 +8820,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 w",
+      "query": "from a_index | eval var = dateField - 1 w",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 W",
+      "query": "from a_index | eval var = dateField - 1 W",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 W",
+      "query": "from a_index | eval var = dateField - 1 W",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 w",
+      "query": "from a_index | eval var = dateField + 1 w",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 w + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 w] type [duration]"
+        "Argument of [+] must be [date], found value [1 w] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 w",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
@@ -8857,7 +8857,7 @@
     {
       "query": "from a_index | eval var = now() / 1 w",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
@@ -8865,7 +8865,7 @@
     {
       "query": "from a_index | eval var = now() % 1 w",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 w] type [duration]"
       ],
       "warning": []
@@ -8890,36 +8890,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 mo",
+      "query": "from a_index | eval var = dateField - 1 mo",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 MO",
+      "query": "from a_index | eval var = dateField - 1 MO",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Mo",
+      "query": "from a_index | eval var = dateField - 1 Mo",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 mo",
+      "query": "from a_index | eval var = dateField + 1 mo",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 mo + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 mo] type [duration]"
+        "Argument of [+] must be [date], found value [1 mo] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 mo",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
@@ -8927,7 +8927,7 @@
     {
       "query": "from a_index | eval var = now() / 1 mo",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
@@ -8935,7 +8935,7 @@
     {
       "query": "from a_index | eval var = now() % 1 mo",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 mo] type [duration]"
       ],
       "warning": []
@@ -8960,36 +8960,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 q",
+      "query": "from a_index | eval var = dateField - 1 q",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Q",
+      "query": "from a_index | eval var = dateField - 1 Q",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Q",
+      "query": "from a_index | eval var = dateField - 1 Q",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 q",
+      "query": "from a_index | eval var = dateField + 1 q",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 q + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 q] type [duration]"
+        "Argument of [+] must be [date], found value [1 q] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 q",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
@@ -8997,7 +8997,7 @@
     {
       "query": "from a_index | eval var = now() / 1 q",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
@@ -9005,7 +9005,7 @@
     {
       "query": "from a_index | eval var = now() % 1 q",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 q] type [duration]"
       ],
       "warning": []
@@ -9030,36 +9030,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 y",
+      "query": "from a_index | eval var = dateField - 1 y",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Y",
+      "query": "from a_index | eval var = dateField - 1 Y",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Y",
+      "query": "from a_index | eval var = dateField - 1 Y",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 y",
+      "query": "from a_index | eval var = dateField + 1 y",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 y + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 y] type [duration]"
+        "Argument of [+] must be [date], found value [1 y] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 y",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
@@ -9067,7 +9067,7 @@
     {
       "query": "from a_index | eval var = now() / 1 y",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
@@ -9075,7 +9075,7 @@
     {
       "query": "from a_index | eval var = now() % 1 y",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 y] type [duration]"
       ],
       "warning": []
@@ -9100,36 +9100,36 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 yr",
+      "query": "from a_index | eval var = dateField - 1 yr",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 YR",
+      "query": "from a_index | eval var = dateField - 1 YR",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField - 1 Yr",
+      "query": "from a_index | eval var = dateField - 1 Yr",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = datetimeField + 1 yr",
+      "query": "from a_index | eval var = dateField + 1 yr",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 yr + 1 year",
       "error": [
-        "Argument of [+] must be [datetime], found value [1 yr] type [duration]"
+        "Argument of [+] must be [date], found value [1 yr] type [duration]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = now() * 1 yr",
       "error": [
-        "Argument of [*] must be [double], found value [now()] type [datetime]",
+        "Argument of [*] must be [double], found value [now()] type [date]",
         "Argument of [*] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
@@ -9137,7 +9137,7 @@
     {
       "query": "from a_index | eval var = now() / 1 yr",
       "error": [
-        "Argument of [/] must be [double], found value [now()] type [datetime]",
+        "Argument of [/] must be [double], found value [now()] type [date]",
         "Argument of [/] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
@@ -9145,7 +9145,7 @@
     {
       "query": "from a_index | eval var = now() % 1 yr",
       "error": [
-        "Argument of [%] must be [double], found value [now()] type [datetime]",
+        "Argument of [%] must be [double], found value [now()] type [date]",
         "Argument of [%] must be [double], found value [1 yr] type [duration]"
       ],
       "warning": []
@@ -11526,17 +11526,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = coalesce(datetimeField, datetimeField)",
+      "query": "from a_index | eval var = coalesce(dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval coalesce(datetimeField, datetimeField)",
+      "query": "from a_index | eval coalesce(dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = coalesce(to_datetime(datetimeField), to_datetime(datetimeField))",
+      "query": "from a_index | eval var = coalesce(to_datetime(dateField), to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -12117,17 +12117,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_diff(\"year\", datetimeField, datetimeField)",
+      "query": "from a_index | eval var = date_diff(\"year\", dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_diff(\"year\", datetimeField, datetimeField)",
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(datetimeField), to_datetime(datetimeField))",
+      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(dateField), to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -12135,35 +12135,35 @@
       "query": "from a_index | eval date_diff(booleanField, booleanField, booleanField)",
       "error": [
         "Argument of [date_diff] must be [keyword], found value [booleanField] type [boolean]",
-        "Argument of [date_diff] must be [datetime], found value [booleanField] type [boolean]",
-        "Argument of [date_diff] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [date_diff] must be [date], found value [booleanField] type [boolean]",
+        "Argument of [date_diff] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_diff(textField, datetimeField, datetimeField)",
+      "query": "from a_index | eval var = date_diff(textField, dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_diff(textField, datetimeField, datetimeField)",
+      "query": "from a_index | eval date_diff(textField, dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_diff(to_string(booleanField), to_datetime(datetimeField), to_datetime(datetimeField))",
+      "query": "from a_index | eval var = date_diff(to_string(booleanField), to_datetime(dateField), to_datetime(dateField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_diff(\"year\", datetimeField, datetimeField, extraArg)",
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
       "error": [
         "Error: [date_diff] function expects exactly 3 arguments, got 4."
       ],
       "warning": []
     },
     {
-      "query": "from a_index | sort date_diff(\"year\", datetimeField, datetimeField)",
+      "query": "from a_index | sort date_diff(\"year\", dateField, dateField)",
       "error": [],
       "warning": []
     },
@@ -12185,8 +12185,8 @@
     {
       "query": "from a_index | eval date_diff(\"year\", concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
-        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12198,8 +12198,8 @@
     {
       "query": "from a_index | eval date_diff(textField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
-        "Argument of [date_diff] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12227,22 +12227,22 @@
       "query": "row var = date_extract(true, true)",
       "error": [
         "Argument of [date_extract] must be [keyword], found value [true] type [boolean]",
-        "Argument of [date_extract] must be [datetime], found value [true] type [boolean]"
+        "Argument of [date_extract] must be [date], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", datetimeField)",
+      "query": "from a_index | eval var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", datetimeField)",
+      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", to_datetime(datetimeField))",
+      "query": "from a_index | eval var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -12250,34 +12250,34 @@
       "query": "from a_index | eval date_extract(booleanField, booleanField)",
       "error": [
         "Argument of [date_extract] must be [keyword], found value [booleanField] type [boolean]",
-        "Argument of [date_extract] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [date_extract] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_extract(textField, datetimeField)",
+      "query": "from a_index | eval var = date_extract(textField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_extract(textField, datetimeField)",
+      "query": "from a_index | eval date_extract(textField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_extract(to_string(booleanField), to_datetime(datetimeField))",
+      "query": "from a_index | eval var = date_extract(to_string(booleanField), to_datetime(dateField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", datetimeField, extraArg)",
+      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField, extraArg)",
       "error": [
         "Error: [date_extract] function expects exactly 2 arguments, got 3."
       ],
       "warning": []
     },
     {
-      "query": "from a_index | sort date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", datetimeField)",
+      "query": "from a_index | sort date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField)",
       "error": [],
       "warning": []
     },
@@ -12299,7 +12299,7 @@
     {
       "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_extract] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_extract] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12311,7 +12311,7 @@
     {
       "query": "from a_index | eval date_extract(textField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_extract] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_extract] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12329,22 +12329,22 @@
       "query": "row var = date_format(true, true)",
       "error": [
         "Argument of [date_format] must be [keyword], found value [true] type [boolean]",
-        "Argument of [date_format] must be [datetime], found value [true] type [boolean]"
+        "Argument of [date_format] must be [date], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_format(keywordField, datetimeField)",
+      "query": "from a_index | eval var = date_format(keywordField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_format(keywordField, datetimeField)",
+      "query": "from a_index | eval date_format(keywordField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_format(to_string(booleanField), to_datetime(datetimeField))",
+      "query": "from a_index | eval var = date_format(to_string(booleanField), to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -12352,29 +12352,29 @@
       "query": "from a_index | eval date_format(booleanField, booleanField)",
       "error": [
         "Argument of [date_format] must be [keyword], found value [booleanField] type [boolean]",
-        "Argument of [date_format] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [date_format] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_format(textField, datetimeField)",
+      "query": "from a_index | eval var = date_format(textField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_format(textField, datetimeField)",
+      "query": "from a_index | eval date_format(textField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_format(keywordField, datetimeField, extraArg)",
+      "query": "from a_index | eval date_format(keywordField, dateField, extraArg)",
       "error": [
         "Error: [date_format] function expects no more than 2 arguments, got 3."
       ],
       "warning": []
     },
     {
-      "query": "from a_index | sort date_format(keywordField, datetimeField)",
+      "query": "from a_index | sort date_format(keywordField, dateField)",
       "error": [],
       "warning": []
     },
@@ -12396,7 +12396,7 @@
     {
       "query": "from a_index | eval date_format(keywordField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_format] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_format] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12408,7 +12408,7 @@
     {
       "query": "from a_index | eval date_format(textField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_format] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_format] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12538,22 +12538,22 @@
       "query": "row var = date_trunc(true, true)",
       "error": [
         "Argument of [date_trunc] must be [time_literal], found value [true] type [boolean]",
-        "Argument of [date_trunc] must be [datetime], found value [true] type [boolean]"
+        "Argument of [date_trunc] must be [date], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_trunc(1 year, datetimeField)",
+      "query": "from a_index | eval var = date_trunc(1 year, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_trunc(1 year, datetimeField)",
+      "query": "from a_index | eval date_trunc(1 year, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_trunc(1 year, to_datetime(datetimeField))",
+      "query": "from a_index | eval var = date_trunc(1 year, to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -12561,40 +12561,40 @@
       "query": "from a_index | eval date_trunc(booleanField, booleanField)",
       "error": [
         "Argument of [date_trunc] must be [time_literal], found value [booleanField] type [boolean]",
-        "Argument of [date_trunc] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [date_trunc] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_trunc(textField, datetimeField)",
+      "query": "from a_index | eval var = date_trunc(textField, dateField)",
       "error": [
         "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_trunc(textField, datetimeField)",
+      "query": "from a_index | eval date_trunc(textField, dateField)",
       "error": [
         "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = date_trunc(textField, to_datetime(datetimeField))",
+      "query": "from a_index | eval var = date_trunc(textField, to_datetime(dateField))",
       "error": [
         "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval date_trunc(1 year, datetimeField, extraArg)",
+      "query": "from a_index | eval date_trunc(1 year, dateField, extraArg)",
       "error": [
         "Error: [date_trunc] function expects exactly 2 arguments, got 3."
       ],
       "warning": []
     },
     {
-      "query": "from a_index | sort date_trunc(1 year, datetimeField)",
+      "query": "from a_index | sort date_trunc(1 year, dateField)",
       "error": [],
       "warning": []
     },
@@ -12616,7 +12616,7 @@
     {
       "query": "from a_index | eval date_trunc(1 year, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_trunc] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12631,7 +12631,7 @@
       "query": "from a_index | eval date_trunc(textField, concat(\"20\", \"22\"))",
       "error": [
         "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]",
-        "Argument of [date_trunc] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -15359,17 +15359,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_append(datetimeField, datetimeField)",
+      "query": "from a_index | eval var = mv_append(dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_append(datetimeField, datetimeField)",
+      "query": "from a_index | eval mv_append(dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_append(to_datetime(datetimeField), to_datetime(datetimeField))",
+      "query": "from a_index | eval var = mv_append(to_datetime(dateField), to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -15982,7 +15982,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where mv_count(datetimeField) > 0",
+      "query": "from a_index | where mv_count(dateField) > 0",
       "error": [],
       "warning": []
     },
@@ -16096,17 +16096,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_count(datetimeField)",
+      "query": "from a_index | eval var = mv_count(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_count(datetimeField)",
+      "query": "from a_index | eval mv_count(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_count(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = mv_count(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -16540,17 +16540,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_dedupe(datetimeField)",
+      "query": "from a_index | eval var = mv_dedupe(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_dedupe(datetimeField)",
+      "query": "from a_index | eval mv_dedupe(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_dedupe(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = mv_dedupe(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -16979,17 +16979,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_first(datetimeField)",
+      "query": "from a_index | eval var = mv_first(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_first(datetimeField)",
+      "query": "from a_index | eval mv_first(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_first(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = mv_first(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -17428,17 +17428,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_last(datetimeField)",
+      "query": "from a_index | eval var = mv_last(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_last(datetimeField)",
+      "query": "from a_index | eval mv_last(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_last(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = mv_last(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -17778,17 +17778,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_max(datetimeField)",
+      "query": "from a_index | eval var = mv_max(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_max(datetimeField)",
+      "query": "from a_index | eval mv_max(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_max(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = mv_max(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -18248,17 +18248,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_min(datetimeField)",
+      "query": "from a_index | eval var = mv_min(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_min(datetimeField)",
+      "query": "from a_index | eval mv_min(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_min(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = mv_min(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -18672,17 +18672,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_slice(datetimeField, integerField, integerField)",
+      "query": "from a_index | eval var = mv_slice(dateField, integerField, integerField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_slice(datetimeField, integerField, integerField)",
+      "query": "from a_index | eval mv_slice(dateField, integerField, integerField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_slice(to_datetime(datetimeField), to_integer(booleanField), to_integer(booleanField))",
+      "query": "from a_index | eval var = mv_slice(to_datetime(dateField), to_integer(booleanField), to_integer(booleanField))",
       "error": [],
       "warning": []
     },
@@ -18937,12 +18937,12 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_sort(datetimeField, \"asc\")",
+      "query": "from a_index | eval var = mv_sort(dateField, \"asc\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_sort(datetimeField, \"asc\")",
+      "query": "from a_index | eval mv_sort(dateField, \"asc\")",
       "error": [],
       "warning": []
     },
@@ -24100,34 +24100,34 @@
     {
       "query": "row var = to_datetime(true)",
       "error": [
-        "Argument of [to_datetime] must be [datetime], found value [true] type [boolean]"
+        "Argument of [to_datetime] must be [date], found value [true] type [boolean]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_datetime(datetimeField)",
+      "query": "from a_index | eval var = to_datetime(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval to_datetime(datetimeField)",
+      "query": "from a_index | eval to_datetime(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_dt(datetimeField)",
+      "query": "from a_index | eval var = to_dt(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_datetime(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = to_datetime(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval to_datetime(booleanField)",
       "error": [
-        "Argument of [to_datetime] must be [datetime], found value [booleanField] type [boolean]"
+        "Argument of [to_datetime] must be [date], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -24244,14 +24244,14 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval to_datetime(datetimeField, extraArg)",
+      "query": "from a_index | eval to_datetime(dateField, extraArg)",
       "error": [
         "Error: [to_datetime] function expects exactly one argument, got 2."
       ],
       "warning": []
     },
     {
-      "query": "from a_index | sort to_datetime(datetimeField)",
+      "query": "from a_index | sort to_datetime(dateField)",
       "error": [],
       "warning": []
     },
@@ -24560,7 +24560,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where to_double(datetimeField) > 0",
+      "query": "from a_index | where to_double(dateField) > 0",
       "error": [],
       "warning": []
     },
@@ -24674,22 +24674,22 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_double(datetimeField)",
+      "query": "from a_index | eval var = to_double(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval to_double(datetimeField)",
+      "query": "from a_index | eval to_double(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_dbl(datetimeField)",
+      "query": "from a_index | eval var = to_dbl(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_double(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = to_double(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -25225,7 +25225,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where to_integer(datetimeField) > 0",
+      "query": "from a_index | where to_integer(dateField) > 0",
       "error": [],
       "warning": []
     },
@@ -25309,22 +25309,22 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_integer(datetimeField)",
+      "query": "from a_index | eval var = to_integer(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval to_integer(datetimeField)",
+      "query": "from a_index | eval to_integer(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_int(datetimeField)",
+      "query": "from a_index | eval var = to_int(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_integer(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = to_integer(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -25683,7 +25683,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where to_long(datetimeField) > 0",
+      "query": "from a_index | where to_long(dateField) > 0",
       "error": [],
       "warning": []
     },
@@ -25767,17 +25767,17 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_long(datetimeField)",
+      "query": "from a_index | eval var = to_long(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval to_long(datetimeField)",
+      "query": "from a_index | eval to_long(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_long(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = to_long(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -26269,9 +26269,9 @@
       "warning": []
     },
     {
-      "query": "from a_index | where to_unsigned_long(datetimeField) > 0",
+      "query": "from a_index | where to_unsigned_long(dateField) > 0",
       "error": [
-        "Argument of [>] must be [double], found value [to_unsigned_long(datetimeField)] type [unsigned_long]"
+        "Argument of [>] must be [double], found value [to_unsigned_long(dateField)] type [unsigned_long]"
       ],
       "warning": []
     },
@@ -26357,27 +26357,27 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_unsigned_long(datetimeField)",
+      "query": "from a_index | eval var = to_unsigned_long(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval to_unsigned_long(datetimeField)",
+      "query": "from a_index | eval to_unsigned_long(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_ul(datetimeField)",
+      "query": "from a_index | eval var = to_ul(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_ulong(datetimeField)",
+      "query": "from a_index | eval var = to_ulong(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_unsigned_long(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = to_unsigned_long(to_datetime(dateField))",
       "error": [],
       "warning": []
     },
@@ -31145,12 +31145,12 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = max(datetimeField)",
+      "query": "from a_index | stats var = max(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats max(datetimeField)",
+      "query": "from a_index | stats max(dateField)",
       "error": [],
       "warning": []
     },
@@ -31234,14 +31234,14 @@
       "warning": []
     },
     {
-      "query": "from a_index | where max(datetimeField)",
+      "query": "from a_index | where max(dateField)",
       "error": [
         "WHERE does not support function max"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where max(datetimeField) > 0",
+      "query": "from a_index | where max(dateField) > 0",
       "error": [
         "WHERE does not support function max"
       ],
@@ -31374,28 +31374,28 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = max(datetimeField)",
+      "query": "from a_index | eval var = max(dateField)",
       "error": [
         "EVAL does not support function max"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = max(datetimeField) > 0",
+      "query": "from a_index | eval var = max(dateField) > 0",
       "error": [
         "EVAL does not support function max"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval max(datetimeField)",
+      "query": "from a_index | eval max(dateField)",
       "error": [
         "EVAL does not support function max"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval max(datetimeField) > 0",
+      "query": "from a_index | eval max(dateField) > 0",
       "error": [
         "EVAL does not support function max"
       ],
@@ -31781,12 +31781,12 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = min(datetimeField)",
+      "query": "from a_index | stats var = min(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats min(datetimeField)",
+      "query": "from a_index | stats min(dateField)",
       "error": [],
       "warning": []
     },
@@ -31870,14 +31870,14 @@
       "warning": []
     },
     {
-      "query": "from a_index | where min(datetimeField)",
+      "query": "from a_index | where min(dateField)",
       "error": [
         "WHERE does not support function min"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where min(datetimeField) > 0",
+      "query": "from a_index | where min(dateField) > 0",
       "error": [
         "WHERE does not support function min"
       ],
@@ -32010,28 +32010,28 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = min(datetimeField)",
+      "query": "from a_index | eval var = min(dateField)",
       "error": [
         "EVAL does not support function min"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = min(datetimeField) > 0",
+      "query": "from a_index | eval var = min(dateField) > 0",
       "error": [
         "EVAL does not support function min"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval min(datetimeField)",
+      "query": "from a_index | eval min(dateField)",
       "error": [
         "EVAL does not support function min"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval min(datetimeField) > 0",
+      "query": "from a_index | eval min(dateField) > 0",
       "error": [
         "EVAL does not support function min"
       ],
@@ -33834,12 +33834,12 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats by bucket(datetimeField, 1 year)",
+      "query": "from a_index | stats by bucket(dateField, 1 year)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bin(datetimeField, 1 year)",
+      "query": "from a_index | stats by bin(dateField, 1 year)",
       "error": [],
       "warning": []
     },
@@ -33858,7 +33858,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats by bucket(datetimeField, integerField, textField, textField)",
+      "query": "from a_index | stats by bucket(dateField, integerField, textField, textField)",
       "error": [
         "Argument of [bucket] must be a constant, received [integerField]",
         "Argument of [bucket] must be a constant, received [textField]",
@@ -33867,7 +33867,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats by bin(datetimeField, integerField, textField, textField)",
+      "query": "from a_index | stats by bin(dateField, integerField, textField, textField)",
       "error": [
         "Argument of [bin] must be a constant, received [integerField]",
         "Argument of [bin] must be a constant, received [textField]",
@@ -33876,55 +33876,55 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats by bucket(datetimeField, integerField, datetimeField, datetimeField)",
+      "query": "from a_index | stats by bucket(dateField, integerField, dateField, dateField)",
       "error": [
         "Argument of [bucket] must be a constant, received [integerField]",
-        "Argument of [bucket] must be a constant, received [datetimeField]",
-        "Argument of [bucket] must be a constant, received [datetimeField]"
+        "Argument of [bucket] must be a constant, received [dateField]",
+        "Argument of [bucket] must be a constant, received [dateField]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bin(datetimeField, integerField, datetimeField, datetimeField)",
+      "query": "from a_index | stats by bin(dateField, integerField, dateField, dateField)",
       "error": [
         "Argument of [bin] must be a constant, received [integerField]",
-        "Argument of [bin] must be a constant, received [datetimeField]",
-        "Argument of [bin] must be a constant, received [datetimeField]"
+        "Argument of [bin] must be a constant, received [dateField]",
+        "Argument of [bin] must be a constant, received [dateField]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bucket(datetimeField, integerField, textField, datetimeField)",
+      "query": "from a_index | stats by bucket(dateField, integerField, textField, dateField)",
       "error": [
         "Argument of [bucket] must be a constant, received [integerField]",
         "Argument of [bucket] must be a constant, received [textField]",
-        "Argument of [bucket] must be a constant, received [datetimeField]"
+        "Argument of [bucket] must be a constant, received [dateField]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bin(datetimeField, integerField, textField, datetimeField)",
+      "query": "from a_index | stats by bin(dateField, integerField, textField, dateField)",
       "error": [
         "Argument of [bin] must be a constant, received [integerField]",
         "Argument of [bin] must be a constant, received [textField]",
-        "Argument of [bin] must be a constant, received [datetimeField]"
+        "Argument of [bin] must be a constant, received [dateField]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bucket(datetimeField, integerField, datetimeField, textField)",
+      "query": "from a_index | stats by bucket(dateField, integerField, dateField, textField)",
       "error": [
         "Argument of [bucket] must be a constant, received [integerField]",
-        "Argument of [bucket] must be a constant, received [datetimeField]",
+        "Argument of [bucket] must be a constant, received [dateField]",
         "Argument of [bucket] must be a constant, received [textField]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats by bin(datetimeField, integerField, datetimeField, textField)",
+      "query": "from a_index | stats by bin(dateField, integerField, dateField, textField)",
       "error": [
         "Argument of [bin] must be a constant, received [integerField]",
-        "Argument of [bin] must be a constant, received [datetimeField]",
+        "Argument of [bin] must be a constant, received [dateField]",
         "Argument of [bin] must be a constant, received [textField]"
       ],
       "warning": []
@@ -33948,7 +33948,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | sort bucket(datetimeField, 1 year)",
+      "query": "from a_index | sort bucket(dateField, 1 year)",
       "error": [
         "SORT does not support function bucket"
       ],
@@ -33976,7 +33976,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 1 year)",
       "error": [
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -33992,7 +33992,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, textField)",
       "error": [
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
         "Argument of [bucket] must be a constant, received [textField]",
         "Argument of [bucket] must be a constant, received [textField]"
@@ -34009,10 +34009,10 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -34027,10 +34027,10 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
         "Argument of [bucket] must be a constant, received [textField]",
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -34045,9 +34045,9 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), textField)",
       "error": [
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
-        "Argument of [bucket] must be [datetime], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [textField]"
       ],
       "warning": []
@@ -35827,22 +35827,22 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_string(datetimeField)",
+      "query": "from a_index | eval var = to_string(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval to_string(datetimeField)",
+      "query": "from a_index | eval to_string(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_str(datetimeField)",
+      "query": "from a_index | eval var = to_str(dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_string(to_datetime(datetimeField))",
+      "query": "from a_index | eval var = to_string(to_datetime(dateField))",
       "error": [],
       "warning": []
     },

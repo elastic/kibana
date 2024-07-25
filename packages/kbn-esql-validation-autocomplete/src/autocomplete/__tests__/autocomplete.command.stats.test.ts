@@ -77,7 +77,7 @@ describe('autocomplete.suggest', () => {
           'from a | stats by bucket(/',
           [
             ...getFieldNamesByType(['number', 'date']),
-            ...getFunctionSignaturesByReturnType('eval', ['datetime', 'number'], {
+            ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], {
               scalar: true,
             }),
           ].map((field) => `${field},`)
@@ -118,8 +118,8 @@ describe('autocomplete.suggest', () => {
       test('when typing inside function left paren', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
-          ...getFieldNamesByType(['number', 'datetime', 'boolean', 'ip']),
-          ...getFunctionSignaturesByReturnType('stats', ['number', 'datetime', 'boolean', 'ip'], {
+          ...getFieldNamesByType(['number', 'date', 'boolean', 'ip']),
+          ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean', 'ip'], {
             scalar: true,
           }),
         ];

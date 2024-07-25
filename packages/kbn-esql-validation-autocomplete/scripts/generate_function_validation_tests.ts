@@ -143,7 +143,7 @@ function generateImplicitDateCastingTestsForFunction(
   const allSignaturesWithDateParams = definition.signatures.filter((signature) =>
     signature.params.some(
       (param, i) =>
-        param.type === 'datetime' ||
+        param.type === 'date' ||
         (param.type === 'date_period' &&
           !definition.signatures.some((def) => isStringType(getParamAtPosition(def, i)?.type))) // don't count parameters that already accept a string
     )
@@ -169,7 +169,7 @@ function generateImplicitDateCastingTestsForFunction(
                 ...signature,
                 params: mappedParams.map((param) =>
                   // overwrite dates with a string
-                  param.type === 'datetime' ? { ...param, name: '"2022"' } : param
+                  param.type === 'date' ? { ...param, name: '"2022"' } : param
                 ),
               },
             ],
@@ -190,7 +190,7 @@ function generateImplicitDateCastingTestsForFunction(
                 ...signature,
                 params: mappedParams.map((param) =>
                   // overwrite dates with a string
-                  param.type === 'datetime' ? { ...param, name: 'concat("20", "22")' } : param
+                  param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
                 ),
               },
             ],

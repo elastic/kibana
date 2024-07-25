@@ -42,7 +42,7 @@ function createMathDefinition(
 // https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-functions-operators.html#_less_than
 const baseComparisonTypeTable: MathFunctionSignature[] = [
   // Verify what's the different between date and datetime
-  ['datetime', 'datetime', 'boolean'],
+  ['date', 'date', 'boolean'],
   ['double', 'double', 'boolean'],
   ['double', 'integer', 'boolean'],
   ['double', 'long', 'boolean'],
@@ -124,10 +124,10 @@ function createComparisonDefinition(
 
 const addTypeTable: MathFunctionSignature[] = [
   ['date_period', 'date_period', 'date_period'],
-  ['date_period', 'datetime', 'datetime'],
-  ['datetime', 'date_period', 'datetime'],
-  ['datetime', 'time_duration', 'datetime'],
-  ['datetime', 'time_literal', 'datetime'],
+  ['date_period', 'date', 'date'],
+  ['date', 'date_period', 'date'],
+  ['date', 'time_duration', 'date'],
+  ['date', 'time_literal', 'date'],
   ['double', 'double', 'double'],
   ['double', 'integer', 'double'],
   ['double', 'long', 'double'],
@@ -137,17 +137,17 @@ const addTypeTable: MathFunctionSignature[] = [
   ['long', 'double', 'double'],
   ['long', 'integer', 'long'],
   ['long', 'long', 'long'],
-  ['time_duration', 'datetime', 'datetime'],
+  ['time_duration', 'date', 'date'],
   ['time_duration', 'time_duration', 'time_duration'],
   ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-  ['time_literal', 'datetime', 'datetime'],
+  ['time_literal', 'date', 'date'],
 ];
 
 const subtractTypeTable: MathFunctionSignature[] = [
   ['date_period', 'date_period', 'date_period'],
-  ['datetime', 'date_period', 'datetime'],
-  ['datetime', 'time_duration', 'datetime'],
-  ['datetime', 'time_literal', 'datetime'],
+  ['date', 'date_period', 'date'],
+  ['date', 'time_duration', 'date'],
+  ['date', 'time_literal', 'date'],
   ['double', 'double', 'double'],
   ['double', 'integer', 'double'],
   ['double', 'long', 'double'],
@@ -157,10 +157,10 @@ const subtractTypeTable: MathFunctionSignature[] = [
   ['long', 'double', 'double'],
   ['long', 'integer', 'long'],
   ['long', 'long', 'long'],
-  ['time_duration', 'datetime', 'datetime'],
+  ['time_duration', 'date', 'date'],
   ['time_duration', 'time_duration', 'time_duration'],
   ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-  ['time_literal', 'datetime', 'datetime'],
+  ['time_literal', 'date', 'date'],
 ];
 
 const multiplyTypeTable: MathFunctionSignature[] = [
@@ -493,7 +493,7 @@ const inFunctions: FunctionDefinition[] = [
     },
     {
       params: [
-        { name: 'left', type: 'datetime' },
+        { name: 'left', type: 'date' },
         { name: 'right', type: 'any[]' },
       ],
       returnType: 'boolean',

@@ -372,8 +372,8 @@ describe('validation logic', () => {
           ['==', '!='].includes(op)
             ? []
             : [
-                `Argument of [${op}] must be [datetime], found value [false] type [boolean]`,
-                `Argument of [${op}] must be [datetime], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [date], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [date], found value [false] type [boolean]`,
               ]
         );
         for (const [valueTypeA, valueTypeB] of [['now()', '"2022"']]) {
@@ -387,10 +387,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `row var = now() ${op} now()`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [date_period], found value [now()] type [datetime]`]
+            ? [`Argument of [${op}] must be [date_period], found value [now()] type [date]`]
             : [
-                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
-                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
               ]
         );
       }
@@ -446,11 +446,11 @@ describe('validation logic', () => {
           testErrorsAndWarnings(`row var = now() - 1 ${capitalize(timeLiteral.name)}`, []);
           testErrorsAndWarnings(`row var = now() + 1 ${timeLiteral.name}`, []);
           testErrorsAndWarnings(`row 1 ${timeLiteral.name} + 1 year`, [
-            `Argument of [+] must be [datetime], found value [1 ${timeLiteral.name}] type [duration]`,
+            `Argument of [+] must be [date], found value [1 ${timeLiteral.name}] type [duration]`,
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`row var = now() ${op} 1 ${timeLiteral.name}`, [
-              `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
+              `Argument of [${op}] must be [double], found value [now()] type [date]`,
               `Argument of [${op}] must be [double], found value [1 ${timeLiteral.name}] type [duration]`,
             ]);
           }
@@ -535,11 +535,11 @@ describe('validation logic', () => {
     describe('keep', () => {
       testErrorsAndWarnings('from index | keep ', ["SyntaxError: missing ID_PATTERN at '<EOF>'"]);
       testErrorsAndWarnings(
-        'from index | keep keywordField, doubleField, integerField, datetimeField',
+        'from index | keep keywordField, doubleField, integerField, dateField',
         []
       );
       testErrorsAndWarnings(
-        'from index | keep `keywordField`, `doubleField`, `integerField`, `datetimeField`',
+        'from index | keep `keywordField`, `doubleField`, `integerField`, `dateField`',
         []
       );
       testErrorsAndWarnings('from index | keep 4.5', [
@@ -549,20 +549,20 @@ describe('validation logic', () => {
         "SyntaxError: missing ID_PATTERN at '<EOF>'",
       ]);
       testErrorsAndWarnings('from index | keep `4.5`', ['Unknown column [4.5]']);
-      testErrorsAndWarnings('from index | keep missingField, doubleField, datetimeField', [
+      testErrorsAndWarnings('from index | keep missingField, doubleField, dateField', [
         'Unknown column [missingField]',
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
-      testErrorsAndWarnings('from index | project textField, doubleField, datetimeField', [
+      testErrorsAndWarnings('from index | project textField, doubleField, dateField', [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
-      testErrorsAndWarnings('from index | PROJECT textField, doubleField, datetimeField', [
+      testErrorsAndWarnings('from index | PROJECT textField, doubleField, dateField', [
         "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
-      testErrorsAndWarnings('from index | project missingField, doubleField, datetimeField', [
+      testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
         "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | keep k*', []);
@@ -593,14 +593,14 @@ describe('validation logic', () => {
 
     describe('drop', () => {
       testErrorsAndWarnings('from index | drop ', ["SyntaxError: missing ID_PATTERN at '<EOF>'"]);
-      testErrorsAndWarnings('from index | drop textField, doubleField, datetimeField', []);
+      testErrorsAndWarnings('from index | drop textField, doubleField, dateField', []);
       testErrorsAndWarnings('from index | drop 4.5', [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
         "SyntaxError: missing ID_PATTERN at '.'",
         "SyntaxError: missing ID_PATTERN at '<EOF>'",
       ]);
-      testErrorsAndWarnings('from index | drop missingField, doubleField, datetimeField', [
+      testErrorsAndWarnings('from index | drop missingField, doubleField, dateField', [
         'Unknown column [missingField]',
       ]);
       testErrorsAndWarnings('from index | drop `any#Char$Field`', []);
@@ -643,7 +643,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | mv_expand ', [
         "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
       ]);
-      for (const type of ['text', 'integer', 'datetime', 'boolean', 'ip']) {
+      for (const type of ['text', 'integer', 'date', 'boolean', 'ip']) {
         testErrorsAndWarnings(`from a_index | mv_expand ${type}Field`, []);
       }
 
@@ -809,14 +809,14 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where (NOT (doubleField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
 
-        for (const type of ['text', 'double', 'datetime', 'boolean', 'ip']) {
+        for (const type of ['text', 'double', 'date', 'boolean', 'ip']) {
           testErrorsAndWarnings(
             `from a_index | where ${type}Field ${op} ${type}Field`,
             type !== 'boolean' || ['==', '!='].includes(op)
               ? []
               : [
-                  `Argument of [${op}] must be [datetime], found value [${type}Field] type [${type}]`,
-                  `Argument of [${op}] must be [datetime], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
                 ]
           );
         }
@@ -1049,15 +1049,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval (doubleField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | eval (NOT (doubleField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 0`, []);
-        for (const type of ['text', 'double', 'datetime', 'boolean', 'ip']) {
+        for (const type of ['text', 'double', 'date', 'boolean', 'ip']) {
           if (type === 'boolean') {
             testErrorsAndWarnings(
               `from a_index | eval ${type}Field ${op} ${type}Field`,
               type !== 'boolean' || ['==', '!='].includes(op)
                 ? []
                 : [
-                    `Argument of [${op}] must be [datetime], found value [${type}Field] type [${type}]`,
-                    `Argument of [${op}] must be [datetime], found value [${type}Field] type [${type}]`,
+                    `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
+                    `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
                   ]
             );
           } else {
@@ -1080,14 +1080,14 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [double], found value [keywordField] type [keyword]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField ${op} "2022"`, [
-          `Argument of [${op}] must be [datetime], found value [doubleField] type [double]`,
+          `Argument of [${op}] must be [date], found value [doubleField] type [double]`,
         ]);
 
-        testErrorsAndWarnings(`from a_index | eval datetimeField ${op} keywordField`, [
-          `Argument of [${op}] must be [datetime], found value [keywordField] type [keyword]`,
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} keywordField`, [
+          `Argument of [${op}] must be [date], found value [keywordField] type [keyword]`,
         ]);
-        testErrorsAndWarnings(`from a_index | eval keywordField ${op} datetimeField`, [
-          `Argument of [${op}] must be [datetime], found value [keywordField] type [keyword]`,
+        testErrorsAndWarnings(`from a_index | eval keywordField ${op} dateField`, [
+          `Argument of [${op}] must be [date], found value [keywordField] type [keyword]`,
         ]);
 
         // Check that the implicit cast doesn't apply for fields
@@ -1095,11 +1095,11 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [double], found value [textField] type [text]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval textField ${op} now()`, [
-          `Argument of [${op}] must be [datetime], found value [textField] type [text]`,
+          `Argument of [${op}] must be [date], found value [textField] type [text]`,
         ]);
 
-        testErrorsAndWarnings(`from a_index | eval datetimeField ${op} "2022"`, []);
-        testErrorsAndWarnings(`from a_index | eval "2022" ${op} datetimeField`, []);
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
+        testErrorsAndWarnings(`from a_index | eval "2022" ${op} dateField`, []);
 
         testErrorsAndWarnings(`from a_index | eval versionField ${op} "1.2.3"`, []);
         testErrorsAndWarnings(`from a_index | eval "1.2.3" ${op} versionField`, []);
@@ -1108,13 +1108,13 @@ describe('validation logic', () => {
           `from a_index | eval booleanField ${op} "true"`,
           ['==', '!='].includes(op)
             ? []
-            : [`Argument of [${op}] must be [datetime], found value [booleanField] type [boolean]`]
+            : [`Argument of [${op}] must be [date], found value [booleanField] type [boolean]`]
         );
         testErrorsAndWarnings(
           `from a_index | eval "true" ${op} booleanField`,
           ['==', '!='].includes(op)
             ? []
-            : [`Argument of [${op}] must be [datetime], found value [booleanField] type [boolean]`]
+            : [`Argument of [${op}] must be [date], found value [booleanField] type [boolean]`]
         );
 
         testErrorsAndWarnings(`from a_index | eval ipField ${op} "136.36.3.205"`, []);
@@ -1127,7 +1127,7 @@ describe('validation logic', () => {
         []
       );
       testErrorsAndWarnings(
-        'from a_index | eval datetimeField in ("2023-12-12", "2024-12-12", date_parse("yyyy-MM-dd", "2025-12-12"))',
+        'from a_index | eval dateField in ("2023-12-12", "2024-12-12", date_parse("yyyy-MM-dd", "2025-12-12"))',
         []
       );
       testErrorsAndWarnings('from a_index | eval booleanField in ("true", "false", false)', []);
@@ -1143,10 +1143,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from a_index | eval now() ${op} now()`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [date_period], found value [now()] type [datetime]`]
+            ? [`Argument of [${op}] must be [date_period], found value [now()] type [date]`]
             : [
-                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
-                `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
+                `Argument of [${op}] must be [double], found value [now()] type [date]`,
               ]
         );
 
@@ -1292,22 +1292,19 @@ describe('validation logic', () => {
           //   `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
           // ]);
           testErrorsAndWarnings(`from a_index | eval var = now() - 1 ${unit}`, []);
-          testErrorsAndWarnings(`from a_index | eval var = datetimeField - 1 ${unit}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${unit}`, []);
           testErrorsAndWarnings(
-            `from a_index | eval var = datetimeField - 1 ${unit.toUpperCase()}`,
+            `from a_index | eval var = dateField - 1 ${unit.toUpperCase()}`,
             []
           );
-          testErrorsAndWarnings(
-            `from a_index | eval var = datetimeField - 1 ${capitalize(unit)}`,
-            []
-          );
-          testErrorsAndWarnings(`from a_index | eval var = datetimeField + 1 ${unit}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${capitalize(unit)}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = dateField + 1 ${unit}`, []);
           testErrorsAndWarnings(`from a_index | eval 1 ${unit} + 1 year`, [
-            `Argument of [+] must be [datetime], found value [1 ${unit}] type [duration]`,
+            `Argument of [+] must be [date], found value [1 ${unit}] type [duration]`,
           ]);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${unit}`, [
-              `Argument of [${op}] must be [double], found value [now()] type [datetime]`,
+              `Argument of [${op}] must be [double], found value [now()] type [date]`,
               `Argument of [${op}] must be [double], found value [1 ${unit}] type [duration]`,
             ]);
           }
@@ -2425,14 +2422,11 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(datetimeField, datetimeField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval coalesce(datetimeField, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(dateField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_datetime(datetimeField), to_datetime(datetimeField))',
+          'from a_index | eval var = coalesce(to_datetime(dateField), to_datetime(dateField))',
           []
         );
 
@@ -2649,17 +2643,14 @@ describe('validation logic', () => {
 
       describe('date_diff', () => {
         testErrorsAndWarnings(
-          'from a_index | eval var = date_diff("year", datetimeField, datetimeField)',
+          'from a_index | eval var = date_diff("year", dateField, dateField)',
           []
         );
 
-        testErrorsAndWarnings(
-          'from a_index | eval date_diff("year", datetimeField, datetimeField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval date_diff("year", dateField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_diff("year", to_datetime(datetimeField), to_datetime(datetimeField))',
+          'from a_index | eval var = date_diff("year", to_datetime(dateField), to_datetime(dateField))',
           []
         );
 
@@ -2667,35 +2658,29 @@ describe('validation logic', () => {
           'from a_index | eval date_diff(booleanField, booleanField, booleanField)',
           [
             'Argument of [date_diff] must be [keyword], found value [booleanField] type [boolean]',
-            'Argument of [date_diff] must be [datetime], found value [booleanField] type [boolean]',
-            'Argument of [date_diff] must be [datetime], found value [booleanField] type [boolean]',
+            'Argument of [date_diff] must be [date], found value [booleanField] type [boolean]',
+            'Argument of [date_diff] must be [date], found value [booleanField] type [boolean]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_diff(textField, datetimeField, datetimeField)',
+          'from a_index | eval var = date_diff(textField, dateField, dateField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval date_diff(textField, dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_diff(to_string(booleanField), to_datetime(dateField), to_datetime(dateField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval date_diff(textField, datetimeField, datetimeField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_diff(to_string(booleanField), to_datetime(datetimeField), to_datetime(datetimeField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_diff("year", datetimeField, datetimeField, extraArg)',
+          'from a_index | eval date_diff("year", dateField, dateField, extraArg)',
           ['Error: [date_diff] function expects exactly 3 arguments, got 4.']
         );
 
-        testErrorsAndWarnings(
-          'from a_index | sort date_diff("year", datetimeField, datetimeField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | sort date_diff("year", dateField, dateField)', []);
 
         testErrorsAndWarnings('from a_index | eval date_diff(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_diff(nullVar, nullVar, nullVar)', []);
@@ -2704,8 +2689,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
-            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
           ]
         );
 
@@ -2714,8 +2699,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_diff(textField, concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
-            'Argument of [date_diff] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
           ]
         );
       });
@@ -2739,47 +2724,44 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = date_extract(true, true)', [
           'Argument of [date_extract] must be [keyword], found value [true] type [boolean]',
-          'Argument of [date_extract] must be [datetime], found value [true] type [boolean]',
+          'Argument of [date_extract] must be [date], found value [true] type [boolean]',
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", datetimeField)',
+          'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", dateField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", datetimeField)',
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", dateField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", to_datetime(datetimeField))',
+          'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", to_datetime(dateField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(booleanField, booleanField)', [
           'Argument of [date_extract] must be [keyword], found value [booleanField] type [boolean]',
-          'Argument of [date_extract] must be [datetime], found value [booleanField] type [boolean]',
+          'Argument of [date_extract] must be [date], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_extract(textField, datetimeField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_extract(textField, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = date_extract(textField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval date_extract(textField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_extract(to_string(booleanField), to_datetime(datetimeField))',
+          'from a_index | eval var = date_extract(to_string(booleanField), to_datetime(dateField))',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", datetimeField, extraArg)',
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", dateField, extraArg)',
           ['Error: [date_extract] function expects exactly 2 arguments, got 3.']
         );
 
         testErrorsAndWarnings(
-          'from a_index | sort date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", datetimeField)',
+          'from a_index | sort date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", dateField)',
           []
         );
 
@@ -2794,13 +2776,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
           [
-            'Argument of [date_extract] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [keyword]',
           ]
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(textField, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_extract(textField, concat("20", "22"))', [
-          'Argument of [date_extract] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [keyword]',
         ]);
       });
 
@@ -2813,48 +2795,42 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = date_format(true, true)', [
           'Argument of [date_format] must be [keyword], found value [true] type [boolean]',
-          'Argument of [date_format] must be [datetime], found value [true] type [boolean]',
+          'Argument of [date_format] must be [date], found value [true] type [boolean]',
         ]);
 
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_format(keywordField, datetimeField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_format(keywordField, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = date_format(keywordField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval date_format(keywordField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_format(to_string(booleanField), to_datetime(datetimeField))',
+          'from a_index | eval var = date_format(to_string(booleanField), to_datetime(dateField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | eval date_format(booleanField, booleanField)', [
           'Argument of [date_format] must be [keyword], found value [booleanField] type [boolean]',
-          'Argument of [date_format] must be [datetime], found value [booleanField] type [boolean]',
+          'Argument of [date_format] must be [date], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_format(textField, datetimeField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_format(textField, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = date_format(textField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval date_format(textField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval date_format(keywordField, datetimeField, extraArg)',
+          'from a_index | eval date_format(keywordField, dateField, extraArg)',
           ['Error: [date_format] function expects no more than 2 arguments, got 3.']
         );
 
-        testErrorsAndWarnings('from a_index | sort date_format(keywordField, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | sort date_format(keywordField, dateField)', []);
         testErrorsAndWarnings('from a_index | eval date_format(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_format(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_format(keywordField, "2022")', []);
 
         testErrorsAndWarnings('from a_index | eval date_format(keywordField, concat("20", "22"))', [
-          'Argument of [date_format] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [keyword]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval date_format(textField, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_format(textField, concat("20", "22"))', [
-          'Argument of [date_format] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [keyword]',
         ]);
       });
 
@@ -2916,51 +2892,51 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('row var = date_trunc(true, true)', [
           'Argument of [date_trunc] must be [time_literal], found value [true] type [boolean]',
-          'Argument of [date_trunc] must be [datetime], found value [true] type [boolean]',
+          'Argument of [date_trunc] must be [date], found value [true] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = date_trunc(1 year, datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = date_trunc(1 year, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_trunc(1 year, to_datetime(datetimeField))',
+          'from a_index | eval var = date_trunc(1 year, to_datetime(dateField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | eval date_trunc(booleanField, booleanField)', [
           'Argument of [date_trunc] must be [time_literal], found value [booleanField] type [boolean]',
-          'Argument of [date_trunc] must be [datetime], found value [booleanField] type [boolean]',
+          'Argument of [date_trunc] must be [date], found value [booleanField] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = date_trunc(textField, datetimeField)', [
+        testErrorsAndWarnings('from a_index | eval var = date_trunc(textField, dateField)', [
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
         ]);
-        testErrorsAndWarnings('from a_index | eval date_trunc(textField, datetimeField)', [
+        testErrorsAndWarnings('from a_index | eval date_trunc(textField, dateField)', [
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_trunc(textField, to_datetime(datetimeField))',
+          'from a_index | eval var = date_trunc(textField, to_datetime(dateField))',
           ['Argument of [date_trunc] must be [time_literal], found value [textField] type [text]']
         );
 
-        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, datetimeField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, dateField, extraArg)', [
           'Error: [date_trunc] function expects exactly 2 arguments, got 3.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort date_trunc(1 year, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | sort date_trunc(1 year, dateField)', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
-          'Argument of [date_trunc] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [keyword]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_trunc(textField, "2022")', [
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_trunc(textField, concat("20", "22"))', [
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
-          'Argument of [date_trunc] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [keyword]',
         ]);
       });
 
@@ -4087,14 +4063,11 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings(
-          'from a_index | eval var = mv_append(datetimeField, datetimeField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval mv_append(datetimeField, datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_append(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(dateField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_append(to_datetime(datetimeField), to_datetime(datetimeField))',
+          'from a_index | eval var = mv_append(to_datetime(dateField), to_datetime(dateField))',
           []
         );
 
@@ -4342,7 +4315,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where mv_count(cartesianPointField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(cartesianShapeField) > 0', []);
-        testErrorsAndWarnings('from a_index | where mv_count(datetimeField) > 0', []);
+        testErrorsAndWarnings('from a_index | where mv_count(dateField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(geoPointField) > 0', []);
         testErrorsAndWarnings('from a_index | where mv_count(geoShapeField) > 0', []);
@@ -4381,9 +4354,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = mv_count(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_count(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_count(to_datetime(datetimeField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_count(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_count(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_count(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval mv_count(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_count(to_double(booleanField))', []);
@@ -4513,12 +4486,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_dedupe(datetimeField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = mv_dedupe(to_datetime(datetimeField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(to_double(booleanField))', []);
@@ -4653,9 +4623,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = mv_first(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_first(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_first(to_datetime(datetimeField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_first(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_first(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_first(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval mv_first(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_first(to_double(booleanField))', []);
@@ -4786,9 +4756,9 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = mv_last(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_last(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_last(to_datetime(datetimeField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_last(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_last(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_last(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval mv_last(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_last(to_double(booleanField))', []);
@@ -4879,9 +4849,9 @@ describe('validation logic', () => {
           'Using wildcards (*) in mv_max is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = mv_max(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_max(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_max(to_datetime(datetimeField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_max(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_max(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_max(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval mv_max(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_max(to_double(booleanField))', []);
@@ -5016,9 +4986,9 @@ describe('validation logic', () => {
           'Using wildcards (*) in mv_min is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = mv_min(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval mv_min(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_min(to_datetime(datetimeField))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_min(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_min(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = mv_min(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval mv_min(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_min(to_double(booleanField))', []);
@@ -5234,17 +5204,17 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(datetimeField, integerField, integerField)',
+          'from a_index | eval var = mv_slice(dateField, integerField, integerField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval mv_slice(datetimeField, integerField, integerField)',
+          'from a_index | eval mv_slice(dateField, integerField, integerField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(to_datetime(datetimeField), to_integer(booleanField), to_integer(booleanField))',
+          'from a_index | eval var = mv_slice(to_datetime(dateField), to_integer(booleanField), to_integer(booleanField))',
           []
         );
 
@@ -5424,8 +5394,8 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval var = mv_sort(booleanField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(booleanField, "asc")', []);
-        testErrorsAndWarnings('from a_index | eval var = mv_sort(datetimeField, "asc")', []);
-        testErrorsAndWarnings('from a_index | eval mv_sort(datetimeField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(dateField, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(dateField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sort(doubleField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(doubleField, "asc")', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sort(integerField, "asc")', []);
@@ -7982,19 +7952,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = to_datetime(to_string(true))', []);
 
         testErrorsAndWarnings('row var = to_datetime(true)', [
-          'Argument of [to_datetime] must be [datetime], found value [true] type [boolean]',
+          'Argument of [to_datetime] must be [date], found value [true] type [boolean]',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_datetime(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_datetime(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_dt(datetimeField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_datetime(to_datetime(datetimeField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval var = to_datetime(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval to_datetime(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dt(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_datetime(to_datetime(dateField))', []);
 
         testErrorsAndWarnings('from a_index | eval to_datetime(booleanField)', [
-          'Argument of [to_datetime] must be [datetime], found value [booleanField] type [boolean]',
+          'Argument of [to_datetime] must be [date], found value [booleanField] type [boolean]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval var = to_datetime(*)', [
@@ -8026,11 +7993,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval to_datetime(unsignedLongField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_dt(unsignedLongField)', []);
 
-        testErrorsAndWarnings('from a_index | eval to_datetime(datetimeField, extraArg)', [
+        testErrorsAndWarnings('from a_index | eval to_datetime(dateField, extraArg)', [
           'Error: [to_datetime] function expects exactly one argument, got 2.',
         ]);
 
-        testErrorsAndWarnings('from a_index | sort to_datetime(datetimeField)', []);
+        testErrorsAndWarnings('from a_index | sort to_datetime(dateField)', []);
         testErrorsAndWarnings('from a_index | eval to_datetime(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_datetime(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval to_datetime("2022")', []);
@@ -8127,7 +8094,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | where to_double(counterDoubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_double(counterIntegerField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_double(counterLongField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_double(datetimeField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_double(dateField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_double(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_double(integerField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_double(keywordField) > 0', []);
@@ -8156,13 +8123,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = to_double(counterLongField)', []);
         testErrorsAndWarnings('from a_index | eval to_double(counterLongField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_dbl(counterLongField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_double(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_double(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_dbl(datetimeField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_double(to_datetime(datetimeField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval var = to_double(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval to_double(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_dbl(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_double(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_double(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval to_double(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_dbl(doubleField)', []);
@@ -8337,7 +8301,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | where to_integer(counterIntegerField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_integer(datetimeField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_integer(dateField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_integer(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_integer(integerField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_integer(keywordField) > 0', []);
@@ -8360,13 +8324,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval var = to_integer(counterIntegerField)', []);
         testErrorsAndWarnings('from a_index | eval to_integer(counterIntegerField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_int(counterIntegerField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_integer(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_integer(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_int(datetimeField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_integer(to_datetime(datetimeField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval var = to_integer(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval to_integer(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_int(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_integer(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_integer(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval to_integer(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_int(doubleField)', []);
@@ -8473,7 +8434,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where to_long(counterIntegerField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_long(counterLongField) > 0', []);
-        testErrorsAndWarnings('from a_index | where to_long(datetimeField) > 0', []);
+        testErrorsAndWarnings('from a_index | where to_long(dateField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_long(doubleField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_long(integerField) > 0', []);
         testErrorsAndWarnings('from a_index | where to_long(keywordField) > 0', []);
@@ -8496,9 +8457,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval to_long(counterIntegerField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_long(counterLongField)', []);
         testErrorsAndWarnings('from a_index | eval to_long(counterLongField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_long(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_long(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_long(to_datetime(datetimeField))', []);
+        testErrorsAndWarnings('from a_index | eval var = to_long(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval to_long(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_long(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_long(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval to_long(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_long(to_double(booleanField))', []);
@@ -8657,8 +8618,8 @@ describe('validation logic', () => {
           'Argument of [>] must be [double], found value [to_unsigned_long(cartesianPointField)] type [unsigned_long]',
         ]);
 
-        testErrorsAndWarnings('from a_index | where to_unsigned_long(datetimeField) > 0', [
-          'Argument of [>] must be [double], found value [to_unsigned_long(datetimeField)] type [unsigned_long]',
+        testErrorsAndWarnings('from a_index | where to_unsigned_long(dateField) > 0', [
+          'Argument of [>] must be [double], found value [to_unsigned_long(dateField)] type [unsigned_long]',
         ]);
         testErrorsAndWarnings('from a_index | where to_unsigned_long(doubleField) > 0', [
           'Argument of [>] must be [double], found value [to_unsigned_long(doubleField)] type [unsigned_long]',
@@ -8695,13 +8656,13 @@ describe('validation logic', () => {
           'Using wildcards (*) in to_unsigned_long is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_unsigned_long(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_ul(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_ulong(datetimeField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_unsigned_long(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval to_unsigned_long(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ul(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_ulong(dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = to_unsigned_long(to_datetime(datetimeField))',
+          'from a_index | eval var = to_unsigned_long(to_datetime(dateField))',
           []
         );
 
@@ -11743,8 +11704,8 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = max(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | stats max(datetimeField)', []);
+        testErrorsAndWarnings('from a_index | stats var = max(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats max(dateField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats max(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(booleanField)', []);
@@ -11780,11 +11741,11 @@ describe('validation logic', () => {
           'WHERE does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | where max(datetimeField)', [
+        testErrorsAndWarnings('from a_index | where max(dateField)', [
           'WHERE does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | where max(datetimeField) > 0', [
+        testErrorsAndWarnings('from a_index | where max(dateField) > 0', [
           'WHERE does not support function max',
         ]);
 
@@ -11860,19 +11821,19 @@ describe('validation logic', () => {
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = max(datetimeField)', [
+        testErrorsAndWarnings('from a_index | eval var = max(dateField)', [
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = max(datetimeField) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = max(dateField) > 0', [
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval max(datetimeField)', [
+        testErrorsAndWarnings('from a_index | eval max(dateField)', [
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval max(datetimeField) > 0', [
+        testErrorsAndWarnings('from a_index | eval max(dateField) > 0', [
           'EVAL does not support function max',
         ]);
 
@@ -12092,8 +12053,8 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | stats var = min(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | stats min(datetimeField)', []);
+        testErrorsAndWarnings('from a_index | stats var = min(dateField)', []);
+        testErrorsAndWarnings('from a_index | stats min(dateField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats min(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(booleanField)', []);
@@ -12129,11 +12090,11 @@ describe('validation logic', () => {
           'WHERE does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | where min(datetimeField)', [
+        testErrorsAndWarnings('from a_index | where min(dateField)', [
           'WHERE does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | where min(datetimeField) > 0', [
+        testErrorsAndWarnings('from a_index | where min(dateField) > 0', [
           'WHERE does not support function min',
         ]);
 
@@ -12209,19 +12170,19 @@ describe('validation logic', () => {
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = min(datetimeField)', [
+        testErrorsAndWarnings('from a_index | eval var = min(dateField)', [
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = min(datetimeField) > 0', [
+        testErrorsAndWarnings('from a_index | eval var = min(dateField) > 0', [
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval min(datetimeField)', [
+        testErrorsAndWarnings('from a_index | eval min(dateField)', [
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval min(datetimeField) > 0', [
+        testErrorsAndWarnings('from a_index | eval min(dateField) > 0', [
           'EVAL does not support function min',
         ]);
 
@@ -13546,8 +13507,8 @@ describe('validation logic', () => {
       });
 
       describe('bucket', () => {
-        testErrorsAndWarnings('from a_index | stats by bucket(datetimeField, 1 year)', []);
-        testErrorsAndWarnings('from a_index | stats by bin(datetimeField, 1 year)', []);
+        testErrorsAndWarnings('from a_index | stats by bucket(dateField, 1 year)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(dateField, 1 year)', []);
 
         testErrorsAndWarnings('from a_index | stats by bucket(integerField, integerField)', [
           'Argument of [bucket] must be a constant, received [integerField]',
@@ -13558,7 +13519,7 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(datetimeField, integerField, textField, textField)',
+          'from a_index | stats by bucket(dateField, integerField, textField, textField)',
           [
             'Argument of [bucket] must be a constant, received [integerField]',
             'Argument of [bucket] must be a constant, received [textField]',
@@ -13567,7 +13528,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats by bin(datetimeField, integerField, textField, textField)',
+          'from a_index | stats by bin(dateField, integerField, textField, textField)',
           [
             'Argument of [bin] must be a constant, received [integerField]',
             'Argument of [bin] must be a constant, received [textField]',
@@ -13576,55 +13537,55 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(datetimeField, integerField, datetimeField, datetimeField)',
+          'from a_index | stats by bucket(dateField, integerField, dateField, dateField)',
           [
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be a constant, received [datetimeField]',
-            'Argument of [bucket] must be a constant, received [datetimeField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats by bin(datetimeField, integerField, datetimeField, datetimeField)',
+          'from a_index | stats by bin(dateField, integerField, dateField, dateField)',
           [
             'Argument of [bin] must be a constant, received [integerField]',
-            'Argument of [bin] must be a constant, received [datetimeField]',
-            'Argument of [bin] must be a constant, received [datetimeField]',
+            'Argument of [bin] must be a constant, received [dateField]',
+            'Argument of [bin] must be a constant, received [dateField]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(datetimeField, integerField, textField, datetimeField)',
+          'from a_index | stats by bucket(dateField, integerField, textField, dateField)',
           [
             'Argument of [bucket] must be a constant, received [integerField]',
             'Argument of [bucket] must be a constant, received [textField]',
-            'Argument of [bucket] must be a constant, received [datetimeField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats by bin(datetimeField, integerField, textField, datetimeField)',
+          'from a_index | stats by bin(dateField, integerField, textField, dateField)',
           [
             'Argument of [bin] must be a constant, received [integerField]',
             'Argument of [bin] must be a constant, received [textField]',
-            'Argument of [bin] must be a constant, received [datetimeField]',
+            'Argument of [bin] must be a constant, received [dateField]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats by bucket(datetimeField, integerField, datetimeField, textField)',
+          'from a_index | stats by bucket(dateField, integerField, dateField, textField)',
           [
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be a constant, received [datetimeField]',
+            'Argument of [bucket] must be a constant, received [dateField]',
             'Argument of [bucket] must be a constant, received [textField]',
           ]
         );
 
         testErrorsAndWarnings(
-          'from a_index | stats by bin(datetimeField, integerField, datetimeField, textField)',
+          'from a_index | stats by bin(dateField, integerField, dateField, textField)',
           [
             'Argument of [bin] must be a constant, received [integerField]',
-            'Argument of [bin] must be a constant, received [datetimeField]',
+            'Argument of [bin] must be a constant, received [dateField]',
             'Argument of [bin] must be a constant, received [textField]',
           ]
         );
@@ -13647,7 +13608,7 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | sort bucket(datetimeField, 1 year)', [
+        testErrorsAndWarnings('from a_index | sort bucket(dateField, 1 year)', [
           'SORT does not support function bucket',
         ]);
 
@@ -13664,7 +13625,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
         testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', [
-          'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
         ]);
 
         testErrorsAndWarnings(
@@ -13679,7 +13640,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, textField, textField)',
           [
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
             'Argument of [bucket] must be a constant, received [textField]',
             'Argument of [bucket] must be a constant, received [textField]',
@@ -13693,10 +13654,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
           ]
         );
 
@@ -13711,10 +13672,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, textField, concat("20", "22"))',
           [
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
             'Argument of [bucket] must be a constant, received [textField]',
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
           ]
         );
 
@@ -13729,9 +13690,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), textField)',
           [
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be [datetime], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [textField]',
           ]
         );
@@ -14834,13 +14795,10 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = to_string(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval to_string(datetimeField)', []);
-        testErrorsAndWarnings('from a_index | eval var = to_str(datetimeField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = to_string(to_datetime(datetimeField))',
-          []
-        );
+        testErrorsAndWarnings('from a_index | eval var = to_string(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval to_string(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_str(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = to_string(to_datetime(dateField))', []);
         testErrorsAndWarnings('from a_index | eval var = to_string(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval to_string(doubleField)', []);
         testErrorsAndWarnings('from a_index | eval var = to_str(doubleField)', []);
