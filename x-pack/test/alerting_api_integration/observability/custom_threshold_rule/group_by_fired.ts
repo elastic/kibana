@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               index: DATA_VIEW_ID,
             },
-            groupBy: ['host.name', 'container.id'],
+            groupBy: ['host.name', 'container.id', 'event.dataset', '_index'],
           },
           actions: [
             {
@@ -209,10 +209,9 @@ export default function ({ getService }: FtrProviderContext) {
           'custom_threshold.fired'
         );
         expect(resp.hits.hits[0]._source).property('tags').contain('observability');
-        expect(resp.hits.hits[0]._source).property(
-          'kibana.alert.instance.id',
-          'host-0,container-0'
-        );
+        expect(resp.hits.hits[0]._source)
+          .property('kibana.alert.instance.id')
+          .contain('host-0,container-0,system.cpu,kbn-data-forge-fake_hosts.fake_hosts');
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
@@ -223,20 +222,23 @@ export default function ({ getService }: FtrProviderContext) {
           .eql(['00-00-5E-00-53-23', '00-00-5E-00-53-24']);
         expect(resp.hits.hits[0]._source).property('container.id', 'container-0');
         expect(resp.hits.hits[0]._source).property('container.name', 'container-name');
+        expect(resp.hits.hits[0]._source).property('event.dataset', 'system.cpu');
         expect(resp.hits.hits[0]._source).not.property('container.cpu');
 
-        expect(resp.hits.hits[0]._source)
-          .property('kibana.alert.group')
-          .eql([
-            {
-              field: 'host.name',
-              value: 'host-0',
-            },
-            {
-              field: 'container.id',
-              value: 'container-0',
-            },
-          ]);
+        const alertGroups = (resp.hits.hits[0]._source as any)?.['kibana.alert.group'];
+        expect(alertGroups[0]).eql({
+          field: 'host.name',
+          value: 'host-0',
+        });
+        expect(alertGroups[1]).eql({
+          field: 'container.id',
+          value: 'container-0',
+        });
+        expect(alertGroups[2]).eql({
+          field: 'event.dataset',
+          value: 'system.cpu',
+        });
+        expect(alertGroups[3].value).contain('kbn-data-forge-fake_hosts.fake_hosts');
         expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
@@ -253,7 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
             alertOnNoData: true,
             alertOnGroupDisappear: true,
             searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
-            groupBy: ['host.name', 'container.id'],
+            groupBy: ['host.name', 'container.id', 'event.dataset', '_index'],
           });
       });
 
@@ -269,15 +271,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
           `https://localhost:5601/app/observability/alerts/${alertId}`
         );
-        expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average system.cpu.total.norm.pct is 80%, above or equal the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0,container-0)`
+        expect(resp.hits.hits[0]._source?.reason).contain(
+          `Average system.cpu.total.norm.pct is 80%, above or equal the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0,container-0,system.cpu,kbn-data-forge-fake_hosts.fake_hosts`
         );
         expect(resp.hits.hits[0]._source?.value).eql('80%');
         expect(resp.hits.hits[0]._source?.host).eql(
           '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
         );
-        expect(resp.hits.hits[0]._source?.group).eql(
-          '{"field":"host.name","value":"host-0"},{"field":"container.id","value":"container-0"}'
+        expect(resp.hits.hits[0]._source?.group).contain(
+          '{"field":"host.name","value":"host-0"},{"field":"container.id","value":"container-0"},{"field":"event.dataset","value":"system.cpu"},{"field":"_index","value":"kbn-data-forge-fake_hosts.fake_hosts'
         );
       });
     });
