@@ -73,6 +73,7 @@ import {
   PerformBulkActionRequestQueryInput,
   PerformBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
+import { PerformRuleUpgradeRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/perform_rule_upgrade/perform_rule_upgrade_route.gen';
 import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { RulePreviewRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -561,6 +562,17 @@ detection engine rules.
         .query(props.query);
     },
     /**
+     * Upgrade prebuilt detection rules.
+     */
+    performRuleUpgrade(props: PerformRuleUpgradeProps) {
+      return supertest
+        .post('/api/detection_engine/rules/prebuilt/_perform_upgrade')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
      */
     previewRiskScore(props: PreviewRiskScoreProps) {
@@ -799,6 +811,9 @@ export interface PatchRuleProps {
 export interface PerformBulkActionProps {
   query: PerformBulkActionRequestQueryInput;
   body: PerformBulkActionRequestBodyInput;
+}
+export interface PerformRuleUpgradeProps {
+  body: PerformRuleUpgradeRequestBodyInput;
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;

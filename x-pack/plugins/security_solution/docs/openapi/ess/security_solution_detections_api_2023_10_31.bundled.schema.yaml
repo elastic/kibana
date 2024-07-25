@@ -772,6 +772,26 @@ paths:
       summary: Import detection rules
       tags:
         - Import/Export API
+  /api/detection_engine/rules/prebuilt/_perform_upgrade:
+    post:
+      description: Upgrade prebuilt detection rules.
+      operationId: PerformRuleUpgrade
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformRuleUpgradeRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformRuleUpgradeResponseBody'
+          description: Indicates a successful call.
+      summary: Perform rule upgrade
+      tags:
+        - Rules API
   /api/detection_engine/rules/prepackaged:
     put:
       description: Install and update all Elastic prebuilt detection rules and Timelines.
@@ -4175,6 +4195,57 @@ components:
       required:
         - action_type_id
         - params
+    PerformRuleUpgradeRequestBody:
+      oneOf:
+        - $ref: '#/components/schemas/UpgradeAllRulesRequest'
+        - $ref: '#/components/schemas/UpgradeSpecificRulesRequest'
+    PerformRuleUpgradeResponseBody:
+      type: object
+      properties:
+        errors:
+          items:
+            $ref: '#/components/schemas/ErrorSchema'
+          type: array
+        results:
+          type: object
+          properties:
+            skipped:
+              items:
+                $ref: '#/components/schemas/SkippedRuleUpgrade'
+              type: array
+            updated:
+              items:
+                $ref: '#/components/schemas/RuleResponse'
+              type: array
+          required:
+            - updated
+            - skipped
+        summary:
+          type: object
+          properties:
+            failed:
+              type: number
+            skipped:
+              type: number
+            succeeded:
+              type: number
+            total:
+              type: number
+          required:
+            - total
+            - succeeded
+            - skipped
+            - failed
+      required:
+        - summary
+        - results
+        - errors
+    PickVersionValues:
+      enum:
+        - BASE
+        - CURRENT
+        - TARGET
+      type: string
     PlatformErrorResponse:
       type: object
       properties:
@@ -5225,6 +5296,21 @@ components:
         - $ref: '#/components/schemas/EsqlRuleUpdateProps'
       discriminator:
         propertyName: type
+    RuleUpgradeSpecifier:
+      type: object
+      properties:
+        pick_version:
+          $ref: '#/components/schemas/PickVersionValues'
+        revision:
+          type: number
+        rule_id:
+          $ref: '#/components/schemas/RuleSignatureId'
+        version:
+          $ref: '#/components/schemas/RuleVersion'
+      required:
+        - rule_id
+        - revision
+        - version
     RuleVersion:
       description: The rule's version number.
       minimum: 1
@@ -5777,6 +5863,20 @@ components:
           type: string
       required:
         - index
+    SkippedRuleUpgrade:
+      type: object
+      properties:
+        reason:
+          $ref: '#/components/schemas/SkipRuleUpgradeReason'
+        rule_id:
+          type: string
+      required:
+        - rule_id
+        - reason
+    SkipRuleUpgradeReason:
+      enum:
+        - RULE_UP_TO_DATE
+      type: string
     SortOrder:
       enum:
         - asc
@@ -6901,6 +7001,33 @@ components:
     TimestampOverrideFallbackDisabled:
       description: Disables the fallback to the event's @timestamp field
       type: boolean
+    UpgradeAllRulesRequest:
+      type: object
+      properties:
+        mode:
+          enum:
+            - ALL_RULES
+          type: string
+        pick_version:
+          $ref: '#/components/schemas/PickVersionValues'
+      required:
+        - mode
+    UpgradeSpecificRulesRequest:
+      type: object
+      properties:
+        mode:
+          enum:
+            - SPECIFIC_RULES
+          type: string
+        pick_version:
+          $ref: '#/components/schemas/PickVersionValues'
+        rules:
+          items:
+            $ref: '#/components/schemas/RuleUpgradeSpecifier'
+          type: array
+      required:
+        - mode
+        - rules
     UUID:
       description: A universally unique identifier
       format: uuid

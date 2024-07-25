@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  title: Perform Rule Upgrade API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/prebuilt/_perform_upgrade:
+    post:
+      x-labels: [ess]
+      x-codegen-enabled: true
+      operationId: PerformRuleUpgrade
+      summary: Perform rule upgrade
+      description: Upgrade prebuilt detection rules.
+      tags:
+        - Rules API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformRuleUpgradeRequestBody'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformRuleUpgradeResponseBody'
+
+components:
+  schemas:
+    PickVersionValues:
+      type: string
+      enum: [BASE, CURRENT, TARGET]
+
+    RuleUpgradeSpecifier:
+      type: object
+      required:
+        - rule_id
+        - revision
+        - version
+      properties:
+        rule_id:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+        revision:
+          type: number
+        version:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleVersion'
+        pick_version:
+          $ref: '#/components/schemas/PickVersionValues'
+
+    UpgradeSpecificRulesRequest:
+      type: object
+      required:
+        - mode
+        - rules
+      properties:
+        mode:
+          type: string
+          enum: [SPECIFIC_RULES]
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleUpgradeSpecifier'
+        pick_version:
+          $ref: '#/components/schemas/PickVersionValues'
+
+    UpgradeAllRulesRequest:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum: [ALL_RULES]
+        pick_version:
+          $ref: '#/components/schemas/PickVersionValues'
+
+    PerformRuleUpgradeRequestBody:
+      oneOf:
+        - $ref: '#/components/schemas/UpgradeAllRulesRequest'
+        - $ref: '#/components/schemas/UpgradeSpecificRulesRequest'
+
+    SkipRuleUpgradeReason:
+      type: string
+      enum: [RULE_UP_TO_DATE]
+
+    SkippedRuleUpgrade:
+      type: object
+      required:
+        - rule_id
+        - reason
+      properties:
+        rule_id:
+          type: string
+        reason:
+          $ref: '#/components/schemas/SkipRuleUpgradeReason'
+
+    PerformRuleUpgradeResponseBody:
+      type: object
+      required:
+        - summary
+        - results
+        - errors
+      properties:
+        summary:
+          type: object
+          required:
+            - total
+            - succeeded
+            - skipped
+            - failed
+          properties:
+            total:
+              type: number
+            succeeded:
+              type: number
+            skipped:
+              type: number
+            failed:
+              type: number
+        results:
+          type: object
+          required:
+            - updated
+            - skipped
+          properties:
+            updated:
+              type: array
+              items:
+                $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+            skipped:
+              type: array
+              items:
+                $ref: '#/components/schemas/SkippedRuleUpgrade'
+        errors:
+          type: array
+          items:
+            $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'
