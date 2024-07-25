@@ -1,0 +1,30 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the Kibana API document
+  version: 0.0.1
+actions:
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
+  - target: '$.components.securitySchemes'
+    description: Add an API key security scheme
+    update:
+      apiKeyAuth:
+        in: header
+        name: Authorization
+        type: apiKey
+        description: You must create an API key and use the encoded value in the request header. To learn about creating keys, go to [API keys](https://www.elastic.co/docs/current/serverless/api-keys).
+  - target: '$'
+    description: Add document-level security.
+    update:
+      security:
+        - apiKeyAuth: []
+
