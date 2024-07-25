@@ -38,7 +38,7 @@ export async function isCreateActionCompatible(
 ) {
   let isCompatible: boolean = core.uiSettings.get(ENABLE_ESQL);
 
-  if (isCompatible && !getDatasourceMap() && !getVisualizationMap()) {
+  if (isCompatible && (!getDatasourceMap() || !getVisualizationMap())) {
     const [visualizationMap, datasourceMap] = await Promise.all([
       editorFrameService.loadVisualizations(),
       editorFrameService.loadDatasources(),
