@@ -18,7 +18,7 @@ import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types'
 import { INTERNAL_API_VERSION } from '../helpers';
 
 describe('helpers', () => {
-  let originalFetch: typeof global['fetch'];
+  let originalFetch: (typeof global)['fetch'];
 
   beforeAll(() => {
     originalFetch = global.fetch;
