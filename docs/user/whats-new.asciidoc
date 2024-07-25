@@ -94,26 +94,35 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta20c9a93d
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt50ac35ab3af29ff8/669a7d4006a6fafe4c7cb39d/create-where-clause-filters-from-sidebar.gif[Create WHERE clause filters from Discover table or sidebar]
 
 [discrete]
-=== ResponseOps
+=== Alerting, cases, and connectors
 
 [discrete]
-==== Cases
+==== Case templates
 
-{kib} cases offer a new powerful capability to enhance the efficiency of your analyst teams with _templates_. 
+{kib} cases offer a new powerful capability to enhance the efficiency of your analyst teams with <<case-templates,templates>>. 
 You can manage multiple templates, each of which can be used to auto-populate values in a case with pre-defined knowledge.
 This streamlines the investigative process and significantly reduces time to resolution.
 
-In 8.11, custom fields were added to cases and they are now moving from technical preview to general availability.
+[discrete]
+==== Case custom fields are GA
+
+In 8.11, <<case-custom-fields,custom fields>> were added to cases and they are now moving from technical preview to general availability.
 You can set custom field values in your templates to enhance consistency across cases.
 
-Learn more about custom fields and templates in <<manage-cases-settings>>.
+[discrete]
+==== {sn} additional fields
+
+You can now create enriched {sn} tickets based on detected alerts with a more comprehensive structure that matches the {sn} ticket scheme.
+A new JSON field is now available as part of the {sn} action, which enables you to send any field from {kib} alerts to {sn} tickets. 
 
 [discrete]
-==== Connector improvements 
+==== {webhook-cm} SSL auth support
 
-*ServiceNow additional field* - You can now create enriched ServiceNow tickets based on detected alerts with a more comprehensive structure that matches the ServiceNow ticket scheme.  A new JSON field is now available as part of the ServiceNow action and lets you define any field to be sent from Kibana Alerts to ServiceNow tickets. 
+It's common for organizations to integrate with third parties using secured authentication.
+Currently, most of the available case connectors use basic authentication (user and passwords or tokens), which might not be sufficient to meet organization security policies.
+With this release, the <<cases-webhook-action-type,{webhook-cm} connector>> now supports client certification, which enables you to leverage the connector for secured integration with third parties.
 
-*Case Webhook SSL auth support* - It's common for organizations to integrate with 3rd parties using secured authentication. Currently, most of the available case connectors use basic authentication (user and passwords or tokens), which might not be sufficient to meet organization security policies.  With this release, the Webhook Case connector now supports client certification to let you leverage the webhook connector for secured integration with 3rd parties. 
+The {webhook-cm} connector also moves from technical preview to general availability in this release.
 
 [discrete]
 === Machine Learning
