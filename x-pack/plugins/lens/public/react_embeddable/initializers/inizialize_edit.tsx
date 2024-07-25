@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { apiHasAppContext, apiPublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import { apiHasAppContext, apiPublishesViewMode } from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
@@ -19,6 +18,7 @@ import {
 } from '../types';
 import { emptySerializer } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
+import { ReactiveConfigs } from './initialize_observables';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -40,22 +40,15 @@ function getSupportedTriggers(
 export function initializeEditApi(
   uuid: string,
   getState: GetStateType,
+  updateState: (newState: LensRuntimeState) => void,
   isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
-  viewMode$: BehaviorSubject<ViewMode | undefined>,
-  {
-    data,
-    embeddable,
-    capabilities,
-    uiSettings,
-    visualizationMap,
-    datasourceMap,
-    coreStart,
-  }: LensEmbeddableStartServices,
+  { viewMode$, hasRenderCompleted$ }: ReactiveConfigs['variables'],
+  startDependencies: LensEmbeddableStartServices,
   inspectorApi: LensInspectorAdapters,
   parentApi?: unknown,
   savedObjectId?: string
 ) {
-  const supportedTriggers = getSupportedTriggers(getState, visualizationMap);
+  const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   if (!parentApi || !apiHasAppContext(parentApi)) {
     return {
       api: { supportedTriggers, openConfigPanel: async () => null },
@@ -85,13 +78,35 @@ export function initializeEditApi(
         skipAppLeave,
       });
     };
+
+  const openInlineEditor = prepareInlineEditPanel(
+    uuid,
+    getState,
+    updateState,
+    startDependencies,
+    inspectorApi,
+    navigateToLensEditor,
+    hasRenderCompleted$
+  );
+
+  const { uiSettings, capabilities, data } = startDependencies;
   return {
     comparators: {},
     serialize: emptySerializer,
     cleanup: noop,
     api: {
       supportedTriggers,
-      onEdit: () => navigateToLensEditor(embeddable.getStateTransfer(), false)(),
+      // TODO: resolve this problem in an elegant way
+      // Defining the onEdit action enables the default Panel edit action, registered at dashboard level,
+      // who will call by default
+      // await api.onEdit()
+      // we do not want that and rather need to pass thru a custom edit action defined at Lens
+      // level to provide the inline editing capabilities
+      // onEdit: async () => {
+
+      // },
+      // This function needs to be exposed in order to be called by the Lens custom edit action
+      openConfigPanel: openInlineEditor,
       isEditingEnabled: () => {
         if (viewMode$.getValue() !== 'edit') {
           return false;
@@ -116,13 +131,6 @@ export function initializeEditApi(
           data.query.timefilter.timefilter.getRefreshInterval()
         );
       },
-      openConfigPanel: prepareInlineEditPanel(
-        uuid,
-        getState,
-        { visualizationMap, datasourceMap, coreStart },
-        inspectorApi,
-        navigateToLensEditor
-      ),
     },
   };
 }

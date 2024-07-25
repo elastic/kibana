@@ -113,7 +113,6 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
-import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
 import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
 import {
   inAppEmbeddableEditTrigger,
@@ -146,6 +145,7 @@ import { ChartType } from './lens_suggestions_api';
 // import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
 // import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
 
 export type { SaveProps } from './app_plugin';
 
@@ -364,11 +364,11 @@ export class LensPlugin {
       initMemoizedErrorNotification(coreStart);
 
       return {
+        ...plugins,
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         coreStart,
-        data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: (doc: LensDocument) =>
@@ -383,15 +383,8 @@ export class LensPlugin {
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
         datasourceMap,
-        dataViews: plugins.dataViews,
-        uiActions: plugins.uiActions,
-        usageCollection,
-        inspector: plugins.inspector,
-        spaces: plugins.spaces,
         theme: core.theme,
         uiSettings: core.uiSettings,
-        embeddableEnhanced: plugins.embeddableEnhanced,
-        embeddable: plugins.embeddable,
       };
     };
 
@@ -416,6 +409,7 @@ export class LensPlugin {
       //   }
       // );
 
+      // Let Kibana know about the Lens embeddable
       embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
           getStartServicesForEmbeddable(),
@@ -424,6 +418,7 @@ export class LensPlugin {
         return createLensEmbeddableFactory(deps);
       });
 
+      // Let Dashboard know about the Lens panel type
       embeddable.registerReactEmbeddableSavedObject<LensSavedObjectAttributes>({
         onAdd: (container, savedObject) => {
           container.addNewPanel({
@@ -692,9 +687,9 @@ export class LensPlugin {
     // dashboard edit panel action
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 
-    // Allows the Lens embeddable to easily open the inapp editing flyout
+    // Allows the Lens embeddable to easily open the inline editing flyout
     const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
-    // embeddable edit panel action
+    // embeddable inline edit panel action
     startDependencies.uiActions.addTriggerAction(
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
       editLensEmbeddableAction

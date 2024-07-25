@@ -13,7 +13,7 @@ import { isLensApi } from '../../react_embeddable/type_guards';
 const ACTION_CONFIGURE_IN_LENS = 'ACTION_CONFIGURE_IN_LENS';
 
 interface Context {
-  api: unknown;
+  embeddable: unknown;
 }
 
 export const getConfigureLensHelpersAsync = async () => await import('../../async_services');
@@ -28,7 +28,7 @@ export class ConfigureInLensPanelAction implements Action<Context> {
     protected readonly startServices: StartServices
   ) {}
 
-  public getDisplayName({ api }: Context): string {
+  public getDisplayName({ embeddable: api }: Context): string {
     const language = isLensApi(api) ? api.isTextBasedLanguage() : undefined;
     return i18n.translate('xpack.lens.app.editVisualizationLabel', {
       defaultMessage: 'Edit {lang} visualization',
@@ -40,16 +40,15 @@ export class ConfigureInLensPanelAction implements Action<Context> {
     return 'pencil';
   }
 
-  public async isCompatible({ api }: Context) {
+  public async isCompatible({ embeddable: api }: Context) {
     const { isEditActionCompatible } = await getConfigureLensHelpersAsync();
     return isEditActionCompatible(api);
   }
 
-  public async execute({ api }: Context) {
+  public async execute({ embeddable: api }: Context) {
     const { executeEditAction } = await getConfigureLensHelpersAsync();
     return executeEditAction({
       api,
-      startDependencies: this.startDependencies,
       ...this.startServices,
     });
   }

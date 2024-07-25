@@ -28,6 +28,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { LensRuntimeState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
@@ -64,7 +65,7 @@ export function LensEditConfigurationFlyout({
   saveByRef,
   savedObjectId,
   updateByRefInput,
-  output$,
+  renderComplete$,
   lensAdapters,
   navigateToLensEditor,
   displayFlyoutHeader,
@@ -109,7 +110,7 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
   useEffect(() => {
-    const s = output$?.subscribe(() => {
+    const s = renderComplete$?.subscribe(() => {
       const activeData: Record<string, Datatable> = {};
       const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       const [table] = Object.values(adaptersTables || {});
@@ -126,7 +127,7 @@ export function LensEditConfigurationFlyout({
       }
     });
     return () => s?.unsubscribe();
-  }, [dispatch, output$, layers]);
+  }, [dispatch, renderComplete$, layers]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -256,7 +257,7 @@ export function LensEditConfigurationFlyout({
       trackUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
+    onApplyCb?.(attrs as LensRuntimeState);
     closeFlyout?.();
   }, [
     visualization.activeId,

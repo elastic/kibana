@@ -7,11 +7,18 @@
 
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { fetch$, apiHasExecutionContext } from '@kbn/presentation-publishing';
+import { fetch$, apiHasExecutionContext, FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { KibanaExecutionContext } from '@kbn/core/public';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { getEditPath } from '../../common/constants';
-import { ExpressionWrapperProps, GetStateType, LensApi, VisualizationContextHelper } from './types';
+import {
+  ExpressionWrapperProps,
+  GetStateType,
+  LensApi,
+  LensRuntimeState,
+  VisualizationContextHelper,
+} from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import { ReactiveConfigs } from './initializers/initialize_observables';
 import { LensEmbeddableStartServices } from './types';
@@ -34,7 +41,8 @@ export function loadEmbeddableData(
     expressionAbortController$,
     viewMode$,
     hasRenderCompleted$,
-  }: ReactiveConfigs['variables'],
+    state$,
+  }: ReactiveConfigs['variables'] & { state$: BehaviorSubject<LensRuntimeState> },
   services: LensEmbeddableStartServices,
   { getVisualizationContext, updateVisualizationContext }: VisualizationContextHelper,
   updateRenderCount: () => void
@@ -43,14 +51,28 @@ export function loadEmbeddableData(
   hasRenderCompleted$.next(false);
   const dispatchRenderComplete = () => hasRenderCompleted$.next(true);
 
-  const { getUserMessages, addUserMessages } = buildUserMessagesHelper(
+  const { getUserMessages, addUserMessages, resetRuntimeMessages } = buildUserMessagesHelper(
     getVisualizationContext,
     services
   );
-  const fetchSubscription = fetch$(api).subscribe(async (data) => {
+
+  const unifiedSearch$ = new BehaviorSubject<
+    Pick<FetchContext, 'query' | 'filters' | 'timeRange' | 'timeslice' | 'searchSessionId'>
+  >({
+    query: undefined,
+    filters: undefined,
+    timeRange: undefined,
+    timeslice: undefined,
+    searchSessionId: undefined,
+  });
+
+  async function reload() {
+    resetRuntimeMessages();
+
     const currentState = getState();
 
-    const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+    const { searchSessionId, ...unifiedSearch } = unifiedSearch$.getValue();
+
     const settings = apiPublishesSettings(parentApi)
       ? {
           syncColors: parentApi.settings.syncColors$.getValue(),
@@ -90,12 +112,7 @@ export function loadEmbeddableData(
 
     // const parentApiContext = apiHasAppContext(parentApi) ? parentApi.getAppContext() : undefined;
     const { params, abortController, ...rest } = await getExpressionRendererParams(currentState, {
-      unifiedSearch: {
-        query: data.query,
-        filters: data.filters,
-        timeRange: data.timeRange,
-        timeslice: data.timeslice,
-      },
+      unifiedSearch,
       api,
       settings,
       renderMode: viewMode$.getValue() as RenderMode,
@@ -123,19 +140,46 @@ export function loadEmbeddableData(
     }
     expressionAbortController$.next(abortController);
 
-    // updateRenderCount();
+    updateRenderCount();
     updateVisualizationContext({
       doc: currentState.attributes,
       mergedSearchContext: params?.searchContext || {},
       ...rest,
     });
-  });
+  }
+
+  const subscriptions: Subscription[] = [];
+
+  // On unified search changes, reload
+  subscriptions.push(
+    fetch$(api).subscribe(async (data) => {
+      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+      unifiedSearch$.next({
+        query: data.query,
+        filters: data.filters,
+        timeRange: data.timeRange,
+        timeslice: data.timeslice,
+        searchSessionId,
+      });
+
+      reload();
+    })
+  );
+
+  // On state change, reload
+  // this is used to refresh the chart on inline editing
+  subscriptions.push(state$.subscribe(reload));
+
+  // When the mode changes, reload
+  subscriptions.push(viewMode$.subscribe(reload));
 
   return {
     getUserMessages,
     addUserMessages,
     cleanup: () => {
-      fetchSubscription.unsubscribe();
+      for (const subscription of subscriptions) {
+        subscription.unsubscribe();
+      }
     },
   };
 }

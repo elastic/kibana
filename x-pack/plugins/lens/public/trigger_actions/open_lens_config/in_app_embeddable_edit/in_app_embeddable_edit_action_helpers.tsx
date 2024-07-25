@@ -11,14 +11,14 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { LensRuntimeState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { extractReferencesFromState } from '../../../utils';
 import type { LensChartLoadEvent } from './types';
 
 export function isEmbeddableEditActionCompatible(
   core: CoreStart,
-  attributes: TypedLensByValueInput['attributes']
+  attributes: LensRuntimeState['attributes']
 ) {
   // for ES|QL is compatible only when advanced setting is enabled
   const query = attributes.state.query;
@@ -37,11 +37,11 @@ export async function executeEditEmbeddableAction({
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
-  attributes: TypedLensByValueInput['attributes'];
+  attributes: LensRuntimeState['attributes'];
   lensEvent: LensChartLoadEvent;
   container?: HTMLElement | null;
-  onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
-  onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
+  onUpdate: (newAttributes: LensRuntimeState['attributes']) => void;
+  onApply?: (newAttributes: LensRuntimeState['attributes']) => void;
   onCancel?: () => void;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
@@ -92,13 +92,13 @@ export async function executeEditEmbeddableAction({
         },
         references,
         visualizationType: visualizationType ?? attributes.visualizationType,
-      } as TypedLensByValueInput['attributes'];
+      } as LensRuntimeState['attributes'];
 
       onUpdate(attrs);
     }
   };
 
-  const onUpdateSuggestion = (attrs: TypedLensByValueInput['attributes']) => {
+  const onUpdateSuggestion = (attrs: LensRuntimeState['attributes']) => {
     const newAttributes = {
       ...attributes,
       ...attrs,
@@ -112,7 +112,7 @@ export async function executeEditEmbeddableAction({
       attributes={attributes}
       updatePanelState={onUpdatePanelState}
       lensAdapters={lensEvent?.adapters}
-      output$={lensEvent?.embeddableOutput$}
+      renderComplete$={lensEvent?.renderComplete$}
       displayFlyoutHeader
       datasourceId={activeDatasourceId}
       onApplyCb={onApply}

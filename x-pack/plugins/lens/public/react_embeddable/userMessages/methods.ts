@@ -63,10 +63,14 @@ export function buildUserMessagesHelper(
 ): {
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
+  resetRuntimeMessages: () => void;
 } {
   let runtimeUserMessages: Record<string, UserMessage> = {};
 
   return {
+    resetRuntimeMessages: () => {
+      runtimeUserMessages = {};
+    },
     getUserMessages: (locationId, filters) => {
       const {
         doc,

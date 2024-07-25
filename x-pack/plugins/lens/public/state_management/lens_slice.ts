@@ -33,7 +33,7 @@ import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../t
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import type { LensAppServices } from '../app_plugin/types';
-import { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState } from '../react_embeddable/types';
 
 const getQueryFromContext = (
   context: VisualizeFieldContext | VisualizeEditorContext,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, ExecutionContextSearch, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import {
@@ -35,19 +35,16 @@ import {
   OverlayRef,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { DataPublicPluginStart, TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
-import { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+// import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+// import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
@@ -98,28 +95,35 @@ export interface ViewUnderlyingDataArgs {
   columns: string[];
 }
 
-export interface LensEmbeddableStartServices {
-  data: DataPublicPluginStart;
-  timefilter: TimefilterContract;
-  coreHttp: HttpSetup;
-  coreStart: CoreStart;
-  inspector: InspectorStartContract;
-  capabilities: RecursiveReadonly<Capabilities>;
-  expressionRenderer: ReactExpressionRendererType;
-  dataViews: DataViewsContract;
-  uiActions?: UiActionsStart;
-  usageCollection?: UsageCollectionSetup;
-  documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>;
-  injectFilterReferences: FilterManager['inject'];
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
-  spaces?: SpacesPluginStart;
-  theme: ThemeServiceStart;
-  uiSettings: IUiSettingsClient;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
-  attributeService: LensAttributesService;
-  embeddable: EmbeddableStart;
-}
+export type LensEmbeddableStartServices = Simplify<
+  LensPluginStartDependencies & {
+    timefilter: TimefilterContract;
+    coreHttp: HttpSetup;
+    coreStart: CoreStart;
+    capabilities: RecursiveReadonly<Capabilities>;
+    expressionRenderer: ReactExpressionRendererType;
+    documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>;
+    injectFilterReferences: FilterManager['inject'];
+    visualizationMap: VisualizationMap;
+    datasourceMap: DatasourceMap;
+    theme: ThemeServiceStart;
+    uiSettings: IUiSettingsClient;
+    attributeService: LensAttributesService;
+  }
+>;
+
+// type SelectCommon<T, V> = {
+//   [K in keyof T]: T[K] extends V[K & keyof V]
+//     ? V[K & keyof V] extends T[K]
+//       ? T[K]
+//       : never
+//     : never;
+// };
+
+// type RemoveNeverType<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
+
+// type A = RemoveNeverType<SelectCommon<LensPluginStartDependencies, LensEmbeddableStartServices>>;
+// type D = keyof Omit<LensEmbeddableStartServices, keyof LensPluginStartDependencies>;
 
 interface PreventableEvent {
   preventDefault(): void;
@@ -171,11 +175,7 @@ interface ViewInDiscoverCallbacks {
 }
 
 interface InlineEditing {
-  openConfigPanel: (
-    services: LensPluginStartDependencies,
-    isNewPanel?: boolean,
-    deletePanel?: () => void
-  ) => Promise<JSX.Element | null>;
+  openConfigPanel: (isNewPanel?: boolean, deletePanel?: () => void) => Promise<JSX.Element | null>;
 }
 
 interface IntegrationCallbacks {
@@ -203,6 +203,7 @@ interface LensPanelStyleProps {
   style?: React.CSSProperties;
   className?: string;
   noPadding?: boolean;
+  disableTriggers?: boolean;
 }
 
 interface LensRequestHandlersProps {

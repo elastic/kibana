@@ -9,25 +9,29 @@ import './helpers.scss';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { hasEditCapabilities, apiHasParentApi } from '@kbn/presentation-publishing';
-import type { LensPluginStartDependencies } from '../../plugin';
+import { apiHasParentApi, HasEditCapabilities } from '@kbn/presentation-publishing';
 import { StartServices } from '../../types';
 import { isLensApi } from '../../react_embeddable/type_guards';
 
 interface Context extends StartServices {
   api: unknown;
-  startDependencies: LensPluginStartDependencies;
   isNewPanel?: boolean;
   deletePanel?: () => void;
 }
 
-export async function isEditActionCompatible(api: unknown) {
-  return hasEditCapabilities(api) && api.isEditingEnabled?.();
+export function isEditActionCompatible(api: unknown) {
+  return Boolean(
+    api &&
+      // limit the action to Lens panels
+      isLensApi(api) &&
+      (api as HasEditCapabilities).isEditingEnabled &&
+      typeof (api as HasEditCapabilities).isEditingEnabled === 'function' &&
+      (api as HasEditCapabilities).isEditingEnabled()
+  );
 }
 
 export async function executeEditAction({
   api,
-  startDependencies,
   isNewPanel,
   deletePanel,
   ...startServices
@@ -38,7 +42,7 @@ export async function executeEditAction({
   }
   const rootEmbeddable = api.parentApi;
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-  const ConfigPanel = await api.openConfigPanel(startDependencies, isNewPanel, deletePanel);
+  const ConfigPanel = await api.openConfigPanel(isNewPanel, deletePanel);
 
   if (ConfigPanel) {
     const handle = startServices.overlays.openFlyout(

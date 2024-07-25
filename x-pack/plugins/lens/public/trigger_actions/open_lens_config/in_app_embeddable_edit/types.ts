@@ -5,9 +5,11 @@
  * 2.0.
  */
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-import type { Observable } from 'rxjs';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import type { BehaviorSubject } from 'rxjs';
+import type { LensRuntimeState } from '../../../react_embeddable/types';
+// import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+// import type { Observable } from 'rxjs';
+// import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 
 export interface LensChartLoadEvent {
   /**
@@ -17,18 +19,18 @@ export interface LensChartLoadEvent {
   /**
    * Observable of the lens embeddable output
    */
-  embeddableOutput$?: Observable<EmbeddableOutput>;
+  renderComplete$: BehaviorSubject<boolean>;
 }
 
 export interface InlineEditLensEmbeddableContext {
   // attributes of the Lens embeddable
-  attributes: TypedLensByValueInput['attributes'];
+  attributes: LensRuntimeState['attributes'];
   // chart event, can be fetched from the onLoad embeddable callback
   lensEvent: LensChartLoadEvent;
   // callback which runs every time something changes in the dimension panel
-  onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
+  onUpdate: (newAttributes: LensRuntimeState['attributes']) => void;
   // optional onApply callback
-  onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
+  onApply?: (newAttributes: LensRuntimeState['attributes']) => void;
   // optional onCancel callback
   onCancel?: () => void;
   // custom container element, use in case you need to render outside a flyout

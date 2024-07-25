@@ -6,10 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  getUnchangingComparator,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
 import {
@@ -34,6 +31,7 @@ import { useMessages } from './userMessages/use_messages';
 import { initializeVisualizationContext } from './initializers/initialize_visualization_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
+import { initializeStateManagement } from './initializers/initialize_state_management';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -77,13 +75,15 @@ export const createLensEmbeddableFactory = (
      * Mind: the getState argument is ok to pass as long as it is lazy evaluated (i.e. called within a function).
      * If there's something that should be immediately computed use the "state" deserialized variable.
      */
+    const stateConfig = initializeStateManagement(state);
     const panelConfig = initializePanelSettings(state);
     const inspectorConfig = initializeInspector(services);
     const editConfig = initializeEditApi(
       uuid,
       getState,
+      stateConfig.api.updateState,
       isTextBasedLanguage,
-      observables.variables.viewMode$,
+      observables.variables,
       services,
       inspectorConfig.api,
       parentApi,
@@ -109,7 +109,7 @@ export const createLensEmbeddableFactory = (
      */
     function getState(): LensRuntimeState {
       return {
-        ...state,
+        ...stateConfig.serialize(),
         ...panelConfig.serialize(),
         ...actionsConfig.serialize(),
         ...editConfig.serialize(),
@@ -137,6 +137,7 @@ export const createLensEmbeddableFactory = (
         ...integrationsConfig.api,
       },
       {
+        ...stateConfig.comparators,
         ...panelConfig.comparators,
         ...editConfig.comparators,
         ...inspectorConfig.comparators,
@@ -144,9 +145,6 @@ export const createLensEmbeddableFactory = (
         ...observables.comparators,
         ...actionsConfig.comparators,
         ...integrationsConfig.comparators,
-        attributes: getUnchangingComparator(),
-        savedObjectId: getUnchangingComparator(),
-        overrides: getUnchangingComparator(),
       }
     );
 
@@ -158,7 +156,7 @@ export const createLensEmbeddableFactory = (
       getState,
       api,
       parentApi,
-      observables.variables,
+      { ...observables.variables, ...stateConfig.variables },
       services,
       visualizationContextHelper,
       updateRenderCount

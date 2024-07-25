@@ -6,35 +6,95 @@
  */
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { noop } from 'lodash';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { TypedLensByValueInput } from '../../embeddable/embeddable_component';
-import { LensPluginStartDependencies } from '../../plugin';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
+// import { LensPluginStartDependencies } from '../../plugin';
+import {
+  extractReferencesFromState,
+  getActiveDatasourceIdFromDoc,
+  getActiveVisualizationIdFromDoc,
+} from '../../utils';
 import { isTextBasedLanguage } from '../helper';
-import { GetStateType, LensEmbeddableStartServices, LensInspectorAdapters } from '../types';
+import {
+  GetStateType,
+  LensEmbeddableStartServices,
+  LensInspectorAdapters,
+  LensRuntimeState,
+} from '../types';
 
 export function prepareInlineEditPanel(
   uuid: string,
   getState: GetStateType,
-  {
-    visualizationMap,
-    datasourceMap,
-    coreStart,
-  }: Pick<LensEmbeddableStartServices, 'coreStart' | 'visualizationMap' | 'datasourceMap'>,
+  updateState: (newState: LensRuntimeState) => void,
+  { visualizationMap, datasourceMap, coreStart, ...startDependencies }: LensEmbeddableStartServices,
   inspectorApi: LensInspectorAdapters,
   navigateToLensEditor: (
     stateTransfer: EmbeddableStateTransfer,
     skipAppLeave?: boolean
-  ) => () => Promise<void>
+  ) => () => Promise<void>,
+  renderComplete$: BehaviorSubject<boolean>
 ) {
-  return async function openConfigPanel(
-    startDependencies: LensPluginStartDependencies,
-    isNewPanel?: boolean,
-    deletePanel?: () => void
-  ) {
+  const updateVisualization = (
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType?: string
+  ) => {
+    const currentState = getState();
+    const viz = currentState.attributes;
+    const activeDatasourceId = (getActiveDatasourceIdFromDoc(viz) ??
+      'formBased') as EditLensConfigurationProps['datasourceId'];
+
+    const activeVisualizationId = getActiveVisualizationIdFromDoc(viz);
+    if (viz?.state) {
+      const datasourceStates = {
+        ...viz.state.datasourceStates,
+        [activeDatasourceId]: datasourceState,
+      };
+      const references = extractReferencesFromState({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates: Object.fromEntries(
+          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
+        ),
+        visualizationState,
+        activeVisualization: activeVisualizationId
+          ? visualizationMap[visualizationType ?? activeVisualizationId]
+          : undefined,
+      });
+      const attrs = {
+        ...viz,
+        state: {
+          ...viz.state,
+          visualization: visualizationState,
+          datasourceStates,
+        },
+        references,
+        visualizationType: visualizationType ?? viz.visualizationType,
+      };
+
+      /**
+       * SavedObjectId is undefined for by value panels and defined for the by reference ones.
+       * Here we are converting the by reference panels to by value when user is inline editing
+       */
+      updateState({ ...currentState, attributes: attrs, savedObjectId: undefined });
+    }
+  };
+
+  const updateSuggestion = (attrs: LensRuntimeState['attributes']) => {
+    updateState({ ...getState(), attributes: attrs });
+  };
+
+  const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {
+    updateState({ ...getState(), savedObjectId });
+  };
+
+  return async function openConfigPanel(isNewPanel?: boolean, deletePanel?: () => void) {
     const { getEditLensConfiguration } = await import('../../async_services');
     const Component = await getEditLensConfiguration(
       coreStart,
@@ -54,16 +114,13 @@ export function prepareInlineEditPanel(
     }
     return (
       <Component
-        attributes={attributes as TypedLensByValueInput['attributes']}
-        // updatePanelState={this.updateVisualization.bind(this)}
-        // updateSuggestion={this.updateSuggestion.bind(this)}
-        // updateByRefInput={this.updateByRefInput.bind(this)}
-        updateByRefInput={noop}
-        updatePanelState={noop}
-        updateSuggestion={noop}
+        attributes={attributes}
+        updateByRefInput={updateByRefInput}
+        updatePanelState={updateVisualization}
+        updateSuggestion={updateSuggestion}
         datasourceId={datasourceId}
         lensAdapters={inspectorApi.getInspectorAdapters()}
-        output$={new BehaviorSubject({})}
+        renderComplete$={renderComplete$}
         panelId={uuid}
         savedObjectId={currentState.savedObjectId}
         navigateToLensEditor={
