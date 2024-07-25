@@ -82,6 +82,7 @@ export function ChangeDataView({
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
+  openESQLInlineDocs,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -439,6 +440,7 @@ export function ChangeDataView({
                 setTriggerLabel(trigger.label);
               }
             }}
+            openESQLInlineDocs={openESQLInlineDocs}
           />
         )}
       </EuiFlexGroup>

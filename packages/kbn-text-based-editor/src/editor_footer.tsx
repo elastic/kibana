@@ -114,6 +114,8 @@ interface EditorFooterProps {
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
+  isHelpMenuOpen: boolean;
+  setIsHelpMenuOpen: (status: boolean) => void;
   measuredContainerWidth: number;
   hideRunQueryText?: boolean;
   disableSubmitAction?: boolean;
@@ -152,6 +154,8 @@ export const EditorFooter = memo(function EditorFooter({
   queryHasChanged,
   measuredContainerWidth,
   code,
+  isHelpMenuOpen,
+  setIsHelpMenuOpen,
 }: EditorFooterProps) {
   const kibana = useKibana<TextBasedEditorDeps>();
   const { docLinks } = kibana.services;
@@ -396,6 +400,8 @@ export const EditorFooter = memo(function EditorFooter({
                         }
                       ),
                     }}
+                    isHelpMenuOpen={isHelpMenuOpen}
+                    setIsHelpMenuOpen={setIsHelpMenuOpen}
                   />
                 </EuiFlexItem>
               )}
@@ -474,6 +480,8 @@ export const EditorFooter = memo(function EditorFooter({
                             }
                           ),
                         }}
+                        isHelpMenuOpen={isHelpMenuOpen}
+                        setIsHelpMenuOpen={setIsHelpMenuOpen}
                       />
                     </EuiFlexItem>
                   )}

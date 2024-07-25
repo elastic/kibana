@@ -58,6 +58,9 @@ export interface TextBasedLanguagesEditorProps {
 
   /** hide query history **/
   hideQueryHistory?: boolean;
+  /** sets the status of the inline help menu outside the editor **/
+  isHelpMenuOpen: boolean;
+  setIsHelpMenuOpen: (status: boolean) => void;
 }
 
 export interface TextBasedEditorDeps {

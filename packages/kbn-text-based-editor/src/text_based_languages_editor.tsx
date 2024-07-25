@@ -67,6 +67,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   allowQueryCancellation,
   hideTimeFilterInfo,
   hideQueryHistory,
+  isHelpMenuOpen,
+  setIsHelpMenuOpen,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -634,6 +636,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         hideQueryHistory={hideHistoryComponent}
         refetchHistoryItems={refetchHistoryItems}
         queryHasChanged={code !== codeWhenSubmitted}
+        isHelpMenuOpen={isHelpMenuOpen}
+        setIsHelpMenuOpen={setIsHelpMenuOpen}
       />
       <ResizableButton
         onMouseDownResizeHandler={onMouseDownResizeHandler}

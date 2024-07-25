@@ -21,9 +21,10 @@ import type { IUnifiedSearchPluginServices } from '../types';
 
 interface ESQLMenuPopoverProps {
   onDataViewSwitch: () => void;
+  openESQLInlineDocs?: () => void;
 }
 
-export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
+export const ESQLMenuPopover = ({ onDataViewSwitch, openESQLInlineDocs }: ESQLMenuPopoverProps) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
 
   const { docLinks } = kibana.services;
@@ -31,18 +32,19 @@ export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
     panelItems.push(
-      // <EuiContextMenuItem
-      //   key="open-docs"
-      //   icon="documentation"
-      //   data-test-subj="esql-open-docs"
-      //   onClick={() => {
-      //     // open the docs
-      //   }}
-      // >
-      //   {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.openDocs', {
-      //     defaultMessage: 'Open docs',
-      //   })}
-      // </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="open-docs"
+        icon="documentation"
+        data-test-subj="esql-open-docs"
+        onClick={() => {
+          openESQLInlineDocs?.();
+          setIsESQLMenuPopoverOpen(false);
+        }}
+      >
+        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.openDocs', {
+          defaultMessage: 'Open docs',
+        })}
+      </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="about"
         icon="iInCircle"
@@ -70,7 +72,7 @@ export const ESQLMenuPopover = ({ onDataViewSwitch }: ESQLMenuPopoverProps) => {
       </EuiContextMenuItem>
     );
     return panelItems;
-  }, [docLinks?.links?.query?.queryESQL, onDataViewSwitch]);
+  }, [docLinks?.links?.query?.queryESQL, onDataViewSwitch, openESQLInlineDocs]);
 
   return (
     <EuiPopover

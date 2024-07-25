@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
@@ -21,6 +21,8 @@ import {
 
 interface DocumentationPopoverProps {
   language: string;
+  isHelpMenuOpen: boolean;
+  setIsHelpMenuOpen: (status: boolean) => void;
   sections?: LanguageDocumentationSections;
   buttonProps?: Omit<EuiButtonIconProps, 'iconType'>;
   searchInDescription?: boolean;
@@ -33,24 +35,28 @@ function DocumentationPopover({
   buttonProps,
   searchInDescription,
   linkToDocumentation,
+  isHelpMenuOpen,
+  setIsHelpMenuOpen,
 }: DocumentationPopoverProps) {
-  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
-
   const toggleDocumentationPopover = useCallback(() => {
-    setIsHelpOpen(!isHelpOpen);
-  }, [isHelpOpen]);
+    setIsHelpMenuOpen?.(!isHelpMenuOpen);
+  }, [isHelpMenuOpen, setIsHelpMenuOpen]);
+
+  useEffect(() => {
+    setIsHelpMenuOpen(isHelpMenuOpen ?? false);
+  }, [isHelpMenuOpen, setIsHelpMenuOpen]);
 
   return (
     <EuiOutsideClickDetector
       onOutsideClick={() => {
-        setIsHelpOpen(false);
+        setIsHelpMenuOpen?.(false);
       }}
     >
       <EuiPopover
         panelClassName="documentation__docs--overlay"
         panelPaddingSize="none"
-        isOpen={isHelpOpen}
-        closePopover={() => setIsHelpOpen(false)}
+        isOpen={isHelpMenuOpen}
+        closePopover={() => setIsHelpMenuOpen(false)}
         button={
           <EuiToolTip
             position="top"
