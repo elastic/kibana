@@ -57,7 +57,9 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
   );
 };
 
-export const apiPublishesChildren = (api: unknown | null): api is Pick<PresentationContainer, 'children$'> => {
+export const apiPublishesChildren = (
+  api: unknown | null
+): api is Pick<PresentationContainer, 'children$'> => {
   return Boolean((api as PresentationContainer)?.children$);
 };
 
