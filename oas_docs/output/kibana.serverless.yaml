@@ -1073,8 +1073,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Machine_learning_APIs_mlSync4xxResponse'
-      security:
-        - Machine_learning_APIs_apiKeyAuth: []
   /api/saved_objects/_export:
     post:
       summary: Export saved objects in the default space
@@ -9063,10 +9061,6 @@ components:
                 enum:
                   - 404
   securitySchemes:
-    Machine_learning_APIs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: ApiKey
     Serverless_saved_objects_apiKeyAuth:
       type: apiKey
       in: header

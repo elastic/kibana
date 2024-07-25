@@ -1401,43 +1401,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Machine_learning_APIs_mlSync4xxResponse'
-      security:
-        - Machine_learning_APIs_basicAuth: []
-        - Machine_learning_APIs_apiKeyAuth: []
-  /s/{spaceId}/api/ml/saved_objects/sync:
-    get:
-      summary: Sync saved objects
-      description: >
-        Synchronizes Kibana saved objects for machine learning jobs and trained
-        models. You must have `all` privileges for the **Machine Learning**
-        feature in the **Analytics** section of the Kibana feature privileges.
-        This API runs automatically when you start Kibana and periodically
-        thereafter.
-      operationId: mlSyncWithSpaceId
-      tags:
-        - ml
-      parameters:
-        - $ref: '#/components/parameters/Machine_learning_APIs_spaceParam'
-        - $ref: '#/components/parameters/Machine_learning_APIs_simulateParam'
-      responses:
-        '200':
-          description: Indicates a successful call
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Machine_learning_APIs_mlSync200Response'
-              examples:
-                syncExample:
-                  $ref: '#/components/examples/Machine_learning_APIs_mlSyncExample'
-        '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Machine_learning_APIs_mlSync4xxResponse'
-      security:
-        - Machine_learning_APIs_basicAuth: []
-        - Machine_learning_APIs_apiKeyAuth: []
   /api/encrypted_saved_objects/_rotate_key:
     post:
       summary: Rotate a key for encrypted saved objects
@@ -3127,15 +3090,6 @@ components:
       schema:
         type: string
         example: hour_of_day
-    Machine_learning_APIs_spaceParam:
-      in: path
-      name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      required: true
-      schema:
-        type: string
     Machine_learning_APIs_simulateParam:
       in: query
       name: simulate
@@ -11340,13 +11294,6 @@ components:
           schema:
             $ref: '#/components/schemas/Connectors_action_response_properties'
   securitySchemes:
-    Machine_learning_APIs_basicAuth:
-      type: http
-      scheme: basic
-    Machine_learning_APIs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: ApiKey
     Saved_objects_basicAuth:
       type: http
       scheme: basic
