@@ -8,44 +8,38 @@
 
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
 import { initializeDefaultControlApi } from './initialize_default_control_api';
-import { COMPARATOR_SUBJECTS_DEBOUNCE, initializeControlState } from './control_state';
+import {
+  COMPARATOR_SUBJECTS_DEBOUNCE,
+  initializeUnsavedChangesApi,
+} from './control_unsaved_changes_api';
 import { DefaultControlState } from './types';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { Subject } from 'rxjs';
 
-describe('state diffing', () => {
-  const saveNotification$ = new Subject<void>();
+describe('initializeUnsavedChangesApi', () => {
+  const parentApi = {
+    saveNotification$: new Subject<void>(),
+  };
   let setWidth: (width: ControlWidth) => void;
-  let unsavedChanges: PublishingSubject<Partial<DefaultControlState> | undefined>;
-  let resetUnsavedChanges: () => void;
+  let api: undefined | PublishesUnsavedChanges;
   beforeEach(() => {
-    const { initialState, startStateDiffing } = initializeControlState('control1', {
-      getSerializedStateForChild: () => {
-        return {
-          rawState: {
-            grow: true,
-            width: 'medium',
-          } as DefaultControlState,
-          references: [],
-        };
-      },
-      saveNotification$,
-    });
+    const initialState: DefaultControlState = {
+      grow: true,
+      width: 'medium',
+    };
     const { comparators } = initializeDefaultControlApi(initialState);
     setWidth = comparators.width[1];
-    const stateDiffing = startStateDiffing(comparators);
-    unsavedChanges = stateDiffing.unsavedChanges;
-    resetUnsavedChanges = stateDiffing.resetUnsavedChanges;
+    ({ api } = initializeUnsavedChangesApi(initialState, parentApi, comparators));
   });
 
   test('should have no unsaved changes after initialization', () => {
-    expect(unsavedChanges.value).toBeUndefined();
+    expect(api?.unsavedChanges.value).toBeUndefined();
   });
 
   test('should have unsaved changes when a property changes', async () => {
     setWidth('small');
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(unsavedChanges.value).toEqual({
+    expect(api?.unsavedChanges.value).toEqual({
       width: 'small',
     });
   });
@@ -53,24 +47,24 @@ describe('state diffing', () => {
   test('should have no unsaved changes after save', async () => {
     setWidth('small');
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(unsavedChanges.value).not.toBeUndefined();
+    expect(api?.unsavedChanges.value).not.toBeUndefined();
 
     // trigger save
-    saveNotification$.next();
+    parentApi.saveNotification$.next();
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(unsavedChanges.value).toBeUndefined();
+    expect(api?.unsavedChanges.value).toBeUndefined();
   });
 
   test('should have no unsaved changes after reset', async () => {
     setWidth('small');
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(unsavedChanges.value).not.toBeUndefined();
+    expect(api?.unsavedChanges.value).not.toBeUndefined();
 
     // trigger reset
-    resetUnsavedChanges();
+    api?.resetUnsavedChanges();
 
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
-    expect(unsavedChanges.value).toBeUndefined();
+    expect(api?.unsavedChanges.value).toBeUndefined();
   });
 });

@@ -15,6 +15,7 @@ import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './components/control_panel';
 import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
+import { initializeUnsavedChangesApi } from './control_unsaved_changes_api';
 
 /**
  * Renders a component from the control registry into a Control Panel
@@ -38,13 +39,23 @@ export const ControlRenderer = <
       (() => {
         const parentApi = getParentApi();
         const factory = getControlFactory<StateType, ApiType>(type);
+        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {
+          rawState: {},
+        };
 
         const buildApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
-          comparators: StateComparators<StateType> // TODO: Use these to calculate unsaved changes
+          comparators: StateComparators<StateType>
         ): ApiType => {
+          const unsavedChanges = initializeUnsavedChangesApi<StateType>(
+            initialState as StateType,
+            parentApi,
+            comparators
+          );
+
           const fullApi = {
             ...apiRegistration,
+            ...unsavedChanges.api,
             uuid,
             parentApi,
             unsavedChanges: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
@@ -56,10 +67,8 @@ export const ControlRenderer = <
           return fullApi;
         };
 
-        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {};
-
         const { api, Component } = factory.buildControl(
-          initialState as unknown as StateType,
+          initialState as StateType,
           buildApi,
           uuid,
           parentApi
