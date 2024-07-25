@@ -30,23 +30,12 @@ export const useSetupTechnology = ({
     SetupTechnology.AGENT_BASED
   );
 
-  // const [isDirty, setIsDirty] = useState<boolean>(false);
-
   const updateSetupTechnology = (value: SetupTechnology) => {
     setSetupTechnology(value);
     if (handleSetupTechnologyChange) {
       handleSetupTechnologyChange(value);
     }
-    // setIsDirty(true);
   };
-
-  // if (!isAgentlessAvailable && !isEditPage && !isDirty) {
-  //   setSetupTechnology(SetupTechnology.AGENT_BASED);
-  // }
-
-  // if (!isEditPage && handleSetupTechnologyChange) {
-  //   handleSetupTechnologyChange(setupTechnology);
-  // }
 
   return {
     isAgentlessAvailable,
