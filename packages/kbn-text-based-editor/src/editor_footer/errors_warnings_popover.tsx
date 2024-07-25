@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -17,13 +17,12 @@ import {
   EuiPopoverTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
-  EuiBadge,
 } from '@elastic/eui';
-import { css, Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
-import type { MonacoMessage } from './helpers';
+import type { MonacoMessage } from '../helpers';
 
-export const getConstsByType = (type: 'error' | 'warning', count: number) => {
+const getConstsByType = (type: 'error' | 'warning', count: number) => {
   if (type === 'error') {
     return {
       color: 'danger',
@@ -49,7 +48,7 @@ export const getConstsByType = (type: 'error' | 'warning', count: number) => {
   }
 };
 
-export function ErrorsWarningsContent({
+function ErrorsWarningsContent({
   items,
   type,
   onErrorClick,
@@ -97,48 +96,6 @@ export function ErrorsWarningsContent({
         })}
       </EuiDescriptionList>
     </div>
-  );
-}
-
-export function ErrorsWarningsCompactViewPopover({
-  items,
-  type,
-  onErrorClick,
-  popoverCSS,
-}: {
-  items: MonacoMessage[];
-  type: 'error' | 'warning';
-  onErrorClick: (error: MonacoMessage) => void;
-  popoverCSS: Interpolation<Theme>;
-}) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { color, message } = getConstsByType(type, items.length);
-  return (
-    <EuiPopover
-      button={
-        <EuiBadge
-          color={color}
-          onClick={() => setIsPopoverOpen(true)}
-          onClickAriaLabel={message}
-          iconType={type}
-          iconSide="left"
-          data-test-subj={`TextBasedLangEditor-inline-${type}-badge`}
-          title={message}
-          css={css`
-            cursor: pointer;
-          `}
-        >
-          {items.length}
-        </EuiBadge>
-      }
-      css={popoverCSS}
-      ownFocus={false}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      data-test-subj={`TextBasedLangEditor-inline-${type}-popover`}
-    >
-      <ErrorsWarningsContent items={items} type={type} onErrorClick={onErrorClick} />
-    </EuiPopover>
   );
 }
 

@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  useEuiTheme,
-  EuiLink,
   EuiCode,
   EuiButtonIcon,
   EuiToolTip,
@@ -26,78 +23,15 @@ import {
   LanguageDocumentationPopover,
   type LanguageDocumentationSections,
 } from '@kbn/language-documentation-popover';
-import { type MonacoMessage, getWrappedInPipesCode, getDocumentationSections } from './helpers';
+import { type MonacoMessage, getDocumentationSections } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
-import type { TextBasedEditorDeps } from './types';
+import { SubmitFeedbackComponent } from './feedback_component';
+import { QueryWrapComponent } from './query_wrap_component';
+import type { TextBasedEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
-const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
-
-export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: boolean }) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <>
-      {isSpaceReduced && (
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            href={FEEDBACK_LINK}
-            external={false}
-            target="_blank"
-            data-test-subj="TextBasedLangEditor-feedback-link"
-          >
-            <EuiToolTip
-              position="top"
-              content={i18n.translate(
-                'textBasedEditor.query.textBasedLanguagesEditor.submitFeedback',
-                {
-                  defaultMessage: 'Submit feedback',
-                }
-              )}
-            >
-              <EuiIcon
-                type="editorComment"
-                color="primary"
-                size="m"
-                css={css`
-                  margin-right: ${euiTheme.size.s};
-                `}
-              />
-            </EuiToolTip>
-          </EuiLink>
-        </EuiFlexItem>
-      )}
-      {!isSpaceReduced && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="editorComment" color="primary" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              href={FEEDBACK_LINK}
-              external={false}
-              target="_blank"
-              css={css`
-                font-size: 12px;
-                margin-right: ${euiTheme.size.m};
-              `}
-              data-test-subj="TextBasedLangEditor-feedback-link"
-            >
-              {isSpaceReduced
-                ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
-                    defaultMessage: 'Feedback',
-                  })
-                : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.submitFeedback', {
-                    defaultMessage: 'Submit feedback',
-                  })}
-            </EuiLink>
-          </EuiFlexItem>
-        </>
-      )}
-    </>
-  );
-}
 
 interface EditorFooterProps {
   lines: number;
@@ -179,12 +113,6 @@ export const EditorFooter = memo(function EditorFooter({
     [runQuery, updateQuery]
   );
 
-  const isWrappedInPipes = useMemo(() => {
-    const pipes = code?.split('|');
-    const pipesWithNewLine = code?.split('\n|');
-    return pipes?.length === pipesWithNewLine?.length;
-  }, [code]);
-
   useEffect(() => {
     async function getDocumentation() {
       const sections = await getDocumentationSections('esql');
@@ -214,54 +142,7 @@ export const EditorFooter = memo(function EditorFooter({
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    isWrappedInPipes
-                      ? i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                          {
-                            defaultMessage: 'Remove line breaks on pipes',
-                          }
-                        )
-                      : i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                          {
-                            defaultMessage: 'Add line breaks on pipes',
-                          }
-                        )
-                  }
-                >
-                  <EuiButtonIcon
-                    iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
-                    color="text"
-                    size="xs"
-                    data-test-subj="TextBasedLangEditor-toggleWordWrap"
-                    aria-label={
-                      isWrappedInPipes
-                        ? i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                            {
-                              defaultMessage: 'Remove line breaks on pipes',
-                            }
-                          )
-                        : i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                            {
-                              defaultMessage: 'Add line breaks on pipes',
-                            }
-                          )
-                    }
-                    onClick={() => {
-                      const updatedCode = getWrappedInPipesCode(code, isWrappedInPipes);
-                      if (code !== updatedCode) {
-                        updateQuery(updatedCode);
-                      }
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
+              <QueryWrapComponent code={code} updateQuery={updateQuery} />
               <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
                 <EuiText
                   size="xs"

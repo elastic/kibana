@@ -253,7 +253,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('esql_menu_button');
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('unifiedSearch_switch_modal');
         });
@@ -266,7 +267,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('esql_menu_button');
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('unifiedSearch_switch_modal');
         });
@@ -277,7 +279,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('unifiedSearch_switch_modal');
         });
         await PageObjects.discover.saveSearch('esql_test');
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await testSubjects.click('esql_menu_button');
+        await testSubjects.click('switch-to-dataviews');
         await testSubjects.missingOrFail('unifiedSearch_switch_modal');
       });
 
@@ -291,7 +294,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('esql_menu_button');
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('unifiedSearch_switch_modal');
         });

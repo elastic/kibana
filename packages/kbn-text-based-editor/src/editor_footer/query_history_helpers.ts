@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { QueryHistoryItem } from './history_local_storage';
+import type { QueryHistoryItem } from '../history_local_storage';
 
 export const getReducedSpaceStyling = () => {
   return `

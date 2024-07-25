@@ -82,10 +82,11 @@ export const ESQLMenuPopover = ({ onDataViewSwitch, openESQLInlineDocs }: ESQLMe
           color="text"
           display="base"
           onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
+          data-test-subj="esql_menu_button"
         />
       }
       panelProps={{
-        ['data-test-subj']: 'esqlMenuPopover',
+        ['data-test-subj']: 'esql_menu_popover',
       }}
       isOpen={isESQLMenuPopoverOpen}
       closePopover={() => setIsESQLMenuPopoverOpen(false)}
