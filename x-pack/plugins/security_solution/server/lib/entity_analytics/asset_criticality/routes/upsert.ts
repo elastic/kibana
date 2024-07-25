@@ -8,6 +8,10 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  CreateAssetCriticalityRecordRequestBody,
+  InternalCreateAssetCriticalityRecordRequestBody,
+} from '../../../../../common/api/entity_analytics';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
@@ -17,7 +21,6 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { CreateSingleAssetCriticalityRequest } from '../../../../../common/api/entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -26,7 +29,7 @@ import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setti
 type UpsertHandler = (
   context: SecuritySolutionRequestHandlerContext,
   request: {
-    body: CreateSingleAssetCriticalityRequest;
+    body: CreateAssetCriticalityRecordRequestBody;
   },
   response: KibanaResponseFactory
 ) => Promise<IKibanaResponse>;
@@ -93,7 +96,7 @@ export const assetCriticalityInternalUpsertRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateSingleAssetCriticalityRequest),
+            body: buildRouteValidationWithZod(InternalCreateAssetCriticalityRecordRequestBody),
           },
         },
       },
@@ -118,7 +121,7 @@ export const assetCriticalityPublicUpsertRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateSingleAssetCriticalityRequest),
+            body: buildRouteValidationWithZod(CreateAssetCriticalityRecordRequestBody),
           },
         },
       },

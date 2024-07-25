@@ -42,6 +42,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
+import { TaskPartitioner } from './lib/task_partitioner';
 
 export interface TaskManagerSetupContract {
   /**
@@ -269,8 +270,7 @@ export class TaskManagerPlugin
     const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
-      startingMaxWorkers: this.config!.max_workers,
-      startingPollInterval: this.config!.poll_interval,
+      config: this.config!,
     });
 
     // Only poll for tasks if configured to run tasks
@@ -281,6 +281,8 @@ export class TaskManagerPlugin
         taskTypes: new Set(this.definitions.getAllTypes()),
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
+
+      const taskPartitioner = new TaskPartitioner(this.taskManagerId!, this.kibanaDiscoveryService);
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -292,6 +294,7 @@ export class TaskManagerPlugin
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         ...managedConfiguration,
+        taskPartitioner,
       });
 
       this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
@@ -306,16 +309,17 @@ export class TaskManagerPlugin
       });
     }
 
-    createMonitoringStats(
+    createMonitoringStats({
       taskStore,
-      this.elasticsearchAndSOAvailability$!,
-      this.config!,
-      managedConfiguration,
-      this.logger,
-      this.adHocTaskCounter,
-      this.taskPollingLifecycle,
-      this.ephemeralTaskLifecycle
-    ).subscribe((stat) => this.monitoringStats$.next(stat));
+      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+      config: this.config!,
+      managedConfig: managedConfiguration,
+      logger: this.logger,
+      adHocTaskCounter: this.adHocTaskCounter,
+      taskDefinitions: this.definitions,
+      taskPollingLifecycle: this.taskPollingLifecycle,
+      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
+    }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
       config: this.config!,

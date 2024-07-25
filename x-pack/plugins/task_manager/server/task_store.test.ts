@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import _ from 'lodash';
+import _, { omit } from 'lodash';
 import { first } from 'rxjs';
 
 import {
@@ -18,7 +18,7 @@ import {
   SerializedConcreteTaskInstance,
 } from './task';
 import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
+import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -160,6 +160,7 @@ describe('TaskStore', () => {
           taskType: 'report',
           user: undefined,
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
         {
           id: 'id',
@@ -183,6 +184,7 @@ describe('TaskStore', () => {
         user: undefined,
         version: '123',
         traceparent: 'apmTraceparent',
+        partition: 225,
       });
     });
 
@@ -290,12 +292,16 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
+    async function testFetch(
+      opts?: SearchOpts,
+      hits: Array<estypes.SearchHit<unknown>> = [],
+      limitResponse: boolean = false
+    ) {
       childEsClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
-      const result = await store.fetch(opts);
+      const result = await store.fetch(opts, limitResponse);
 
       expect(childEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -339,6 +345,18 @@ describe('TaskStore', () => {
       childEsClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('excludes state and params from source when excludeState is true', async () => {
+      const { args } = await testFetch({}, [], true);
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: {
+          sort: [{ 'task.runAt': 'asc' }],
+          query: { term: { type: 'task' } },
+        },
+        _source_excludes: ['task.state', 'task.params'],
+      });
     });
   });
 
@@ -490,6 +508,7 @@ describe('TaskStore', () => {
         version: '123',
         ownerId: null,
         traceparent: 'myTraceparent',
+        partition: 99,
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -532,6 +551,7 @@ describe('TaskStore', () => {
           user: undefined,
           ownerId: null,
           traceparent: 'myTraceparent',
+          partition: 99,
         },
         { version: '123', refresh: false }
       );
@@ -611,10 +631,11 @@ describe('TaskStore', () => {
 
   describe('bulkUpdate', () => {
     let store: TaskStore;
+    const logger = mockLogger();
 
     beforeAll(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -667,6 +688,125 @@ describe('TaskStore', () => {
       expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
         validate: false,
       });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: taskInstanceToAttributes(task, task.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test(`validates whenever validate:true is passed-in`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...task,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task], { validate: true });
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: true,
+      });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: taskInstanceToAttributes(task, task.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test(`logs warning and doesn't validate whenever excludeLargeFields option is passed-in`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...task,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task], { validate: true, excludeLargeFields: true });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipping validation for bulk update because excludeLargeFields=true.`
+      );
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: false,
+      });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: omit(taskInstanceToAttributes(task, task.id), ['state', 'params']),
+          },
+        ],
+        { refresh: false }
+      );
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -1050,6 +1190,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
             references: [],
             version: '123',
@@ -1089,6 +1230,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
           },
         ],
@@ -1113,6 +1255,7 @@ describe('TaskStore', () => {
           user: undefined,
           version: '123',
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
       ]);
     });

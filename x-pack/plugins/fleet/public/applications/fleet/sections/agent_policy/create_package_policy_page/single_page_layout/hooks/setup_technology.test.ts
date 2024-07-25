@@ -157,7 +157,7 @@ describe('useAgentless', () => {
 });
 
 describe('useSetupTechnology', () => {
-  const updateNewAgentPolicyMock = jest.fn();
+  const setNewAgentPolicy = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
   const newAgentPolicyMock = {
@@ -202,7 +202,7 @@ describe('useSetupTechnology', () => {
 
     const { result } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -217,7 +217,7 @@ describe('useSetupTechnology', () => {
   it('should fetch agentless policy if agentless feature is enabled and isServerless is true', async () => {
     const { waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -246,7 +246,7 @@ describe('useSetupTechnology', () => {
     });
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -262,7 +262,7 @@ describe('useSetupTechnology', () => {
     waitForNextUpdate();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-    expect(updateNewAgentPolicyMock).toHaveBeenCalledWith({
+    expect(setNewAgentPolicy).toHaveBeenCalledWith({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
     });
@@ -284,7 +284,7 @@ describe('useSetupTechnology', () => {
     });
     const { result, rerender } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -299,13 +299,13 @@ describe('useSetupTechnology', () => {
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-    expect(updateNewAgentPolicyMock).toHaveBeenCalledWith({
+    expect(setNewAgentPolicy).toHaveBeenCalledWith({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
     });
 
     rerender({
-      updateNewAgentPolicy: updateNewAgentPolicyMock,
+      setNewAgentPolicy,
       newAgentPolicy: newAgentPolicyMock,
       updateAgentPolicies: updateAgentPoliciesMock,
       setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -316,7 +316,7 @@ describe('useSetupTechnology', () => {
     });
 
     waitFor(() => {
-      expect(updateNewAgentPolicyMock).toHaveBeenCalledWith({
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
         supports_agentless: true,
       });
@@ -333,7 +333,7 @@ describe('useSetupTechnology', () => {
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -348,7 +348,7 @@ describe('useSetupTechnology', () => {
     });
 
     waitForNextUpdate();
-    expect(updateNewAgentPolicyMock).toHaveBeenCalledTimes(0);
+    expect(setNewAgentPolicy).toHaveBeenCalledTimes(0);
   });
 
   it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
@@ -360,7 +360,7 @@ describe('useSetupTechnology', () => {
 
     const { result } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -375,7 +375,7 @@ describe('useSetupTechnology', () => {
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -396,7 +396,7 @@ describe('useSetupTechnology', () => {
   it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -420,7 +420,7 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
-    expect(updateNewAgentPolicyMock).toHaveBeenCalledWith(newAgentPolicyMock);
+    expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
     expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.NEW);
   });
 
@@ -431,7 +431,7 @@ describe('useSetupTechnology', () => {
 
     const { result } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -451,7 +451,7 @@ describe('useSetupTechnology', () => {
   it('should not update agent policy and selected policy tab when setup technology matches the current one ', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -469,14 +469,14 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
-    expect(updateNewAgentPolicyMock).not.toHaveBeenCalled();
+    expect(setNewAgentPolicy).not.toHaveBeenCalled();
     expect(setSelectedPolicyTabMock).not.toHaveBeenCalled();
   });
 
   it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useSetupTechnology({
-        updateNewAgentPolicy: updateNewAgentPolicyMock,
+        setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
@@ -495,7 +495,7 @@ describe('useSetupTechnology', () => {
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
 
     waitFor(() => {
-      expect(updateNewAgentPolicyMock).toHaveBeenCalledWith({
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
       });
@@ -506,6 +506,6 @@ describe('useSetupTechnology', () => {
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(updateNewAgentPolicyMock).toHaveBeenCalledWith(newAgentPolicyMock);
+    expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
   });
 });
