@@ -261,9 +261,6 @@ export const ESQL_QUERY_BAR_INPUT_AREA =
 
 export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
 
-export const ESQL_QUERY_BAR_EXPAND_BTN =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] [data-test-subj="TextBasedLangEditor-expand"]';
-
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 
 export const NEW_TERMS_HISTORY_SIZE =
