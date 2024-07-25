@@ -121,7 +121,7 @@ const SPACES_REGEX = /\s+/g;
  *
  * @example
  *
- * Given a namespace `Security Solution Detections API (Elastic Cloud Serverless)`
+ * Given a namespace `Some Domain API (Extra Information)`
  * it will produce `Security_Solution_Detections_API`
  *
  * Given a namespace `Hello, world!`
