@@ -54,13 +54,7 @@ export const AlertSummaryWidgetCompact = ({
   };
 
   return (
-    <EuiPanel
-      element="div"
-      data-test-subj="alertSummaryWidgetCompact"
-      hasShadow={false}
-      hasBorder
-      onClick={handleClick}
-    >
+    <EuiPanel element="div" data-test-subj="alertSummaryWidgetCompact" hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
         {!!timeRangeTitle && (
           <EuiFlexItem>
@@ -78,7 +72,7 @@ export const AlertSummaryWidgetCompact = ({
           <AlertCounts
             activeAlertCount={activeAlertCount}
             recoveredAlertCount={recoveredAlertCount}
-            onActiveClick={handleClick}
+            handleClick={handleClick}
           />
         </EuiFlexItem>
 

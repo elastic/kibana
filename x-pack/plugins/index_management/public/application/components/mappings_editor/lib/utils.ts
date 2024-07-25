@@ -789,5 +789,5 @@ export const getFieldByPathName = (fields: NormalizedFields, name: string) => {
 export function isLocalModel(
   model: InferenceServiceSettings
 ): model is LocalInferenceServiceSettings {
-  return Boolean((model as LocalInferenceServiceSettings).service_settings.model_id);
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
 }
