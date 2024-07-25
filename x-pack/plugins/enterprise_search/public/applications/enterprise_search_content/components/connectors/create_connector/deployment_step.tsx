@@ -85,7 +85,7 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
             disabled={!isNextStepEnabled}
           >
             {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.button.continue', {
-              defaultMessage: 'Contiue',
+              defaultMessage: 'Continue',
             })}
           </EuiButton>
         </EuiPanel>

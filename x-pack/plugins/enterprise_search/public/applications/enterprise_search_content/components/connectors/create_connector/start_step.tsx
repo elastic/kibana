@@ -369,6 +369,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                       connectorName={connectorName}
                       setConnectorName={setConnectorName}
                       connector={connector}
+                      setIsNextStepEnabled={setNextStepEnabled}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

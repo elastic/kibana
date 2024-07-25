@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 export interface GenerateConfigButtonProps {
   connectorId: string;
-  disabled: boolean;
+  disabled?: boolean;
   generateConfiguration: (params: { connectorId: string }) => void;
   isGenerateLoading: boolean;
 }
@@ -20,7 +20,7 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
   connectorId,
   disabled,
   generateConfiguration,
-  isGenerateLoading,
+  isGenerateLoading = false,
 }) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="center">

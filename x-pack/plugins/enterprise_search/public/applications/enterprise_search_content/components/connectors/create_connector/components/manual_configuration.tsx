@@ -45,6 +45,7 @@ export interface ManualConfigurationProps {
   connectorName: string;
   isDisabled: boolean;
   setConnectorName: Function;
+  setIsNextStepEnabled: Function;
 }
 
 export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
@@ -52,6 +53,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   connectorName,
   setConnectorName,
   connector,
+  setIsNextStepEnabled,
 }) => {
   const { services } = useKibana<KibanaDeps>();
   const [isPopoverOpen, setPopover] = useState(false);
@@ -256,7 +258,16 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="enterpriseSearchFlyoutManualConfigContentSaveButton"
-              onClick={() => setIsFlyoutVisible(false)}
+              onClick={() => {
+                setIsFlyoutVisible(false);
+                setIsNextStepEnabled(true);
+                setTimeout(() => {
+                  window.scrollTo({
+                    behavior: 'smooth',
+                    top: window.innerHeight,
+                  });
+                }, 100);
+              }}
               fill
             >
               {i18n.translate(
