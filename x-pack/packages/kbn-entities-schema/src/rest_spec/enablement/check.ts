@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { z } from '@kbn/zod';
 
-export const getEntityDefinitionQuerySchema = z.object({
-  page: z.optional(z.coerce.number()),
-  perPage: z.optional(z.coerce.number()),
+export const entityManagerEnablementResponseSchema = z.object({
+  enabled: z.boolean(),
+  reason: z.optional(z.string()),
 });
+
+export type EntityManagerEnablementResponse = z.infer<typeof entityManagerEnablementResponseSchema>;

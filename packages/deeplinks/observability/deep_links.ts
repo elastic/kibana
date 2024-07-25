@@ -20,6 +20,7 @@ import {
   OBLT_UX_APP_ID,
   OBLT_PROFILING_APP_ID,
   ENTITY_APP_ID,
+  ENTITY_MANAGER_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -30,6 +31,7 @@ type ApmApp = typeof APM_APP_ID;
 type SyntheticsApp = typeof SYNTHETICS_APP_ID;
 type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
 type SloApp = typeof SLO_APP_ID;
+type EntityManagerApp = typeof ENTITY_MANAGER_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
@@ -44,6 +46,7 @@ export type AppId =
   | MetricsApp
   | SyntheticsApp
   | SloApp
+  | EntityManagerApp
   | AiAssistantApp
   | ObltUxApp
   | ObltProfilingApp
