@@ -418,7 +418,9 @@
           }
         },
         "summary": "Get Kibana's current status",
-        "tags": []
+        "tags": [
+          "system"
+        ]
       }
     }
   },
@@ -432,5 +434,9 @@
       "url": "http://localhost:5622"
     }
   ],
-  "tags": []
+  "tags": [
+    {
+      "name": "system"
+    }
+  ]
 }

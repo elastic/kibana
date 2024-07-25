@@ -767,18 +767,6 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
-              },
-              {
-                "plugin": "discover",
                 "path": "src/plugins/discover/public/plugin.tsx"
               },
               {

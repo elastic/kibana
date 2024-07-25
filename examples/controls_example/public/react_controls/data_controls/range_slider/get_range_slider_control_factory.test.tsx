@@ -248,7 +248,7 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          initialState={{}}
+          currentState={{}}
           updateState={jest.fn()}
           setControlEditorValid={jest.fn()}
         />
@@ -263,7 +263,7 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          initialState={{}}
+          currentState={{}}
           updateState={jest.fn()}
           setControlEditorValid={setControlEditorValid}
         />
