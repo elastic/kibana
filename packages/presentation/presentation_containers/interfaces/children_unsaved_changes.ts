@@ -8,9 +8,10 @@
 
 import { combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { PublishingSubject } from "@kbn/presentation-publishing/publishing_subject";
 import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { PresentationContainer } from './presentation_container';
+
+export const DEBOUNCE_TIME = 100;
 
 /**
  *  Create an observable stream of unsaved changes from all react embeddable children
@@ -19,23 +20,31 @@ export function childrenUnsavedChanges$(children$: PresentationContainer['childr
   return children$.pipe(
     map((children) => Object.keys(children)),
     distinctUntilChanged(deepEqual),
-  
+
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
       if (newChildIds.length === 0) return of([]);
       const childrenThatPublishUnsavedChanges = Object.entries(children$.value).filter(
         ([childId, child]) => apiPublishesUnsavedChanges(child)
       ) as Array<[string, PublishesUnsavedChanges]>;
-  
-      if (childrenThatPublishUnsavedChanges.length === 0) return of([]);
-  
-      return combineLatest(
-        childrenThatPublishUnsavedChanges.map(([childId, child]) =>
-          child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
-        )
-      );
+
+      return childrenThatPublishUnsavedChanges.length === 0
+        ? of([])
+        : combineLatest(
+            childrenThatPublishUnsavedChanges.map(([childId, child]) =>
+              child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
+            )
+          );
     }),
-    debounceTime(100),
-    map((children) => children.filter((child) => Boolean(child.unsavedChanges)))
+    debounceTime(DEBOUNCE_TIME),
+    map((unsavedChildStates) => {
+      const unsavedChildrenState: { [key: string]: object } = {};
+      unsavedChildStates.forEach(({ childId, unsavedChanges }) => {
+        if (unsavedChanges) {
+          unsavedChildrenState[childId] = unsavedChanges;
+        }
+      });
+      return Object.keys(unsavedChildrenState).length ? unsavedChildrenState : undefined;
+    })
   );
 }

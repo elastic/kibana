@@ -113,27 +113,23 @@ export function startDiffingDashboardState(
       childrenUnsavedChanges$(this.children$),
       this.controlGroup?.unsavedChanges ??
         (of(undefined) as Observable<PersistableControlGroupInput | undefined>),
-    ]).subscribe(([dashboardChanges, reactEmbeddableChanges, controlGroupChanges]) => {
+    ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
       // calculate unsaved changes
       const hasUnsavedChanges =
         Object.keys(omit(dashboardChanges, keysNotConsideredUnsavedChanges)).length > 0 ||
-        reactEmbeddableChanges.length > 0 ||
+        unsavedPanelState !== undefined ||
         controlGroupChanges !== undefined;
       if (hasUnsavedChanges !== this.getState().componentState.hasUnsavedChanges) {
         this.dispatch.setHasUnsavedChanges(hasUnsavedChanges);
       }
 
-      const unsavedPanelState = reactEmbeddableChanges.reduce<UnsavedPanelState>(
-        (acc, { childId, unsavedChanges }) => {
-          acc[childId] = unsavedChanges;
-          return acc;
-        },
-        {} as UnsavedPanelState
-      );
-
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
-        backupUnsavedChanges.bind(this)(dashboardChanges, unsavedPanelState, controlGroupChanges);
+        backupUnsavedChanges.bind(this)(
+          dashboardChanges,
+          unsavedPanelState ? unsavedPanelState : {},
+          controlGroupChanges
+        );
       }
     })
   );

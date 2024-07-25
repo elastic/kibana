@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { apiPublishesUnsavedChanges, type PublishesUnsavedChanges } from './publishes_unsaved_changes';
-export { initializeUnsavedChanges } from './unsaved_changes_api'; 
+export {
+  apiPublishesUnsavedChanges,
+  type PublishesUnsavedChanges,
+} from './publishes_unsaved_changes';
+export { initializeUnsavedChanges } from './unsaved_changes_api';
