@@ -17,7 +17,7 @@ import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_a
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
 
@@ -40,7 +40,7 @@ const mockStorage = {
 const queryClient = new QueryClient(testQueryClientConfig);
 
 const wrapper: FunctionComponent = ({ children }) => (
-  <QueryClientProvider client={queryClient} context={AlertsTableQueryContext}>
+  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
     {children}
   </QueryClientProvider>
 );

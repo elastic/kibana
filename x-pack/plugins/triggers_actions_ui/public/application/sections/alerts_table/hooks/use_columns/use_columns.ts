@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useKibana } from '../../../../../common';
@@ -166,7 +166,7 @@ export const useColumns = ({
       featureIds,
     },
     {
-      context: AlertsTableQueryContext,
+      context: AlertsQueryContext,
     }
   );
 
