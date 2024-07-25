@@ -100,9 +100,7 @@ describe(
       );
     });
 
-    // github.com/elastic/security-team/issues/9933
-    // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-    it.skip('should open host preview when click on host details title', () => {
+    it('should open host preview when click on host details title', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_HOST_CELL).click();
 
       cy.get(PREVIEW_SECTION).should('exist');
@@ -118,9 +116,7 @@ describe(
       cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
     });
 
-    // github.com/elastic/security-team/issues/9933
-    // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-    it.skip('should open user preview when click on user details title', () => {
+    it('should open user preview when click on user details title', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_USER_CELL).click();
 
       cy.get(PREVIEW_SECTION).should('exist');

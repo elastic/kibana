@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Asset Criticality Create Record Schema
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';
@@ -37,23 +37,3 @@ export type CreateAssetCriticalityRecordResponse = z.infer<
   typeof CreateAssetCriticalityRecordResponse
 >;
 export const CreateAssetCriticalityRecordResponse = AssetCriticalityRecord;
-
-export type InternalCreateAssetCriticalityRecordRequestBody = z.infer<
-  typeof InternalCreateAssetCriticalityRecordRequestBody
->;
-export const InternalCreateAssetCriticalityRecordRequestBody = CreateAssetCriticalityRecord.merge(
-  z.object({
-    /**
-     * If 'wait_for' the request will wait for the index refresh.
-     */
-    refresh: z.literal('wait_for').optional(),
-  })
-);
-export type InternalCreateAssetCriticalityRecordRequestBodyInput = z.input<
-  typeof InternalCreateAssetCriticalityRecordRequestBody
->;
-
-export type InternalCreateAssetCriticalityRecordResponse = z.infer<
-  typeof InternalCreateAssetCriticalityRecordResponse
->;
-export const InternalCreateAssetCriticalityRecordResponse = AssetCriticalityRecord;
