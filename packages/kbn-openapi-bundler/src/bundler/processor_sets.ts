@@ -19,7 +19,7 @@ import {
 } from './process_document/document_processors/reduce_all_of_items';
 import { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
 import { createIncludeLabelsProcessor } from './process_document/document_processors/include_labels';
-import { createNamespaceComponentsProcessor } from './process_document/document_processors/namespace_refs';
+import { createNamespaceComponentsProcessor } from './process_document/document_processors/namespace_components';
 
 /**
  * Document modification includes the following
@@ -42,14 +42,14 @@ export const DEFAULT_BUNDLING_PROCESSORS: Readonly<DocumentNodeProcessor[]> = [
  * Adds createIncludeLabelsProcessor processor, see createIncludeLabelsProcessor description
  * for more details
  */
-export function withLabels(
+export function withIncludeLabelsProcessor(
   processors: Readonly<DocumentNodeProcessor[]>,
   includeLabels: string[]
 ): Readonly<DocumentNodeProcessor[]> {
   return [...processors, createIncludeLabelsProcessor(includeLabels)];
 }
 
-export function withComponentsNamespace(
+export function withNamespaceComponentsProcessor(
   processors: Readonly<DocumentNodeProcessor[]>,
   namespacePointer: string
 ): Readonly<DocumentNodeProcessor[]> {

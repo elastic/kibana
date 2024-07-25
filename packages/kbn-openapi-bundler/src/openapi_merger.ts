@@ -15,7 +15,7 @@ import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { writeDocuments } from './utils/write_documents';
 import { resolveGlobs } from './utils/resolve_globs';
 import { bundleDocument } from './bundler/bundle_document';
-import { withComponentsNamespace } from './bundler/processor_sets';
+import { withNamespaceComponentsProcessor } from './bundler/processor_sets';
 
 export interface MergerConfig {
   sourceGlobs: string[];
@@ -51,7 +51,7 @@ export const merge = async ({
 
   logger.info(`Merging schemas...`);
 
-  const resolvedDocuments = await resolveDocuments(schemaFilePaths);
+  const resolvedDocuments = await bundleDocuments(schemaFilePaths);
 
   const blankOasDocumentFactory = (oasVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
@@ -76,10 +76,10 @@ function logSchemas(schemaFilePaths: string[]): void {
   }
 }
 
-async function resolveDocuments(schemaFilePaths: string[]): Promise<ResolvedDocument[]> {
+async function bundleDocuments(schemaFilePaths: string[]): Promise<ResolvedDocument[]> {
   return await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) =>
-      bundleDocument(schemaFilePath, withComponentsNamespace([], '/info/title'))
+      bundleDocument(schemaFilePath, withNamespaceComponentsProcessor([], '/info/title'))
     )
   );
 }
