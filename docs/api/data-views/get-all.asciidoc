@@ -4,7 +4,7 @@
 <titleabbrev>Get all data views</titleabbrev>
 ++++
 
-experimental[] Retrieve a list of all data views.
+Retrieve a list of all data views.
 
 [NOTE]
 ====
