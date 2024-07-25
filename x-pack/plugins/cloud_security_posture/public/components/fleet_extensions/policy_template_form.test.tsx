@@ -1460,7 +1460,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).not.toBeInTheDocument();
     });
 
-    it('should render setup technology selector for AWS and allow to select agent-based', async () => {
+    it('should render setup technology selector for AWS and allow to select agentless', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       const { getByTestId, getByRole } = render(
@@ -1471,31 +1471,34 @@ describe('<CspPolicyTemplateForm />', () => {
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+
+      expect(
+        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
+      ).toBeInTheDocument();
+      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+
+      // select agent-based and check for cloudformation option
+      userEvent.click(setupTechnologySelector);
+      const agentlessOption = getByRole('option', { name: /agentless/i });
+      await waitForEuiPopoverOpen();
+      userEvent.click(agentlessOption);
+
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
         'option'
       );
       const optionValues = options.map((option) => option.value);
 
-      // default state
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
-      expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
-      expect(options).toHaveLength(2);
-      expect(optionValues).toEqual(
-        expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
-      );
-
-      // select agent-based and check for cloudformation option
-      userEvent.click(setupTechnologySelector);
-      const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      await waitForEuiPopoverOpen();
-      userEvent.click(agentBasedOption);
       await waitFor(() => {
-        expect(
-          getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
-        ).toBeInTheDocument();
-        expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+        );
       });
     });
 
@@ -1598,54 +1601,6 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for Azure for Organisation type', async () => {
       const newPackagePolicy = getMockPolicyAzure();
 
-      const { getByTestId, queryByTestId, getByRole } = render(
-        <WrappedComponent
-          newPolicy={newPackagePolicy}
-          isAgentlessEnabled={true}
-          packageInfo={getPackageInfoMock() as PackageInfo}
-        />
-      );
-
-      // navigate to Azure
-      const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
-      userEvent.click(azureSelectorButton);
-
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
-      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-      const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
-      const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
-      const clientSecretField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
-      const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
-      const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
-
-      // default state for Azure with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
-      expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
-      expect(tenantIdField).toBeInTheDocument();
-      expect(clientIdField).toBeInTheDocument();
-      expect(clientSecretField).toBeInTheDocument();
-      expect(armTemplateSelector).not.toBeInTheDocument();
-      expect(manualSelector).not.toBeInTheDocument();
-
-      // select agent-based and check for ARM template option
-      userEvent.click(setupTechnologySelector);
-      const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      await waitForEuiPopoverOpen();
-      userEvent.click(agentBasedOption);
-      await waitFor(() => {
-        expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
-        expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
-      });
-    });
-
-    it('should render setup technology selector for Azure for Single Subscription type', async () => {
-      const newPackagePolicy = getMockPolicyAzure({
-        'azure.account_type': { value: 'single-account', type: 'text' },
-      });
-
       const { getByTestId, queryByTestId } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
@@ -1662,6 +1617,59 @@ describe('<CspPolicyTemplateForm />', () => {
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      // const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+      // const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+      // const clientSecretField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
+      // const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+      // const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+
+      // default state for Azure with the Org selected
+      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      await waitFor(() => {
+        expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
+        expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
+      });
+      // // select agent-based and check for ARM template option
+      // userEvent.click(setupTechnologySelector);
+      // const agentBasedOption = getByRole('option', { name: /agent-based/i });
+      // await waitForEuiPopoverOpen();
+      // userEvent.click(agentBasedOption);
+      // await waitFor(() => {
+      //   expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
+      //   expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
+      // });
+    });
+
+    it('should render setup technology selector for Azure for Single Subscription type', async () => {
+      const newPackagePolicy = getMockPolicyAzure({
+        'azure.account_type': { value: 'single-account', type: 'text' },
+      });
+
+      const { getByTestId, queryByTestId, getByRole } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          isAgentlessEnabled={true}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+        />
+      );
+
+      // navigate to Azure
+      const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
+      userEvent.click(azureSelectorButton);
+
+      const setupTechnologySelectorAccordion = queryByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // select agent-based and check for ARM template option
+      userEvent.click(setupTechnologySelector);
+      const agentlessOption = getByRole('option', { name: /agentless/i });
+      await waitForEuiPopoverOpen();
+      userEvent.click(agentlessOption);
+
       const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
       const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
       const clientSecretField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);

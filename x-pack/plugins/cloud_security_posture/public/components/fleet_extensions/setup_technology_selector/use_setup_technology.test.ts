@@ -38,7 +38,7 @@ describe('useSetupTechnology', () => {
         useSetupTechnology({ input, isAgentlessEnabled: true, isEditPage })
       );
       expect(result.current.isAgentlessAvailable).toBeTruthy();
-      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('sets to AGENTLESS when agentless is available and GCP cloud', () => {
@@ -47,7 +47,7 @@ describe('useSetupTechnology', () => {
         useSetupTechnology({ input, isAgentlessEnabled: true, isEditPage })
       );
       expect(result.current.isAgentlessAvailable).toBeTruthy();
-      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('sets to AGENTLESS when agentless is available and Azure cloud', () => {
@@ -56,7 +56,7 @@ describe('useSetupTechnology', () => {
         useSetupTechnology({ input, isAgentlessEnabled: true, isEditPage })
       );
       expect(result.current.isAgentlessAvailable).toBeTruthy();
-      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('sets to AGENT_BASED when agentless is available but input is not supported for agentless', () => {
@@ -76,7 +76,7 @@ describe('useSetupTechnology', () => {
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
-    it('calls handleSetupTechnologyChange when setupTechnology changes', () => {
+    it('calls handleSetupTechnologyChange when setupTechnology changes', async () => {
       const handleSetupTechnologyChangeMock = jest.fn();
       const { result } = renderHook(() =>
         useSetupTechnology({
@@ -86,10 +86,13 @@ describe('useSetupTechnology', () => {
         })
       );
 
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
+
       act(() => {
-        result.current.setSetupTechnology(SetupTechnology.AGENTLESS);
+        result.current.updateSetupTechnology(SetupTechnology.AGENTLESS);
       });
 
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(handleSetupTechnologyChangeMock).toHaveBeenCalledWith(SetupTechnology.AGENTLESS);
     });
   });
@@ -107,7 +110,7 @@ describe('useSetupTechnology', () => {
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
-    it('initializes with AGENTLESS technology if isAgentlessEnable is true', () => {
+    it('initializes with AGENT-BASED technology if isAgentlessEnable is true', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
       const { result } = renderHook(() =>
         useSetupTechnology({
@@ -116,7 +119,7 @@ describe('useSetupTechnology', () => {
           isEditPage,
         })
       );
-      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('should not call handleSetupTechnologyChange when setupTechnology changes', () => {
@@ -131,7 +134,7 @@ describe('useSetupTechnology', () => {
       );
 
       act(() => {
-        result.current.setSetupTechnology(SetupTechnology.AGENTLESS);
+        result.current.setSetupTechnology(SetupTechnology.AGENT_BASED);
       });
 
       expect(handleSetupTechnologyChangeMock).not.toHaveBeenCalled();
