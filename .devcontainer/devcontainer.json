@@ -20,6 +20,7 @@
 		5601
 	],
 	"postCreateCommand": "/workspaces/kibana/.devcontainer/scripts/bootstrap.sh",
+	"postStartCommand": "NODE_OPTIONS= yarn kbn bootstrap",
 	"remoteUser": "vscode",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -30,8 +31,5 @@
 			"installDirectlyFromGitHubRelease": true,
 			"version": "latest"
 		}
-	},
-	"mounts": [
-		"source=${localEnv:HOME}/.cache/bazel,target=/home/vscode/.cache/bazel,type=bind,consistency=cached"
-	]
+	}
 }
