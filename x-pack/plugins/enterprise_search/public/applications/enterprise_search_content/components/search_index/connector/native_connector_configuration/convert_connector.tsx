@@ -56,7 +56,11 @@ export const ConvertConnector: React.FC = () => {
           defaultMessage="Want to self-host this native connector? Convert it to a {link}, to be self-managed on your own infrastructure. You'll need to convert this connector if you want to customize the code using our Python framework."
           values={{
             link: (
-              <EuiLink href={docLinks.buildConnector} target="_blank">
+              <EuiLink
+                data-test-subj="enterpriseSearchConvertConnectorConnectorClientLink"
+                href={docLinks.buildConnector}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.linkTitle',
                   { defaultMessage: 'connector client' }
@@ -66,7 +70,10 @@ export const ConvertConnector: React.FC = () => {
           }}
         />
         <EuiSpacer size="l" />
-        <EuiButton onClick={() => showModal()}>
+        <EuiButton
+          data-test-subj="enterpriseSearchConvertConnectorConvertConnectorButton"
+          onClick={() => showModal()}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.buttonTitle',
             { defaultMessage: 'Convert connector' }

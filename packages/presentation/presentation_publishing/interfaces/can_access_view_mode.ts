@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { useStateFromPublishingSubject } from '../publishing_subject';
 import { apiHasParentApi, HasParentApi } from './has_parent_api';
-import { apiPublishesViewMode, PublishesViewMode } from './publishes_view_mode';
+import { apiPublishesViewMode, PublishesViewMode, ViewMode } from './publishes_view_mode';
 
 /**
  * This API can access a view mode, either its own or from its parent API.
@@ -40,6 +41,10 @@ export const getViewModeSubject = (api?: CanAccessViewMode) => {
   if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) {
     return api.parentApi.viewMode;
   }
+};
+
+export const getRequiredViewModeSubject = (api: CanAccessViewMode, fallback: ViewMode = 'view') => {
+  return getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 };
 
 /**

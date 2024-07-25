@@ -177,7 +177,6 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       .filter(({ disableCreate }: BaseVisType) => !disableCreate);
 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
-  const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
   const legacyVisTypes = getSortedVisTypesByGroup(VisGroups.LEGACY);
 
   const visTypeAliases = getVisTypeAliases()
@@ -333,16 +332,6 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
             items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
               (panelGroup.items ?? []).concat(
                 legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
-              )
-            ),
-          };
-        }
-        case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
-          return {
-            ...panelGroup,
-            items: sortGroupPanelsByOrder<PanelSelectionMenuItem>(
-              (panelGroup.items ?? []).concat(
-                toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
               )
             ),
           };
