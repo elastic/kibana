@@ -10,15 +10,34 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { useLatestFindings } from '@kbn/cloud-security-posture-plugin/public';
 import { ExpandablePanel } from '../../../../shared/components/expandable_panel';
 
-export const MisconfigurationsOverview = ({
-  passedFindings,
-  failedFindings,
-}: {
-  passedFindings: number;
-  failedFindings: number;
-}) => {
+export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) => {
+  const queryHostName = {
+    bool: {
+      must: [],
+      filter: [
+        {
+          bool: {
+            should: [{ term: { 'host.name': { value: `${hostName}` } } }],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+      should: [],
+      must_not: [],
+    },
+  };
+  const { data } = useLatestFindings({
+    query: queryHostName,
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const passedFindings = data?.pages[0].count.passed || 0;
+  const failedFindings = data?.pages[0].count.failed || 0;
   const { euiTheme } = useEuiTheme();
   const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
     if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -40,10 +59,17 @@ export const MisconfigurationsOverview = ({
     <ExpandablePanel
       header={{
         title: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.insights.misconfigurations.misconfigurationsTitle"
-            defaultMessage="Misconfigurations"
-          />
+          <EuiText
+            css={css`
+              font-size: ${euiTheme.size.m};
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.misconfigurations.misconfigurationsTitle"
+              defaultMessage="Misconfigurations"
+            />
+          </EuiText>
         ),
         iconType: 'arrowStart',
       }}
@@ -66,7 +92,7 @@ export const MisconfigurationsOverview = ({
               <EuiFlexItem>
                 <EuiText
                   css={css`
-                    font-size: ${euiTheme.size.m};
+                    font-size: ${euiTheme.size.base};
                     font-weight: ${euiTheme.font.weight.semiBold};
                   `}
                 >
@@ -94,7 +120,7 @@ export const MisconfigurationsOverview = ({
               <EuiFlexItem>
                 <EuiText
                   css={css`
-                    font-size: ${euiTheme.size.m};
+                    font-size: ${euiTheme.size.base};
                     font-weight: ${euiTheme.font.weight.semiBold};
                   `}
                 >
@@ -107,10 +133,14 @@ export const MisconfigurationsOverview = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem
+              css={css`
+                margin-top: ${euiTheme.size.l};
+              `}
+            >
               <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
             </EuiFlexItem>
           </EuiFlexGroup>

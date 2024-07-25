@@ -23,6 +23,7 @@ import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { MisconfigurationsOverview } from '../../../entity_details/shared/components/insight_entity/misconfigurations_overview';
 
 const KEY = 'insights';
 
@@ -32,14 +33,13 @@ const KEY = 'insights';
 export const InsightsSection = memo(() => {
   const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
-
   const { activeStep, isTourShown } = useTourContext();
   const isGuidedOnboardingTourShown =
     isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase;
 
   const expanded =
     useExpandSection({ title: KEY, defaultValue: false }) || isGuidedOnboardingTourShown;
-
+  const hostName = getFieldsData('host.name')?.[0] || '';
   return (
     <ExpandableSection
       expanded={expanded}
@@ -63,6 +63,8 @@ export const InsightsSection = memo(() => {
       <CorrelationsOverview />
       <EuiSpacer size="s" />
       <PrevalenceOverview />
+      <EuiSpacer size="s" />
+      <MisconfigurationsOverview hostName={hostName} />
     </ExpandableSection>
   );
 });
