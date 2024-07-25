@@ -5,75 +5,165 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { type NumericChartData, type SignificantItem } from '@kbn/ml-agg-utils';
+import type {
+  NumericChartData,
+  SignificantItem,
+  SignificantItemGroup,
+  SignificantItemHistogramItem,
+} from '@kbn/ml-agg-utils';
+import { isSignificantItem, isSignificantItemGroup } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import { RANDOM_SAMPLER_SEED } from '../constants';
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
+import { getGroupFilter } from './get_group_filter';
 import { getHistogramQuery } from './get_histogram_query';
+
+export interface LogRateAnalysisMiniDateHistogram {
+  fieldName: SignificantItem['fieldName'];
+  fieldValue: SignificantItem['fieldValue'];
+  histogram: SignificantItemHistogramItem[];
+}
+
+interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
+  doc_count: number;
+  bg_count: number;
+  buckets: estypes.AggregationsSignificantLongTermsBucket[];
+}
 
 export const fetchDateHistograms = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
-  significantItem: SignificantItem,
+  significantItems: Array<SignificantItemGroup | SignificantItem>,
   overallTimeSeries: NumericChartData,
   logger: Logger,
   // The default value of 1 means no sampling will be used
   randomSamplerProbability: number = 1,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
-) => {
-  const histogramQuery = getHistogramQuery(params, [
-    {
-      term: { [significantItem.fieldName]: significantItem.fieldValue },
-    },
-  ]);
+): Promise<LogRateAnalysisMiniDateHistogram[]> => {
+  const histogramQuery = getHistogramQuery(params);
 
-  const histogramAgg = {
-    mini_histogram: {
-      histogram: {
-        field: params.timeFieldName,
-        interval: overallTimeSeries.interval,
-        min_doc_count: 0,
-        extended_bounds: {
-          min: params.start,
-          max: params.end,
+  const histogramAggs = significantItems.reduce<
+    Record<string, estypes.AggregationsAggregationContainer>
+  >((aggs, significantItem, index) => {
+    let filter;
+
+    if (isSignificantItem(significantItem) && significantItem.type === 'keyword') {
+      filter = {
+        term: { [significantItem.fieldName]: significantItem.fieldValue },
+      };
+    } else if (isSignificantItem(significantItem) && significantItem.type === 'log_pattern') {
+      filter = getCategoryQuery(significantItem.fieldName, [
+        {
+          key: `${significantItem.key}`,
+          count: significantItem.doc_count,
+          examples: [],
+          regex: '',
+        },
+      ]);
+    } else if (isSignificantItemGroup(significantItem)) {
+      filter = {
+        bool: { filter: getGroupFilter(significantItem) },
+      };
+    } else {
+      throw new Error('Invalid significant item type.');
+    }
+
+    aggs[`histogram_${index}`] = {
+      filter,
+      aggs: {
+        mini_histogram: {
+          histogram: {
+            field: params.timeFieldName,
+            interval: overallTimeSeries.interval,
+            min_doc_count: 0,
+            extended_bounds: {
+              min: params.start,
+              max: params.end,
+            },
+          },
         },
       },
-    },
-  };
+    };
+
+    return aggs;
+  }, {});
 
   const { wrap, unwrap } = createRandomSamplerWrapper({
-    probability: randomSamplerProbability ?? 1,
+    probability: randomSamplerProbability,
     seed: RANDOM_SAMPLER_SEED,
   });
 
-  const body = await esClient.search(
+  const resp = await esClient.search(
     {
       index: params.index,
       size: 0,
       body: {
         query: histogramQuery,
-        aggs: wrap(histogramAgg),
+        aggs: wrap(histogramAggs),
         size: 0,
-        // ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
     },
     { signal: abortSignal, maxRetries: 0 }
   );
 
-  const aggregations = unwrap(body.aggregations);
+  const results: LogRateAnalysisMiniDateHistogram[] = [];
 
-  const chartData = {
-    data: aggregations.mini_histogram.buckets,
-    interval: overallTimeSeries.interval,
-    stats: overallTimeSeries.stats,
-    type: 'numeric',
-    id: significantItem.fieldName,
-  } as NumericChartData;
+  if (resp.aggregations === undefined) {
+    if (!isRequestAbortedError(resp)) {
+      if (logger) {
+        logger.error(
+          `Failed to fetch the histogram data chunk, got: \n${JSON.stringify(resp, null, 2)}`
+        );
+      }
 
-  return chartData;
+      if (emitError) {
+        emitError(`Failed to fetch the histogram data chunk.`);
+      }
+    }
+    return results;
+  }
+
+  const unwrappedResp = unwrap(resp.aggregations) as Record<string, Aggs>;
+
+  for (const [index, significantItem] of significantItems.entries()) {
+    const histogram =
+      overallTimeSeries.data.map((o) => {
+        const current = unwrappedResp[`histogram_${index}`].mini_histogram.buckets.find(
+          (d1) => d1.key_as_string === o.key_as_string
+        ) ?? {
+          doc_count: 0,
+        };
+
+        return {
+          key: o.key,
+          key_as_string: o.key_as_string ?? '',
+          doc_count_significant_item: current.doc_count,
+          doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+        };
+      }) ?? [];
+
+    if (isSignificantItem(significantItem)) {
+      results.push({
+        fieldName: significantItem.fieldName,
+        fieldValue: significantItem.fieldValue,
+        histogram,
+      });
+    } else if (isSignificantItemGroup(significantItem)) {
+      results.push({
+        id: significantItem.id,
+        histogram,
+      });
+    }
+  }
+
+  return results;
 };
