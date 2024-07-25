@@ -28,5 +28,5 @@ export const createKubernetesContainerLogsDataSourceProfileProvider = (
         ],
       }),
     },
-    resolve: createResolve('logs-kubernetes.container_logs-'),
+    resolve: createResolve('logs-kubernetes.container_logs'),
   });

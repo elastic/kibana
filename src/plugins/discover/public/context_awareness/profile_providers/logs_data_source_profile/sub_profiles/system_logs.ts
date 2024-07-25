@@ -27,5 +27,5 @@ export const createSystemLogsDataSourceProfileProvider = (
         ],
       }),
     },
-    resolve: createResolve('logs-system.'),
+    resolve: createResolve('logs-system'),
   });

@@ -28,5 +28,5 @@ export const createAwsS3accessLogsDataSourceProfileProvider = (
         ],
       }),
     },
-    resolve: createResolve('logs-aws.s3access-'),
+    resolve: createResolve('logs-aws.s3access'),
   });

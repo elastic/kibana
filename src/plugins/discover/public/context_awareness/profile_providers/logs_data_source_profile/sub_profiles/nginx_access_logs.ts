@@ -28,5 +28,5 @@ export const createNginxAccessLogsDataSourceProfileProvider = (
         ],
       }),
     },
-    resolve: createResolve('logs-nginx.access-'),
+    resolve: createResolve('logs-nginx.access'),
   });
