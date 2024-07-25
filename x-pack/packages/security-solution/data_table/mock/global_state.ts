@@ -24,7 +24,6 @@ export const mockGlobalState = {
         defaultColumns: defaultHeaders,
         dataViewId: 'security-solution-default',
         deletedEventIds: [],
-        expandedDetail: {},
         filters: [],
         indexNames: ['.alerts-security.alerts-default'],
         isSelectAllChecked: false,

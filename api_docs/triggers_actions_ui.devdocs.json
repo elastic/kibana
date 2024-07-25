@@ -7715,7 +7715,7 @@
           "signature": [
             "(props: Omit<",
             "ActionAccordionFormProps",
-            ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
+            ", \"setActions\" | \"actionTypeRegistry\"> & { setActions: (actions: ",
             {
               "pluginId": "@kbn/alerting-types",
               "scope": "common",
@@ -7741,7 +7741,7 @@
               "signature": [
                 "Omit<",
                 "ActionAccordionFormProps",
-                ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
+                ", \"setActions\" | \"actionTypeRegistry\"> & { setActions: (actions: ",
                 {
                   "pluginId": "@kbn/alerting-types",
                   "scope": "common",
@@ -7877,7 +7877,7 @@
             },
             ">(props: Omit<",
             "RuleAddProps",
-            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
             "RuleAddProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7895,7 +7895,7 @@
               "signature": [
                 "Omit<",
                 "RuleAddProps",
-                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
+                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -7947,7 +7947,7 @@
             },
             ">(props: Omit<",
             "RuleEditProps",
-            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
             "RuleEditProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7965,7 +7965,7 @@
               "signature": [
                 "Omit<",
                 "RuleEditProps",
-                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
+                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

@@ -42,5 +42,5 @@ export const dataSlice = createSlice({
 
 export const { updateProgress, addToEntity, deleteEntity, error, reset } = dataSlice.actions;
 export type ReduxStreamApiAction = ReturnType<
-  typeof dataSlice.actions[keyof typeof dataSlice.actions]
+  (typeof dataSlice.actions)[keyof typeof dataSlice.actions]
 >;
