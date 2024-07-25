@@ -22,6 +22,10 @@ export interface TextBasedLanguagesEditorProps {
     query?: AggregateQuery,
     abortController?: AbortController
   ) => Promise<void>;
+  /** inline docs popover status, controlled from outside the editor **/
+  isHelpMenuOpen?: boolean;
+  /** sets the inline docs popover status, controlled from outside the editor **/
+  setIsHelpMenuOpen?: (status: boolean) => void;
   /** If it is true, the editor displays the message @timestamp found
    * The text based queries are relying on adhoc dataviews which
    * can have an @timestamp timefield or nothing
@@ -58,9 +62,6 @@ export interface TextBasedLanguagesEditorProps {
 
   /** hide query history **/
   hideQueryHistory?: boolean;
-  /** sets the status of the inline help menu outside the editor **/
-  isHelpMenuOpen: boolean;
-  setIsHelpMenuOpen: (status: boolean) => void;
 }
 
 export interface TextBasedEditorDeps {

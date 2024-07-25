@@ -57,9 +57,6 @@ const KEYCODE_ARROW_DOWN = 40;
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 
-let lines = 1;
-let isDatePickerOpen = false;
-
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
   onTextLangQueryChange,
@@ -81,6 +78,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   setIsHelpMenuOpen,
 }: TextBasedLanguagesEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
+  const datePickerOpenStatusRef = useRef<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
@@ -104,6 +102,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showLineNumbers, setShowLineNumbers] = useState(true);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
+  const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   // contains both client side validation and server messages
@@ -208,7 +207,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
-      isDatePickerOpen = true;
+      datePickerOpenStatusRef.current = true;
       popoverRef.current?.focus();
     }
   }, []);
@@ -474,6 +473,20 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, esqlCallbacks]
   );
 
+  const helpMenuPopoverProps = useMemo(() => {
+    if (setIsHelpMenuOpen) {
+      return {
+        isHelpMenuOpen: isHelpMenuOpen ?? false,
+        setIsHelpMenuOpen,
+      };
+    }
+
+    return {
+      isHelpMenuOpen: isLanguagePopoverOpen,
+      setIsHelpMenuOpen: setIsLanguagePopoverOpen,
+    };
+  }, [isHelpMenuOpen, isLanguagePopoverOpen, setIsHelpMenuOpen]);
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -597,8 +610,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     if (model) {
                       editorModel.current = model;
                     }
-                    lines = model?.getLineCount() || 1;
-
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
@@ -608,7 +619,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
-                      if (isDatePickerOpen) {
+                      if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
                       }
                     });
@@ -649,7 +660,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         </EuiOutsideClickDetector>
       </EuiFlexGroup>
       <EditorFooter
-        lines={lines}
+        lines={editorModel.current?.getLineCount() || 1}
         styles={{
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
@@ -673,8 +684,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         hideQueryHistory={hideHistoryComponent}
         refetchHistoryItems={refetchHistoryItems}
         queryHasChanged={code !== codeWhenSubmitted}
-        isHelpMenuOpen={isHelpMenuOpen}
-        setIsHelpMenuOpen={setIsHelpMenuOpen}
+        isHelpMenuOpen={helpMenuPopoverProps.isHelpMenuOpen}
+        setIsHelpMenuOpen={helpMenuPopoverProps.setIsHelpMenuOpen}
       />
       <ResizableButton
         onMouseDownResizeHandler={onMouseDownResizeHandler}
@@ -728,7 +739,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     },
                   ]);
                   setPopoverPosition({});
-                  isDatePickerOpen = false;
+                  datePickerOpenStatusRef.current = false;
                 }
               }}
               inline
