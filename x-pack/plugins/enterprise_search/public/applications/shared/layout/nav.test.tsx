@@ -88,7 +88,7 @@ const baseNavItems = [
     id: 'relevance',
     items: [
       {
-        href: '/app/enterprise_search/relevance/inference_endpoints',
+        href: '/app/inference_endpoints',
         id: 'inference_endpoints',
         items: undefined,
         name: 'Inference Endpoints',
