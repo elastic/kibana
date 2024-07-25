@@ -11,6 +11,7 @@ import type {
   Agent,
   AgentPolicy,
   AgentStatus,
+  CopyAgentPolicyResponse,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
@@ -24,7 +25,6 @@ import type {
   GetPackagePoliciesResponse,
   PackagePolicy,
   PostFleetSetupResponse,
-  CopyAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
@@ -37,8 +37,8 @@ import {
   APP_API_ROUTES,
   epmRouteService,
   PACKAGE_POLICY_API_ROUTES,
-  SETUP_API_ROUTE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SETUP_API_ROUTE,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -49,6 +49,7 @@ import {
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
+  CopyAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   EnrollmentAPIKey,
   GenerateServiceTokenResponse,
@@ -56,7 +57,6 @@ import type {
   GetEnrollmentAPIKeysResponse,
   GetOutputsResponse,
   PostAgentUnenrollResponse,
-  CopyAgentPolicyRequest,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
 import axios from 'axios';
@@ -522,24 +522,6 @@ export const getAgentDownloadUrl = async (
     fileName: agentFile,
     dirName: fileNameWithoutExtension,
   };
-};
-
-/**
- * Fetches the latest version of the Elastic Agent available for download
- * @param kbnClient
- */
-
-export const fetchFleetAvailableVersions = async (kbnClient: KbnClient): Promise<string> => {
-  return kbnClient
-    .request<{ items: string[] }>({
-      method: 'GET',
-      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
-      headers: {
-        'elastic-api-version': '2023-10-31',
-      },
-    })
-    .then((response) => response.data.items[0])
-    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**

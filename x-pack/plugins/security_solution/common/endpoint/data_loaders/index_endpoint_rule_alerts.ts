@@ -15,6 +15,8 @@ import type {
   MappingTypeMapping,
   Name,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { KbnClient } from '@kbn/test';
+import { fetchFleetAvailableVersions } from '../utils/fetch_fleet_version';
 import { createToolingLogger, wrapErrorIfNeeded } from './utils';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
 import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_alert_generator';
@@ -26,6 +28,8 @@ export interface IndexEndpointRuleAlertsOptions {
   endpointIsolated?: boolean;
   count?: number;
   log?: ToolingLog;
+  isServerless?: boolean;
+  kbnClient: KbnClient;
 }
 
 export interface IndexedEndpointRuleAlerts {
@@ -41,30 +45,39 @@ export interface DeletedIndexedEndpointRuleAlerts {
  * Loads alerts for Endpoint directly into the internal index that the Endpoint Rule would have
  * written them to for a given endpoint
  * @param esClient
+ * @param kbnClient
  * @param endpointAgentId
  * @param endpointHostname
  * @param endpointIsolated
  * @param count
  * @param log
+ * @param isServerless
  */
 export const indexEndpointRuleAlerts = async ({
   esClient,
+  kbnClient,
   endpointAgentId,
   endpointHostname,
   endpointIsolated,
   count = 1,
   log = createToolingLogger(),
+  isServerless,
 }: IndexEndpointRuleAlertsOptions): Promise<IndexedEndpointRuleAlerts> => {
   log.verbose(`Indexing ${count} endpoint rule alerts`);
 
   await ensureEndpointRuleAlertsIndexExists(esClient);
+
+  let version = kibanaPackageJson.version;
+  if (isServerless) {
+    version = await fetchFleetAvailableVersions(kbnClient);
+  }
 
   const alertsGenerator = new EndpointRuleAlertGenerator();
   const indexedAlerts: estypes.IndexResponse[] = [];
 
   for (let n = 0; n < count; n++) {
     const alert = alertsGenerator.generate({
-      agent: { id: endpointAgentId },
+      agent: { id: endpointAgentId, version },
       host: { hostname: endpointHostname },
       ...(endpointIsolated ? { Endpoint: { state: { isolation: endpointIsolated } } } : {}),
     });

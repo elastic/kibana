@@ -8,6 +8,7 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { fetchFleetAvailableVersions } from '../../../common/endpoint/utils/fetch_fleet_version';
 import { prefixedOutputLogger } from './utils';
 import type { HostVm } from './types';
 import type { BaseVmCreateOptions } from './vm_services';
@@ -29,6 +30,8 @@ export interface CreateAndEnrollEndpointHostOptions
   useClosestVersionMatch?: boolean;
   /** If the local cache of agent downloads should be used. Defaults to `true` */
   useCache?: boolean;
+  /** If the environment is Serverless */
+  isServerless?: boolean;
 }
 
 export interface CreateAndEnrollEndpointHostResponse {
@@ -51,11 +54,17 @@ export const createAndEnrollEndpointHost = async ({
   version = kibanaPackageJson.version,
   useClosestVersionMatch = false,
   useCache = true,
+  isServerless = false,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
   const log = prefixedOutputLogger('createAndEnrollEndpointHost()', _log);
+  let agentVersion = version;
+
+  if (isServerless) {
+    agentVersion = await fetchFleetAvailableVersions(kbnClient);
+  }
   const isRunningInCI = Boolean(process.env.CI);
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
-  const { url: agentUrl } = await getAgentDownloadUrl(version, useClosestVersionMatch, log);
+  const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
   const agentDownload = isRunningInCI ? await downloadAndStoreAgent(agentUrl) : undefined;
 
   // TODO: remove dependency on env. var and keep function pure
@@ -84,7 +93,7 @@ export const createAndEnrollEndpointHost = async ({
     log,
     hostVm,
     agentPolicyId,
-    version,
+    version: agentVersion,
     closestVersionMatch: useClosestVersionMatch,
     useAgentCache: useCache,
   });
