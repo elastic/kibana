@@ -282,15 +282,19 @@ export class TaskManagerPlugin
     });
 
     const defaultCapacity = getDefaultCapacity({
-      claimStrategy: this.config!.claim_strategy,
+      claimStrategy: this.config?.claim_strategy,
       heapSizeLimit: this.heapSizeLimit,
-      isCloud: !!cloud,
+      isCloud: cloud?.isCloudEnabled ?? false,
       isServerless: !!serverless,
       isBackgroundTaskNodeOnly: this.isNodeBackgroundTasksOnly(),
     });
 
     this.logger.info(
-      `Task manager isCloud=${!!cloud} isServerless=${!!serverless} isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
+      `Task manager isCloud=${
+        cloud?.isCloudEnabled ?? false
+      } isServerless=${!!serverless} claimStrategy=${
+        this.config!.claim_strategy
+      } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
       } defaultCapacity=${defaultCapacity}`
     );

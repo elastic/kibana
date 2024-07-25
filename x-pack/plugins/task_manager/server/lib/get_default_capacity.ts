@@ -8,7 +8,7 @@
 import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY } from '../config';
 
 interface GetDefaultCapacityOpts {
-  claimStrategy: string;
+  claimStrategy?: string;
   heapSizeLimit: number;
   isCloud: boolean;
   isServerless: boolean;
