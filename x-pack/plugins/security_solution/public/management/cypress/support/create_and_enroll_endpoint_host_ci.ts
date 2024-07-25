@@ -38,6 +38,8 @@ export interface CreateAndEnrollEndpointHostCIOptions
   agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
   version?: string;
+  /** skip all checks and use provided version */
+  forceVersion?: boolean;
   /** The name for the host. Will also be the name of the VM */
   hostname?: string;
   /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
@@ -66,12 +68,13 @@ export const createAndEnrollEndpointHostCI = async ({
   hostname,
   version = kibanaPackageJson.version,
   useClosestVersionMatch = true,
+  forceVersion = false,
   isServerless = false,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
   let agentVersion = version;
 
-  if (isServerless) {
+  if (isServerless && !forceVersion) {
     agentVersion = await fetchFleetAvailableVersions(kbnClient);
   }
 
