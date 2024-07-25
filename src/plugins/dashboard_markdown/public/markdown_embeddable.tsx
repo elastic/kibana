@@ -12,6 +12,8 @@ import {
   EuiFlexItem,
   EuiMarkdownEditor,
   EuiMarkdownFormat,
+  EuiTab,
+  EuiTabs,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
@@ -27,7 +29,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { MARKDOWN_ID } from './constants';
 import { getDashboardLinksPlugin } from './dashboard_links/dashboard_links_plugin';
@@ -161,65 +163,134 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
       Component: () => {
         const content = useStateFromPublishingSubject(content$);
         const isEditing = useStateFromPublishingSubject(isEditing$);
+        const [selectedTabId, setSelectedTabId] = useState('editor');
+
+        const onSelectedTabChanged = (id: string) => {
+          setSelectedTabId(id);
+        };
+        const tabs = useMemo(
+          () => [
+            {
+              id: 'editor',
+              name: i18n.translate('embeddableExamples.euiMarkdownEditor.editor', {
+                defaultMessage: 'Editor',
+              }),
+              content: (
+                <EuiMarkdownEditor
+                  value={content ?? ''}
+                  css={EuiMarkdownStyleOverrides}
+                  onChange={(value) => content$.next(value)}
+                  aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
+                    defaultMessage: 'Dashboard markdown editor',
+                  })}
+                  uiPlugins={uiPlugins}
+                  processingPluginList={processingPlugins}
+                  parsingPluginList={parsingPlugins}
+                  height="full"
+                />
+              ),
+            },
+            {
+              id: 'preview',
+              name: i18n.translate('embeddableExamples.euiMarkdownEditor.preview', {
+                defaultMessage: 'Preview',
+              }),
+              content: (
+                <EuiMarkdownFormat
+                  tabIndex={0}
+                  className="eui-yScroll"
+                  css={css`
+                    width: 100%;
+                    padding: ${euiThemeVars.euiSizeM};
+                  `}
+                  parsingPluginList={parsingPlugins}
+                  processingPluginList={processingPlugins}
+                >
+                  {content ?? ''}
+                </EuiMarkdownFormat>
+              ),
+            },
+          ],
+          [content]
+        );
+
+        const renderTabs = () => {
+          return tabs.map((tab, index) => (
+            <EuiTab
+              key={index}
+              onClick={() => onSelectedTabChanged(tab.id)}
+              isSelected={tab.id === selectedTabId}
+            >
+              {tab.name}
+            </EuiTab>
+          ));
+        };
+
+        const selectedTabContent = useMemo(() => {
+          return tabs.find((obj) => obj.id === selectedTabId);
+        }, [selectedTabId, tabs]);
 
         useEffect(() => {
           return () => viewModeSubscription.unsubscribe();
         }, []);
 
         return isEditing ? (
-          <div
-            css={css`
-              position: relative;
-              width: 100%;
-            `}
-          >
-            <span
+          <>
+            <EuiTabs
+              size="s"
               css={css`
-                padding: ${euiThemeVars.euiSizeXS};
                 position: absolute;
-                bottom: 0;
-                right: 0;
-                display: flex;
-                z-index: 10;
+                width: 100%;
+                padding: ${euiThemeVars.euiSizeM};
+                z-index: 1;
+                top: 0;
+              `}
+              bottomBorder={false}
+            >
+              {renderTabs()}
+            </EuiTabs>
+            <div
+              css={css`
+                position: relative;
+                width: 100%;
               `}
             >
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    size="s"
-                    color="text"
-                    onClick={() => {
-                      if (editBackupContent) content$.next(editBackupContent);
-                      onStopEditing(true);
-                    }}
-                  >
-                    {i18n.translate('embeddableExamples.euiMarkdownEditor.cancel', {
-                      defaultMessage: 'Cancel',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty size="s" iconType="save" onClick={() => onStopEditing()}>
-                    {i18n.translate('embeddableExamples.euiMarkdownEditor.save', {
-                      defaultMessage: 'Save',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </span>
-            <EuiMarkdownEditor
-              value={content ?? ''}
-              css={EuiMarkdownStyleOverrides}
-              onChange={(value) => content$.next(value)}
-              aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
-                defaultMessage: 'Dashboard markdown editor',
-              })}
-              uiPlugins={uiPlugins}
-              processingPluginList={processingPlugins}
-              parsingPluginList={parsingPlugins}
-              height="full"
-            />
-          </div>
+              <span
+                css={css`
+                  padding: ${euiThemeVars.euiSizeXS};
+                  position: absolute;
+                  bottom: 0;
+                  right: 0;
+                  z-index: 12;
+                `}
+              >
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      onClick={() => {
+                        if (editBackupContent) content$.next(editBackupContent);
+                        onStopEditing(true);
+                      }}
+                    >
+                      {i18n.translate('embeddableExamples.euiMarkdownEditor.cancel', {
+                        defaultMessage: 'Cancel',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButtonEmpty size="s" iconType="save" onClick={() => onStopEditing()}>
+                      {i18n.translate('embeddableExamples.euiMarkdownEditor.save', {
+                        defaultMessage: 'Save',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </span>
+              {selectedTabContent?.content}
+            </div>
+          </>
         ) : (
           <EuiMarkdownFormat
             tabIndex={0}
