@@ -100,7 +100,7 @@ export default function enterSpaceFunctionalTests({
       await PageObjects.spaceSelector.expectRoute(spaceId, '/app/management/kibana/objects');
     });
 
-    it('allows user to navigate to different space with provided next route preserving hash and search', async () => {
+    it('allows user to navigate to different space with provided next route preserving url hash and search', async () => {
       const spaceId = 'another-space';
 
       await PageObjects.security.login(undefined, undefined, {
