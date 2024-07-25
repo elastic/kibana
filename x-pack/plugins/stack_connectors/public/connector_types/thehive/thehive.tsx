@@ -24,6 +24,7 @@ export function getConnectorType(): TheHiveConnector {
       defaultMessage: 'Create cases and alerts in TheHive',
     }),
     actionTypeTitle: THEHIVE_TITLE,
+    hideInUi: true,
     validateParams: async (
       actionParams: ExecutorParams
     ): Promise<GenericValidationResult<unknown>> => {
