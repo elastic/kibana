@@ -19,8 +19,8 @@
 		9200,
 		5601
 	],
-	"postCreateCommand": "/workspaces/kibana/.devcontainer/scripts/bootstrap.sh",
-	"postStartCommand": "NODE_OPTIONS= yarn kbn bootstrap",
+	"postCreateCommand": "/workspaces/kibana/.devcontainer/scripts/post_create.sh",
+	"postStartCommand": "/workspaces/kibana/.devcontainer/scripts/post_start.sh",
 	"remoteUser": "vscode",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
