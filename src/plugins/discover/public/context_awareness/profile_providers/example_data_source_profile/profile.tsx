@@ -84,6 +84,7 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
             renderControl: (Control, rowProps) => {
               return (
                 <Control
+                  data-test-subj={`exampleLogsControl_${iconType}`}
                   label={`Example ${iconType}`}
                   iconType={iconType}
                   onClick={() => {
