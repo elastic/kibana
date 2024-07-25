@@ -8,7 +8,7 @@
 import type { Moment } from 'moment';
 import { Client } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
-import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, SERVICE_LOGS } from '../constants';
+import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, FAKE_STACK_DS, SERVICE_LOGS } from '../constants';
 
 export interface Doc {
   namespace: string;
@@ -27,6 +27,7 @@ export const DatasetRT = rt.keyof({
   [FAKE_LOGS]: null,
   [FAKE_STACK]: null,
   [SERVICE_LOGS]: null,
+  [FAKE_STACK_DS]: null,
 });
 
 export type Dataset = rt.TypeOf<typeof DatasetRT>;

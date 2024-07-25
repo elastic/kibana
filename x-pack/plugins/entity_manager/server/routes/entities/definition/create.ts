@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createEntityDefinitionQuerySchema, entityDefinitionSchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
-import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
-import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
-import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
-import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { entityDefinitionSchema, createEntityDefinitionQuerySchema } from '@kbn/entities-schema';
+import { EntityDefinitionIdInvalid } from '../../../lib/entities/errors/entity_definition_id_invalid';
+import { createEntityManagerServerRoute } from '../../create_entity_manager_server_route';
+import { EntityIdConflict } from '../../../lib/entities/errors/entity_id_conflict_error';
+import { EntitySecurityException } from '../../../lib/entities/errors/entity_security_exception';
+import { InvalidTransformError } from '../../../lib/entities/errors/invalid_transform_error';
 
 /**
  * @openapi
