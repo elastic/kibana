@@ -16,7 +16,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/inference_integration_flyout",
     "@kbn/ml-plugin",
     "@kbn/ml-trained-models-utils",
     "@kbn/shared-ux-router",
