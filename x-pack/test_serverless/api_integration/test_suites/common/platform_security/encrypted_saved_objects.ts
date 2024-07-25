@@ -47,7 +47,10 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/api/encrypted_saved_objects/_rotate_key')
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader));
-          // expect a different error when we use the internal header
+          // expect a different, legitimate error when we use the internal header
+          // the config does not contain decryptionOnlyKeys, so when the API is
+          // called successfully, it will error for this reason, and not for an
+          // access or or missing header reason
           expect(body).toEqual({
             statusCode: 400,
             error: 'Bad Request',
