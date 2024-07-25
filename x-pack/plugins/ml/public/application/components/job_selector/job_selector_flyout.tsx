@@ -278,7 +278,18 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiFlexGroup>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onFlyoutClose}
+              data-test-subj="mlFlyoutJobSelectorButtonClose"
+            >
+              {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {
+                defaultMessage: 'Close',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={applySelection}
@@ -290,17 +301,6 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                 defaultMessage: 'Apply',
               })}
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              onClick={onFlyoutClose}
-              data-test-subj="mlFlyoutJobSelectorButtonClose"
-            >
-              {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {
-                defaultMessage: 'Close',
-              })}
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
