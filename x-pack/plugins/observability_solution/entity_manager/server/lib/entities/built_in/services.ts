@@ -76,24 +76,27 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
         metrics: [
           {
             name: 'A',
-            aggregation: 'doc_count',
+            aggregation: 'value_count',
             filter: serviceTransactionFilter(),
+            field: 'transaction.duration.summary',
           },
         ],
       },
       {
         name: 'failedTransactionRate',
-        equation: 'A / B',
+        equation: '1 - (A / B)',
         metrics: [
           {
             name: 'A',
-            aggregation: 'doc_count',
-            filter: serviceTransactionFilter(['event.outcome: "failure"']),
+            aggregation: 'sum',
+            filter: serviceTransactionFilter(),
+            field: 'event.success_count',
           },
           {
             name: 'B',
-            aggregation: 'doc_count',
-            filter: serviceTransactionFilter(['event.outcome: *']),
+            aggregation: 'value_count',
+            filter: serviceTransactionFilter(),
+            field: 'event.success_count',
           },
         ],
       },
