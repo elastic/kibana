@@ -17,7 +17,7 @@ import {
 import { useProfileAccessor } from '../../context_awareness';
 
 // Temporary workaround to avoid UI changes in Discover for now
-const DEFAULT_SORTED_CONTROL_COLUMN_IDS = [OPEN_DETAILS, SELECT_ROW];
+const DEFAULT_SORTED_CONTROL_COLUMN_IDS = [SELECT_ROW, OPEN_DETAILS];
 
 /**
  * Customized version of the UnifiedDataTable
@@ -50,7 +50,7 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       // TODO: remove after controls are swapped permanently https://github.com/elastic/kibana/issues/186808
       controlColumnIds={
-        !props.controlColumnIds && !rowAdditionalLeadingControls
+        !props.controlColumnIds && rowAdditionalLeadingControls
           ? DEFAULT_SORTED_CONTROL_COLUMN_IDS
           : props.controlColumnIds
       }
