@@ -45,13 +45,12 @@ export async function uninstallEntityDefinition({
   await stopAndDeleteLatestTransform(esClient, definition, logger);
   await deleteHistoryIngestPipeline(esClient, definition, logger);
   await deleteLatestIngestPipeline(esClient, definition, logger);
-  await deleteEntityDefinition(soClient, definition, logger);
   await deleteTemplate({ esClient, logger, name: getEntityHistoryIndexTemplateV1(definition.id) });
   await deleteTemplate({ esClient, logger, name: getEntityLatestIndexTemplateV1(definition.id) });
-
   if (deleteData) {
     await deleteIndices(esClient, definition, logger);
   }
+  await deleteEntityDefinition(soClient, definition, logger);
 }
 
 export async function uninstallBuiltInEntityDefinitions({

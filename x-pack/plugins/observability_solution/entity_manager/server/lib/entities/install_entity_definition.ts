@@ -75,9 +75,6 @@ export async function installEntityDefinition({
 
     validateDefinitionCanCreateValidTransformIds(definition);
 
-    const entityDefinition = await saveEntityDefinition(soClient, definition);
-    installState.definition = true;
-
     // install scoped index template
     await upsertTemplate({
       esClient,
@@ -94,30 +91,29 @@ export async function installEntityDefinition({
 
     // install ingest pipelines
     logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
-    await createAndInstallHistoryIngestPipeline(esClient, entityDefinition, logger);
+    await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
     installState.ingestPipelines.history = true;
-    await createAndInstallLatestIngestPipeline(esClient, entityDefinition, logger);
+    await createAndInstallLatestIngestPipeline(esClient, definition, logger);
     installState.ingestPipelines.latest = true;
 
     // install transforms
     logger.debug(`Installing transforms for definition ${definition.id}`);
-    await createAndInstallHistoryTransform(esClient, entityDefinition, logger);
+    await createAndInstallHistoryTransform(esClient, definition, logger);
     installState.transforms.history = true;
-    if (isBackfillEnabled(entityDefinition)) {
-      await createAndInstallHistoryBackfillTransform(esClient, entityDefinition, logger);
+    if (isBackfillEnabled(definition)) {
+      await createAndInstallHistoryBackfillTransform(esClient, definition, logger);
       installState.transforms.backfill = true;
     }
-    await createAndInstallLatestTransform(esClient, entityDefinition, logger);
+    await createAndInstallLatestTransform(esClient, definition, logger);
     installState.transforms.latest = true;
+
+    const entityDefinition = await saveEntityDefinition(soClient, definition);
+    installState.definition = true;
 
     return entityDefinition;
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}`, e);
     // Clean up anything that was successful.
-    if (installState.definition) {
-      await deleteEntityDefinition(soClient, definition, logger);
-    }
-
     if (installState.ingestPipelines.history) {
       await deleteHistoryIngestPipeline(esClient, definition, logger);
     }
@@ -128,11 +124,9 @@ export async function installEntityDefinition({
     if (installState.transforms.history) {
       await stopAndDeleteHistoryTransform(esClient, definition, logger);
     }
-
     if (installState.transforms.backfill) {
       await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
     }
-
     if (installState.transforms.latest) {
       await stopAndDeleteLatestTransform(esClient, definition, logger);
     }
@@ -150,6 +144,10 @@ export async function installEntityDefinition({
         logger,
         name: getEntityLatestIndexTemplateV1(definition.id),
       });
+    }
+
+    if (installState.definition) {
+      await deleteEntityDefinition(soClient, definition, logger);
     }
 
     throw e;
