@@ -95,6 +95,7 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
                     font-size: ${euiTheme.size.base};
                     font-weight: ${euiTheme.font.weight.semiBold};
                   `}
+                  data-test-subj="noFindingsDataTestSubj"
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.right.insights.misconfigurations.noFindingsDescription"

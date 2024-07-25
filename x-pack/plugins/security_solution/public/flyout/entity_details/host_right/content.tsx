@@ -82,6 +82,5 @@ export const HostPanelContent = ({
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
     </FlyoutBody>
-    // TODO: ADD INSIGHT ENTITY HERE (CSP)
   );
 };

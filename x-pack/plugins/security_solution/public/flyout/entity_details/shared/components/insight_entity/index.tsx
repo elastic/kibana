@@ -20,7 +20,7 @@ export const InsightEntity = <T,>({ hostName }: { hostName: string }) => {
       <EuiAccordion
         initialIsOpen={true}
         id="observedEntity-accordion"
-        data-test-subj="observedEntity-accordion"
+        data-test-subj="insightEntityTestSubj"
         buttonProps={{
           'data-test-subj': 'observedEntity-accordion-button',
           css: css`
