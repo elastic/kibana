@@ -115,7 +115,7 @@ describe('useTourContext', () => {
           wrapper: TourContextProvider,
         });
         await waitForNextUpdate();
-        // @ts-expect-error upgrade typescript v5.1.6
+        // @ts-expect-error testing invalid step
         result.current.setStep(tourId, 88);
         expect(result.current.activeStep).toBe(1);
       });
