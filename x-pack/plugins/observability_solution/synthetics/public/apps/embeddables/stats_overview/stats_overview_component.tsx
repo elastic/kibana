@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux';
+import { getStatsOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
 import { MonitorFilters } from '../monitors_overview/types';
 import { setOverviewPageStateAction } from '../../synthetics/state';
@@ -21,8 +22,10 @@ export const StatsOverviewComponent = ({
   reload$: Subject<boolean>;
   filters: MonitorFilters;
 }) => {
+  const statsOverviewStore = useRef(getStatsOverviewStore());
+
   return (
-    <SyntheticsEmbeddableContext reload$={reload$}>
+    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={statsOverviewStore.current}>
       <WithFiltersComponent filters={filters} />
     </SyntheticsEmbeddableContext>
   );

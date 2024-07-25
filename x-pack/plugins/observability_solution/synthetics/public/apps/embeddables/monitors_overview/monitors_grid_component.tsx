@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
+import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
 import { setOverviewPageStateAction } from '../../synthetics/state';
 import { MonitorFilters } from './types';
@@ -23,6 +24,8 @@ export const StatusGridComponent = ({
   reload$: Subject<boolean>;
   filters: MonitorFilters;
 }) => {
+  const overviewStore = useRef(getOverviewStore());
+
   return (
     <EmbeddablePanelWrapper
       title={i18n.translate(
@@ -31,7 +34,7 @@ export const StatusGridComponent = ({
       )}
       titleAppend={<ShowSelectedFilters filters={filters ?? {}} />}
     >
-      <SyntheticsEmbeddableContext reload$={reload$}>
+      <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
         <MonitorsOverviewList filters={filters} />
       </SyntheticsEmbeddableContext>
     </EmbeddablePanelWrapper>

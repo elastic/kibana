@@ -44,7 +44,7 @@ export const GroupFields = () => {
   const isUReduxHydratedFromUrl = useRef(false);
 
   useEffect(() => {
-    if (urlGroupField !== groupField && !isUReduxHydratedFromUrl.current) {
+    if (urlGroupField && urlGroupField !== groupField && !isUReduxHydratedFromUrl.current) {
       dispatch(
         setOverviewGroupByAction({
           field: urlGroupField ?? 'none',
