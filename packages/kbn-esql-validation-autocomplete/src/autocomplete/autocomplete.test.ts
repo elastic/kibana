@@ -1104,7 +1104,7 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('string').map((v) => `${v},`),
       ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
         'concat',
-      ]).map((v) => `${v},`),
+      ]).map((v) => ({ ...v, text: `${v.text},` })),
     ]);
     testSuggestions('from a | eval a=concat(stringField, ', [
       ...getFieldNamesByType('string'),
@@ -1124,7 +1124,7 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('ip').map((v) => `${v},`),
       ...getFunctionSignaturesByReturnType('eval', 'ip', { evalMath: true }, undefined, [
         'cidr_match',
-      ]).map((v) => `${v},`),
+      ]).map((v) => ({ ...v, text: `${v.text},` })),
     ]);
     testSuggestions('from a | eval a=cidr_match(ipField, ', [
       ...getFieldNamesByType('string'),
@@ -1289,7 +1289,7 @@ describe('autocomplete', () => {
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
           ...getFunctionSignaturesByReturnType('eval', 'date', { evalMath: true }, undefined, [
             'date_trunc',
-          ]).map((t) => `${t},`),
+          ]).map((t) => ({ ...t, text: `${t.text},` })),
           ...getFieldNamesByType('date').map((t) => `${t},`),
         ],
         '('
