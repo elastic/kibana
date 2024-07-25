@@ -14,7 +14,7 @@ concurrency:
 jobs:
   launchDarklyCodeReferences:
     name: LaunchDarkly Code References
-    if: github.event.repository.fork == false
+    if: github.event.repository.fork == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
