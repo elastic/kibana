@@ -22,5 +22,5 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
         defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
       }),
     },
-    resolve: createResolve((indexPattern) => indexPattern === 'logs-apache_error'),
+    resolve: createResolve('logs-apache.error-'),
   });

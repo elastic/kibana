@@ -22,5 +22,5 @@ export const createNginxErrorLogsDataSourceProfileProvider = (
         defaultColumns: [LOG_LEVEL_COLUMN, MESSAGE_COLUMN],
       }),
     },
-    resolve: createResolve((indexPattern) => indexPattern === 'logs-nginx_error'),
+    resolve: createResolve('logs-nginx.error-'),
   });

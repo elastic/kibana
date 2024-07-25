@@ -28,5 +28,5 @@ export const createK8ContainerLogsDataSourceProfileProvider = (
         ],
       }),
     },
-    resolve: createResolve((indexPattern) => indexPattern === 'logs-k8_container'),
+    resolve: createResolve('logs-kubernetes.container_logs-'),
   });

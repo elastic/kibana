@@ -22,5 +22,5 @@ export const createWindowsLogsDataSourceProfileProvider = (
         defaultColumns: [LOG_LEVEL_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN],
       }),
     },
-    resolve: createResolve((indexPattern) => indexPattern === 'logs-windows'),
+    resolve: createResolve('logs-windows.'),
   });

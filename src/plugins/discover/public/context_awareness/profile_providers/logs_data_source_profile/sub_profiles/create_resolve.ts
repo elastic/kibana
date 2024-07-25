@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
-export const createResolve =
-  (checkIndexPattern: (indexPatter: string) => boolean): DataSourceProfileProvider['resolve'] =>
-  (params) => {
+export const createResolve = (baseIndexPattern: string): DataSourceProfileProvider['resolve'] => {
+  const testIndexPattern = testPatternAgainstAllowedList([
+    createRegExpPatternFrom(baseIndexPattern),
+  ]);
+
+  return (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 
-    if (!indexPattern || !checkIndexPattern(indexPattern)) {
+    if (!indexPattern || !testIndexPattern(indexPattern)) {
       return { isMatch: false };
     }
 
@@ -23,3 +27,4 @@ export const createResolve =
       context: { category: DataSourceCategory.Logs },
     };
   };
+};
