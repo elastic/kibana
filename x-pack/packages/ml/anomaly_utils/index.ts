@@ -59,7 +59,7 @@ export {
   ML_DETECTOR_RULE_FILTER_TYPE,
   ML_DETECTOR_RULE_OPERATOR,
   ML_DETECTOR_RULE_PARAMS,
-  ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT
+  ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT,
 } from './detector_rule';
 
 export type { InfluencersFilterQuery } from './es_client';

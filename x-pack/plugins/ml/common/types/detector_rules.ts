@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { long } from '@elastic/elasticsearch/lib/api/types';
+import type { long } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_FILTER_TYPE,
@@ -27,11 +27,11 @@ export interface DetectorRuleCondition {
 }
 
 export interface DetectorRuleParamsForceTimeShift {
-  time_shift_amount: long
+  time_shift_amount: long;
 }
 
 export interface DetectorRuleParams {
-  force_time_shift?: DetectorRuleParamsForceTimeShift
+  force_time_shift?: DetectorRuleParamsForceTimeShift;
 }
 
 export interface DetectorRule {
