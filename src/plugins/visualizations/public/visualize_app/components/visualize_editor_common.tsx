@@ -8,7 +8,7 @@
 
 import './visualize_editor.scss';
 import { EventEmitter } from 'events';
-import React, { useCallback, useEffect } from 'react';
+import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
@@ -32,13 +32,6 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
-import {
-  NavigateToLensFn,
-  OpenInspectorFn,
-  SerializeStateFn,
-  UpdateTitleFn,
-} from '../utils/use/use_embeddable_api_handler';
-import { VisualizeRuntimeState } from '../../react_embeddable/types';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -48,45 +41,40 @@ interface VisualizeEditorCommonProps {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
+  isEmbeddableRendered: boolean;
   onAppLeave: AppMountParameters['onAppLeave'];
+  visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   originatingPath?: string;
+  visualizationIdFromUrl?: string;
   embeddableId?: string;
   eventEmitter?: EventEmitter;
-  openInspectorFn?: OpenInspectorFn;
-  navigateToLensFn?: NavigateToLensFn;
-  serializeStateFn?: SerializeStateFn;
-  snapshotStateFn?: () => VisualizeRuntimeState;
-  updateTitle?: UpdateTitleFn;
 }
 
-export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
+export const VisualizeEditorCommon = ({
+  visInstance,
   appState,
   currentAppState,
   isChromeVisible,
   hasUnsavedChanges,
   setHasUnsavedChanges,
   hasUnappliedChanges,
+  isEmbeddableRendered,
   onAppLeave,
   originatingApp,
   originatingPath,
   setOriginatingApp,
+  visualizationIdFromUrl,
   embeddableId,
+  visEditorRef,
   eventEmitter,
-  openInspectorFn,
-  navigateToLensFn,
-  serializeStateFn,
-  snapshotStateFn,
-  updateTitle,
-  visInstance,
-  children,
-}) => {
+}: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
   useEffect(() => {
     async function aliasMatchRedirect() {
-      const sharingSavedObjectProps = visInstance?.savedObjectProperties?.sharingSavedObjectProps;
+      const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
       if (services.spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
@@ -106,16 +94,12 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
     }
 
     aliasMatchRedirect();
-  }, [
-    visInstance?.savedObjectProperties?.sharingSavedObjectProps,
-    visInstance?.vis?.type.title,
-    services,
-  ]);
+  }, [visInstance?.savedVis.sharingSavedObjectProps, visInstance?.vis?.type.title, services]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
     const currentObjectId = visInstance?.savedVis.id;
-    const sharingSavedObjectProps = visInstance?.savedObjectProperties?.sharingSavedObjectProps;
+    const sharingSavedObjectProps = visInstance?.savedVis.sharingSavedObjectProps;
     if (services.spaces && sharingSavedObjectProps?.outcome === 'conflict' && currentObjectId) {
       // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
@@ -134,13 +118,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
       });
     }
     return null;
-  }, [
-    visInstance?.savedVis.id,
-    visInstance?.savedObjectProperties?.sharingSavedObjectProps,
-    visInstance?.vis?.type.title,
-    services.spaces,
-    services.history.location.search,
-  ]);
+  }, [visInstance?.savedVis, services, visInstance?.vis?.type.title]);
   // Adds a notification for split chart on the new implementation as it is not supported yet
   const chartName = visInstance?.vis.type.name;
   const isSplitChart = isSplitChartFn(chartName, visInstance?.vis?.data?.aggs);
@@ -157,26 +135,23 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
-      {visInstance && serializeStateFn && snapshotStateFn && appState && currentAppState && (
+      {visInstance && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
           hasUnsavedChanges={hasUnsavedChanges}
           setHasUnsavedChanges={setHasUnsavedChanges}
           isChromeVisible={isChromeVisible}
+          isEmbeddableRendered={isEmbeddableRendered}
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
           originatingPath={originatingPath}
           setOriginatingApp={setOriginatingApp}
           visInstance={visInstance}
           stateContainer={appState}
+          visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           eventEmitter={eventEmitter}
-          openInspectorFn={openInspectorFn}
-          navigateToLensFn={navigateToLensFn}
-          serializeStateFn={serializeStateFn}
-          snapshotStateFn={snapshotStateFn}
-          updateTitle={updateTitle}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&
@@ -222,7 +197,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
           </h1>
         </EuiScreenReaderOnly>
       )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'}>{children}</div>
+      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
     </div>
   );
 };

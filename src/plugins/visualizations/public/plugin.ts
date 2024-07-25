@@ -83,7 +83,11 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
+import {
+  createVisEmbeddableFromObject,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeEmbeddableFactory,
+} from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -331,6 +335,7 @@ export class VisualizationsPlugin
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
+          createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
           scopedHistory: params.history,
           restorePreviousUrl,
           setHeaderActionMenu: params.setHeaderActionMenu,

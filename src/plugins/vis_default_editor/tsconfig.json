@@ -28,9 +28,7 @@
     "@kbn/utility-types",
     "@kbn/saved-search-plugin",
     "@kbn/code-editor",
-    "@kbn/embeddable-plugin",
-    "@kbn/content-management-utils",
-    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

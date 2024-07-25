@@ -16,10 +16,16 @@
       "dataViews",
       "fieldFormats",
       "usageCollection",
-      "unifiedSearch",
-      "embeddable"
+      "unifiedSearch"
     ],
-    "optionalPlugins": ["home"],
-    "requiredBundles": ["unifiedSearch", "kibanaUtils", "kibanaReact", "fieldFormats"]
+    "optionalPlugins": [
+      "home"
+    ],
+    "requiredBundles": [
+      "unifiedSearch",
+      "kibanaUtils",
+      "kibanaReact",
+      "fieldFormats"
+    ]
   }
 }

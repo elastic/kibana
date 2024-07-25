@@ -6,51 +6,54 @@
  * Side Public License, v 1.
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import type {
-  AppMountParameters,
-  ChromeStart,
   CoreStart,
   PluginInitializerContext,
-  ScopedHistory,
-  ThemeServiceStart,
+  ChromeStart,
   ToastsStart,
+  ScopedHistory,
+  AppMountParameters,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
+  Storage,
   IKbnUrlStateStorage,
   ReduxLikeStateContainer,
-  Storage,
 } from '@kbn/kibana-utils-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { BehaviorSubject } from 'rxjs';
-import type { PersistedState, Vis, VisParams } from '..';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type {
+  Vis,
+  VisualizeEmbeddableContract,
+  VisSavedObject,
+  PersistedState,
+  VisParams,
+} from '..';
 
-import { ExtraSavedObjectProperties, VisualizeRuntimeState } from '../react_embeddable/types';
-import type { ListingViewRegistry, SavedVisState, SerializedVis, VisSavedObject } from '../types';
+import type { ListingViewRegistry, SavedVisState } from '../types';
+import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
-import { EmbeddableApiHandler } from './utils/use/use_embeddable_api_handler';
 
 export interface VisualizeAppState {
   dataView?: string;
@@ -78,20 +81,10 @@ export interface VisualizeAppStateTransitions {
   updateDataView: (state: VisualizeAppState) => (dataViewId?: string) => VisualizeAppState;
 }
 
-export type VisualizeLegacyAppStateContainer = ReduxLikeStateContainer<
+export type VisualizeAppStateContainer = ReduxLikeStateContainer<
   VisualizeAppState,
   VisualizeAppStateTransitions
 >;
-
-export interface VisualizeAppStateContainer {
-  getState: () => VisualizeRuntimeState;
-  updateUrlState: (newState: VisualizeRuntimeState) => void;
-  state$: BehaviorSubject<VisualizeRuntimeState | null>;
-  transitions: {
-    updateDataView: (dataViewId?: string) => void;
-    updateTitle: (title: string) => void;
-  };
-}
 
 export interface VisualizeServices extends CoreStart {
   stateTransferService: EmbeddableStateTransfer;
@@ -112,6 +105,7 @@ export interface VisualizeServices extends CoreStart {
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   setActiveUrl: (newUrl: string) => void;
+  createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -131,18 +125,9 @@ export interface VisualizeServices extends CoreStart {
 
 export interface VisInstance {
   vis: Vis;
-  savedVis: SerializedVis;
-  savedObjectProperties?: Partial<ExtraSavedObjectProperties>;
-  references?: Reference[];
-  panelTitle?: string;
-  panelDescription?: string;
-  panelTimeRange?: TimeRange;
-}
-
-export interface LegacyVisInstance {
-  vis: Vis;
   savedVis: VisSavedObject;
   savedSearch?: SavedSearch;
+  embeddableHandler: VisualizeEmbeddableContract;
   panelTitle?: string;
   panelDescription?: string;
   panelTimeRange?: TimeRange;
@@ -156,8 +141,7 @@ export type VisEditorConstructor<TVisParams extends VisParams = VisParams> = new
   element: HTMLElement,
   vis: Vis<TVisParams>,
   eventEmitter: EventEmitter,
-  embeddableApiHandler: EmbeddableApiHandler,
-  references?: Reference[]
+  embeddableHandler: VisualizeEmbeddableContract
 ) => IEditorController;
 
 export interface IEditorController {
@@ -166,15 +150,16 @@ export interface IEditorController {
 }
 
 export interface EditorRenderProps {
+  core: CoreStart;
+  data: DataPublicPluginStart;
   filters: Filter[];
   timeRange: TimeRange;
   query?: Query;
   savedSearch?: SavedSearch;
   uiState: PersistedState;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */
   linked: boolean;
 }
-
-export type { EmbeddableApiHandler };

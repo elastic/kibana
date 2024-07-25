@@ -7,8 +7,7 @@
  */
 
 import './app.scss';
-import React, { useEffect, useCallback, useState, useMemo } from 'react';
-import { parse } from 'query-string';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -26,8 +25,6 @@ import {
   VisualizeListing,
   VisualizeNoMatch,
   VisualizeByValueEditor,
-  LegacyVisualizeEditor,
-  LegacyVisualizeByValueEditor,
 } from './components';
 import { VisualizeConstants } from '../../common/constants';
 
@@ -94,11 +91,9 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       share,
     },
   } = useKibana<VisualizeServices>();
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const searchParams = useMemo(() => parse(search), [search]);
 
   const onDataViewCreated = useCallback((dataView: unknown) => {
     if (dataView) {
@@ -163,23 +158,9 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   return (
     <Routes>
       <Route exact path={`${VisualizeConstants.EDIT_BY_VALUE_PATH}`}>
-        {searchParams.type === 'metrics' ? (
-          <LegacyVisualizeByValueEditor onAppLeave={onAppLeave} />
-        ) : (
-          <VisualizeByValueEditor onAppLeave={onAppLeave} />
-        )}
+        <VisualizeByValueEditor onAppLeave={onAppLeave} />
       </Route>
-      <Route path={VisualizeConstants.CREATE_PATH}>
-        {searchParams.type === 'metrics' ? (
-          <LegacyVisualizeEditor onAppLeave={onAppLeave} />
-        ) : (
-          <VisualizeEditor onAppLeave={onAppLeave} />
-        )}
-      </Route>
-      <Route path={`${VisualizeConstants.LEGACY_EDIT_PATH}/:id`}>
-        <LegacyVisualizeEditor onAppLeave={onAppLeave} />
-      </Route>
-      <Route path={`${VisualizeConstants.EDIT_PATH}/:id`}>
+      <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
         <VisualizeEditor onAppLeave={onAppLeave} />
       </Route>
       <Route

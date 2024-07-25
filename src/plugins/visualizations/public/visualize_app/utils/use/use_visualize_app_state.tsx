@@ -6,18 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { encode, decode } from '@kbn/rison';
+import React, { useEffect, useState } from 'react';
+import { cloneDeep, isEqual } from 'lodash';
+import { map } from 'rxjs';
 import { EventEmitter } from 'events';
-import { parse, stringifyUrl } from 'query-string';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { BehaviorSubject } from 'rxjs';
-import { STATE_STORAGE_KEY } from '../../../../common/constants';
-import { VisualizeRuntimeState } from '../../../react_embeddable/types';
+import { i18n } from '@kbn/i18n';
+import { FilterStateStore } from '@kbn/es-query';
 
-import { VisualizeServices } from '../../types';
-import { UpdateVisFn } from './use_embeddable_api_handler';
-
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Markdown } from '@kbn/shared-ux-markdown';
+import { connectToQueryState } from '@kbn/data-plugin/public';
+import { migrateLegacyQuery } from '../migrate_legacy_query';
+import {
+  VisualizeServices,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
+} from '../../types';
+import { visStateToEditorState } from '../utils';
+import { createVisualizeAppState } from '../create_visualize_app_state';
+import { VisualizeConstants } from '../../../../common/constants';
 /**
  * This effect is responsible for instantiating the visualize app state container,
  * which is in sync with "_a" url param
@@ -25,95 +32,121 @@ import { UpdateVisFn } from './use_embeddable_api_handler';
 export const useVisualizeAppState = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
-  updateVis: UpdateVisFn | undefined
+  instance?: VisualizeEditorVisInstance
 ) => {
-  const { history } = services;
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
-  const currentState = useMemo(() => {
-    const searchParams = parse(history.location.search);
-    const appState = searchParams[STATE_STORAGE_KEY];
-    return typeof appState === 'string'
-      ? (decode(appState) as unknown as VisualizeRuntimeState)
-      : null;
-  }, [history.location.search]);
-  const state$ = useRef(new BehaviorSubject<VisualizeRuntimeState | null>(currentState));
+  const [appState, setAppState] = useState<VisualizeAppStateContainer | null>(null);
 
-  useEffectOnce(() => {
-    const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {
-      if (!isDirty) {
-        //   // it is important to update vis state with fresh data
-        //   stateContainer.transitions.updateVisState(visStateToEditorState(instance, services).vis);
-        // }
-        setHasUnappliedChanges(isDirty);
-      }
-    };
-
-    eventEmitter.on('dirtyStateChange', onDirtyStateChange);
-    return () => {
-      eventEmitter.off('dirtyStateChange', onDirtyStateChange);
-    };
-  });
-
-  const getState = useCallback(() => currentState, [currentState]);
-
-  const updateUrlState = useCallback(
-    (newState: VisualizeRuntimeState) => {
-      state$.current.next(newState);
-      const encodedState = encode(newState);
-      const newUrl = stringifyUrl({
-        url: history.location.pathname,
-        query: {
-          ...parse(history.location.search),
-          [STATE_STORAGE_KEY]: encodedState,
-        },
+  useEffect(() => {
+    if (instance) {
+      const stateDefaults = visStateToEditorState(instance, services);
+      const byValue = !('savedVis' in instance);
+      const { stateContainer, stopStateSync } = createVisualizeAppState({
+        stateDefaults,
+        kbnUrlStateStorage: services.kbnUrlStateStorage,
+        byValue,
       });
-      history.replace(newUrl);
-    },
-    [history]
-  );
+      const currentAppState = stateContainer.getState();
 
-  const updateDataView = useCallback(
-    async (dataViewId) => {
-      if (!currentState || !updateVis) return;
-      const newSerializedVis = {
-        ...currentState.serializedVis,
+      const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {
+        if (!isDirty) {
+          // it is important to update vis state with fresh data
+          stateContainer.transitions.updateVisState(visStateToEditorState(instance, services).vis);
+        }
+        setHasUnappliedChanges(isDirty);
       };
-      const selectedDataView = await services.dataViews.get(dataViewId);
-      Object.assign(newSerializedVis.data, {
-        indexPattern: selectedDataView,
-        searchSource: {
-          ...newSerializedVis.data.searchSource,
-          index: dataViewId,
-          aggs: services.data.search.aggs.createAggConfigs(
-            selectedDataView,
-            newSerializedVis.data.aggs
+
+      eventEmitter.on('dirtyStateChange', onDirtyStateChange);
+
+      const { filterManager, queryString } = services.data.query;
+      // sync initial app state from state to managers
+      filterManager.setAppFilters(cloneDeep(currentAppState.filters));
+      queryString.setQuery(migrateLegacyQuery(currentAppState.query));
+
+      // setup syncing of app filters between appState and query services
+      const stopSyncingAppFilters = connectToQueryState(
+        services.data.query,
+        {
+          set: ({ filters, query }) => {
+            stateContainer.transitions.set('filters', filters);
+            stateContainer.transitions.set('query', query);
+          },
+          get: () => {
+            return {
+              filters: stateContainer.getState().filters,
+              query: stateContainer.getState().query,
+            };
+          },
+          state$: stateContainer.state$.pipe(
+            map((state) => ({
+              filters: state.filters,
+              query: state.query,
+            }))
           ),
         },
-        savedSearchId: undefined,
-      });
-      updateVis(newSerializedVis);
-    },
-    [currentState, services, updateVis]
-  );
+        {
+          filters: FilterStateStore.APP_STATE,
+          query: true,
+        }
+      );
 
-  const updateTitle = useCallback(
-    (newTitle: string) => {
-      updateVis?.({ title: newTitle });
-    },
-    [updateVis]
-  );
+      // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
+      // defaults applied. If the url was from a previous session which included modifications to the
+      // appState then they won't be equal.
+      if (
+        !isEqual(currentAppState.vis, stateDefaults.vis) ||
+        !isEqual(currentAppState.query, stateDefaults.query) ||
+        !isEqual(currentAppState.filters, stateDefaults.filters)
+      ) {
+        const { aggs, ...visState } = currentAppState.vis;
+        const query = currentAppState.query;
+        const filter = currentAppState.filters;
 
-  return {
-    stateContainer: {
-      updateUrlState,
-      getState,
-      state$: state$.current,
-      transitions: {
-        updateDataView,
-        updateTitle,
-      },
-    },
-    currentAppState: currentState,
-    hasUnappliedChanges,
-  };
+        const visSearchSource = instance.vis.data.searchSource?.getSerializedFields() || {};
+        instance.vis
+          .setState({
+            ...visState,
+            data: {
+              aggs,
+              searchSource: {
+                ...visSearchSource,
+                query,
+                filter,
+              },
+              savedSearchId: instance.vis.data.savedSearchId,
+            },
+          })
+          .then(() => {
+            // setting up the stateContainer after setState is successful will prevent loading the editor with failures
+            // otherwise the catch will take presedence
+            setAppState(stateContainer);
+          })
+          .catch((error: Error) => {
+            // if setting new vis state was failed for any reason,
+            // redirect to the listing page with error message
+            services.toastNotifications.addWarning({
+              title: i18n.translate('visualizations.visualizationLoadingFailedErrorMessage', {
+                defaultMessage: 'Failed to load the visualization',
+              }),
+              text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services.core),
+            });
+
+            services.history.replace(
+              `${VisualizeConstants.LANDING_PAGE_PATH}?notFound=visualization`
+            );
+          });
+      } else {
+        setAppState(stateContainer);
+      }
+
+      // don't forget to clean up
+      return () => {
+        eventEmitter.off('dirtyStateChange', onDirtyStateChange);
+        stopStateSync();
+        stopSyncingAppFilters();
+      };
+    }
+  }, [eventEmitter, instance, services]);
+
+  return { appState, hasUnappliedChanges };
 };

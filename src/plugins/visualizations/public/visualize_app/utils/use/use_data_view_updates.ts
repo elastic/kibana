@@ -52,11 +52,13 @@ export const useDataViewUpdates = (
           const selectedDataView = await services.dataViews.get(dataView);
           if (selectedDataView) {
             updateDataView(services, visInstance, selectedDataView);
+            visInstance.embeddableHandler.reload();
             eventEmitter.emit('updateEditor');
           }
         }
       };
 
+      syncDataView(appState.getState());
       stateUpdatesSubscription = appState.state$.subscribe(syncDataView);
     }
     return () => {

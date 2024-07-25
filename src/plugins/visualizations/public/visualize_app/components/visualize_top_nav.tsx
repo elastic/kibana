@@ -24,18 +24,13 @@ import type {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
-import {
-  NavigateToLensFn,
-  OpenInspectorFn,
-  SerializeStateFn,
-} from '../utils/use/use_embeddable_api_handler';
-import { VisualizeRuntimeState } from '../../react_embeddable/types';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
   isChromeVisible?: boolean;
+  isEmbeddableRendered: boolean;
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
@@ -44,18 +39,16 @@ interface VisualizeTopNavProps {
   visInstance: VisualizeEditorVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   stateContainer: VisualizeAppStateContainer;
+  visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
   eventEmitter?: EventEmitter;
-  openInspectorFn?: OpenInspectorFn;
-  navigateToLensFn?: NavigateToLensFn;
-  serializeStateFn: SerializeStateFn;
-  snapshotStateFn: () => VisualizeRuntimeState;
 }
 
 const TopNav = ({
   currentAppState,
   isChromeVisible,
+  isEmbeddableRendered,
   hasUnsavedChanges,
   setHasUnsavedChanges,
   hasUnappliedChanges,
@@ -64,22 +57,22 @@ const TopNav = ({
   originatingPath,
   visInstance,
   stateContainer,
+  visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
   eventEmitter,
-  openInspectorFn,
-  navigateToLensFn,
-  serializeStateFn,
-  snapshotStateFn,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
-  const { vis } = visInstance;
-  const { managed } = visInstance.savedObjectProperties ?? { managed: false };
+  const {
+    embeddableHandler,
+    vis,
+    savedVis: { managed },
+  } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [navigateToLens, setNavigateToLens] = useState(false);
-  const displayEditInLensItem = !!navigateToLensFn;
+  const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -91,10 +84,9 @@ const TopNav = ({
   }, [setHideTryInLensBadge]);
 
   const openInspector = useCallback(() => {
-    if (!openInspectorFn) return;
-    const session = openInspectorFn();
+    const session = embeddableHandler.openInspector();
     setInspectorSession(session);
-  }, [openInspectorFn]);
+  }, [embeddableHandler]);
 
   const doReload = useCallback(async () => {
     // start a new session to make sure all data is up to date
@@ -112,34 +104,46 @@ const TopNav = ({
     [doReload]
   );
 
+  useEffect(() => {
+    const subscription = embeddableHandler
+      .getExpressionVariables$()
+      .subscribe((expressionVariables) => {
+        setDisplayEditInLensItem(
+          Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
+        );
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [embeddableHandler, vis]);
+
   const config = useMemo(() => {
-    return getTopNavConfig(
-      {
-        hasUnsavedChanges,
-        setHasUnsavedChanges,
-        hasUnappliedChanges,
-        openInspector,
-        originatingApp,
-        setOriginatingApp,
-        originatingPath,
-        visInstance,
-        stateContainer,
-        stateTransfer: services.stateTransferService,
-        savedSearchService: services.savedSearch,
-        embeddableId,
-        displayEditInLensItem,
-        hideLensBadge,
-        setNavigateToLens,
-        navigateToLensFn,
-        serializeState: serializeStateFn,
-        snapshotState: snapshotStateFn,
-        showBadge: !hideTryInLensBadge && displayEditInLensItem,
-        eventEmitter,
-        hasInspector: !!openInspectorFn,
-      },
-      services
-    );
+    if (isEmbeddableRendered) {
+      return getTopNavConfig(
+        {
+          hasUnsavedChanges,
+          setHasUnsavedChanges,
+          hasUnappliedChanges,
+          openInspector,
+          originatingApp,
+          setOriginatingApp,
+          originatingPath,
+          visInstance,
+          stateContainer,
+          visualizationIdFromUrl,
+          stateTransfer: services.stateTransferService,
+          embeddableId,
+          displayEditInLensItem,
+          hideLensBadge,
+          setNavigateToLens,
+          showBadge: !hideTryInLensBadge && displayEditInLensItem,
+          eventEmitter,
+        },
+        services
+      );
+    }
   }, [
+    isEmbeddableRendered,
     hasUnsavedChanges,
     setHasUnsavedChanges,
     hasUnappliedChanges,
@@ -149,16 +153,13 @@ const TopNav = ({
     originatingPath,
     visInstance,
     stateContainer,
-    snapshotStateFn,
+    visualizationIdFromUrl,
     services,
     embeddableId,
     displayEditInLensItem,
     hideLensBadge,
     hideTryInLensBadge,
     eventEmitter,
-    openInspectorFn,
-    navigateToLensFn,
-    serializeStateFn,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {
@@ -169,8 +170,6 @@ const TopNav = ({
   };
   const showFilterBar = vis.type.options.showFilterBar;
   const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryInput;
-
-  const currentIndexPattern = useMemo(() => vis.data.indexPattern, [vis.data.indexPattern]);
 
   useEffect(() => {
     return () => {
@@ -292,7 +291,7 @@ const TopNav = ({
   const onChangeDataView = useCallback(
     async (selectedDataViewId: string) => {
       if (selectedDataViewId) {
-        await stateContainer.transitions.updateDataView(selectedDataViewId);
+        stateContainer.transitions.updateDataView(selectedDataViewId);
       }
     },
     [stateContainer.transitions]
@@ -315,6 +314,7 @@ const TopNav = ({
       setMenuMountPoint={setHeaderActionMenu}
       onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
+      onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
       indexPatterns={indexPatterns}
       screenTitle={vis.title}
       showAutoRefreshOnly={!showDatePicker()}
@@ -337,9 +337,9 @@ const TopNav = ({
         services.visualizeCapabilities.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
       }
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker && currentIndexPattern
+        shouldShowDataViewPicker && vis.data.indexPattern
           ? {
-              currentDataViewId: currentIndexPattern.id,
+              currentDataViewId: vis.data.indexPattern.id,
               trigger: {
                 label: isMissingCurrentDataView
                   ? i18n.translate('visualizations.fallbackDataView.label', {
@@ -354,7 +354,7 @@ const TopNav = ({
                             }),
                       },
                     })
-                  : currentIndexPattern?.getName(),
+                  : vis.data.indexPattern.getName(),
               },
               isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,

@@ -7,9 +7,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
+import { DefaultEditorController } from './default_editor_controller';
 import { VisDefaultEditorPlugin } from './plugin';
 
-export { DefaultEditor } from './default_editor_lazy';
+export { DefaultEditorController };
 export { useValidation } from './components/controls/utils';
 export { PalettePicker } from './components/controls/palette_picker';
 export {

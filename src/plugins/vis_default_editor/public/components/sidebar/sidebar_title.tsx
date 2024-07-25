@@ -32,7 +32,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 interface LinkedSearchProps {
   savedSearch: SavedSearch;
   eventEmitter: EventEmitter;
-  unlinkFromSavedSearch: () => void;
 }
 
 interface SidebarTitleProps {
@@ -40,14 +39,9 @@ interface SidebarTitleProps {
   savedSearch?: SavedSearch;
   vis: Vis;
   eventEmitter: EventEmitter;
-  unlinkFromSavedSearch: () => void;
 }
 
-export function LinkedSearch({
-  savedSearch,
-  eventEmitter,
-  unlinkFromSavedSearch,
-}: LinkedSearchProps) {
+export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const {
     services: { application },
@@ -57,9 +51,8 @@ export function LinkedSearch({
   const onClickButtonLink = useCallback(() => setShowPopover((v) => !v), []);
   const onClickUnlikFromSavedSearch = useCallback(() => {
     setShowPopover(false);
-    unlinkFromSavedSearch();
     eventEmitter.emit('unlinkFromSavedSearch');
-  }, [eventEmitter, unlinkFromSavedSearch]);
+  }, [eventEmitter]);
   const onClickViewInDiscover = useCallback(() => {
     application.navigateToApp('discover', {
       path: getSavedSearchUrl(savedSearch.id),
@@ -165,19 +158,9 @@ export function LinkedSearch({
   );
 }
 
-function SidebarTitle({
-  savedSearch,
-  vis,
-  isLinkedSearch,
-  eventEmitter,
-  unlinkFromSavedSearch,
-}: SidebarTitleProps) {
+function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: SidebarTitleProps) {
   return isLinkedSearch && savedSearch ? (
-    <LinkedSearch
-      savedSearch={savedSearch}
-      eventEmitter={eventEmitter}
-      unlinkFromSavedSearch={unlinkFromSavedSearch}
-    />
+    <LinkedSearch savedSearch={savedSearch} eventEmitter={eventEmitter} />
   ) : vis.type.options.showIndexSelection ? (
     <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
       <h2

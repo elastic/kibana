@@ -9,6 +9,7 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { DefaultEditorController } from './default_editor_controller';
 import { setAnalytics, setI18n, setTheme } from './services';
 
 export interface VisDefaultEditorSetupDependencies {
@@ -21,6 +22,9 @@ export class VisDefaultEditorPlugin
   public setup(core: CoreSetup, { visualizations }: VisDefaultEditorSetupDependencies) {
     setAnalytics(core.analytics);
     setTheme(core.theme);
+    if (visualizations) {
+      visualizations.visEditorsRegistry.registerDefault(DefaultEditorController);
+    }
   }
 
   public start(core: CoreStart) {

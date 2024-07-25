@@ -7,8 +7,13 @@
     "id": "visDefaultEditor",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["dataViews", "unifiedSearch"],
-    "optionalPlugins": ["visualizations"],
+    "requiredPlugins": [
+      "dataViews",
+      "unifiedSearch",
+    ],
+    "optionalPlugins": [
+      "visualizations"
+    ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
@@ -16,8 +21,7 @@
       "fieldFormats",
       "esUiShared",
       "visualizations",
-      "savedSearch",
-      "embeddable"
+      "savedSearch"
     ]
   }
 }

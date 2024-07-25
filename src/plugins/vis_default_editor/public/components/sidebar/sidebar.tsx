@@ -6,56 +6,56 @@
  * Side Public License, v 1.
  */
 
-import type { DeepPartial } from '@kbn/utility-types';
 import React, {
-  KeyboardEventHandler,
   memo,
-  useCallback,
-  useEffect,
   useMemo,
   useState,
+  useCallback,
+  KeyboardEventHandler,
+  useEffect,
 } from 'react';
-
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EventEmitter } from 'events';
 import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EventEmitter } from 'events';
 
+import {
+  Vis,
+  PersistedState,
+  VisualizeEmbeddableContract,
+} from '@kbn/visualizations-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { Schema } from '@kbn/visualizations-plugin/public';
-import { PersistedState, SerializedVis, Vis } from '@kbn/visualizations-plugin/public';
-import { DefaultEditorAggCommonProps } from '../agg_common_props';
-import { DefaultEditorControls } from './controls';
 import { DefaultEditorNavBar } from './navbar';
+import { DefaultEditorControls } from './controls';
+import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
+import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
-import { discardChanges, setStateParamValue, useEditorFormState, useEditorReducer } from './state';
 import { useOptionTabs } from './use_option_tabs';
 
 interface DefaultEditorSideBarProps {
+  embeddableHandler: VisualizeEmbeddableContract;
   isCollapsed: boolean;
   onClickCollapse: () => void;
-  onUpdateVis: (vis: DeepPartial<SerializedVis>) => void;
   uiState: PersistedState;
   vis: Vis;
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
   savedSearch?: SavedSearch;
   timeRange: TimeRange;
-  unlinkFromSavedSearch: () => void;
 }
 
 function DefaultEditorSideBarComponent({
+  embeddableHandler,
   isCollapsed,
   onClickCollapse,
-  onUpdateVis,
   uiState,
   vis,
   isLinkedSearch,
   eventEmitter,
   savedSearch,
   timeRange,
-  unlinkFromSavedSearch,
 }: DefaultEditorSideBarProps) {
   const [isDirty, setDirty] = useState(false);
   const [state, dispatch] = useEditorReducer(vis, eventEmitter);
@@ -100,18 +100,19 @@ function DefaultEditorSideBarComponent({
       return;
     }
 
-    const visUpdates = {
+    vis.setState({
+      ...vis.serialize(),
       params: state.params,
       data: {
         aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.serialize()) as any) : [],
       },
-    };
-    onUpdateVis(visUpdates);
+    });
+    embeddableHandler.reload();
     eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
     setTouched(false);
-  }, [onUpdateVis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
+  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter, embeddableHandler]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     (event) => {
@@ -193,7 +194,6 @@ function DefaultEditorSideBarComponent({
                 savedSearch={savedSearch}
                 vis={vis}
                 eventEmitter={eventEmitter}
-                unlinkFromSavedSearch={unlinkFromSavedSearch}
               />
             )}
 

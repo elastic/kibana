@@ -24,20 +24,20 @@ export const useLinkedSearchUpdates = (
   visInstance: VisualizeEditorVisInstance | undefined
 ) => {
   useEffect(() => {
-    if (appState && visInstance && visInstance.vis.data.savedSearchId) {
-      const { savedSearch: savedSearchService } = services;
+    if (appState && visInstance && visInstance.savedSearch && visInstance.vis.data.searchSource) {
+      const { savedSearch } = visInstance;
       // SearchSource is a promise-based stream of search results that can inherit from other search sources.
+      const { searchSource } = visInstance.vis.data;
 
-      const unlinkFromSavedSearch = async (showToast: boolean = true) => {
-        const { searchSource } = visInstance.vis.data;
-        const savedSearch = await savedSearchService.get(visInstance.vis.data.savedSearchId!);
+      const unlinkFromSavedSearch = (showToast: boolean = true) => {
         const searchSourceParent = savedSearch.searchSource;
         const searchSourceGrandparent = searchSourceParent?.getParent();
         const currentIndex = searchSourceParent?.getField('index');
+        visInstance.savedSearch = undefined;
         visInstance.vis.data.savedSearchId = undefined;
 
-        searchSource!.setField('index', currentIndex);
-        searchSource!.setParent(searchSourceGrandparent);
+        searchSource.setField('index', currentIndex);
+        searchSource.setParent(searchSourceGrandparent);
 
         appState.transitions.unlinkSavedSearch({
           query: searchSourceParent?.getField('query') as Query,
@@ -62,5 +62,5 @@ export const useLinkedSearchUpdates = (
         eventEmitter.off('unlinkFromSavedSearch', unlinkFromSavedSearch);
       };
     }
-  }, [appState, eventEmitter, visInstance, services.toastNotifications, services]);
+  }, [appState, eventEmitter, visInstance, services.toastNotifications]);
 };
