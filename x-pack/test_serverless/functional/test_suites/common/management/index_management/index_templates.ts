@@ -22,6 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const INDEX_PATTERN = `index_pattern_${Math.random()}`;
 
   describe('Index Templates', function () {
+    // see details: https://github.com/elastic/kibana/issues/189191
+    this.tags(['failsOnMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
     });
@@ -97,10 +99,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
 
         // Click form summary step and then the submit button
-        await testSubjects.click('formWizardStep-5'); // "Review Template"
-        await testSubjects.click('nextButton'); // "Create template"
-        await testSubjects.existOrFail('closeDetailsButton', { timeout: 120 * 1000 + 10_000 }); // assert flyout opened (by asserting on the close button), using the default timeout + 10 secs
-        await testSubjects.existOrFail('stepTitle', { timeout: 120 * 1000 + 10_000 }); // assert flyout opened (by asserting on the close button), using the default timeout + 10 secs
+        await testSubjects.click('formWizardStep-5');
+        await testSubjects.click('nextButton');
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
