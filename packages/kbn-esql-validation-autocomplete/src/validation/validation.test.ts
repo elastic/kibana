@@ -111,7 +111,7 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
         },
       ],
     },
-    { withTypes: false }
+    { withTypes: false, capitalize: false }
   )[0].declaration;
 }
 function getFieldMapping(
@@ -12973,6 +12973,7 @@ describe('validation logic', () => {
           'from a_index | stats var = round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)',
           []
         );
+        testErrorsAndWarnings('from a_index | stats round(weighted_avg(longField, longField))', []);
 
         testErrorsAndWarnings(
           'from a_index | stats round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)',
@@ -12985,6 +12986,8 @@ describe('validation logic', () => {
           'from a_index | stats avg(doubleField), weighted_avg(longField, longField)',
           []
         );
+
+        testErrorsAndWarnings('from a_index | stats var0 = weighted_avg(longField, longField)', []);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField)',
@@ -13031,6 +13034,7 @@ describe('validation logic', () => {
           'from a_index | stats var = round(weighted_avg(longField, integerField))',
           []
         );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(longField, integerField)', []);
 
         testErrorsAndWarnings(
           'from a_index | stats round(weighted_avg(longField, integerField))',
@@ -13102,6 +13106,7 @@ describe('validation logic', () => {
           'from a_index | stats var = round(weighted_avg(integerField, doubleField))',
           []
         );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(integerField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | stats round(weighted_avg(integerField, doubleField))',

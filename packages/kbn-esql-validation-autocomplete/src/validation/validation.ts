@@ -44,7 +44,6 @@ import {
   isSupportedFunction,
   isTimeIntervalItem,
   inKnownTimeInterval,
-  printFunctionSignature,
   sourceExists,
   getColumnExists,
   hasWildcard,
@@ -221,7 +220,7 @@ function validateNestedFunctionArg(
           values: {
             name: astFunction.name,
             argType: parameterDefinition.type,
-            value: printFunctionSignature(actualArg, false) || actualArg.name,
+            value: actualArg.text,
             givenType: argFn.signatures[0].returnType,
           },
           locations: actualArg.location,
