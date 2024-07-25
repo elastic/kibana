@@ -133,10 +133,52 @@
 .console__monaco_editor__selectedRequests {
   background: transparentize($euiColorLightShade, .3);
 }
+
+/*
+ * The styling for the multiple-response status code decorations
+ */
+%monaco__status_badge {
+  font-family: $euiFontFamily;
+  font-size: $euiFontSizeS;
+  font-weight: $euiFontWeightMedium;
+  line-height: $euiLineHeight;
+  padding: 2px $euiSizeXS;
+  display: inline-block;
+  border-radius: calc($euiBorderRadius / 2);
+  white-space: nowrap;
+  vertical-align: top;
+  cursor: default;
+  max-width: 100%;
+}
+
+.monaco__status_badge__primary {
+  @extend %monaco__status_badge;
+  background-color: $euiColorVis1;
+}
+
+.monaco__status_badge__success {
+  @extend %monaco__status_badge;
+  background-color: $euiColorSuccess;
+}
+
+.monaco__status_badge__default {
+  @extend %monaco__status_badge;
+  background-color: $euiColorLightShade;
+}
+
+.monaco__status_badge__warning {
+  @extend %monaco__status_badge;
+  background-color: $euiColorWarning;
+}
+
+.monaco__status_badge__danger {
+  @extend %monaco__status_badge;
+  background-color: $euiColorDanger;
+}
+
 /*
  * The z-index for the autocomplete suggestions popup
  */
-
 .kibanaCodeEditor .monaco-editor .suggest-widget {
   // the value needs to be above the z-index of the resizer bar
   z-index: $euiZLevel1 + 2;

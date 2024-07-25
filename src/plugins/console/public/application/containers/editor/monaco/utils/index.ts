@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { AutocompleteType, SELECTED_REQUESTS_CLASSNAME } from './constants';
+export {
+  AutocompleteType,
+  SELECTED_REQUESTS_CLASSNAME,
+  SUCCESS_STATUS_BADGE_CLASSNAME,
+  WARNING_STATUS_BADGE_CLASSNAME,
+  PRIMARY_STATUS_BADGE_CLASSNAME,
+  DEFAULT_STATUS_BADGE_CLASSNAME,
+  DANGER_STATUS_BADGE_CLASSNAME,
+} from './constants';
 export {
   getRequestStartLineNumber,
   getRequestEndLineNumber,
@@ -25,3 +33,4 @@ export {
   shouldTriggerSuggestions,
 } from './autocomplete_utils';
 export { getLineTokens, containsUrlParams } from './tokens_utils';
+export { getStatusCodeDecorations } from './status_code_decoration_utils';

@@ -13,6 +13,15 @@ import { i18n } from '@kbn/i18n';
  */
 export const SELECTED_REQUESTS_CLASSNAME = 'console__monaco_editor__selectedRequests';
 
+/*
+ * CSS class names used for the styling of multiple-response status codes
+ */
+export const PRIMARY_STATUS_BADGE_CLASSNAME = 'monaco__status_badge__success';
+export const SUCCESS_STATUS_BADGE_CLASSNAME = 'monaco__status_badge__success';
+export const DEFAULT_STATUS_BADGE_CLASSNAME = 'monaco__status_badge__success';
+export const WARNING_STATUS_BADGE_CLASSNAME = 'monaco__status_badge__warning';
+export const DANGER_STATUS_BADGE_CLASSNAME = 'monaco__status_badge__danger';
+
 export const whitespacesRegex = /\s+/;
 export const newLineRegex = /\n/;
 export const slashRegex = /\//;
