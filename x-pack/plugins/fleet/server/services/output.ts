@@ -38,6 +38,7 @@ import type {
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -130,27 +131,56 @@ async function getAgentPoliciesPerOutput(
   outputId?: string,
   isDefault?: boolean
 ) {
-  let kuery: string;
+  let agentPoliciesKuery: string;
+  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
   if (outputId) {
     if (isDefault) {
-      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
     }
   } else {
     if (isDefault) {
-      kuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
       return;
     }
   }
 
-  const agentPolicySO = await agentPolicyService.list(soClient, {
-    kuery,
+  // Get agent policies directly using output
+  const directAgentPolicies = await agentPolicyService.list(soClient, {
+    kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
     withPackagePolicies: true,
   });
-  return agentPolicySO?.items;
+  const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
+
+  // Get package policies using output and derive agent policies from that which
+  // are not already identfied above. The IDs cannot be used as part of the kuery
+  // above since the underlying saved object client .find() only filters on attributes
+  const packagePolicySOs = await packagePolicyService.list(soClient, {
+    kuery: packagePoliciesKuery,
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const agentPolicyIdsFromPackagePolicies = [
+    ...new Set(
+      packagePolicySOs?.items.reduce((acc: string[], packagePolicy) => {
+        return [
+          ...acc,
+          ...packagePolicy.policy_ids.filter((id) => !directAgentPolicyIds?.includes(id)),
+        ];
+      }, [])
+    ),
+  ];
+  const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIDs(
+    soClient,
+    agentPolicyIdsFromPackagePolicies,
+    {
+      withPackagePolicies: true,
+    }
+  );
+
+  return [...directAgentPolicies.items, ...agentPoliciesFromPackagePolicies];
 }
 
 async function validateLogstashOutputNotUsedInAPMPolicy(
