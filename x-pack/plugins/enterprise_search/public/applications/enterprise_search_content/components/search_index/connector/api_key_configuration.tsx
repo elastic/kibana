@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -150,9 +151,10 @@ export const ApiKeyConfig: React.FC<{
         <></>
       )}
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchApiKeyConfigGenerateApiKeyButton"
               onClick={clickGenerateApiKey}
               isLoading={status === Status.LOADING}
               isDisabled={indexName.length === 0}
@@ -166,6 +168,21 @@ export const ApiKeyConfig: React.FC<{
               )}
             </EuiButton>
           </EuiFlexItem>
+          {status === Status.SUCCESS && (
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                color="success"
+                size="s"
+                iconType="check"
+                title={
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.apiKeyConfig.newApiKeyCreatedCalloutLabel"
+                    defaultMessage="New API key created succesfully"
+                  />
+                }
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 

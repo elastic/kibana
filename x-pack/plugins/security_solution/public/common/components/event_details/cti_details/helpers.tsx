@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy, isObject } from 'lodash';
 import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
-import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  ENRICHMENT_DESTINATION_PATH,
+} from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
   FIRST_SEEN,
@@ -25,6 +28,7 @@ import type {
 } from '../../../../../common/search_strategy/security_solution/cti';
 import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
+import * as i18n from './translations';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;
@@ -134,3 +138,24 @@ export interface ThreatDetailsRow {
     value: string;
   };
 }
+
+interface ThreatDetailItem {
+  title: string;
+  description: { fieldName: string; value: unknown };
+}
+
+export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetailItem[] =>
+  Object.keys(enrichment)
+    .sort()
+    .map((field) => {
+      const title = field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
+        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}`, 'indicator')
+        : field;
+
+      let value = getFirstElement(enrichment[field]);
+      if (isObject(value)) {
+        value = i18n.NESTED_OBJECT_VALUES_NOT_RENDERED;
+      }
+
+      return { title, description: { fieldName: field, value } };
+    });

@@ -166,3 +166,12 @@ export const PROGRESS_RELATED_GRAPH = i18n.translate(
     defaultMessage: 'Generating related fields',
   }
 );
+export const GENERATION_ERROR = (progressStep: string) =>
+  i18n.translate('xpack.integrationAssistant.step.dataStream.generationError', {
+    values: { progressStep },
+    defaultMessage: 'An error occurred during: {progressStep}',
+  });
+
+export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.retryButtonLabel', {
+  defaultMessage: 'Retry',
+});

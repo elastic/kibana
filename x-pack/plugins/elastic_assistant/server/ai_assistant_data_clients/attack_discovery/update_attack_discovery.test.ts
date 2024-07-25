@@ -68,6 +68,7 @@ const existingAttackDiscovery: AttackDiscoveryResponse = {
     connectorId: 'my-gpt4o-ai',
   },
   attackDiscoveries: [],
+  lastViewedAt: '2024-06-07T21:19:08.090Z',
   updatedAt: '2024-06-07T21:19:08.090Z',
   replacements: {
     'f19e1a0a-de3b-496c-8ace-dd91229e1084': 'root',

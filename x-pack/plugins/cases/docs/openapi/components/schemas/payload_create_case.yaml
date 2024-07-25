@@ -13,9 +13,9 @@ properties:
   settings:
     $ref: 'settings.yaml'
   severity:
-    $ref: 'severity_property.yaml'
+    $ref: 'case_severity.yaml'
   status: 
-    $ref: 'status.yaml'
+    $ref: 'case_status.yaml'
   tags: 
     type: array
     items:

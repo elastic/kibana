@@ -43,6 +43,7 @@ export const getConfigurationRequest = ({
     closure_type: 'close-by-user',
     owner: 'securitySolutionFixture',
     customFields: [],
+    templates: [],
     ...overrides,
   };
 };

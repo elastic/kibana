@@ -57,7 +57,7 @@ export interface AlertDetailsContextualInsightsRequestContext {
   }>;
   licensing: Promise<LicensingApiRequestHandlerContext>;
 }
-type AlertDetailsContextualInsightsHandler = (
+export type AlertDetailsContextualInsightsHandler = (
   context: AlertDetailsContextualInsightsRequestContext,
   query: AlertDetailsContextualInsightsHandlerQuery
 ) => Promise<AlertDetailsContextualInsight[]>;

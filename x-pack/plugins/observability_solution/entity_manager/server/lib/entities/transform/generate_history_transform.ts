@@ -15,23 +15,60 @@ import { generateHistoryMetricAggregations } from './generate_metric_aggregation
 import {
   ENTITY_DEFAULT_HISTORY_FREQUENCY,
   ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
-  ENTITY_HISTORY_BASE_PREFIX,
 } from '../../../../common/constants_entities';
 import { generateHistoryMetadataAggregations } from './generate_metadata_aggregations';
-import { generateHistoryTransformId } from './generate_history_transform_id';
-import { generateHistoryIngestPipelineId } from '../ingest_pipeline/generate_history_ingest_pipeline_id';
+import {
+  generateHistoryTransformId,
+  generateHistoryIngestPipelineId,
+  generateHistoryIndexName,
+  generateHistoryBackfillTransformId,
+} from '../helpers/generate_component_id';
+import { isBackfillEnabled } from '../helpers/is_backfill_enabled';
 
 export function generateHistoryTransform(
-  definition: EntityDefinition
+  definition: EntityDefinition,
+  backfill = false
 ): TransformPutTransformRequest {
+  if (backfill && !isBackfillEnabled(definition)) {
+    throw new Error(
+      'This function was called with backfill=true without history.settings.backfillSyncDelay'
+    );
+  }
+
   const filter: QueryDslQueryContainer[] = [];
 
   if (definition.filter) {
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
+  if (backfill && definition.history.settings?.backfillLookbackPeriod) {
+    filter.push({
+      range: {
+        [definition.history.timestampField]: {
+          gte: `now-${definition.history.settings?.backfillLookbackPeriod.toJSON()}`,
+        },
+      },
+    });
+  }
+
+  const syncDelay = backfill
+    ? definition.history.settings?.backfillSyncDelay
+    : definition.history.settings?.syncDelay;
+
+  const transformId = backfill
+    ? generateHistoryBackfillTransformId(definition)
+    : generateHistoryTransformId(definition);
+
+  const frequency = backfill
+    ? definition.history.settings?.backfillFrequency
+    : definition.history.settings?.frequency;
+
   return {
-    transform_id: generateHistoryTransformId(definition),
+    transform_id: transformId,
+    _meta: {
+      definitionVersion: definition.version,
+      managed: definition.managed,
+    },
     defer_validation: true,
     source: {
       index: definition.indexPatterns,
@@ -44,14 +81,14 @@ export function generateHistoryTransform(
       }),
     },
     dest: {
-      index: `${ENTITY_HISTORY_BASE_PREFIX}.noop`,
+      index: `${generateHistoryIndexName({ id: 'noop' } as EntityDefinition)}`,
       pipeline: generateHistoryIngestPipelineId(definition),
     },
-    frequency: definition.history.settings?.frequency ?? ENTITY_DEFAULT_HISTORY_FREQUENCY,
+    frequency: frequency || ENTITY_DEFAULT_HISTORY_FREQUENCY,
     sync: {
       time: {
         field: definition.history.settings?.syncField ?? definition.history.timestampField,
-        delay: definition.history.settings?.syncDelay ?? ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
+        delay: syncDelay || ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
       },
     },
     settings: {
@@ -63,7 +100,7 @@ export function generateHistoryTransform(
         ...definition.identityFields.reduce(
           (acc, id) => ({
             ...acc,
-            [`entity.identityFields.${id.field}`]: {
+            [`entity.identity.${id.field}`]: {
               terms: { field: id.field, missing_bucket: id.optional },
             },
           }),

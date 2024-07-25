@@ -42,6 +42,21 @@
             "properties": {
               "created": {
                 "type": "keyword"
+              },
+              "action": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "original": {
+                "type": "text"
+              },
+              "module": {
+                "type": "text"
               }
             }
           },

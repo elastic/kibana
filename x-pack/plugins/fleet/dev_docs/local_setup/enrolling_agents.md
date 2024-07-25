@@ -12,6 +12,9 @@ Add the following to your `kibana.dev.yml`. Note that the only differences betwe
 # Set the Kibana server address to Fleet Server default host.
 server.host: 0.0.0.0
 
+# Use default version resolution to let APIs work without version header
+server.versioned.versionResolution: oldest
+
 # Install Fleet Server package.
 xpack.fleet.packages:
   - name: fleet_server

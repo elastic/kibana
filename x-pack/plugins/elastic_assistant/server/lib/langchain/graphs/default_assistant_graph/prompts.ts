@@ -8,10 +8,7 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
-  [
-    'system',
-    'You are a helpful assistant\n\nUse the below context as a sample of information about the user from their knowledge base:\n\n```{knowledge_history}```',
-  ],
+  ['system', 'You are a helpful assistant'],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
   ['placeholder', '{agent_scratchpad}'],
@@ -22,13 +19,14 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
     'system',
     'Respond to the human as helpfully and accurately as possible. You have access to the following tools:\n\n' +
       '{tools}\n\n' +
-      'Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).\n\n' +
+      `The tool action_input should ALWAYS follow the tool JSON schema args.\n\n` +
       'Valid "action" values: "Final Answer" or {tool_names}\n\n' +
+      'Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input strictly adhering to the tool JSON schema args).\n\n' +
       'Provide only ONE action per $JSON_BLOB, as shown:\n\n' +
       '```\n\n' +
       '{{\n\n' +
       '  "action": $TOOL_NAME,\n\n' +
-      '  "action_input": $INPUT\n\n' +
+      '  "action_input": $TOOL_INPUT\n\n' +
       '}}\n\n' +
       '```\n\n' +
       'Follow this format:\n\n' +
@@ -45,13 +43,11 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       '```\n\n' +
       '{{\n\n' +
       '  "action": "Final Answer",\n\n' +
-      '  "action_input": "Final response to human"\n\n' +
+      // important, no new line here
+      '  "action_input": "Final response to human"' +
       '}}\n\n' +
-      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation',
+      'Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:```$JSON_BLOB```then Observation',
   ],
   ['placeholder', '{chat_history}'],
-  [
-    'human',
-    'Use the below context as a sample of information about the user from their knowledge base:\n\n```\n{knowledge_history}\n```\n\n{input}\n\n{agent_scratchpad}\n(reminder to respond in a JSON blob no matter what)',
-  ],
+  ['human', '{input}\n\n{agent_scratchpad}\n\n(reminder to respond in a JSON blob no matter what)'],
 ]);

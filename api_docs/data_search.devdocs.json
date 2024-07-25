@@ -3611,7 +3611,15 @@
             "label": "uiSettingsClient",
             "description": [],
             "signature": [
-              "{ get: <T = any>(key: string) => Promise<T>; }"
+              "{ get: <T = any>(key: string, context?: ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.GetUiSettingsContext",
+                "text": "GetUiSettingsContext"
+              },
+              " | undefined) => Promise<T>; }"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -6996,7 +7004,7 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "[]; setField: <K extends keyof ",
+                  "<Record<string, any>>[]; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -9663,7 +9671,7 @@
             "description": [],
             "signature": [
               "SearchRequest",
-              "[]"
+              "<Record<string, any>>[]"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": false,
@@ -10084,14 +10092,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14839,7 +14839,7 @@
         "signature": [
           "(searchRequest: ",
           "SearchRequest",
-          ", dependencies: { getConfig: ",
+          "<Record<string, any>>, dependencies: { getConfig: ",
           {
             "pluginId": "@kbn/data-service",
             "scope": "common",
@@ -14863,12 +14863,13 @@
           {
             "parentPluginId": "data",
             "id": "def-common.getSearchParamsFromRequest.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "searchRequest",
             "description": [],
             "signature": [
-              "SearchRequest"
+              "SearchRequest",
+              "<Record<string, any>>"
             ],
             "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
             "deprecated": false,
@@ -16898,7 +16899,7 @@
           },
           "[] | undefined; request: ",
           "SearchRequest",
-          "; }) => Promise<Record<string, ",
+          "<Record<string, any>>; }) => Promise<Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -16975,12 +16976,52 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.queryToFields.$1.request",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ index?: string | ",
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  " | undefined; query?: (",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.AggregateQuery",
+                    "text": "AggregateQuery"
+                  },
+                  ")[] | undefined; filters?: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[] | (() => ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]) | undefined; } & Omit<Record<string, any>, \"index\" | \"query\" | \"filters\">"
                 ],
                 "path": "src/plugins/data/common/search/search_source/query_to_fields.ts",
                 "deprecated": false,
@@ -27005,7 +27046,7 @@
             "signature": [
               "(request: ",
               "SearchRequest",
-              ", response: ",
+              "<Record<string, any>>, response: ",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -27038,12 +27079,13 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.FetchHandlers.onResponse.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "SearchRequest"
+                  "SearchRequest",
+                  "<Record<string, any>>"
                 ],
                 "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
                 "deprecated": false,
@@ -33514,7 +33556,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "[]; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",

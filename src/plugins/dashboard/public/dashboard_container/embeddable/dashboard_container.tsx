@@ -498,11 +498,19 @@ export class DashboardContainer
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
 
+      const getCustomPlacementSettingFunc = await getDashboardPanelPlacementSetting(
+        panelPackage.panelType
+      );
+
+      const customPlacementSettings = getCustomPlacementSettingFunc
+        ? await getCustomPlacementSettingFunc(panelPackage.initialState)
+        : {};
+
       const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,
         height: DEFAULT_PANEL_HEIGHT,
         strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
-        ...getDashboardPanelPlacementSetting(panelPackage.panelType)?.(panelPackage.initialState),
+        ...customPlacementSettings,
       };
 
       const { width, height, strategy } = placementSettings;
@@ -519,10 +527,12 @@ export class DashboardContainer
           i: newId,
         },
         explicitInput: {
-          ...panelPackage.initialState,
           id: newId,
         },
       };
+      if (panelPackage.initialState) {
+        this.setRuntimeStateForChild(newId, panelPackage.initialState);
+      }
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
       onSuccess(newId, newPanel.explicitInput.title);
       return await this.untilReactEmbeddableLoaded<ApiType>(newId);

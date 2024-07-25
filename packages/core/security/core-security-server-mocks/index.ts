@@ -9,3 +9,4 @@
 export { securityServiceMock } from './src/security_service.mock';
 export type { InternalSecurityStartMock, SecurityStartMock } from './src/security_service.mock';
 export { auditLoggerMock } from './src/audit.mock';
+export { apiKeysMock } from './src/api_keys.mock';

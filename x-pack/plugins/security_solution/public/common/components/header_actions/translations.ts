@@ -21,18 +21,22 @@ export const NOTES_DISABLE_TOOLTIP = i18n.translate(
   }
 );
 
-export const NOTE_COUNT_TOOLTIP = (notesCount: number) =>
-  i18n.translate('xpack.securitySolution.notes.noteCountTooltip', {
-    defaultMessage: '{notesCount} {notesCount, plural, one { note } other { notes }}',
-    values: { notesCount },
-  });
-
-export const NOTES_TOOLTIP = i18n.translate(
+export const NOTES_ADD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.addNoteTooltip',
   {
-    defaultMessage: 'Add note',
+    defaultMessage: 'Add Note',
   }
 );
+
+export const NOTES_COUNT_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
+  i18n.translate(
+    'xpack.securitySolution.timeline.body.notes.addNote.multipleNotesAvailableTooltip',
+    {
+      values: { notesCount },
+      defaultMessage:
+        '{notesCount} {notesCount, plural, one {Note} other {Notes}  } available. Click to view {notesCount, plural, one {it} other {them}} & add more.',
+    }
+  );
 
 export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
   defaultMessage: 'Sort fields',

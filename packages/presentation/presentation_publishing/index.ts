@@ -86,6 +86,7 @@ export {
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
   apiPublishesBlockingError,
+  hasBlockingError,
   type PublishesBlockingError,
 } from './interfaces/publishes_blocking_error';
 export {

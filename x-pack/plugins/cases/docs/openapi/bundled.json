@@ -354,9 +354,9 @@
     },
     "/api/cases/configure": {
       "get": {
-        "summary": "Retrieves external connection details, such as the closure type and default connector for cases in the default space.",
+        "summary": "Get case settings in the default space",
         "operationId": "getCaseConfigurationDefaultSpace",
-        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.\n",
+        "description": "Retrieves setting details such as the closure type, custom fields, templatse, and the default connector for cases in the default space. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.\n",
         "tags": [
           "cases"
         ],
@@ -377,40 +377,6 @@
                     "properties": {
                       "closure_type": {
                         "$ref": "#/components/schemas/closure_types"
-                      },
-                      "customFields": {
-                        "type": "array",
-                        "x-technical-preview": true,
-                        "description": "Custom fields configuration details.",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 36
-                            },
-                            "label": {
-                              "description": "The custom field label that is displayed in the case.",
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 50
-                            },
-                            "required": {
-                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
-                              "type": "boolean"
-                            },
-                            "type": {
-                              "description": "The type of the custom field.",
-                              "type": "string",
-                              "enum": [
-                                "text",
-                                "toggle"
-                              ]
-                            }
-                          }
-                        }
                       },
                       "connector": {
                         "type": "object",
@@ -491,6 +457,51 @@
                           }
                         }
                       },
+                      "customFields": {
+                        "type": "array",
+                        "x-technical-preview": true,
+                        "description": "Custom fields configuration details.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "defaultValue": {
+                              "oneOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "boolean"
+                                }
+                              ],
+                              "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                            },
+                            "key": {
+                              "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 36
+                            },
+                            "label": {
+                              "description": "The custom field label that is displayed in the case.",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 50
+                            },
+                            "required": {
+                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "description": "The type of the custom field.",
+                              "type": "string",
+                              "enum": [
+                                "text",
+                                "toggle"
+                              ]
+                            }
+                          }
+                        }
+                      },
                       "error": {
                         "type": [
                           "string",
@@ -534,6 +545,9 @@
                       },
                       "owner": {
                         "$ref": "#/components/schemas/owners"
+                      },
+                      "templates": {
+                        "$ref": "#/components/schemas/templates"
                       },
                       "updated_at": {
                         "type": [
@@ -621,9 +635,9 @@
         }
       },
       "post": {
-        "summary": "Creates a case specific configuration that includes external connection details and custom fields.",
+        "summary": "Add case settings in the default space",
         "operationId": "setCaseConfigurationDefaultSpace",
-        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
+        "description": "Case settings include external connection details, custom fields, and templates.  Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.\n",
         "tags": [
           "cases"
         ],
@@ -656,40 +670,6 @@
                   "properties": {
                     "closure_type": {
                       "$ref": "#/components/schemas/closure_types"
-                    },
-                    "customFields": {
-                      "type": "array",
-                      "x-technical-preview": true,
-                      "description": "Custom fields configuration details.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": {
-                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 36
-                          },
-                          "label": {
-                            "description": "The custom field label that is displayed in the case.",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 50
-                          },
-                          "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
-                            "type": "boolean"
-                          },
-                          "type": {
-                            "description": "The type of the custom field.",
-                            "type": "string",
-                            "enum": [
-                              "text",
-                              "toggle"
-                            ]
-                          }
-                        }
-                      }
                     },
                     "connector": {
                       "type": "object",
@@ -770,6 +750,51 @@
                         }
                       }
                     },
+                    "customFields": {
+                      "type": "array",
+                      "x-technical-preview": true,
+                      "description": "Custom fields configuration details.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "defaultValue": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "boolean"
+                              }
+                            ],
+                            "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                          },
+                          "key": {
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
+                          },
+                          "label": {
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
+                          },
+                          "required": {
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "description": "The type of the custom field.",
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "toggle"
+                            ]
+                          }
+                        }
+                      }
+                    },
                     "error": {
                       "type": [
                         "string",
@@ -813,6 +838,9 @@
                     },
                     "owner": {
                       "$ref": "#/components/schemas/owners"
+                    },
+                    "templates": {
+                      "$ref": "#/components/schemas/templates"
                     },
                     "updated_at": {
                       "type": [
@@ -901,9 +929,9 @@
     },
     "/api/cases/configure/{configurationId}": {
       "patch": {
-        "summary": "Updates external connection details, such as the closure type and default connector for cases in the default space.",
+        "summary": "Update case settings in the default space",
         "operationId": "updateCaseConfigurationDefaultSpace",
-        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API.\n",
+        "description": "Updates setting details such as the closure type, custom fields, templates, and the default connector for cases in the default space. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the case was created.\n",
         "tags": [
           "cases"
         ],
@@ -939,40 +967,6 @@
                   "properties": {
                     "closure_type": {
                       "$ref": "#/components/schemas/closure_types"
-                    },
-                    "customFields": {
-                      "type": "array",
-                      "x-technical-preview": true,
-                      "description": "Custom fields configuration details.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": {
-                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 36
-                          },
-                          "label": {
-                            "description": "The custom field label that is displayed in the case.",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 50
-                          },
-                          "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
-                            "type": "boolean"
-                          },
-                          "type": {
-                            "description": "The type of the custom field.",
-                            "type": "string",
-                            "enum": [
-                              "text",
-                              "toggle"
-                            ]
-                          }
-                        }
-                      }
                     },
                     "connector": {
                       "type": "object",
@@ -1053,6 +1047,51 @@
                         }
                       }
                     },
+                    "customFields": {
+                      "type": "array",
+                      "x-technical-preview": true,
+                      "description": "Custom fields configuration details.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "defaultValue": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "boolean"
+                              }
+                            ],
+                            "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                          },
+                          "key": {
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
+                          },
+                          "label": {
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
+                          },
+                          "required": {
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "description": "The type of the custom field.",
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "toggle"
+                            ]
+                          }
+                        }
+                      }
+                    },
                     "error": {
                       "type": [
                         "string",
@@ -1096,6 +1135,9 @@
                     },
                     "owner": {
                       "$ref": "#/components/schemas/owners"
+                    },
+                    "templates": {
+                      "$ref": "#/components/schemas/templates"
                     },
                     "updated_at": {
                       "type": [
@@ -1903,9 +1945,9 @@
     },
     "/api/cases/configure/connectors/_find": {
       "get": {
-        "summary": "Retrieves information about connectors in the default space.",
+        "summary": "Get case connectors in the default space",
         "operationId": "findCaseConnectorsDefaultSpace",
-        "description": "In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "description": "Retrieves information about connectors that are supported for use in cases in the default space. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "cases"
         ],
@@ -2312,9 +2354,9 @@
     },
     "/s/{spaceId}/api/cases/configure": {
       "get": {
-        "summary": "Retrieves external connection details, such as the closure type and default connector for cases.",
+        "summary": "Get case settings",
         "operationId": "getCaseConfiguration",
-        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.\n",
+        "description": "Retrieves setting details such as the closure type, custom fields, templates, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.\n",
         "tags": [
           "cases"
         ],
@@ -2338,40 +2380,6 @@
                     "properties": {
                       "closure_type": {
                         "$ref": "#/components/schemas/closure_types"
-                      },
-                      "customFields": {
-                        "type": "array",
-                        "x-technical-preview": true,
-                        "description": "Custom fields configuration details.",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 36
-                            },
-                            "label": {
-                              "description": "The custom field label that is displayed in the case.",
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 50
-                            },
-                            "required": {
-                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
-                              "type": "boolean"
-                            },
-                            "type": {
-                              "description": "The type of the custom field.",
-                              "type": "string",
-                              "enum": [
-                                "text",
-                                "toggle"
-                              ]
-                            }
-                          }
-                        }
                       },
                       "connector": {
                         "type": "object",
@@ -2452,6 +2460,51 @@
                           }
                         }
                       },
+                      "customFields": {
+                        "type": "array",
+                        "x-technical-preview": true,
+                        "description": "Custom fields configuration details.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "defaultValue": {
+                              "oneOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "boolean"
+                                }
+                              ],
+                              "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                            },
+                            "key": {
+                              "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 36
+                            },
+                            "label": {
+                              "description": "The custom field label that is displayed in the case.",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 50
+                            },
+                            "required": {
+                              "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
+                              "type": "boolean"
+                            },
+                            "type": {
+                              "description": "The type of the custom field.",
+                              "type": "string",
+                              "enum": [
+                                "text",
+                                "toggle"
+                              ]
+                            }
+                          }
+                        }
+                      },
                       "error": {
                         "type": [
                           "string",
@@ -2495,6 +2548,9 @@
                       },
                       "owner": {
                         "$ref": "#/components/schemas/owners"
+                      },
+                      "templates": {
+                        "$ref": "#/components/schemas/templates"
                       },
                       "updated_at": {
                         "type": [
@@ -2582,9 +2638,9 @@
         }
       },
       "post": {
-        "summary": "Creates a case specific configuration that includes external connection details and custom fields.",
+        "summary": "Add case settings",
         "operationId": "setCaseConfiguration",
-        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
+        "description": "Case settings include external connection details, custom fields, and templates.  Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.\n",
         "tags": [
           "cases"
         ],
@@ -2620,40 +2676,6 @@
                   "properties": {
                     "closure_type": {
                       "$ref": "#/components/schemas/closure_types"
-                    },
-                    "customFields": {
-                      "type": "array",
-                      "x-technical-preview": true,
-                      "description": "Custom fields configuration details.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": {
-                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 36
-                          },
-                          "label": {
-                            "description": "The custom field label that is displayed in the case.",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 50
-                          },
-                          "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
-                            "type": "boolean"
-                          },
-                          "type": {
-                            "description": "The type of the custom field.",
-                            "type": "string",
-                            "enum": [
-                              "text",
-                              "toggle"
-                            ]
-                          }
-                        }
-                      }
                     },
                     "connector": {
                       "type": "object",
@@ -2734,6 +2756,51 @@
                         }
                       }
                     },
+                    "customFields": {
+                      "type": "array",
+                      "x-technical-preview": true,
+                      "description": "Custom fields configuration details.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "defaultValue": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "boolean"
+                              }
+                            ],
+                            "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                          },
+                          "key": {
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
+                          },
+                          "label": {
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
+                          },
+                          "required": {
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "description": "The type of the custom field.",
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "toggle"
+                            ]
+                          }
+                        }
+                      }
+                    },
                     "error": {
                       "type": [
                         "string",
@@ -2777,6 +2844,9 @@
                     },
                     "owner": {
                       "$ref": "#/components/schemas/owners"
+                    },
+                    "templates": {
+                      "$ref": "#/components/schemas/templates"
                     },
                     "updated_at": {
                       "type": [
@@ -2865,9 +2935,9 @@
     },
     "/s/{spaceId}/api/cases/configure/{configurationId}": {
       "patch": {
-        "summary": "Updates external connection details, such as the closure type and default connector for cases.",
+        "summary": "Update case settings",
         "operationId": "updateCaseConfiguration",
-        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API.\n",
+        "description": "Updates setting details such as the closure type, custom fields, templates, and the default connector for cases. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the case was created.\n",
         "tags": [
           "cases"
         ],
@@ -2906,40 +2976,6 @@
                   "properties": {
                     "closure_type": {
                       "$ref": "#/components/schemas/closure_types"
-                    },
-                    "customFields": {
-                      "type": "array",
-                      "x-technical-preview": true,
-                      "description": "Custom fields configuration details.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": {
-                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 36
-                          },
-                          "label": {
-                            "description": "The custom field label that is displayed in the case.",
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 50
-                          },
-                          "required": {
-                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
-                            "type": "boolean"
-                          },
-                          "type": {
-                            "description": "The type of the custom field.",
-                            "type": "string",
-                            "enum": [
-                              "text",
-                              "toggle"
-                            ]
-                          }
-                        }
-                      }
                     },
                     "connector": {
                       "type": "object",
@@ -3020,6 +3056,51 @@
                         }
                       }
                     },
+                    "customFields": {
+                      "type": "array",
+                      "x-technical-preview": true,
+                      "description": "Custom fields configuration details.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "defaultValue": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "boolean"
+                              }
+                            ],
+                            "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                          },
+                          "key": {
+                            "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 36
+                          },
+                          "label": {
+                            "description": "The custom field label that is displayed in the case.",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
+                          },
+                          "required": {
+                            "description": "Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.\n",
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "description": "The type of the custom field.",
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "toggle"
+                            ]
+                          }
+                        }
+                      }
+                    },
                     "error": {
                       "type": [
                         "string",
@@ -3063,6 +3144,9 @@
                     },
                     "owner": {
                       "$ref": "#/components/schemas/owners"
+                    },
+                    "templates": {
+                      "$ref": "#/components/schemas/templates"
                     },
                     "updated_at": {
                       "type": [
@@ -3151,9 +3235,9 @@
     },
     "/s/{spaceId}/api/cases/configure/connectors/_find": {
       "get": {
-        "summary": "Retrieves information about connectors.",
+        "summary": "Get case connectors",
         "operationId": "findCaseConnectors",
-        "description": "In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "description": "Retrieves information about connectors that are supported for use in cases. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "cases"
         ],
@@ -4908,6 +4992,11 @@
           }
         }
       },
+      "case_description": {
+        "description": "The description for the case.",
+        "type": "string",
+        "maxLength": 30000
+      },
       "owners": {
         "type": "string",
         "description": "The application that owns the cases: Stack Management, Observability, or Elastic Security.\n",
@@ -4936,7 +5025,7 @@
           }
         }
       },
-      "severity_property": {
+      "case_severity": {
         "type": "string",
         "description": "The severity of the case.",
         "enum": [
@@ -4946,6 +5035,25 @@
           "medium"
         ],
         "default": "low"
+      },
+      "case_tags": {
+        "description": "The words and phrases that help categorize cases. It can be an empty array.\n",
+        "type": "array",
+        "maxItems": 200,
+        "items": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "case_category": {
+        "description": "A word or phrase that categorizes the case.",
+        "type": "string",
+        "maxLength": 50
+      },
+      "case_title": {
+        "description": "A title for the case.",
+        "type": "string",
+        "maxLength": 160
       },
       "create_case_request": {
         "title": "Create case request",
@@ -4989,9 +5097,7 @@
             ]
           },
           "description": {
-            "description": "The description for the case.",
-            "type": "string",
-            "maxLength": 30000
+            "$ref": "#/components/schemas/case_description"
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -5000,26 +5106,16 @@
             "$ref": "#/components/schemas/settings"
           },
           "severity": {
-            "$ref": "#/components/schemas/severity_property"
+            "$ref": "#/components/schemas/case_severity"
           },
           "tags": {
-            "description": "The words and phrases that help categorize cases. It can be an empty array.",
-            "type": "array",
-            "maxItems": 200,
-            "items": {
-              "type": "string",
-              "maxLength": 256
-            }
+            "$ref": "#/components/schemas/case_tags"
           },
           "category": {
-            "description": "A word or phrase that categorizes the case.",
-            "type": "string",
-            "maxLength": 50
+            "$ref": "#/components/schemas/case_category"
           },
           "title": {
-            "description": "A title for the case.",
-            "type": "string",
-            "maxLength": 160
+            "$ref": "#/components/schemas/case_title"
           },
           "customFields": {
             "type": "array",
@@ -5625,7 +5721,7 @@
           }
         }
       },
-      "status": {
+      "case_status": {
         "type": "string",
         "description": "The status of the case.",
         "enum": [
@@ -5822,10 +5918,10 @@
             "$ref": "#/components/schemas/settings"
           },
           "severity": {
-            "$ref": "#/components/schemas/severity_property"
+            "$ref": "#/components/schemas/case_severity"
           },
           "status": {
-            "$ref": "#/components/schemas/status"
+            "$ref": "#/components/schemas/case_status"
           },
           "tags": {
             "type": "array",
@@ -5919,9 +6015,7 @@
                   "$ref": "#/components/schemas/assignees"
                 },
                 "category": {
-                  "description": "A word or phrase that categorizes the case.",
-                  "type": "string",
-                  "maxLength": 50
+                  "$ref": "#/components/schemas/case_category"
                 },
                 "connector": {
                   "oneOf": [
@@ -5994,8 +6088,7 @@
                   }
                 },
                 "description": {
-                  "description": "An updated description for the case.",
-                  "type": "string"
+                  "$ref": "#/components/schemas/case_description"
                 },
                 "id": {
                   "description": "The identifier for the case.",
@@ -6006,24 +6099,16 @@
                   "$ref": "#/components/schemas/settings"
                 },
                 "severity": {
-                  "$ref": "#/components/schemas/severity_property"
+                  "$ref": "#/components/schemas/case_severity"
                 },
                 "status": {
-                  "$ref": "#/components/schemas/status"
+                  "$ref": "#/components/schemas/case_status"
                 },
                 "tags": {
-                  "description": "The words and phrases that help categorize cases.",
-                  "type": "array",
-                  "maxItems": 200,
-                  "items": {
-                    "type": "string",
-                    "maxLength": 256
-                  }
+                  "$ref": "#/components/schemas/case_tags"
                 },
                 "title": {
-                  "description": "A title for the case.",
-                  "type": "string",
-                  "maxLength": 160
+                  "$ref": "#/components/schemas/case_title"
                 },
                 "version": {
                   "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
@@ -6068,6 +6153,127 @@
         "examples": [
           ".none"
         ]
+      },
+      "template_tags": {
+        "description": "The words and phrases that help categorize templates. It can be an empty array.\n",
+        "type": "array",
+        "maxItems": 200,
+        "items": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "templates": {
+        "type": "array",
+        "x-technical-preview": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "caseFields": {
+              "type": "object",
+              "properties": {
+                "assignees": {
+                  "$ref": "#/components/schemas/assignees"
+                },
+                "category": {
+                  "$ref": "#/components/schemas/case_category"
+                },
+                "connector": {
+                  "type": "object",
+                  "properties": {
+                    "fields": {
+                      "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
+                    "id": {
+                      "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
+                      "type": "string",
+                      "examples": [
+                        "none"
+                      ]
+                    },
+                    "name": {
+                      "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
+                      "type": "string",
+                      "examples": [
+                        "none"
+                      ]
+                    },
+                    "type": {
+                      "$ref": "#/components/schemas/connector_types"
+                    }
+                  }
+                },
+                "customFields": {
+                  "type": "array",
+                  "x-technical-preview": true,
+                  "description": "Custom field values in the template.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "description": "The unique key for the custom field."
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text",
+                          "toggle"
+                        ],
+                        "description": "The type of the custom field."
+                      },
+                      "value": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ],
+                        "description": "The default value for the custom field when a case uses the template. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                      }
+                    }
+                  }
+                },
+                "description": {
+                  "$ref": "#/components/schemas/case_description"
+                },
+                "settings": {
+                  "$ref": "#/components/schemas/settings"
+                },
+                "severity": {
+                  "$ref": "#/components/schemas/case_severity"
+                },
+                "tags": {
+                  "$ref": "#/components/schemas/case_tags"
+                },
+                "title": {
+                  "$ref": "#/components/schemas/case_title"
+                }
+              }
+            },
+            "description": {
+              "type": "string",
+              "description": "A description for the template."
+            },
+            "key": {
+              "type": "string",
+              "description": "A unique key for the template. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific template.\n"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the template."
+            },
+            "tags": {
+              "$ref": "#/components/schemas/template_tags"
+            }
+          }
+        }
       },
       "set_case_configuration_request": {
         "title": "Set case configuration request",
@@ -6133,6 +6339,17 @@
                 "type"
               ],
               "properties": {
+                "defaultValue": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ],
+                  "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                },
                 "key": {
                   "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
                   "type": "string",
@@ -6162,12 +6379,15 @@
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
+          },
+          "templates": {
+            "$ref": "#/components/schemas/templates"
           }
         }
       },
       "update_case_configuration_request": {
         "title": "Update case configuration request",
-        "description": "External connection details, such as the closure type and default connector for cases.",
+        "description": "You can update settings such as the closure type, custom fields, templates, and the default connector for cases.\n",
         "type": "object",
         "required": [
           "version"
@@ -6225,6 +6445,17 @@
                 "type"
               ],
               "properties": {
+                "defaultValue": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ],
+                  "description": "A default value for the custom field. If the `type` is `text`, the default value must be a string. If the `type` is `toggle`, the default value must be boolean.\n"
+                },
                 "key": {
                   "description": "A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.\n",
                   "type": "string",
@@ -6251,6 +6482,9 @@
                 }
               }
             }
+          },
+          "templates": {
+            "$ref": "#/components/schemas/templates"
           },
           "version": {
             "description": "The version of the connector. To retrieve the version value, use the get configuration API.\n",
@@ -6875,10 +7109,10 @@
             "$ref": "#/components/schemas/settings"
           },
           "severity": {
-            "$ref": "#/components/schemas/severity_property"
+            "$ref": "#/components/schemas/case_severity"
           },
           "status": {
-            "$ref": "#/components/schemas/status"
+            "$ref": "#/components/schemas/case_status"
           },
           "tags": {
             "type": "array",
@@ -6931,7 +7165,7 @@
         "type": "object",
         "properties": {
           "severity": {
-            "$ref": "#/components/schemas/severity_property"
+            "$ref": "#/components/schemas/case_severity"
           }
         }
       },
@@ -6939,7 +7173,7 @@
         "type": "object",
         "properties": {
           "status": {
-            "$ref": "#/components/schemas/status"
+            "$ref": "#/components/schemas/case_status"
           }
         }
       },
@@ -7590,13 +7824,14 @@
             "customFields": [
               {
                 "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
+                "defaultValue": "Custom text field value.",
                 "label": "my-text-field",
                 "required": false,
                 "type": "text"
               }
             ],
             "owner": "cases",
-            "created_at": "2023-06-01T17:07:17.767Z",
+            "created_at": "2024-07-01T17:07:17.767Z",
             "created_by": {
               "username": "elastic",
               "email": null,
@@ -7611,13 +7846,52 @@
               "fields": null
             },
             "mappings": [],
-            "version": "WzUxLDRd",
-            "error": null
+            "version": "WzEyLDNd",
+            "error": null,
+            "templates": [
+              {
+                "key": "505932fe-ee3a-4960-a661-c781b5acdb05",
+                "name": "template-1",
+                "caseFields": {
+                  "title": "Default case title",
+                  "tags": [
+                    "Default case tag"
+                  ],
+                  "category": "Default-category",
+                  "description": "A default description for cases.",
+                  "assignees": [
+                    {
+                      "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+                    }
+                  ],
+                  "connector": {
+                    "id": "none",
+                    "type": ".none",
+                    "fields": null,
+                    "name": "none"
+                  },
+                  "customFields": [
+                    {
+                      "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
+                      "value": "Default text field value.",
+                      "type": "text"
+                    }
+                  ],
+                  "settings": {
+                    "syncAlerts": false
+                  }
+                },
+                "description": "A description of the template.",
+                "tags": [
+                  "Template tag 1"
+                ]
+              }
+            ]
           }
         ]
       },
       "set_case_configuration_request": {
-        "summary": "Set the closure type and default connector for Stack Management cases.",
+        "summary": "Set the closure type, custom fields, and default connector for Stack Management cases.",
         "value": {
           "owner": "cases",
           "connector": {
@@ -7632,7 +7906,38 @@
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
               "label": "my-text-field",
               "required": false,
-              "type": "text"
+              "type": "text",
+              "defaultValue": "My custom field default value."
+            }
+          ],
+          "templates": [
+            {
+              "key": "505932fe-ee3a-4960-a661-c781b5acdb05",
+              "name": "template-1",
+              "caseFields": {
+                "title": "Default case title",
+                "tags": [
+                  "Default case tag"
+                ],
+                "category": "Default-category",
+                "description": "A default description for cases.",
+                "assignees": [
+                  {
+                    "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+                  }
+                ],
+                "customFields": [
+                  {
+                    "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
+                    "type": "text",
+                    "value": "A text field value for the template."
+                  }
+                ]
+              },
+              "description": "A description of the template.",
+              "tags": [
+                "Template tag 1"
+              ]
             }
           ]
         }
@@ -7646,11 +7951,42 @@
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
               "label": "my-text-field",
               "required": false,
-              "type": "text"
+              "type": "text",
+              "defaultValue": "My custom field default value."
+            }
+          ],
+          "templates": [
+            {
+              "key": "505932fe-ee3a-4960-a661-c781b5acdb05",
+              "name": "template-1",
+              "caseFields": {
+                "title": "Default case title",
+                "tags": [
+                  "Default case tag"
+                ],
+                "category": "Default-category",
+                "description": "A default description for cases.",
+                "assignees": [
+                  {
+                    "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+                  }
+                ],
+                "customFields": [
+                  {
+                    "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
+                    "type": "text",
+                    "value": "A text field value for the template."
+                  }
+                ]
+              },
+              "description": "A description of the template.",
+              "tags": [
+                "Template tag 1"
+              ]
             }
           ],
           "owner": "cases",
-          "created_at": "2023-10-01T17:07:17.767Z",
+          "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {
             "username": "elastic",
             "email": "null,",
@@ -7680,6 +8016,11 @@
               "source": "comments",
               "target": "comments",
               "action_type": "append"
+            },
+            {
+              "source": "tags",
+              "target": "labels",
+              "action_type": "overwrite"
             }
           ],
           "version": "WzIwNzMsMV0=",
@@ -7703,7 +8044,8 @@
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
               "label": "my-text-field",
               "required": true,
-              "type": "text"
+              "type": "text",
+              "defaultValue": "A new default value."
             },
             {
               "key": "fcc6840d-eb14-42df-8aaf-232201a705ec",
@@ -7723,7 +8065,8 @@
               "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
               "label": "my-text-field",
               "required": true,
-              "type": "text"
+              "type": "text",
+              "defaultValue": "A new default value."
             },
             {
               "key": "fcc6840d-eb14-42df-8aaf-232201a705ec",
@@ -7733,14 +8076,14 @@
             }
           ],
           "owner": "cases",
-          "created_at": "2023-10-01T17:07:17.767Z",
+          "created_at": "2024-07-01T17:07:17.767Z",
           "created_by": {
             "username": "elastic",
-            "email": "null,",
+            "email": null,
             "full_name": null,
             "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
           },
-          "updated_at": "2023-10-19T00:52:42.401Z",
+          "updated_at": "2024-07-19T00:52:42.401Z",
           "updated_by": {
             "username": "elastic",
             "full_name": null,
@@ -7765,14 +8108,20 @@
               "action_type": "overwrite"
             },
             {
+              "source": "tags",
+              "target": "labels",
+              "action_type": "overwrite"
+            },
+            {
               "source": "comments",
               "target": "comments",
               "action_type": "append"
             }
           ],
-          "version": "zEzNSw1XQ==",
+          "version": "WzI2LDNd",
           "error": null,
-          "id": "4a97a440-e1cd-11ec-be9b-9b1838238ee6"
+          "id": "4a97a440-e1cd-11ec-be9b-9b1838238ee6",
+          "templates": []
         }
       },
       "get_reporters_response": {
