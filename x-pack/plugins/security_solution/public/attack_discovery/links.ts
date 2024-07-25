@@ -17,7 +17,7 @@ import {
 import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
-  capabilities: [[`${SERVER_APP_ID}.show`, `${ASSISTANT_FEATURE_ID}.ai-assistant`]], // This is an OR condition via the nested array
+  capabilities: [[`${SERVER_APP_ID}.show`, `${ASSISTANT_FEATURE_ID}.ai-assistant`]], // This is an AND condition via the nested array
   globalNavPosition: 4,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.attackDiscovery', {

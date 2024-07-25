@@ -38,10 +38,6 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('../../common/components/landing_page/onboarding/hooks/use_product_types', () => ({
-  useProductTypes: jest.fn(() => undefined),
-}));
-
 jest.mock('react-use', () => {
   const actual = jest.requireActual('react-use');
 

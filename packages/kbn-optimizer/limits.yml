@@ -55,7 +55,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 29700
+  expressionPartitionVis: 44720
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -144,7 +144,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 16573
+  securitySolutionEss: 31781
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747
@@ -156,7 +156,7 @@ pageLoadAssetSize:
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
-  synthetics: 40958
+  synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
   threatIntelligence: 44299

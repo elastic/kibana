@@ -10,7 +10,7 @@ import { SERVER_APP_ID } from '../../common';
 import { links } from './links';
 
 describe('links', () => {
-  it('for serverless, it specifies capabilities as an OR condition, via a nested array', () => {
+  it('for serverless, it specifies capabilities as an AND condition, via a nested array', () => {
     expect(links.capabilities).toEqual<string[][]>([
       [`${SERVER_APP_ID}.show`, `${ASSISTANT_FEATURE_ID}.ai-assistant`],
     ]);
