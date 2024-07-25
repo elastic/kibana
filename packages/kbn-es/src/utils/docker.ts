@@ -107,10 +107,10 @@ interface ServerlessEsNodeArgs {
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
 
+const ARCHIVE_LOGS = true;
+
 const DOCKER_BASE_CMD = [
   'run',
-
-  '--rm',
 
   '-t',
 
@@ -147,8 +147,6 @@ export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SE
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
 const SHARED_SERVERLESS_PARAMS = [
   'run',
-
-  '--rm',
 
   '--detach',
 
@@ -382,7 +380,6 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
 }
 
 /**
- *
  * Pull a Docker image if needed. Ensures latest image.
  * Stops serverless from pulling the same image in each node's promise and
  * gives better control of log output, instead of falling back to docker run.
@@ -417,6 +414,22 @@ export async function printESImageInfo(log: ToolingLog, image: string) {
   log.info(`Using ES image: ${imageFullName} (${revisionUrl})`);
 }
 
+export async function cleanUpDanglingContainers(log: ToolingLog) {
+  log.info(chalk.bold('Cleaning up dangling Docker containers.'));
+
+  try {
+    if (ARCHIVE_LOGS) {
+      await archiveLogs(log);
+    }
+
+    const { stdout } = await execa('docker', ['container', 'prune', '--force']);
+    log.indent(4, () => log.info(stdout));
+    log.success('Cleaned up dangling Docker containers.');
+  } catch (e) {
+    log.error(e);
+  }
+}
+
 export async function detectRunningNodes(
   log: ToolingLog,
   options: ServerlessOptions | DockerOptions
@@ -428,19 +441,34 @@ export async function detectRunningNodes(
   }, []);
 
   const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
-  const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
+  const runningNodeIds = stdout.split(/\r?\n/).filter((s) => s);
 
-  if (runningNodes.length) {
+  if (runningNodeIds.length) {
     if (options.kill) {
       log.info(chalk.bold('Killing running ES Nodes.'));
-      await execa('docker', ['kill'].concat(runningNodes));
-
-      return;
+      await execa('docker', ['kill'].concat(runningNodeIds));
+    } else {
+      throw createCliError(
+        'ES has already been started, pass --kill to automatically stop the nodes on startup.'
+      );
     }
+  } else {
+    log.info('No running nodes detected.');
+  }
+}
 
-    throw createCliError(
-      'ES has already been started, pass --kill to automatically stop the nodes on startup.'
-    );
+async function archiveLogs(log: ToolingLog) {
+  for (const { name } of SERVERLESS_NODES) {
+    const { stdout: nodeId } = await execa('docker', [
+      'ps',
+      '-a',
+      '--quiet',
+      '--filter',
+      `name=${name}`,
+    ]);
+    const { stdout } = await execa('docker', ['logs', name]);
+    await Fsp.writeFile(`${name}-${nodeId}.log`, stdout);
+    log.info(`Archived logs for ${name} to ${name}-${nodeId}.log`);
   }
 }
 
@@ -458,6 +486,7 @@ async function setupDocker({
 }) {
   await verifyDockerInstalled(log);
   await detectRunningNodes(log, options);
+  await cleanUpDanglingContainers(log);
   await maybeCreateDockerNetwork(log);
   await maybePullDockerImage(log, image);
   await printESImageInfo(log, image);
@@ -748,6 +777,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   const volumeCmd = await setupServerlessVolumes(log, options);
   const portCmd = resolvePort(options);
 
+  // This is where nodes are started
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
       await runServerlessEsNode(log, {
@@ -821,7 +851,10 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
-    await readyPromise;
+    await readyPromise.catch(async (e) => {
+      await archiveLogs(log);
+      throw e;
+    });
     if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
       // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
       await waitForSecurityIndex({ client, log });

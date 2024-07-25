@@ -35,6 +35,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'x-pack/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload '.es/**/*.hprof'
   buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
+  buildkite-agent artifact upload 'es*.log'
 
   if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]] && \
       # Skip when triggered from elasticsearch's validation pipeline
