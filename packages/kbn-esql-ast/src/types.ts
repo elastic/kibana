@@ -28,6 +28,8 @@ export type ESQLAstField = ESQLFunction | ESQLColumn;
 
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
+export type ESQLAstNodeWithArgs = ESQLCommand | ESQLCommandOption | ESQLFunction;
+
 export interface ESQLLocation {
   min: number;
   max: number;
