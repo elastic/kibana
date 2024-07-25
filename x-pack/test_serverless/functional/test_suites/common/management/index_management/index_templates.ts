@@ -97,10 +97,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
 
         // Click form summary step and then the submit button
-        await testSubjects.click('formWizardStep-5');
-        await testSubjects.click('nextButton');
+        await testSubjects.click('formWizardStep-5'); // "Review Template"
+        await testSubjects.click('nextButton'); // "Create template"
+        await testSubjects.existOrFail('templateDetails', { timeout: 60_000 }); // assert flyout opened
 
-        await retry.try(async () => {
+        await retry.tryForTime(150_000, async () => {
           expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
         });
       });
