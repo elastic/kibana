@@ -526,7 +526,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
             version: '3.0.33',
           },
           temp_file_path: 'C:/temp/fake_malware.exe',
-          // @ts-expect-error upgrade typescript v5.1.6
           quarantine_result: true,
           quarantine_message: 'fake quarantine message',
         },
@@ -894,7 +893,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           user: 'SYSTEM',
           token: {
             integrity_level_name: 'high',
-            // @ts-expect-error upgrade typescript v5.1.6
             elevation_level: 'full',
           },
         },
