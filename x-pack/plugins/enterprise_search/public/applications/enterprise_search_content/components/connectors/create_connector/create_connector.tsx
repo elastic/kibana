@@ -383,6 +383,7 @@ export const CreateConnector: React.FC = () => {
               background-repeat: no-repeat;
               background-position: bottom center;
               min-height: 600px;
+              border: 1px solid ${euiTheme.colors.lightShade};
             `}
           >
             {currentStep > 0 && (
@@ -398,17 +399,6 @@ export const CreateConnector: React.FC = () => {
                       defaultMessage: 'Back',
                     })}
                   </EuiButtonEmpty>
-                  {/*         <EuiButtonEmpty
-                data-test-subj="enterpriseSearchCreateConnectorNextButton"
-                iconSide="right"
-                iconType="arrowRight"
-                size="s"
-                onClick={() => updateStep('next')}
-              >
-                {i18n.translate('xpack.enterpriseSearch.createConnector.nextButtonEmptyLabel', {
-                  defaultMessage: 'Next',
-                })}
-              </EuiButtonEmpty> */}
                 </EuiFlexGroup>
                 <EuiSpacer size="xl" />
               </>

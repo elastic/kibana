@@ -29,14 +29,14 @@ interface ChooseConnectorSelectableProps {
     isTechPreview: boolean;
     name: string;
   }>;
-  connectorSelected: Array<{
+  connectorSelected: {
     description: string;
     iconPath: string;
     isBeta: boolean;
     isNative: boolean;
     isTechPreview: boolean;
     name: string;
-  }>;
+  };
   selfManaged: boolean;
   setConnectorSelected: Function;
   setSelfManaged: Function;
@@ -116,8 +116,6 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
     selectableSetOptions(initialOptions);
   }, []);
 
-  // Rest of the code...
-
   useEffect(() => {
     // Setting options when changing the radiobutton to self managed but it doesn't update the values for disable nor badges
     selectableSetOptions(initialOptions);
@@ -184,10 +182,6 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         singleSelection
         searchable
         searchProps={{
-          // TODO it doesn't apply this css class
-          css: {
-            '.euiFormControlLayoutIcons--absolute': { display: 'none' },
-          },
           fullWidth: true,
           isClearable: true,
           onChange: (value) => {

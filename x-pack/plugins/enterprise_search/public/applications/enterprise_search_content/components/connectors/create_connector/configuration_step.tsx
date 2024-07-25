@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useValues } from 'kea';
 
 import {
   EuiFlexGroup,
@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 // import { FormattedMessage } from '@kbn/i18n-react';
-import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
 
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
@@ -47,7 +47,9 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   syncing,
 }) => {
   const { connector } = useValues(ConnectorViewLogic);
-  connector.status = 'created';
+  if (connector) {
+    connector.status = 'created' as ConnectorStatus;
+  }
 
   useEffect(() => {
     setTimeout(() => {

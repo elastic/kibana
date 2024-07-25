@@ -7,24 +7,20 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
-  EuiPopover,
   EuiRadio,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
-  EuiContextMenuItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -88,7 +84,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   const [radioIdSelected, setRadioIdSelected] = useState(
     selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId
   );
-  const { generateConfiguration } = useActions(DeploymentLogic);
+  // const { generateConfiguration } = useActions(DeploymentLogic);
   const { isGenerateLoading } = useValues(DeploymentLogic);
 
   useEffect(() => {
