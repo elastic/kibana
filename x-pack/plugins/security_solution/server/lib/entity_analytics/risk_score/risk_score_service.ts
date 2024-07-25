@@ -6,8 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
-import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  RiskScoresCalculationResponse,
+  RiskScoresPreviewResponse,
+} from '../../../../common/api/entity_analytics';
 import type {
   CalculateAndPersistScoresParams,
   CalculateScoresParams,
