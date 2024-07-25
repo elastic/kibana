@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // import { useLocation } from 'react-router-dom';
 import {
@@ -35,6 +35,14 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
   isNextStepEnabled,
   setNextStepEnabled,
 }) => {
+  useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo({
+        behavior: 'smooth',
+        top: 0,
+      });
+    }, 100);
+  }, []);
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <ConnectorDeployment />

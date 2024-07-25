@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -47,6 +47,16 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   syncing,
 }) => {
   const { connector } = useValues(ConnectorViewLogic);
+  connector.status = 'created';
+
+  useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo({
+        behavior: 'smooth',
+        top: 0,
+      });
+    }, 100);
+  }, []);
 
   return (
     <>

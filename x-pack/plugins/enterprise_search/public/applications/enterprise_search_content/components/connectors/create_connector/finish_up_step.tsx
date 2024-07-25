@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // import { useLocation } from 'react-router-dom';
 
@@ -78,6 +78,15 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title, syncing, setS
       })}
     </EuiContextMenuItem>,
   ];
+
+  useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo({
+        behavior: 'smooth',
+        top: 0,
+      });
+    }, 100);
+  }, []);
   return (
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
