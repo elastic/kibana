@@ -210,44 +210,6 @@ describe('POST roles', () => {
       licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
-
-    describe('feature validation', () => {
-      postRolesTest('returns validation errors', {
-        payload: {
-          roles: {
-            'role-1': {
-              elasticsearch: {},
-              kibana: [
-                {
-                  spaces: ['bar-space'],
-                  base: [],
-                  feature: {
-                    bar: ['all', 'read'],
-                  },
-                },
-              ],
-            },
-          },
-        },
-        apiResponses: {
-          get: () => ({}),
-          post: () => ({}),
-        },
-        features: [kibanaFeature],
-        asserts: {
-          statusCode: 200,
-          result: {
-            errors: {
-              'role-1': {
-                type: 'kibana_privilege_validation_exception',
-                reason:
-                  'Role cannot be updated due to validation errors: ["Feature privilege [bar.all] requires all spaces to be selected but received [bar-space]","Feature [bar] does not support privilege [read]."]',
-              },
-            },
-          },
-        },
-      });
-    });
   });
 
   describe('success', () => {
@@ -298,6 +260,42 @@ describe('POST roles', () => {
         },
         statusCode: 200,
         result: { created: ['role-1', 'role-2'] },
+      },
+    });
+
+    postRolesTest('returns validation errors', {
+      payload: {
+        roles: {
+          'role-1': {
+            elasticsearch: {},
+            kibana: [
+              {
+                spaces: ['bar-space'],
+                base: [],
+                feature: {
+                  bar: ['all', 'read'],
+                },
+              },
+            ],
+          },
+        },
+      },
+      apiResponses: {
+        get: () => ({}),
+        post: () => ({}),
+      },
+      features: [kibanaFeature],
+      asserts: {
+        statusCode: 200,
+        result: {
+          errors: {
+            'role-1': {
+              type: 'kibana_privilege_validation_exception',
+              reason:
+                'Role cannot be updated due to validation errors: ["Feature privilege [bar.all] requires all spaces to be selected but received [bar-space]","Feature [bar] does not support privilege [read]."]',
+            },
+          },
+        },
       },
     });
 
@@ -627,223 +625,373 @@ describe('POST roles', () => {
       },
     });
 
-    // putRoleTest(`creates role with everything`, {
-    //   name: 'foo-role',
-    //   payload: {
-    //     description: 'test description',
-    //     metadata: {
-    //       foo: 'test-metadata',
-    //     },
-    //     elasticsearch: {
-    //       cluster: ['test-cluster-privilege'],
-    //       indices: [
-    //         {
-    //           field_security: {
-    //             grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-    //             except: ['test-field-security-except-1', 'test-field-security-except-2'],
-    //           },
-    //           names: ['test-index-name-1', 'test-index-name-2'],
-    //           privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-    //           query: `{ "match": { "title": "foo" } }`,
-    //         },
-    //       ],
-    //       remote_indices: [
-    //         {
-    //           field_security: {
-    //             grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-    //             except: ['test-field-security-except-1', 'test-field-security-except-2'],
-    //           },
-    //           clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
-    //           names: ['test-index-name-1', 'test-index-name-2'],
-    //           privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-    //           query: `{ "match": { "title": "foo" } }`,
-    //         },
-    //       ],
-    //       run_as: ['test-run-as-1', 'test-run-as-2'],
-    //     },
-    //     kibana: [
-    //       {
-    //         base: ['all', 'read'],
-    //         spaces: ['*'],
-    //       },
-    //       {
-    //         base: ['all', 'read'],
-    //         spaces: ['test-space-1', 'test-space-2'],
-    //       },
-    //       {
-    //         feature: {
-    //           foo: ['foo-privilege-1', 'foo-privilege-2'],
-    //         },
-    //         spaces: ['test-space-3'],
-    //       },
-    //     ],
-    //   },
-    //   apiResponses: {
-    //     get: () => ({}),
-    //     put: () => {},
-    //   },
-    //   asserts: {
-    //     apiArguments: {
-    //       get: [{ name: 'foo-role' }, { ignore: [404] }],
-    //       put: [
-    //         {
-    //           name: 'foo-role',
-    //           body: {
-    //             applications: [
-    //               {
-    //                 application,
-    //                 privileges: ['all', 'read'],
-    //                 resources: [GLOBAL_RESOURCE],
-    //               },
-    //               {
-    //                 application,
-    //                 privileges: ['space_all', 'space_read'],
-    //                 resources: ['space:test-space-1', 'space:test-space-2'],
-    //               },
-    //               {
-    //                 application,
-    //                 privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2'],
-    //                 resources: ['space:test-space-3'],
-    //               },
-    //             ],
-    //             cluster: ['test-cluster-privilege'],
-    //             description: 'test description',
-    //             indices: [
-    //               {
-    //                 field_security: {
-    //                   grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-    //                   except: ['test-field-security-except-1', 'test-field-security-except-2'],
-    //                 },
-    //                 names: ['test-index-name-1', 'test-index-name-2'],
-    //                 privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-    //                 query: `{ "match": { "title": "foo" } }`,
-    //               },
-    //             ],
-    //             remote_indices: [
-    //               {
-    //                 field_security: {
-    //                   grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-    //                   except: ['test-field-security-except-1', 'test-field-security-except-2'],
-    //                 },
-    //                 clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
-    //                 names: ['test-index-name-1', 'test-index-name-2'],
-    //                 privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-    //                 query: `{ "match": { "title": "foo" } }`,
-    //               },
-    //             ],
-    //             metadata: { foo: 'test-metadata' },
-    //             run_as: ['test-run-as-1', 'test-run-as-2'],
-    //           },
-    //         },
-    //       ],
-    //     },
-    //     statusCode: 204,
-    //     result: undefined,
-    //   },
-    // });
+    postRolesTest(`creates roles with everything`, {
+      payload: {
+        roles: {
+          'role-1': {
+            description: 'role 1 test description',
+            metadata: {
+              foo: 'test-metadata',
+            },
+            elasticsearch: {
+              cluster: ['test-cluster-privilege'],
+              indices: [
+                {
+                  field_security: {
+                    grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                    except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                  },
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  query: `{ "match": { "title": "foo" } }`,
+                },
+              ],
+              remote_indices: [
+                {
+                  field_security: {
+                    grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                    except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                  },
+                  clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  query: `{ "match": { "title": "foo" } }`,
+                },
+              ],
+              run_as: ['test-run-as-1', 'test-run-as-2'],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                spaces: ['*'],
+              },
+              {
+                base: ['all', 'read'],
+                spaces: ['test-space-1', 'test-space-2'],
+              },
+              {
+                feature: {
+                  foo: ['foo-privilege-1', 'foo-privilege-2'],
+                },
+                spaces: ['test-space-3'],
+              },
+            ],
+          },
+          'role-2': {
+            description: 'role 2 test description',
+            metadata: {
+              foo: 'test-metadata',
+            },
+            elasticsearch: {
+              cluster: ['test-cluster-privilege'],
+              remote_cluster: [
+                {
+                  clusters: ['cluster1', 'cluster2'],
+                  privileges: ['monitor_enrich'],
+                },
+                {
+                  clusters: ['cluster3', 'cluster4'],
+                  privileges: ['monitor_enrich'],
+                },
+              ],
+              indices: [
+                {
+                  field_security: {
+                    grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                    except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                  },
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  query: `{ "match": { "title": "foo" } }`,
+                },
+              ],
+              remote_indices: [
+                {
+                  field_security: {
+                    grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                    except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                  },
+                  clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  query: `{ "match": { "title": "foo" } }`,
+                },
+              ],
+              run_as: ['test-run-as-1', 'test-run-as-2'],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                spaces: ['test-space-1', 'test-space-2'],
+              },
+              {
+                feature: {
+                  foo: ['foo-privilege-1', 'foo-privilege-2'],
+                },
+                spaces: ['test-space-3'],
+              },
+            ],
+          },
+        },
+      },
+      apiResponses: {
+        get: () => ({}),
+        post: () => ({ created: ['role-1', 'role-2'] }),
+      },
+      asserts: {
+        apiArguments: {
+          get: [{ name: 'role-1,role-2' }, { ignore: [404] }],
+          post: [
+            {
+              roles: {
+                'role-1': {
+                  applications: [
+                    {
+                      application,
+                      privileges: ['all', 'read'],
+                      resources: [GLOBAL_RESOURCE],
+                    },
+                    {
+                      application,
+                      privileges: ['space_all', 'space_read'],
+                      resources: ['space:test-space-1', 'space:test-space-2'],
+                    },
+                    {
+                      application,
+                      privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2'],
+                      resources: ['space:test-space-3'],
+                    },
+                  ],
+                  cluster: ['test-cluster-privilege'],
+                  description: 'role 1 test description',
+                  indices: [
+                    {
+                      field_security: {
+                        grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                        except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                      },
+                      names: ['test-index-name-1', 'test-index-name-2'],
+                      privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                      query: `{ "match": { "title": "foo" } }`,
+                    },
+                  ],
+                  remote_indices: [
+                    {
+                      field_security: {
+                        grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                        except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                      },
+                      clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+                      names: ['test-index-name-1', 'test-index-name-2'],
+                      privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                      query: `{ "match": { "title": "foo" } }`,
+                    },
+                  ],
+                  metadata: { foo: 'test-metadata' },
+                  run_as: ['test-run-as-1', 'test-run-as-2'],
+                },
+                'role-2': {
+                  applications: [
+                    {
+                      application,
+                      privileges: ['space_all', 'space_read'],
+                      resources: ['space:test-space-1', 'space:test-space-2'],
+                    },
+                    {
+                      application,
+                      privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2'],
+                      resources: ['space:test-space-3'],
+                    },
+                  ],
+                  cluster: ['test-cluster-privilege'],
+                  remote_cluster: [
+                    {
+                      clusters: ['cluster1', 'cluster2'],
+                      privileges: ['monitor_enrich'],
+                    },
+                    {
+                      clusters: ['cluster3', 'cluster4'],
+                      privileges: ['monitor_enrich'],
+                    },
+                  ],
+                  description: 'role 2 test description',
+                  indices: [
+                    {
+                      field_security: {
+                        grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                        except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                      },
+                      names: ['test-index-name-1', 'test-index-name-2'],
+                      privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                      query: `{ "match": { "title": "foo" } }`,
+                    },
+                  ],
+                  remote_indices: [
+                    {
+                      field_security: {
+                        grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                        except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                      },
+                      clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+                      names: ['test-index-name-1', 'test-index-name-2'],
+                      privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                      query: `{ "match": { "title": "foo" } }`,
+                    },
+                  ],
+                  metadata: { foo: 'test-metadata' },
+                  run_as: ['test-run-as-1', 'test-run-as-2'],
+                },
+              },
+            },
+          ],
+        },
+        statusCode: 200,
+        result: { created: ['role-1', 'role-2'] },
+      },
+    });
 
-    // putRoleTest(`updates role which has existing other application privileges`, {
-    //   name: 'foo-role',
-    //   payload: {
-    //     metadata: {
-    //       foo: 'test-metadata',
-    //     },
-    //     elasticsearch: {
-    //       cluster: ['test-cluster-privilege'],
-    //       indices: [
-    //         {
-    //           names: ['test-index-name-1', 'test-index-name-2'],
-    //           privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-    //         },
-    //       ],
-    //       run_as: ['test-run-as-1', 'test-run-as-2'],
-    //     },
-    //     kibana: [
-    //       {
-    //         base: ['all', 'read'],
-    //         spaces: ['*'],
-    //       },
-    //     ],
-    //   },
-    //   apiResponses: {
-    //     get: () => ({
-    //       'foo-role': {
-    //         metadata: {
-    //           bar: 'old-metadata',
-    //         },
-    //         transient_metadata: {
-    //           enabled: true,
-    //         },
-    //         cluster: ['old-cluster-privilege'],
-    //         indices: [
-    //           {
-    //             names: ['old-index-name'],
-    //             privileges: ['old-privilege'],
-    //           },
-    //         ],
-    //         run_as: ['old-run-as'],
-    //         applications: [
-    //           {
-    //             application,
-    //             privileges: ['old-kibana-privilege'],
-    //             resources: ['old-resource'],
-    //           },
-    //           {
-    //             application: 'logstash-foo',
-    //             privileges: ['logstash-privilege'],
-    //             resources: ['logstash-resource'],
-    //           },
-    //           {
-    //             application: 'beats-foo',
-    //             privileges: ['beats-privilege'],
-    //             resources: ['beats-resource'],
-    //           },
-    //         ],
-    //       },
-    //     }),
-    //     put: () => {},
-    //   },
-    //   asserts: {
-    //     apiArguments: {
-    //       get: [{ name: 'foo-role' }, { ignore: [404] }],
-    //       put: [
-    //         {
-    //           name: 'foo-role',
-    //           body: {
-    //             applications: [
-    //               {
-    //                 application,
-    //                 privileges: ['all', 'read'],
-    //                 resources: [GLOBAL_RESOURCE],
-    //               },
-    //               {
-    //                 application: 'logstash-foo',
-    //                 privileges: ['logstash-privilege'],
-    //                 resources: ['logstash-resource'],
-    //               },
-    //               {
-    //                 application: 'beats-foo',
-    //                 privileges: ['beats-privilege'],
-    //                 resources: ['beats-resource'],
-    //               },
-    //             ],
-    //             cluster: ['test-cluster-privilege'],
-    //             indices: [
-    //               {
-    //                 names: ['test-index-name-1', 'test-index-name-2'],
-    //                 privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-    //               },
-    //             ],
-    //             remote_indices: undefined,
-    //             metadata: { foo: 'test-metadata' },
-    //             run_as: ['test-run-as-1', 'test-run-as-2'],
-    //           },
-    //         },
-    //       ],
-    //     },
-    //     statusCode: 204,
-    //     result: undefined,
-    //   },
-    // });
+    postRolesTest(`updates roles which have existing other application privileges`, {
+      payload: {
+        roles: {
+          'role-1': {
+            elasticsearch: {
+              cluster: ['test-cluster-privilege'],
+              indices: [
+                {
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                },
+              ],
+              run_as: ['test-run-as-1', 'test-run-as-2'],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                spaces: ['*'],
+              },
+            ],
+          },
+          'role-2': {
+            elasticsearch: {
+              cluster: ['test-cluster-privilege'],
+              indices: [
+                {
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                },
+              ],
+              run_as: ['test-run-as-1', 'test-run-as-2'],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                spaces: ['*'],
+              },
+            ],
+          },
+        },
+      },
+      apiResponses: {
+        get: () => ({
+          'role-1': {
+            cluster: ['old-cluster-privilege'],
+            indices: [],
+            run_as: ['old-run-as'],
+            applications: [
+              {
+                application,
+                privileges: ['old-kibana-privilege'],
+                resources: ['old-resource'],
+              },
+              {
+                application: 'logstash-foo',
+                privileges: ['logstash-privilege'],
+                resources: ['logstash-resource'],
+              },
+            ],
+          },
+          'role-2': {
+            cluster: ['old-cluster-privilege'],
+            indices: [
+              {
+                names: ['old-index-name'],
+                privileges: ['old-privilege'],
+              },
+            ],
+            run_as: ['old-run-as'],
+            applications: [
+              {
+                application,
+                privileges: ['old-kibana-privilege'],
+                resources: ['old-resource'],
+              },
+              {
+                application: 'beats-foo',
+                privileges: ['beats-privilege'],
+                resources: ['beats-resource'],
+              },
+            ],
+          },
+        }),
+        post: () => ({ updated: ['role-1', 'role-2'] }),
+      },
+      asserts: {
+        apiArguments: {
+          get: [{ name: 'role-1,role-2' }, { ignore: [404] }],
+          post: [
+            {
+              roles: {
+                'role-1': {
+                  applications: [
+                    {
+                      application,
+                      privileges: ['all', 'read'],
+                      resources: [GLOBAL_RESOURCE],
+                    },
+                    {
+                      application: 'logstash-foo',
+                      privileges: ['logstash-privilege'],
+                      resources: ['logstash-resource'],
+                    },
+                  ],
+                  cluster: ['test-cluster-privilege'],
+                  indices: [
+                    {
+                      names: ['test-index-name-1', 'test-index-name-2'],
+                      privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                    },
+                  ],
+                  run_as: ['test-run-as-1', 'test-run-as-2'],
+                },
+                'role-2': {
+                  applications: [
+                    {
+                      application,
+                      privileges: ['all', 'read'],
+                      resources: [GLOBAL_RESOURCE],
+                    },
+                    {
+                      application: 'beats-foo',
+                      privileges: ['beats-privilege'],
+                      resources: ['beats-resource'],
+                    },
+                  ],
+                  cluster: ['test-cluster-privilege'],
+                  indices: [
+                    {
+                      names: ['test-index-name-1', 'test-index-name-2'],
+                      privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                    },
+                  ],
+                  run_as: ['test-run-as-1', 'test-run-as-2'],
+                },
+              },
+            },
+          ],
+        },
+        statusCode: 200,
+        result: { updated: ['role-1', 'role-2'] },
+      },
+    });
   });
 });
