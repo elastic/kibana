@@ -66,6 +66,7 @@ export const getVisualizeEmbeddableFactory: (
     // when the serialized vis changes, update the vis instance
     serializedVis$.subscribe(async (serializedVis) => {
       vis$.next(await createVisInstance(serializedVis));
+      await updateExpressionParams();
     });
 
     const savedObjectId$ = new BehaviorSubject<string | undefined>(
@@ -176,7 +177,6 @@ export const getVisualizeEmbeddableFactory: (
           if (visUpdates.title) {
             titlesApi.setPanelTitle(visUpdates.title);
           }
-          await updateExpressionParams();
         },
         subscribeToSerializedStateChanges: (listener) => serializedVis$.subscribe(listener),
         subscribeToVisInstance: (listener) => vis$.subscribe(listener),
