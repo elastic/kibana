@@ -20,13 +20,10 @@ import { useSetupTechnology } from './use_setup_technology';
 
 describe('useSetupTechnology', () => {
   describe('create page flow', () => {
-    const isEditPage = false;
-
     it('initializes with AGENT_BASED technology', () => {
       const { result } = renderHook(() =>
         useSetupTechnology({
           input: { type: 'cloudbeat/no-agentless-support' } as NewPackagePolicyInput,
-          isEditPage,
         })
       );
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
@@ -34,45 +31,35 @@ describe('useSetupTechnology', () => {
 
     it('sets to AGENTLESS when agentless is available and AWS cloud', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
-      const { result } = renderHook(() =>
-        useSetupTechnology({ input, isAgentlessEnabled: true, isEditPage })
-      );
+      const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: true }));
       expect(result.current.isAgentlessAvailable).toBeTruthy();
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('sets to AGENTLESS when agentless is available and GCP cloud', () => {
       const input = { type: CLOUDBEAT_GCP } as NewPackagePolicyInput;
-      const { result } = renderHook(() =>
-        useSetupTechnology({ input, isAgentlessEnabled: true, isEditPage })
-      );
+      const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: true }));
       expect(result.current.isAgentlessAvailable).toBeTruthy();
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('sets to AGENTLESS when agentless is available and Azure cloud', () => {
       const input = { type: CLOUDBEAT_AZURE } as NewPackagePolicyInput;
-      const { result } = renderHook(() =>
-        useSetupTechnology({ input, isAgentlessEnabled: true, isEditPage })
-      );
+      const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: true }));
       expect(result.current.isAgentlessAvailable).toBeTruthy();
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('sets to AGENT_BASED when agentless is available but input is not supported for agentless', () => {
       const input = { type: CLOUDBEAT_EKS } as NewPackagePolicyInput;
-      const { result } = renderHook(() =>
-        useSetupTechnology({ input, isAgentlessEnabled: true, isEditPage })
-      );
+      const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: true }));
       expect(result.current.isAgentlessAvailable).toBeFalsy();
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
     it('sets to AGENT_BASED when isAgentlessEnabled is false', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
-      const { result } = renderHook(() =>
-        useSetupTechnology({ input, isAgentlessEnabled: false, isEditPage })
-      );
+      const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: false }));
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
@@ -82,7 +69,6 @@ describe('useSetupTechnology', () => {
         useSetupTechnology({
           input: { type: 'someType' } as NewPackagePolicyInput,
           handleSetupTechnologyChange: handleSetupTechnologyChangeMock,
-          isEditPage,
         })
       );
 
@@ -98,13 +84,10 @@ describe('useSetupTechnology', () => {
   });
 
   describe('edit page flow', () => {
-    const isEditPage = true;
-
     it('initializes with AGENT_BASED technology', () => {
       const { result } = renderHook(() =>
         useSetupTechnology({
           input: { type: 'cloudbeat/no-agentless-support' } as NewPackagePolicyInput,
-          isEditPage,
         })
       );
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
@@ -116,7 +99,6 @@ describe('useSetupTechnology', () => {
         useSetupTechnology({
           input,
           isAgentlessEnabled: true,
-          isEditPage,
         })
       );
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
@@ -129,7 +111,6 @@ describe('useSetupTechnology', () => {
         useSetupTechnology({
           input,
           handleSetupTechnologyChange: handleSetupTechnologyChangeMock,
-          isEditPage,
         })
       );
 
@@ -146,7 +127,6 @@ describe('useSetupTechnology', () => {
       const { result, rerender } = renderHook(() =>
         useSetupTechnology({
           input,
-          isEditPage,
         })
       );
 
@@ -156,7 +136,6 @@ describe('useSetupTechnology', () => {
         rerender({
           input,
           agentlessPolicy,
-          isEditPage,
         });
       });
 

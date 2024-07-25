@@ -14,12 +14,10 @@ export const useSetupTechnology = ({
   input,
   isAgentlessEnabled,
   handleSetupTechnologyChange,
-  isEditPage,
 }: {
   input: NewPackagePolicyInput;
   isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
-  isEditPage: boolean;
 }) => {
   const isCspmAws = input.type === CLOUDBEAT_AWS;
   const isCspmGcp = input.type === CLOUDBEAT_GCP;
