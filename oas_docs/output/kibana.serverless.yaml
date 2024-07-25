@@ -521,8 +521,6 @@ paths:
                     #/components/examples/Connectors_get_connector_types_generativeai_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/data_views:
     get:
       summary: Get all data views
@@ -9065,17 +9063,6 @@ components:
                 enum:
                   - 404
   securitySchemes:
-    Data_views_basicAuth:
-      type: http
-      scheme: basic
-    Data_views_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
     Machine_learning_APIs_apiKeyAuth:
       type: apiKey
       in: header
