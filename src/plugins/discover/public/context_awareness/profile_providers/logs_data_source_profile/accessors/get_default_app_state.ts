@@ -9,24 +9,24 @@
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DefaultAppStateColumn } from '../../../types';
 
-export const createGetDefaultAppState =
-  ({
-    defaultColumns,
-  }: {
-    defaultColumns?: DefaultAppStateColumn[];
-  } = {}): DataSourceProfileProvider['profile']['getDefaultAppState'] =>
-  (prev) =>
-  (params) => {
-    const prevState = prev(params);
-    const columns = prevState?.columns ?? [];
+export const createGetDefaultAppState = ({
+  defaultColumns,
+}: {
+  defaultColumns?: DefaultAppStateColumn[];
+}): DataSourceProfileProvider['profile']['getDefaultAppState'] => {
+  return (prev) => (params) => {
+    const appState = { ...prev(params) };
 
     if (defaultColumns) {
+      appState.columns = [];
+
       if (params.dataView.isTimeBased()) {
-        columns.push({ name: params.dataView.timeFieldName, width: 212 });
+        appState.columns.push({ name: params.dataView.timeFieldName, width: 212 });
       }
 
-      columns.push(...defaultColumns);
+      appState.columns.push(...defaultColumns);
     }
 
-    return { columns, rowHeight: 0 };
+    return appState;
   };
+};

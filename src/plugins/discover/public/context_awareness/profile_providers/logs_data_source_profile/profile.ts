@@ -8,7 +8,7 @@
 
 import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
-import { createGetDefaultAppState, getRowIndicatorProvider } from './accessors';
+import { getRowIndicatorProvider } from './accessors';
 import { extractIndexPatternFrom } from '../extract_index_pattern_from';
 import { getCellRenderers } from './accessors';
 
@@ -19,7 +19,6 @@ export const createLogsDataSourceProfileProvider = (
   profile: {
     getRowIndicatorProvider,
     getCellRenderers,
-    getDefaultAppState: createGetDefaultAppState(),
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
