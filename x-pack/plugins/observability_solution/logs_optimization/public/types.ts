@@ -5,19 +5,34 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin as PluginClass,
+} from '@kbn/core/public';
+import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { UsePipelineSimulatorHook } from './hooks/use_pipeline_simulator';
+import { UseRecommendationsHook } from './hooks/use_recommendations';
+import { RecommendationsServiceStart } from './services/recommendations';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsOptimizationPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsOptimizationPublicStart {}
+export interface LogsOptimizationPublicStart {
+  recommendations: RecommendationsServiceStart;
+  useRecommendations: UseRecommendationsHook;
+  usePipelineSimulator: UsePipelineSimulatorHook;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsOptimizationPublicSetupDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsOptimizationPublicStartDeps {}
+export interface LogsOptimizationPublicStartDeps {
+  observabilityShared: ObservabilitySharedPluginStart;
+  serverless?: ServerlessPluginStart;
+}
 
 export type LogsOptimizationClientCoreSetup = CoreSetup<
   LogsOptimizationPublicStartDeps,
@@ -30,6 +45,8 @@ export type LogsOptimizationClientPluginClass = PluginClass<
   LogsOptimizationPublicSetupDeps,
   LogsOptimizationPublicStartDeps
 >;
+
+export type LogsOptimizationAppMountParameters = AppMountParameters;
 
 export type LogsOptimizationPublicStartServicesAccessor =
   LogsOptimizationClientCoreSetup['getStartServices'];

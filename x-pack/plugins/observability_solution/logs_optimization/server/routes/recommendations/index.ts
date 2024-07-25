@@ -6,7 +6,9 @@
  */
 import { LogsOptimizationBackendLibs } from '../../lib/shared_types';
 import { initGetRecommendationsRoute } from './get_recommendations';
+import { initSimulatePipelineRoute } from './simulate_pipeline';
 
 export const initRecommendationsRoutes = (libs: LogsOptimizationBackendLibs) => {
   initGetRecommendationsRoute(libs);
+  initSimulatePipelineRoute(libs);
 };

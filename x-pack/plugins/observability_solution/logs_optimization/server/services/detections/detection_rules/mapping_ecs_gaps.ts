@@ -84,6 +84,8 @@ export class MappingEcsGapsDetection {
         rename: {
           field,
           target_field: target as string,
+          ignore_failure: true,
+          ignore_missing: true,
         },
       }));
   }

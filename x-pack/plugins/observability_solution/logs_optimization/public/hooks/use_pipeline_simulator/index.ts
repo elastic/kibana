@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const GET_RECOMMENDATIONS_URL = '/internal/recommendations';
-export const SIMULATE_PIPELINE_URL = '/internal/recommendations/simulate_pipeline';
+export * from './use_pipeline_simulator';

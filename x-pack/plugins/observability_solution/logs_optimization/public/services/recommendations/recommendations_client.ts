@@ -16,6 +16,7 @@ import {
   DecodeRecommendationsError,
   FetchRecommendationsError,
   GET_RECOMMENDATIONS_URL,
+  SIMULATE_PIPELINE_URL,
 } from '../../../common/recommendations';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { IRecommendationsClient } from './types';
@@ -45,5 +46,23 @@ export class RecommendationsClient implements IRecommendationsClient {
     )(response);
 
     return data;
+  }
+
+  public async simulatePipeline(body) {
+    const response = await this.http
+      .post(SIMULATE_PIPELINE_URL, { body: JSON.stringify(body), version: '1' })
+      .catch((error) => {
+        throw new FetchRecommendationsError(`Failed to simulate pipeline: ${error.message}`);
+      });
+
+    // const data = decodeOrThrow(
+    //   getRecommendationsResponsePayloadRT,
+    //   (message: string) =>
+    //     new DecodeRecommendationsError(
+    //       `Failed decoding recommendations for dataset "${query.dataset}": ${message}`
+    //     )
+    // )(response);
+
+    return response;
   }
 }

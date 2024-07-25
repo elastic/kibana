@@ -14,8 +14,14 @@ export const recommendationStatusRT = rt.keyof({
   rejected: null,
 });
 
+export const recommendationTypeRT = rt.keyof({
+  field_extraction: null,
+  mapping_gap: null,
+});
+
 export const recommendationRT = rt.type({
   id: rt.string,
+  type: recommendationTypeRT,
   status: recommendationStatusRT,
   created_at: rt.string,
   updated_at: rt.string,

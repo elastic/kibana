@@ -6,9 +6,9 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
-import { createRecommendation } from '@kbn/logs-optimization-plugin/common/recommendations/utils';
-import { Recommendation } from '@kbn/logs-optimization-plugin/common/recommendations';
+import { NewestIndex } from '../../../common/types';
+import { createRecommendation } from '../../../common/recommendations/utils';
+import { Recommendation } from '../../../common/recommendations';
 import { IDetectionsClient } from '../detections/types';
 import { IRecommendationsClient } from './types';
 
@@ -38,8 +38,6 @@ export class RecommendationsClient implements IRecommendationsClient {
 
     return recommendations;
   }
-
-  // generateRecommendationsByDataset({ dataset }) {}
 
   // applyRecommendation({ dataset, recommendationId }) {}
 

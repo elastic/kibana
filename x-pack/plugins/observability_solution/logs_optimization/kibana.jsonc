@@ -9,8 +9,13 @@
     "browser": true,
     "configPath": ["xpack", "logs_optimization"],
     "requiredPlugins": [
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "observabilityShared"
     ],
-    "requiredBundles": [],
+    "optionalPlugins": ["serverless"],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ],
   }
 }

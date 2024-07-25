@@ -1,0 +1,219 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCode,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import React, { useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { CodeEditor } from '@kbn/code-editor';
+import { Recommendation } from '../../common/recommendations';
+import { LogsOptimizationPageTemplate } from '../components/page_template';
+import { noBreadcrumbs, useBreadcrumbs } from '../utils/breadcrumbs';
+import { useKibanaContextForPlugin } from '../utils/use_kibana';
+
+export const RecommendationsRoute = () => {
+  const { services } = useKibanaContextForPlugin();
+  const { useRecommendations, serverless, chrome } = services;
+
+  useBreadcrumbs(noBreadcrumbs, chrome, serverless);
+
+  const datasetFieldRef = useRef<HTMLInputElement | null>(null);
+
+  const [dataset, setDataset] = useState('logs-random-default');
+
+  const { recommendations, loading, error } = useRecommendations({ dataset }, [dataset]);
+
+  return (
+    <LogsOptimizationPageTemplate
+      restrictWidth
+      pageHeader={{
+        pageTitle: 'Recommendations',
+      }}
+    >
+      <EuiSpacer />
+      <EuiFieldText
+        inputRef={datasetFieldRef}
+        data-test-subj="logsOptimizationRecommendationsRouteFieldText"
+        name="dataset"
+        defaultValue={dataset}
+        prepend="Dataset"
+        append={
+          <EuiButtonEmpty
+            data-test-subj="logsOptimizationRecommendationsRouteButtonButton"
+            size="xs"
+            onClick={() => {
+              if (datasetFieldRef.current?.value) setDataset(datasetFieldRef.current?.value);
+            }}
+          >
+            {i18n.translate('app_not_found_in_i18nrc.recommendationsRoute.buttonButtonEmptyLabel', {
+              defaultMessage: 'Find suggestions',
+            })}
+          </EuiButtonEmpty>
+        }
+      />
+      <EuiSpacer size="xxl" />
+      {loading && 'Loading...'}
+      {error && error.message}
+      {recommendations?.map((recommendation) => {
+        if (recommendation.type === 'field_extraction')
+          return (
+            <>
+              <FieldExtractionRecommendation recommendation={recommendation} />
+              <EuiSpacer size="m" />
+            </>
+          );
+      })}
+    </LogsOptimizationPageTemplate>
+  );
+};
+
+const FieldExtractionRecommendation = ({ recommendation }: { recommendation: Recommendation }) => {
+  const { services } = useKibanaContextForPlugin();
+  const { usePipelineSimulator } = services;
+
+  const { simulation, simulate } = usePipelineSimulator();
+
+  const simulationStr = JSON.stringify(
+    simulation?.docs[0]?.processor_results.at(-1).doc._source,
+    null,
+    2
+  );
+
+  const [pipeline, setPipeline] = useState(() =>
+    JSON.stringify(recommendation.detection.tasks.processors, null, 2)
+  );
+  const [docSample, setDocSample] = useState(() =>
+    JSON.stringify(recommendation.detection.documentSamples[0]._source, null, 2)
+  );
+
+  const simulateRecommendedPipeline = () => {
+    simulate({
+      processors: JSON.parse(pipeline),
+      docs: [{ _source: JSON.parse(docSample) }],
+    });
+  };
+
+  const accordionTriggerButton = (
+    <EuiTitle size="xs">
+      <h3>
+        {i18n.translate('app_not_found_in_i18nrc.extractionRecommendation.extractLabel', {
+          defaultMessage: 'Extract {targetField} from {sourceField}',
+          values: {
+            targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
+            sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
+          },
+        })}
+      </h3>
+    </EuiTitle>
+  );
+
+  return (
+    <EuiPanel>
+      <EuiAccordion
+        id={recommendation.type + recommendation.created_at}
+        buttonContent={accordionTriggerButton}
+        extraAction={
+          <EuiButton data-test-subj="logsOptimizationFieldExtractionRecommendationApplyRecommendationButton">
+            {i18n.translate(
+              'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabel',
+              { defaultMessage: 'Apply recommendation' }
+            )}
+          </EuiButton>
+        }
+        initialIsOpen
+      >
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem grow={4}>
+            <EuiText>
+              {i18n.translate(
+                'app_not_found_in_i18nrc.fieldExtractionRecommendation.weCanExtractLoglevelsAccordionLabel',
+                {
+                  defaultMessage:
+                    'We can extract the {targetField} field from this dataset {sourceField} field.',
+                  values: {
+                    targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
+                    sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
+                  },
+                }
+              )}
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText>
+              {i18n.translate(
+                'app_not_found_in_i18nrc.fieldExtractionRecommendation.youCanSimulateTheTextLabel',
+                {
+                  defaultMessage:
+                    'You can simulate the proposed pipeline processors to extract the data and ensure accuracy. In the future, logs will be ingested using these pipeline processors during logs ingestion:',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <CodeEditor
+              languageId="json"
+              value={pipeline}
+              onChange={setPipeline}
+              height={300}
+              options={{ lineNumbers: 'off' }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate(
+              'app_not_found_in_i18nrc.fieldExtractionRecommendation.h4.changesSimulationLabel',
+              { defaultMessage: 'Changes simulation' }
+            )}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={3}>
+            <CodeEditor
+              languageId="json"
+              value={docSample}
+              onChange={setDocSample}
+              height={300}
+              options={{ lineNumbers: 'off' }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiButton
+              onClick={simulateRecommendedPipeline}
+              data-test-subj="logsOptimizationFieldExtractionRecommendationSimulateButton"
+            >
+              {i18n.translate(
+                'app_not_found_in_i18nrc.fieldExtractionRecommendation.simulateButtonLabel',
+                { defaultMessage: 'Simulate pipeline' }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <CodeEditor
+              languageId="json"
+              value={simulationStr}
+              height={300}
+              options={{ lineNumbers: 'off', readOnly: true }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiAccordion>
+    </EuiPanel>
+  );
+};

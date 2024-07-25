@@ -27,7 +27,7 @@ export const fieldExtractionDetectionRT = rt.type({
   sourceField: rt.string,
   targetField: rt.string,
   pattern: rt.string,
-  documentSamples: rt.record(rt.string, rt.unknown), // TODO: update types
+  documentSamples: rt.record(rt.string, rt.any), // TODO: update types
   tasks: rt.partial({
     processors: processorsRT,
   }),

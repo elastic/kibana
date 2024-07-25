@@ -24,4 +24,5 @@ export interface RecommendationsServiceStartDeps {
 
 export interface IRecommendationsClient {
   find(params: GetRecommendationsRequestQuery): Promise<GetRecommendationsResponsePayload>;
+  simulatePipeline(params: any): Promise<GetRecommendationsResponsePayload>;
 }

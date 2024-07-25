@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { EsqlTransport } from '@kbn/logs-optimization-plugin/server/lib/esql_transport';
-import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
-import {
-  IngestPipelineProcessor,
-  IngestProcessorContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EsqlTransport } from '../../../lib/esql_transport';
+import { NewestIndex } from '../../../../common/types';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../../../common/constants';
 import { createFieldExtractionDetection } from '../../../../common/detections/utils';
 import { FieldExtractionDetection } from '../../../../common/detections/types';
@@ -77,8 +74,10 @@ export class TimestampExtractionDetection {
                 timestamp_date_us IS NOT NULL, "%{DATE_US:${TEMPORARY_TIMESTAMP_FIELD}}",
                 ""
             )
+            | EVAL matched_value = COALESCE(timestamp_iso, timestamp_sys, timestamp_rfc822, timestamp_rfc2822, timestamp_eventlog, timestamp_httpdate, timestamp_other, timestamp_date_eu, timestamp_date_us)
             | WHERE matched_pattern != ""
-            | DROP timestamp_*
+            | WHERE matched_value != DATE_FORMAT(@timestamp)
+            | KEEP @timestamp,${MESSAGE_FIELD},matched_pattern
             | LIMIT 5
     `;
   }

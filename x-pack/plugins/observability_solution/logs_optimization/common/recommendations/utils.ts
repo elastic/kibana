@@ -10,6 +10,7 @@ import { Recommendation } from './types';
 
 export const createRecommendation = (detection: Detection): Recommendation => ({
   id: uuidv4(),
+  type: detection.type,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   status: 'pending',

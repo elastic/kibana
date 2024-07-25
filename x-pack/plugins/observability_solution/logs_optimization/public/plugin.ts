@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { createUsePipelineSimulatorHook } from './hooks/use_pipeline_simulator';
 import { createUseRecommendationsHook } from './hooks/use_recommendations';
 import { RecommendationsService } from './services/recommendations';
-import { LogsOptimizationClientPluginClass } from './types';
+import {
+  LogsOptimizationAppMountParameters,
+  LogsOptimizationClientPluginClass,
+  LogsOptimizationPublicSetupDeps,
+  LogsOptimizationPublicStart,
+  LogsOptimizationPublicStartDeps,
+} from './types';
 
 export class LogsOptimizationPlugin implements LogsOptimizationClientPluginClass {
   private recommendations: RecommendationsService;
@@ -17,8 +24,26 @@ export class LogsOptimizationPlugin implements LogsOptimizationClientPluginClass
     this.recommendations = new RecommendationsService();
   }
 
-  public setup() {
+  public setup(
+    core: CoreSetup<LogsOptimizationPublicStartDeps, LogsOptimizationPublicStart>,
+    _pluginsSetup: LogsOptimizationPublicSetupDeps
+  ) {
     this.recommendations.setup();
+
+    core.application.register({
+      id: 'logs-optimization',
+      title: 'Logs optimization',
+      category: DEFAULT_APP_CATEGORIES.observability,
+      euiIconType: 'logoLogging',
+      visibleIn: [],
+      keywords: [],
+      mount: async (appParams: LogsOptimizationAppMountParameters) => {
+        const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
+        const { renderRecommendationsApp } = await import('./applications/logs_optimization_app');
+
+        return renderRecommendationsApp(coreStart, pluginsStart, ownPluginStart, appParams);
+      },
+    });
 
     return {};
   }
@@ -29,10 +54,12 @@ export class LogsOptimizationPlugin implements LogsOptimizationClientPluginClass
     const recommendationsService = this.recommendations.start({ http });
 
     const useRecommendations = createUseRecommendationsHook({ recommendationsService });
+    const usePipelineSimulator = createUsePipelineSimulatorHook({ recommendationsService });
 
     return {
-      getClient: recommendationsService.getClient,
+      recommendations: recommendationsService,
       useRecommendations,
+      usePipelineSimulator,
     };
   }
 }
