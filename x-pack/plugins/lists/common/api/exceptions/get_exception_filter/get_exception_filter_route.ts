@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './exceptions/create_exception_list/create_exception_list_route';
-export * from './exceptions/get_exception_filter/get_exception_filter_route';
-export * from './values/find_lists_by_size/find_lists_by_size_route';
+import { getExceptionFilterSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+export { getExceptionFilterSchema as getExceptionFilterRequest };
