@@ -28,7 +28,6 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -37,7 +36,6 @@ import type {
   OnChangePage,
   RowRenderer,
   SortColumnTimeline,
-  ToggleDetailPanel,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
@@ -107,9 +105,6 @@ interface Props {
   events: TimelineItem[];
   refetch: inputsModel.Refetch;
   totalCount: number;
-  onEventClosed: (args: ToggleDetailPanel) => void;
-  expandedDetail: ExpandedDetailTimeline;
-  showExpandedDetails: boolean;
   onChangePage: OnChangePage;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
@@ -133,9 +128,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   refetch,
   dataLoadingState,
   totalCount,
-  onEventClosed,
-  showExpandedDetails,
-  expandedDetail,
   onChangePage,
   updatedAt,
   isTextBasedQuery,
@@ -417,9 +409,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFieldEdited={onFieldEdited}
                       dataLoadingState={dataLoadingState}
                       totalCount={totalCount}
-                      onEventClosed={onEventClosed}
-                      expandedDetail={expandedDetail}
-                      showExpandedDetails={showExpandedDetails}
                       onChangePage={onChangePage}
                       activeTab={activeTab}
                       updatedAt={updatedAt}

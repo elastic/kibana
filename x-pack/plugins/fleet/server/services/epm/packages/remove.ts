@@ -65,11 +65,15 @@ export async function removeInstallation(options: {
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new PackageRemovalError(`${pkgName} is not installed`);
 
-  const { total, items } = await packagePolicyService.list(savedObjectsClient, {
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-  });
+  const { total, items } = await packagePolicyService.list(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      spaceId: '*',
+    }
+  );
 
   if (!options.force) {
     await populatePackagePolicyAssignedAgentsCount(esClient, items);
