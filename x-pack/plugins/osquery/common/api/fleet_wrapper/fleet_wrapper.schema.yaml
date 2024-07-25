@@ -5,6 +5,7 @@ info:
 paths:
   /internal/osquery/fleet_wrapper/agents:
     get:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetAgents
       summary: Get agents
@@ -27,6 +28,7 @@ paths:
 
   /internal/osquery/fleet_wrapper/agents/{id}:
     get:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetAgentDetails
       summary: Get Agent details
@@ -48,6 +50,7 @@ paths:
 
   /internal/osquery/fleet_wrapper/agent_policies:
     get:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetAgentPolicies
       summary: Get Agent policies
@@ -63,6 +66,7 @@ paths:
 
   /internal/osquery/fleet_wrapper/agent_policies/{id}:
     get:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetAgentPolicy
       summary: Get Agent policy
@@ -84,6 +88,7 @@ paths:
 
   /internal/osquery/fleet_wrapper/package_policies:
     get:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetAgentPackagePolicies
       summary: Get Agent policy
