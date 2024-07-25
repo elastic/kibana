@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useKibana } from '../../../../common';
 
 export const useBulkUntrackAlertsByQuery = () => {
@@ -39,7 +39,7 @@ export const useBulkUntrackAlertsByQuery = () => {
       }
     },
     {
-      context: AlertsTableQueryContext,
+      context: AlertsQueryContext,
       onError: () => {
         toasts.addDanger(
           i18n.translate('xpack.triggersActionsUI.alertsTable.untrackByQuery.failedMessage', {

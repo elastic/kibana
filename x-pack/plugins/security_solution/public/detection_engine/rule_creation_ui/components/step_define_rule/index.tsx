@@ -54,7 +54,6 @@ import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
@@ -210,16 +209,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     mlSuppressionFields,
   } = useMLRuleConfig({ machineLearningJobId });
 
+  const isMlSuppressionIncomplete =
+    isMlRule(ruleType) && machineLearningJobId?.length > 0 && !allJobsStarted;
+
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
-
-  const isAIAssistantEnabled = useIsExperimentalFeatureEnabled(
-    'AIAssistantOnRuleCreationFormEnabled'
-  );
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
@@ -938,7 +936,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          {isAIAssistantEnabled && !isMlRule(ruleType) && !isQueryBarValid && (
+          {!isMlRule(ruleType) && !isQueryBarValid && (
             <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
           )}
 
@@ -1092,7 +1090,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     disabledText: suppressionGroupByDisabledText,
                   }}
                 />
-                {!allJobsStarted && (
+                {isMlSuppressionIncomplete && (
                   <EuiText size="xs" color="warning">
                     {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
                   </EuiText>
