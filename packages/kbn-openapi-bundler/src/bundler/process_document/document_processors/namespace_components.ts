@@ -89,9 +89,30 @@ function decorateRefBaseName(ref: string, prefix: string): string {
 }
 
 const PARENTHESES_INFO_REGEX = /\(.+\)+/g;
+const ALPHANUMERIC_SYMBOLS_REGEX = /[^\w\n]+/g;
 const SPACES_REGEX = /\s+/g;
 
+/**
+ * Normalizes provided namespace string by
+ *
+ * - getting rid of non alphanumeric symbols
+ * - getting rid of parentheses including text between them
+ * - collapsing and replacing spaces with underscores
+ *
+ * @example
+ *
+ * Given a namespace `Security Solution Detections API (Elastic Cloud Serverless)`
+ * it will produce `Security_Solution_Detections_API`
+ *
+ * Given a namespace `Hello, world!`
+ * it will produce `Hello_world`
+ *
+ */
 function normalizeNamespace(namespace: string): string {
   // Using two replaceAll() to make sure there is no leading or trailing underscores
-  return namespace.replaceAll(PARENTHESES_INFO_REGEX, ' ').trim().replaceAll(SPACES_REGEX, '_');
+  return namespace
+    .replaceAll(PARENTHESES_INFO_REGEX, ' ')
+    .replaceAll(ALPHANUMERIC_SYMBOLS_REGEX, ' ')
+    .trim()
+    .replaceAll(SPACES_REGEX, '_');
 }
