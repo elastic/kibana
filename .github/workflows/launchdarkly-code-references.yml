@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'fix/ld-action-triggering-on-forks'
 
 # cancel in-flight workflow run if another push was triggered
 concurrency:
@@ -14,7 +13,7 @@ concurrency:
 jobs:
   launchDarklyCodeReferences:
     name: LaunchDarkly Code References
-    if: github.event.repository.fork == true
+    if: github.event.repository.fork == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
