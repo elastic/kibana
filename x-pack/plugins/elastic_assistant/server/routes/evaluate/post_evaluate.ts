@@ -18,6 +18,7 @@ import {
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
@@ -29,7 +30,7 @@ import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
+import { fetchLangSmithDataset, getConnectorName } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
@@ -152,8 +153,6 @@ export const postEvaluateRoute = (
               actionTypeId: '.gen-ai',
               replacements: {},
               size: DEFAULT_SIZE,
-              isEnabledKnowledgeBase: true,
-              isEnabledRAGAlerts: true,
               conversationId: '',
             },
           };
@@ -162,8 +161,10 @@ export const postEvaluateRoute = (
           // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
           const enableKnowledgeBaseByDefault =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const bedrockChatEnabled =
+            assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
           const kbDataClient = enableKnowledgeBaseByDefault
-            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined
             : undefined;
           const kbIndex =
             enableKnowledgeBaseByDefault && kbDataClient != null
@@ -193,8 +194,8 @@ export const postEvaluateRoute = (
                 agentEvaluator: async (langChainMessages, exampleId) => {
                   const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                     actionsClient,
-                    isEnabledKnowledgeBase: true,
                     assistantTools,
+                    bedrockChatEnabled,
                     connectorId,
                     esClient,
                     esStore,

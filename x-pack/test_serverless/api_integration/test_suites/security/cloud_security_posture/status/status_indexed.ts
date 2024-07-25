@@ -50,12 +50,12 @@ export default function (providerContext: FtrProviderContext) {
     let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('STATUS = INDEXED TEST', () => {

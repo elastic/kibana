@@ -17,7 +17,7 @@ import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
 

@@ -12,6 +12,7 @@ import * as t from 'io-ts';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
@@ -197,6 +198,23 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
           t.record(t.string, sortOrderSchema),
           t.array(t.record(t.string, sortOrderSchema)),
         ]),
+      })
+    ),
+    bucket_sort: t.exact(
+      t.partial({
+        sort: sortSchema,
+        from: t.number,
+        size: t.number,
+        gap_policy: t.union([
+          t.literal('skip'),
+          t.literal('insert_zeros'),
+          t.literal('keep_values'),
+        ]),
+      })
+    ),
+    value_count: t.exact(
+      t.partial({
+        field: t.string,
       })
     ),
   })
@@ -406,7 +424,7 @@ export interface BrowserField {
   description?: string | null;
   example?: string | number | null;
   fields: Readonly<Record<string, Partial<BrowserField>>>;
-  format?: string;
+  format?: SerializedFieldFormat;
   indexes: string[];
   name: string;
   searchable: boolean;

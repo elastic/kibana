@@ -12,12 +12,10 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('./use_chat_send');
 
-const handleOnChatCleared = jest.fn();
 const handlePromptChange = jest.fn();
 const handleSendMessage = jest.fn();
 const handleRegenerateResponse = jest.fn();
 const testProps: Props = {
-  handleOnChatCleared,
   handlePromptChange,
   handleSendMessage,
   handleRegenerateResponse,
@@ -25,7 +23,6 @@ const testProps: Props = {
   isDisabled: false,
   shouldRefocusPrompt: false,
   userPrompt: '',
-  isFlyoutMode: false,
 };
 describe('ChatSend', () => {
   beforeEach(() => {

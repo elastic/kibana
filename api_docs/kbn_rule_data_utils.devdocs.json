@@ -1648,6 +1648,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.EVENT_ORIGINAL",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_ORIGINAL",
+        "description": [],
+        "signature": [
+          "\"event.original\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/legacy_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.KIBANA_NAMESPACE",
         "type": "string",
         "tags": [],
@@ -1834,7 +1849,7 @@
         "label": "STATUS_VALUES",
         "description": [],
         "signature": [
-          "\"in-progress\" | \"open\" | \"closed\" | \"acknowledged\""
+          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

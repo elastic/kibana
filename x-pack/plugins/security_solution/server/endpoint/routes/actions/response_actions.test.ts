@@ -192,11 +192,6 @@ describe('Response actions', () => {
         }: CallRouteInterface,
         indexExists?: { endpointDsExists: boolean }
       ): Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>> => {
-        const asUser = mockUser ? mockUser : superUser;
-        (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
-          () => asUser
-        );
-
         const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
 
         ctx.securitySolution.getEndpointAuthz.mockResolvedValue(
@@ -218,6 +213,9 @@ describe('Response actions', () => {
             };
           }
         );
+        const asUser = mockUser ? mockUser : superUser;
+        (ctx.core.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(() => asUser);
+
         const metadataResponse = docGen.generateHostMetadata();
 
         const withErrorResponse = indexErrorResponse ? indexErrorResponse : { statusCode: 201 };

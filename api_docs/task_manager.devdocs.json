@@ -126,7 +126,15 @@
                 "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, plugins: { usageCollection?: ",
+              "<",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerStartContract",
+                "text": "TaskManagerStartContract"
+              },
+              ", unknown>, plugins: { usageCollection?: ",
               {
                 "pluginId": "usageCollection",
                 "scope": "server",
@@ -162,7 +170,15 @@
                     "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>"
+                  "<",
+                  {
+                    "pluginId": "taskManager",
+                    "scope": "server",
+                    "docId": "kibTaskManagerPluginApi",
+                    "section": "def-server.TaskManagerStartContract",
+                    "text": "TaskManagerStartContract"
+                  },
+                  ", unknown>"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -257,6 +273,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskManagerPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -858,6 +890,20 @@
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.ConcreteTaskInstance.partition",
+            "type": "number",
+            "tags": [],
+            "label": "partition",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1305,6 +1351,20 @@
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.partition",
+            "type": "number",
+            "tags": [],
+            "label": "partition",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1371,6 +1431,23 @@
                 "section": "def-server.TaskPriority",
                 "text": "TaskPriority"
               },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.cost",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cost",
+            "description": [
+              "\nAn optional definition of the cost associated with running the task."
+            ],
+            "signature": [
+              "TaskCost",
               " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",

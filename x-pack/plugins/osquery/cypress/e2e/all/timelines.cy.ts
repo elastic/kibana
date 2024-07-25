@@ -8,8 +8,10 @@
 import { initializeDataViews } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
+import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-describe('ALL - Timelines', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/189136
+describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {
     initializeDataViews();
   });
@@ -18,7 +20,11 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {
-    cy.visit('/app/security/timelines');
+    cy.visit('/app/security/timelines', {
+      onBeforeLoad: (win) => {
+        disableNewFeaturesTours(win);
+      },
+    });
     cy.getBySel('timeline-bottom-bar').within(() => {
       cy.getBySel('timeline-bottom-bar-title-button').click();
     });
@@ -36,16 +42,7 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
     });
     cy.getBySel('sourcerer-save').click();
 
-    cy.getBySel('event-actions-container')
-      .first()
-      .within(() => {
-        cy.getBySel('expand-event')
-          .first()
-          .within(() => {
-            cy.get(`[data-is-loading="true"]`).should('not.exist');
-          })
-          .click();
-      });
+    cy.getBySel('docTableExpandToggleColumn').first().click();
     takeOsqueryActionWithParams();
   });
 });

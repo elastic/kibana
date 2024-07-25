@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
   ): Promise<void> =>
     retry.try(async () => {
       log.debug('Check CSP plugin is initialized');
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       const response = await supertestWithoutAuthParam
         .get('/internal/cloud_security_posture/status?check=init')
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });

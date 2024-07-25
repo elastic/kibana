@@ -5,14 +5,9 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import type { SetupPlugins } from '../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { getDashboardsByTagsRoute } from './get_dashboards_by_tags';
 
-export const registerDashboardsRoutes = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
-) => {
-  getDashboardsByTagsRoute(router, logger, security);
+export const registerDashboardsRoutes = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+  getDashboardsByTagsRoute(router, logger);
 };

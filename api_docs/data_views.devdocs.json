@@ -12930,6 +12930,10 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {
@@ -12991,6 +12995,10 @@
               {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -13115,10 +13123,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "packages/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "@kbn/ml-data-view-utils",
@@ -13259,18 +13263,6 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/common/dependency_mocks/index_patterns.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/common/dependency_mocks/index_patterns.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/common/dependency_mocks/index_patterns.ts"
               },
               {
                 "plugin": "enterpriseSearch",

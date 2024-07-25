@@ -43,7 +43,7 @@ export async function fetchEsqlQuery({
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
-  logger.debug(`ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
+  logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
   let response: EsqlTable;
   try {
@@ -66,6 +66,7 @@ export async function fetchEsqlQuery({
 
   return {
     link,
+    query,
     numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
       isCountAgg: true,
