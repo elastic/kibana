@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useImperativeHandle, useMemo } from 'react';
+import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { StateComparators } from '@kbn/presentation-publishing';
@@ -15,7 +15,7 @@ import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './components/control_panel';
 import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
-import { initializeUnsavedChangesApi } from './control_unsaved_changes_api';
+import { initUnsavedChanges } from './init_unsaved_changes';
 
 /**
  * Renders a component from the control registry into a Control Panel
@@ -34,6 +34,8 @@ export const ControlRenderer = <
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
+  const cleanupFunction = useRef<(() => void) | null>(null);
+
   const component = useMemo(
     () =>
       (() => {
@@ -47,7 +49,7 @@ export const ControlRenderer = <
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<StateType>
         ): ApiType => {
-          const unsavedChanges = initializeUnsavedChangesApi<StateType>(
+          const unsavedChanges = initUnsavedChanges<StateType>(
             initialState as StateType,
             parentApi,
             comparators
@@ -63,6 +65,7 @@ export const ControlRenderer = <
             type: factory.type,
           } as unknown as ApiType;
 
+          cleanupFunction.current = () => unsavedChanges.cleanup();
           onApiAvailable?.(fullApi);
           return fullApi;
         };
@@ -88,6 +91,12 @@ export const ControlRenderer = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [type]
   );
+
+  useEffect(() => {
+    return () => {
+      cleanupFunction.current?.();
+    };
+  }, []);
 
   return <ControlPanel<ApiType> Component={component} uuid={uuid} />;
 };

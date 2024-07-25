@@ -26,9 +26,7 @@ import { DefaultControlState } from './types';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
-export const initializeUnsavedChangesApi = <
-  ControlState extends DefaultControlState = DefaultControlState
->(
+export const initUnsavedChanges = <ControlState extends DefaultControlState = DefaultControlState>(
   initialState: ControlState,
   parentApi: unknown,
   comparators: StateComparators<ControlState>

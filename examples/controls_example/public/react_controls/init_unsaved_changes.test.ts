@@ -8,15 +8,12 @@
 
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
 import { initializeDefaultControlApi } from './initialize_default_control_api';
-import {
-  COMPARATOR_SUBJECTS_DEBOUNCE,
-  initializeUnsavedChangesApi,
-} from './control_unsaved_changes_api';
+import { COMPARATOR_SUBJECTS_DEBOUNCE, initUnsavedChanges } from './init_unsaved_changes';
 import { DefaultControlState } from './types';
 import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { Subject } from 'rxjs';
 
-describe('initializeUnsavedChangesApi', () => {
+describe('initUnsavedChanges', () => {
   const parentApi = {
     saveNotification$: new Subject<void>(),
   };
@@ -29,7 +26,7 @@ describe('initializeUnsavedChangesApi', () => {
     };
     const { comparators } = initializeDefaultControlApi(initialState);
     setWidth = comparators.width[1];
-    ({ api } = initializeUnsavedChangesApi(initialState, parentApi, comparators));
+    ({ api } = initUnsavedChanges(initialState, parentApi, comparators));
   });
 
   test('should have no unsaved changes after initialization', () => {
