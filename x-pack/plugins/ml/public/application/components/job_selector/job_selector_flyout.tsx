@@ -293,16 +293,18 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={applySelection}
-              fill
-              isDisabled={newSelection.length === 0}
-              data-test-subj="mlFlyoutJobSelectorButtonApply"
-            >
-              {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
-                defaultMessage: 'Apply',
-              })}
-            </EuiButton>
+            {jobs.length !== 0 ? (
+              <EuiButton
+                onClick={applySelection}
+                fill
+                isDisabled={newSelection.length === 0}
+                data-test-subj="mlFlyoutJobSelectorButtonApply"
+              >
+                {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
+                  defaultMessage: 'Apply',
+                })}
+              </EuiButton>
+            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
