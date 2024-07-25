@@ -11,7 +11,11 @@ import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  HasSaveNotification,
+  HasSerializedChildState,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -54,7 +58,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
-  Partial<HasParentApi<PublishesUnifiedSearch>> & {
+  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;

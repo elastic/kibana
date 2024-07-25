@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonGroup,
   EuiCallOut,
@@ -18,6 +20,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiToolTip,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import {
@@ -137,6 +140,9 @@ export const ReactControlExample = ({
   const viewMode$ = useMemo(() => {
     return new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
   }, []);
+  const saveNotification$ = useMemo(() => {
+    return new Subject<void>();
+  }, []);
   const [dataLoading, timeRange, viewMode] = useBatchedPublishingSubjects(
     dataLoading$,
     timeRange$,
@@ -173,6 +179,7 @@ export const ReactControlExample = ({
         return Promise.resolve(undefined);
       },
       lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
+      saveNotification$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -245,6 +252,23 @@ export const ReactControlExample = ({
       subscription.unsubscribe();
     };
   }, [controlGroupFilters$, filters$, unifiedSearchFilters$]);
+
+  const [unsavedChanges, setUnsavedChanges] = useState<object | undefined>(undefined);
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    const subscription = controlGroupApi.unsavedChanges.subscribe(
+      (unsavedChanges) => {
+        setUnsavedChanges(unsavedChanges);
+        console.log('unsavedChanges', unsavedChanges);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
 
   return (
     <>
@@ -327,6 +351,15 @@ export const ReactControlExample = ({
             }}
           />
         </EuiFlexItem>
+        {unsavedChanges !== undefined && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={<pre>{JSON.stringify(unsavedChanges, null, ' ')}</pre>}
+            >
+              <EuiBadge color="warning">Unsaved changes</EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiSuperDatePicker

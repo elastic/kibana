@@ -41,7 +41,10 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import {
+  apiHasSaveNotification,
+  combineCompatibleChildrenApis,
+} from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   apiPublishesFilters,
@@ -57,13 +60,9 @@ import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup } from './serialization_utils';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlGroupUnsavedChanges,
-} from './types';
+import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 import { ControlClone } from '../components/control_clone';
+import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -109,20 +108,11 @@ export const getControlGroupEmbeddableFactory = (services: {
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
-      /** TODO: Handle unsaved changes
-       * - Each child has an unsaved changed behaviour subject it pushes to
-       * - The control group listens to all of them (anyChildHasUnsavedChanges) and publishes its
-       *   own unsaved changes if either one of its children has unsaved changes **or** one of
-       *   the control group settings changed.
-       * - Children should **not** publish unsaved changes based on their output filters or selections.
-       *   Instead, the control group will handle unsaved changes for filters.
-       */
-      const unsavedChanges = new BehaviorSubject<Partial<ControlGroupUnsavedChanges> | undefined>(
-        undefined
-      );
+      const unsavedChanges = initializeControlGroupUnsavedChanges(controlsManager.api.children$);
 
       const api = setApi({
         ...controlsManager.api,
+        ...unsavedChanges.api,
         controlFetch$: (controlUuid: string) =>
           controlFetch$(
             chaining$(
@@ -135,10 +125,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           ),
         ignoreParentSettings$,
         autoApplySelections$,
-        unsavedChanges,
-        resetUnsavedChanges: () => {
-          // TODO: Implement this
-        },
         snapshotRuntimeState: () => {
           // TODO: Remove this if it ends up being unnecessary
           return {} as unknown as ControlGroupRuntimeState;
@@ -180,6 +166,9 @@ export const getControlGroupEmbeddableFactory = (services: {
         dataViews,
         labelPosition: labelPosition$,
         timeslice$,
+        saveNotification$: apiHasSaveNotification(parentApi)
+          ? parentApi.saveNotification$
+          : undefined,
       });
 
       /**

@@ -17,6 +17,7 @@ export function initializeControlGroupUnsavedChanges(
     api: {
       unsavedChanges: combineLatest([childrenUnsavedChanges$(children$)]).pipe(
         map(([unsavedControlState]) => {
+          console.log('unsavedControlState', unsavedControlState);
           const unsavedChanges: { [key: string]: unknown } = {};
           if (unsavedControlState) {
             unsavedChanges.controls = unsavedControlState;
