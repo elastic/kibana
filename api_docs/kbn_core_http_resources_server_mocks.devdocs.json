@@ -903,9 +903,7 @@
                 "section": "def-common.CustomHttpResponseOptions",
                 "text": "CustomHttpResponseOptions"
               },
-              "<Buffer | ",
-              "Stream",
-              " | ",
+              "<",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -921,9 +919,7 @@
                 "section": "def-common.CustomHttpResponseOptions",
                 "text": "CustomHttpResponseOptions"
               },
-              "<Buffer | ",
-              "Stream",
-              " | ",
+              "<",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
