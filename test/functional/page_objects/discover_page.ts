@@ -571,8 +571,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    await this.testSubjects.click('select-text-based-language-btn');
-    await this.header.waitUntilLoadingHasFinished();
+    if (await this.testSubjects.exists('select-text-based-language-btn')) {
+      await this.testSubjects.click('select-text-based-language-btn');
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async removeHeaderColumn(name: string) {
