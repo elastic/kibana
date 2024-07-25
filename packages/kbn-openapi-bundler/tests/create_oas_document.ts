@@ -13,8 +13,10 @@ export function createOASDocument(overrides: {
   info?: Partial<OpenAPIV3.InfoObject>;
   paths?: OpenAPIV3.PathsObject;
   components?: OpenAPIV3.ComponentsObject;
+  servers?: OpenAPIV3.ServerObject[];
+  security?: OpenAPIV3.SecurityRequirementObject[];
 }): OpenAPIV3.Document {
-  return {
+  const document: OpenAPIV3.Document = {
     openapi: overrides.openapi ?? '3.0.3',
     info: {
       title: 'Test endpoint',
@@ -28,4 +30,14 @@ export function createOASDocument(overrides: {
       ...overrides.components,
     },
   };
+
+  if (overrides.servers) {
+    document.servers = overrides.servers;
+  }
+
+  if (overrides.security) {
+    document.security = overrides.security;
+  }
+
+  return document;
 }
