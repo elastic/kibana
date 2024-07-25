@@ -43,6 +43,7 @@ import {
   getDefaultConnector,
   getBlockBotConversation,
   mergeBaseWithPersistedConversations,
+  sleep,
 } from './helpers';
 
 import { useAssistantContext, UserAvatar } from '../assistant_context';
@@ -79,7 +80,7 @@ import { Conversation } from '../assistant_context/types';
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
+import { SetupKnowledgeBaseButton } from '../knowledge_base/setup_knowledge_base_button';
 import { useFetchPrompts } from './api/prompts/use_fetch_prompts';
 
 export interface Props {
@@ -117,7 +118,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantAvailability: { isAssistantEnabled },
     getComments,
     http,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationId,
     getLastConversationId,
@@ -197,7 +197,11 @@ const AssistantComponent: React.FC<Props> = ({
   }, [currentConversation?.title, setConversationTitle]);
 
   const refetchCurrentConversation = useCallback(
-    async ({ cId, cTitle }: { cId?: string; cTitle?: string } = {}) => {
+    async ({
+      cId,
+      cTitle,
+      isStreamRefetch = false,
+    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean } = {}) => {
       if (cId === '' || (cTitle && !conversations[cTitle])) {
         return;
       }
@@ -205,7 +209,22 @@ const AssistantComponent: React.FC<Props> = ({
       const conversationId = cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
 
       if (conversationId) {
-        const updatedConversation = await getConversation(conversationId);
+        let updatedConversation = await getConversation(conversationId);
+        let retries = 0;
+        const maxRetries = 5;
+
+        // this retry is a workaround for the stream not YET being persisted to the stored conversation
+        while (
+          isStreamRefetch &&
+          updatedConversation &&
+          updatedConversation.messages[updatedConversation.messages.length - 1].role !==
+            'assistant' &&
+          retries < maxRetries
+        ) {
+          retries++;
+          await sleep(2000);
+          updatedConversation = await getConversation(conversationId);
+        }
 
         if (updatedConversation) {
           setCurrentConversation(updatedConversation);
@@ -565,7 +584,6 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
-            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
@@ -592,8 +610,6 @@ const AssistantComponent: React.FC<Props> = ({
       showAnonymizedValues,
       refetchCurrentConversation,
       handleRegenerateResponse,
-      isEnabledKnowledgeBase,
-      isEnabledRAGAlerts,
       isLoadingChatSend,
       currentUserAvatar,
       selectedPromptContextsCount,
@@ -778,7 +794,7 @@ const AssistantComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <InstallKnowledgeBaseButton />
+                  <SetupKnowledgeBaseButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

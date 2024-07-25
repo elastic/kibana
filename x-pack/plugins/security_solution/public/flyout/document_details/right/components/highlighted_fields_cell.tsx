@@ -20,6 +20,7 @@ import {
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
@@ -51,7 +52,8 @@ interface LinkFieldCellProps {
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
   const { scopeId, eventId, indexName } = useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
+  const { telemetry } = useKibana().services;
 
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({
@@ -74,7 +76,11 @@ const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
         banner: HOST_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, value, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, value, scopeId, telemetry]);
 
   const openUserPreview = useCallback(() => {
     openPreviewPanel({
@@ -85,7 +91,11 @@ const LinkFieldCell: VFC<LinkFieldCellProps> = ({ field, value }) => {
         banner: USER_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, value, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, value, scopeId, telemetry]);
 
   const onClick = useMemo(() => {
     if (isPreviewEnabled && field === HOST_NAME_FIELD_NAME) {

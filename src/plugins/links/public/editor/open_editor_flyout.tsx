@@ -96,11 +96,13 @@ export async function openEditorFlyout({
           options: { references },
         });
         resolve(newState);
+        closeEditorFlyout(editorFlyout);
       } else {
         const saveResult = await runSaveToLibrary(newState);
         resolve(saveResult);
+        // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
+        if (saveResult) closeEditorFlyout(editorFlyout);
       }
-      closeEditorFlyout(editorFlyout);
     };
 
     const onAddToDashboard = (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {

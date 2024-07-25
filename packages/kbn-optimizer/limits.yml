@@ -86,6 +86,7 @@ pageLoadAssetSize:
   integrationAssistant: 19524
   interactiveSetup: 80000
   investigate: 17970
+  investigateApp: 91898
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -110,7 +111,7 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 76678
+  observability: 118191
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityAiAssistantManagement: 19279

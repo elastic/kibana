@@ -102,6 +102,13 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
+    "@kbn/visualization-ui-components",
+    "@kbn/expression-metric-vis-plugin",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/event-annotation-components",
+    "@kbn/slo-schema",
+    "@kbn/license-management-plugin",
+    "@kbn/observability-alerting-rule-utils",
   ],
   "exclude": [
     "target/**/*"
