@@ -70,7 +70,7 @@ export interface ManagementAppProps {
 }
 
 export interface AppDefinition {
-  category: typeof appCategories[keyof typeof appCategories];
+  category: (typeof appCategories)[keyof typeof appCategories];
   description: string;
   icon: EuiIconProps['type'];
 }
