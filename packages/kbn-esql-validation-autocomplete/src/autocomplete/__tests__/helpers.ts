@@ -17,6 +17,7 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
+import { FunctionReturnType } from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -123,7 +124,7 @@ export const policies = [
  */
 export function getFunctionSignaturesByReturnType(
   command: string,
-  _expectedReturnType: string | string[],
+  _expectedReturnType: FunctionReturnType | FunctionReturnType[],
   {
     agg,
     grouping,

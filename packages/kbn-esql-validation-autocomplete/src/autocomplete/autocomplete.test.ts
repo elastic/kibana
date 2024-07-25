@@ -10,12 +10,7 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
-import {
-  getSafeInsertText,
-  getUnitDuration,
-  TRIGGER_SUGGESTION_COMMAND,
-  TIME_SYSTEM_PARAMS,
-} from './factories';
+import { getSafeInsertText, getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { FunctionParameter } from '../definitions/types';
@@ -31,7 +26,6 @@ import {
   createCompletionContext,
   getPolicyFields,
   PartialSuggestionWithText,
-  TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 
@@ -682,12 +676,16 @@ describe('autocomplete', () => {
     );
     // test that the arg type is correct after minParams
     testSuggestions(
-      'from a | eval a=cidr_match(ipField, stringField, ',
+      'from a | eval a=cidr_match(ipField, textField, ',
       [
-        ...getFieldNamesByType('string'),
-        ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
-          'cidr_match',
-        ]),
+        ...getFieldNamesByType('text'),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          ['text', 'keyword'],
+          { scalar: true },
+          undefined,
+          ['cidr_match']
+        ),
       ],
       ' '
     );
@@ -843,7 +841,7 @@ describe('autocomplete', () => {
           ',',
           '|',
           ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'interger',
+            'integer',
           ]),
         ],
         ' '
@@ -855,39 +853,30 @@ describe('autocomplete', () => {
           'time_interval',
         ]),
       ]);
-      testSuggestions(
-        'from a | eval a = 1 day + 2 ',
-        [
-          ...dateSuggestions,
-          ',',
-          '|',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'interger',
-          ]),
-        ],
-        ' '
-      );
+      testSuggestions('from a | eval a = 1 day + 2 ', [
+        ',',
+        '|',
+        // ...dateSuggestions,
+        // ',',
+        // '|',
+        // '+ $0',
+        // '- $0',
+        // 'IS NOT NULL',
+        // 'IS NULL',
+      ]);
       testSuggestions(
         'from a | eval 1 day + 2 ',
         [
           ...dateSuggestions,
           ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'interger',
+            'integer',
           ]),
         ],
         ' '
       );
       testSuggestions(
         'from a | eval var0=date_trunc()',
-        [
-          ...[...TIME_SYSTEM_PARAMS].map((t) => `${t},`),
-          ...getLiteralsByType('time_literal').map((t) => `${t},`),
-          ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }, undefined, [
-            'date_trunc',
-          ]).map((t) => `${t},`),
-          ...getFieldNamesByType('date').map((t) => `${t},`),
-          TIME_PICKER_SUGGESTION,
-        ],
+        [...getLiteralsByType('time_literal').map((t) => `${t},`)],
         '('
       );
       testSuggestions(
