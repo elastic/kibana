@@ -133,7 +133,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes,
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
-        getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
+        getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 10),
         taskPartitioner,
         ...taskClaimingOpts,
       });
@@ -158,7 +158,7 @@ describe('TaskClaiming', () => {
       excludedTaskTypes?: string[];
       unusedTaskTypes?: string[];
     }) {
-      const getCapacity = taskClaimingOpts.getCapacity ?? (() => 10);
+      const getCapacity = taskClaimingOpts.getAvailableCapacity ?? (() => 10);
       const { taskClaiming, store } = initialiseTestClaiming({
         storeOpts,
         taskClaimingOpts,
@@ -447,7 +447,7 @@ if (doc['task.runAt'].size()!=0) {
         },
         taskClaimingOpts: {
           maxAttempts,
-          getCapacity: (type) => {
+          getAvailableCapacity: (type) => {
             switch (type) {
               case 'limitedToOne':
               case 'anotherLimitedToOne':
@@ -577,7 +577,7 @@ if (doc['task.runAt'].size()!=0) {
         },
         taskClaimingOpts: {
           maxAttempts,
-          getCapacity: (type) => {
+          getAvailableCapacity: (type) => {
             switch (type) {
               case 'limitedToTwo':
                 return 2;
@@ -686,7 +686,7 @@ if (doc['task.runAt'].size()!=0) {
         },
         taskClaimingOpts: {
           maxAttempts,
-          getCapacity: (type) => {
+          getAvailableCapacity: (type) => {
             switch (type) {
               case 'limitedToOne':
               case 'anotherLimitedToOne':
@@ -1139,7 +1139,7 @@ if (doc['task.runAt'].size()!=0) {
         storeOpts: {
           taskManagerId,
         },
-        taskClaimingOpts: { getCapacity: () => maxDocs },
+        taskClaimingOpts: { getAvailableCapacity: () => maxDocs },
         claimingOpts: {
           claimOwnershipUntil,
         },
@@ -1219,9 +1219,9 @@ if (doc['task.runAt'].size()!=0) {
     function instantiateStoreWithMockedApiResponses({
       taskManagerId = uuidv4(),
       definitions = taskDefinitions,
-      getCapacity = () => 10,
+      getAvailableCapacity = () => 10,
       tasksClaimed,
-    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getCapacity'>> & {
+    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getAvailableCapacity'>> & {
       taskManagerId?: string;
       tasksClaimed?: ConcreteTaskInstance[][];
     } = {}) {
@@ -1254,7 +1254,7 @@ if (doc['task.runAt'].size()!=0) {
         unusedTypes: [],
         taskStore,
         maxAttempts: 2,
-        getCapacity,
+        getAvailableCapacity,
         taskPartitioner,
       });
 
