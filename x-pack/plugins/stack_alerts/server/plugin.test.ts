@@ -13,9 +13,9 @@ import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 describe('AlertingBuiltins Plugin', () => {
   describe('setup()', () => {
-    let context: ReturnType<typeof coreMock['createPluginInitializerContext']>;
+    let context: ReturnType<(typeof coreMock)['createPluginInitializerContext']>;
     let plugin: AlertingBuiltinsPlugin;
-    let coreSetup: ReturnType<typeof coreMock['createSetup']>;
+    let coreSetup: ReturnType<(typeof coreMock)['createSetup']>;
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext();
