@@ -18,6 +18,7 @@ import { createBlankOpenApiDocument } from './bundler/merge_documents/create_bla
 import { writeDocuments } from './utils/write_documents';
 import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { resolveGlobs } from './utils/resolve_globs';
+import { DEFAULT_BUNDLING_PROCESSORS, withIncludeLabelsProcessor } from './bundler/processor_sets';
 
 export interface BundlerConfig {
   sourceGlob: string;
@@ -51,9 +52,9 @@ export const bundle = async ({
 
   logger.debug(`Processing schemas...`);
 
-  const resolvedDocuments = await resolveDocuments(schemaFilePaths, options);
+  const bundledDocuments = await bundleDocuments(schemaFilePaths, options);
 
-  logger.success(`Processed ${resolvedDocuments.length} schemas`);
+  logger.success(`Processed ${bundledDocuments.length} schemas`);
 
   const blankOasFactory = (oasVersion: string, apiVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
@@ -69,7 +70,7 @@ export const bundle = async ({
         isUndefined
       ),
     });
-  const resultDocumentsMap = await mergeDocuments(resolvedDocuments, blankOasFactory, {
+  const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasFactory, {
     splitDocumentsByVersion: true,
   });
 
@@ -82,16 +83,19 @@ function logSchemas(schemaFilePaths: string[]): void {
   }
 }
 
-async function resolveDocuments(
+async function bundleDocuments(
   schemaFilePaths: string[],
   options?: BundleOptions
 ): Promise<ResolvedDocument[]> {
   const resolvedDocuments = await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
-        const resolvedDocument = await bundleDocument(schemaFilePath, {
-          includeLabels: options?.includeLabels,
-        });
+        const resolvedDocument = await bundleDocument(
+          schemaFilePath,
+          options?.includeLabels
+            ? withIncludeLabelsProcessor(DEFAULT_BUNDLING_PROCESSORS, options.includeLabels)
+            : DEFAULT_BUNDLING_PROCESSORS
+        );
 
         logger.debug(`Processed ${chalk.bold(basename(schemaFilePath))}`);
 
