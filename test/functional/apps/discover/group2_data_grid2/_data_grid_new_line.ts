@@ -81,10 +81,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('message');
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await dataGrid.clickGridSettings();
-      await dataGrid.changeRowHeightValue('Custom');
-      await dataGrid.clickGridSettings();
-
       let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       let content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
       expect(await content.getVisibleText()).to.be(VALUE_WITH_NEW_LINES);

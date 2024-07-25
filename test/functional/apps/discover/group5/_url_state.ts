@@ -68,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const originalHash = await browser.execute<[], string>('return window.location.hash');
       const dataViewId = await PageObjects.discover.getCurrentDataViewId();
       const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
@@ -180,9 +179,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 20:40:22.952jpg1,576',
         'Sep 22, 2015 @ 20:11:39.532png1,708',
         'Sep 22, 2015 @ 19:45:13.813php1,406',
-        'Sep 22, 2015 @ 19:40:17.903jpg1,557',
-        'Sep 22, 2015 @ 19:05:23.413jpg1,529',
-        'Sep 22, 2015 @ 18:58:57.002jpg1,911',
       ]);
 
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
@@ -208,9 +204,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 18:50:22.335css1,841',
         'Sep 22, 2015 @ 18:40:32.329css1,945',
         'Sep 22, 2015 @ 18:13:35.361css1,752',
-        'Sep 22, 2015 @ 17:22:12.782css1,583',
-        'Sep 22, 2015 @ 16:30:09.197css1,507',
-        'Sep 22, 2015 @ 16:27:03.356png1,993',
       ];
 
       expect(await dataGrid.getRowsText()).to.eql(filteredRows);

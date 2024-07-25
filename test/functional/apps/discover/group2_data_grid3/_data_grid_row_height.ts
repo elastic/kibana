@@ -23,21 +23,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await browser.setWindowSize(1200, 2000);
-      await esArchiver.load(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
-      );
-      await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
-      );
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
-      );
-      await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
-      );
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -46,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -37,10 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Navigate to discover app
       await appsMenu.clickLink('Discover', { category: 'kibana' });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       const discoverUrl = await browser.getCurrentUrl();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
 
       // Navigate to dashboard app
@@ -48,13 +46,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Navigating back to discover
       await browser.goBack();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       currUrl = await browser.getCurrentUrl();
       expect(currUrl).to.be(modifiedTimeDiscoverUrl);
 
       // Navigating back from time settings
       await browser.goBack(); // undo time settings
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       currUrl = await browser.getCurrentUrl();
       expect(currUrl.startsWith(discoverUrl)).to.be(true);
 

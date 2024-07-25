@@ -64,7 +64,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const originalHash = await browser.execute<[], string>('return window.location.hash');
       const dataViewId = await PageObjects.discover.getCurrentDataViewId();
       const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
