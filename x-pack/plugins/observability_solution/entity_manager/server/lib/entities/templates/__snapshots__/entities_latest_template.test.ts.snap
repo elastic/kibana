@@ -27,7 +27,7 @@ Object {
     ".entities.v1.latest.admin-console-services",
   ],
   "name": "entities_v1_latest_admin-console-services_index_template",
-  "priority": 1,
+  "priority": 200,
   "template": Object {
     "mappings": Object {
       "_meta": Object {

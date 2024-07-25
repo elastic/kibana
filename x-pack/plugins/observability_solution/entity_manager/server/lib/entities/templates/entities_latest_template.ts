@@ -34,7 +34,7 @@ export const getEntitiesLatestIndexTemplateConfig = (
     ...getCustomLatestTemplateComponents(definitionId),
   ],
   index_patterns: [`${ENTITY_LATEST_INDEX_PREFIX_V1}.${definitionId}`],
-  priority: 1,
+  priority: 200,
   template: {
     mappings: {
       _meta: {
