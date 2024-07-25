@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   InitRiskEngineResponse,
   InitRiskEngineResult,
-} from '../../../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+} from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
