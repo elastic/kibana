@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { BuildFlavor } from '@kbn/config';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineKeyRotationRoutes } from './key_rotation';
 import type { ConfigType } from '../config';
 import type { EncryptionKeyRotationService } from '../crypto';
-import { BuildFlavor } from '@kbn/config';
 
 /**
  * Describes parameters used to define HTTP routes.
