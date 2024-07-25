@@ -19,14 +19,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   describe('connectors', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'serverlessConnectors',
       });
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('Connector app is loaded and  has no connectors', async () => {

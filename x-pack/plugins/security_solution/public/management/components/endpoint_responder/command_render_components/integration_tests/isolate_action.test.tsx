@@ -135,6 +135,14 @@ describe('When using isolate action from response actions console', () => {
     });
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['error one', 'error two'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['error one', 'error two'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
     enterConsoleCommand(renderResult, 'isolate');

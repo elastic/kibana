@@ -1,0 +1,15 @@
+{
+  "capabilities": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_capabilities"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/capabilities.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

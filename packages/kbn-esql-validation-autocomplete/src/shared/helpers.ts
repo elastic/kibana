@@ -17,14 +17,14 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { ESQLInlineCast } from '@kbn/esql-ast/src/types';
+import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeUnits } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -127,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['from', 'row', 'show'].includes(String(label));
+  return ['FROM', 'ROW', 'SHOW'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -233,9 +233,6 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return false;
   }
 
-  if (argType === 'chrono_literal') {
-    return chronoLiterals.some(({ name }) => name === item.text);
-  }
   // date-type parameters accept string literals because of ES auto-casting
   return ['string', 'date'].includes(argType);
 }
@@ -312,7 +309,7 @@ export function printFunctionSignature(arg: ESQLFunction): string {
           },
         ],
       },
-      { withTypes: false }
+      { withTypes: false, capitalize: true }
     );
     return signature[0].declaration;
   }
@@ -376,7 +373,7 @@ export function getAllArrayTypes(
 }
 
 export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
-  return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
+  return timeUnits.some((unit) => unit === item.unit.toLowerCase());
 }
 
 /**
@@ -406,7 +403,7 @@ export function checkFunctionArgMatchesDefinition(
   parentCommand?: string
 ) {
   const argType = parameterDefinition.type;
-  if (argType === 'any') {
+  if (argType === 'any' || isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
@@ -557,14 +554,47 @@ export function sourceExists(index: string, sources: Set<string>) {
   return Boolean(fuzzySearch(index, sources.keys()));
 }
 
+/**
+ * Works backward from the cursor position to determine if
+ * the final character of the previous word matches the given character.
+ */
+function characterPrecedesCurrentWord(text: string, char: string) {
+  let inCurrentWord = true;
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (inCurrentWord && /\s/.test(text[i])) {
+      inCurrentWord = false;
+    }
+
+    if (!inCurrentWord && !/\s/.test(text[i])) {
+      return text[i] === char;
+    }
+  }
+}
+
+export function pipePrecedesCurrentWord(text: string) {
+  return characterPrecedesCurrentWord(text, '|');
+}
+
 export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
+/**
+ * Are we after a comma? i.e. STATS fieldA, <here>
+ */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',';
+  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
 
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
+}
+
+export function shouldBeQuotedSource(text: string) {
+  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
+  return /[:"=|,[\]\/ \t\r\n]/.test(text);
+}
 export function shouldBeQuotedText(
   text: string,
   { dashSupported }: { dashSupported?: boolean } = {}
@@ -574,3 +604,9 @@ export function shouldBeQuotedText(
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
   getFunctionDefinition(arg.name)?.type === 'agg';
+
+export const isParam = (x: unknown): x is ESQLParamLiteral =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLParamLiteral).type === 'literal' &&
+  (x as ESQLParamLiteral).literalType === 'param';

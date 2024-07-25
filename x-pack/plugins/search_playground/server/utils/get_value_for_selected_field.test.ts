@@ -91,7 +91,7 @@ describe('getValueForSelectedField', () => {
         },
       },
       inner_hits: {
-        'test.inference.chunks': {
+        'sample-index.test': {
           hits: {
             hits: [
               {

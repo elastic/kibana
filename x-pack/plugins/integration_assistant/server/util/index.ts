@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-export { existsSync, ensureDirSync, createSync, copySync, listDirSync, readSync } from './files';
+export {
+  existsSync,
+  ensureDirSync,
+  createSync,
+  copySync,
+  listDirSync,
+  readSync,
+  removeDirSync,
+} from './files';
 
 export { generateFields, mergeSamples } from './samples';
 export { deepCopy, generateUniqueId } from './util';

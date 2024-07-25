@@ -10,6 +10,8 @@ import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 
+import { ExperimentalFeaturesService } from '../../../../../../../services';
+
 import type {
   EsAssetReference,
   AssetSOObject,
@@ -31,12 +33,12 @@ import {
   useAuthz,
   useFleetStatus,
 } from '../../../../../hooks';
-
 import { sendGetBulkAssets } from '../../../../../hooks';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { DeferredAssetsSection } from './deferred_assets_accordion';
-
 import { AssetsAccordion } from './assets_accordion';
+import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
@@ -50,6 +52,8 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const { docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
 
+  const { useSpaceAwareness } = ExperimentalFeaturesService.get();
+
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
   const canReadPackageSettings = useAuthz().integrations.readPackageInfo;
@@ -62,23 +66,30 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
 
   const installedSpaceId = pkgInstallationInfo?.installed_kibana_space_id;
-  const assetsInstalledInCurrentSpace = !installedSpaceId || installedSpaceId === spaceId;
-
+  const assetsInstalledInCurrentSpace =
+    !installedSpaceId ||
+    installedSpaceId === spaceId ||
+    pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId || 'default'];
   const [assetSavedObjectsByType, setAssetsSavedObjectsByType] = useState<
     Record<string, Record<string, SimpleSOAssetType & { appLink?: string }>>
   >({});
   const [deferredInstallations, setDeferredInstallations] = useState<EsAssetReference[]>();
+
+  const kibanaAssets = useMemo(() => {
+    return !installedSpaceId || installedSpaceId === spaceId
+      ? pkgInstallationInfo?.installed_kibana || []
+      : pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId || 'default'] || [];
+  }, [
+    installedSpaceId,
+    spaceId,
+    pkgInstallationInfo?.installed_kibana,
+    pkgInstallationInfo?.additional_spaces_installed_kibana,
+  ]);
   const pkgAssets = useMemo(
-    () => [
-      ...(assetsInstalledInCurrentSpace ? pkgInstallationInfo?.installed_kibana || [] : []),
-      ...(pkgInstallationInfo?.installed_es || []),
-    ],
-    [
-      assetsInstalledInCurrentSpace,
-      pkgInstallationInfo?.installed_es,
-      pkgInstallationInfo?.installed_kibana,
-    ]
+    () => [...kibanaAssets, ...(pkgInstallationInfo?.installed_es || [])],
+    [kibanaAssets, pkgInstallationInfo?.installed_es]
   );
+
   const pkgAssetsByType = useMemo(
     () =>
       pkgAssets.reduce((acc, asset) => {
@@ -231,6 +242,13 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
                 }}
               />
             </p>
+            {useSpaceAwareness ? (
+              <InstallKibanaAssetsButton
+                installInfo={pkgInstallationInfo}
+                title={packageInfo.title}
+                onSuccess={forceRefreshAssets}
+              />
+            ) : null}
           </EuiCallOut>
 
           <EuiSpacer size="m" />
@@ -282,7 +300,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
   return (
     <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1} />
+      <SideBarColumn grow={1} />
       <EuiFlexItem grow={7}>
         {fetchError && (
           <>

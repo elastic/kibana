@@ -10,7 +10,23 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { EmbeddedConsoleViewButtonProps } from '@kbn/console-plugin/public';
 
-export const SearchNotebooksButton = ({ activeView, onClick }: EmbeddedConsoleViewButtonProps) => {
+export interface SearchNotebooksButtonProps extends EmbeddedConsoleViewButtonProps {
+  clearNotebookList: () => void;
+}
+
+export const SearchNotebooksButton = ({
+  activeView,
+  onClick,
+  clearNotebookList,
+}: SearchNotebooksButtonProps) => {
+  React.useEffect(() => {
+    return () => {
+      // When the Notebooks button is unmounted we want to clear
+      // any page specific contextual notebook list that was set.
+      clearNotebookList();
+    };
+  }, [clearNotebookList]);
+
   if (activeView) {
     return (
       <EuiButton

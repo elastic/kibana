@@ -17,122 +17,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
   ]);
   const synthtrace = getService('svlLogsSynthtraceClient');
-  const browser = getService('browser');
-  const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
   const excludeKeysFromServerless = ['estimatedData']; // https://github.com/elastic/kibana/issues/178954
+
+  const ingestDataForSummary = async () => {
+    // Ingest documents for 3 type of datasets
+    return synthtrace.index([
+      // Ingest good data to all 3 datasets
+      getInitialTestLogs({ to, count: 4 }),
+      // Ingesting poor data to one dataset
+      getLogsForDataset({
+        to: Date.now(),
+        count: 1,
+        dataset: datasetNames[1],
+        isMalformed: true,
+      }),
+      // Ingesting degraded docs into another dataset by ingesting malformed 1st and then good data
+      getLogsForDataset({
+        to: Date.now(),
+        count: 1,
+        dataset: datasetNames[2],
+        isMalformed: true,
+      }),
+      getLogsForDataset({
+        to: Date.now(),
+        count: 10,
+        dataset: datasetNames[2],
+        isMalformed: false,
+      }),
+    ]);
+  };
 
   describe('Dataset quality summary', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.datasetQuality.navigateTo();
     });
 
-    after(async () => {
+    afterEach(async () => {
       await synthtrace.clean();
     });
 
-    it('shows poor, degraded and good count', async () => {
+    it('shows poor, degraded and good count as 0 and all dataset as healthy', async () => {
+      await PageObjects.datasetQuality.refreshTable();
       const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
       expect(summary).to.eql({
         datasetHealthPoor: '0',
         datasetHealthDegraded: '0',
         datasetHealthGood: '3',
         activeDatasets: '0 of 3',
-        // estimatedData: '0.0 B', https://github.com/elastic/kibana/issues/178954
       });
     });
 
-    it('updates the poor count when degraded docs are ingested', async () => {
-      // Index malformed document with current timestamp
-      await synthtrace.index(
-        getLogsForDataset({
-          to: Date.now(),
-          count: 1,
-          dataset: datasetNames[2],
-          isMalformed: true,
-        })
-      );
+    it('shows updated count for poor, degraded and good datasets and updates active datasets', async () => {
+      await ingestDataForSummary();
+      await PageObjects.datasetQuality.refreshTable();
 
-      await browser.refresh();
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
-
-      await retry.try(async () => {
-        const summary = await PageObjects.datasetQuality.parseSummaryPanel(
-          excludeKeysFromServerless
-        );
-        const { estimatedData, ...restOfSummary } = summary;
-        expect(restOfSummary).to.eql({
-          datasetHealthPoor: '1',
-          datasetHealthDegraded: '0',
-          datasetHealthGood: '2',
-          activeDatasets: '1 of 3',
-        });
-      });
-    });
-
-    it('updates the degraded count when degraded docs are ingested', async () => {
-      // Index malformed document with current timestamp
-      await synthtrace.index(
-        getLogsForDataset({
-          to: Date.now(),
-          count: 1,
-          dataset: datasetNames[1],
-          isMalformed: true,
-        })
-      );
-
-      // Index healthy documents
-      await synthtrace.index(
-        getLogsForDataset({
-          to: Date.now(),
-          count: 10,
-          dataset: datasetNames[1],
-          isMalformed: false,
-        })
-      );
-
-      await browser.refresh();
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
-
-      await retry.try(async () => {
-        const { estimatedData, ...restOfSummary } =
-          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
-        expect(restOfSummary).to.eql({
-          datasetHealthPoor: '1',
-          datasetHealthDegraded: '1',
-          datasetHealthGood: '1',
-          activeDatasets: '2 of 3',
-        });
-      });
-    });
-
-    it('updates active datasets and estimated data KPIs', async () => {
-      const { estimatedData: _existingEstimatedData } =
-        await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
-
-      // Index document at current time to mark dataset as active
-      await synthtrace.index(
-        getLogsForDataset({
-          to: Date.now(),
-          count: 4,
-          dataset: datasetNames[0],
-          isMalformed: false,
-        })
-      );
-
-      await browser.refresh(); // Summary panel doesn't update reactively
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
-
-      await retry.try(async () => {
-        const { activeDatasets: updatedActiveDatasets, estimatedData: _updatedEstimatedData } =
-          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
-
-        expect(updatedActiveDatasets).to.eql('3 of 3');
-
-        // TODO: `_stats` not available on Serverless. // https://github.com/elastic/kibana/issues/178954
-        // expect(_updatedEstimatedData).to.not.eql(_existingEstimatedData);
+      const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
+      expect(summary).to.eql({
+        datasetHealthPoor: '1',
+        datasetHealthDegraded: '1',
+        datasetHealthGood: '1',
+        activeDatasets: '2 of 3',
       });
     });
   });

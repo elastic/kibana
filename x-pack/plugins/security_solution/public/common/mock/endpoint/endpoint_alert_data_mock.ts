@@ -90,7 +90,7 @@ const generateEndpointAlertDetailsItemDataMock = (
     },
     {
       category: 'agent',
-      field: 'agent.id',
+      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.endpoint,
       values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       isObjectArray: false,
@@ -119,6 +119,13 @@ const generateEndpointAlertDetailsItemDataMock = (
     {
       category: 'host',
       field: 'host.os.family',
+      values: ['Windows Server'],
+      originalValue: ['Windows Server'],
+      isObjectArray: false,
+    },
+    {
+      category: 'host',
+      field: 'host.os.type',
       values: ['windows'],
       originalValue: ['windows'],
       isObjectArray: false,
@@ -185,22 +192,15 @@ const generateCrowdStrikeAlertDetailsItemDataMock = (
 
   data.push(
     {
-      category: 'crowdstrike',
+      category: 'device',
       field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
       values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       isObjectArray: false,
     },
     {
-      category: 'crowdstrike',
-      field: 'crowdstrike.event.HostName',
-      values: ['elastic-host-win'],
-      originalValue: ['windows-native'],
-      isObjectArray: false,
-    },
-    {
-      category: 'crowdstrike',
-      field: 'crowdstrike.event.Platform',
+      category: 'host',
+      field: 'host.os.platform',
       values: ['windows'],
       originalValue: ['windows'],
       isObjectArray: false,

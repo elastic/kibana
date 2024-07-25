@@ -39,7 +39,7 @@ beforeEach(async () => {
 
   mockStartDeps = await createMockPluginStart(
     {
-      security: {
+      securityService: {
         authc: {
           getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
         },

@@ -31,6 +31,7 @@ export function Readme({
     (uri: string) => {
       const isRelative =
         uri.indexOf('http://') === 0 || uri.indexOf('https://') === 0 ? false : true;
+
       const fullUri = isRelative ? toRelativeImage({ packageName, version, path: uri }) : uri;
       return fullUri;
     },

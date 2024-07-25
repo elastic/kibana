@@ -397,13 +397,14 @@ describe('rules_list ', () => {
     );
     fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
     fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
+
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        ruleStatusesFilter: ['disabled', 'enabled'],
+        ruleStatusesFilter: ['enabled', 'disabled'],
       })
     );
     expect(onStatusFilterChangeMock).toHaveBeenCalled();
-    expect(onStatusFilterChangeMock).toHaveBeenLastCalledWith(['disabled', 'enabled']);
+    expect(onStatusFilterChangeMock).toHaveBeenLastCalledWith(['enabled', 'disabled']);
   });
 
   it('can filter by last response', async () => {

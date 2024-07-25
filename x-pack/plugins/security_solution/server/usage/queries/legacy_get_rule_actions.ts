@@ -40,7 +40,7 @@ export const legacyGetRuleActions = async ({
     namespaces: ['*'],
   };
   logger.debug(
-    `Getting legacy rule actions with point in time (PIT) query:', ${JSON.stringify(query)}`
+    () => `Getting legacy rule actions with point in time (PIT) query:', ${JSON.stringify(query)}`
   );
   const finder =
     savedObjectsClient.createPointInTimeFinder<LegacyIRuleActionsAttributesSavedObjectAttributes>(

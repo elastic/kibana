@@ -9,8 +9,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
-import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../types';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -39,7 +39,7 @@ describe('bulk action hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
+    appMockRender = createAppMockRenderer(AlertsQueryContext);
   });
 
   const refresh = jest.fn();
@@ -348,7 +348,7 @@ describe('bulk action hooks', () => {
 
     it('appends the case and untrack bulk actions', async () => {
       const { result } = renderHook(
-        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh }),
+        () => useBulkActions({ alertsCount: 0, query: {}, casesConfig, refresh }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -391,7 +391,8 @@ describe('bulk action hooks', () => {
 
     it('appends only the case bulk actions for SIEM', async () => {
       const { result } = renderHook(
-        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh, featureIds: ['siem'] }),
+        () =>
+          useBulkActions({ alertsCount: 0, query: {}, casesConfig, refresh, featureIds: ['siem'] }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -444,7 +445,8 @@ describe('bulk action hooks', () => {
       ];
       const useBulkActionsConfig = () => customBulkActionConfig;
       const { result, rerender } = renderHook(
-        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh, useBulkActionsConfig }),
+        () =>
+          useBulkActions({ alertsCount: 0, query: {}, casesConfig, refresh, useBulkActionsConfig }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -470,7 +472,7 @@ describe('bulk action hooks', () => {
       const { result: resultWithoutHideBulkActions } = renderHook(
         () =>
           useBulkActions({
-            alerts: [],
+            alertsCount: 0,
             query: {},
             casesConfig,
             refresh,
@@ -486,7 +488,7 @@ describe('bulk action hooks', () => {
       const { result: resultWithHideBulkActions } = renderHook(
         () =>
           useBulkActions({
-            alerts: [],
+            alertsCount: 0,
             query: {},
             casesConfig,
             refresh,

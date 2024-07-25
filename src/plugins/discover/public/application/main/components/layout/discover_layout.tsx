@@ -389,7 +389,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 trackUiMetric={trackUiMetric}
                 onFieldEdited={onFieldEdited}
                 onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                availableFields$={stateContainer.dataState.data$.availableFields$}
                 sidebarToggleState$={sidebarToggleState$}
               />
             }

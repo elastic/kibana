@@ -11,15 +11,15 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
   RowRenderer,
+  TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
 import type {
   TimelineItem,
   TimelineNonEcsData,
@@ -28,22 +28,18 @@ import type { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { getEventType, isEvenEqlSequence } from '../helpers';
-import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
 import type { inputsModel } from '../../../../../common/store';
 import { appSelectors } from '../../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineActions } from '../../../../store';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
-import { timelineDefaults } from '../../../../store/defaults';
-import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ControlColumnProps,
-  ExpandedDetailType,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../../common/types';
@@ -70,6 +66,7 @@ interface Props {
   timelineId: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  onToggleShowNotes?: (eventId?: string) => void;
 }
 
 const emptyNotes: string[] = [];
@@ -105,11 +102,12 @@ const StatefulEventComponent: React.FC<Props> = ({
   timelineId,
   leadingControlColumns,
   trailingControlColumns,
+  onToggleShowNotes,
 }) => {
+  const { telemetry } = useKibana().services;
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
@@ -120,42 +118,11 @@ const StatefulEventComponent: React.FC<Props> = ({
     tabType,
   });
 
-  const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const expandedDetail = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
-  );
-  const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
+  const [, setFocusedNotes] = useState<{ [eventId: string]: boolean }>({});
 
-  const hostName = useMemo(() => {
-    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
-  }, [hostNameArr]);
-  const hostIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
-  const sourceIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' });
-  const destinationIpList = useGetMappedNonEcsValue({
-    data: event?.data,
-    fieldName: 'destination.ip',
-  });
-  const hostIPAddresses = useMemo(() => {
-    const hostIps = hostIpList ?? [];
-    const sourceIps = sourceIpList ?? [];
-    const destinationIps = destinationIpList ?? [];
-    return new Set([...hostIps, ...sourceIps, ...destinationIps]);
-  }, [destinationIpList, sourceIpList, hostIpList]);
-
-  const activeTab = tabType ?? TimelineTabs.query;
-  const activeExpandedDetail = expandedDetail[activeTab];
   const eventId = event._id;
 
-  const isDetailPanelExpanded: boolean =
-    (activeExpandedDetail?.panelView === 'eventDetail' &&
-      activeExpandedDetail?.params?.eventId === eventId) ||
-    (activeExpandedDetail?.panelView === 'hostDetail' &&
-      activeExpandedDetail?.params?.hostName === hostName) ||
-    (activeExpandedDetail?.panelView === 'networkDetail' &&
-      activeExpandedDetail?.params?.ip &&
-      hostIPAddresses?.has(activeExpandedDetail?.params?.ip)) ||
-    false;
+  const isDetailPanelExpanded: boolean = false;
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
   const notesById = useDeepEqualSelector(getNotesByIds);
@@ -178,79 +145,45 @@ const StatefulEventComponent: React.FC<Props> = ({
     [event.ecs, rowRenderers]
   );
 
-  const onToggleShowNotes = useCallback(() => {
-    setShowNotes((prevShowNotes) => {
-      if (prevShowNotes[eventId]) {
-        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
-        setTimeout(() => {
-          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-            `.${NOTES_BUTTON_CLASS_NAME}`
-          );
-          notesButtonElement?.focus();
-        }, 0);
-      }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const indexName = event._index!;
 
-      return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
-    });
-  }, [eventId]);
+  const onToggleShowNotesHandler = useCallback(
+    (currentEventId?: string) => {
+      onToggleShowNotes?.(currentEventId);
+      setFocusedNotes((prevShowNotes) => {
+        if (prevShowNotes[eventId]) {
+          // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
+          setTimeout(() => {
+            const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+              `.${NOTES_BUTTON_CLASS_NAME}`
+            );
+            notesButtonElement?.focus();
+          }, 0);
+        }
+
+        return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
+      });
+    },
+    [onToggleShowNotes, eventId]
+  );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const indexName = event._index!;
-
-    const updatedExpandedDetail: ExpandedDetailType = {
-      panelView: 'eventDetail',
-      params: {
-        eventId,
-        indexName,
-        refetch,
-      },
-    };
-
-    if (!expandableFlyoutDisabled) {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: timelineId,
         },
-      });
-    } else {
-      // opens the panel when clicking on the table row action
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          ...updatedExpandedDetail,
-          tabType,
-          id: timelineId,
-        })
-      );
-    }
-  }, [
-    dispatch,
-    eventId,
-    event._index,
-    expandableFlyoutDisabled,
-    openFlyout,
-    refetch,
-    tabType,
-    timelineId,
-  ]);
-
-  const associateNote = useCallback(
-    (noteId: string) => {
-      dispatch(
-        timelineActions.addNoteToEvent({
-          eventId,
-          id: timelineId,
-          noteId,
-        })
-      );
-    },
-    [dispatch, eventId, timelineId]
-  );
+      },
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: timelineId,
+      panel: 'right',
+    });
+  }, [eventId, indexName, openFlyout, timelineId, telemetry]);
 
   const setEventsLoading = useCallback<SetEventsLoading>(
     ({ eventIds, isLoading }) => {
@@ -299,10 +232,10 @@ const StatefulEventComponent: React.FC<Props> = ({
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}
-          showNotes={!!showNotes[eventId]}
+          showNotes={true}
           tabType={tabType}
           timelineId={timelineId}
-          toggleShowNotes={onToggleShowNotes}
+          toggleShowNotes={onToggleShowNotesHandler}
           leadingControlColumns={leadingControlColumns}
           trailingControlColumns={trailingControlColumns}
           setEventsLoading={setEventsLoading}
@@ -310,21 +243,6 @@ const StatefulEventComponent: React.FC<Props> = ({
         />
 
         <EventsTrSupplementContainerWrapper>
-          <EventsTrSupplement
-            className="siemEventsTable__trSupplement--notes"
-            data-test-subj="event-notes-flex-item"
-            $display="block"
-          >
-            <NoteCards
-              ariaRowindex={ariaRowindex}
-              associateNote={associateNote}
-              data-test-subj="note-cards"
-              notes={notes}
-              showAddNote={!!showNotes[eventId]}
-              toggleShowAddNote={onToggleShowNotes}
-            />
-          </EventsTrSupplement>
-
           <EuiFlexGroup gutterSize="none" justifyContent="center">
             <EuiFlexItem grow={false}>
               <EventsTrSupplement>

@@ -84,6 +84,12 @@ $controlMinWidth: $euiSize * 14;
   flex-basis: auto;
   position: relative;
 
+  &:not(.controlFrameWrapper-isEditable) {
+    .controlFrame--twoLine {
+      border-radius: $euiFormControlBorderRadius !important;
+    }
+  }
+
   .controlFrame__labelToolTip {
     max-width: 40%;
   }
@@ -176,12 +182,7 @@ $controlMinWidth: $euiSize * 14;
   }
 
   &-isDragging {
-    .euiFormRow__labelWrapper {
-      opacity: 0;
-    }
-    .controlFrame__formControlLayout {
-      opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
-    }
+    opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
   }
 }
 

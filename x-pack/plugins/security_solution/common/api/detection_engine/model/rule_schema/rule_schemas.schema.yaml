@@ -686,18 +686,27 @@ components:
         - machine_learning_job_id
         - anomaly_threshold
 
+    MachineLearningRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+
     MachineLearningRulePatchFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
           x-modify: partial
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRuleResponseFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRuleCreateFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRule:
       allOf:

@@ -53,9 +53,9 @@ import {
   BulkEditOptions,
 } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
-import { updateApiKey } from './methods/update_api_key';
-import { enable } from './methods/enable';
-import { disable } from './methods/disable';
+import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
+import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
+import { disableRule } from '../application/rule/methods/disable/disable_rule';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
 import { muteAll } from './methods/mute_all';
@@ -75,6 +75,8 @@ import { getBackfill } from '../application/backfill/methods/get';
 import { findBackfill } from '../application/backfill/methods/find';
 import { deleteBackfill } from '../application/backfill/methods/delete';
 import { FindBackfillParams } from '../application/backfill/methods/find/types';
+import { DisableRuleParams } from '../application/rule/methods/disable';
+import { EnableRuleParams } from '../application/rule/methods/enable_rule';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -164,10 +166,9 @@ export class RulesClient {
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
 
-  public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
-
-  public enable = (options: { id: string }) => enable(this.context, options);
-  public disable = (options: { id: string; untrack?: boolean }) => disable(this.context, options);
+  public updateRuleApiKey = (params: { id: string }) => updateRuleApiKey(this.context, params);
+  public disableRule = (params: DisableRuleParams) => disableRule(this.context, params);
+  public enableRule = (params: EnableRuleParams) => enableRule(this.context, params);
 
   public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);

@@ -764,6 +764,27 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.integrationAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "integrationAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "integrationAssistant",
+                "scope": "public",
+                "docId": "kibIntegrationAssistantPluginApi",
+                "section": "def-public.IntegrationAssistantPluginStart",
+                "text": "IntegrationAssistantPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.FleetStartServices.cloud",
             "type": "CompoundType",
             "tags": [],
@@ -4212,6 +4233,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.integration_create",
+            "type": "Function",
+            "tags": [],
+            "label": "integration_create",
+            "description": [],
+            "signature": [
+              "() => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.pagePathGetters.integration_details_overview",
             "type": "Function",
             "tags": [],
@@ -4898,7 +4935,7 @@
             "label": "agent_list",
             "description": [],
             "signature": [
-              "({ kuery }: ",
+              "({ kuery, showInactive }: ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -4917,7 +4954,7 @@
                 "id": "def-public.pagePathGetters.agent_list.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ kuery }",
+                "label": "{ kuery, showInactive }",
                 "description": [],
                 "signature": [
                   {
@@ -7463,8 +7500,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               },
               " | undefined"
             ],
@@ -19418,7 +19455,7 @@
         "label": "isValidNamespace",
         "description": [],
         "signature": [
-          "(namespace: string, allowBlankNamespace: boolean | undefined) => { valid: boolean; error?: string | undefined; }"
+          "(namespace: string, allowBlankNamespace: boolean | undefined, allowedNamespacePrefixes: string[] | undefined) => { valid: boolean; error?: string | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
         "deprecated": false,
@@ -19448,6 +19485,21 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidNamespace.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedNamespacePrefixes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
             "deprecated": false,
@@ -21669,7 +21721,7 @@
                 "section": "def-common.PackagePolicyPackage",
                 "text": "PackagePolicyPackage"
               },
-              ", \"name\" | \"version\"> | undefined; } | undefined"
+              ", \"version\" | \"name\"> | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -22116,6 +22168,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.GetInfoResponse.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "PackageMetadata",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.GetInfoResponse.response",
             "type": "CompoundType",
             "tags": [],
@@ -22407,6 +22474,28 @@
                 "text": "KibanaAssetReference"
               },
               "[]"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.additional_spaces_installed_kibana",
+            "type": "Object",
+            "tags": [],
+            "label": "additional_spaces_installed_kibana",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.KibanaAssetReference",
+                "text": "KibanaAssetReference"
+              },
+              "[]> | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -22796,6 +22885,20 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.KibanaAssetReference.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -25681,7 +25784,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"password\" | \"select\" | \"textarea\" | \"bool\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"password\" | \"bool\" | \"select\" | \"textarea\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -25794,6 +25897,20 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.full_width",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RegistryVarsEntryKeys.full_width]",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -27651,7 +27768,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; name: string; title: string; description: string; version: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; version: string; name: string; title: string; description: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -29506,6 +29623,28 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INSTALL_KIBANA_ASSETS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "DELETE_KIBANA_ASSETS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.FILEPATH_PATTERN",
             "type": "string",
             "tags": [],
@@ -29898,6 +30037,53 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-common.epmRouteService.getRemovePath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "pkgVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getInstallKibanaAssetsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getInstallKibanaAssetsPath",
+            "description": [],
+            "signature": [
+              "(pkgName: string, pkgVersion: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getInstallKibanaAssetsPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pkgName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getInstallKibanaAssetsPath.$2",
                 "type": "string",
                 "tags": [],
                 "label": "pkgVersion",

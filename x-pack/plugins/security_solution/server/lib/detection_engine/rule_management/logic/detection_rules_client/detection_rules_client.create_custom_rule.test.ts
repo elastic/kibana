@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
   getCreateRulesSchemaMock,
@@ -19,8 +20,6 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
-import { RuleResponseValidationError } from './utils';
-import type { RuleAlertType } from '../../../rule_schema';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -37,7 +36,8 @@ describe('DetectionRulesClient.createCustomRule', () => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    const savedObjectsClient = savedObjectsClientMock.create();
+    detectionRulesClient = createDetectionRulesClient({ rulesClient, mlAuthz, savedObjectsClient });
   });
 
   it('should create a rule with the correct parameters and options', async () => {
@@ -68,20 +68,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
     ).rejects.toThrow('mocked MLAuth error');
 
     expect(rulesClient.create).not.toHaveBeenCalled();
-  });
-
-  it('throws if RuleResponse validation fails', async () => {
-    const internalRuleMock: RuleAlertType = getRuleMock({
-      ...getQueryRuleParams(),
-      /* Casting as 'query' suppress to TS error */
-      type: 'fake-non-existent-type' as 'query',
-    });
-
-    rulesClient.create.mockResolvedValueOnce(internalRuleMock);
-
-    await expect(
-      detectionRulesClient.createCustomRule({ params: getCreateMachineLearningRulesSchemaMock() })
-    ).rejects.toThrow(RuleResponseValidationError);
   });
 
   it('calls the rulesClient with legacy ML params', async () => {

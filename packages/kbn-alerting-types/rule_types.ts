@@ -19,7 +19,7 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
-export type IsoWeekday = typeof ISO_WEEKDAYS[number];
+export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -104,8 +104,8 @@ export enum RuleExecutionStatusWarningReasons {
   MAX_QUEUED_ACTIONS = 'maxQueuedActions',
 }
 
-export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
-export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
+export type RuleExecutionStatuses = (typeof RuleExecutionStatusValues)[number];
+export type RuleLastRunOutcomes = (typeof RuleLastRunOutcomeValues)[number];
 
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
@@ -237,7 +237,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   revision: number;
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
-  alertDelay?: AlertDelay;
+  alertDelay?: AlertDelay | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

@@ -181,7 +181,7 @@ export const categorizationTestState = {
   exAnswer: 'testanswer',
   lastExecutedChain: 'testchain',
   packageName: 'testpackage',
-  dataStreamName: 'testdatastream',
+  dataStreamName: 'testDataStream',
   errors: { test: 'testerror' },
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,

@@ -173,7 +173,7 @@ export class JobListUi extends Component {
 
         <EuiSpacer size="l" />
 
-        <DeprecationCallout />
+        <DeprecationCallout linksTestSubjPrefix="listView" />
 
         <EuiSpacer size="l" />
 

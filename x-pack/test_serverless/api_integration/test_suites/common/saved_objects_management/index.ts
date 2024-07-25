@@ -8,7 +8,9 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('saved objects management apis', () => {
+  describe('saved objects management apis', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./bulk_delete'));

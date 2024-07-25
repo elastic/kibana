@@ -32,8 +32,13 @@ export async function getDataStreamSettings({
 
   const createdOn = await getDataStreamCreatedOn(esClient, dataStream);
 
+  // Getting the 1st item from the data streams endpoint as we will be passing the exact DS name
+  const [dataStreamInfo] = await dataStreamService.getMatchingDataStreams(esClient, dataStream);
+  const integration = dataStreamInfo?._meta?.package?.name;
+
   return {
     createdOn,
+    integration,
   };
 }
 
@@ -61,6 +66,7 @@ export async function getDataStreamDetails({
         await getDataStreamsStats({
           esClient,
           dataStreams: [dataStream],
+          sizeStatsAvailable,
         })
       ).items[0]?.lastActivity
     : undefined;

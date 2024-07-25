@@ -74,6 +74,7 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
       <EuiBasicTable
         tableCaption={i18n.FILES_TABLE}
         items={items}
+        rowHeader="name"
         columns={columns}
         pagination={pagination}
         onChange={onChange}

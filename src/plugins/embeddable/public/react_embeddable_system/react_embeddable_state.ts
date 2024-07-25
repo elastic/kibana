@@ -39,9 +39,10 @@ export const initializeReactEmbeddableState = async <
   factory: ReactEmbeddableFactory<SerializedState, RuntimeState, Api>,
   parentApi: HasSerializedChildState<SerializedState>
 ) => {
-  const lastSavedRuntimeState = await factory.deserializeState(
-    parentApi.getSerializedStateForChild(uuid)
-  );
+  const serializedState = parentApi.getSerializedStateForChild(uuid);
+  const lastSavedRuntimeState = serializedState
+    ? await factory.deserializeState(serializedState)
+    : ({} as RuntimeState);
 
   // If the parent provides runtime state for the child (usually as a state backup or cache),
   // we merge it with the last saved runtime state.

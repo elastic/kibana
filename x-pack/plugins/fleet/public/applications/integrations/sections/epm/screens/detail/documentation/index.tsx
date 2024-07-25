@@ -29,6 +29,7 @@ import type {
 } from '../../../../../types';
 import { useStartServices } from '../../../../../../../hooks';
 import { getStreamsForInputType } from '../../../../../../../../common/services';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -70,7 +71,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
 
   return (
     <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1} />
+      <SideBarColumn grow={1} />
       <EuiFlexItem grow={7}>
         <EuiText>
           <FormattedMessage

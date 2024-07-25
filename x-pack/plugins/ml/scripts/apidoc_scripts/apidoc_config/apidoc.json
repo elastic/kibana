@@ -193,9 +193,6 @@
 
     "ModelManagement",
     "GetModelManagementNodesOverview",
-    "GetModelManagementMemoryUsage",
-
-    "JsonSchema",
-    "GetJsonSchema"
+    "GetModelManagementMemoryUsage"
   ]
 }
