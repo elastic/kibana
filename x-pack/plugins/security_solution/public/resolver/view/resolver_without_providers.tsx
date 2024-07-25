@@ -17,7 +17,7 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { StyledMapContainer, GraphContainer } from './styles';
+import { StyledMapContainer, GraphContainer, StyledPanel } from './styles';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import type { ResolverProps } from '../types';
@@ -162,7 +162,9 @@ export const ResolverWithoutProviders = React.memo(
                 );
               })}
             </GraphContainer>
-            <PanelRouter id={resolverComponentInstanceID} />
+            <StyledPanel hasBorder>
+              <PanelRouter id={resolverComponentInstanceID} />
+            </StyledPanel>
           </>
         ) : (
           <ResolverNoProcessEvents />
