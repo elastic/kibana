@@ -38,9 +38,9 @@ export const EMPTY_EXECUTION_KPI_RESULT = {
   triggeredActions: 0,
 };
 
-export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
+export type ExecutionLogSortFields = (typeof executionLogSortableColumns)[number];
 
-export type ActionErrorLogSortFields = typeof actionErrorLogSortableColumns[number];
+export type ActionErrorLogSortFields = (typeof actionErrorLogSortableColumns)[number];
 
 export interface IExecutionLog {
   id: string;
