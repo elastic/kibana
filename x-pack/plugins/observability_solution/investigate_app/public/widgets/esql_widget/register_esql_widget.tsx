@@ -88,7 +88,7 @@ export function EsqlWidget({
     const timestampColumn = datatable.columns.find((column) => column.name === '@timestamp');
     const messageColumn = datatable.columns.find((column) => column.name === 'message');
 
-    if (datatable.columns.length > 10 && timestampColumn && messageColumn) {
+    if (datatable.columns.length > 100 && timestampColumn && messageColumn) {
       const hasDataForBothColumns = datatable.rows.every((row) => {
         const timestampValue = row['@timestamp'];
         const messageValue = row.message;
@@ -100,7 +100,7 @@ export function EsqlWidget({
         return [timestampColumn, messageColumn];
       }
     }
-    return undefined;
+    return datatable.columns;
   }, [datatable.columns, datatable.rows]);
 
   const previewInput = useAbortableAsync(
