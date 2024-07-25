@@ -8,7 +8,7 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { GetAssetCriticalityRecordRequestQuery } from '../../../../../common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
+import { GetAssetCriticalityRecordRequestQuery } from '../../../../../common/api/entity_analytics';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   ASSET_CRITICALITY_INTERNAL_URL,
