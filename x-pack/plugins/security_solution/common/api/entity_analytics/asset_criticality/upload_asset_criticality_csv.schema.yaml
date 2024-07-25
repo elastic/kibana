@@ -2,19 +2,15 @@ openapi: 3.0.0
 info:
   version: '1'
   title: Asset Criticality CSV Upload Schema
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /internal/asset_criticality/upload_csv:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      x-codegen-enabled: true
+      operationId: InternalUploadAssetCriticalityRecords
       summary: Deprecated internal API which Uploads a CSV file containing asset criticality data
+      deprecated: true
       requestBody:
         content:
           multipart/form-data:
@@ -33,13 +29,33 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#./common/components/schemas/AssetCriticalityBulkUploadResponse'
+                type: object
+                example:
+                  errors:
+                    - message: 'Invalid ID field'
+                      index: 0
+                  stats:
+                    successful: 1
+                    failed: 1
+                    total: 2
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AssetCriticalityCsvUploadErrorItem'
+                  stats:
+                    $ref: '#/components/schemas/AssetCriticalityCsvUploadStats'
+                required:
+                  - errors
+                  - stats
         '413':
           description: File too large
   /api/asset_criticality/upload_csv:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      x-codegen-enabled: true
+      operationId: UploadAssetCriticalityRecords
       summary: Uploads a CSV file containing asset criticality data
       requestBody:
         content:
@@ -59,6 +75,51 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#./common/components/schemas/AssetCriticalityBulkUploadResponse'
+                type: object
+                example:
+                  errors:
+                    - message: 'Invalid ID field'
+                      index: 0
+                  stats:
+                    successful: 1
+                    failed: 1
+                    total: 2
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AssetCriticalityCsvUploadErrorItem'
+                  stats:
+                    $ref: '#/components/schemas/AssetCriticalityCsvUploadStats'
+                required:
+                  - errors
+                  - stats
         '413':
           description: File too large
+
+components:
+  schemas:
+    AssetCriticalityCsvUploadErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+        index:
+          type: integer
+      required:
+        - message
+        - index
+
+    AssetCriticalityCsvUploadStats:
+      type: object
+      properties:
+        successful:
+          type: integer
+        failed:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
