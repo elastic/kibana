@@ -7,15 +7,13 @@
  */
 
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
-import { StateComparators } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
 
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './components/control_panel';
 import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
-import { initUnsavedChanges } from './init_unsaved_changes';
 
 /**
  * Renders a component from the control registry into a Control Panel
@@ -49,7 +47,7 @@ export const ControlRenderer = <
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<StateType>
         ): ApiType => {
-          const unsavedChanges = initUnsavedChanges<StateType>(
+          const unsavedChanges = initializeUnsavedChanges<StateType>(
             initialState as StateType,
             parentApi,
             comparators
@@ -60,8 +58,6 @@ export const ControlRenderer = <
             ...unsavedChanges.api,
             uuid,
             parentApi,
-            unsavedChanges: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
-            resetUnsavedChanges: () => {},
             type: factory.type,
           } as unknown as ApiType;
 

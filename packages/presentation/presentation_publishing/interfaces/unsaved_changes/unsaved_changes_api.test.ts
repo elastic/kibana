@@ -6,43 +6,51 @@
  * Side Public License, v 1.
  */
 
-import { ControlWidth } from '@kbn/controls-plugin/public/types';
-import { initializeDefaultControlApi } from './initialize_default_control_api';
-import { COMPARATOR_SUBJECTS_DEBOUNCE, initUnsavedChanges } from './init_unsaved_changes';
-import { DefaultControlState } from './types';
-import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { COMPARATOR_SUBJECTS_DEBOUNCE, initializeUnsavedChanges } from './unsaved_changes_api';
+import { PublishesUnsavedChanges, StateComparators } from '../..';
 
-describe('initUnsavedChanges', () => {
+interface TestState {
+  key1: string;
+  key2: string;
+}
+
+describe('unsavedChanges api', () => {
+  const initialState = {
+    key1: 'original key1 value',
+    key2: 'original key2 value',
+  } as TestState;
+  const key1$ = new BehaviorSubject(initialState.key1);
+  const key2$ = new BehaviorSubject(initialState.key2);
+  const comparators = {
+    key1: [key1$, (next: string) => key1$.next(next)],
+    key2: [key2$, (next: string) => key2$.next(next)],
+  } as StateComparators<TestState>;
   const parentApi = {
     saveNotification$: new Subject<void>(),
   };
-  let setWidth: (width: ControlWidth) => void;
+
   let api: undefined | PublishesUnsavedChanges;
   beforeEach(() => {
-    const initialState: DefaultControlState = {
-      grow: true,
-      width: 'medium',
-    };
-    const { comparators } = initializeDefaultControlApi(initialState);
-    setWidth = comparators.width[1];
-    ({ api } = initUnsavedChanges(initialState, parentApi, comparators));
+    key1$.next(initialState.key1);
+    key2$.next(initialState.key2);
+    ({ api } = initializeUnsavedChanges<TestState>(initialState, parentApi, comparators));
   });
 
   test('should have no unsaved changes after initialization', () => {
     expect(api?.unsavedChanges.value).toBeUndefined();
   });
 
-  test('should have unsaved changes when a property changes', async () => {
-    setWidth('small');
+  test('should have unsaved changes when state changes', async () => {
+    key1$.next('modified key1 value');
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
     expect(api?.unsavedChanges.value).toEqual({
-      width: 'small',
+      key1: 'modified key1 value',
     });
   });
 
   test('should have no unsaved changes after save', async () => {
-    setWidth('small');
+    key1$.next('modified key1 value');
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
     expect(api?.unsavedChanges.value).not.toBeUndefined();
 
@@ -54,7 +62,7 @@ describe('initUnsavedChanges', () => {
   });
 
   test('should have no unsaved changes after reset', async () => {
-    setWidth('small');
+    key1$.next('modified key1 value');
     await new Promise((resolve) => setTimeout(resolve, COMPARATOR_SUBJECTS_DEBOUNCE + 1));
     expect(api?.unsavedChanges.value).not.toBeUndefined();
 
