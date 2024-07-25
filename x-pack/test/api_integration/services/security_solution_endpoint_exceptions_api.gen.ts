@@ -18,13 +18,13 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../ftr_provider_context';
 
-import { CreateEndpointListItemRequestBodyInput } from '../../../../packages/kbn-securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
-import { DeleteEndpointListItemRequestQueryInput } from '../../../../packages/kbn-securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
-import { FindEndpointListItemsRequestQueryInput } from '../../../../packages/kbn-securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
-import { GetEndpointListItemRequestQueryInput } from '../../../../packages/kbn-securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
-import { UpdateEndpointListItemRequestBodyInput } from '../../../../packages/kbn-securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
+import { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
+import { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
+import { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
+import { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
+import { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -64,7 +64,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getEndpointListItem(props: GetEndpointListItemProps) {
+    readEndpointListItem(props: ReadEndpointListItemProps) {
       return supertest
         .get('/api/endpoint_list/items')
         .set('kbn-xsrf', 'true')
@@ -92,8 +92,8 @@ export interface DeleteEndpointListItemProps {
 export interface FindEndpointListItemsProps {
   query: FindEndpointListItemsRequestQueryInput;
 }
-export interface GetEndpointListItemProps {
-  query: GetEndpointListItemRequestQueryInput;
+export interface ReadEndpointListItemProps {
+  query: ReadEndpointListItemRequestQueryInput;
 }
 export interface UpdateEndpointListItemProps {
   body: UpdateEndpointListItemRequestBodyInput;
