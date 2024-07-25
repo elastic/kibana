@@ -31,7 +31,6 @@ import { context } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiCallOut,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -96,7 +95,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
     dataViewsService: PropTypes.object,
-    onForecastComplete: PropTypes.function,
+    onForecastComplete: PropTypes.func,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -311,7 +310,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
             // Add properties used for building the links menu.
             // TODO - when job_service is moved server_side, move this to server endpoint.
-            if (selectedJob.custom_settings.custom_urls) {
+            if (selectedJob.custom_settings && selectedJob.custom_settings.custom_urls) {
               anomaly.customUrls = selectedJob.custom_settings.custom_urls;
             }
           });
@@ -1018,7 +1017,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
                 {showForecastCheckbox && (
                   <EuiFlexItem grow={false}>
-                    <EuiCheckbox
+                    <TimeseriesExplorerCheckbox
                       id="toggleShowForecastCheckbox"
                       label={
                         <span data-test-subj={'mlForecastCheckbox'}>
