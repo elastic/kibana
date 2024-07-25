@@ -101,11 +101,11 @@ export default function ({ getService }: FtrProviderContext) {
         const enableResponse = await enableEntityDiscovery(authorizedUser);
         expect(enableResponse.success).to.eql(true, "authorized user can't enable EEM");
 
-        let disableResponse = await enableEntityDiscovery(unauthorizedUser);
+        let disableResponse = await disableEntityDiscovery(unauthorizedUser);
         expect(disableResponse.success).to.eql(false, 'unauthorized user can disable EEM');
         expect(disableResponse.reason).to.eql(ERROR_USER_NOT_AUTHORIZED);
 
-        disableResponse = await enableEntityDiscovery(authorizedUser);
+        disableResponse = await disableEntityDiscovery(authorizedUser);
         expect(disableResponse.success).to.eql(true, "authorized user can't disable EEM");
       });
     });
