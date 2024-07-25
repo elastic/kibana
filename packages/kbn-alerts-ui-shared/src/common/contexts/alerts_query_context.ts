@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './action_types';
-export * from './alerts_types';
-export * from './rule_types';
+import { createContext } from 'react';
+import { QueryClient } from '@tanstack/react-query';
+
+export const AlertsQueryContext = createContext<QueryClient | undefined>(undefined);
