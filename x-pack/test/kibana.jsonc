@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/test-suites-xpack",
+  "owner": "@elastic/appex-qa",
+  "devOnly": true
+}

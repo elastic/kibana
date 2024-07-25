@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { services as commonServices } from '../../common/services';
 
 // @ts-ignore not ts yet

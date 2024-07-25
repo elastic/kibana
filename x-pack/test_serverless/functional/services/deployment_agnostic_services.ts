@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services as functionalServices } from '../../../test/functional/services';
+
+import { services as functionalServices } from '@kbn/test-suites-xpack/functional/services';
 import { services as deploymentAgnosticSharedServices } from '../../shared/services/deployment_agnostic_services';
 
 /*

@@ -6,8 +6,8 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { setupUserDataLoader } from '@kbn/test-suites-serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 import { getFailedSpecVideos } from './support/filter_videos';
-import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({

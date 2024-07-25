@@ -10,7 +10,7 @@ import { generateConfig } from '../ess/config.base.edr_workflows';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const serverlessTestsConfig = await readConfigFile(
-    require.resolve('../../../../test_serverless/shared/config.base.ts')
+    require.resolve('@kbn/test-suites-serverless/shared/config.base')
   );
 
   return generateConfig({

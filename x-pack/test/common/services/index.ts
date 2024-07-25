@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
-import { services as kibanaCommonServices } from '../../../../test/common/services';
+import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
+import { services as kibanaCommonServices } from '@kbn/test-suites-src/common/services';
 import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { SpacesServiceProvider } from './spaces';
 import { BsearchSecureService } from './bsearch_secure';

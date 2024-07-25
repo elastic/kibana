@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services as apiIntegrationServices } from '../../../test/api_integration/services';
+
+import { services as apiIntegrationServices } from '@kbn/test-suites-xpack/api_integration/services';
 
 /*
  * Some FTR services from api integration stateful tests are compatible with serverless environment
