@@ -11,7 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   DeleteAssetCriticalityRecordRequestQuery,
   InternalDeleteAssetCriticalityRecordRequestQuery,
-} from '../../../../../common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+} from '../../../../../common/api/entity_analytics';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,

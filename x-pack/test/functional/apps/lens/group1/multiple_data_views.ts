@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ).to.eql(expectedData);
   }
 
-  describe('lens with multiple data views', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/189056
+  describe.skip('lens with multiple data views', () => {
     const visTitle = 'xyChart with multiple data views';
 
     before(async () => {

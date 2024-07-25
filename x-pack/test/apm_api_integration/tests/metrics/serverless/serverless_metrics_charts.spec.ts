@@ -118,7 +118,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      let metricsChart: typeof serverlessMetrics.charts[0] | undefined;
+      let metricsChart: (typeof serverlessMetrics.charts)[0] | undefined;
 
       describe('Cold start duration', () => {
         before(() => {
@@ -183,7 +183,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
+        let computeUsageMetric: (typeof serverlessMetrics.charts)[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
             return chart.key === 'compute_usage';
@@ -245,7 +245,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      let metricsChart: typeof serverlessMetrics.charts[0] | undefined;
+      let metricsChart: (typeof serverlessMetrics.charts)[0] | undefined;
 
       describe('Cold start duration', () => {
         before(() => {
@@ -306,7 +306,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
+        let computeUsageMetric: (typeof serverlessMetrics.charts)[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
             return chart.key === 'compute_usage';

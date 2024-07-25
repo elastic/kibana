@@ -293,9 +293,9 @@ In other use cases the message field can be used to concatenate different values
       },
     ]
   }
+  dispatch={Object {}}
   end="2018-03-24T03:33:52.253Z"
   eventIdToNoteIds={Object {}}
-  expandedDetail={Object {}}
   filters={Array []}
   isLive={false}
   itemsPerPage={5}
@@ -309,7 +309,6 @@ In other use cases the message field can be used to concatenate different values
   kqlMode="search"
   kqlQueryExpression=" "
   kqlQueryLanguage="kuery"
-  onEventClosed={[MockFunction]}
   pinnedEventIds={Object {}}
   renderCellValue={[Function]}
   rowRenderers={
@@ -1298,7 +1297,6 @@ In other use cases the message field can be used to concatenate different values
   }
   show={true}
   showCallOutUnauthorizedMsg={false}
-  showExpandedDetails={false}
   sort={
     Array [
       Object {
