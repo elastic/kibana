@@ -5,35 +5,50 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCode,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
+import { useEntityResolutions } from '../../../../api/hooks/use_entity_resolutions';
 
 interface Props {
   username: string;
 }
 
 export const EntityResolutionTab = ({ username }: Props) => {
-  const entities = [
-    { 'user.name': 'test', confidence: 0.9, resolved: false },
-    { 'user.name': 'test2', confidence: 0.8, resolved: true },
-  ];
+  const entities = useEntityResolutions({ name: username, type: 'user' });
 
   return (
     <>
       <EuiTitle>
         <h2>{'Observed Data'}</h2>
       </EuiTitle>
-      {entities.map((entity, index) => {
+      {entities.isLoading && <EuiLoadingSpinner size="xl" />}
+      {entities.data?.suggestions?.map(({ entity, confidence, document, id, reason }) => {
         return (
           <EuiPanel hasBorder>
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiFlexItem>{entity['user.name']}</EuiFlexItem>
-              <EuiFlexItem>{entity.confidence}</EuiFlexItem>
-              {!entity.resolved && (
+            <EuiFlexGroup justifyContent="spaceEvenly" direction="column">
+              <EuiFlexGroup justifyContent="flexStart">
+                <EuiFlexItem>{entity?.name}</EuiFlexItem>
+
+                <EuiFlexItem>{confidence}</EuiFlexItem>
+                <EuiFlexItem>{reason}</EuiFlexItem>
+                {/* {!entity.resolved && (
                 <EuiButton size="s" fill>
-                  {'Mark as resolved'}
+                {'Mark as resolved'}
                 </EuiButton>
-              )}
+                )} */}
+              </EuiFlexGroup>
+              <EuiText>{reason}</EuiText>
+              <EuiCodeBlock language="json">{JSON.stringify(document)}</EuiCodeBlock>
             </EuiFlexGroup>
           </EuiPanel>
         );

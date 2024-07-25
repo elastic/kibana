@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import React from 'react';
+import { useEntityResolutions } from '../../../entity_analytics/api/hooks/use_entity_resolutions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
@@ -22,7 +23,7 @@ import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 interface UserPanelContentProps {
   userName: string;
@@ -53,6 +54,7 @@ export const UserPanelContent = ({
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
+  const entityResolutions = useEntityResolutions({ name: userName, type: 'user' });
 
   return (
     <FlyoutBody>
@@ -72,6 +74,16 @@ export const UserPanelContent = ({
         entity={{ name: userName, type: 'user' }}
         onChange={onAssetCriticalityChange}
       />
+      <EuiPanel hasBorder>
+        {entityResolutions.isLoading ? (
+          <EuiLoadingSpinner size="xl" />
+        ) : (
+          <div onClick={() => openDetailsPanel?.(EntityDetailsLeftPanelTab.OBSERVED_DATA)}>
+            <EuiText>{`Found ${entityResolutions.data?.suggestions?.length} candidates`}</EuiText>
+          </div>
+        )}
+      </EuiPanel>
+      <EuiSpacer size="m" />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}

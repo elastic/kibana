@@ -14,7 +14,7 @@ Given the following entity from elasticsearch:
 
 $$ENTITY
 
-Do any of the follwing candidates match the entity? :
+Do any of the following candidates match the entity? :
 
 $$CANDIDATES
 `;

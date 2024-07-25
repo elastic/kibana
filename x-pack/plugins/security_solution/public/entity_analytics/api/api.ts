@@ -6,6 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { ENTITY_RESOLUTION } from '@kbn/elastic-assistant-plugin/common/constants';
+import type { EntityResolutionPostResponse, SearchEntity } from '@kbn/elastic-assistant-common';
 import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
@@ -229,6 +231,31 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    /**
+     * Fetches entity candidates
+     */
+    const fetchEntityResolutions = async (entity: SearchEntity) =>
+      http.fetch<EntityResolutionPostResponse>(ENTITY_RESOLUTION, {
+        version: '1',
+        method: 'POST',
+        body: JSON.stringify({
+          entitiesIndexPattern: '.entities.v1.latest.secsol-ea-entity-store',
+          entity,
+          size: 10,
+          replacements: {},
+          subAction: 'invokeAI',
+          apiConfig: {
+            connectorId: '57fe89ef-e8e6-4672-96b1-3811e0ebc138',
+            actionTypeId: '.bedrock',
+            model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
+          },
+        }),
+      });
+
+    /**
+     * Fetched entity resolution candidates
+     */
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -244,6 +271,7 @@ export const useEntityAnalyticsRoutes = () => {
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
+      fetchEntityResolutions,
     };
   }, [http]);
 };
