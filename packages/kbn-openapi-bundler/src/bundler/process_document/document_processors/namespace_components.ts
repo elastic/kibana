@@ -76,6 +76,26 @@ export function createNamespaceComponentsProcessor(pointer: string): DocumentNod
   };
 }
 
+/**
+ * Adds provided `prefix` to the provided `ref`'s base name. Where `ref`'s
+ * base name is the last part of JSON Pointer representing a component name.
+ *
+ * @example
+ *
+ * Given
+ *
+ * `ref` = `../some/path/to/my.schema.yaml#/components/schema/MyComponent`
+ * `prefix` = `Some_Prefix`
+ *
+ * it will produce `../some/path/to/my.schema.yaml#/components/schema/Some_Prefix_MyComponent`
+ *
+ * Given
+ *
+ * `ref` = `#/components/responses/SomeResponse`
+ * `prefix` = `Prefix`
+ *
+ * it will produce `#/components/responses/Prefix_SomeResponse`
+ */
 function decorateRefBaseName(ref: string, prefix: string): string {
   const { path, pointer } = parseRef(ref);
   const pointerParts = pointer.split('/');
@@ -93,7 +113,7 @@ const ALPHANUMERIC_SYMBOLS_REGEX = /[^\w\n]+/g;
 const SPACES_REGEX = /\s+/g;
 
 /**
- * Normalizes provided namespace string by
+ * Normalizes provided `namespace` string by
  *
  * - getting rid of non alphanumeric symbols
  * - getting rid of parentheses including text between them
