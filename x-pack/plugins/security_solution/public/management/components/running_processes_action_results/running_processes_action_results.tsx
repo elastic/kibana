@@ -198,6 +198,9 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
     const agentIds = agentId ? [agentId] : action.agents;
     const { canGetRunningProcesses } = useUserPrivileges().endpointPrivileges;
 
+    // If user is not allowed to execute the running processes response action (but may still have
+    // access to the Response Actions history log), then we don't show any results because user
+    // does not have access to the file download apis.
     if (!canGetRunningProcesses) {
       return null;
     }
