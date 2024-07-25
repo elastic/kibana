@@ -20,6 +20,7 @@
     "@kbn/i18n-react",
     "@kbn/ui-actions-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/data-plugin"
   ]
 }
