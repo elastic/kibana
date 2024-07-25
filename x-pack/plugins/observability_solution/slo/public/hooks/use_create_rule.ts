@@ -35,14 +35,14 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
           body,
         });
       } catch (e) {
-        throw new Error(`Unable to create rule: ${e}`);
+        throw new Error(`Unable to create burn rate rule: ${e}`);
       }
     },
     {
       onError: (_err) => {
         toasts.addDanger(
           i18n.translate('xpack.slo.rules.createRule.errorNotification.descriptionText', {
-            defaultMessage: 'Failed to create rule',
+            defaultMessage: 'Failed to create burn rate rule.',
           })
         );
       },
@@ -50,7 +50,7 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate('xpack.slo.rules.createRule.successNotification.descriptionText', {
-            defaultMessage: 'Rule created',
+            defaultMessage: 'Burn rate rule created successfully.',
           })
         );
       },
