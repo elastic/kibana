@@ -173,7 +173,7 @@ function correctQuerySyntax(_query: string, context: EditorContext) {
   // check if all brackets are closed, otherwise close them
   const unclosedRoundBrackets = countBracketsUnclosed('(', query);
   const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
-  const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
+  const unclosedQuotes = countBracketsUnclosed('"', query);
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
   const charThatNeedMarkers = [',', ':'];
@@ -188,8 +188,9 @@ function correctQuerySyntax(_query: string, context: EditorContext) {
   }
 
   // if there are unclosed brackets, close them
-  if (unclosedBrackets) {
+  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
     for (const [char, count] of [
+      ['"', unclosedQuotes],
       [')', unclosedRoundBrackets],
       [']', unclosedSquaredBrackets],
     ]) {

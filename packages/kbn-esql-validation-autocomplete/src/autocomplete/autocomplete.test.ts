@@ -899,7 +899,16 @@ describe('autocomplete', () => {
   });
 
   describe('values suggestions', () => {
+    testSuggestions('FROM "a"', ['a', 'b'], undefined, 7, [
+      ,
+      [
+        { name: 'a', hidden: false },
+        { name: 'b', hidden: false },
+      ],
+    ]);
+    testSuggestions('FROM " "', [], ' ');
     testSuggestions('FROM a | WHERE tags == " "', [], ' ');
+    testSuggestions('FROM a | WHERE tags == """ """', [], ' ');
     testSuggestions('FROM a | WHERE tags == "a"', [], undefined, 25);
     testSuggestions('FROM a | EVAL tags == " "', [], ' ');
     testSuggestions('FROM a | EVAL tags == "a"', [], undefined, 24);
