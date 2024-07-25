@@ -15,6 +15,7 @@ import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 
 export interface ObservabilityOnboardingPluginSetupDependencies {
   data: DataPluginSetup;
@@ -23,6 +24,7 @@ export interface ObservabilityOnboardingPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   fleet: FleetSetupContract;
   security: SecurityPluginSetup;
+  customIntegrations: CustomIntegrationsPluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDependencies {
