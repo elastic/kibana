@@ -11,6 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { defineKeyRotationRoutes } from './key_rotation';
 import type { ConfigType } from '../config';
 import type { EncryptionKeyRotationService } from '../crypto';
+import { BuildFlavor } from '@kbn/config';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -20,6 +21,7 @@ export interface RouteDefinitionParams {
   logger: Logger;
   config: ConfigType;
   encryptionKeyRotationService: PublicMethodsOf<EncryptionKeyRotationService>;
+  buildFlavor: BuildFlavor;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
