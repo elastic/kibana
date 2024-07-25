@@ -6,6 +6,8 @@ SCRIPT_DIR=$(dirname "$0")
 # Source setup_shell.sh from the determined directory
 source "${SCRIPT_DIR}/setup_shell.sh"
 
+grep -qxF "xpack.security.experimental.fipsMode.enabled: true" config/kibana.dev.yml || echo "xpack.security.experimental.fipsMode.enabled: true" >>config/kibana.dev.yml
+
 # The node_modules are mounted from the host machine which can be a different platform,
 # so we re-install the dependencies to ensure they are compatible.
 #
