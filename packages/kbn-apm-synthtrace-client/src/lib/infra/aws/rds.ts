@@ -6,33 +6,14 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-import { Entity, Fields } from '../../entity';
+import { Fields } from '../../entity';
 import { Serializable } from '../../serializable';
 
-interface AWSRdsDocument extends Fields {
+export interface AWSRdsDocument extends Fields {
   'aws.rds.db_instance.arn': string;
   'aws.rds.db_instance.identifier': string;
   'metricset.name'?: string;
   'event.dataset'?: string;
-}
-
-export class AWSRds extends Entity<AWSRdsDocument> {
-  metrics() {
-    return new AWSRdsMetrics({
-      ...this.fields,
-      'aws.rds.cpu.total.pct': 0.4,
-      'aws.rds.database_connections': 5,
-      'aws.rds.latency.read': 500 * 1000,
-      'aws.rds.latency.write': 500 * 1000,
-      'aws.rds.latency.insert': 500 * 1000,
-      'aws.rds.latency.update': 500 * 1000,
-      'aws.rds.latency.commit': 500 * 1000,
-      'aws.rds.latency.dml': 500 * 1000,
-      'aws.rds.queries': 100,
-      'event.dataset': 'aws.rds',
-    });
-  }
 }
 
 export interface AWSRdsMetricsDocument extends AWSRdsDocument {
@@ -47,11 +28,4 @@ export interface AWSRdsMetricsDocument extends AWSRdsDocument {
   'aws.rds.queries'?: number;
 }
 
-class AWSRdsMetrics extends Serializable<AWSRdsMetricsDocument> {}
-
-export function awsRds(arn: string, name: string): AWSRds {
-  return new AWSRds({
-    'aws.rds.db_instance.arn': arn,
-    'aws.rds.db_instance.identifier': name,
-  });
-}
+export class AWSRdsMetrics extends Serializable<AWSRdsMetricsDocument> {}
