@@ -52,9 +52,9 @@ export const bundle = async ({
 
   logger.debug(`Processing schemas...`);
 
-  const resolvedDocuments = await bundleDocuments(schemaFilePaths, options);
+  const bundledDocuments = await bundleDocuments(schemaFilePaths, options);
 
-  logger.success(`Processed ${resolvedDocuments.length} schemas`);
+  logger.success(`Processed ${bundledDocuments.length} schemas`);
 
   const blankOasFactory = (oasVersion: string, apiVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
@@ -70,7 +70,7 @@ export const bundle = async ({
         isUndefined
       ),
     });
-  const resultDocumentsMap = await mergeDocuments(resolvedDocuments, blankOasFactory, {
+  const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasFactory, {
     splitDocumentsByVersion: true,
   });
 

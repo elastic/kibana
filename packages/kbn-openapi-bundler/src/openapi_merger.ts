@@ -51,7 +51,7 @@ export const merge = async ({
 
   logger.info(`Merging schemas...`);
 
-  const resolvedDocuments = await bundleDocuments(schemaFilePaths);
+  const bundledDocuments = await bundleDocuments(schemaFilePaths);
 
   const blankOasDocumentFactory = (oasVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
@@ -60,7 +60,7 @@ export const merge = async ({
       ...(options?.mergedSpecInfo ?? {}),
     });
 
-  const resultDocumentsMap = await mergeDocuments(resolvedDocuments, blankOasDocumentFactory, {
+  const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasDocumentFactory, {
     splitDocumentsByVersion: false,
   });
   // Only one document is expected when `splitDocumentsByVersion` is set to `false`
