@@ -134,7 +134,7 @@ function getFrameAPIMock({
 ReactDOM.createPortal = jest.fn((element) => element);
 
 describe('TextBased Query Languages Data Panel', () => {
-  let core: ReturnType<typeof coreMock['createStart']>;
+  let core: ReturnType<(typeof coreMock)['createStart']>;
   let dataViews: DataViewPublicStart;
   const defaultIndexPatterns = {
     '1': {
