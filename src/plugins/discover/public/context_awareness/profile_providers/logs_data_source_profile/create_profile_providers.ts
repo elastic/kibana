@@ -10,8 +10,8 @@ import type { ProfileProviderServices } from '../profile_provider_services';
 import { createLogsDataSourceProfileProvider } from './profile';
 import {
   createApacheErrorLogsDataSourceProfileProvider,
-  createAwsS3LogsDataSourceProfileProvider,
-  createK8ContainerLogsDataSourceProfileProvider,
+  createAwsS3accessLogsDataSourceProfileProvider,
+  createKubernetesContainerLogsDataSourceProfileProvider,
   createNginxAccessLogsDataSourceProfileProvider,
   createNginxErrorLogsDataSourceProfileProvider,
   createSystemLogsDataSourceProfileProvider,
@@ -23,9 +23,9 @@ export const createLogsDataSourceProfileProviders = (providerServices: ProfilePr
 
   return [
     createSystemLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
-    createK8ContainerLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createKubernetesContainerLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
     createWindowsLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
-    createAwsS3LogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createAwsS3accessLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
     createNginxErrorLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
     createNginxAccessLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
     createApacheErrorLogsDataSourceProfileProvider(logsDataSourceProfileProvider),

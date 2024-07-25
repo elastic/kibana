@@ -12,11 +12,11 @@ import { createGetDefaultAppState } from '../accessors';
 import { CLIENT_IP_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createAwsS3LogsDataSourceProfileProvider = (
+export const createAwsS3accessLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'aws_s3_logs_data_source',
+    profileId: 'aws-s3access-logs-data-source',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [

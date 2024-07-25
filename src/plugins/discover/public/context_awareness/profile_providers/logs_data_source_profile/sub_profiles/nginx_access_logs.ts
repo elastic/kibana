@@ -16,7 +16,7 @@ export const createNginxAccessLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'nginx_access_logs_data_source',
+    profileId: 'nginx-access-logs-data-source',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [

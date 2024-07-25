@@ -12,11 +12,11 @@ import { createGetDefaultAppState } from '../accessors';
 import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createK8ContainerLogsDataSourceProfileProvider = (
+export const createKubernetesContainerLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'k8_container_logs_data_source',
+    profileId: 'kubernetes-container-logs-data-source',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [

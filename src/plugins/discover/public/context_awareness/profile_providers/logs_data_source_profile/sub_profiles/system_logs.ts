@@ -16,7 +16,7 @@ export const createSystemLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'system_logs_data_source',
+    profileId: 'system-logs-data-source',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [

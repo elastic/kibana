@@ -7,8 +7,8 @@
  */
 
 export { createApacheErrorLogsDataSourceProfileProvider } from './apache_error_logs';
-export { createAwsS3LogsDataSourceProfileProvider } from './aws_s3_logs';
-export { createK8ContainerLogsDataSourceProfileProvider } from './k8_container_logs';
+export { createAwsS3accessLogsDataSourceProfileProvider } from './aws_s3access_logs';
+export { createKubernetesContainerLogsDataSourceProfileProvider } from './kubernetes_container_logs';
 export { createNginxAccessLogsDataSourceProfileProvider } from './nginx_access_logs';
 export { createNginxErrorLogsDataSourceProfileProvider } from './nginx_error_logs';
 export { createSystemLogsDataSourceProfileProvider } from './system_logs';

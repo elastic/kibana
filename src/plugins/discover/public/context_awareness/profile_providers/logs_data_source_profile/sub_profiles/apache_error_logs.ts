@@ -16,7 +16,7 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'apache_error_logs_data_source',
+    profileId: 'apache-error-logs-data-source',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
