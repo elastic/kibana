@@ -21,6 +21,7 @@ import {
   addSignificantItemsHistogram,
   updateLoadingState,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import { fetchDateHistograms } from '@kbn/aiops-log-rate-analysis/queries/fetch_date_histograms';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
@@ -80,37 +81,19 @@ export const histogramHandlerFactory =
         }
 
         if (overallTimeSeries !== undefined) {
-          const histogramQuery = getHistogramQuery(requestBody, [
-            {
-              term: { [cp.fieldName]: cp.fieldValue },
-            },
-          ]);
-
           let cpTimeSeries: NumericChartData;
 
           try {
-            cpTimeSeries = (
-              (await fetchHistogramsForFields({
-                esClient,
-                abortSignal,
-                arguments: {
-                  indexPattern: requestBody.index,
-                  query: histogramQuery,
-                  fields: [
-                    {
-                      fieldName: requestBody.timeFieldName,
-                      type: KBN_FIELD_TYPES.DATE,
-                      interval: overallTimeSeries.interval,
-                      min: overallTimeSeries.stats[0],
-                      max: overallTimeSeries.stats[1],
-                    },
-                  ],
-                  samplerShardSize: -1,
-                  randomSamplerProbability: stateHandler.sampleProbability(),
-                  randomSamplerSeed: RANDOM_SAMPLER_SEED,
-                },
-              })) as [NumericChartData]
-            )[0];
+            cpTimeSeries = await fetchDateHistograms(
+              esClient,
+              requestBody,
+              cp,
+              overallTimeSeries,
+              logger,
+              stateHandler.sampleProbability(),
+              () => {},
+              abortSignal
+            );
           } catch (e) {
             logger.error(
               `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
