@@ -159,20 +159,20 @@ function countBracketsUnclosed(bracketType: '(' | '[' | '"', text: string) {
   return stack.length;
 }
 
-export async function suggest(
-  fullText: string,
-  offset: number,
-  context: EditorContext,
-  astProvider: AstProviderFn,
-  resourceRetriever?: ESQLCallbacks
-): Promise<SuggestionRawDefinition[]> {
-  const innerText = fullText.substring(0, offset);
-
-  let finalText = innerText;
-
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * This is important because a syntactically-invalid query will not generate a good AST.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+function correctQuerySyntax(_query: string, context: EditorContext) {
+  let query = _query;
   // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
+  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
+  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
   const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
@@ -182,11 +182,11 @@ export async function suggest(
     // monaco.editor.CompletionTriggerKind['Invoke'] === 0
     (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
     (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) ||
-        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
+      (isMathFunction(query, query.length) || isComma(query.trimEnd()[query.trimEnd().length - 1])))
   ) {
-    finalText = `${innerText}${EDITOR_MARKER}`;
+    query += EDITOR_MARKER;
   }
+
   // if there are unclosed brackets, close them
   if (unclosedBrackets) {
     for (const [char, count] of [
@@ -195,16 +195,33 @@ export async function suggest(
     ]) {
       if (count) {
         // inject the closing brackets
-        finalText += Array(count).fill(char).join('');
+        query += Array(count).fill(char).join('');
       }
     }
   }
 
-  const { ast } = await astProvider(finalText);
+  return query;
+}
+
+export async function suggest(
+  fullText: string,
+  offset: number,
+  context: EditorContext,
+  astProvider: AstProviderFn,
+  resourceRetriever?: ESQLCallbacks
+): Promise<SuggestionRawDefinition[]> {
+  const innerText = fullText.substring(0, offset);
+
+  const correctedQuery = correctQuerySyntax(innerText, context);
+
+  const { ast } = await astProvider(correctedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
+  const queryForFields = getQueryForFields(
+    buildQueryUntilPreviousCommand(ast, correctedQuery),
+    ast
+  );
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
