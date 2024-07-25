@@ -10,9 +10,6 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: /
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: saved objects
     description: Manage Kibana saved objects, including dashboards, visualizations, and more.
@@ -798,15 +795,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     key_rotation_response:
       summary: Encryption key rotation using default parameters.

@@ -17,14 +17,6 @@
       "url": "/"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ],
   "tags": [
     {
       "name": "saved objects",
@@ -1208,18 +1200,6 @@
     }
   },
   "components": {
-    "securitySchemes": {
-      "basicAuth": {
-        "type": "http",
-        "scheme": "basic"
-      },
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
-      }
-    },
     "examples": {
       "key_rotation_response": {
         "summary": "Encryption key rotation using default parameters.",

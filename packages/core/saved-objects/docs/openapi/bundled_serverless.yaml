@@ -13,8 +13,6 @@ servers:
     variables:
       kibana_url:
         default: localhost:5601
-security:
-  - apiKeyAuth: []
 tags:
   - name: saved objects
     description: Manage Kibana saved objects, including dashboards, visualizations, and more.
@@ -252,13 +250,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
 components:
-  securitySchemes:
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: |
-        Serverless APIs support only key-based authentication. You must create an API key and use the encoded value in the request header. For example: 'Authorization: ApiKey base64AccessApiKey'.
   parameters:
     kbn_xsrf:
       schema:

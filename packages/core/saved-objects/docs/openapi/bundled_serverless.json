@@ -22,11 +22,6 @@
       }
     }
   ],
-  "security": [
-    {
-      "apiKeyAuth": []
-    }
-  ],
   "tags": [
     {
       "name": "saved objects",
@@ -369,14 +364,6 @@
     }
   },
   "components": {
-    "securitySchemes": {
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "Serverless APIs support only key-based authentication. You must create an API key and use the encoded value in the request header. For example: 'Authorization: ApiKey base64AccessApiKey'.\n"
-      }
-    },
     "parameters": {
       "kbn_xsrf": {
         "schema": {
