@@ -106,7 +106,8 @@
     "@kbn/presentation-containers",
     "@kbn/deeplinks-observability",
     "@kbn/event-annotation-common",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/observability-alerting-rule-utils"
   ],
   "exclude": [
     "target/**/*"
