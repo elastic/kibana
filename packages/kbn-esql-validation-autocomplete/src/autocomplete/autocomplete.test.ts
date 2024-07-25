@@ -13,7 +13,7 @@ import { commandDefinitions } from '../definitions/commands';
 import { getSafeInsertText, getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { FunctionParameter } from '../definitions/types';
+import { FunctionParameter, FunctionReturnType } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import {
@@ -28,6 +28,10 @@ import {
   PartialSuggestionWithText,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
+import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
+
+const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
+const ESQL_NUMERIC_RETURN_TYPES = ESQL_NUMBER_TYPES as unknown as FunctionReturnType[];
 
 describe('autocomplete', () => {
   type TestArgs = [
@@ -714,10 +718,14 @@ describe('autocomplete', () => {
       testSuggestions(
         `from a | eval a=${Array(nesting).fill('round(').join('')}`,
         [
-          ...getFieldNamesByType('double'),
-          ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }, undefined, [
-            'round',
-          ]),
+          ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ESQL_NUMERIC_RETURN_TYPES,
+            { scalar: true },
+            undefined,
+            ['round']
+          ),
         ],
         '('
       );
@@ -739,10 +747,14 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval var0 = abs(b) | eval abs(var0)',
       [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }, undefined, [
-          'abs',
-        ]),
+        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          ESQL_NUMERIC_TYPES,
+          { scalar: true },
+          undefined,
+          ['abs']
+        ),
       ],
       undefined,
       26 /* b column in abs */

@@ -1031,7 +1031,7 @@ const toCartesianShapeSignature = evalFunctionDefinitions.find(
 )!;
 const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
-// @ts-expect-error
+// We don't have full list for long, unsigned_long, etc.
 const nestedFunctions: Record<SupportedFieldType, string> = {
   double: prepareNestedFunction(toDoubleSignature),
   integer: prepareNestedFunction(toInteger),
@@ -1044,6 +1044,7 @@ const nestedFunctions: Record<SupportedFieldType, string> = {
   geo_shape: prepareNestedFunction(toGeoShapeSignature),
   cartesian_point: prepareNestedFunction(toCartesianPointSignature),
   cartesian_shape: prepareNestedFunction(toCartesianShapeSignature),
+  // @ts-expect-error
   datetime: prepareNestedFunction(toDateSignature),
 };
 

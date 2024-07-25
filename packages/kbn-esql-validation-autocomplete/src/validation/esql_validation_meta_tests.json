@@ -12185,8 +12185,8 @@
     {
       "query": "from a_index | eval date_diff(\"year\", concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
-        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_diff] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
+        "Argument of [date_diff] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12198,8 +12198,8 @@
     {
       "query": "from a_index | eval date_diff(textField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
-        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_diff] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
+        "Argument of [date_diff] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12299,7 +12299,7 @@
     {
       "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_extract] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_extract] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12311,7 +12311,7 @@
     {
       "query": "from a_index | eval date_extract(textField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_extract] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_extract] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12396,7 +12396,7 @@
     {
       "query": "from a_index | eval date_format(keywordField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_format] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_format] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12408,7 +12408,7 @@
     {
       "query": "from a_index | eval date_format(textField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_format] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_format] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12616,7 +12616,7 @@
     {
       "query": "from a_index | eval date_trunc(1 year, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -12631,7 +12631,7 @@
       "query": "from a_index | eval date_trunc(textField, concat(\"20\", \"22\"))",
       "error": [
         "Argument of [date_trunc] must be [time_literal], found value [textField] type [text]",
-        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -31503,7 +31503,7 @@
     {
       "query": "from a_index | stats max(concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [max] must be [double], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [max] must be [double], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -32139,7 +32139,7 @@
     {
       "query": "from a_index | stats min(concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [min] must be [double], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [min] must be [double], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -33976,7 +33976,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 1 year)",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -33992,7 +33992,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, textField)",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
         "Argument of [bucket] must be a constant, received [textField]",
         "Argument of [bucket] must be a constant, received [textField]"
@@ -34009,10 +34009,10 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -34027,10 +34027,10 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, textField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
         "Argument of [bucket] must be a constant, received [textField]",
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]"
       ],
       "warning": []
     },
@@ -34045,9 +34045,9 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), integerField, concat(\"20\", \"22\"), textField)",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [integerField]",
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [keyword]",
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [keyword]",
         "Argument of [bucket] must be a constant, received [textField]"
       ],
       "warning": []

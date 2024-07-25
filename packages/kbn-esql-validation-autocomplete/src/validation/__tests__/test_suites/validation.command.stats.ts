@@ -226,7 +226,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               );
               await expectErrors(
                 'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
-                ['Argument of [bucket] must be [date], found value [concat("", "")] type [keyword]']
+                ['Argument of [bucket] must be [date], found value [concat("","")] type [keyword]']
               );
             });
 

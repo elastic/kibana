@@ -2689,8 +2689,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [keyword]',
           ]
         );
 
@@ -2699,8 +2699,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_diff(textField, concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [keyword]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [keyword]',
           ]
         );
       });
@@ -2776,13 +2776,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
           [
-            'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [date_extract] must be [date], found value [concat("20","22")] type [keyword]',
           ]
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(textField, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_extract(textField, concat("20", "22"))', [
-          'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_extract] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
       });
 
@@ -2825,12 +2825,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_format(keywordField, "2022")', []);
 
         testErrorsAndWarnings('from a_index | eval date_format(keywordField, concat("20", "22"))', [
-          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_format] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
 
         testErrorsAndWarnings('from a_index | eval date_format(textField, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_format(textField, concat("20", "22"))', [
-          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_format] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
       });
 
@@ -2929,14 +2929,14 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
-          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_trunc(textField, "2022")', [
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_trunc(textField, concat("20", "22"))', [
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
-          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [keyword]',
+          'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
       });
 
@@ -11889,7 +11889,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
         testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
-          'Argument of [max] must be [double], found value [concat("20", "22")] type [keyword]',
+          'Argument of [max] must be [double], found value [concat("20","22")] type [keyword]',
         ]);
       });
 
@@ -12238,7 +12238,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
         testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
-          'Argument of [min] must be [double], found value [concat("20", "22")] type [keyword]',
+          'Argument of [min] must be [double], found value [concat("20","22")] type [keyword]',
         ]);
       });
 
@@ -12973,7 +12973,6 @@ describe('validation logic', () => {
           'from a_index | stats var = round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)',
           []
         );
-        testErrorsAndWarnings('from a_index | stats round(weighted_avg(longField, longField))', []);
 
         testErrorsAndWarnings(
           'from a_index | stats round(weighted_avg(longField, longField)) + weighted_avg(longField, longField)',
@@ -12986,8 +12985,6 @@ describe('validation logic', () => {
           'from a_index | stats avg(doubleField), weighted_avg(longField, longField)',
           []
         );
-
-        testErrorsAndWarnings('from a_index | stats var0 = weighted_avg(longField, longField)', []);
 
         testErrorsAndWarnings(
           'from a_index | stats avg(doubleField), var0 = weighted_avg(longField, longField)',
@@ -13034,7 +13031,6 @@ describe('validation logic', () => {
           'from a_index | stats var = round(weighted_avg(longField, integerField))',
           []
         );
-        testErrorsAndWarnings('from a_index | stats weighted_avg(longField, integerField)', []);
 
         testErrorsAndWarnings(
           'from a_index | stats round(weighted_avg(longField, integerField))',
@@ -13106,7 +13102,6 @@ describe('validation logic', () => {
           'from a_index | stats var = round(weighted_avg(integerField, doubleField))',
           []
         );
-        testErrorsAndWarnings('from a_index | stats weighted_avg(integerField, doubleField)', []);
 
         testErrorsAndWarnings(
           'from a_index | stats round(weighted_avg(integerField, doubleField))',
@@ -13630,7 +13625,7 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
         testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', [
-          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
 
         testErrorsAndWarnings(
@@ -13645,7 +13640,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, textField, textField)',
           [
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
             'Argument of [bucket] must be a constant, received [textField]',
             'Argument of [bucket] must be a constant, received [textField]',
@@ -13659,10 +13654,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
           ]
         );
 
@@ -13677,10 +13672,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, textField, concat("20", "22"))',
           [
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
             'Argument of [bucket] must be a constant, received [textField]',
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
           ]
         );
 
@@ -13695,9 +13690,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), integerField, concat("20", "22"), textField)',
           [
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [integerField]',
-            'Argument of [bucket] must be [date], found value [concat("20", "22")] type [keyword]',
+            'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
             'Argument of [bucket] must be a constant, received [textField]',
           ]
         );
