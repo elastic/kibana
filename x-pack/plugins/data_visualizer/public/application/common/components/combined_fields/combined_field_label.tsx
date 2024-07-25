@@ -15,7 +15,11 @@ export function CombinedFieldLabel({ combinedField }: { combinedField: CombinedF
 }
 
 function getCombinedFieldLabel(combinedField: CombinedField) {
-  return `${combinedField.fieldNames.join(combinedField.delimiter)} => ${
-    combinedField.combinedFieldName
-  } (${combinedField.mappingType})`;
+  if (combinedField.mappingType === 'geo_point') {
+    return `${combinedField.fieldNames.join(combinedField.delimiter)} => ${
+      combinedField.combinedFieldName
+    } (${combinedField.mappingType})`;
+  }
+
+  return combinedField.combinedFieldName;
 }

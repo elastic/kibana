@@ -20,14 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
-import { getFieldNames } from './utils';
+import { createSemanticTextCombinedField, getFieldNames } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import type { AddCombinedField } from './combined_fields_form';
 
 interface Props {
-  addCombinedField: (
-    addToMappings: (mappings: any) => any,
-    addToPipeline: (pipeline: any) => any
-  ) => void;
+  addCombinedField: AddCombinedField;
   hasNameCollision: (name: string) => boolean;
   results: FindFileStructureResponse;
 }
@@ -38,7 +36,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
   const [inferenceServices, setInferenceServices] = useState<EuiSelectOption[]>([]);
   const [selectedInference, setSelectedInference] = useState<string | undefined>();
   const [selectedFieldOption, setSelectedFieldOption] = useState<string | undefined>();
-  const [renameToFieldOption, setRenameToFieldOption] = useState<string | null>();
+  const [renameToFieldOption, setRenameToFieldOption] = useState<string | undefined>();
 
   const fieldOptions = useMemo(
     () =>
@@ -71,17 +69,23 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
   useEffect(() => {
     if (selectedFieldOption?.includes('.')) {
-      setRenameToFieldOption(selectedFieldOption.split('.').pop());
+      setRenameToFieldOption(selectedFieldOption.split('.').pop()!);
     } else {
-      setRenameToFieldOption(null);
+      setRenameToFieldOption(`${selectedFieldOption}_semantic`);
     }
   }, [selectedFieldOption]);
 
   const onSubmit = () => {
-    if (selectedFieldOption === undefined || selectedInference === undefined) {
+    if (
+      renameToFieldOption === '' ||
+      renameToFieldOption === undefined ||
+      selectedFieldOption === undefined ||
+      selectedInference === undefined
+    ) {
       return;
     }
     addCombinedField(
+      createSemanticTextCombinedField(renameToFieldOption, selectedFieldOption),
       (mappings: any) => {
         if (renameToFieldOption === undefined || selectedFieldOption === undefined) {
           return mappings;
@@ -110,7 +114,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
   };
 
   const isInvalid = useMemo(() => {
-    return !selectedInference || !selectedFieldOption || !renameToFieldOption;
+    return !selectedInference || !selectedFieldOption || renameToFieldOption === '';
   }, [selectedInference, selectedFieldOption, renameToFieldOption]);
 
   return (

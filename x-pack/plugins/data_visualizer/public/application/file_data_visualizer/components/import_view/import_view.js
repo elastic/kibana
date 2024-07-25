@@ -75,8 +75,7 @@ const DEFAULT_STATE = {
   checkingValidIndex: false,
   combinedFields: [],
   importer: undefined,
-  reuseIndex: false,
-  createNewPipeline: true,
+  createPipeline: true,
 };
 
 export class ImportView extends Component {
@@ -112,9 +111,8 @@ export class ImportView extends Component {
       indexSettingsString,
       mappingsString,
       pipelineString,
-      reuseIndex,
       pipelineId,
-      createNewPipeline,
+      createPipeline,
     } = this.state;
 
     importData(
@@ -127,9 +125,8 @@ export class ImportView extends Component {
         mappingsString,
         originalMappingsString: this.originalMappingsString,
         pipelineString,
-        reuseIndex,
         pipelineId,
-        createNewPipeline: reuseIndex ? createNewPipeline : true,
+        createPipeline,
       },
       (state) => this.setState(state)
     );
@@ -208,9 +205,9 @@ export class ImportView extends Component {
     });
   };
 
-  onCreateNewPipelineChange = (b) => {
+  onCreatePipelineChange = (b) => {
     this.setState({
-      createNewPipeline: b,
+      createPipeline: b,
     });
   };
 
@@ -230,12 +227,6 @@ export class ImportView extends Component {
 
   closeFilebeatFlyout = () => {
     this.setState({ isFilebeatFlyoutVisible: false });
-  };
-
-  setReuseIndex = (reuseIndex) => {
-    const createDataView = reuseIndex ? false : this.state.createDataView;
-    const createNewPipeline = reuseIndex ? false : this.state.createNewPipeline;
-    this.setState({ reuseIndex, createDataView, createNewPipeline });
   };
 
   closeFilebeatFlyout = () => {
@@ -283,8 +274,7 @@ export class ImportView extends Component {
       checkingValidIndex,
       combinedFields,
       importer,
-      reuseIndex,
-      createNewPipeline,
+      createPipeline,
     } = this.state;
 
     const statuses = {
@@ -298,8 +288,7 @@ export class ImportView extends Component {
       uploadProgress,
       uploadStatus,
       createDataView,
-      createNewPipeline,
-      createNewIndex: !reuseIndex,
+      createPipeline,
     };
 
     const disableImport =
@@ -307,8 +296,7 @@ export class ImportView extends Component {
       indexNameError !== '' ||
       (createDataView === true && dataViewNameError !== '') ||
       initialized === true ||
-      checkingValidIndex === true ||
-      (reuseIndex && pipelineId === null);
+      checkingValidIndex === true;
 
     return (
       <EuiPageBody data-test-subj="dataVisualizerPageFileImport">
@@ -353,14 +341,10 @@ export class ImportView extends Component {
               combinedFields={combinedFields}
               onCombinedFieldsChange={this.onCombinedFieldsChange}
               results={this.props.results}
-              reuseIndex={reuseIndex}
-              setReuseIndex={this.setReuseIndex}
               pipelineId={pipelineId}
               setPipelineId={this.setPipelineId}
               originalMappingsString={this.originalMappingsString}
               originalPipelineString={this.originalPipelineString}
-              createNewPipeline={createNewPipeline}
-              onCreateNewPipelineChange={this.onCreateNewPipelineChange}
             />
 
             <EuiSpacer size="m" />
@@ -432,6 +416,7 @@ export class ImportView extends Component {
                     docCount={docCount}
                     importFailures={importFailures}
                     createDataView={createDataView}
+                    createPipeline={createPipeline}
                   />
 
                   <EuiSpacer size="l" />

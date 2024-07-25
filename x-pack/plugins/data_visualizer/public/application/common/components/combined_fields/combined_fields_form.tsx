@@ -24,13 +24,7 @@ import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
 import { SemanticTextForm } from './semantic_text';
 import { CombinedFieldLabel } from './combined_field_label';
-import {
-  addCombinedFieldsToMappings,
-  addCombinedFieldsToPipeline,
-  getNameCollisionMsg,
-  removeCombinedFieldsFromMappings,
-  removeCombinedFieldsFromPipeline,
-} from './utils';
+import { removeCombinedFieldsFromMappings, removeCombinedFieldsFromPipeline } from './utils';
 
 interface Props {
   mappingsString: string;
@@ -46,6 +40,12 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
 }
+
+export type AddCombinedField = (
+  combinedField: CombinedField,
+  addToMappings: (mappings: any) => any,
+  addToPipeline: (pipeline: any) => any
+) => void;
 
 export class CombinedFieldsForm extends Component<Props, State> {
   state: State = {
@@ -64,34 +64,11 @@ export class CombinedFieldsForm extends Component<Props, State> {
     });
   };
 
-  addCombinedField = (combinedField: CombinedField) => {
-    // !!!!!!!!!!!! replace this with addCombinedField2
-    if (this.hasNameCollision(combinedField.combinedFieldName)) {
-      throw new Error(getNameCollisionMsg(combinedField.combinedFieldName));
-    }
-
-    const mappings = this.parseMappings();
-    const pipeline = this.parsePipeline();
-
-    this.props.onMappingsStringChange(
-      JSON.stringify(addCombinedFieldsToMappings(mappings, [combinedField]), null, 2)
-    );
-    this.props.onPipelineStringChange(
-      JSON.stringify(addCombinedFieldsToPipeline(pipeline, [combinedField]), null, 2)
-    );
-    this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
-
-    this.closePopover();
-  };
-
-  addCombinedField2 = (
+  addCombinedField = (
+    combinedField: CombinedField,
     addToMappings: (mappings: any) => {},
     addToPipeline: (pipeline: any) => {}
   ) => {
-    // if (this.hasNameCollision(combinedField.combinedFieldName)) {
-    //   throw new Error(getNameCollisionMsg(combinedField.combinedFieldName));
-    // }
-
     const mappings = this.parseMappings();
     const pipeline = this.parsePipeline();
 
@@ -100,7 +77,8 @@ export class CombinedFieldsForm extends Component<Props, State> {
 
     this.props.onMappingsStringChange(JSON.stringify(newMappings, null, 2));
     this.props.onPipelineStringChange(JSON.stringify(newPipeline, null, 2));
-    // this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
+
+    this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
 
     this.closePopover();
   };
@@ -215,7 +193,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
         title: semanticTextLabel,
         content: (
           <SemanticTextForm
-            addCombinedField={this.addCombinedField2}
+            addCombinedField={this.addCombinedField}
             hasNameCollision={this.hasNameCollision}
             results={this.props.results}
           />
