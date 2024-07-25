@@ -190,6 +190,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
 
+  useEffect(() => {
+    if (editor1.current) {
+      if (code !== queryString) {
+        setCode(queryString);
+      }
+    }
+  }, [code, queryString]);
+
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
   }, []);
