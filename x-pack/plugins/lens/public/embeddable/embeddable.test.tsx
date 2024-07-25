@@ -297,8 +297,8 @@ describe('embeddable', () => {
     ]);
 
     const embeddable = new Embeddable(getEmbeddableProps({}), {
-      overrideBadgeMessages: getBadgeMessage,
-    } as unknown as LensEmbeddableInput);
+      customBadgeMessages: getBadgeMessage as LensEmbeddableInput['customBadgeMessages'],
+    } as LensEmbeddableInput);
 
     const getUserMessagesSpy = jest.spyOn(embeddable, 'getUserMessages');
     await embeddable.initializeSavedVis({} as LensEmbeddableInput);
