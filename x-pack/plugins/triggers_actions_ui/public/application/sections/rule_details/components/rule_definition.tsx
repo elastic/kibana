@@ -7,13 +7,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiText,
-  EuiSpacer,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiTitle,
+  EuiSpacer,
   EuiLoadingSpinner,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
@@ -102,9 +103,91 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     return '';
   }, [rule, ruleTypeRegistry]);
 
+  const ruleDefinitionList = [
+    {
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.ruleType', {
+        defaultMessage: 'Rule type',
+      }),
+      description: ruleTypesIsLoading ? (
+        <EuiFlexItem>
+          <EuiLoadingSpinner data-test-subj="ruleSummaryRuleTypeLoadingSpinner" />
+        </EuiFlexItem>
+      ) : (
+        <ItemValueRuleSummary
+          data-test-subj="ruleSummaryRuleType"
+          itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
+        />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.description', {
+        defaultMessage: 'Description',
+      }),
+      description: (
+        <ItemValueRuleSummary
+          data-test-subj="ruleSummaryRuleDescription"
+          itemValue={ruleDescription}
+        />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.runsEvery', {
+        defaultMessage: 'Runs every',
+      }),
+      description: (
+        <ItemValueRuleSummary
+          data-test-subj="ruleSummaryRuleInterval"
+          itemValue={formatDuration(rule.schedule.interval)}
+        />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
+        defaultMessage: 'Conditions',
+      }),
+      description: (
+        <EuiFlexGroup
+          data-test-subj="ruleSummaryRuleConditions"
+          alignItems="center"
+          gutterSize="none"
+        >
+          <EuiFlexItem grow={false}>
+            {hasEditButton ? (
+              <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)} flush="left">
+                <EuiText size="s">{getRuleConditionsWording()}</EuiText>
+              </EuiButtonEmpty>
+            ) : (
+              <EuiText size="s">{getRuleConditionsWording()}</EuiText>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
+        defaultMessage: 'Actions',
+      }),
+      description: canReadActions ? (
+        <RuleActions
+          ruleActions={rule.actions}
+          actionTypeRegistry={actionTypeRegistry}
+          legacyNotifyWhen={rule.notifyWhen}
+        />
+      ) : (
+        <EuiFlexItem>
+          <EuiText size="s">
+            {i18n.translate('xpack.triggersActionsUI.ruleDetails.cannotReadActions', {
+              defaultMessage: 'Connector feature privileges are required to view actions',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      ),
+    },
+  ];
+
   return (
     <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
-      <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
+      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiTitle size="s">
             <EuiFlexItem grow={false}>
@@ -129,114 +212,8 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
             )
           )}
         </EuiFlexGroup>
-
         <EuiSpacer size="m" />
-
-        <EuiFlexGroup alignItems="baseline">
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.ruleType', {
-                  defaultMessage: 'Rule type',
-                })}
-              </ItemTitleRuleSummary>
-              {ruleTypesIsLoading ? (
-                <EuiFlexItem>
-                  <EuiLoadingSpinner data-test-subj="ruleSummaryRuleTypeLoadingSpinner" />
-                </EuiFlexItem>
-              ) : (
-                <ItemValueRuleSummary
-                  data-test-subj="ruleSummaryRuleType"
-                  itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
-                />
-              )}
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup alignItems="flexStart" responsive={false}>
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.description', {
-                  defaultMessage: 'Description',
-                })}
-              </ItemTitleRuleSummary>
-              <ItemValueRuleSummary
-                data-test-subj="ruleSummaryRuleDescription"
-                itemValue={ruleDescription}
-              />
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup>
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.runsEvery', {
-                  defaultMessage: 'Runs every',
-                })}
-              </ItemTitleRuleSummary>
-
-              <ItemValueRuleSummary
-                data-test-subj="ruleSummaryRuleInterval"
-                itemValue={formatDuration(rule.schedule.interval)}
-              />
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup alignItems="center">
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
-                  defaultMessage: 'Conditions',
-                })}
-              </ItemTitleRuleSummary>
-              <EuiFlexItem grow={3}>
-                <EuiFlexGroup
-                  data-test-subj="ruleSummaryRuleConditions"
-                  alignItems="center"
-                  gutterSize="none"
-                >
-                  <EuiFlexItem grow={false}>
-                    {hasEditButton ? (
-                      <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)} flush="left">
-                        <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                      </EuiButtonEmpty>
-                    ) : (
-                      <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="baseline">
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
-                  defaultMessage: 'Actions',
-                })}
-              </ItemTitleRuleSummary>
-              <EuiFlexItem grow={3}>
-                {canReadActions ? (
-                  <RuleActions
-                    ruleActions={rule.actions}
-                    actionTypeRegistry={actionTypeRegistry}
-                    legacyNotifyWhen={rule.notifyWhen}
-                  />
-                ) : (
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      {i18n.translate('xpack.triggersActionsUI.ruleDetails.cannotReadActions', {
-                        defaultMessage: 'Connector feature privileges are required to view actions',
-                      })}
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiDescriptionList compressed={true} type="column" listItems={ruleDefinitionList} />
       </EuiPanel>
       {editFlyoutVisible && (
         <RuleEdit
@@ -254,9 +231,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   );
 };
 
-export interface ItemTitleRuleSummaryProps {
-  children: string;
-}
 export interface ItemValueRuleSummaryProps {
   itemValue: string;
   extraSpace?: boolean;
@@ -271,16 +245,6 @@ function ItemValueRuleSummary({
     <EuiFlexItem grow={extraSpace ? 3 : 1} {...otherProps}>
       <EuiText size="s">{itemValue}</EuiText>
     </EuiFlexItem>
-  );
-}
-
-function ItemTitleRuleSummary({ children }: ItemTitleRuleSummaryProps) {
-  return (
-    <EuiTitle size="xxs">
-      <EuiFlexItem style={{ whiteSpace: 'nowrap' }} grow={1}>
-        {children}
-      </EuiFlexItem>
-    </EuiTitle>
   );
 }
 

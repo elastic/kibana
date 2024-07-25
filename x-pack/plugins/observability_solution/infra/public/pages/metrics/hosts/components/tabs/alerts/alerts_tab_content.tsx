@@ -81,7 +81,7 @@ export const AlertsTabContent = () => {
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={infraAlertFeatureIds}
               id={ALERTS_TABLE_ID}
-              pageSize={ALERTS_PER_PAGE}
+              initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
               showAlertStatusWithFlapping
             />
