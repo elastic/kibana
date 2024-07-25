@@ -1,7 +1,7 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "exclude": ["tmp", "target/**/*"],
-  "include": ["**/*"],
+  "include": ["**/*", "../common/**/*", "../server/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["node"],
