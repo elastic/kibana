@@ -287,13 +287,12 @@ export function areFieldAndVariableTypesCompatible(
   return fieldType === variableType;
 }
 
-export function printFunctionSignature(arg: ESQLFunction, useCaps = true): string {
+export function printFunctionSignature(arg: ESQLFunction): string {
   const fnDef = getFunctionDefinition(arg.name);
   if (fnDef) {
     const signature = getFunctionSignatures(
       {
         ...fnDef,
-        name: useCaps ? fnDef.name.toUpperCase() : fnDef.name,
         signatures: [
           {
             ...fnDef?.signatures[0],
@@ -310,7 +309,7 @@ export function printFunctionSignature(arg: ESQLFunction, useCaps = true): strin
           },
         ],
       },
-      { withTypes: false }
+      { withTypes: false, capitalize: true }
     );
     return signature[0].declaration;
   }
