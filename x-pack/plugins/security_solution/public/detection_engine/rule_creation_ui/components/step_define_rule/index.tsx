@@ -211,7 +211,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   } = useMLRuleConfig({ machineLearningJobId });
 
   const isMlSuppressionIncomplete =
-    isMlRule(ruleType) && machineLearningJobId?.length && !allJobsStarted;
+    isMlRule(ruleType) && machineLearningJobId?.length > 0 && !allJobsStarted;
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
