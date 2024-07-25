@@ -7,12 +7,13 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiTextProps } from '@elastic/eui';
-import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
+import type { EuiAccordionProps, EuiTextProps } from '@elastic/eui';
+import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { KeyValueDisplay } from '../key_value_display';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 import type {
   ActionDetails,
@@ -58,6 +59,7 @@ RunningProcessesActionResults.displayName = 'RunningProcessesActionResults';
 const StyledEuiBasicTable = styled(EuiBasicTable)`
   table {
     background-color: transparent;
+    font-size: inherit;
   }
 
   .euiTableHeaderCell {
@@ -135,25 +137,34 @@ const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProp
       [testId]
     );
 
+    const wrappingClassname = useMemo(() => {
+      return css({
+        '.accordion-host-name-button-content': {
+          'font-size': 'inherit',
+        },
+      });
+    }, []);
+
     return (
-      <div data-test-subj={testId()}>
+      <div data-test-subj={testId()} className={wrappingClassname}>
         {agentIds.length > 1 ? (
           agentIds.map((id) => {
             const hostName = action.hosts[id].name;
 
             return (
               <div key={hostName}>
-                <KeyValueDisplay
-                  name={hostName}
-                  value={
-                    <StyledEuiBasicTable
-                      data-test-subj={testId('processListTable')}
-                      items={action.outputs?.[id]?.content.entries ?? []}
-                      columns={columns}
-                    />
-                  }
-                />
-                <EuiSpacer />
+                <HostProcessesAccordion
+                  buttonContent={<HostNameHeader hostName={hostName} />}
+                  data-test-subj={testId('hostOutput')}
+                >
+                  <StyledEuiBasicTable
+                    data-test-subj={testId('processListTable')}
+                    items={action.outputs?.[id]?.content.entries ?? []}
+                    columns={columns}
+                  />
+                </HostProcessesAccordion>
+
+                <EuiSpacer size="m" />
               </div>
             );
           })
@@ -201,19 +212,23 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
           />
         ) : (
           agentIds.map((id) => {
+            const hostName = action.hosts[id].name;
+
             return (
               <div key={id}>
-                <KeyValueDisplay
-                  name={action.hosts[id].name}
-                  value={
-                    <ResponseActionFileDownloadLink
-                      action={action}
-                      agentId={id}
-                      canAccessFileDownloadLink={canGetRunningProcesses}
-                      data-test-subj={testId('download')}
-                    />
-                  }
-                />
+                <HostProcessesAccordion
+                  buttonContent={<HostNameHeader hostName={hostName} />}
+                  data-test-subj={testId('hostOutput')}
+                >
+                  <ResponseActionFileDownloadLink
+                    action={action}
+                    agentId={id}
+                    canAccessFileDownloadLink={canGetRunningProcesses}
+                    data-test-subj={testId('download')}
+                  />
+                </HostProcessesAccordion>
+
+                <EuiSpacer size="m" />
               </div>
             );
           })
@@ -223,3 +238,45 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
   }
 );
 SentinelOneRunningProcessesResults.displayName = 'SentinelOneRunningProcessesResults';
+
+interface HostNameHeaderProps {
+  hostName: string;
+}
+
+const HostNameHeader = memo<HostNameHeaderProps>(({ hostName }) => {
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.runningProcessesActionResults.accordionHostName"
+      defaultMessage="Host: {hostName}"
+      values={{ hostName }}
+    />
+  );
+});
+HostNameHeader.displayName = 'HostNameHeader';
+
+interface HostProcessesAccordionProps {
+  buttonContent: EuiAccordionProps['buttonContent'];
+  children: React.ReactNode;
+  'data-test-subj'?: string;
+}
+
+const HostProcessesAccordion = memo<HostProcessesAccordionProps>(
+  ({ buttonContent, 'data-test-subj': dataTestSubj, children }) => {
+    const htmlId = useGeneratedHtmlId();
+
+    // FYI: Class name used below is defined at the top-level - under component `RunningProcessesActionResults`
+    return (
+      <EuiAccordion
+        id={`ProcessesOutput_${htmlId}`}
+        initialIsOpen={false}
+        paddingSize="s"
+        data-test-subj={dataTestSubj}
+        buttonClassName="accordion-host-name-button-content"
+        buttonContent={buttonContent}
+      >
+        {children}
+      </EuiAccordion>
+    );
+  }
+);
+HostProcessesAccordion.displayName = 'HostProcessesAccordion';
