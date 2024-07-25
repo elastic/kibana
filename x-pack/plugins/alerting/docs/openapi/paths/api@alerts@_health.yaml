@@ -5,8 +5,6 @@ get:
   description: Deprecated in 7.13.0. Use the get alerting framework health API instead.
   tags:
     - alerting
-  parameters:
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.

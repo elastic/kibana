@@ -7,7 +7,6 @@ post:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: The identifier for the alert.

@@ -10,8 +10,6 @@ get:
     **Stack Monitoring** feature, use the `monitoring_user` built-in role.
   tags:
     - alerting
-  parameters:
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.

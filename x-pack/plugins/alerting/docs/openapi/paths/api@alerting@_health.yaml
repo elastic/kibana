@@ -7,8 +7,6 @@ get:
     **Analytics > Machine Learning**, **Observability**, or **Security** features.
   tags:
     - alerting
-  parameters:
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.

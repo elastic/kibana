@@ -9,7 +9,6 @@ delete:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: The identifier for the alert.
@@ -35,7 +34,6 @@ get:
   tags:
     - alerting
   parameters:
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: The identifier for the alert.
@@ -73,7 +71,6 @@ post:
       schema:
         type: string
         example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
     content:
@@ -182,7 +179,6 @@ put:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: The identifier for the alert.

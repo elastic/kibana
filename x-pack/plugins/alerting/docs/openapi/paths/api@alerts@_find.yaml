@@ -10,7 +10,6 @@ get:
   tags:
     - alerting
   parameters:
-    - $ref: '../components/parameters/space_id.yaml'
     - name: default_search_operator
       in: query
       description: The default operator to use for the `simple_query_string`.
