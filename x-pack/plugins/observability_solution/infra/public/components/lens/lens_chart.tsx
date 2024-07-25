@@ -82,7 +82,7 @@ export const LensChart = React.memo(
                     </strong>
                   </EuiText>
                   <EuiHorizontalRule margin="s" />
-                  <EuiText size="xs">
+                  <EuiText size="xs" data-test-subj="infraLensCustomErrorHanlderText">
                     <p>
                       <FormattedMessage
                         id="xpack.infra.lens.customErrorHandler.description"
@@ -92,18 +92,16 @@ export const LensChart = React.memo(
                     <p>{missingFieldsMessage && missingFieldsMessage.longMessage}</p>
                   </EuiText>
                   <EuiHorizontalRule margin="s" />
-                  <p>
-                    <EuiLink
-                      data-test-subj="infraLensCustomErrorHanlderLink"
-                      href={HOST_MISSING_FIELDS}
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.customErrorHandler.learnMoreLink"
-                        defaultMessage="Learn more"
-                      />
-                    </EuiLink>
-                  </p>
+                  <EuiLink
+                    data-test-subj="infraLensCustomErrorHanlderLink"
+                    href={HOST_MISSING_FIELDS}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.customErrorHandler.learnMoreLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
                 </>
               ),
             },
@@ -127,7 +125,7 @@ export const LensChart = React.memo(
         onBrushEnd={onBrushEnd}
         searchSessionId={searchSessionId}
         onFilter={onFilter}
-        overrideBadgeMessages={getBadgeMessages}
+        customBadgeMessages={getBadgeMessages}
       />
     );
     const content = !toolTip ? (

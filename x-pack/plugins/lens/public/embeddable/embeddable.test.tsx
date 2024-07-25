@@ -276,7 +276,7 @@ describe('embeddable', () => {
 
   it('should not call', async () => {
     const getBadgeMessage = jest.fn(
-      (): ReturnType<NonNullable<LensEmbeddableInput['overrideBadgeMessages']>> => [
+      (): ReturnType<NonNullable<LensEmbeddableInput['customBadgeMessages']>> => [
         {
           severity: 'warning',
           longMessage: 'lmao',

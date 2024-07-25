@@ -186,7 +186,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
-  overrideBadgeMessages?: (userMessages: UserMessage[]) => UseHandledMessage[];
+  customBadgeMessages?: (userMessages: UserMessage[]) => UseHandledMessage[];
 }
 
 export type LensByValueInput = {
@@ -613,7 +613,7 @@ export class Embeddable
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
   private handleExternalUserMessage = (messages: UserMessage[]) => {
-    if (this.input.overrideBadgeMessages) {
+    if (this.input.customBadgeMessages) {
       // we need something else to better identify those errors
       const messagesToHandle = messages.filter(
         (message) =>
@@ -622,7 +622,7 @@ export class Embeddable
       );
 
       if (messagesToHandle.length > 0) {
-        const userHandledMessages = this.input.overrideBadgeMessages(messagesToHandle);
+        const userHandledMessages = this.input.customBadgeMessages(messagesToHandle);
         return userHandledMessages.map((userMessage, index) => {
           const originalMessage = messagesToHandle[index];
 

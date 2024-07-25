@@ -102,6 +102,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Node Details', () => {
+    describe('#Onboarding problems', function () {
+      before(async () => {
+        await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box', 'host');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+      describe('KPIs', () => {
+        it('should render custom badge message', async () => {
+          await pageObjects.assetDetails.getAssetDetailsKPIMissingFieldMessageExists('cpuUsage');
+        });
+      });
+    });
+
     describe('#With Asset Details', () => {
       before(async () => {
         await Promise.all([
