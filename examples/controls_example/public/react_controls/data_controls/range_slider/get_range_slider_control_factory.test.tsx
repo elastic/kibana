@@ -9,6 +9,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -51,8 +52,8 @@ describe('RangesliderControlApi', () => {
     };
   });
   const mockDataViews = dataViewPluginMocks.createStartContract();
-  // @ts-ignore
-  mockDataViews.get = async (id: string): Promise<DataView> => {
+
+  mockDataViews.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -63,7 +64,7 @@ describe('RangesliderControlApi', () => {
           {
             displayName: 'My field name',
             name: 'myFieldName',
-            type: 'string',
+            type: 'number',
             toSpec: jest.fn(),
           },
         ].find((field) => fieldName === field.name);
@@ -76,7 +77,8 @@ describe('RangesliderControlApi', () => {
         };
       },
     } as unknown as DataView;
-  };
+  });
+
   const factory = getRangesliderControlFactory({
     core: coreMock.createStart(),
     data: dataStartServiceMock,
@@ -224,9 +226,11 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          currentState={{}}
+          initialState={{} as RangesliderControlState}
+          field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={jest.fn()}
+          parentApi={controlGroupApi}
         />
       );
       expect(
@@ -239,9 +243,11 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          currentState={{}}
+          initialState={{} as RangesliderControlState}
+          field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={setControlEditorValid}
+          parentApi={controlGroupApi}
         />
       );
 
@@ -250,7 +256,7 @@ describe('RangesliderControlApi', () => {
       });
       expect(setControlEditorValid).toBeCalledWith(false);
       fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
-        target: { value: '' },
+        target: { value: undefined },
       });
       expect(setControlEditorValid).toBeCalledWith(false);
       fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {

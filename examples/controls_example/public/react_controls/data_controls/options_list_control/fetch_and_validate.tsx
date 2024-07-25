@@ -17,12 +17,11 @@ import {
 } from 'rxjs';
 
 import { OptionsListSuccessResponse } from '@kbn/controls-plugin/common/options_list/types';
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
+import { DataControlServices } from '../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
 
@@ -37,11 +36,7 @@ export function fetchAndValidate$({
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  services: {
-    http: CoreStart['http'];
-    uiSettings: CoreStart['uiSettings'];
-    data: DataPublicPluginStart;
-  };
+  services: DataControlServices;
   stateManager: ControlStateManager<OptionsListComponentState>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();

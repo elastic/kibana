@@ -96,4 +96,25 @@ describe('Options list control', () => {
     const selections = control.getByTestId('optionsListSelections');
     expect(selections.textContent).toBe('1;   2 ');
   });
+
+  test('should display invalid state', async () => {
+    const mocks = getOptionsListMocks();
+    mocks.api.uuid = 'testInvalid';
+    mocks.api.availableOptions$.next([
+      { value: 'woof', docCount: 5 },
+      { value: 'bark', docCount: 10 },
+      { value: 'meow', docCount: 12 },
+    ]);
+    mocks.stateManager.selectedOptions.next(['woof', 'bark']);
+    mocks.api.invalidSelections$.next(new Set(['woof']));
+    mocks.api.fieldSpec.next({
+      name: 'Test keyword field',
+      type: 'number',
+    } as FieldSpec);
+
+    const control = mountComponent(mocks);
+    expect(
+      control.queryByTestId('optionsList__invalidSelectionsToken-testInvalid')
+    ).toBeInTheDocument();
+  });
 });

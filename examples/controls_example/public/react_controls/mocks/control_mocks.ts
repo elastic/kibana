@@ -16,13 +16,16 @@ import { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../ty
 export const getMockedControlGroupApi = (
   dashboardApi: Partial<PublishesUnifiedSearch> = {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-  }
+  },
+  overwriteApi?: Partial<ControlGroupApi>
 ) => {
   return {
     parentApi: dashboardApi,
     autoApplySelections$: new BehaviorSubject(true),
     ignoreParentSettings$: new BehaviorSubject(undefined),
     controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
+    allowExpensiveQueries$: new BehaviorSubject(true),
+    ...overwriteApi,
   } as unknown as ControlGroupApi;
 };
 

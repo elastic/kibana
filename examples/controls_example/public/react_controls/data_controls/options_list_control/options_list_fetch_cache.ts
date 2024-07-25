@@ -12,14 +12,14 @@ import hash from 'object-hash';
 import dateMath from '@kbn/datemath';
 
 import {
-  type OptionsListResponse,
-  type OptionsListRequest,
-  type OptionsListSuccessResponse,
   type OptionsListFailureResponse,
+  type OptionsListRequest,
+  type OptionsListResponse,
+  type OptionsListSuccessResponse,
 } from '@kbn/controls-plugin/common/options_list/types';
-import { DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
+import { DataControlServices } from '../types';
 
 const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
 const REQUEST_CACHE_TTL = 1000 * 60; // time to live = 1 minute
@@ -78,11 +78,7 @@ export class OptionsListFetchCache {
   public async runFetchRequest(
     request: OptionsListRequest,
     abortSignal: AbortSignal,
-    services: {
-      http: CoreStart['http'];
-      uiSettings: CoreStart['uiSettings'];
-      data: DataPublicPluginStart;
-    }
+    services: DataControlServices
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
 
@@ -95,7 +91,7 @@ export class OptionsListFetchCache {
       const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
       const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
       const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
-      const config = getEsQueryConfig(services.uiSettings);
+      const config = getEsQueryConfig(services.core.uiSettings);
       const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [], config)];
 
       const requestBody = {
@@ -103,10 +99,10 @@ export class OptionsListFetchCache {
         filters: esFilters,
         fieldName: field.name,
         fieldSpec: field,
-        runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
+        runtimeFieldMap: dataView.toSpec?.().runtimeFieldMap,
       };
 
-      const result = await services.http.fetch<OptionsListResponse>(
+      const result = await services.core.http.fetch<OptionsListResponse>(
         `/internal/controls/optionsList/${index}`,
         {
           version: '1',

@@ -15,7 +15,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory } from '../types';
+import { DataControlFactory, DataControlServices } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
@@ -25,11 +25,10 @@ import {
   RangesliderControlState,
   RangeValue,
   RANGE_SLIDER_CONTROL_TYPE,
-  Services,
 } from './types';
 
 export const getRangesliderControlFactory = (
-  services: Services
+  services: DataControlServices
 ): DataControlFactory<RangesliderControlState, RangesliderControlApi> => {
   return {
     type: RANGE_SLIDER_CONTROL_TYPE,

@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import {
@@ -16,6 +19,7 @@ import {
   PublishesPanelTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { ControlGroupApi } from '../control_group/types';
 import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: string) => string);
@@ -34,17 +38,22 @@ export type DataControlApi = DefaultControlApi &
     setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
   };
 
+export interface CustomOptionsComponentProps<
+  State extends DefaultDataControlState = DefaultDataControlState
+> {
+  initialState: Omit<State, 'fieldName'>;
+  field: DataViewField;
+  updateState: (newState: Partial<State>) => void;
+  setControlEditorValid: (valid: boolean) => void;
+  parentApi: ControlGroupApi;
+}
+
 export interface DataControlFactory<
   State extends DefaultDataControlState = DefaultDataControlState,
   Api extends DataControlApi = DataControlApi
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
-  CustomOptionsComponent?: React.FC<{
-    initialState: Omit<State, 'fieldName'>;
-    field: DataViewField;
-    updateState: (newState: Partial<State>) => void;
-    setControlEditorValid: (valid: boolean) => void;
-  }>;
+  CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
 }
 
 export const isDataControlFactory = (
@@ -57,4 +66,10 @@ export interface DefaultDataControlState extends DefaultControlState {
   dataViewId: string;
   fieldName: string;
   title?: string; // custom control label
+}
+
+export interface DataControlServices {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }

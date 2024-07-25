@@ -12,14 +12,12 @@ import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } fr
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory } from '../types';
+import { DataControlFactory, DataControlServices } from '../types';
 import {
   SearchControlApi,
   SearchControlState,
@@ -46,13 +44,9 @@ const allSearchOptions = [
 
 const DEFAULT_SEARCH_TECHNIQUE = 'match';
 
-export const getSearchControlFactory = ({
-  core,
-  dataViewsService,
-}: {
-  core: CoreStart;
-  dataViewsService: DataViewsPublicPluginStart;
-}): DataControlFactory<SearchControlState, SearchControlApi> => {
+export const getSearchControlFactory = (
+  services: DataControlServices
+): DataControlFactory<SearchControlState, SearchControlApi> => {
   return {
     type: SEARCH_CONTROL_TYPE,
     getIconType: () => 'search',
@@ -95,10 +89,7 @@ export const getSearchControlFactory = ({
         initialState,
         editorStateManager,
         parentApi,
-        {
-          core,
-          dataViews: dataViewsService,
-        }
+        services
       );
 
       const api = buildApi(

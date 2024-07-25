@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { act, render, within } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ControlStateManager } from '../../../types';
@@ -19,8 +19,6 @@ import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_
 import { getOptionsListMocks } from '../../mocks/api_mocks';
 
 describe('Options list sorting button', () => {
-  const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-
   const mountComponent = ({
     api,
     displaySettings,

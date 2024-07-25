@@ -23,16 +23,15 @@ import {
   OptionsListSuccessResponse,
   OptionsListSuggestions,
 } from '@kbn/controls-plugin/common/options_list/types';
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory } from '../types';
+import { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';
+import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
@@ -42,15 +41,10 @@ import {
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListControlApi, OptionsListControlState, OptionsListSelection } from './types';
-import { OptionsListEditorOptions } from './components/options_list_editor_options';
 
-export const getOptionsListControlFactory = ({
-  core,
-  dataService,
-}: {
-  core: CoreStart;
-  dataService: DataPublicPluginStart;
-}): DataControlFactory<OptionsListControlState, OptionsListControlApi> => {
+export const getOptionsListControlFactory = (
+  services: DataControlServices
+): DataControlFactory<OptionsListControlState, OptionsListControlApi> => {
   return {
     type: OPTIONS_LIST_CONTROL_TYPE,
     getIconType: () => 'editorChecklist',
@@ -106,10 +100,7 @@ export const getOptionsListControlFactory = ({
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
         controlGroupApi,
-        {
-          core,
-          dataViews: dataService.dataViews,
-        }
+        services
       );
 
       const stateManager = {
@@ -161,7 +152,7 @@ export const getOptionsListControlFactory = ({
       ])
         .pipe(
           distinctUntilChanged(deepEqual),
-          skip(1) // skip first filter output because it will have been applied in initialize
+          skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {
           searchString$.next('');
@@ -175,7 +166,7 @@ export const getOptionsListControlFactory = ({
       /** Fetch the suggestions and perform validation */
       const loadMoreSubject = new BehaviorSubject<null>(null);
       const fetchSubscription = fetchAndValidate$({
-        services: { http: core.http, uiSettings: core.uiSettings, data: dataService },
+        services,
         api: {
           ...dataControl.api,
           loadMoreSubject,
@@ -225,12 +216,13 @@ export const getOptionsListControlFactory = ({
       ]).subscribe(([dataViews, fieldName, selections, existsSelected, exclude]) => {
         const dataView = dataViews?.[0];
         const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+
         if (!dataView || !field) return;
 
         let newFilter: Filter | undefined;
         if (existsSelected) {
           newFilter = buildExistsFilter(field, dataView);
-        } else if (selections) {
+        } else if (selections && selections.length > 0) {
           newFilter =
             selections.length === 1
               ? buildPhraseFilter(field, selections[0], dataView)
@@ -239,8 +231,8 @@ export const getOptionsListControlFactory = ({
         if (newFilter) {
           newFilter.meta.key = field?.name;
           if (exclude) newFilter.meta.negate = true;
-          api.setOutputFilter(newFilter);
         }
+        api.setOutputFilter(newFilter);
       });
 
       const api = buildApi(
@@ -359,7 +351,7 @@ export const getOptionsListControlFactory = ({
             };
           }, []);
 
-          /** Get display settings */
+          /** Get display settings - if these are ever made editable, should be part of stateManager instead */
           const [placeholder, hideActionBar, hideExclude, hideExists, hideSort] =
             useBatchedPublishingSubjects(
               placeholder$,

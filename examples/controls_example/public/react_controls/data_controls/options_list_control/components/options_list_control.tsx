@@ -91,6 +91,7 @@ export const OptionsListControl = ({
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: string, i, { length }) => {
+                        // TODO: Fix types once https://github.com/elastic/kibana/pull/188789 is merged
                         const text = `${fieldFormatter(value)}${
                           i + 1 === length ? '' : delimiter
                         } `;
@@ -130,6 +131,7 @@ export const OptionsListControl = ({
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                     invalidSelections.size
                   )}
+                  data-test-subj={`optionsList__invalidSelectionsToken-${api.uuid}`}
                   css={{ verticalAlign: 'text-bottom' }} // Align with the notification badge
                 />
               </EuiToolTip>

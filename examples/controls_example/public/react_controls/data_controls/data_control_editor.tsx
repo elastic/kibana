@@ -208,10 +208,11 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           field={fieldRegistry[editorState.fieldName].field}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
+          parentApi={controlGroup}
         />
       </EuiDescribedFormGroup>
     );
-  }, [fieldRegistry, selectedControlType, initialState, editorState]);
+  }, [fieldRegistry, selectedControlType, initialState, editorState, controlGroup]);
 
   return (
     <>
