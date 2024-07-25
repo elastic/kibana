@@ -194,15 +194,19 @@ const deleteSloAssets = async (
   namespace: string | undefined,
   soClient: SavedObjectsClientContract
 ) => {
-  const sloClient = appContextService.getSloStart()?.sloClient;
-  if (!sloClient) {
-    return;
-  }
+  try {
+    const sloClient = appContextService.getSloStart()?.sloClient;
+    if (!sloClient) {
+      return;
+    }
 
-  const esClient = appContextService.getInternalUserESClient();
+    const esClient = appContextService.getInternalUserESClient();
 
-  for (const { id } of sloAssets) {
-    await sloClient.deleteSLO({ sloId: id, soClient, esClient, spaceId: namespace ?? 'default' });
+    for (const { id } of sloAssets) {
+      await sloClient.deleteSLO({ sloId: id, soClient, esClient, spaceId: namespace ?? 'default' });
+    }
+  } catch (err) {
+    appContextService.getLogger().error(err);
   }
 };
 
