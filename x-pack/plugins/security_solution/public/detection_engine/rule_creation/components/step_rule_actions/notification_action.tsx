@@ -131,7 +131,13 @@ export function NotificationAction({
             <EuiFlexItem grow={false}>
               <EuiIcon size="s" type="bell" color="subdued" />
             </EuiFlexItem>
-            {isRuleAction && <FrequencyDescription frequency={action.frequency} />}
+            {isRuleAction ? (
+              <FrequencyDescription frequency={action.frequency} />
+            ) : (
+              // Display frequency description for system action
+              // same text used by stack alerting
+              <DescriptionLine>{i18n.SYSTEM_ACTION_FREQUENCY}</DescriptionLine>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
