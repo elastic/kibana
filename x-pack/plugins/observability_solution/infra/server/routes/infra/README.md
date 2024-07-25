@@ -29,26 +29,7 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' 
 --data '{
    "type": 'host',
    "limit": 100,
-   "metrics": [
-      {
-         "type": "rx"
-      },
-      {
-         "type": "tx"
-      },
-      {
-         "type": "memory"
-      },
-      {
-         "type": "cpu"
-      },
-      {
-         type: 'diskSpaceUsage',
-      },
-      {
-         type: 'memoryFree',
-      },
-   ],
+   "metrics": ["rx","tx","memory","diskSpaceUsage","memoryFree"],
    "query": {
       "bool": {
          "must": [],
@@ -57,10 +38,8 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' 
          "must_not": []
       }
    },
-   "range": {
-      "from": "2023-04-18T11:15:31.407Z",
-      "to":   "2023-04-18T11:30:31.407Z"
-   },
+   "from": "2023-04-18T11:15:31.407Z",
+   "to":   "2023-04-18T11:30:31.407Z"
    "sourceId": "default"
 }'
 ```
