@@ -116,7 +116,7 @@ export default function enterSpaceFunctionalTests({
 
       await PageObjects.spaceSelector.expectRoute(
         spaceId,
-        '/app/management/kibana/objects?initialQuery=type:(visualization)#/view'
+        '/app/management/kibana/objects?initialQuery=type%3A(visualization)#/view'
       );
     });
 
