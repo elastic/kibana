@@ -71,11 +71,11 @@ export function SecuritySolutionServerlessUtils({
     createSuperTest,
 
     createBsearch: async (role = 'admin') => {
-      const credentials = rolesCredentials.get(role);
-      if (!credentials) {
-        await createSuperTest(role);
+      const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader;
+
+      if (!apiKeyHeader) {
+        new Error(`API key for role [${role}] is not available`);
       }
-      const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader ?? { Authorization: '' };
 
       const send = <T extends IEsSearchResponse>(sendOptions: SendOptions): Promise<T> => {
         const { supertest: _, ...rest } = sendOptions;
