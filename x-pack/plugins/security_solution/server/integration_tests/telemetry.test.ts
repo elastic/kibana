@@ -182,6 +182,7 @@ describe('telemetry tasks', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/178918
+  // FLAKY: https://github.com/elastic/kibana/issues/187720
   describe.skip('sender configuration', () => {
     it('should use legacy sender by default', async () => {
       // launch a random task and verify it uses the new configuration
