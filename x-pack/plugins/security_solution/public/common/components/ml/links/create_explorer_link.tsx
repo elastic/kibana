@@ -43,8 +43,6 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
         refreshInterval: {
           pause: true,
           value: 0,
-          // @ts-expect-error upgrade typescript v5.1.6
-          display: 'Off',
         },
       },
     },
