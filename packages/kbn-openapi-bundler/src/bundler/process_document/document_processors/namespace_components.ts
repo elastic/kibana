@@ -39,11 +39,15 @@ export function createNamespaceComponentsProcessor(pointer: string): DocumentNod
 
       const extractedNamespace = extractByJsonPointer(node, pointer);
 
-      if (typeof extractedNamespace !== 'string' || extractedNamespace.trim() === '') {
+      if (typeof extractedNamespace !== 'string') {
         throw new Error(`"${pointer}" should resolve to a non empty string`);
       }
 
       namespace = normalizeNamespace(extractedNamespace);
+
+      if (extractedNamespace.trim() === '') {
+        throw new Error(`Namespace becomes an empty string after normalization`);
+      }
     },
     onRefNodeLeave(node) {
       // It's enough to decorate the base name and actual object manipulation
