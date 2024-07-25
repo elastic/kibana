@@ -13,7 +13,7 @@ import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { setAlertsToUntracked } from './set_alerts_to_untracked';
 
 let clusterClient: ElasticsearchClientMock;
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 const getAuthorizedRuleTypesMock = jest.fn();
 

@@ -122,7 +122,7 @@ type SignificantItemTypeKeys = keyof typeof SIGNIFICANT_ITEM_TYPE;
 /**
  * Represents the type of significant item as determined by the SIGNIFICANT_ITEM_TYPE enumeration.
  */
-export type SignificantItemType = typeof SIGNIFICANT_ITEM_TYPE[SignificantItemTypeKeys];
+export type SignificantItemType = (typeof SIGNIFICANT_ITEM_TYPE)[SignificantItemTypeKeys];
 
 /**
  * Represents significant item metadata for a field/value pair.
