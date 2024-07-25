@@ -10,17 +10,14 @@ import {
   EuiFormRow,
   EuiText,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiSpacer,
-  EuiSwitchEvent,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiButtonEmpty,
-  EuiToolTip,
-  EuiSwitch,
   EuiPanel,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -28,7 +25,6 @@ import { css } from '@emotion/react';
 import { AlertsSettings } from '../alerts/settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import * as i18n from './translations';
-import { useDeleteKnowledgeBase } from '../assistant/api/knowledge_base/use_delete_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import {
@@ -38,20 +34,16 @@ import {
 } from '../assistant/settings/use_settings_updater/use_settings_updater';
 import { AssistantSettingsBottomBar } from '../assistant/settings/assistant_settings_bottom_bar';
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../assistant/settings/translations';
+import { SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP } from './translations';
 
 const ESQL_RESOURCE = 'esql';
-const KNOWLEDGE_BASE_INDEX_PATTERN_OLD = '.kibana-elastic-ai-assistant-kb';
 const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-(SPACE)';
 
 /**
- * Knowledge Base Settings -- enable and disable LangChain integration, Knowledge Base, and ESQL KB Documents
+ * Knowledge Base Settings -- set up the Knowledge Base and configure RAG on alerts
  */
 export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
-  const {
-    assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
-    http,
-    toasts,
-  } = useAssistantContext();
+  const { http, toasts } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
@@ -97,166 +89,80 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     isLoading,
     isFetching,
   } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
-  const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
-  const { mutate: deleteKB, isLoading: isDeletingUpKB } = useDeleteKnowledgeBase({ http });
+  const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   // Resource enabled state
   const isElserEnabled = kbStatus?.elser_exists ?? false;
-  const isKnowledgeBaseEnabled = (kbStatus?.index_exists && kbStatus?.pipeline_exists) ?? false;
   const isESQLEnabled = kbStatus?.esql_exists ?? false;
+  const isKnowledgeBaseSetup =
+    (isElserEnabled && isESQLEnabled && kbStatus?.index_exists && kbStatus?.pipeline_exists) ??
+    false;
   const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
+  const isSetupAvailable = kbStatus?.is_setup_available ?? false;
 
   // Resource availability state
-  const isLoadingKb =
-    isLoading || isFetching || isSettingUpKB || isDeletingUpKB || isSetupInProgress;
-  const isKnowledgeBaseAvailable = knowledgeBase.isEnabledKnowledgeBase && kbStatus?.elser_exists;
-  const isESQLAvailable =
-    knowledgeBase.isEnabledKnowledgeBase && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
-  // Prevent enabling if elser doesn't exist, but always allow to disable
-  const isSwitchDisabled = enableKnowledgeBaseByDefault
-    ? false
-    : !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
+  const isLoadingKb = isLoading || isFetching || isSettingUpKB || isSetupInProgress;
 
   // Calculated health state for EuiHealth component
   const elserHealth = isElserEnabled ? 'success' : 'subdued';
-  const knowledgeBaseHealth = isKnowledgeBaseEnabled ? 'success' : 'subdued';
+  const knowledgeBaseHealth = isKnowledgeBaseSetup ? 'success' : 'subdued';
   const esqlHealth = isESQLEnabled ? 'success' : 'subdued';
 
   //////////////////////////////////////////////////////////////////////////////////////////
-  // Main `Knowledge Base` switch, which toggles the `isEnabledKnowledgeBase` UI feature toggle
-  // setting that is saved to localstorage
-  const onEnableAssistantLangChainChange = useCallback(
-    (event: EuiSwitchEvent) => {
-      handleUpdateKnowledgeBaseSettings({
-        ...knowledgeBase,
-        isEnabledKnowledgeBase: event.target.checked,
-      });
+  // Main `Knowledge Base` setup button
+  const onSetupKnowledgeBaseButtonClick = useCallback(() => {
+    setupKB(ESQL_RESOURCE);
+  }, [setupKB]);
 
-      // If enabling and ELSER exists or automatic KB setup FF is enabled, try to set up automatically
-      if (event.target.checked && (enableKnowledgeBaseByDefault || kbStatus?.elser_exists)) {
-        setupKB(ESQL_RESOURCE);
-      }
-    },
-    [
-      enableKnowledgeBaseByDefault,
-      handleUpdateKnowledgeBaseSettings,
-      kbStatus?.elser_exists,
-      knowledgeBase,
-      setupKB,
-    ]
-  );
+  const toolTipContent = !isSetupAvailable ? SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP : undefined;
 
-  const isEnabledKnowledgeBaseSwitch = useMemo(() => {
-    return isLoadingKb ? (
-      <EuiLoadingSpinner size="s" />
+  const setupKnowledgeBaseButton = useMemo(() => {
+    return isKnowledgeBaseSetup ? (
+      <></>
     ) : (
-      <EuiToolTip content={isSwitchDisabled && i18n.KNOWLEDGE_BASE_TOOLTIP} position={'right'}>
-        <EuiSwitch
-          showLabel={false}
-          data-test-subj="isEnabledKnowledgeBaseSwitch"
-          disabled={isSwitchDisabled}
-          checked={knowledgeBase.isEnabledKnowledgeBase}
-          onChange={onEnableAssistantLangChainChange}
-          label={i18n.KNOWLEDGE_BASE_LABEL}
-          compressed
-        />
+      <EuiToolTip position={'bottom'} content={toolTipContent}>
+        <EuiButtonEmpty
+          color={'primary'}
+          data-test-subj={'setupKnowledgeBaseButton'}
+          disabled={!isSetupAvailable}
+          onClick={onSetupKnowledgeBaseButtonClick}
+          size="xs"
+          isLoading={isLoadingKb}
+        >
+          {i18n.SETUP_KNOWLEDGE_BASE_BUTTON}
+        </EuiButtonEmpty>
       </EuiToolTip>
     );
   }, [
+    isKnowledgeBaseSetup,
     isLoadingKb,
-    isSwitchDisabled,
-    knowledgeBase.isEnabledKnowledgeBase,
-    onEnableAssistantLangChainChange,
+    isSetupAvailable,
+    onSetupKnowledgeBaseButtonClick,
+    toolTipContent,
   ]);
 
   //////////////////////////////////////////////////////////////////////////////////////////
   // Knowledge Base Resource
-  const onEnableKB = useCallback(
-    (enabled: boolean) => {
-      if (enabled) {
-        setupKB();
-      } else {
-        deleteKB();
-      }
-    },
-    [deleteKB, setupKB]
-  );
-
-  const knowledgeBaseActionButton = useMemo(() => {
-    return isLoadingKb || !isKnowledgeBaseAvailable ? (
-      <></>
-    ) : (
-      <EuiButtonEmpty
-        color={isKnowledgeBaseEnabled ? 'danger' : 'primary'}
-        flush="left"
-        data-test-subj={'knowledgeBaseActionButton'}
-        onClick={() => onEnableKB(!isKnowledgeBaseEnabled)}
-        size="xs"
-      >
-        {isKnowledgeBaseEnabled
-          ? i18n.KNOWLEDGE_BASE_DELETE_BUTTON
-          : i18n.KNOWLEDGE_BASE_INIT_BUTTON}
-      </EuiButtonEmpty>
-    );
-  }, [isKnowledgeBaseAvailable, isKnowledgeBaseEnabled, isLoadingKb, onEnableKB]);
-
   const knowledgeBaseDescription = useMemo(() => {
-    return isKnowledgeBaseEnabled ? (
+    return isKnowledgeBaseSetup ? (
       <span data-test-subj="kb-installed">
-        {i18n.KNOWLEDGE_BASE_DESCRIPTION_INSTALLED(
-          enableKnowledgeBaseByDefault
-            ? KNOWLEDGE_BASE_INDEX_PATTERN
-            : KNOWLEDGE_BASE_INDEX_PATTERN_OLD
-        )}{' '}
-        {knowledgeBaseActionButton}
+        {i18n.KNOWLEDGE_BASE_DESCRIPTION_INSTALLED(KNOWLEDGE_BASE_INDEX_PATTERN)}
       </span>
     ) : (
-      <span data-test-subj="install-kb">
-        {i18n.KNOWLEDGE_BASE_DESCRIPTION} {knowledgeBaseActionButton}
-      </span>
+      <span data-test-subj="install-kb">{i18n.KNOWLEDGE_BASE_DESCRIPTION}</span>
     );
-  }, [enableKnowledgeBaseByDefault, isKnowledgeBaseEnabled, knowledgeBaseActionButton]);
+  }, [isKnowledgeBaseSetup]);
 
   //////////////////////////////////////////////////////////////////////////////////////////
   // ESQL Resource
-  const onEnableESQL = useCallback(
-    (enabled: boolean) => {
-      if (enabled) {
-        setupKB(ESQL_RESOURCE);
-      } else {
-        deleteKB(ESQL_RESOURCE);
-      }
-    },
-    [deleteKB, setupKB]
-  );
-
-  const esqlActionButton = useMemo(() => {
-    return isLoadingKb || !isESQLAvailable ? (
-      <></>
-    ) : (
-      <EuiButtonEmpty
-        color={isESQLEnabled ? 'danger' : 'primary'}
-        flush="left"
-        data-test-subj="esqlEnableButton"
-        onClick={() => onEnableESQL(!isESQLEnabled)}
-        size="xs"
-      >
-        {isESQLEnabled ? i18n.KNOWLEDGE_BASE_DELETE_BUTTON : i18n.KNOWLEDGE_BASE_INIT_BUTTON}
-      </EuiButtonEmpty>
-    );
-  }, [isLoadingKb, isESQLAvailable, isESQLEnabled, onEnableESQL]);
 
   const esqlDescription = useMemo(() => {
     return isESQLEnabled ? (
-      <span data-test-subj="esql-installed">
-        {i18n.ESQL_DESCRIPTION_INSTALLED} {esqlActionButton}
-      </span>
+      <span data-test-subj="esql-installed">{i18n.ESQL_DESCRIPTION_INSTALLED}</span>
     ) : (
-      <span data-test-subj="install-esql">
-        {i18n.ESQL_DESCRIPTION} {esqlActionButton}
-      </span>
+      <span data-test-subj="install-esql">{i18n.ESQL_DESCRIPTION}</span>
     );
-  }, [esqlActionButton, isESQLEnabled]);
+  }, [isESQLEnabled]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -288,7 +194,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
           }
         `}
       >
-        {isEnabledKnowledgeBaseSwitch}
+        {setupKnowledgeBaseButton}
       </EuiFormRow>
       <EuiSpacer size="s" />
 
@@ -310,30 +216,8 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
               `}
             >
               <FormattedMessage
-                defaultMessage="Configure ELSER within {machineLearning} to get started. {seeDocs}"
-                id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettings.knowledgeBaseDescription"
-                values={{
-                  machineLearning: (
-                    <EuiLink
-                      external
-                      href={http.basePath.prepend('/app/ml/trained_models')}
-                      target="_blank"
-                    >
-                      {i18n.KNOWLEDGE_BASE_ELSER_MACHINE_LEARNING}
-                    </EuiLink>
-                  ),
-                  seeDocs: (
-                    <EuiLink
-                      external
-                      href={
-                        'https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html#download-deploy-elser'
-                      }
-                      target="_blank"
-                    >
-                      {i18n.KNOWLEDGE_BASE_ELSER_SEE_DOCS}
-                    </EuiLink>
-                  ),
-                }}
+                defaultMessage="Elastic Learned Sparse EncodeR - or ELSER - is a retrieval model trained by Elastic for performing semantic search."
+                id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingsManagement.knowledgeBaseDescription"
               />
             </EuiText>
           </div>

@@ -81,7 +81,7 @@ const SINGLE_SELECTION = { asPlainText: true };
 
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
   const { consumers, errors, onChange, selectedConsumer, initialSelectedConsumer } = props;
-  const isInvalid = errors?.consumer?.length > 0;
+  const isInvalid = (errors?.consumer as string[])?.length > 0;
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
       if (selected.length > 0) {

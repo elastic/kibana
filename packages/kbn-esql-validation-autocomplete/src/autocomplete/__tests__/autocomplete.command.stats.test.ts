@@ -16,7 +16,7 @@ const allEvaFunctions = getFunctionSignaturesByReturnType(
   'stats',
   'any',
   {
-    evalMath: true,
+    scalar: true,
     grouping: false,
   },
   undefined,
@@ -73,41 +73,40 @@ describe('autocomplete.suggest', () => {
       test('on function left paren', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions(
-          'from a | stats by bucket(/',
-          [
-            ...getFieldNamesByType(['number', 'date']),
-            ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
-          ].map((field) => `${field},`)
-        );
+        await assertSuggestions('from a | stats by bucket(/', [
+          ...getFieldNamesByType(['number', 'date']).map((field) => `${field},`),
+          ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { scalar: true }).map(
+            (s) => ({ ...s, text: `${s.text},` })
+          ),
+        ]);
 
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
         await assertSuggestions('from a | stats round(round(/', [
           ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true }),
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
         await assertSuggestions('from a | stats avg(round(/', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
         await assertSuggestions('from a | stats avg(/', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }),
         ]);
         await assertSuggestions('from a | stats round(avg(/', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }, undefined, [
             'round',
           ]),
         ]);
@@ -116,9 +115,9 @@ describe('autocomplete.suggest', () => {
       test('when typing inside function left paren', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
-          ...getFieldNamesByType(['number', 'date', 'boolean']),
-          ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean'], {
-            evalMath: true,
+          ...getFieldNamesByType(['number', 'date', 'boolean', 'ip']),
+          ...getFunctionSignaturesByReturnType('stats', ['number', 'date', 'boolean', 'ip'], {
+            scalar: true,
           }),
         ];
 
@@ -132,7 +131,7 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from a | stats avg(b/) by stringField', [
           ...getFieldNamesByType('number'),
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }),
         ]);
       });
 
@@ -198,7 +197,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 =',
           ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
         ]);
       });
@@ -209,7 +208,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats avg(b) by numberField % /', [
           ...getFieldNamesByType('number'),
           '`avg(b)`',
-          ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+          ...getFunctionSignaturesByReturnType('eval', 'number', { scalar: true }),
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
