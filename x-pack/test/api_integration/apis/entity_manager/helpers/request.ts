@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Agent } from 'supertest';
+import { EntityDefinition } from '@kbn/entities-schema';
 
 export interface Auth {
   username: string;
