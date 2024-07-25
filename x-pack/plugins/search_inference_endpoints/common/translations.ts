@@ -21,8 +21,7 @@ export const CANCEL = i18n.translate('xpack.searchInferenceEndpoints.cancel', {
 export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
   {
-    defaultMessage:
-      'View and manage your deployed inference endpoints.',
+    defaultMessage: 'View and manage your deployed inference endpoints.',
   }
 );
 
