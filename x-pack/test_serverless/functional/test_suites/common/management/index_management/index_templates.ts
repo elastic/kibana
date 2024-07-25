@@ -99,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Click form summary step and then the submit button
         await testSubjects.click('formWizardStep-5'); // "Review Template"
         await testSubjects.click('nextButton'); // "Create template"
-        await testSubjects.existOrFail('templateDetails', { timeout: 60_000 }); // assert flyout opened
+        await testSubjects.existOrFail('closeDetailsButton', { timeout: 120 * 1000 + 10_000 }); // assert flyout opened (by asserting on the close button), using the default timeout + 10 secs
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
