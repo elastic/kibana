@@ -29,7 +29,7 @@ export interface IndexEndpointRuleAlertsOptions {
   count?: number;
   log?: ToolingLog;
   isServerless?: boolean;
-  kbnClient: KbnClient;
+  kbnClient?: KbnClient;
 }
 
 export interface IndexedEndpointRuleAlerts {
@@ -68,7 +68,7 @@ export const indexEndpointRuleAlerts = async ({
   await ensureEndpointRuleAlertsIndexExists(esClient);
 
   let version = kibanaPackageJson.version;
-  if (isServerless) {
+  if (isServerless && kbnClient) {
     version = await fetchFleetAvailableVersions(kbnClient);
   }
 
