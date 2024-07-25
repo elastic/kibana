@@ -67,5 +67,7 @@ RUN mkdir -p $NVM_DIR && \
 # Set after installing Node, otherwise FIPS interferes
 ENV NODE_OPTIONS="--enable-fips --openssl-config=${KBN_DIR}/.devcontainer/config/nodejs.cnf"
 
+RUN echo "xpack.security.experimental.fipsMode.enabled: true" >> config/kibana.dev.yml
+
 # This is for documentation. Ports are exposed via devcontainer.json
 EXPOSE 9200 5601
