@@ -101,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton'); // "Create template"
         await testSubjects.existOrFail('templateDetails', { timeout: 60_000 }); // assert flyout opened
 
-        await retry.tryForTime(150_000, async () => {
+        await retry.try(async () => {
           expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
         });
       });
