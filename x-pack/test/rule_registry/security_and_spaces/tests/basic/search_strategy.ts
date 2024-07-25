@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   obsOnlySpacesAll,
   logsOnlySpacesAll,
