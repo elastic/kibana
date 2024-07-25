@@ -72,8 +72,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           vars.esTestCluster.license = 'trial';
           vars.suiteTags.exclude = ['skipFIPS'];
           vars.esTestCluster.serverArgs = ['xpack.security.enabled=true'];
-          vars.security.disableTestUser = false;
-          log.success(JSON.stringify(vars.esTestCluster.serverArgs));
         }
 
         return vars;

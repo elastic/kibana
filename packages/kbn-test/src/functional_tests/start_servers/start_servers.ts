@@ -32,9 +32,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
         vars.esTestCluster.license = 'trial';
         vars.suiteTags.exclude = ['skipFIPS'];
         vars.esTestCluster.serverArgs = ['xpack.security.enabled=true'];
-        vars.security.disableTestUser = false;
-
-        log.success(JSON.stringify(vars.esTestCluster.serverArgs));
       }
 
       return vars;
