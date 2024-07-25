@@ -442,6 +442,25 @@ export class DataViewsService {
   };
 
   /**
+   * Find and load lazy data views by title.
+   * @param search Search string
+   * @param size  Number of data views to return
+   * @returns DataViewLazy[]
+   */
+  findLazy = async (search: string, size: number = 10): Promise<DataViewLazy[]> => {
+    const savedObjects = await this.savedObjectsClient.find({
+      fields: ['title'],
+      search,
+      searchFields: ['title', 'name'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.getDataViewLazy(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
+  /**
    * Gets list of index pattern ids with titles.
    * @param refresh Force refresh of index pattern list
    */
