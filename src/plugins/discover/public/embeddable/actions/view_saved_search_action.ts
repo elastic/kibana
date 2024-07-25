@@ -10,13 +10,9 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiCanAccessViewMode,
-  apiHasType,
-  apiIsOfType,
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasType,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -29,16 +25,19 @@ export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
 type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
-const compatibilityCheck = (
-  api: EmbeddableApiContext['embeddable']
-): api is ViewSavedSearchActionApi => {
-  return (
+/** Async type guards aren't supported, so need to make this an async getter instead */
+const getCompatibilityCheck = async (): Promise<
+  (api: EmbeddableApiContext['embeddable']) => api is ViewSavedSearchActionApi
+> => {
+  const { apiCanAccessViewMode, apiHasType, apiIsOfType, getInheritedViewMode } = await import(
+    '@kbn/presentation-publishing'
+  );
+  return (api: EmbeddableApiContext['embeddable']): api is ViewSavedSearchActionApi =>
     apiCanAccessViewMode(api) &&
     getInheritedViewMode(api) === ViewMode.VIEW &&
     apiHasType(api) &&
     apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
-    apiPublishesSavedSearch(api)
-  );
+    apiPublishesSavedSearch(api);
 };
 
 export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
@@ -51,6 +50,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   ) {}
 
   async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+    const compatibilityCheck = await getCompatibilityCheck();
     if (!compatibilityCheck(embeddable)) {
       return;
     }
@@ -73,6 +73,6 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
     const { capabilities } = this.application;
     const hasDiscoverPermissions =
       (capabilities.discover.show as boolean) || (capabilities.discover.save as boolean);
-    return compatibilityCheck(embeddable) && hasDiscoverPermissions;
+    return hasDiscoverPermissions && (await getCompatibilityCheck())(embeddable);
   }
 }
