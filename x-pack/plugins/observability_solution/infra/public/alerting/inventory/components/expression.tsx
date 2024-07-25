@@ -775,6 +775,8 @@ const metricUnit: Record<string, { label: string }> = {
   memory: { label: '%' },
   rx: { label: 'bits/s' },
   tx: { label: 'bits/s' },
+  rxNew: { label: 'bits' },
+  txNew: { label: 'bits' },
   logRate: { label: '/s' },
   diskIOReadBytes: { label: 'bytes/s' },
   diskIOWriteBytes: { label: 'bytes/s' },

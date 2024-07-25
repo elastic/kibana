@@ -17,6 +17,8 @@ import { memoryTotal } from './memory_total';
 import { normalizedLoad1m } from './normalized_load_1m';
 import { rx } from './rx';
 import { tx } from './tx';
+import { txNew } from './tx_new';
+import { rxNew } from './rx_new';
 
 export const snapshot = {
   cpu,
@@ -31,4 +33,6 @@ export const snapshot = {
   normalizedLoad1m,
   rx,
   tx,
+  rxNew,
+  txNew,
 };

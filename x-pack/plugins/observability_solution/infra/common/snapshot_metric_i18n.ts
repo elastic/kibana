@@ -28,6 +28,14 @@ const TranslationsLowercase = {
     defaultMessage: 'outbound traffic',
   }),
 
+  InboundTrafficLegacy: i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficText', {
+    defaultMessage: 'inbound traffic (Legacy)',
+  }),
+
+  OutboundTrafficLegacy: i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
+    defaultMessage: 'outbound traffic (Legacy)',
+  }),
+
   LogRate: i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
     defaultMessage: 'log rate',
   }),
@@ -112,15 +120,27 @@ export const toMetricOpt = (
       };
     case 'rx':
       return {
-        text: Translations.InboundTraffic,
-        textLC: TranslationsLowercase.InboundTraffic,
+        text: Translations.InboundTrafficLegacy,
+        textLC: TranslationsLowercase.InboundTrafficLegacy,
         value: 'rx',
       };
     case 'tx':
       return {
+        text: Translations.OutboundTrafficLegacy,
+        textLC: TranslationsLowercase.OutboundTrafficLegacy,
+        value: 'tx',
+      };
+    case 'rxNew':
+      return {
+        text: Translations.InboundTraffic,
+        textLC: TranslationsLowercase.InboundTraffic,
+        value: 'rxNew',
+      };
+    case 'txNew':
+      return {
         text: Translations.OutboundTraffic,
         textLC: TranslationsLowercase.OutboundTraffic,
-        value: 'tx',
+        value: 'txNew',
       };
     case 'logRate':
       return {

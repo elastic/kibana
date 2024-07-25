@@ -25,11 +25,11 @@ export const TABLE_COLUMN_LABEL = {
   }),
 
   tx: i18n.translate('xpack.infra.hostsViewPage.table.txColumnHeader', {
-    defaultMessage: 'TX (avg.)',
+    defaultMessage: 'TX (sum.)',
   }),
 
   rx: i18n.translate('xpack.infra.hostsViewPage.table.rxColumnHeader', {
-    defaultMessage: 'RX (avg.)',
+    defaultMessage: 'RX (sum.)',
   }),
 
   memoryFree: i18n.translate('xpack.infra.hostsViewPage.table.memoryFreeColumnHeader', {
