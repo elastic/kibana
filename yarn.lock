@@ -5765,10 +5765,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-endpoint-exceptions-common@link:packages/kbn-securitysolution-endpoint-exceptions-common":
-  version "0.0.0"
-  uid ""
-
 "@kbn/openapi-generator@link:packages/kbn-openapi-generator":
   version "0.0.0"
   uid ""
@@ -6266,6 +6262,10 @@
   uid ""
 
 "@kbn/securitysolution-ecs@link:packages/kbn-securitysolution-ecs":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-endpoint-exceptions-common@link:packages/kbn-securitysolution-endpoint-exceptions-common":
   version "0.0.0"
   uid ""
 
