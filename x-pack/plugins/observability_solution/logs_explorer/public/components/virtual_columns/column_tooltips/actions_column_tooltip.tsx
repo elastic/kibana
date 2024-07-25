@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
   actionsHeaderTooltipExpandAction,
@@ -26,7 +26,17 @@ const spacingCSS = css`
 
 export const ActionsColumnTooltip = () => {
   return (
-    <TooltipButton popoverTitle={actionsLabel} displayText="&nbsp;">
+    <TooltipButton
+      popoverTitle={actionsLabel}
+      displayText={
+        <>
+          &nbsp;
+          <EuiScreenReaderOnly>
+            <span>{actionsLabel}</span>
+          </EuiScreenReaderOnly>
+        </>
+      }
+    >
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
           <p>{actionsHeaderTooltipParagraph}</p>
