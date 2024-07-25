@@ -32,27 +32,8 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export async function isCreateActionCompatible(
-  core: CoreStart,
-  editorFrameService: EditorFrameService
-) {
-  let isCompatible: boolean = core.uiSettings.get(ENABLE_ESQL);
-
-  if (isCompatible && (!getDatasourceMap() || !getVisualizationMap())) {
-    const [visualizationMap, datasourceMap] = await Promise.all([
-      editorFrameService.loadVisualizations(),
-      editorFrameService.loadDatasources(),
-    ]);
-
-    if (visualizationMap && datasourceMap) {
-      setDatasourceMap(datasourceMap);
-      setVisualizationMap(visualizationMap);
-    } else {
-      isCompatible = false;
-    }
-  }
-
-  return isCompatible;
+export async function isCreateActionCompatible(core: CoreStart) {
+  return core.uiSettings.get(ENABLE_ESQL);
 }
 
 export async function executeCreateAction({
@@ -66,8 +47,6 @@ export async function executeCreateAction({
   api: PresentationContainer;
   editorFrameService: EditorFrameService;
 }) {
-  const isCompatibleAction = await isCreateActionCompatible(core, editorFrameService);
-
   const getFallbackDataView = async () => {
     const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
     if (!indexName) return null;
@@ -75,13 +54,33 @@ export async function executeCreateAction({
     return dataView;
   };
 
-  const dataView = await getFallbackDataView();
+  const [isCompatibleAction, dataView] = await Promise.all([
+    isCreateActionCompatible(core),
+    getFallbackDataView(),
+  ]);
 
   if (!isCompatibleAction || !dataView) {
     throw new IncompatibleActionError();
   }
-  const visualizationMap = getVisualizationMap();
-  const datasourceMap = getDatasourceMap();
+
+  let visualizationMap = getVisualizationMap();
+  let datasourceMap = getDatasourceMap();
+
+  if (!visualizationMap || !datasourceMap) {
+    [visualizationMap, datasourceMap] = await Promise.all([
+      editorFrameService.loadVisualizations(),
+      editorFrameService.loadDatasources(),
+    ]);
+
+    if (!visualizationMap && !datasourceMap) {
+      throw new IncompatibleActionError();
+    }
+
+    // persist for retrieval elsewhere
+    setDatasourceMap(datasourceMap);
+    setVisualizationMap(visualizationMap);
+  }
+
   const defaultIndex = dataView.getIndexPattern();
 
   const defaultEsqlQuery = {

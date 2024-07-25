@@ -44,9 +44,8 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(embeddable)) return false;
     const { isCreateActionCompatible } = await getAsyncHelpers();
-    const editorFrameService = await this.getEditorFrameService();
 
-    return isCreateActionCompatible(this.core, editorFrameService);
+    return isCreateActionCompatible(this.core);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
