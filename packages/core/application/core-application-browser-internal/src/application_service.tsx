@@ -31,6 +31,7 @@ import type {
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { HttpServiceStart } from '@kbn/core-http-server';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -59,6 +60,7 @@ export interface StartDeps {
   theme: ThemeServiceStart;
   overlays: OverlayStart;
   customBranding: CustomBrandingStart;
+  httpStart: HttpServiceStart;
 }
 
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
@@ -230,6 +232,7 @@ export class ApplicationService {
     overlays,
     theme,
     customBranding,
+    httpStart,
   }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
@@ -374,6 +377,7 @@ export class ApplicationService {
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
             hasCustomBranding$={this.hasCustomBranding$}
+            http={httpStart}
           />
         );
       },

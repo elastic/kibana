@@ -71,7 +71,7 @@ export const Route = <T extends {}>({
  * The match propagator that is part of the Route
  */
 export const MatchPropagator = () => {
-  const { executionContext } = useKibanaSharedUX().services;
+  const { executionContext } = useKibanaSharedUX().services.coreStart?.http;
   const match = useRouteMatch();
 
   useSharedUXExecutionContext(executionContext, {
