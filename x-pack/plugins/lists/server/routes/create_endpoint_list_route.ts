@@ -48,9 +48,8 @@ export const createEndpointListRoute = (router: ListsPluginRouter): void => {
           // within it to get the list if it needs details about it. Our goal is to be as fast as possible
           // and block the least amount of time with this route since it could end up in various parts of the
           // stack at some point such as repeatedly being called by endpoint agents.
-          return siemResponse.error({
+          return response.ok({
             body: CreateEndpointListResponse.parse(createdList ?? {}),
-            statusCode: 500,
           });
         } catch (err) {
           const error = transformError(err);
