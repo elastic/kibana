@@ -38,8 +38,7 @@ export const multiLineStringDiffAlgorithm = (
   const hasBaseVersion = baseVersion !== MissingVersion;
 
   const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
-    hasBaseVersion,
-    baseVersion,
+    baseVersion: hasBaseVersion ? baseVersion : undefined,
     currentVersion,
     targetVersion,
     diffOutcome,
@@ -66,15 +65,13 @@ interface MergeResult {
 }
 
 interface MergeArgs {
-  hasBaseVersion: boolean;
-  baseVersion: string | MissingVersion;
+  baseVersion: string | undefined;
   currentVersion: string;
   targetVersion: string;
   diffOutcome: ThreeWayDiffOutcome;
 }
 
 const mergeVersions = ({
-  hasBaseVersion,
   baseVersion,
   currentVersion,
   targetVersion,
@@ -104,7 +101,7 @@ const mergeVersions = ({
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       // TS does not realize that in ABC scenario, baseVersion cannot be missing
       // Missing baseVersion scenarios were handled as -AA and -AB.
-      const mergedVersion = merge(currentVersion, baseVersion as string, targetVersion, {
+      const mergedVersion = merge(currentVersion, baseVersion ?? '', targetVersion, {
         stringSeparator: /(\S+|\s+)/g, // Retains all whitespace, which we keep to preserve formatting
       });
 

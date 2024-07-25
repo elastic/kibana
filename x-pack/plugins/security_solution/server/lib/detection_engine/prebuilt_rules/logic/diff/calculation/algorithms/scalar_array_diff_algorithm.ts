@@ -40,7 +40,6 @@ export const scalarArrayDiffAlgorithm = <TValue>(
   const hasBaseVersion = baseVersion !== MissingVersion;
 
   const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
-    hasBaseVersion,
     baseVersion: hasBaseVersion ? baseVersion : undefined,
     currentVersion,
     targetVersion,
@@ -68,7 +67,6 @@ interface MergeResult<TValue> {
 }
 
 interface MergeArgs<TValue> {
-  hasBaseVersion: boolean;
   baseVersion: TValue[] | undefined;
   currentVersion: TValue[];
   targetVersion: TValue[];
@@ -76,7 +74,6 @@ interface MergeArgs<TValue> {
 }
 
 const mergeVersions = <TValue>({
-  hasBaseVersion,
   baseVersion,
   currentVersion,
   targetVersion,
@@ -108,10 +105,10 @@ const mergeVersions = <TValue>({
     }
 
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion as TValue[]);
+      const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion);
       const removedCurrent = difference(dedupedBaseVersion, dedupedCurrentVersion);
 
-      const addedTarget = difference(dedupedTargetVersion, dedupedBaseVersion as TValue[]);
+      const addedTarget = difference(dedupedTargetVersion, dedupedBaseVersion);
       const removedTarget = difference(dedupedBaseVersion, dedupedTargetVersion);
 
       const bothAdded = union(addedCurrent, addedTarget);
@@ -125,7 +122,6 @@ const mergeVersions = <TValue>({
         mergeOutcome: ThreeWayMergeOutcome.Merged,
       };
     }
-
     // Scenario -AB is treated as scenario ABC, but marked as
     // SOLVABLE, and returns the target version as the merged version
     // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
