@@ -206,7 +206,7 @@ describe('DetectionRulesClient.patchRule', () => {
     const rule = await detectionRulesClient.patchRule({ rulePatch });
 
     expect(rule.enabled).toBe(true);
-    expect(rulesClient.enable).toHaveBeenCalledWith(
+    expect(rulesClient.enableRule).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
       })
