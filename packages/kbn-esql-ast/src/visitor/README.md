@@ -66,7 +66,6 @@ As of this writing, the following expressions are defined:
 - Column identifier expression, `{type: "column"}`, like `@timestamp`
 - Source identifier expression, `{type: "source"}`, like `tsdb_index`
 - Function call expression, `{type: "function"}`, like `fn(123)`
-- Assignment expression, `[left, right]`, like `a = 123`
 - Literal expression, `{type: "literal"}`, like `123`, `"hello"`
 - List literal expression, `{type: "list"}`, like `[1, 2, 3]`, `["a", "b", "c"]`, `[true, false]`
 - Time interval expression, `{type: "interval"}`, like `1h`, `1d`, `1w`

@@ -10,10 +10,11 @@ import {
   ColumnExpressionVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
+  LiteralExpressionVisitorContext,
   SourceExpressionVisitorContext,
   type VisitorContext,
 } from './contexts';
-import type { ESQLColumn, ESQLFunction, ESQLSource } from '../types';
+import type { ESQLColumn, ESQLFunction, ESQLLiteral, ESQLSource } from '../types';
 import type { ESQLAstExpressionNode, VisitorInput, VisitorMethods, VisitorOutput } from './types';
 
 export type SharedData = Record<string, unknown>;
@@ -95,6 +96,19 @@ export class GlobalVisitorContext<
 
     const context = new FunctionCallExpressionVisitorContext(this, node, parent);
     const output = this.methods.visitFunctionCallExpression!(context, input);
+
+    return output;
+  }
+
+  public visitLiteralExpression(
+    parent: VisitorContext | null,
+    node: ESQLLiteral,
+    input: VisitorInput<Methods, 'visitLiteralExpression'>
+  ): VisitorOutput<Methods, 'visitLiteralExpression'> {
+    this.assertMethodExists('visitLiteralExpression');
+
+    const context = new LiteralExpressionVisitorContext(this, node, parent);
+    const output = this.methods.visitLiteralExpression!(context, input);
 
     return output;
   }

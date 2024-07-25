@@ -18,6 +18,7 @@ import type {
   ESQLColumn,
   ESQLCommandOption,
   ESQLFunction,
+  ESQLLiteral,
   ESQLNumberLiteral,
   ESQLSource,
 } from '../types';
@@ -68,33 +69,37 @@ export class VisitorContext<
       throw new Error('Node does not have arguments');
     }
 
-    for (const arg of node.args) {
-      yield this.visitConcreteExpression(arg, input as any);
+    for (const arg of singleItems(node.args)) {
+      yield this.visitExpressionWithExactContext(arg, input as any);
     }
   }
 
-  public visitConcreteExpression(
-    expression: ESQLAstExpressionNode,
+  public visitExpressionWithExactContext(
+    expressionNode: ESQLAstExpressionNode,
     input: ExpressionVisitorInput<Methods>
   ): ExpressionVisitorOutput<Methods> {
-    if (Array.isArray(expression)) {
-      throw new Error('not implemented');
+    if (Array.isArray(expressionNode)) {
+      throw new Error('should not happen');
     }
-    switch (expression.type) {
+    switch (expressionNode.type) {
       case 'column': {
         if (!this.ctx.methods.visitColumn) break;
-        return this.ctx.visitColumn(this, expression, input as any);
+        return this.ctx.visitColumn(this, expressionNode, input as any);
       }
       case 'source': {
         if (!this.ctx.methods.visitSource) break;
-        return this.ctx.visitSource(this, expression, input as any);
+        return this.ctx.visitSource(this, expressionNode, input as any);
       }
       case 'function': {
         if (!this.ctx.methods.visitFunctionCallExpression) break;
-        return this.ctx.visitFunctionCallExpression(this, expression, input as any);
+        return this.ctx.visitFunctionCallExpression(this, expressionNode, input as any);
+      }
+      case 'literal': {
+        if (!this.ctx.methods.visitLiteralExpression) break;
+        return this.ctx.visitLiteralExpression(this, expressionNode, input as any);
       }
     }
-    return this.ctx.visitExpression(this, expression, input as any);
+    return this.ctx.visitExpression(this, expressionNode, input as any);
   }
 }
 
@@ -259,8 +264,9 @@ export class LimitCommandVisitorContext<
 
 export class ExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
-> extends VisitorContext<Methods, Data, ESQLAstExpressionNode> {}
+  Data extends SharedData = SharedData,
+  Node extends ESQLAstExpressionNode = ESQLAstExpressionNode
+> extends VisitorContext<Methods, Data, Node> {}
 
 export class ColumnExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -276,3 +282,9 @@ export class FunctionCallExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLFunction> {}
+
+export class LiteralExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData,
+  Node extends ESQLLiteral = ESQLLiteral
+> extends ExpressionVisitorContext<Methods, Data, Node> {}

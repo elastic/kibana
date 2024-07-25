@@ -23,6 +23,9 @@ export const prettyPrintOneLine = (ast: ESQLAstQueryNode) => {
       }
       return `${ctx.node.name.toUpperCase()}${args ? `(${args})` : ''}`;
     })
+    .on('visitLiteralExpression', (ctx) => {
+      return ctx.node.value;
+    })
     .on('visitExpression', (ctx) => {
       return 'UNKNOWN_EXPRESSION';
     })

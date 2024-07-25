@@ -15,6 +15,7 @@ import type {
   ESQLSource,
   ESQLAstItem,
   ESQLFunction,
+  ESQLLiteral,
 } from '../types';
 import type { SharedData } from './global_visitor_context';
 import type {
@@ -28,6 +29,7 @@ import type {
   CommandOptionVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
+  LiteralExpressionVisitorContext,
 } from './contexts';
 
 /**
@@ -73,7 +75,9 @@ export type VisitorOutput<
 export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
   | VisitorInput<Methods, 'visitExpression'> &
       VisitorInput<Methods, 'visitColumn'> &
-      VisitorInput<Methods, 'visitSource'>
+      VisitorInput<Methods, 'visitSource'> &
+      VisitorInput<Methods, 'visitFunctionCallExpression'> &
+      VisitorInput<Methods, 'visitLiteralExpression'>
 >;
 
 /**
@@ -82,7 +86,9 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
 export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitExpression'>
   | VisitorOutput<Methods, 'visitColumn'>
-  | VisitorOutput<Methods, 'visitSource'>;
+  | VisitorOutput<Methods, 'visitSource'>
+  | VisitorOutput<Methods, 'visitFunctionCallExpression'>
+  | VisitorOutput<Methods, 'visitLiteralExpression'>;
 
 export interface VisitorMethods<
   Visitors extends VisitorMethods = any,
@@ -101,6 +107,7 @@ export interface VisitorMethods<
     any,
     any
   >;
+  visitLiteralExpression?: Visitor<LiteralExpressionVisitorContext<Visitors, Data>, any, any>;
 }
 
 /**
@@ -118,6 +125,8 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitColumn'
   : Node extends ESQLFunction
   ? 'visitFunctionCallExpression'
+  : Node extends ESQLLiteral
+  ? 'visitLiteralExpression'
   : never;
 
 /**
@@ -147,7 +156,8 @@ export type EnsureFunction<T> = T extends (...args: any[]) => any ? T : never;
  */
 export type UndefinedToVoid<T> = T extends undefined ? void : T;
 
+/** Returns `Y` if `T` is `any`, or `N` otherwise. */
 export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N;
-// type IsAny<T> = IfAny<T, true, false>;
+
+/** Converts `any` type to `void`. */
 export type AnyToVoid<T> = IfAny<T, void, T>;
-// export type RemoveVoid<T> = Exclude<T, void> extends never ? T : Exclude<T, void>;
