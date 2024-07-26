@@ -207,7 +207,7 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
 }
 
 function visitLogicalNot(ctx: LogicalNotContext) {
-  const fn = createFunction('not', ctx);
+  const fn = createFunction('not', ctx, undefined, 'unary-expression');
   fn.args.push(...collectBooleanExpression(ctx.booleanExpression()));
   // update the location of the assign based on arguments
   const argsLocationExtends = computeLocationExtends(fn);
@@ -216,7 +216,7 @@ function visitLogicalNot(ctx: LogicalNotContext) {
 }
 
 function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
-  const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx);
+  const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
   fn.args.push(...collectBooleanExpression(ctx._left), ...collectBooleanExpression(ctx._right));
   // update the location of the assign based on arguments
   const argsLocationExtends = computeLocationExtends(fn);
@@ -225,7 +225,7 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 }
 
 function visitLogicalIns(ctx: LogicalInContext) {
-  const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
+  const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx, undefined, 'binary-expression');
   const [left, ...list] = ctx.valueExpression_list();
   const leftArg = visitValueExpression(left);
   if (leftArg) {
@@ -264,7 +264,12 @@ function visitValueExpression(ctx: ValueExpressionContext) {
   }
   if (ctx instanceof ComparisonContext) {
     const comparisonNode = ctx.comparisonOperator();
-    const comparisonFn = createFunction(getComparisonName(comparisonNode), comparisonNode);
+    const comparisonFn = createFunction(
+      getComparisonName(comparisonNode),
+      comparisonNode,
+      undefined,
+      'binary-expression'
+    );
     comparisonFn.args.push(
       visitOperatorExpression(ctx._left)!,
       visitOperatorExpression(ctx._right)!

@@ -70,9 +70,25 @@ describe('function AST nodes', () => {
     });
   });
 
+  describe('"unary-expression"', () => {
+    it('logical NOT', () => {
+      const query = 'FROM a | STATS NOT b';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'not');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'unary-expression',
+        name: 'not',
+        args: [expect.any(Object)],
+      });
+    });
+  });
+
   describe('"binary-expression"', () => {
-    it('arithmetic operations', () => {
-      const ops = ['+', '-', '*', '/', '%'];
+    it('arithmetic and logical operations', () => {
+      const ops = ['+', '-', '*', '/', '%', 'and', 'or', '>', '>=', '<', '<=', '==', '!='];
 
       for (const op of ops) {
         const query = `ROW 1 ${op} 2`;
@@ -103,6 +119,34 @@ describe('function AST nodes', () => {
           },
         ]);
       }
+    });
+
+    it('logical IN', () => {
+      const query = 'FROM a | STATS a IN (1, 2, 3)';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'in');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'binary-expression',
+        name: 'in',
+        args: [expect.any(Object), expect.any(Object)],
+      });
+    });
+
+    it('logical NOT IN', () => {
+      const query = 'FROM a | STATS a NOT IN (1, 2, 3)';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'not_in');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'binary-expression',
+        name: 'not_in',
+        args: [expect.any(Object), expect.any(Object)],
+      });
     });
 
     it('assignment in ENRICH .. WITH clause', () => {
