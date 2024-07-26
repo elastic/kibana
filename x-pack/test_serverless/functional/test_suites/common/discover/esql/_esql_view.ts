@@ -286,7 +286,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('unifiedSearch_switch_modal');
         });
         await PageObjects.discover.saveSearch('esql_test');
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await testSubjects.click('esql_menu_button');
+        await testSubjects.click('switch-to-dataviews');
         await testSubjects.missingOrFail('unifiedSearch_switch_modal');
       });
 
