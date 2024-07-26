@@ -14,12 +14,14 @@ import { DataViewApiProvider } from './data_view_api';
 export type {
   InternalRequestHeader,
   RoleCredentials,
-  SupertestWithoutAuthType,
+  SupertestWithoutAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
+
+const SupertestWithoutAuthProvider = commonFunctionalServices.supertestWithoutAuth;
 
 export const services = {
   supertest: SupertestProvider,
-  supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
+  supertestWithoutAuth: SupertestWithoutAuthProvider,
   svlCommonApi: SvlCommonApiServiceProvider,
   svlReportingApi: SvlReportingServiceProvider,
   svlUserManager: commonFunctionalServices.samlAuthProvider,
