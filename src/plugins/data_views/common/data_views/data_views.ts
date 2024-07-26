@@ -194,6 +194,12 @@ export interface DataViewsServicePublicMethods {
    */
   find: (search: string, size?: number) => Promise<DataView[]>;
   /**
+   * Find and load lazy data views by title.
+   * @param search - Search string
+   * @param size - Number of results to return
+   */
+  findLazy: (search: string, size?: number) => Promise<DataViewLazy[]>;
+  /**
    * Get data view by id.
    * @param id - Id of the data view to get.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
