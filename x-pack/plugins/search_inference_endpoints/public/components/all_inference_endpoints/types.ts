@@ -9,6 +9,7 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
 export enum ServiceProviderKeys {
+  amazonbedrock = 'amazonbedrock',
   azureopenai = 'azureopenai',
   azureaistudio = 'azureaistudio',
   cohere = 'cohere',
