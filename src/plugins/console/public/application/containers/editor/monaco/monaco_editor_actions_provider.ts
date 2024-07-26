@@ -339,7 +339,6 @@ export class MonacoEditorActionsProvider {
     // get the current request on this line
     const currentRequests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
     const currentRequest = currentRequests.at(0);
-
     // if there is no request, suggest method
     if (!currentRequest) {
       return AutocompleteType.METHOD;
@@ -348,13 +347,13 @@ export class MonacoEditorActionsProvider {
     // if on the 1st line of the request, suggest method, url or url_params depending on the content
     const { startLineNumber: requestStartLineNumber } = currentRequest;
     if (lineNumber === requestStartLineNumber) {
+      // get the content on the line up until the position
       const lineContent = model.getValueInRange({
         startLineNumber: lineNumber,
         startColumn: 1,
         endLineNumber: lineNumber,
         endColumn: column,
       });
-
       const lineTokens = getLineTokens(lineContent);
       // if there is 1 or fewer tokens, suggest method
       if (lineTokens.length <= 1) {
