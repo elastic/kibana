@@ -93,7 +93,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           if (!fieldSpec || !changedOption.key) {
-            throw new Error(OptionsListStrings.popover.getInvalidSelectionMessage());
+            return; // this should never happen, but early return for type safety
           }
 
           setSelectableOptions(newSuggestions);

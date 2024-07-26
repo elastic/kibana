@@ -199,9 +199,8 @@ export const OptionsListPopoverSuggestions = ({
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, _, changedOption) => {
             if (!fieldSpec || !changedOption.key) {
-              throw new Error(OptionsListStrings.popover.getInvalidSelectionMessage());
+              return; // this should never happen, but early return for type safety
             }
-
             setSelectableOptions(newSuggestions);
             if (changedOption.key === 'exists-option') {
               optionsList.dispatch.selectExists(!Boolean(existsSelected));
