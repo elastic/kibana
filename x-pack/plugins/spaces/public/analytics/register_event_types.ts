@@ -18,6 +18,14 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
+  [FieldType.SPACE_ID_PREV]: {
+    [FieldType.SPACE_ID_PREV]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The previous ID of the space (before switching space).',
+      },
+    },
+  },
   [FieldType.SOLUTION_NEXT]: {
     [FieldType.SOLUTION_NEXT]: {
       type: 'keyword',
@@ -53,6 +61,15 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.SOLUTION_PREV],
       ...fields[FieldType.SOLUTION_NEXT],
       ...fields[FieldType.ACTION],
+    },
+  },
+  {
+    eventType: EventType.SPACE_CHANGED,
+    schema: {
+      ...fields[FieldType.SPACE_ID],
+      ...fields[FieldType.SPACE_ID_PREV],
+      ...fields[FieldType.SOLUTION_PREV],
+      ...fields[FieldType.SOLUTION_NEXT],
     },
   },
 ];

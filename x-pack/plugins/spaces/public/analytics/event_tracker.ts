@@ -11,13 +11,15 @@ import type { SolutionView } from '../../common';
 
 export enum EventType {
   SPACE_SOLUTION_CHANGED = 'space_solution_changed',
+  SPACE_CHANGED = 'space_changed',
 }
 
 export enum FieldType {
-  SPACE_ID = 'space_id',
   ACTION = 'action',
-  SOLUTION_PREV = 'solution_prev',
+  SPACE_ID = 'space_id',
+  SPACE_ID_PREV = 'space_id_prev',
   SOLUTION_NEXT = 'solution_next',
+  SOLUTION_PREV = 'solution_prev',
 }
 
 export class EventTracker {
@@ -51,6 +53,28 @@ export class EventTracker {
       [FieldType.SOLUTION_NEXT]: solution,
       [FieldType.SOLUTION_PREV]: solutionPrev,
       [FieldType.ACTION]: action,
+    });
+  }
+
+  /**
+   * Track whenever the user changes space.
+   */
+  public changeSpace({
+    prevSpaceId,
+    prevSolution,
+    nextSpaceId,
+    nextSolution,
+  }: {
+    prevSpaceId: string;
+    prevSolution?: SolutionView;
+    nextSpaceId: string;
+    nextSolution?: SolutionView;
+  }) {
+    this.track(EventType.SPACE_CHANGED, {
+      [FieldType.SPACE_ID]: nextSpaceId,
+      [FieldType.SPACE_ID_PREV]: prevSpaceId,
+      [FieldType.SOLUTION_NEXT]: nextSolution,
+      [FieldType.SOLUTION_PREV]: prevSolution,
     });
   }
 }

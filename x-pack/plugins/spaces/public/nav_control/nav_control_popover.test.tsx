@@ -20,6 +20,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { NavControlPopover } from './nav_control_popover';
 import type { Space } from '../../common';
+import { EventTracker } from '../analytics';
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
 import { SpaceSolutionBadge } from '../space_solution_badge';
 import type { SpacesManager } from '../spaces_manager';
@@ -44,6 +45,8 @@ const mockSpaces = [
   },
 ];
 
+const eventTracker = new EventTracker({ reportEvent: jest.fn() });
+
 describe('NavControlPopover', () => {
   async function setup(spaces: Space[], isSolutionNavEnabled = false) {
     const spacesManager = spacesManagerMock.create();
@@ -58,6 +61,7 @@ describe('NavControlPopover', () => {
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
         solutionNavExperiment={Promise.resolve(isSolutionNavEnabled)}
+        eventTracker={eventTracker}
       />
     );
 
@@ -80,6 +84,7 @@ describe('NavControlPopover', () => {
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
         solutionNavExperiment={Promise.resolve(false)}
+        eventTracker={eventTracker}
       />
     );
     expect(baseElement).toMatchSnapshot();
@@ -105,6 +110,7 @@ describe('NavControlPopover', () => {
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
         solutionNavExperiment={Promise.resolve(false)}
+        eventTracker={eventTracker}
       />
     );
 

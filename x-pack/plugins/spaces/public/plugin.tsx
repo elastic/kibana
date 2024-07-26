@@ -133,7 +133,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   public start(core: CoreStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment);
+      initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment, this.eventTracker);
     }
 
     return this.spacesApi;
