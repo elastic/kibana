@@ -18,7 +18,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/elastic-assistant",
     "@kbn/security-solution-navigation",
     "@kbn/shared-ux-page-kibana-template",
   ],
