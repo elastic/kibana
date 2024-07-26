@@ -780,7 +780,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PerformRuleUpgradeRequestBody'
+              oneOf:
+                - $ref: '#/components/schemas/UpgradeAllRulesRequest'
+                - $ref: '#/components/schemas/UpgradeSpecificRulesRequest'
         required: true
       responses:
         '200':
@@ -2963,6 +2965,63 @@ components:
       required:
         - type
         - is_customized
+    FieldUpgradeRequest:
+      type: object
+      properties:
+        pick_version:
+          enum:
+            - BASE
+            - CURRENT
+            - TARGET
+            - MERGED
+            - RESOLVED
+          type: string
+        resolved_value:
+          oneOf:
+            - $ref: '#/components/schemas/RuleName'
+            - $ref: '#/components/schemas/RuleTagArray'
+            - $ref: '#/components/schemas/RuleDescription'
+            - $ref: '#/components/schemas/Severity'
+            - $ref: '#/components/schemas/SeverityMapping'
+            - $ref: '#/components/schemas/RiskScore'
+            - $ref: '#/components/schemas/RiskScoreMapping'
+            - $ref: '#/components/schemas/RuleReferenceArray'
+            - $ref: '#/components/schemas/RuleFalsePositiveArray'
+            - $ref: '#/components/schemas/ThreatArray'
+            - $ref: '#/components/schemas/InvestigationGuide'
+            - $ref: '#/components/schemas/SetupGuide'
+            - $ref: '#/components/schemas/RelatedIntegrationArray'
+            - $ref: '#/components/schemas/RequiredFieldArray'
+            - $ref: '#/components/schemas/RequiredFieldArray'
+            - $ref: '#/components/schemas/MaxSignals'
+            - $ref: '#/components/schemas/BuildingBlockType'
+            - $ref: '#/components/schemas/RuleIntervalFrom'
+            - $ref: '#/components/schemas/RuleInterval'
+            - $ref: '#/components/schemas/RuleExceptionList'
+            - $ref: '#/components/schemas/RuleNameOverride'
+            - $ref: '#/components/schemas/TimestampOverride'
+            - $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+            - $ref: '#/components/schemas/TimelineTemplateId'
+            - $ref: '#/components/schemas/TimelineTemplateTitle'
+            - $ref: '#/components/schemas/IndexPatternArray'
+            - $ref: '#/components/schemas/DataViewId'
+            - $ref: '#/components/schemas/RuleQuery'
+            - $ref: '#/components/schemas/QueryLanguage'
+            - $ref: '#/components/schemas/RuleFilterArray'
+            - $ref: '#/components/schemas/SavedQueryId'
+            - $ref: '#/components/schemas/MachineLearningJobId'
+            - $ref: '#/components/schemas/AnomalyThreshold'
+            - $ref: '#/components/schemas/AnomalyThreshold'
+            - $ref: '#/components/schemas/ThreatQuery'
+            - $ref: '#/components/schemas/ThreatMapping'
+            - $ref: '#/components/schemas/ThreatIndex'
+            - $ref: '#/components/schemas/ThreatFilters'
+            - $ref: '#/components/schemas/ThreatIndicatorPath'
+            - $ref: '#/components/schemas/KqlQueryLanguage'
+            - $ref: '#/components/schemas/NewTermsFields'
+            - $ref: '#/components/schemas/HistoryWindowStart'
+      required:
+        - pick_version
     FindRulesSortField:
       enum:
         - created_at
@@ -4195,10 +4254,6 @@ components:
       required:
         - action_type_id
         - params
-    PerformRuleUpgradeRequestBody:
-      oneOf:
-        - $ref: '#/components/schemas/UpgradeAllRulesRequest'
-        - $ref: '#/components/schemas/UpgradeSpecificRulesRequest'
     PerformRuleUpgradeResponseBody:
       type: object
       properties:
@@ -4240,12 +4295,6 @@ components:
         - summary
         - results
         - errors
-    PickVersionValues:
-      enum:
-        - BASE
-        - CURRENT
-        - TARGET
-      type: string
     PlatformErrorResponse:
       type: object
       properties:
@@ -4284,6 +4333,13 @@ components:
       required:
         - command
         - config
+    QueryLanguage:
+      enum:
+        - kuery
+        - lucene
+        - eql
+        - esql
+      type: string
     QueryRule:
       allOf:
         - type: object
@@ -5215,6 +5271,13 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchProps'
         - $ref: '#/components/schemas/NewTermsRulePatchProps'
         - $ref: '#/components/schemas/EsqlRulePatchProps'
+    RulePickVersionValues:
+      enum:
+        - BASE
+        - CURRENT
+        - TARGET
+        - MERGED
+      type: string
     RulePreviewLogs:
       type: object
       properties:
@@ -5299,8 +5362,96 @@ components:
     RuleUpgradeSpecifier:
       type: object
       properties:
+        fields:
+          description: |
+            Fields that can be customized during the upgrade workflow
+            as decided in: https://github.com/elastic/kibana/issues/186544
+            Fields listed here, which are not specified in the request body,
+            will default to a `pick_version` of `MERGED`.
+          type: object
+          properties:
+            anomaly_threshold:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            building_block_type:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            data_view_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            description:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            exceptions_list:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            false_positives:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            filters:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            from:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            history_window_start:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            index:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            interval:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            language:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            machine_learning_job_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            max_signals:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            name:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            new_terms_fields:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            note:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            query:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            references:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            related_integrations:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            required_fields:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            risk_score:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            risk_score_mapping:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            rule_name_override:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            saved_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            setup:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            severity:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            severity_mapping:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            tags:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_filters:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_index:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_indicator_path:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_language:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_mapping:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_query:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timeline_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timeline_title:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timestamp_override:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
         pick_version:
-          $ref: '#/components/schemas/PickVersionValues'
+          $ref: '#/components/schemas/RulePickVersionValues'
         revision:
           type: number
         rule_id:
@@ -7009,7 +7160,7 @@ components:
             - ALL_RULES
           type: string
         pick_version:
-          $ref: '#/components/schemas/PickVersionValues'
+          $ref: '#/components/schemas/RulePickVersionValues'
       required:
         - mode
     UpgradeSpecificRulesRequest:
@@ -7020,7 +7171,7 @@ components:
             - SPECIFIC_RULES
           type: string
         pick_version:
-          $ref: '#/components/schemas/PickVersionValues'
+          $ref: '#/components/schemas/RulePickVersionValues'
         rules:
           items:
             $ref: '#/components/schemas/RuleUpgradeSpecifier'
