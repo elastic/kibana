@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
 
@@ -23,7 +24,7 @@ export const useDeleteEndpoint = () => {
 
   return useMutation(
     async ({ type, id }: MutationArgs) => {
-      await services.http.delete<{}>(`/internal/inference_endpoint/endpoints/${type}/${id}`);
+      return await services.http.delete<{}>(`/internal/inference_endpoint/endpoints/${type}/${id}`);
     },
     {
       onSuccess: () => {
@@ -32,9 +33,10 @@ export const useDeleteEndpoint = () => {
           title: i18n.DELETE_SUCCESS,
         });
       },
-      onError: (error: Error) => {
-        toasts?.addError(new Error(error?.message), {
+      onError: (error: { body: KibanaServerError }) => {
+        toasts?.addError(new Error(error.body.message), {
           title: i18n.ENDPOINT_DELETION_FAILED,
+          toastMessage: error.body.message,
         });
       },
     }
