@@ -1752,10 +1752,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.3.0":
-  version "95.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.3.0.tgz#b880012120f748e71bc2c1e4dbcf5acd514f043e"
-  integrity sha512-KKe2Yuswm0pnOpEnFdWjnekOqFQpN1rlWLp4MPLQwHTc9hMIujiRfOo66RGgc4K3p8qWhyRl/DxbxXC+NnsKiQ==
+"@elastic/eui@95.4.0":
+  version "95.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.4.0.tgz#57ac111c2a3e8125db244928a95787bbb2f318c8"
+  integrity sha512-UXmn+xgJj4pwq6MV7xMjM79GN+taTv7LBfrtRfurGwhkmvXJrOjMXWq+mfR8rU44lOS2R4AwzH5gcCBjAafLsA==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -5718,6 +5718,10 @@
   uid ""
 
 "@kbn/observability-alert-details@link:x-pack/packages/observability/alert_details":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-alerting-rule-utils@link:x-pack/packages/observability/alerting_rule_utils":
   version "0.0.0"
   uid ""
 
