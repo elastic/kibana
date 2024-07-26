@@ -181,6 +181,7 @@ const getCurrentActiveNodeHref = (
   basePath: BasePathService
 ) => {
   const [nodes] = activeNodes;
+  if (!nodes) return;
   const activeNode = nodes[nodes.length - 1];
   if (activeNode && activeNode.href) {
     return basePath.remove(activeNode.href);
