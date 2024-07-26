@@ -224,7 +224,7 @@ components:
 
     SkipRuleUpgradeReason:
       type: string
-      enum: [RULE_UP_TO_DATE]
+      enum: [RULE_UP_TO_DATE, RULE_NOT_FOUND]
 
     SkippedRuleUpgrade:
       type: object

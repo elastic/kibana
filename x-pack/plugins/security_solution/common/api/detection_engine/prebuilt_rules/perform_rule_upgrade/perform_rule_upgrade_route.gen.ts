@@ -203,7 +203,9 @@ export const UpgradeAllRulesRequest = z.object({
 });
 
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
-export const SkipRuleUpgradeReason = z.literal('RULE_UP_TO_DATE');
+export const SkipRuleUpgradeReason = z.enum(['RULE_UP_TO_DATE', 'RULE_NOT_FOUND']);
+export type SkipRuleUpgradeReasonEnum = typeof SkipRuleUpgradeReason.enum;
+export const SkipRuleUpgradeReasonEnum = SkipRuleUpgradeReason.enum;
 
 export type SkippedRuleUpgrade = z.infer<typeof SkippedRuleUpgrade>;
 export const SkippedRuleUpgrade = z.object({
