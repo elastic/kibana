@@ -1478,6 +1478,14 @@
       }
     }
   },
+  "favorite": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
   "file": {
     "dynamic": false,
     "properties": {
