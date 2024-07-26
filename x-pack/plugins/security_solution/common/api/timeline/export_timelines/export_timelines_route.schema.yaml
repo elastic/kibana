@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Import Timelines API
-  version: 8.9.0
+  version: '2023-10-31'
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-import.html
   description: Documentation
@@ -15,13 +15,16 @@ servers:
 paths:
   /api/timeline/_export:
     post:
-      operationId: exportTimelines
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ExportTimelines
       summary: Exports timelines as an NDJSON file
       tags:
         - access:securitySolution
       parameters:
         - in: query
           name: file_name
+          required: true
           schema:
             type: string
           description: The name of the file to export
