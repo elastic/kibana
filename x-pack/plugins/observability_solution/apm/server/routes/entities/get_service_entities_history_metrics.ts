@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { EntityMetrics } from '../../../common/entities/types';
 import {
   ENTITY_ID,
@@ -36,10 +37,7 @@ export async function getServiceEntitiesHistoryMetrics({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [
-            { range: { [LAST_SEEN]: { gte: start, lte: end } } },
-            { terms: { [ENTITY_ID]: entityIds } },
-          ],
+          filter: [...rangeQuery(start, end, LAST_SEEN), ...termsQuery(ENTITY_ID, ...entityIds)],
         },
       },
       aggs: {

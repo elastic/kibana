@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AGENT_NAME,
   DATA_STEAM_TYPE,
@@ -64,7 +64,7 @@ export async function getEntities({
               ...kqlQuery(kuery),
               ...environmentQuery(environment, SERVICE_ENVIRONMENT),
               ...entitiesRangeQuery(start, end),
-              { term: { [ENTITY_TYPE]: EntityType.SERVICE } },
+              ...termQuery(ENTITY_TYPE, EntityType.SERVICE),
             ],
           },
         },
