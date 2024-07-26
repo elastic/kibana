@@ -8,7 +8,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
-import { fireEvent, render, waitFor, screen } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import {
   AlertConsumers,
   ALERT_CASE_IDS,
@@ -22,12 +22,13 @@ import {
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
+  AlertsTableProps,
   FetchAlertData,
   RenderCustomActionsRowArgs,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
-import { useFetchAlerts } from './hooks/use_fetch_alerts';
+import { AlertsTable } from './alerts_table';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { DefaultSort } from './hooks';
@@ -38,8 +39,17 @@ import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
 
-jest.mock('./hooks/use_fetch_alerts');
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query');
+
+jest.mock('./alerts_table', () => {
+  return {
+    AlertsTable: jest.fn(),
+  };
+});
+const MockAlertsTable = AlertsTable as jest.Mock;
+
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
 jest.mock('./hooks/use_bulk_get_cases');
 jest.mock('./hooks/use_bulk_get_maintenance_windows');
@@ -49,7 +59,7 @@ jest.mock('@kbn/kibana-utils-plugin/public');
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
 const mockCaseService = createCasesServiceMock();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
     services: {
       application: {
@@ -71,6 +81,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
           addDanger: () => {},
         },
       },
+      data: {},
     },
   }),
 }));
@@ -295,18 +306,19 @@ storageMock.mockImplementation(() => {
 });
 
 const refetchMock = jest.fn();
-const hookUseFetchAlerts = useFetchAlerts as jest.Mock;
-const fetchAlertsResponse = {
-  alerts,
-  isInitializing: false,
-  getInspectQuery: jest.fn(),
+const mockUseSearchAlertsQuery = useSearchAlertsQuery as jest.Mock;
+const searchAlertsResponse = {
+  data: {
+    alerts,
+    ecsAlertsData,
+    oldAlertsData,
+    total: alerts.length,
+    querySnapshot: { request: [], response: [] },
+  },
   refetch: refetchMock,
-  totalAlerts: alerts.length,
-  ecsAlertsData,
-  oldAlertsData,
 };
 
-hookUseFetchAlerts.mockReturnValue([false, fetchAlertsResponse]);
+mockUseSearchAlertsQuery.mockReturnValue(searchAlertsResponse);
 
 const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
 hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
@@ -363,6 +375,16 @@ describe('AlertsTableState', () => {
     };
   };
 
+  let onPageChange: AlertsTableProps['onPageChange'];
+  let refetchAlerts: AlertsTableProps['refetchAlerts'];
+
+  MockAlertsTable.mockImplementation((props) => {
+    const { AlertsTable: AlertsTableComponent } = jest.requireActual('./alerts_table');
+    onPageChange = props.onPageChange;
+    refetchAlerts = props.refetchAlerts;
+    return <AlertsTableComponent {...props} />;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: false });
@@ -409,13 +431,13 @@ describe('AlertsTableState', () => {
     });
 
     it('remove duplicated case ids', async () => {
-      hookUseFetchAlerts.mockReturnValue([
-        false,
-        {
-          ...fetchAlertsResponse,
-          alerts: [...fetchAlertsResponse.alerts, ...fetchAlertsResponse.alerts],
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        data: {
+          ...searchAlertsResponse.data,
+          alerts: [...searchAlertsResponse.data.alerts, ...searchAlertsResponse.data.alerts],
         },
-      ]);
+      });
 
       render(<AlertsTableWithLocale {...tableProps} />);
 
@@ -425,16 +447,16 @@ describe('AlertsTableState', () => {
     });
 
     it('skips alerts with empty case ids', async () => {
-      hookUseFetchAlerts.mockReturnValue([
-        false,
-        {
-          ...fetchAlertsResponse,
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        data: {
+          ...searchAlertsResponse.data,
           alerts: [
-            { ...fetchAlertsResponse.alerts[0], 'kibana.alert.case_ids': [] },
-            fetchAlertsResponse.alerts[1],
+            { ...searchAlertsResponse.data.alerts[0], 'kibana.alert.case_ids': [] },
+            searchAlertsResponse.data.alerts[1],
           ],
         },
-      ]);
+      });
 
       render(<AlertsTableWithLocale {...tableProps} />);
 
@@ -598,13 +620,13 @@ describe('AlertsTableState', () => {
     });
 
     it('should remove duplicated maintenance window ids', async () => {
-      hookUseFetchAlerts.mockReturnValue([
-        false,
-        {
-          ...fetchAlertsResponse,
-          alerts: [...fetchAlertsResponse.alerts, ...fetchAlertsResponse.alerts],
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        data: {
+          ...searchAlertsResponse.data,
+          alerts: [...searchAlertsResponse.data.alerts, ...searchAlertsResponse.data.alerts],
         },
-      ]);
+      });
 
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
@@ -618,16 +640,16 @@ describe('AlertsTableState', () => {
     });
 
     it('should skip alerts with empty maintenance window ids', async () => {
-      hookUseFetchAlerts.mockReturnValue([
-        false,
-        {
-          ...fetchAlertsResponse,
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        data: {
+          ...searchAlertsResponse.data,
           alerts: [
-            { ...fetchAlertsResponse.alerts[0], 'kibana.alert.maintenance_window_ids': [] },
-            fetchAlertsResponse.alerts[1],
+            { ...searchAlertsResponse.data.alerts[0], 'kibana.alert.maintenance_window_ids': [] },
+            searchAlertsResponse.data.alerts[1],
           ],
         },
-      ]);
+      });
 
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
@@ -716,7 +738,7 @@ describe('AlertsTableState', () => {
         <AlertsTableWithLocale
           {...{
             ...tableProps,
-            pageSize: 1,
+            initialPageSize: 1,
           }}
         />
       );
@@ -725,26 +747,22 @@ describe('AlertsTableState', () => {
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
-      hookUseFetchAlerts.mockClear();
+      mockUseSearchAlertsQuery.mockClear();
 
       userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+      expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          pagination: {
-            pageIndex: 1,
-            pageSize: 1,
-          },
+          pageIndex: 1,
+          pageSize: 1,
         })
       );
 
-      hookUseFetchAlerts.mockClear();
+      mockUseSearchAlertsQuery.mockClear();
       userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+      expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          pagination: {
-            pageIndex: 0,
-            pageSize: 1,
-          },
+          pageIndex: 0,
+          pageSize: 1,
         })
       );
     });
@@ -754,7 +772,7 @@ describe('AlertsTableState', () => {
         <AlertsTableWithLocale
           {...{
             ...tableProps,
-            pageSize: 2,
+            initialPageSize: 2,
           }}
         />
       );
@@ -763,26 +781,22 @@ describe('AlertsTableState', () => {
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
-      hookUseFetchAlerts.mockClear();
+      mockUseSearchAlertsQuery.mockClear();
 
       userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+      expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          pagination: {
-            pageIndex: 1,
-            pageSize: 2,
-          },
+          pageIndex: 1,
+          pageSize: 2,
         })
       );
 
-      hookUseFetchAlerts.mockClear();
+      mockUseSearchAlertsQuery.mockClear();
       userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+      expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          pagination: {
-            pageIndex: 0,
-            pageSize: 2,
-          },
+          pageIndex: 0,
+          pageSize: 2,
         })
       );
     });
@@ -912,7 +926,9 @@ describe('AlertsTableState', () => {
     });
 
     it('should show the inspect button if the right prop is set', async () => {
-      const props = mockCustomProps({ showInspectButton: true });
+      const props = mockCustomProps({
+        showInspectButton: true,
+      });
       render(<AlertsTableWithLocale {...props} />);
       expect(await screen.findByTestId('inspect-icon-button')).toBeInTheDocument();
     });
@@ -921,16 +937,14 @@ describe('AlertsTableState', () => {
   describe('empty state', () => {
     beforeEach(() => {
       refetchMock.mockClear();
-      hookUseFetchAlerts.mockImplementation(() => [
-        false,
-        {
+      mockUseSearchAlertsQuery.mockReturnValue({
+        data: {
           alerts: [],
-          isInitializing: false,
-          getInspectQuery: jest.fn(),
-          refetch: refetchMock,
-          totalAlerts: 0,
+          total: 0,
+          querySnapshot: { request: [], response: [] },
         },
-      ]);
+        refetch: refetchMock,
+      });
     });
 
     it('should render an empty screen if there are no alerts', async () => {
@@ -983,6 +997,45 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...customTableProps} />);
 
       expect(screen.queryByTestId('dataGridColumnSortingButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Pagination', () => {
+    it('resets the page index when any query parameter changes', () => {
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        alerts: Array.from({ length: 100 }).map((_, i) => ({ [AlertsField.uuid]: `alert-${i}` })),
+      });
+      const { rerender } = render(<AlertsTableWithLocale {...tableProps} />);
+      act(() => {
+        onPageChange({ pageIndex: 1, pageSize: 50 });
+      });
+      rerender(
+        <AlertsTableWithLocale
+          {...tableProps}
+          query={{ bool: { filter: [{ term: { 'kibana.alert.rule.name': 'test' } }] } }}
+        />
+      );
+      expect(mockUseSearchAlertsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ pageIndex: 0 })
+      );
+    });
+
+    it('resets the page index when refetching alerts', () => {
+      mockUseSearchAlertsQuery.mockReturnValue({
+        ...searchAlertsResponse,
+        alerts: Array.from({ length: 100 }).map((_, i) => ({ [AlertsField.uuid]: `alert-${i}` })),
+      });
+      render(<AlertsTableWithLocale {...tableProps} />);
+      act(() => {
+        onPageChange({ pageIndex: 1, pageSize: 50 });
+      });
+      act(() => {
+        refetchAlerts();
+      });
+      expect(mockUseSearchAlertsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ pageIndex: 0 })
+      );
     });
   });
 });

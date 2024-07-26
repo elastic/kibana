@@ -23,6 +23,7 @@ export function defineKeyRotationRoutes({
   router,
   logger,
   config,
+  buildFlavor,
 }: RouteDefinitionParams) {
   let rotationInProgress = false;
   router.post(
@@ -41,6 +42,7 @@ export function defineKeyRotationRoutes({
       options: {
         tags: ['access:rotateEncryptionKey', 'oas-tag:saved objects'],
         description: `Rotate a key for encrypted saved objects`,
+        access: buildFlavor === 'serverless' ? 'internal' : undefined,
       },
     },
     async (context, request, response) => {

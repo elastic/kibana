@@ -83,6 +83,9 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory: TimelineFactory<T>;
   logger: Logger;
 }) => {
+  // NOTE: without this parameter, .hits.hits can be empty
+  options.retrieveResults = true;
+
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(
     map((response) => {
@@ -108,6 +111,8 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
 }) => {
+  // NOTE: without this parameter, .hits.hits can be empty
+  options.retrieveResults = true;
   const indices = request.defaultIndex ?? request.indexType;
 
   const requestSessionLeaders = {
