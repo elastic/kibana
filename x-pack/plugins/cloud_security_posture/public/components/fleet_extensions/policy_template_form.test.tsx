@@ -1601,7 +1601,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for Azure for Organisation type', async () => {
       const newPackagePolicy = getMockPolicyAzure();
 
-      const { getByTestId, queryByTestId } = render(
+      const { getByTestId, queryByTestId, getByRole } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
@@ -1617,11 +1617,6 @@ describe('<CspPolicyTemplateForm />', () => {
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-      // const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
-      // const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
-      // const clientSecretField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
-      // const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
-      // const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
       // default state for Azure with the Org selected
       expect(setupTechnologySelectorAccordion).toBeInTheDocument();
@@ -1631,15 +1626,27 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
         expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
       });
-      // // select agent-based and check for ARM template option
-      // userEvent.click(setupTechnologySelector);
-      // const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      // await waitForEuiPopoverOpen();
-      // userEvent.click(agentBasedOption);
-      // await waitFor(() => {
-      //   expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
-      //   expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
-      // });
+
+      // select agent-based and check for ARM template option
+      userEvent.click(setupTechnologySelector);
+      const agentlessOption = getByRole('option', { name: /agentless/i });
+      await waitForEuiPopoverOpen();
+      userEvent.click(agentlessOption);
+
+      const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+      const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+      const clientSecretField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
+      const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+      const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+
+      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(tenantIdField).toBeInTheDocument();
+      expect(clientIdField).toBeInTheDocument();
+      expect(clientSecretField).toBeInTheDocument();
+      expect(armTemplateSelector).not.toBeInTheDocument();
+      expect(manualSelector).not.toBeInTheDocument();
     });
 
     it('should render setup technology selector for Azure for Single Subscription type', async () => {

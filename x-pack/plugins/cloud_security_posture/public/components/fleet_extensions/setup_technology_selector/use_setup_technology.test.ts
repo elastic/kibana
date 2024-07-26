@@ -29,21 +29,21 @@ describe('useSetupTechnology', () => {
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
-    it('sets to AGENTLESS when agentless is available and AWS cloud', () => {
+    it('sets to AGENT-BASED when agentless is available and AWS cloud', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
       const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: true }));
       expect(result.current.isAgentlessAvailable).toBeTruthy();
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
-    it('sets to AGENTLESS when agentless is available and GCP cloud', () => {
+    it('sets to AGENT-BASED when agentless is available and GCP cloud', () => {
       const input = { type: CLOUDBEAT_GCP } as NewPackagePolicyInput;
       const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: true }));
       expect(result.current.isAgentlessAvailable).toBeTruthy();
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
-    it('sets to AGENTLESS when agentless is available and Azure cloud', () => {
+    it('sets to AGENT-BASED when agentless is available and Azure cloud', () => {
       const input = { type: CLOUDBEAT_AZURE } as NewPackagePolicyInput;
       const { result } = renderHook(() => useSetupTechnology({ input, isAgentlessEnabled: true }));
       expect(result.current.isAgentlessAvailable).toBeTruthy();
