@@ -291,6 +291,7 @@ describe('Output Service', () => {
   } as unknown as ReturnType<typeof mockedAgentPolicyService.list>;
 
   beforeEach(() => {
+    mockedAgentPolicyService.getByIDs.mockResolvedValue([]);
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.hasFleetServerIntegration.mockClear();
@@ -301,6 +302,10 @@ describe('Output Service', () => {
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
     mockedAgentPolicyService.update.mockReset();
+  });
+
+  afterEach(() => {
+    mockedAgentPolicyService.getByIDs.mockClear();
   });
 
   describe('create', () => {

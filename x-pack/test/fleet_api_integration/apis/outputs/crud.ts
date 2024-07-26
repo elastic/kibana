@@ -411,7 +411,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(body.message).to.eql(
-          'Logstash output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+          'Logstash output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new Elasticsearch output.'
         );
       });
 
@@ -432,7 +432,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(body.message).to.eql(
-          'Kafka output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+          'Kafka output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new Elasticsearch output.'
         );
       });
 

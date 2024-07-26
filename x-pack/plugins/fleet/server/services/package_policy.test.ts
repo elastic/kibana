@@ -2921,6 +2921,7 @@ describe('Package policy service', () => {
       version: 'WzYyMzcsMV0=',
       name: 'my-cis_kubernetes_benchmark',
       namespace: 'default',
+      output_id: null,
       description: '',
       package: {
         name: 'cis_kubernetes_benchmark',
