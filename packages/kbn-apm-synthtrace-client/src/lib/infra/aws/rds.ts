@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from '../../entity';
+/* eslint-disable max-classes-per-file */
+import { Entity, Fields } from '../../entity';
 import { Serializable } from '../../serializable';
 
 export interface AWSRdsDocument extends Fields {
@@ -28,4 +29,21 @@ export interface AWSRdsMetricsDocument extends AWSRdsDocument {
   'aws.rds.queries'?: number;
 }
 
-export class AWSRdsMetrics extends Serializable<AWSRdsMetricsDocument> {}
+class AWSRdsMetrics extends Serializable<AWSRdsMetricsDocument> {}
+
+export class AWSRds extends Entity<AWSRdsDocument> {
+  metrics(metricsFields: AWSRdsMetricsDocument) {
+    return new AWSRdsMetrics({
+      ...this.fields,
+      ...metricsFields,
+    });
+  }
+}
+
+export function awsRds(arn: string, name: string): AWSRds {
+  return new AWSRds({
+    'aws.rds.db_instance.arn': arn,
+    'aws.rds.db_instance.identifier': name,
+    'event.dataset': 'aws.rds',
+  });
+}
