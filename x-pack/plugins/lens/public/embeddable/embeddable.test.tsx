@@ -275,7 +275,7 @@ describe('embeddable', () => {
 
   it('should override embeddableBadge message', async () => {
     const getBadgeMessage = jest.fn(
-      (): ReturnType<NonNullable<LensEmbeddableInput['customBadgeMessages']>> => [
+      (): ReturnType<NonNullable<LensEmbeddableInput['onBeforeBadgesRender']>> => [
         {
           uniqueId: FIELD_NOT_FOUND,
           severity: 'warning',
@@ -322,7 +322,7 @@ describe('embeddable', () => {
         },
       }),
       {
-        customBadgeMessages: getBadgeMessage as LensEmbeddableInput['customBadgeMessages'],
+        onBeforeBadgesRender: getBadgeMessage as LensEmbeddableInput['onBeforeBadgesRender'],
       } as LensEmbeddableInput
     );
 

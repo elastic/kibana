@@ -64,7 +64,7 @@ export const LensChart = React.memo(
       searchSessionId,
     });
 
-    const getBadgeMessages = useCallback((messages: UserMessage[]) => {
+    const handleBeforeBadgesRender = useCallback((messages: UserMessage[]) => {
       const missingFieldsMessage = messages.find(
         (m) => m.uniqueId === 'field_not_found' && m.severity === 'error'
       );
@@ -128,7 +128,7 @@ export const LensChart = React.memo(
         onBrushEnd={onBrushEnd}
         searchSessionId={searchSessionId}
         onFilter={onFilter}
-        customBadgeMessages={getBadgeMessages}
+        onBeforeBadgesRender={handleBeforeBadgesRender}
       />
     );
     const content = !toolTip ? (

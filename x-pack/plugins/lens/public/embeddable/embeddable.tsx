@@ -185,7 +185,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
-  customBadgeMessages?: (userMessages: UserMessage[]) => UserMessage[];
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 export type LensByValueInput = {
@@ -612,30 +612,14 @@ export class Embeddable
   private fullAttributes: LensSavedObjectAttributes | undefined;
 
   private handleExternalUserMessage = (messages: UserMessage[]) => {
-    if (this.input.customBadgeMessages) {
+    if (this.input.onBeforeBadgesRender) {
       // we need something else to better identify those errors
-      const { messagesToHandle, originalMessages } = messages.reduce<{
-        messagesToHandle: UserMessage[];
-        originalMessages: UserMessage[];
-      }>(
-        (acc, message) => {
-          const hasEmbeddableBadge = message.displayLocations.some(
-            (d) => d.id === 'embeddableBadge'
-          );
-
-          if (hasEmbeddableBadge) {
-            acc.messagesToHandle.push(message);
-          } else {
-            acc.originalMessages.push(message);
-          }
-
-          return acc;
-        },
-        { messagesToHandle: [], originalMessages: [] }
+      const [messagesToHandle, originalMessages] = partition(messages, (message) =>
+        message.displayLocations.some((location) => location.id === 'embeddableBadge')
       );
 
       if (messagesToHandle.length > 0) {
-        const customBadgeMessages = this.input.customBadgeMessages(messagesToHandle);
+        const customBadgeMessages = this.input.onBeforeBadgesRender(messagesToHandle);
         return [...originalMessages, ...customBadgeMessages];
       }
     }
