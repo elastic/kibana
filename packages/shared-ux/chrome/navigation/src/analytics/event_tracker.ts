@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { AnalyticsServiceStart } from '@kbn/core/public';
+
+export enum EventType {
+  CLICK_NAVLINK = 'click_navlink',
+}
+
+export enum FieldType {
+  ID = 'id',
+  HREF = 'href',
+  PREV_HREF = 'prev_href',
+}
+
+export class EventTracker {
+  constructor(private analytics: Pick<AnalyticsServiceStart, 'reportEvent'>) {}
+
+  private track(eventType: string, eventFields: object) {
+    try {
+      this.analytics.reportEvent(eventType, eventFields);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }
+
+  /*
+   * Track whenever a user clicks on a navigation link in the side nav
+   */
+  public clickNavLink({ id, href, prevHref }: { id: string; href?: string; prevHref?: string }) {
+    this.track(EventType.CLICK_NAVLINK, {
+      [FieldType.ID]: id,
+      [FieldType.HREF]: href,
+      [FieldType.PREV_HREF]: prevHref,
+    });
+  }
+}
