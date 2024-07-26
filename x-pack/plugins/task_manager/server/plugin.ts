@@ -18,6 +18,8 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
+import { ServerlessPluginStart } from '@kbn/serverless/server';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -43,6 +45,7 @@ import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
+import { getDefaultCapacity } from './lib/get_default_capacity';
 
 export interface TaskManagerSetupContract {
   /**
@@ -76,6 +79,11 @@ export type TaskManagerStartContract = Pick<
     getRegisteredTypes: () => string[];
   };
 
+export interface TaskManagerPluginStart {
+  cloud?: CloudStart;
+  serverless?: ServerlessPluginStart;
+}
+
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
 
 export class TaskManagerPlugin
@@ -99,6 +107,7 @@ export class TaskManagerPlugin
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private kibanaDiscoveryService?: KibanaDiscoveryService;
+  private heapSizeLimit: number = 0;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -121,6 +130,13 @@ export class TaskManagerPlugin
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
+    core.metrics
+      .getOpsMetrics$()
+      .pipe(distinctUntilChanged())
+      .subscribe((metrics) => {
+        this.heapSizeLimit = metrics.process.memory.heap.size_limit;
+      });
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -232,12 +248,10 @@ export class TaskManagerPlugin
     };
   }
 
-  public start({
-    savedObjects,
-    elasticsearch,
-    executionContext,
-    docLinks,
-  }: CoreStart): TaskManagerStartContract {
+  public start(
+    { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
+    { cloud, serverless }: TaskManagerPluginStart
+  ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
@@ -267,10 +281,29 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
     });
 
+    const defaultCapacity = getDefaultCapacity({
+      claimStrategy: this.config?.claim_strategy,
+      heapSizeLimit: this.heapSizeLimit,
+      isCloud: cloud?.isCloudEnabled ?? false,
+      isServerless: !!serverless,
+      isBackgroundTaskNodeOnly: this.isNodeBackgroundTasksOnly(),
+    });
+
+    this.logger.info(
+      `Task manager isCloud=${
+        cloud?.isCloudEnabled ?? false
+      } isServerless=${!!serverless} claimStrategy=${
+        this.config!.claim_strategy
+      } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
+        this.heapSizeLimit
+      } defaultCapacity=${defaultCapacity}`
+    );
+
     const managedConfiguration = createManagedConfiguration({
-      logger: this.logger,
-      errors$: taskStore.errors$,
       config: this.config!,
+      errors$: taskStore.errors$,
+      defaultCapacity,
+      logger: this.logger,
     });
 
     // Only poll for tasks if configured to run tasks
