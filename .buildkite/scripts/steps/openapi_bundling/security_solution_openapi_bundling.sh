@@ -23,6 +23,11 @@ check_for_changed_files "yarn openapi:bundle:entity-analytics" true
 
 echo -e "\n[Security Solution OpenAPI Bundling] Lists API\n"
 
+echo -e "\n[Security Solution OpenAPI Bundling] Endpoint Management API\n"
+
+(cd x-pack/plugins/security_solution && yarn openapi:bundle:endpoint-management)
+check_for_changed_files "yarn openapi:bundle:endpoint-management" true
+
 (cd packages/kbn-securitysolution-lists-common && yarn openapi:bundle)
 check_for_changed_files "yarn openapi:bundle" true
 
