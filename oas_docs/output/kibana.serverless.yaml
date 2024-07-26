@@ -273,8 +273,9 @@ paths:
                         type: string
   /api/actions/connector:
     post:
-      summary: Create a connector
+      summary: Create a connector with a random ID
       operationId: createConnector
+      description: The connector identifier is randomly generated.
       tags:
         - connectors
       parameters:
@@ -320,8 +321,6 @@ paths:
                     #/components/examples/Connectors_create_xmatters_connector_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/actions/connector/{connectorId}:
     get:
       summary: Get a connector information
@@ -344,8 +343,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_apiKeyAuth: []
     delete:
       summary: Delete a connector
       operationId: deleteConnector
@@ -361,8 +358,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_apiKeyAuth: []
     post:
       summary: Create a connector
       operationId: createConnectorId
@@ -402,8 +397,6 @@ paths:
                     #/components/examples/Connectors_create_index_connector_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
     put:
       summary: Update a connector
       operationId: updateConnector
@@ -435,8 +428,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/actions/connectors:
     get:
       summary: Get all connectors
@@ -458,8 +449,6 @@ paths:
                   $ref: '#/components/examples/Connectors_get_connectors_response'
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/actions/connector_types:
     get:
       summary: Get all connector types
@@ -532,8 +521,6 @@ paths:
                     #/components/examples/Connectors_get_connector_types_generativeai_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/data_views:
     get:
       summary: Get all data views
@@ -2048,42 +2035,6 @@ paths:
       security:
         - Kibana_HTTP_APIs_basicAuth: []
 components:
-  securitySchemes:
-    Connectors_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
-    Machine_learning_APIs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: ApiKey
-    Serverless_saved_objects_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
-    SLOs_basicAuth:
-      type: http
-      scheme: basic
-    SLOs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-    Kibana_HTTP_APIs_apiKeyAuth:
-      in: header
-      name: Authorization
-      type: apiKey
-    Kibana_HTTP_APIs_basicAuth:
-      scheme: basic
-      type: http
   parameters:
     Connectors_kbn_xsrf:
       schema:
@@ -9111,6 +9062,34 @@ components:
                 example: 404
                 enum:
                   - 404
+  securitySchemes:
+    Machine_learning_APIs_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+    Serverless_saved_objects_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        Serverless APIs support only key-based authentication. You must create
+        an API key and use the encoded value in the request header. For example:
+        'Authorization: ApiKey base64AccessApiKey'.
+    SLOs_basicAuth:
+      type: http
+      scheme: basic
+    SLOs_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+    Kibana_HTTP_APIs_apiKeyAuth:
+      in: header
+      name: Authorization
+      type: apiKey
+    Kibana_HTTP_APIs_basicAuth:
+      scheme: basic
+      type: http
 x-tagGroups:
   - name: APM UI
     tags:
