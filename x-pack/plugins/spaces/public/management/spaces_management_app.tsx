@@ -53,8 +53,8 @@ export const spacesManagementApp = Object.freeze({
         const [
           [coreStart, { features }],
           { SpacesGridPage },
-          { ManageSpacePage },
-          { ViewSpacePage },
+          { ManageSpacePage: CreateSpacePage },
+          { ViewSpacePage: EditSpacePage },
         ] = await Promise.all([
           getStartServices(),
           import('./spaces_grid'),
@@ -98,7 +98,7 @@ export const spacesManagementApp = Object.freeze({
           ]);
 
           return (
-            <ManageSpacePage
+            <CreateSpacePage
               capabilities={application.capabilities}
               getFeatures={features.getFeatures}
               notifications={notifications}
@@ -110,22 +110,17 @@ export const spacesManagementApp = Object.freeze({
           );
         };
 
-        const SpacePageWithBreadcrumbs = ({ context }: { context: 'edit' | 'view' }) => {
+        const EditSpacePageWithBreadcrumbs = () => {
           const { spaceId, selectedTabId } = useParams<{
             spaceId: string;
             selectedTabId?: string;
           }>();
 
           const breadcrumbText = (space: Space) =>
-            context === 'edit'
-              ? i18n.translate('xpack.spaces.management.editSpaceBreadcrumb', {
-                  defaultMessage: 'Edit {space}',
-                  values: { space: space.name },
-                })
-              : i18n.translate('xpack.spaces.management.viewSpaceBreadcrumb', {
-                  defaultMessage: 'View {space}',
-                  values: { space: space.name },
-                });
+            i18n.translate('xpack.spaces.management.editSpaceBreadcrumb', {
+              defaultMessage: 'Edit {space}',
+              values: { space: space.name },
+            });
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
@@ -136,24 +131,8 @@ export const spacesManagementApp = Object.freeze({
             ]);
           };
 
-          if (context === 'edit') {
-            return (
-              <ManageSpacePage
-                capabilities={application.capabilities}
-                getFeatures={features.getFeatures}
-                notifications={notifications}
-                spacesManager={spacesManager}
-                spaceId={spaceId}
-                onLoadSpace={onLoadSpace}
-                history={history}
-                allowFeatureVisibility={config.allowFeatureVisibility}
-                solutionNavExperiment={solutionNavExperiment}
-              />
-            );
-          }
-
           return (
-            <ViewSpacePage
+            <EditSpacePage
               capabilities={application.capabilities}
               getFeatures={features.getFeatures}
               getUrlForApp={application.getUrlForApp}
@@ -185,11 +164,8 @@ export const spacesManagementApp = Object.freeze({
                     <Route path="/create">
                       <CreateSpacePageWithBreadcrumbs />
                     </Route>
-                    <Route path="/edit/:spaceId">
-                      <SpacePageWithBreadcrumbs context="edit" />
-                    </Route>
-                    <Route path={['/view/:spaceId', '/view/:spaceId/:selectedTabId']} exact>
-                      <SpacePageWithBreadcrumbs context="view" />
+                    <Route path={['/edit/:spaceId', '/edit/:spaceId/:selectedTabId']} exact>
+                      <EditSpacePageWithBreadcrumbs />
                     </Route>
                   </Routes>
                 </Router>

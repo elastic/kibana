@@ -269,7 +269,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
                     href={addSpaceIdToPath(
                       props.serverBasePath,
                       space.id,
-                      `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/view/${space.id}`
+                      `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${space.id}`
                     )}
                     data-test-subj="spaceSwitcherButton"
                   >
@@ -296,7 +296,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
                   append={tab.append}
                   {...reactRouterNavigate(
                     history,
-                    `/view/${encodeURIComponent(space.id)}/${tab.id}`
+                    `/edit/${encodeURIComponent(space.id)}/${tab.id}`
                   )}
                 >
                   {tab.name}

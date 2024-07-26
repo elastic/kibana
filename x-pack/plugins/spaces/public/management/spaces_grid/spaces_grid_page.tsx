@@ -266,7 +266,7 @@ export class SpacesGridPage extends Component<Props, State> {
           return (
             <Suspense fallback={<EuiLoadingSpinner />}>
               <EuiLink
-                {...reactRouterNavigate(this.props.history, this.getViewSpacePath(rowRecord))}
+                {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
               >
                 <LazySpaceAvatar space={rowRecord} size="s" />
               </EuiLink>
@@ -284,7 +284,7 @@ export class SpacesGridPage extends Component<Props, State> {
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <EuiLink
-                {...reactRouterNavigate(this.props.history, this.getViewSpacePath(rowRecord))}
+                {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
                 data-test-subj={`${rowRecord.id}-hyperlink`}
               >
                 {value}
@@ -465,8 +465,6 @@ export class SpacesGridPage extends Component<Props, State> {
 
     return config;
   }
-
-  private getViewSpacePath = (space: Space) => `view/${encodeURIComponent(space.id)}`;
 
   private getEditSpacePath = (space: Space) => `edit/${encodeURIComponent(space.id)}`;
 
