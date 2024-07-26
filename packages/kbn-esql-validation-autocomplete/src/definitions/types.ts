@@ -15,7 +15,6 @@ export const supportedFieldTypes = [
   'unsigned_long',
   'long',
   'integer',
-  'int',
   'counter_integer',
   'counter_long',
   'counter_double',
@@ -49,7 +48,6 @@ export type FunctionParameterType =
   | 'unsigned_long[]'
   | 'long[]'
   | 'integer[]'
-  | 'int[]'
   | 'counter_integer[]'
   | 'counter_long[]'
   | 'counter_double[]'

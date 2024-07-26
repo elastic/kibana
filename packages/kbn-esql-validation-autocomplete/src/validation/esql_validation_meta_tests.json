@@ -25,10 +25,6 @@
       "type": "integer"
     },
     {
-      "name": "intField",
-      "type": "int"
-    },
-    {
       "name": "counterIntegerField",
       "type": "counter_integer"
     },
@@ -3940,46 +3936,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where intField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where intField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where intField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where intField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where intField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where intField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where intField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where intField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | where counterIntegerField IS NULL",
       "error": [],
       "warning": []
@@ -4807,41 +4763,6 @@
     },
     {
       "query": "from a_index | eval integerField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval intField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval intField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval intField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval intField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval intField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval intField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval intField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -13284,14 +13205,6 @@
     {
       "query": "from a_index | where greatest(doubleField, doubleField) > 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where greatest(cartesianPointField, cartesianPointField) > 0",
-      "error": [
-        "Argument of [greatest] must be [boolean], found value [cartesianPointField] type [cartesian_point]",
-        "Argument of [greatest] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
-      ],
       "warning": []
     },
     {
@@ -26991,81 +26904,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = avg(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(avg(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(avg(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(avg(intField)) + avg(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(avg(intField)) + avg(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = avg(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), avg(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = avg(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(intField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = avg(intField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), avg(intField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = avg(intField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), avg(intField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = avg(intField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | stats var = avg(counterIntegerField)",
       "error": [],
       "warning": []
@@ -27537,20 +27375,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where avg(intField)",
-      "error": [
-        "WHERE does not support function avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where avg(intField) > 0",
-      "error": [
-        "WHERE does not support function avg"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where avg(counterIntegerField)",
       "error": [
         "WHERE does not support function avg"
@@ -27657,34 +27481,6 @@
     },
     {
       "query": "from a_index | eval avg(integerField) > 0",
-      "error": [
-        "EVAL does not support function avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = avg(intField)",
-      "error": [
-        "EVAL does not support function avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = avg(intField) > 0",
-      "error": [
-        "EVAL does not support function avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval avg(intField)",
-      "error": [
-        "EVAL does not support function avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval avg(intField) > 0",
       "error": [
         "EVAL does not support function avg"
       ],
@@ -27989,81 +27785,6 @@
       "error": [
         "Using wildcards (*) in sum is not allowed"
       ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = sum(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(sum(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(sum(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(sum(intField)) + sum(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(sum(intField)) + sum(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = sum(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), sum(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = sum(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats sum(intField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = sum(intField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), sum(intField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = sum(intField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), sum(intField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = sum(intField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
       "warning": []
     },
     {
@@ -28538,20 +28259,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where sum(intField)",
-      "error": [
-        "WHERE does not support function sum"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where sum(intField) > 0",
-      "error": [
-        "WHERE does not support function sum"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where sum(counterIntegerField)",
       "error": [
         "WHERE does not support function sum"
@@ -28658,34 +28365,6 @@
     },
     {
       "query": "from a_index | eval sum(integerField) > 0",
-      "error": [
-        "EVAL does not support function sum"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = sum(intField)",
-      "error": [
-        "EVAL does not support function sum"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = sum(intField) > 0",
-      "error": [
-        "EVAL does not support function sum"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval sum(intField)",
-      "error": [
-        "EVAL does not support function sum"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval sum(intField) > 0",
       "error": [
         "EVAL does not support function sum"
       ],
@@ -28990,81 +28669,6 @@
       "error": [
         "Using wildcards (*) in median is not allowed"
       ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = median(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats median(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(median(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(median(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(median(intField)) + median(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(median(intField)) + median(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = median(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), median(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = median(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats median(intField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = median(intField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), median(intField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = median(intField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), median(intField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = median(intField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
       "warning": []
     },
     {
@@ -29539,20 +29143,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where median(intField)",
-      "error": [
-        "WHERE does not support function median"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where median(intField) > 0",
-      "error": [
-        "WHERE does not support function median"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where median(counterIntegerField)",
       "error": [
         "WHERE does not support function median"
@@ -29659,34 +29249,6 @@
     },
     {
       "query": "from a_index | eval median(integerField) > 0",
-      "error": [
-        "EVAL does not support function median"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = median(intField)",
-      "error": [
-        "EVAL does not support function median"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = median(intField) > 0",
-      "error": [
-        "EVAL does not support function median"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval median(intField)",
-      "error": [
-        "EVAL does not support function median"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval median(intField) > 0",
       "error": [
         "EVAL does not support function median"
       ],
@@ -29991,81 +29553,6 @@
       "error": [
         "Using wildcards (*) in median_absolute_deviation is not allowed"
       ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = median_absolute_deviation(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats median_absolute_deviation(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(median_absolute_deviation(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(median_absolute_deviation(intField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(median_absolute_deviation(intField)) + median_absolute_deviation(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(median_absolute_deviation(intField)) + median_absolute_deviation(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = median_absolute_deviation(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), median_absolute_deviation(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = median_absolute_deviation(intField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats median_absolute_deviation(intField) by round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = median_absolute_deviation(intField) by var1 = round(doubleField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), median_absolute_deviation(intField) by round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = median_absolute_deviation(intField) by var1 = round(doubleField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), median_absolute_deviation(intField) by round(doubleField / 2), doubleField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(doubleField), var0 = median_absolute_deviation(intField) by var1 = round(doubleField / 2), doubleField / 2",
-      "error": [],
       "warning": []
     },
     {
@@ -30540,20 +30027,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where median_absolute_deviation(intField)",
-      "error": [
-        "WHERE does not support function median_absolute_deviation"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where median_absolute_deviation(intField) > 0",
-      "error": [
-        "WHERE does not support function median_absolute_deviation"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where median_absolute_deviation(counterIntegerField)",
       "error": [
         "WHERE does not support function median_absolute_deviation"
@@ -30660,34 +30133,6 @@
     },
     {
       "query": "from a_index | eval median_absolute_deviation(integerField) > 0",
-      "error": [
-        "EVAL does not support function median_absolute_deviation"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = median_absolute_deviation(intField)",
-      "error": [
-        "EVAL does not support function median_absolute_deviation"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = median_absolute_deviation(intField) > 0",
-      "error": [
-        "EVAL does not support function median_absolute_deviation"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval median_absolute_deviation(intField)",
-      "error": [
-        "EVAL does not support function median_absolute_deviation"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval median_absolute_deviation(intField) > 0",
       "error": [
         "EVAL does not support function median_absolute_deviation"
       ],
@@ -32230,85 +31675,6 @@
     {
       "query": "row nullVar = null | stats count(nullVar)",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "SORT does not support function count_distinct"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "WHERE does not support function count_distinct"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "WHERE does not support function count_distinct"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function count_distinct"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function count_distinct"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)",
-      "error": [
-        "EVAL does not support function count_distinct"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0",
-      "error": [
-        "EVAL does not support function count_distinct"
-      ],
       "warning": []
     },
     {

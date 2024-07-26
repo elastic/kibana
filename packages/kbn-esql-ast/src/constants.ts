@@ -24,7 +24,6 @@ export const ESQL_NUMERIC_DECIMAL_TYPES = [
 ] as const;
 export const ESQL_NUMBER_TYPES = [
   'integer',
-  'int',
   'counter_integer',
   ...ESQL_NUMERIC_DECIMAL_TYPES,
 ] as const;

@@ -974,7 +974,6 @@ const fieldTypesToConstants: Record<SupportedFieldType, string> = {
   integer: '5',
   long: '5',
   unsigned_long: '5',
-  int: '5',
   counter_integer: '5',
   counter_long: '5',
   counter_double: '5.5',

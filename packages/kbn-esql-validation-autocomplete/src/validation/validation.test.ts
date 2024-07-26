@@ -3171,14 +3171,6 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | where greatest(doubleField, doubleField) > 0', []);
 
-        testErrorsAndWarnings(
-          'from a_index | where greatest(cartesianPointField, cartesianPointField) > 0',
-          [
-            'Argument of [greatest] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
-            'Argument of [greatest] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
-          ]
-        );
-
         testErrorsAndWarnings('from a_index | where greatest(integerField) > 0', []);
 
         testErrorsAndWarnings('from a_index | where greatest(cartesianPointField) > 0', [
@@ -8905,45 +8897,6 @@ describe('validation logic', () => {
           'Using wildcards (*) in avg is not allowed',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats var = avg(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(intField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(avg(intField))', []);
-        testErrorsAndWarnings('from a_index | stats round(avg(intField))', []);
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(avg(intField)) + avg(intField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats round(avg(intField)) + avg(intField)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = avg(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(doubleField), avg(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = avg(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(intField) by round(doubleField / 2)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = avg(intField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), avg(intField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = avg(intField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), avg(intField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = avg(intField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
-
         testErrorsAndWarnings('from a_index | stats var = avg(counterIntegerField)', []);
         testErrorsAndWarnings('from a_index | stats avg(counterIntegerField)', []);
         testErrorsAndWarnings('from a_index | stats var = round(avg(counterIntegerField))', []);
@@ -9254,14 +9207,6 @@ describe('validation logic', () => {
           'WHERE does not support function avg',
         ]);
 
-        testErrorsAndWarnings('from a_index | where avg(intField)', [
-          'WHERE does not support function avg',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where avg(intField) > 0', [
-          'WHERE does not support function avg',
-        ]);
-
         testErrorsAndWarnings('from a_index | where avg(counterIntegerField)', [
           'WHERE does not support function avg',
         ]);
@@ -9323,22 +9268,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval avg(integerField) > 0', [
-          'EVAL does not support function avg',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = avg(intField)', [
-          'EVAL does not support function avg',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = avg(intField) > 0', [
-          'EVAL does not support function avg',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval avg(intField)', [
-          'EVAL does not support function avg',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval avg(intField) > 0', [
           'EVAL does not support function avg',
         ]);
 
@@ -9515,45 +9444,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats var = sum(*)', [
           'Using wildcards (*) in sum is not allowed',
         ]);
-
-        testErrorsAndWarnings('from a_index | stats var = sum(intField)', []);
-        testErrorsAndWarnings('from a_index | stats sum(intField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(sum(intField))', []);
-        testErrorsAndWarnings('from a_index | stats round(sum(intField))', []);
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(sum(intField)) + sum(intField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats round(sum(intField)) + sum(intField)', []);
-        testErrorsAndWarnings('from a_index | stats var0 = sum(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(doubleField), sum(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = sum(intField)', []);
-        testErrorsAndWarnings('from a_index | stats sum(intField) by round(doubleField / 2)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = sum(intField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), sum(intField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = sum(intField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), sum(intField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = sum(intField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
 
         testErrorsAndWarnings('from a_index | stats var = sum(counterIntegerField)', []);
         testErrorsAndWarnings('from a_index | stats sum(counterIntegerField)', []);
@@ -9865,14 +9755,6 @@ describe('validation logic', () => {
           'WHERE does not support function sum',
         ]);
 
-        testErrorsAndWarnings('from a_index | where sum(intField)', [
-          'WHERE does not support function sum',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where sum(intField) > 0', [
-          'WHERE does not support function sum',
-        ]);
-
         testErrorsAndWarnings('from a_index | where sum(counterIntegerField)', [
           'WHERE does not support function sum',
         ]);
@@ -9934,22 +9816,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval sum(integerField) > 0', [
-          'EVAL does not support function sum',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = sum(intField)', [
-          'EVAL does not support function sum',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = sum(intField) > 0', [
-          'EVAL does not support function sum',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval sum(intField)', [
-          'EVAL does not support function sum',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval sum(intField) > 0', [
           'EVAL does not support function sum',
         ]);
 
@@ -10129,53 +9995,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats var = median(*)', [
           'Using wildcards (*) in median is not allowed',
         ]);
-
-        testErrorsAndWarnings('from a_index | stats var = median(intField)', []);
-        testErrorsAndWarnings('from a_index | stats median(intField)', []);
-        testErrorsAndWarnings('from a_index | stats var = round(median(intField))', []);
-        testErrorsAndWarnings('from a_index | stats round(median(intField))', []);
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(median(intField)) + median(intField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(median(intField)) + median(intField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | stats var0 = median(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(doubleField), median(intField)', []);
-        testErrorsAndWarnings('from a_index | stats avg(doubleField), var0 = median(intField)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats median(intField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = median(intField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), median(intField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = median(intField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), median(intField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = median(intField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
 
         testErrorsAndWarnings('from a_index | stats var = median(counterIntegerField)', []);
         testErrorsAndWarnings('from a_index | stats median(counterIntegerField)', []);
@@ -10514,14 +10333,6 @@ describe('validation logic', () => {
           'WHERE does not support function median',
         ]);
 
-        testErrorsAndWarnings('from a_index | where median(intField)', [
-          'WHERE does not support function median',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where median(intField) > 0', [
-          'WHERE does not support function median',
-        ]);
-
         testErrorsAndWarnings('from a_index | where median(counterIntegerField)', [
           'WHERE does not support function median',
         ]);
@@ -10583,22 +10394,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval median(integerField) > 0', [
-          'EVAL does not support function median',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = median(intField)', [
-          'EVAL does not support function median',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = median(intField) > 0', [
-          'EVAL does not support function median',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval median(intField)', [
-          'EVAL does not support function median',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval median(intField) > 0', [
           'EVAL does not support function median',
         ]);
 
@@ -10812,74 +10607,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats var = median_absolute_deviation(*)', [
           'Using wildcards (*) in median_absolute_deviation is not allowed',
         ]);
-
-        testErrorsAndWarnings('from a_index | stats var = median_absolute_deviation(intField)', []);
-        testErrorsAndWarnings('from a_index | stats median_absolute_deviation(intField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(median_absolute_deviation(intField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(median_absolute_deviation(intField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(median_absolute_deviation(intField)) + median_absolute_deviation(intField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(median_absolute_deviation(intField)) + median_absolute_deviation(intField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = median_absolute_deviation(intField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), median_absolute_deviation(intField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(intField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats median_absolute_deviation(intField) by round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var0 = median_absolute_deviation(intField) by var1 = round(doubleField / 2)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), median_absolute_deviation(intField) by round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(intField) by var1 = round(doubleField / 2), ipField',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), median_absolute_deviation(intField) by round(doubleField / 2), doubleField / 2',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats avg(doubleField), var0 = median_absolute_deviation(intField) by var1 = round(doubleField / 2), doubleField / 2',
-          []
-        );
 
         testErrorsAndWarnings(
           'from a_index | stats var = median_absolute_deviation(counterIntegerField)',
@@ -11335,14 +11062,6 @@ describe('validation logic', () => {
           'WHERE does not support function median_absolute_deviation',
         ]);
 
-        testErrorsAndWarnings('from a_index | where median_absolute_deviation(intField)', [
-          'WHERE does not support function median_absolute_deviation',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where median_absolute_deviation(intField) > 0', [
-          'WHERE does not support function median_absolute_deviation',
-        ]);
-
         testErrorsAndWarnings(
           'from a_index | where median_absolute_deviation(counterIntegerField)',
           ['WHERE does not support function median_absolute_deviation']
@@ -11411,22 +11130,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval median_absolute_deviation(integerField) > 0', [
-          'EVAL does not support function median_absolute_deviation',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = median_absolute_deviation(intField)', [
-          'EVAL does not support function median_absolute_deviation',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = median_absolute_deviation(intField) > 0', [
-          'EVAL does not support function median_absolute_deviation',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(intField)', [
-          'EVAL does not support function median_absolute_deviation',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval median_absolute_deviation(intField) > 0', [
           'EVAL does not support function median_absolute_deviation',
         ]);
 
@@ -12291,71 +11994,6 @@ describe('validation logic', () => {
       });
 
       describe('count_distinct', () => {
-        testErrorsAndWarnings(
-          'from a_index | stats var = count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats var = round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | stats round(count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | sort count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['SORT does not support function count_distinct']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['WHERE does not support function count_distinct']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['WHERE does not support function count_distinct']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function count_distinct']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function count_distinct']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
-          ['EVAL does not support function count_distinct']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval count_distinct(textField, integerField, intField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
-          ['EVAL does not support function count_distinct']
-        );
-
         testErrorsAndWarnings(
           'from a_index | stats count_distinct(null, null, null, null, null, null, null, null, null)',
           []
