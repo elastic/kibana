@@ -307,7 +307,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
-      telemetry: core.analytics,
+      analytics: core.analytics,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {

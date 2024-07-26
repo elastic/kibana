@@ -31,7 +31,7 @@ export const suppressionDurationToSeconds = (
 };
 
 interface SendAlertSuppressionEventArgs {
-  telemetry: AnalyticsServiceSetup;
+  analytics: AnalyticsServiceSetup;
   suppressedAlertsCount: number;
   createdAlertsCount: number;
   ruleParams: RuleParams;
@@ -39,7 +39,7 @@ interface SendAlertSuppressionEventArgs {
 }
 
 export const sendAlertSuppressionTelemetryEvent = ({
-  telemetry,
+  analytics,
   suppressedAlertsCount,
   createdAlertsCount,
   ruleParams,
@@ -72,6 +72,5 @@ export const sendAlertSuppressionTelemetryEvent = ({
     suppressionRuleType: ruleParams.type,
     suppressionMissingFields,
   };
-
-  telemetry.reportEvent(ALERT_SUPPRESSION_EVENT.eventType, telemetryEvent);
+  analytics.reportEvent(ALERT_SUPPRESSION_EVENT.eventType, telemetryEvent);
 };

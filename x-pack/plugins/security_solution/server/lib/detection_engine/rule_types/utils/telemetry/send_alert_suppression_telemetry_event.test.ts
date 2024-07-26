@@ -31,12 +31,12 @@ describe('suppressionDurationToSeconds', () => {
 });
 
 describe('sendAlertSuppressionTelemetryEvent', () => {
-  let mockTelemetry: jest.Mocked<AnalyticsServiceSetup>;
+  let mockAnalytics: jest.Mocked<AnalyticsServiceSetup>;
   let mockCore: ReturnType<typeof coreMock.createSetup>;
   const ruleAttributes = { name: 'Detects suspicious activity on endpoint' } as SanitizedRuleConfig;
   beforeEach(() => {
     mockCore = coreMock.createSetup();
-    mockTelemetry = mockCore.analytics;
+    mockAnalytics = mockCore.analytics;
   });
 
   it('should not report event if suppression is not configured', () => {
@@ -46,14 +46,14 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
-      telemetry: mockTelemetry,
+      analytics: mockAnalytics,
       suppressedAlertsCount: 4,
       createdAlertsCount: 4,
       ruleParams,
       ruleAttributes,
     });
 
-    expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
+    expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
   });
   it('should not report event if no alerts created or suppressed', () => {
     const ruleParams = {
@@ -65,14 +65,14 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
-      telemetry: mockTelemetry,
+      analytics: mockAnalytics,
       suppressedAlertsCount: 0,
       createdAlertsCount: 0,
       ruleParams,
       ruleAttributes,
     });
 
-    expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
+    expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
   });
   it('should report correct event data for threshold rule type', () => {
     const ruleParams = {
@@ -87,14 +87,14 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
-      telemetry: mockTelemetry,
+      analytics: mockAnalytics,
       suppressedAlertsCount: 1,
       createdAlertsCount: 6,
       ruleParams,
       ruleAttributes,
     });
 
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(ALERT_SUPPRESSION_EVENT.eventType, {
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ALERT_SUPPRESSION_EVENT.eventType, {
       suppressionAlertsCreated: 6,
       suppressionAlertsSuppressed: 1,
       suppressionDuration: 1200,
@@ -118,14 +118,14 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
-      telemetry: mockTelemetry,
+      analytics: mockAnalytics,
       suppressedAlertsCount: 0,
       createdAlertsCount: 10,
       ruleParams,
       ruleAttributes,
     });
 
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(ALERT_SUPPRESSION_EVENT.eventType, {
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ALERT_SUPPRESSION_EVENT.eventType, {
       suppressionAlertsCreated: 10,
       suppressionAlertsSuppressed: 0,
       suppressionDuration: 3600,
@@ -147,14 +147,14 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
-      telemetry: mockTelemetry,
+      analytics: mockAnalytics,
       suppressedAlertsCount: 2,
       createdAlertsCount: 11,
       ruleParams,
       ruleAttributes,
     });
 
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(ALERT_SUPPRESSION_EVENT.eventType, {
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ALERT_SUPPRESSION_EVENT.eventType, {
       suppressionAlertsCreated: 11,
       suppressionAlertsSuppressed: 2,
       suppressionDuration: -1,
@@ -175,14 +175,14 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
-      telemetry: mockTelemetry,
+      analytics: mockAnalytics,
       suppressedAlertsCount: 2,
       createdAlertsCount: 11,
       ruleParams,
       ruleAttributes,
     });
 
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
       ALERT_SUPPRESSION_EVENT.eventType,
       expect.objectContaining({
         suppressionRuleName: 'Detects suspicious activity on endpoint',

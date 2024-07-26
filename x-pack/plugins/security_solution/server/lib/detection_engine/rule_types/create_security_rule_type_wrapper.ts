@@ -81,7 +81,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     isPreview,
     experimentalFeatures,
     alerting,
-    telemetry,
+    analytics,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -553,9 +553,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (!isPreview && telemetry) {
+          if (!isPreview && analytics) {
             sendAlertSuppressionTelemetryEvent({
-              telemetry,
+              analytics,
               suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
               createdAlertsCount: result.createdSignalsCount,
               ruleAttributes: rule,
