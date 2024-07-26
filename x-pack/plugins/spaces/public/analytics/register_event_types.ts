@@ -31,6 +31,15 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       type: 'keyword',
       _meta: {
         description: 'The previous solution value before editing the space.',
+        optional: true,
+      },
+    },
+  },
+  [FieldType.ACTION]: {
+    [FieldType.ACTION]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The user action, either create or edit a space.',
       },
     },
   },
@@ -38,18 +47,12 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
 
 const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
   {
-    eventType: EventType.SPACE_CREATED,
-    schema: {
-      ...fields[FieldType.SPACE_ID],
-      ...fields[FieldType.SOLUTION_NEXT],
-    },
-  },
-  {
-    eventType: EventType.SPACE_EDITED,
+    eventType: EventType.SPACE_SOLUTION_CHANGED,
     schema: {
       ...fields[FieldType.SPACE_ID],
       ...fields[FieldType.SOLUTION_PREV],
       ...fields[FieldType.SOLUTION_NEXT],
+      ...fields[FieldType.ACTION],
     },
   },
 ];

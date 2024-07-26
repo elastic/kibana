@@ -468,15 +468,16 @@ export class ManageSpacePage extends Component<Props, State> {
     this.setState({ saveInProgress: true });
 
     const trackSpaceSolutionChange = () => {
-      if (isEditing) {
-        eventTracker.spaceEdited({
-          spaceId: id,
-          solution,
-          solutionPrev: this.state.originalSpace?.solution,
-        });
-      } else {
-        eventTracker.spaceCreated({ spaceId: id, solution });
-      }
+      const hasChangedSolution = this.state.originalSpace?.solution !== solution;
+
+      if (!hasChangedSolution || solution === undefined) return;
+
+      eventTracker.spaceSolutionChanged({
+        spaceId: id,
+        solution,
+        solutionPrev: this.state.originalSpace?.solution,
+        action: isEditing ? 'edit' : 'create',
+      });
     };
 
     action

@@ -10,12 +10,12 @@ import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { SolutionView } from '../../common';
 
 export enum EventType {
-  SPACE_CREATED = 'space_created',
-  SPACE_EDITED = 'space_edited',
+  SPACE_SOLUTION_CHANGED = 'space_solution_changed',
 }
 
 export enum FieldType {
   SPACE_ID = 'space_id',
+  ACTION = 'action',
   SOLUTION_PREV = 'solution_prev',
   SOLUTION_NEXT = 'solution_next',
 }
@@ -32,32 +32,25 @@ export class EventTracker {
     }
   }
 
-  /*
-   * Track whenever a user creates a new space
-   */
-  public spaceCreated({ spaceId, solution }: { spaceId: string; solution?: SolutionView }) {
-    this.track(EventType.SPACE_CREATED, {
-      [FieldType.SPACE_ID]: spaceId,
-      [FieldType.SOLUTION_NEXT]: solution,
-    });
-  }
-
   /**
-   * Track whenever a user edits a space
+   * Track whenever the space "solution" is changed.
    */
-  public spaceEdited({
+  public spaceSolutionChanged({
     spaceId,
+    action,
     solution,
     solutionPrev,
   }: {
     spaceId: string;
-    solution?: SolutionView;
+    action: 'create' | 'edit';
+    solution: SolutionView;
     solutionPrev?: SolutionView;
   }) {
-    this.track(EventType.SPACE_EDITED, {
+    this.track(EventType.SPACE_SOLUTION_CHANGED, {
       [FieldType.SPACE_ID]: spaceId,
       [FieldType.SOLUTION_NEXT]: solution,
       [FieldType.SOLUTION_PREV]: solutionPrev,
+      [FieldType.ACTION]: action,
     });
   }
 }
