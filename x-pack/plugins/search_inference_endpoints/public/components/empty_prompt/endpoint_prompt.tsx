@@ -9,18 +9,12 @@ import React from 'react';
 import { EuiCard } from '@elastic/eui';
 
 interface EndpointPromptProps {
-  setIsInferenceFlyoutVisible: (value: boolean) => void;
   title: string;
   description: string;
   footer: React.ReactElement;
 }
 
-export const EndpointPrompt: React.FC<EndpointPromptProps> = ({
-  setIsInferenceFlyoutVisible,
-  title,
-  description,
-  footer,
-}) => (
+export const EndpointPrompt: React.FC<EndpointPromptProps> = ({ title, description, footer }) => (
   <EuiCard
     display="plain"
     textAlign="left"
