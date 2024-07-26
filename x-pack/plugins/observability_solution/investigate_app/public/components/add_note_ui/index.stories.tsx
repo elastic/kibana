@@ -35,10 +35,6 @@ const defaultStory: Story = {
         full_name: 'John Doe',
       },
       filters: [],
-      query: {
-        language: 'kuery',
-        query: '',
-      },
       timeRange: {
         from: moment().subtract(15, 'minutes').toISOString(),
         to: moment().toISOString(),
