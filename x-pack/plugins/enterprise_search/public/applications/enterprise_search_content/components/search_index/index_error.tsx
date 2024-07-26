@@ -154,7 +154,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
       data-test-subj="indexErrorCallout"
       color="danger"
       iconType="error"
-      title={i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.title', {
+      title={i18n.translate('xpack.enterpriseSearch.indexOverview.indexErrors.title', {
         defaultMessage: 'Index has errors',
       })}
     >
