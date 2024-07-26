@@ -325,9 +325,10 @@ export const SpaceAssignedRolesTable = ({
                   {i18n.translate(
                     'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
                     {
-                      defaultMessage: 'Select all {selectableRolesCount} roles',
+                      defaultMessage:
+                        'Select {count, plural, one {role} other {all {count} roles}}',
                       values: {
-                        selectableRolesCount: selectableRoles.current.length,
+                        count: selectableRoles.current.length,
                       },
                     }
                   )}
