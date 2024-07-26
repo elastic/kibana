@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Import Timelines API
-  version: '2023-10-31'
+  version: 8.9.0
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-import.html
   description: Documentation
@@ -15,9 +15,7 @@ servers:
 paths:
   /api/timeline/_import:
     post:
-      x-labels: [serverless, ess]
-      x-codegen-enabled: true
-      operationId: ImportTimelines
+      operationId: importTimelines
       summary: Imports timelines.
       tags:
         - access:securitySolution
@@ -30,24 +28,17 @@ paths:
               type: object
               properties:
                 file:
+                  type: object
                   allOf:
-                    - $ref: '../model/components.schema.yaml#/components/schemas/Readable'
-                    - type: object
-                      required: [hapi]
-                      properties:
-                        hapi:
-                          type: object
-                          required: [filename, headers]
-                          properties:
-                            filename:
-                              type: string
-                            headers:
-                              type: object
-                            isImmutable:
-                              type: string
-                              enum:
-                                - 'true'
-                                - 'false'
+                   - $ref: '../model/components.yaml#/components/schemas/Readable'
+                   - properties:
+                      hapi:
+                        type: object
+                        properties:
+                          filename:
+                            type: string
+                          headers:
+                            type: object
       responses:
         '200':
           description: Indicates the import of timelines was successful.
@@ -55,10 +46,11 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [data]
                 properties:
                   data:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+                    $ref: '../model/components.yaml#/components/schemas/ImportTimelineResult'
+                required:
+                  - data
 
         '400':
           description: Indicates the import of timelines was unsuccessful because of an invalid file extension.
