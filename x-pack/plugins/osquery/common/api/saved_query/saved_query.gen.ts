@@ -17,14 +17,9 @@
 import { z } from 'zod';
 
 import { FindSavedQueryRequestQuery } from './find_saved_query.gen';
-import { DefaultSuccessResponse } from '../model/schema/common_attributes.gen';
+import { DefaultSuccessResponse, SavedQueryId } from '../model/schema/common_attributes.gen';
 import { CreateSavedQueryRequestBody } from './create_saved_query.gen';
-import { ReadSavedQueryRequestQuery } from './read_saved_query.gen';
-import { DeleteSavedQueryRequestQuery } from './delete_saved_query.gen';
-import {
-  UpdateSavedQueryRequestBody,
-  UpdateSavedQueryRequestParams,
-} from './update_saved_query.gen';
+import { UpdateSavedQueryRequestBody } from './update_saved_query.gen';
 
 export type OsqueryCreateSavedQueryRequestBody = z.infer<typeof OsqueryCreateSavedQueryRequestBody>;
 export const OsqueryCreateSavedQueryRequestBody = CreateSavedQueryRequestBody;
@@ -39,7 +34,7 @@ export type OsqueryDeleteSavedQueryRequestParams = z.infer<
   typeof OsqueryDeleteSavedQueryRequestParams
 >;
 export const OsqueryDeleteSavedQueryRequestParams = z.object({
-  query: DeleteSavedQueryRequestQuery,
+  id: SavedQueryId,
 });
 export type OsqueryDeleteSavedQueryRequestParamsInput = z.input<
   typeof OsqueryDeleteSavedQueryRequestParams
@@ -64,7 +59,7 @@ export type OsqueryGetSavedQueryDetailsRequestParams = z.infer<
   typeof OsqueryGetSavedQueryDetailsRequestParams
 >;
 export const OsqueryGetSavedQueryDetailsRequestParams = z.object({
-  query: ReadSavedQueryRequestQuery,
+  id: SavedQueryId,
 });
 export type OsqueryGetSavedQueryDetailsRequestParamsInput = z.input<
   typeof OsqueryGetSavedQueryDetailsRequestParams
@@ -79,7 +74,7 @@ export type OsqueryUpdateSavedQueryRequestParams = z.infer<
   typeof OsqueryUpdateSavedQueryRequestParams
 >;
 export const OsqueryUpdateSavedQueryRequestParams = z.object({
-  query: UpdateSavedQueryRequestParams,
+  id: SavedQueryId,
 });
 export type OsqueryUpdateSavedQueryRequestParamsInput = z.input<
   typeof OsqueryUpdateSavedQueryRequestParams

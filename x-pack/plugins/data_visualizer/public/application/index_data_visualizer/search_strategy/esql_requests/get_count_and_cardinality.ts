@@ -10,7 +10,7 @@ import { chunk } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { appendToESQLQuery, getEarliestLatestParams } from '@kbn/esql-utils';
+import { appendToESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
@@ -94,7 +94,7 @@ const getESQLOverallStatsInChunk = async ({
     let countQuery = fieldsToFetch.length > 0 ? '| STATS ' : '';
     countQuery += fieldsToFetch.map((field) => field.query).join(',');
     const query = appendToESQLQuery(esqlBaseQueryWithLimit, countQuery);
-    const namedParams = getEarliestLatestParams(esqlBaseQueryWithLimit, timeRange);
+    const namedParams = getStartEndParams(esqlBaseQueryWithLimit, timeRange);
 
     const request = {
       params: {

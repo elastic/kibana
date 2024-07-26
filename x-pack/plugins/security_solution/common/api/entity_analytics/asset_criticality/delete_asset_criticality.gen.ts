@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Asset Criticality Delete Record Schema
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';
@@ -37,25 +37,4 @@ export const DeleteAssetCriticalityRecordRequestQuery = z.object({
 });
 export type DeleteAssetCriticalityRecordRequestQueryInput = z.input<
   typeof DeleteAssetCriticalityRecordRequestQuery
->;
-
-export type InternalDeleteAssetCriticalityRecordRequestQuery = z.infer<
-  typeof InternalDeleteAssetCriticalityRecordRequestQuery
->;
-export const InternalDeleteAssetCriticalityRecordRequestQuery = z.object({
-  /**
-   * The ID value of the asset.
-   */
-  id_value: z.string(),
-  /**
-   * The field representing the ID.
-   */
-  id_field: IdField,
-  /**
-   * If 'wait_for' the request will wait for the index refresh.
-   */
-  refresh: z.literal('wait_for').optional(),
-});
-export type InternalDeleteAssetCriticalityRecordRequestQueryInput = z.input<
-  typeof InternalDeleteAssetCriticalityRecordRequestQuery
 >;

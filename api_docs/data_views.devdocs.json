@@ -12930,6 +12930,10 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts"
               },
               {

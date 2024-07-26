@@ -23,10 +23,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
 
-    after(async () => {
-      await svlCommonPage.forceLogout();
-    });
-
     describe('lens visualization', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');

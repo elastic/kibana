@@ -10,7 +10,8 @@ import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-describe('ALL - Timelines', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/189136
+describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {
     initializeDataViews();
   });
