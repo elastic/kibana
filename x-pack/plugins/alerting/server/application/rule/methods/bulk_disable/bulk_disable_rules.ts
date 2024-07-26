@@ -167,82 +167,79 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         rulesFinderRules.push(...response.saved_objects);
 
-        await pMap(
-          rulesFinderRules.filter((rule) => rule.attributes.enabled),
-          async (rule) => {
-            try {
-              if (untrack) {
-                await untrackRuleAlerts(context, rule.id, rule.attributes);
-              }
-
-              if (rule.attributes.name) {
-                ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-              }
-
-              // migrate legacy actions only for SIEM rules
-              // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-              const migratedActions = await migrateLegacyActions(context, {
-                ruleId: rule.id,
-                actions: rule.attributes.actions as RawRuleAction[],
-                references: rule.references,
-                attributes: rule.attributes as RawRule,
-              });
-
-              // TODO (http-versioning) Remove casts when updateMeta has been converted
-              const castedAttributes = rule.attributes as RawRule;
-              const updatedAttributes = updateMeta(context, {
-                ...castedAttributes,
-                ...(migratedActions.hasLegacyActions
-                  ? {
-                      actions: migratedActions.resultedActions,
-                      throttle: undefined,
-                      notifyWhen: undefined,
-                    }
-                  : {}),
-                enabled: false,
-                scheduledTaskId:
-                  rule.attributes.scheduledTaskId === rule.id
-                    ? rule.attributes.scheduledTaskId
-                    : null,
-                updatedBy: username,
-                updatedAt: new Date().toISOString(),
-              });
-
-              rulesToDisable.push({
-                ...rule,
-                // TODO (http-versioning) Remove casts when updateMeta has been converted
-                attributes: {
-                  ...updatedAttributes,
-                } as RuleAttributes,
-                ...(migratedActions.hasLegacyActions
-                  ? { references: migratedActions.resultedReferences }
-                  : {}),
-              });
-
-              context.auditLogger?.log(
-                ruleAuditEvent({
-                  action: RuleAuditAction.DISABLE,
-                  outcome: 'unknown',
-                  savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
-                })
-              );
-            } catch (error) {
-              errors.push({
-                message: error.message,
-                rule: {
-                  id: rule.id,
-                  name: rule.attributes?.name,
-                },
-              });
-              context.auditLogger?.log(
-                ruleAuditEvent({
-                  action: RuleAuditAction.DISABLE,
-                  error,
-                })
-              );
+        await pMap(rulesFinderRules, async (rule) => {
+          try {
+            if (untrack) {
+              await untrackRuleAlerts(context, rule.id, rule.attributes);
             }
+
+            if (rule.attributes.name) {
+              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+            }
+
+            // migrate legacy actions only for SIEM rules
+            // TODO (http-versioning) Remove RawRuleAction and RawRule casts
+            const migratedActions = await migrateLegacyActions(context, {
+              ruleId: rule.id,
+              actions: rule.attributes.actions as RawRuleAction[],
+              references: rule.references,
+              attributes: rule.attributes as RawRule,
+            });
+
+            // TODO (http-versioning) Remove casts when updateMeta has been converted
+            const castedAttributes = rule.attributes as RawRule;
+            const updatedAttributes = updateMeta(context, {
+              ...castedAttributes,
+              ...(migratedActions.hasLegacyActions
+                ? {
+                    actions: migratedActions.resultedActions,
+                    throttle: undefined,
+                    notifyWhen: undefined,
+                  }
+                : {}),
+              enabled: false,
+              scheduledTaskId:
+                rule.attributes.scheduledTaskId === rule.id
+                  ? rule.attributes.scheduledTaskId
+                  : null,
+              updatedBy: username,
+              updatedAt: new Date().toISOString(),
+            });
+
+            rulesToDisable.push({
+              ...rule,
+              // TODO (http-versioning) Remove casts when updateMeta has been converted
+              attributes: {
+                ...updatedAttributes,
+              } as RuleAttributes,
+              ...(migratedActions.hasLegacyActions
+                ? { references: migratedActions.resultedReferences }
+                : {}),
+            });
+
+            context.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.DISABLE,
+                outcome: 'unknown',
+                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+              })
+            );
+          } catch (error) {
+            errors.push({
+              message: error.message,
+              rule: {
+                id: rule.id,
+                name: rule.attributes?.name,
+              },
+            });
+            context.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.DISABLE,
+                error,
+              })
+            );
           }
-        );
+        });
       }
       await rulesFinder.close();
     }
@@ -297,31 +294,10 @@ const bulkDisableRulesWithOCC = async (
     }
   });
 
-  const updatedRules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> =
-    disabledRules.length < rulesFinderRules.length
-      ? rulesFinderRules.reduce(
-          (
-            acc: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
-            originalRule: SavedObjectsBulkUpdateObject<RuleAttributes>
-          ) => {
-            const enabledRule = disabledRules.find((item) => item.id === originalRule.id);
-
-            if (enabledRule) {
-              acc.push(enabledRule);
-            } else if (!errors.find((error) => error.rule.id === originalRule.id)) {
-              acc.push(originalRule);
-            }
-
-            return acc;
-          },
-          []
-        )
-      : disabledRules;
-
   return {
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api
-    rules: updatedRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
+    rules: disabledRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
     accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete, taskIdsToClearState],
   };
 };

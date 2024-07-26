@@ -469,7 +469,7 @@ describe('bulkDisableRules', () => {
       saved_objects: [enabledRuleForBulkOps1, disabledRuleForBulkDisable2],
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [disabledRuleForBulkDisable1],
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
     });
 
     const result = await rulesClient.bulkDisableRules({ ids: ['id1', 'id2'] });
@@ -479,6 +479,12 @@ describe('bulkDisableRules', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
           }),
@@ -499,7 +505,7 @@ describe('bulkDisableRules', () => {
       saved_objects: [enabledRuleForBulkOps1, disabledRuleForBulkDisable2],
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [disabledRuleForBulkDisable1],
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -509,6 +515,12 @@ describe('bulkDisableRules', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
           }),
