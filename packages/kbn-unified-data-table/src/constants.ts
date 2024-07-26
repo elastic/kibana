@@ -48,8 +48,6 @@ export const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   stripes: true,
   rowHover: 'highlight',
   header: 'underline',
-  footer: 'overline',
-  stickyFooter: true,
 };
 
 export const toolbarVisibility = {

@@ -382,7 +382,6 @@ describe('UnifiedDataTable', () => {
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <React.Fragment>
-
               <UnifiedDataTableAdditionalDisplaySettings
                 headerRowHeight="custom"
                 headerRowHeightLines={1}
@@ -416,7 +415,6 @@ describe('UnifiedDataTable', () => {
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <React.Fragment>
-
               <UnifiedDataTableAdditionalDisplaySettings
                 headerRowHeight="custom"
                 headerRowHeightLines={1}
