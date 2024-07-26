@@ -9,7 +9,7 @@
 export {
   type FavoritesClientPublic,
   FavoritesClient,
-  FavoriteContextProvider,
+  FavoritesContextProvider,
   FavoriteButton,
   type FavoriteButtonProps,
   cssFavoriteHoverWithinEuiTableRow,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { FavoriteContextProvider, useFavoritesClient } from './favorites_context';
+export { FavoritesContextProvider, useFavoritesClient } from './favorites_context';
 export { type FavoritesClientPublic, FavoritesClient } from './favorites_client';
 export { useAddFavorite, useRemoveFavorite, useFavorites } from './favorites_query';
 export {

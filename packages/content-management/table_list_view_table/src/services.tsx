@@ -26,7 +26,7 @@ import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app
 import { UserProfilesKibanaProvider } from '@kbn/content-management-user-profiles';
 import {
   FavoritesClientPublic,
-  FavoriteContextProvider,
+  FavoritesContextProvider,
 } from '@kbn/content-management-favorites-public';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
@@ -240,7 +240,7 @@ export const TableListViewKibanaProvider: FC<
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <UserProfilesKibanaProvider core={core}>
         <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <FavoriteContextProvider
+          <FavoritesContextProvider
             favoritesClient={services.favorites}
             notifyError={(title, text) => {
               notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
@@ -270,7 +270,7 @@ export const TableListViewKibanaProvider: FC<
             >
               {children}
             </TableListViewProvider>
-          </FavoriteContextProvider>
+          </FavoritesContextProvider>
         </ContentEditorKibanaProvider>
       </UserProfilesKibanaProvider>
     </RedirectAppLinksKibanaProvider>
