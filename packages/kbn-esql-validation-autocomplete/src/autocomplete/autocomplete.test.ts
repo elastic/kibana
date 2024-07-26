@@ -907,6 +907,9 @@ describe('autocomplete', () => {
       ],
     ]);
     testSuggestions('FROM " "', [], ' ');
+    // TODO — re-enable these tests when we can support this case
+    // testSuggestions('FROM "  a"', [], undefined, 9);
+    // testSuggestions('FROM "foo b"', [], undefined, 11);
     testSuggestions('FROM a | WHERE tags == " "', [], ' ');
     testSuggestions('FROM a | WHERE tags == """ """', [], ' ');
     testSuggestions('FROM a | WHERE tags == "a"', [], undefined, 25);

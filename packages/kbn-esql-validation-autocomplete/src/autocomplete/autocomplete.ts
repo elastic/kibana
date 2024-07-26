@@ -529,6 +529,12 @@ async function getExpressionSuggestionsByType(
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
 
+  // TODO - this is a workaround because it was too difficult to handle this case in a generic way :(
+  if (commandDef.name === 'from' && node && isSourceItem(node) && /\s/.test(node.name)) {
+    // FROM " <suggest>"
+    return [];
+  }
+
   // A new expression is considered either
   // * just after a command name => i.e. ... | STATS <here>
   // * or after a comma => i.e. STATS fieldA, <here>
