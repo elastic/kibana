@@ -8,6 +8,13 @@
 import type { AnalyticsClient } from '@kbn/ebt/client';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
+const MAX_CUSTOM_METRICS = 9;
+// The keys and values for the custom metrics are limited to 9 pairs
+const ALLOWED_CUSTOM_METRICS_KEYS_VALUES = Array.from({ length: MAX_CUSTOM_METRICS }, (_, i) => [
+  `key${i + 1}`,
+  `value${i + 1}`,
+]).flat();
+
 export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDevMode: boolean) {
   function perfObserver(
     list: PerformanceObserverEntryList,
@@ -18,7 +25,19 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
       if (entry.entryType === 'measure' && entry.detail?.type === 'kibana:performance') {
         const target = entry?.name;
         const duration = entry.duration;
-        const customMetrics = entry.detail?.customMetrics ?? {};
+        const customMetrics = Object.keys(entry.detail?.customMetrics ?? {}).reduce(
+          (acc, metric) => {
+            if (ALLOWED_CUSTOM_METRICS_KEYS_VALUES.includes(metric)) {
+              return {
+                ...acc,
+                [metric]: entry.detail.customMetrics[metric],
+              };
+            }
+
+            return acc;
+          },
+          {}
+        );
 
         if (isDevMode) {
           if (!target) {
