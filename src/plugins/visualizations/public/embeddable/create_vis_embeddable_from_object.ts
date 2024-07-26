@@ -13,16 +13,16 @@ import type {
   VisualizeInput,
   VisualizeEmbeddable,
   VisualizeByValueInput,
+  VisualizeEmbeddableDeps,
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
-} from './visualize_embeddable';
+} from './legacy_visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
+import { createVisualizeEmbeddableAsync } from './legacy_visualize_embeddable_async';
 
 export const createVisEmbeddableFromObject =
-  (deps: VisualizeEmbeddableFactoryDeps) =>
+  (deps: VisualizeEmbeddableDeps) =>
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },

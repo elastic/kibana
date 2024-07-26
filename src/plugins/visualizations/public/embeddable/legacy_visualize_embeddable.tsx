@@ -6,52 +6,57 @@
  * Side Public License, v 1.
  */
 
-import _, { get } from 'lodash';
-import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { render } from 'react-dom';
+import fastIsEqual from 'fast-deep-equal';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
-import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
-import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { Warnings } from '@kbn/charts-plugin/public';
-import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
+import { mapAndFlattenFilters, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import {
   Adapters,
   AttributeService,
-  Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  FilterableEmbeddable,
-  IContainer,
-  ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
+import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
+import type { ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
-import type { RenderMode } from '@kbn/expressions-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { isFallbackDataView } from '../visualize_app/utils';
-import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
+import { i18n } from '@kbn/i18n';
+import { RenderCompleteDispatcher, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import _, { cloneDeep, get } from 'lodash';
+import React from 'react';
+import { render } from 'react-dom';
+import { debounceTime, merge, mergeMap, Observable, ReplaySubject, skip, Subscription } from 'rxjs';
 import VisualizationError from '../components/visualization_error';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { SerializedVis, Vis } from '../vis';
-import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../services';
-import { VIS_EVENT_TO_TRIGGER } from './events';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { getSavedVisualization } from '../utils/saved_visualize_utils';
+import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
+import { VisualizationsStartDeps } from '../plugin';
+import { getApplication, getExpressions, getUiActions } from '../services';
 import { VisSavedObject } from '../types';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
+import { SerializedVis, Vis } from '../vis';
+import { isFallbackDataView } from '../visualize_app/utils';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { VIS_EVENT_TO_TRIGGER } from './events';
 import { toExpressionAst } from './to_ast';
+
+export interface VisualizeEmbeddableDeps {
+  start: StartServicesGetter<
+    Pick<
+      VisualizationsStartDeps,
+      'inspector' | 'embeddable' | 'data' | 'savedObjectsTaggingOss' | 'spaces'
+    >
+  >;
+}
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -59,7 +64,7 @@ export interface VisualizeEmbeddableConfiguration {
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
-  deps: VisualizeEmbeddableFactoryDeps;
+  deps: VisualizeEmbeddableDeps;
 }
 
 export interface VisualizeInput extends EmbeddableInput {
@@ -91,12 +96,15 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
-export class VisualizeEmbeddable
-  extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements
-    ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>,
-    FilterableEmbeddable
-{
+/**
+ * The legacy visualize embeddable class. This class remains for backwards compatibility with
+ * the visualize editor only. For rendering an agg based visualization on a Dashboard, use the
+ * React Embeddable instead.
+ */
+export class VisualizeEmbeddable {
+  public readonly id: string;
+  public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -113,9 +121,9 @@ export class VisualizeEmbeddable
   private vis: Vis;
   private domNode: any;
   private warningDomNode: any;
-  public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+
   private abortController?: AbortController;
-  private readonly deps: VisualizeEmbeddableFactoryDeps;
+  private readonly deps: VisualizeEmbeddableDeps;
   private readonly inspectorAdapters?: Adapters;
   private attributeService?: AttributeService<
     VisualizeSavedObjectAttributes,
@@ -127,6 +135,16 @@ export class VisualizeEmbeddable
     Record<string, unknown> | undefined
   >(1);
 
+  protected output: VisualizeOutput;
+  protected input: VisualizeInput;
+  protected destroyed: boolean = false;
+  protected renderComplete = new RenderCompleteDispatcher();
+
+  private readonly inputSubject = new ReplaySubject<VisualizeInput>(1);
+  private readonly outputSubject = new ReplaySubject<VisualizeOutput>(1);
+  private readonly input$ = this.inputSubject.asObservable();
+  private readonly output$ = this.outputSubject.asObservable();
+
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
@@ -135,22 +153,19 @@ export class VisualizeEmbeddable
       VisualizeSavedObjectAttributes,
       VisualizeByValueInput,
       VisualizeByReferenceInput
-    >,
-    parent?: IContainer
+    >
   ) {
-    super(
-      initialInput,
-      {
-        defaultTitle: vis.title,
-        defaultDescription: vis.description,
-        editPath,
-        editApp: 'visualize',
-        editUrl,
-        indexPatterns,
-        visTypeName: vis.type.name,
-      },
-      parent
-    );
+    this.id = initialInput.id;
+    this.output = {
+      defaultTitle: vis.title,
+      defaultDescription: vis.description,
+      editPath,
+      editApp: 'visualize',
+      editUrl,
+      indexPatterns,
+      visTypeName: vis.type.name,
+    };
+    this.input = initialInput;
     this.deps = deps;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
@@ -191,6 +206,72 @@ export class VisualizeEmbeddable
       this.inspectorAdapters =
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
+  }
+
+  public updateInput(changes: Partial<VisualizeInput>): void {
+    if (this.destroyed) {
+      throw new Error('Embeddable has been destroyed');
+    }
+    const newInput = cloneDeep({
+      ...this.input,
+      ...changes,
+    });
+
+    if (!fastIsEqual(this.input, newInput)) {
+      const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
+      this.input = newInput;
+      this.inputSubject.next(newInput);
+
+      const title = this.input.hidePanelTitles ? '' : this.input.title ?? this.output.defaultTitle;
+      const description = this.input.hidePanelTitles
+        ? ''
+        : this.input.description ?? this.output.defaultDescription;
+
+      this.updateOutput({
+        title,
+        description,
+      });
+      if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
+        this.reload();
+      }
+    }
+  }
+
+  public updateOutput(outputChanges: Partial<VisualizeOutput>): void {
+    const newOutput = {
+      ...this.output,
+      ...outputChanges,
+    };
+    if (!fastIsEqual(this.output, newOutput)) {
+      this.output = newOutput;
+      this.outputSubject.next(this.output);
+    }
+  }
+
+  public getInput$(): Readonly<Observable<VisualizeInput>> {
+    return this.input$;
+  }
+
+  public getOutput$(): Readonly<Observable<VisualizeOutput>> {
+    return this.output$;
+  }
+
+  public getUpdated$(): Readonly<Observable<VisualizeInput | VisualizeOutput>> {
+    return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
+      debounceTime(0)
+    );
+  }
+
+  public getOutput(): Readonly<VisualizeOutput> {
+    return this.output;
+  }
+
+  public getInput(): Readonly<VisualizeInput> {
+    return this.input;
+  }
+
+  public getTitle(): string {
+    return this.output.title ?? '';
   }
 
   public reportsEmbeddableLoad() {
@@ -265,8 +346,6 @@ export class VisualizeEmbeddable
 
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
-    } else if (this.parent) {
-      this.vis.uiState.clearAllKeys();
     }
   }
 
@@ -446,7 +525,9 @@ export class VisualizeEmbeddable
     this.warningDomNode = warningDiv;
 
     this.domNode = div;
-    super.render(this.domNode);
+    this.renderComplete.setEl(domNode);
+    this.renderComplete.setTitle(this.output.title || '');
+
     const { core } = this.deps.start();
 
     render(
@@ -544,7 +625,11 @@ export class VisualizeEmbeddable
   }
 
   public destroy() {
-    super.destroy();
+    this.destroyed = true;
+
+    this.inputSubject.complete();
+    this.outputSubject.complete();
+
     this.subscriptions.forEach((s) => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
     this.vis.uiState.off('reload', this.reload);
@@ -559,19 +644,13 @@ export class VisualizeEmbeddable
     await this.handleVisUpdate();
   };
 
-  private getExecutionContext() {
-    const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
-    const child: KibanaExecutionContext = {
+  private getExecutionContext(): KibanaExecutionContext {
+    return {
       type: 'agg_based',
       name: this.vis.type.name,
       id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
-    };
-
-    return {
-      ...parentContext,
-      child,
     };
   }
 
