@@ -1577,7 +1577,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       modelName: SupportedTrainedModelNamesType,
       config?: PutTrainedModelConfig
     ) {
-      const trainedModelConfig = config || this.getTrainedModelConfig(modelName);
+      const trainedModelConfig = config ?? this.getTrainedModelConfig(modelName);
       await this.createTrainedModel(modelId, trainedModelConfig);
       await this.createTrainedModelVocabularyES(modelId, this.getTrainedModelVocabulary(modelName));
       await this.uploadTrainedModelDefinitionES(
