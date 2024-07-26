@@ -79,6 +79,7 @@ export interface ESQLCommandMode extends ESQLAstBaseItem {
 export type FunctionSubtype =
   | 'variadic-call' // fn(a, b, c, ...)
   | 'unary-expression' // -a, +a, NOT a, ...
+  | 'postfix-unary-expression' // a IS NULL, a IS NOT NULL, ...
   | 'binary-expression'; // a + b, a - b, a * b, ...
 
 export interface ESQLFunction<
@@ -102,6 +103,11 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
 
 export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
   subtype: 'unary-expression';
+  args: [ESQLAstItem];
+}
+
+export interface ESQLPostfixUnaryExpression extends ESQLFunction<'postfix-unary-expression'> {
+  subtype: 'postfix-unary-expression';
   args: [ESQLAstItem];
 }
 

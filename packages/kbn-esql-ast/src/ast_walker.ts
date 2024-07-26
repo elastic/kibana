@@ -524,7 +524,7 @@ function collectIsNullExpression(ctx: BooleanExpressionContext) {
   }
   const negate = ctx.NOT();
   const fnName = `is${negate ? ' not ' : ' '}null`;
-  const fn = createFunction(fnName, ctx);
+  const fn = createFunction(fnName, ctx, undefined, 'postfix-unary-expression');
   const arg = visitValueExpression(ctx.valueExpression());
   if (arg) {
     fn.args.push(arg);

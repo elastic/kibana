@@ -88,7 +88,7 @@ describe('function AST nodes', () => {
     // Currently arithmetic unary expressions, like "-x", are transformed to
     // binary expressions: "-1 * x". Enable this test once unary expressions
     // are supported.
-    it.skip('unary expression', () => {
+    it.skip('arithmetic', () => {
       const query = 'FROM a | STATS -a';
       const { ast, errors } = parse(query);
       const fn = Walker.findFunction(ast, ({ name }) => name === '*');
@@ -98,6 +98,22 @@ describe('function AST nodes', () => {
         type: 'function',
         subtype: 'unary-expression',
         name: '-',
+        args: [expect.any(Object)],
+      });
+    });
+  });
+
+  describe('"postfix-unary-expression"', () => {
+    it('IS [NOT] NULL', () => {
+      const query = 'FROM a | STATS a IS NOT NULL';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'is not null');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'postfix-unary-expression',
+        name: 'is not null',
         args: [expect.any(Object)],
       });
     });
