@@ -17,6 +17,7 @@ export const recommendationStatusRT = rt.keyof({
 export const recommendationTypeRT = rt.keyof({
   field_extraction: null,
   mapping_gap: null,
+  json_parsing: null,
 });
 
 export const recommendationRT = rt.type({

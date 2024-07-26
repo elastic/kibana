@@ -24,7 +24,7 @@ const ecsAlikeMappings = {
 
 const ecsAlikeMappingsKeys = Object.keys(ecsAlikeMappings) as Array<keyof typeof ecsAlikeMappings>;
 
-export class MappingEcsGapsDetection {
+export class MappingGapsDetectionRule {
   constructor(private fieldsMetadataClient: IFieldsMetadataClient) {}
 
   async process(index: NewestIndex): Promise<MappingGapsDetection | null> {
@@ -49,10 +49,12 @@ export class MappingEcsGapsDetection {
       );
 
       if (unmatchingFields.length > 0) {
-        const gaps = unmatchingFields.map((field) => ({
-          field,
-          target_field: this.identifySuggestedField(field),
-        }));
+        const gaps = unmatchingFields
+          .map((field) => ({
+            field,
+            target_field: this.identifySuggestedField(field),
+          }))
+          .sort(sortByStringThenNull);
 
         return createMappingGapsDetection({
           gaps,
@@ -96,12 +98,25 @@ const flatMappings = (
   prefix = ''
 ): Record<PropertyName, MappingProperty> => {
   return Object.entries(properties).reduce((props, [propertyName, propertyObj]) => {
+    const joinedPropertyName = [prefix, propertyName].filter(Boolean).join('.');
+
     if (propertyObj.properties) {
-      return Object.assign(props, flatMappings(propertyObj.properties, propertyName));
+      return Object.assign(props, flatMappings(propertyObj.properties, joinedPropertyName));
     }
 
-    const joinedPropertyName = [prefix, propertyName].filter(Boolean).join('.');
     props[joinedPropertyName] = propertyObj;
     return props;
   }, {} as Record<PropertyName, MappingProperty>);
+};
+
+const sortByStringThenNull = (curr: MappingGap, next: MappingGap) => {
+  if (curr.target_field === null && next.target_field !== null) {
+    return 1;
+  } else if (curr.target_field !== null && next.target_field === null) {
+    return -1;
+  } else if (curr.target_field === null && next.target_field === null) {
+    return 0;
+  } else {
+    return curr.target_field!.localeCompare(next.target_field!);
+  }
 };

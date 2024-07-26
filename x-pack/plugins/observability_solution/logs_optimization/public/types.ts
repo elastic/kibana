@@ -11,6 +11,7 @@ import type {
   CoreStart,
   Plugin as PluginClass,
 } from '@kbn/core/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { UsePipelineSimulatorHook } from './hooks/use_pipeline_simulator';
@@ -30,6 +31,7 @@ export interface LogsOptimizationPublicStart {
 export interface LogsOptimizationPublicSetupDeps {}
 
 export interface LogsOptimizationPublicStartDeps {
+  fieldsMetadata: FieldsMetadataPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless?: ServerlessPluginStart;
 }

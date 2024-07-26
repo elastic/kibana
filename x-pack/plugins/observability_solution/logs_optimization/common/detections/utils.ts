@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldExtractionDetection, MappingGapsDetection } from './types';
+import { FieldExtractionDetection, MappingGapsDetection, JSONParsingDetection } from './types';
 
 export const createMappingGapsDetection = (
   params: Omit<MappingGapsDetection, 'type'>
@@ -19,4 +19,11 @@ export const createFieldExtractionDetection = (
 ): FieldExtractionDetection => ({
   ...params,
   type: 'field_extraction',
+});
+
+export const createJSONParsingDetection = (
+  params: Omit<JSONParsingDetection, 'type'>
+): JSONParsingDetection => ({
+  ...params,
+  type: 'json_parsing',
 });

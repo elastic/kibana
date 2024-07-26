@@ -33,9 +33,23 @@ export const fieldExtractionDetectionRT = rt.type({
   }),
 });
 
-export const detectionRT = rt.union([mappingGapDetectionRT, fieldExtractionDetectionRT]);
+export const jsonParsingDetectionRT = rt.type({
+  type: rt.literal('json_parsing'),
+  sourceField: rt.string,
+  documentSamples: rt.record(rt.string, rt.any), // TODO: update types
+  tasks: rt.partial({
+    processors: processorsRT,
+  }),
+});
+
+export const detectionRT = rt.union([
+  mappingGapDetectionRT,
+  fieldExtractionDetectionRT,
+  jsonParsingDetectionRT,
+]);
 
 export type MappingGap = rt.TypeOf<typeof mappingGapRT>;
 export type MappingGapsDetection = rt.TypeOf<typeof mappingGapDetectionRT>;
 export type FieldExtractionDetection = rt.TypeOf<typeof fieldExtractionDetectionRT>;
-export type Detection = MappingGapsDetection | FieldExtractionDetection;
+export type JSONParsingDetection = rt.TypeOf<typeof jsonParsingDetectionRT>;
+export type Detection = MappingGapsDetection | FieldExtractionDetection | JSONParsingDetection;

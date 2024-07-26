@@ -14,7 +14,7 @@ import { FieldExtractionDetection } from '../../../../common/detections/types';
 
 const TEMPORARY_TIMESTAMP_FIELD = 'detected_timestamp';
 
-export class TimestampExtractionDetection {
+export class TimestampExtractionDetectionRule {
   constructor(private esqlTransport: EsqlTransport) {}
 
   async process(index: NewestIndex): Promise<FieldExtractionDetection | null> {

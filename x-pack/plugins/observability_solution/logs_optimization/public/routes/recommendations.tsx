@@ -9,6 +9,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,9 +19,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useRef, useState } from 'react';
+import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import { FieldName } from '@kbn/fields-metadata-plugin/common';
 import { Recommendation } from '../../common/recommendations';
 import { LogsOptimizationPageTemplate } from '../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../utils/breadcrumbs';
@@ -33,7 +36,7 @@ export const RecommendationsRoute = () => {
 
   const datasetFieldRef = useRef<HTMLInputElement | null>(null);
 
-  const [dataset, setDataset] = useState('logs-random-default');
+  const [dataset, setDataset] = useState('logs-random-generic');
 
   const { recommendations, loading, error } = useRecommendations({ dataset }, [dataset]);
 
@@ -69,13 +72,23 @@ export const RecommendationsRoute = () => {
       {loading && 'Loading...'}
       {error && error.message}
       {recommendations?.map((recommendation) => {
-        if (recommendation.type === 'field_extraction')
-          return (
-            <>
-              <FieldExtractionRecommendation recommendation={recommendation} />
-              <EuiSpacer size="m" />
-            </>
-          );
+        const recommendationToComponentMap: Record<
+          Recommendation['type'],
+          React.FunctionComponent<{ recommendation: Recommendation }>
+        > = {
+          mapping_gap: MappingGapRecommendation,
+          field_extraction: FieldExtractionRecommendation,
+          json_parsing: JSONParsingRecommendation,
+        };
+
+        const RecommendationComponent = recommendationToComponentMap[recommendation.type];
+
+        return (
+          <Fragment key={recommendation.id}>
+            <RecommendationComponent recommendation={recommendation} />
+            <EuiSpacer size="m" />
+          </Fragment>
+        );
       })}
     </LogsOptimizationPageTemplate>
   );
@@ -210,6 +223,269 @@ const FieldExtractionRecommendation = ({ recommendation }: { recommendation: Rec
               value={simulationStr}
               height={300}
               options={{ lineNumbers: 'off', readOnly: true }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiAccordion>
+    </EuiPanel>
+  );
+};
+
+const JSONParsingRecommendation = ({ recommendation }: { recommendation: Recommendation }) => {
+  const { services } = useKibanaContextForPlugin();
+  const { usePipelineSimulator } = services;
+
+  const { simulation, simulate } = usePipelineSimulator();
+
+  const simulationStr = JSON.stringify(
+    simulation?.docs[0]?.processor_results.at(-1).doc._source,
+    null,
+    2
+  );
+
+  const [pipeline, setPipeline] = useState(() =>
+    JSON.stringify(recommendation.detection.tasks.processors, null, 2)
+  );
+  const [docSample, setDocSample] = useState(() =>
+    JSON.stringify(recommendation.detection.documentSamples[0]._source, null, 2)
+  );
+
+  const simulateRecommendedPipeline = () => {
+    simulate({
+      processors: JSON.parse(pipeline),
+      docs: [{ _source: JSON.parse(docSample) }],
+    });
+  };
+
+  const accordionTriggerButton = (
+    <EuiTitle size="xs">
+      <h3>
+        {i18n.translate(
+          'app_not_found_in_i18nrc.jSONParsingRecommendation.h3.parseTheSourceFieldFieldLabel',
+          {
+            defaultMessage: 'Parse the {sourceField} field JSON content',
+            values: {
+              sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
+            },
+          }
+        )}
+      </h3>
+    </EuiTitle>
+  );
+
+  return (
+    <EuiPanel>
+      <EuiAccordion
+        id={recommendation.type + recommendation.created_at}
+        buttonContent={accordionTriggerButton}
+        extraAction={
+          <EuiButton data-test-subj="logsOptimizationFieldExtractionRecommendationApplyRecommendationButton">
+            {i18n.translate(
+              'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabel',
+              { defaultMessage: 'Apply recommendation' }
+            )}
+          </EuiButton>
+        }
+        initialIsOpen
+      >
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem grow={4}>
+            <EuiText>
+              {i18n.translate(
+                'app_not_found_in_i18nrc.fieldExtractionRecommendation.weCanExtractLoglevelsAccordionLabel',
+                {
+                  defaultMessage:
+                    'We can parse the {sourceField} field content from this dataset, as it seems to be in JSON format.',
+                  values: {
+                    targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
+                    sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
+                  },
+                }
+              )}
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText>
+              {i18n.translate(
+                'app_not_found_in_i18nrc.fieldExtractionRecommendation.youCanSimulateTheTextLabel',
+                {
+                  defaultMessage:
+                    'You can simulate the proposed pipeline processors to extract the data and ensure accuracy. In the future, logs will be ingested using these pipeline processors during logs ingestion:',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <CodeEditor
+              languageId="json"
+              value={pipeline}
+              onChange={setPipeline}
+              height={300}
+              options={{ lineNumbers: 'off' }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate(
+              'app_not_found_in_i18nrc.fieldExtractionRecommendation.h4.changesSimulationLabel',
+              { defaultMessage: 'Changes simulation' }
+            )}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={3}>
+            <CodeEditor
+              languageId="json"
+              value={docSample}
+              onChange={setDocSample}
+              height={300}
+              options={{ lineNumbers: 'off' }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiButton
+              onClick={simulateRecommendedPipeline}
+              data-test-subj="logsOptimizationFieldExtractionRecommendationSimulateButton"
+            >
+              {i18n.translate(
+                'app_not_found_in_i18nrc.fieldExtractionRecommendation.simulateButtonLabel',
+                { defaultMessage: 'Simulate pipeline' }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <CodeEditor
+              languageId="json"
+              value={simulationStr}
+              height={300}
+              options={{ lineNumbers: 'off', readOnly: true }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiAccordion>
+    </EuiPanel>
+  );
+};
+
+const MappingGapRecommendation = ({ recommendation }: { recommendation: Recommendation }) => {
+  const { services } = useKibanaContextForPlugin();
+  const {
+    fieldsMetadata: { useFieldsMetadata },
+  } = services;
+
+  const { fieldsMetadata = {} } = useFieldsMetadata({ attributes: ['flat_name', 'type', 'short'] });
+
+  const options: Array<EuiComboBoxOptionOption<FieldName>> = useMemo(
+    () =>
+      Object.values(fieldsMetadata).map((field) => ({
+        label: field.flat_name!,
+        value: field.flat_name,
+        toolTipContent: field.short,
+      })),
+    [fieldsMetadata]
+  );
+
+  const [selectedOptions, setSelected] = useState();
+
+  const onChange = (selectedOptions) => {
+    // We should only get back either 0 or 1 options.
+    setSelected(selectedOptions);
+  };
+
+  const [pipeline, setPipeline] = useState(() =>
+    JSON.stringify(recommendation.detection.tasks.processors, null, 2)
+  );
+
+  const accordionTriggerButton = (
+    <EuiTitle size="xs">
+      <h3>
+        {i18n.translate(
+          'app_not_found_in_i18nrc.mappingGapRecommendation.h3.adjustMappingToBeLabel',
+          { defaultMessage: 'Adjust mapping to be ECS compliant' }
+        )}
+      </h3>
+    </EuiTitle>
+  );
+
+  return (
+    <EuiPanel>
+      <EuiAccordion
+        id={recommendation.type + recommendation.created_at}
+        buttonContent={accordionTriggerButton}
+        extraAction={
+          <EuiButton data-test-subj="logsOptimizationFieldExtractionRecommendationApplyRecommendationButton">
+            {i18n.translate(
+              'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabel',
+              { defaultMessage: 'Apply recommendation' }
+            )}
+          </EuiButton>
+        }
+        initialIsOpen
+      >
+        <EuiSpacer size="m" />
+        <EuiText>
+          {i18n.translate(
+            'app_not_found_in_i18nrc.mappingGapRecommendation.weDetectedSomeFieldsTextLabel',
+            {
+              defaultMessage:
+                'We detected some fields are not compliant with the Elastic Common Schema.',
+            }
+          )}
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiText>
+          {i18n.translate(
+            'app_not_found_in_i18nrc.mappingGapRecommendation.youCanSearchAndTextLabel',
+            {
+              defaultMessage:
+                "You can search and assign the fields that best suits your data, we'll take care of updating them with a ingest pipeline.",
+            }
+          )}
+        </EuiText>
+        <EuiSpacer size="l" />
+        <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem grow={4}>
+            <EuiFlexGroup direction="column">
+              {recommendation.detection.gaps.map((gap) => (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFieldText
+                      data-test-subj="logsOptimizationMappingGapRecommendationFieldText"
+                      value={gap.field}
+                      readOnly
+                    />
+                    <EuiText>
+                      <strong>⇒</strong>
+                    </EuiText>
+                    <EuiComboBox
+                      aria-label={i18n.translate(
+                        'app_not_found_in_i18nrc.mappingGapRecommendation.euiComboBox.accessibleScreenReaderLabelLabel',
+                        { defaultMessage: 'Select a field...' }
+                      )}
+                      placeholder="Select a field..."
+                      singleSelection={{ asPlainText: true }}
+                      options={options}
+                      selectedOptions={selectedOptions}
+                      onChange={onChange}
+                    />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <CodeEditor
+              languageId="json"
+              value={pipeline}
+              onChange={setPipeline}
+              fitToContent={{
+                minLines: 10,
+                maxLines: 20,
+              }}
+              options={{ lineNumbers: 'off' }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

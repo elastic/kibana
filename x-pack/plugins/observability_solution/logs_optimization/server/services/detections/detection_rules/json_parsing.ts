@@ -6,18 +6,16 @@
  */
 
 import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { JSONParsingDetection } from '../../../../common/detections/types';
 import { EsqlTransport } from '../../../lib/esql_transport';
 import { NewestIndex } from '../../../../common/types';
-import { LOG_LEVEL_FIELD, MESSAGE_FIELD } from '../../../../common/constants';
-import { createFieldExtractionDetection } from '../../../../common/detections/utils';
-import { FieldExtractionDetection } from '../../../../common/detections/types';
+import { MESSAGE_FIELD } from '../../../../common/constants';
+import { createJSONParsingDetection } from '../../../../common/detections/utils';
 
-const LOG_LEVEL_PATTERN = '\\b%{LOGLEVEL:log.level}\\b';
-
-export class LogLevelExtractionDetectionRule {
+export class JSONParsingDetectionRule {
   constructor(private esqlTransport: EsqlTransport) {}
 
-  async process(index: NewestIndex): Promise<FieldExtractionDetection | null> {
+  async process(index: NewestIndex): Promise<JSONParsingDetection | null> {
     const hasMessageMapping = MESSAGE_FIELD in (index.mappings?.properties ?? {});
     if (!hasMessageMapping) {
       return null;
@@ -28,15 +26,13 @@ export class LogLevelExtractionDetectionRule {
 
       const esqlDocs = esqlTable.toDocuments();
 
-      const canExtractLogLevel = esqlDocs.total > 0;
-      if (canExtractLogLevel) {
-        return createFieldExtractionDetection({
+      const canParseJSONMessage = esqlDocs.total > 0;
+      if (canParseJSONMessage) {
+        return createJSONParsingDetection({
           sourceField: MESSAGE_FIELD,
-          targetField: LOG_LEVEL_FIELD,
-          pattern: LOG_LEVEL_PATTERN,
           documentSamples: esqlDocs.hits,
           tasks: {
-            processors: this.buildPipelineProcessors(LOG_LEVEL_PATTERN),
+            processors: this.buildPipelineProcessors(),
           },
         });
       } else {
@@ -48,29 +44,23 @@ export class LogLevelExtractionDetectionRule {
   }
 
   private buildQuery(index: NewestIndex) {
-    const hasLogLevelMapping = LOG_LEVEL_FIELD in (index.mappings?.properties ?? {});
-
-    const filterIfExists = hasLogLevelMapping ? `| WHERE ${LOG_LEVEL_FIELD} IS NULL` : '';
-
     return `FROM ${index.name}
-            ${filterIfExists}
             | WHERE ${MESSAGE_FIELD} IS NOT NULL
-            | GROK ${MESSAGE_FIELD} ${JSON.stringify(LOG_LEVEL_PATTERN)}
-            | WHERE ${LOG_LEVEL_FIELD} IS NOT NULL
+            | WHERE STARTS_WITH(${MESSAGE_FIELD}, "{") == true
             | KEEP ${MESSAGE_FIELD}
             | LIMIT 5
     `;
   }
 
-  private buildPipelineProcessors(pattern: string): IngestProcessorContainer[] {
+  private buildPipelineProcessors(): IngestProcessorContainer[] {
     return [
       {
-        grok: {
-          description: `Extract ${LOG_LEVEL_FIELD} field from ${MESSAGE_FIELD}`,
+        json: {
+          if: "ctx.message.startsWith('{')",
           field: MESSAGE_FIELD,
-          patterns: [pattern],
           ignore_failure: true,
-          ignore_missing: true,
+          add_to_root: true,
+          add_to_root_conflict_strategy: 'replace',
         },
       },
     ];
