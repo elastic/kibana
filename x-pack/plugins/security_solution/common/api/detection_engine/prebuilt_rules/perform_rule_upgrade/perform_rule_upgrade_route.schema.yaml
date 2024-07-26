@@ -55,6 +55,11 @@ components:
           $ref: '#/components/schemas/RulePickVersionValues'
         fields:
           type: object
+          description: |
+           Fields that can be customized during the upgrade workflow
+           as decided in: https://github.com/elastic/kibana/issues/186544
+           Fields listed here, which are not specified in the request body,
+           will default to a `pick_version` of `MERGED`.
           properties:
             name:
               $ref: '#/components/schemas/FieldUpgradeRequest'

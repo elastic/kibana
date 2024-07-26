@@ -136,6 +136,13 @@ export const RuleUpgradeSpecifier = z.object({
   revision: z.number(),
   version: RuleVersion,
   pick_version: RulePickVersionValues.optional(),
+  /** 
+      * Fields that can be customized during the upgrade workflow
+as decided in: https://github.com/elastic/kibana/issues/186544
+Fields listed here, which are not specified in the request body,
+will default to a `pick_version` of `MERGED`.
+ 
+      */
   fields: z
     .object({
       name: FieldUpgradeRequest.optional(),
