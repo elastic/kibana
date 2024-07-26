@@ -20,7 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
-import { createSemanticTextCombinedField, getFieldNames } from './utils';
+import useDebounce from 'react-use/lib/useDebounce';
+import { createSemanticTextCombinedField, getFieldNames, getNameCollisionMsg } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { AddCombinedField } from './combined_fields_form';
 
@@ -37,6 +38,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
   const [selectedInference, setSelectedInference] = useState<string | undefined>();
   const [selectedFieldOption, setSelectedFieldOption] = useState<string | undefined>();
   const [renameToFieldOption, setRenameToFieldOption] = useState<string | undefined>();
+  const [fieldError, setFieldError] = useState<string | undefined>();
 
   const fieldOptions = useMemo(
     () =>
@@ -113,9 +115,28 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
     );
   };
 
+  useDebounce(
+    () => {
+      if (renameToFieldOption === undefined) {
+        return;
+      }
+      const error = hasNameCollision(renameToFieldOption)
+        ? getNameCollisionMsg(renameToFieldOption)
+        : undefined;
+      setFieldError(error);
+    },
+    250,
+    [renameToFieldOption]
+  );
+
   const isInvalid = useMemo(() => {
-    return !selectedInference || !selectedFieldOption || renameToFieldOption === '';
-  }, [selectedInference, selectedFieldOption, renameToFieldOption]);
+    return (
+      !selectedInference ||
+      !selectedFieldOption ||
+      renameToFieldOption === '' ||
+      fieldError !== undefined
+    );
+  }, [selectedInference, selectedFieldOption, renameToFieldOption, fieldError]);
 
   return (
     <>
@@ -138,6 +159,8 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
           label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel', {
             defaultMessage: 'Copy to field',
           })}
+          isInvalid={fieldError !== undefined}
+          error={[fieldError]}
         >
           <EuiFieldText
             placeholder={i18n.translate(
