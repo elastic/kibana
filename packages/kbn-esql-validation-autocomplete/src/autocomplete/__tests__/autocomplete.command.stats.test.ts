@@ -73,13 +73,12 @@ describe('autocomplete.suggest', () => {
       test('on function left paren', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions(
-          'from a | stats by bucket(/',
-          [
-            ...getFieldNamesByType(['number', 'date']),
-            ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { scalar: true }),
-          ].map((field) => `${field},`)
-        );
+        await assertSuggestions('from a | stats by bucket(/', [
+          ...getFieldNamesByType(['number', 'date']).map((field) => `${field},`),
+          ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { scalar: true }).map(
+            (s) => ({ ...s, text: `${s.text},` })
+          ),
+        ]);
 
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', 'number', { agg: true, grouping: true }),

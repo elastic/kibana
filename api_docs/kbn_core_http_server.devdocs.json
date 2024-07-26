@@ -6386,7 +6386,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -7538,14 +7538,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
               },
               {
@@ -8039,6 +8031,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",

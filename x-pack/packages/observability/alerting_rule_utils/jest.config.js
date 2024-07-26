@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export interface Group {
-  field: string;
-  value: string;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/observability/alerting_rule_utils'],
+};
