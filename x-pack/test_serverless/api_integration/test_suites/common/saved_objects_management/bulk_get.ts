@@ -61,42 +61,39 @@ export default function ({ getService }: FtrProviderContext) {
         });
       }
 
-      it('should return 200 for object that exists and inject metadata', async () =>
-        await supertestWithoutAuth
+      it('should return 200 for object that exists and inject metadata', async () => {
+        const response = await supertestWithoutAuth
           .post(URL)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send([validObject])
-          .expect(200)
-          .then(({ body }) => {
-            expect(body).to.have.length(1);
-            expectSuccess(0, body);
-          }));
+          .expect(200);
+        expect(response.body).to.have.length(1);
+        expectSuccess(0, response.body);
+      });
 
-      it('should return error for invalid object type', async () =>
-        await supertestWithoutAuth
+      it('should return error for invalid object type', async () => {
+        const response = await supertestWithoutAuth
           .post(URL)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send([invalidObject])
-          .expect(200)
-          .then(({ body }) => {
-            expect(body).to.have.length(1);
-            expectBadRequest(0, body);
-          }));
+          .expect(200);
+        expect(response.body).to.have.length(1);
+        expectBadRequest(0, response.body);
+      });
 
-      it('should return mix of successes and errors', async () =>
-        await supertestWithoutAuth
+      it('should return mix of successes and errors', async () => {
+        const response = await supertestWithoutAuth
           .post(URL)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send([validObject, invalidObject])
-          .expect(200)
-          .then(({ body }) => {
-            expect(body).to.have.length(2);
-            expectSuccess(0, body);
-            expectBadRequest(1, body);
-          }));
+          .expect(200);
+        expect(response.body).to.have.length(2);
+        expectSuccess(0, response.body);
+        expectBadRequest(1, response.body);
+      });
     });
   });
 }

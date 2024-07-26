@@ -9,12 +9,14 @@ import expect from '@kbn/expect';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common/constants';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  let roleAuthc;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
 
   describe('Script Languages API', function getLanguages() {
     before(async () => {
@@ -23,31 +25,28 @@ export default function ({ getService }) {
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
-    it('should return 200 with an array of languages', () =>
-      supertestWithoutAuth
+    it('should return 200 with an array of languages', async () => {
+      const response = await supertestWithoutAuth
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
-        .expect(200)
-        .then((response) => {
-          expect(response.body).to.be.an('array');
-        }));
+        .expect(200);
+      expect(response.body).to.be.an('array');
+    });
 
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('should only return langs enabled for inline scripting', () =>
-      supertestWithoutAuth
+    it.skip('should only return langs enabled for inline scripting', async () => {
+      const response = await supertestWithoutAuth
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
-        .expect(200)
-        .then((response) => {
-          expect(response.body).to.contain('expression');
-          expect(response.body).to.contain('painless');
-          expect(response.body).to.not.contain('groovy');
-        }));
+        .expect(200);
+      expect(response.body).to.contain('expression');
+      expect(response.body).to.contain('painless');
+      expect(response.body).to.not.contain('groovy');
+    });
   });
 }
