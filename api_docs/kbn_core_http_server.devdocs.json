@@ -6386,11 +6386,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/enable_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule.ts"
               },
               {
                 "plugin": "alerting",
@@ -6414,7 +6414,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/update_rule_api_key.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6815,6 +6815,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -7534,22 +7538,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/enable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/enable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
               },
               {
@@ -7591,14 +7579,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/update_flapping_settings.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/update_rule_api_key.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/update_rule_api_key.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -8054,6 +8034,22 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/mute_alert/mute_alert.test.ts"
               },
               {
@@ -8079,6 +8075,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -10646,9 +10650,7 @@
                 "section": "def-common.CustomHttpResponseOptions",
                 "text": "CustomHttpResponseOptions"
               },
-              "<Buffer | ",
-              "Stream",
-              " | ",
+              "<",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -10687,9 +10689,7 @@
                     "section": "def-common.CustomHttpResponseOptions",
                     "text": "CustomHttpResponseOptions"
                   },
-                  "<Buffer | ",
-                  "Stream",
-                  " | ",
+                  "<",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "common",
@@ -19036,7 +19036,9 @@
           "\nError message and optional data send to the client in case of error."
         ],
         "signature": [
-          "string | Error | { message: string | Error; attributes?: ",
+          "string | Error | Buffer | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
