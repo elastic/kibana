@@ -183,7 +183,6 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
-            console.log('STATE TRANSFER', id);
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
