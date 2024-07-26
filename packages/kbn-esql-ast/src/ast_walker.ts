@@ -291,7 +291,7 @@ function visitOperatorExpression(
     return fn;
   }
   if (ctx instanceof ArithmeticBinaryContext) {
-    const fn = createFunction(getMathOperation(ctx), ctx);
+    const fn = createFunction(getMathOperation(ctx), ctx, undefined, 'binary-expression');
     const args = [visitOperatorExpression(ctx._left), visitOperatorExpression(ctx._right)];
     for (const arg of args) {
       if (arg) {

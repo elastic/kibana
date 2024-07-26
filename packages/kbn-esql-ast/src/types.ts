@@ -74,7 +74,7 @@ export type FunctionSubtype =
   | 'unary-expression' // -a, +a, NOT a, ...
   | 'binary-expression'; // a + b, a - b, a * b, ...
 
-export interface ESQLFunction<Subtype extends FunctionSubtype = 'variadic-call'>
+export interface ESQLFunction<Subtype extends FunctionSubtype = FunctionSubtype>
   extends ESQLAstBaseItem {
   type: 'function';
 
