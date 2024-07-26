@@ -27,6 +27,7 @@ export const getMockServices = (overrides?: Partial<Services & UserProfilesServi
     getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
     isTaggingEnabled: () => true,
+    isFavoritesEnabled: () => false,
     bulkGetUserProfiles: async () => [],
     getUserProfile: async () => ({ uid: '', enabled: true, data: {}, user: { username: '' } }),
     ...overrides,
