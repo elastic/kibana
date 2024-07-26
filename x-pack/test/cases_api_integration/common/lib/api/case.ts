@@ -41,10 +41,7 @@ export const waitForCases = async (supertest: SuperTest.Agent, log: ToolingLog):
   await waitFor(
     async () => {
       const response = await getCases(supertest);
-
-      // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
       const cases = response;
-
       return cases != null && cases.cases.length > 0 && cases?.cases[0]?.totalAlerts > 0;
     },
     'waitForCaseToAttachAlert',
