@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import fastIsEqual from 'fast-deep-equal';
 import { EuiLoadingChart } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { Warnings } from '@kbn/charts-plugin/public';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
-import { mapAndFlattenFilters, TimefilterContract } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
-import {
+import type {
   Adapters,
-  AttributeService,
   EmbeddableInput,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
@@ -33,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { RenderCompleteDispatcher, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import fastIsEqual from 'fast-deep-equal';
 import _, { cloneDeep, get } from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
@@ -42,7 +41,6 @@ import { VisualizationMissedSavedObjectError } from '../components/visualization
 import { VisualizationsStartDeps } from '../plugin';
 import { getApplication, getExpressions, getUiActions } from '../services';
 import { VisSavedObject } from '../types';
-import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { SerializedVis, Vis } from '../vis';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
@@ -111,9 +109,6 @@ export class VisualizeEmbeddable {
   private query?: Query;
   private filters?: Filter[];
   private searchSessionId?: string;
-  private syncColors?: boolean;
-  private syncTooltips?: boolean;
-  private syncCursor?: boolean;
   private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
@@ -125,11 +120,6 @@ export class VisualizeEmbeddable {
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableDeps;
   private readonly inspectorAdapters?: Adapters;
-  private attributeService?: AttributeService<
-    VisualizeSavedObjectAttributes,
-    VisualizeByValueInput,
-    VisualizeByReferenceInput
-  >;
   private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
@@ -148,12 +138,7 @@ export class VisualizeEmbeddable {
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
-    initialInput: VisualizeInput,
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    initialInput: VisualizeInput
   ) {
     this.id = initialInput.id;
     this.output = {
@@ -168,9 +153,6 @@ export class VisualizeEmbeddable {
     this.input = initialInput;
     this.deps = deps;
     this.timefilter = timefilter;
-    this.syncColors = this.input.syncColors;
-    this.syncTooltips = this.input.syncTooltips;
-    this.syncCursor = this.input.syncCursor;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
     this.embeddableTitle = this.getTitle();
@@ -178,17 +160,6 @@ export class VisualizeEmbeddable {
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
-    this.attributeService = attributeService;
-
-    if (this.attributeService) {
-      const readOnly = Boolean(vis.type.disableEdit);
-      const isByValue = !this.inputIsRefType(initialInput);
-      const editable = readOnly
-        ? false
-        : capabilities.visualizeSave ||
-          (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
-      this.updateOutput({ ...this.getOutput(), editable });
-    }
 
     this.subscriptions.push(
       this.getInput$().subscribe(() => {
@@ -282,24 +253,6 @@ export class VisualizeEmbeddable {
     return this.vis;
   }
 
-  /**
-   * Gets the Visualize embeddable's local filters
-   * @returns Local/panel-level array of filters for Visualize embeddable
-   */
-  public getFilters() {
-    const filters = this.vis.serialize().data.searchSource?.filter ?? [];
-    // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
-    return mapAndFlattenFilters(_.cloneDeep(filters));
-  }
-
-  /**
-   * Gets the Visualize embeddable's local query
-   * @returns Local/panel-level query for Visualize embeddable
-   */
-  public getQuery() {
-    return this.vis.serialize().data.searchSource.query;
-  }
-
   public getInspectorAdapters = () => {
     if (!this.handler || (this.inspectorAdapters && !Object.keys(this.inspectorAdapters).length)) {
       return undefined;
@@ -382,21 +335,6 @@ export class VisualizeEmbeddable {
 
     if (this.searchSessionId !== this.input.searchSessionId) {
       this.searchSessionId = this.input.searchSessionId;
-      dirty = true;
-    }
-
-    if (this.syncColors !== this.input.syncColors) {
-      this.syncColors = this.input.syncColors;
-      dirty = true;
-    }
-
-    if (this.syncTooltips !== this.input.syncTooltips) {
-      this.syncTooltips = this.input.syncTooltips;
-      dirty = true;
-    }
-
-    if (this.syncCursor !== this.input.syncCursor) {
-      this.syncCursor = this.input.syncCursor;
       dirty = true;
     }
 
@@ -641,7 +579,8 @@ export class VisualizeEmbeddable {
   }
 
   public reload = async () => {
-    await this.handleVisUpdate();
+    this.handleChanges();
+    await this.updateHandler();
   };
 
   private getExecutionContext(): KibanaExecutionContext {
@@ -705,20 +644,11 @@ export class VisualizeEmbeddable {
     }
   }
 
-  private handleVisUpdate = async () => {
-    this.handleChanges();
-    await this.updateHandler();
-  };
-
   private uiStateChangeHandler = () => {
     this.updateInput({
       ...this.vis.uiState.toJSON(),
     });
   };
-
-  public supportedTriggers(): string[] {
-    return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
-  }
 
   public getExpressionVariables$() {
     return this.expressionVariablesSubject.asObservable();
@@ -727,58 +657,4 @@ export class VisualizeEmbeddable {
   public getExpressionVariables() {
     return this.expressionVariables;
   }
-
-  inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
-    if (!this.attributeService) {
-      throw new Error('AttributeService must be defined for getInputAsRefType');
-    }
-    return this.attributeService.inputIsRefType(input as VisualizeByReferenceInput);
-  };
-
-  getInputAsValueType = async (): Promise<VisualizeByValueInput> => {
-    const input = {
-      savedVis: this.vis.serialize(),
-    };
-    delete input.savedVis.id;
-    _.unset(input, 'savedVis.title');
-    return new Promise<VisualizeByValueInput>((resolve) => {
-      resolve({ ...(input as VisualizeByValueInput) });
-    });
-  };
-
-  getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { plugins, core } = this.deps.start();
-    const { data, spaces, savedObjectsTaggingOss } = plugins;
-    const savedVis = await getSavedVisualization({
-      search: data.search,
-      dataViews: data.dataViews,
-      spaces,
-      savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-      ...core,
-    });
-    if (!savedVis) {
-      throw new Error('Error creating a saved vis object');
-    }
-    if (!this.attributeService) {
-      throw new Error('AttributeService must be defined for getInputAsRefType');
-    }
-    const saveModalTitle = this.getTitle()
-      ? this.getTitle()
-      : i18n.translate('visualizations.embeddable.placeholderTitle', {
-          defaultMessage: 'Placeholder Title',
-        });
-    // @ts-ignore
-    const attributes: VisualizeSavedObjectAttributes = {
-      savedVis,
-      vis: this.vis,
-      title: this.vis.title,
-    };
-    return this.attributeService.getInputAsRefType(
-      {
-        id: this.id,
-        attributes,
-      },
-      { showSaveModal: true, saveModalTitle }
-    );
-  };
 }

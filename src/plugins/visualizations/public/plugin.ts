@@ -162,7 +162,6 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
-  getAttributeService: EmbeddableStart['getAttributeService'];
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;

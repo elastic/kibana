@@ -42,6 +42,7 @@ export type { VisualizeEditorInput } from './react_embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
+export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './embeddable';
 export type { PersistedState } from './persisted_state';
 export type {
   ISavedVis,
