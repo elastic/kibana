@@ -448,17 +448,6 @@ describe('validation logic', () => {
 
     describe('show', () => {
       testErrorsAndWarnings('show', ["SyntaxError: missing 'info' at '<EOF>'"]);
-      testErrorsAndWarnings('show functions', [
-        "SyntaxError: token recognition error at: 'f'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'c'",
-        "SyntaxError: token recognition error at: 't'",
-        "SyntaxError: token recognition error at: 'io'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 's'",
-        "SyntaxError: missing 'info' at '<EOF>'",
-      ]);
       testErrorsAndWarnings('show info', []);
       testErrorsAndWarnings('show numberField', [
         "SyntaxError: token recognition error at: 'n'",

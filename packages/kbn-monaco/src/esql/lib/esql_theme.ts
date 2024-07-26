@@ -90,6 +90,9 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
       true // isBold
     ),
 
+    // functions
+    ...buildRuleGroup(['functions'], euiThemeVars.euiColorPrimaryText),
+
     // operators
     ...buildRuleGroup(
       [
