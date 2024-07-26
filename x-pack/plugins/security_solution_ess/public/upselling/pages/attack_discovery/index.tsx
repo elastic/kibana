@@ -6,11 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { UpgradeButtons } from '@kbn/elastic-assistant';
 import { AttackDiscoveryUpsellingPage } from '@kbn/security-solution-upselling/pages/attack_discovery';
 import React, { useMemo } from 'react';
 
 import { useKibana } from '../../../common/services';
+import { UpgradeActions } from './upgrade_actions';
 import * as i18n from './translations';
 
 /**
@@ -24,7 +24,7 @@ const AttackDiscoveryUpsellingPageESSComponent: React.FC = () => {
     () => (
       <EuiFlexGroup data-test-subj="essActions" justifyContent="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <UpgradeButtons basePath={http.basePath.get()} />
+          <UpgradeActions basePath={http.basePath.get()} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

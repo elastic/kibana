@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { AssistantAvatar } from './assistant_avatar/assistant_avatar';
 import * as i18n from './translations';
 
 interface Props {
