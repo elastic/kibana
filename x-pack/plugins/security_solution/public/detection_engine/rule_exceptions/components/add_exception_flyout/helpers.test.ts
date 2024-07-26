@@ -10,7 +10,7 @@ import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/res
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
-import { isSubmitDisabled, prepareNewItemsForSubmition, prepareToCloseAlerts } from './helpers';
+import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 import type { Rule } from '../../../rule_management/logic/types';
 import type { AlertData } from '../../utils/types';
 
@@ -269,9 +269,9 @@ describe('add_exception_flyout#helpers', () => {
 
   // Doesn't explicitly test "enrichNewExceptionItems" used within helper as that function
   // is covered with unit tests itself.
-  describe('prepareNewItemsForSubmition', () => {
+  describe('prepareNewItemsForSubmission', () => {
     it('returns "addToLists" true and the sharedListToAddTo lists to add to if correct radio selection and lists are referenced', () => {
-      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmition({
+      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmission({
         sharedListToAddTo: [getExceptionListSchemaMock()],
         addExceptionToRadioSelection: 'add_to_lists',
         exceptionListsToAddTo: [],
@@ -289,7 +289,7 @@ describe('add_exception_flyout#helpers', () => {
     });
 
     it('returns "addToLists" true and the exceptionListsToAddTo if correct radio selection and lists are referenced', () => {
-      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmition({
+      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmission({
         sharedListToAddTo: [],
         addExceptionToRadioSelection: 'add_to_lists',
         exceptionListsToAddTo: [getExceptionListSchemaMock()],
@@ -307,7 +307,7 @@ describe('add_exception_flyout#helpers', () => {
     });
 
     it('returns "addToLists" false if no exception lists are specified as the lists to add to', () => {
-      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmition({
+      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmission({
         sharedListToAddTo: [],
         addExceptionToRadioSelection: 'add_to_lists',
         exceptionListsToAddTo: [],
@@ -325,7 +325,7 @@ describe('add_exception_flyout#helpers', () => {
     });
 
     it('returns "addToRules" true if radio selection is "add_to_rule"', () => {
-      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmition({
+      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmission({
         sharedListToAddTo: [],
         addExceptionToRadioSelection: 'add_to_rule',
         exceptionListsToAddTo: [],
@@ -343,7 +343,7 @@ describe('add_exception_flyout#helpers', () => {
     });
 
     it('returns "addToRules" true if radio selection is "add_to_rules"', () => {
-      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmition({
+      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmission({
         sharedListToAddTo: [],
         addExceptionToRadioSelection: 'add_to_rules',
         exceptionListsToAddTo: [],
@@ -361,7 +361,7 @@ describe('add_exception_flyout#helpers', () => {
     });
 
     it('returns "addToRules" true if radio selection is "select_rules_to_add_to"', () => {
-      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmition({
+      const { addToRules, addToLists, listsToAddTo } = prepareNewItemsForSubmission({
         sharedListToAddTo: [],
         addExceptionToRadioSelection: 'select_rules_to_add_to',
         exceptionListsToAddTo: [],

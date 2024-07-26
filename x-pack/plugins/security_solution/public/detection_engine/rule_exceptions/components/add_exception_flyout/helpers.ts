@@ -80,7 +80,7 @@ export const isSubmitDisabled = ({
  * Helper method for determining if user has selected to add exception
  * items to specific rules or to exception lists. It also returns the
  * exception items enriched with various flyout values.
- * @param sharedListToAddTo Exception list passed into add exceptino item flyout component
+ * @param sharedListToAddTo Exception list passed into add exception item flyout component
  * @param addExceptionToRadioSelection Radio selection value denoting whether to add item to lists or rules
  * @param exceptionListsToAddTo User selected exception lists to add item to
  * @param exceptionItemName Item name
@@ -90,7 +90,7 @@ export const isSubmitDisabled = ({
  * @param expireTime User defined item expire time
  * @param exceptionItems Items to be added
  */
-export const prepareNewItemsForSubmition = ({
+export const prepareNewItemsForSubmission = ({
   sharedListToAddTo,
   addExceptionToRadioSelection,
   exceptionListsToAddTo,
