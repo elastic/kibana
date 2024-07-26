@@ -76,7 +76,7 @@ paths:
                   - per_page
                   - total
         400:
-          description: Invalid input data response
+          description: Invalid input data
           content:
             application/json:
               schema:
@@ -84,25 +84,25 @@ paths:
                   - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         401:
-          description: Unsuccessful authentication response
+          description: Unsuccessful authentication
           content:
             application/json:
               schema:
                 $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         403:
-          description: Not enough privileges response
+          description: Insufficient privileges
           content:
             application/json:
               schema:
                 $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         404:
-          description: Endpoint list not found response
+          description: Endpoint list not found
           content:
             application/json:
               schema:
                 $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         500:
-          description: Internal server error response
+          description: Internal server error
           content:
             application/json:
               schema:

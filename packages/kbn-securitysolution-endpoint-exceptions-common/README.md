@@ -2,7 +2,7 @@
 
 The package contains common files for the Endpoint Exceptions feature.
 
-`common` in the name highlights that this package is intended to combine any common entities related to Endpoint Exceptions in this package. E.g. the other `kbn-securitysolution-endpoint-exception-list-*` packages
+`common` in the name highlights that this package is intended to combine any common entities related to Endpoint Exceptions. E.g. the other `kbn-securitysolution-endpoint-exception-list-*` packages
 content should be moved here while `kbn-securitysolution-io-ts-list-types` package should be
 gone eventually.
 
