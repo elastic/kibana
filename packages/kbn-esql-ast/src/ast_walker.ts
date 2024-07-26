@@ -288,7 +288,7 @@ function visitOperatorExpression(
   if (ctx instanceof ArithmeticUnaryContext) {
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
-    const fn = createFunction('*', ctx);
+    const fn = createFunction('*', ctx, undefined, 'binary-expression');
     fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
@@ -448,7 +448,12 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
   }
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
-    const fn = createFunction(functionExpressionCtx.identifier().getText().toLowerCase(), ctx);
+    const fn = createFunction(
+      functionExpressionCtx.identifier().getText().toLowerCase(),
+      ctx,
+      undefined,
+      'variadic-call'
+    );
     const asteriskArg = functionExpressionCtx.ASTERISK()
       ? createColumnStar(functionExpressionCtx.ASTERISK()!)
       : undefined;
@@ -499,7 +504,7 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
       const negate = regex.NOT();
       const likeType = regex._kind.text?.toLowerCase() || '';
       const fnName = `${negate ? 'not_' : ''}${likeType}`;
-      const fn = createFunction(fnName, regex);
+      const fn = createFunction(fnName, regex, undefined, 'binary-expression');
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {
         fn.args.push(arg);

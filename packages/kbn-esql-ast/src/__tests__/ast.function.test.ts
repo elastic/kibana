@@ -84,6 +84,23 @@ describe('function AST nodes', () => {
         args: [expect.any(Object)],
       });
     });
+
+    // Currently arithmetic unary expressions, like "-x", are transformed to
+    // binary expressions: "-1 * x". Enable this test once unary expressions
+    // are supported.
+    it.skip('unary expression', () => {
+      const query = 'FROM a | STATS -a';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === '*');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'unary-expression',
+        name: '-',
+        args: [expect.any(Object)],
+      });
+    });
   });
 
   describe('"binary-expression"', () => {
@@ -145,6 +162,20 @@ describe('function AST nodes', () => {
         type: 'function',
         subtype: 'binary-expression',
         name: 'not_in',
+        args: [expect.any(Object), expect.any(Object)],
+      });
+    });
+
+    it('regex expression', () => {
+      const query = 'FROM a | STATS a LIKE "adsf"';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'like');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'binary-expression',
+        name: 'like',
         args: [expect.any(Object), expect.any(Object)],
       });
     });
