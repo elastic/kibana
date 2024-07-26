@@ -228,7 +228,7 @@ export class DashboardPlugin
 
         // We also don't want to store the table list view state.
         // The question is: what _do_ we want to save here? :)
-        const tableListUrlState = ['s', 'title', 'sort', 'sortdir', 'created_by'];
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir', 'created_by', 'favorites'];
         return replaceUrlHashQuery(newNavLink, (query) => {
           [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
             delete query[param];

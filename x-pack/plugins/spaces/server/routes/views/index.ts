@@ -42,11 +42,11 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
 
         const route = nextCandidateRoute === '/' ? defaultRoute : nextCandidateRoute;
         // need to get reed of ../../ to make sure we will not be out of space basePath
-        const normalizedRoute = new URL(route, 'https://localhost');
+        const normalizedRoute = new URL(route, 'https://localhost').pathname;
 
         return response.redirected({
           headers: {
-            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}`,
+            location: `${basePath}${normalizedRoute}`,
           },
         });
       } catch (e) {

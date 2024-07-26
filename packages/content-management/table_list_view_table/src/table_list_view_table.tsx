@@ -157,6 +157,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   sortColumnChanged: boolean;
   tableFilter: {
     createdBy: string[];
+    favorites: boolean;
   };
 }
 
@@ -168,6 +169,7 @@ export interface URLState {
   };
   filter?: {
     createdBy?: string[];
+    favorites?: boolean;
   };
 
   [key: string]: unknown;
@@ -179,6 +181,7 @@ interface URLQueryParams {
   sort?: string;
   sortdir?: string;
   created_by?: string[];
+  favorites?: 'true';
 
   [key: string]: unknown;
 }
@@ -236,6 +239,12 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     stateFromURL.filter = { createdBy: [] };
   }
 
+  if (sanitizedParams.favorites === 'true') {
+    stateFromURL.filter.favorites = true;
+  } else {
+    stateFromURL.filter.favorites = false;
+  }
+
   return stateFromURL;
 };
 
@@ -248,7 +257,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
-  filter?: { createdBy?: string[] };
+  filter?: { createdBy?: string[]; favorites?: boolean };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -269,6 +278,10 @@ const urlStateSerializer = (updated: {
 
   if (updated.filter?.createdBy) {
     updatedQueryParams.created_by = updated.filter.createdBy;
+  }
+
+  if (updated?.filter && 'favorites' in updated.filter) {
+    updatedQueryParams.favorites = updated.filter.favorites ? 'true' : undefined;
   }
 
   return updatedQueryParams;
@@ -354,6 +367,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     notifyError,
     DateFormatterComp,
     getTagList,
+    isFavoritesEnabled,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
@@ -400,6 +414,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       sortColumnChanged: !initialSort.isDefault,
       tableFilter: {
         createdBy: [],
+        favorites: false,
       },
     };
   }, [initialPageSize, entityName, recentlyAccessed]);
@@ -589,6 +604,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
                 }
               }}
               searchTerm={searchQuery.text}
+              isFavoritesEnabled={isFavoritesEnabled()}
             />
           );
         },
@@ -721,6 +737,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     tableItemsRowActions,
     inspectItem,
     entityName,
+    isFavoritesEnabled,
   ]);
 
   const itemsById = useMemo(() => {
@@ -1041,6 +1058,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: {
           filter: {
             createdBy: filter.createdBy ?? [],
+            favorites: filter.favorites ?? false,
           },
         },
       });
@@ -1150,6 +1168,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
+          favoritesEnabled={isFavoritesEnabled()}
         />
 
         {/* Delete modal */}
