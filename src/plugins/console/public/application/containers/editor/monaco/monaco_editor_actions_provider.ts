@@ -344,23 +344,16 @@ export class MonacoEditorActionsProvider {
       return AutocompleteType.METHOD;
     }
 
-    // get the content on the line up until the position
-    const lineContent = model.getValueInRange({
-      startLineNumber: lineNumber,
-      startColumn: 1,
-      endLineNumber: lineNumber,
-      endColumn: column,
-    });
-
-    // if the content of the line doesnt need to have autosuggestions, we should not
-    // return any autocomplete type
-    if (!shouldTriggerSuggestions(lineContent)) {
-      return null;
-    }
-
     // if on the 1st line of the request, suggest method, url or url_params depending on the content
     const { startLineNumber: requestStartLineNumber } = currentRequest;
     if (lineNumber === requestStartLineNumber) {
+      const lineContent = model.getValueInRange({
+        startLineNumber: lineNumber,
+        startColumn: 1,
+        endLineNumber: lineNumber,
+        endColumn: column,
+      });
+
       const lineTokens = getLineTokens(lineContent);
       // if there is 1 or fewer tokens, suggest method
       if (lineTokens.length <= 1) {
@@ -378,8 +371,13 @@ export class MonacoEditorActionsProvider {
       return null;
     }
 
-    // if not on the 1st line of the request, suggest request body
+    // if the current request doesn't have a method, the request is not valid
+    // and shouldn't have an autocomplete type
+    if (!currentRequest.method) {
+      return null;
+    }
 
+    // if not on the 1st line of the request, suggest request body
     return AutocompleteType.BODY;
   }
 
