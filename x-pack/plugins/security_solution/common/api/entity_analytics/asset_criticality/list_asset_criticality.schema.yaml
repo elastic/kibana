@@ -1,14 +1,7 @@
 openapi: 3.0.0
 info:
-  version: '1'
+  version: '2023-10-31'
   title: Asset Criticality List Schema
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/asset_criticality/list:
     post:

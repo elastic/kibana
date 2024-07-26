@@ -46,7 +46,7 @@ export const JOB_MAP_NODE_TYPES = {
 /**
  * Union type of JOB_MAP_NODE_TYPES
  */
-export type JobMapNodeTypes = typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES];
+export type JobMapNodeTypes = (typeof JOB_MAP_NODE_TYPES)[keyof typeof JOB_MAP_NODE_TYPES];
 
 /**
  * Custom enum for the metadata to be stored about which tool was used to create an index

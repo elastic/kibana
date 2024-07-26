@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Create Conversation API endpoint
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';
@@ -20,33 +20,8 @@ import {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
-  ConversationMessageCreateProps,
 } from './common_attributes.gen';
 import { NonEmptyString } from '../common_attributes.gen';
-
-export type AppendConversationMessageRequestParams = z.infer<
-  typeof AppendConversationMessageRequestParams
->;
-export const AppendConversationMessageRequestParams = z.object({
-  /**
-   * The conversation's `id` value.
-   */
-  id: NonEmptyString,
-});
-export type AppendConversationMessageRequestParamsInput = z.input<
-  typeof AppendConversationMessageRequestParams
->;
-
-export type AppendConversationMessageRequestBody = z.infer<
-  typeof AppendConversationMessageRequestBody
->;
-export const AppendConversationMessageRequestBody = ConversationMessageCreateProps;
-export type AppendConversationMessageRequestBodyInput = z.input<
-  typeof AppendConversationMessageRequestBody
->;
-
-export type AppendConversationMessageResponse = z.infer<typeof AppendConversationMessageResponse>;
-export const AppendConversationMessageResponse = ConversationResponse;
 
 export type CreateConversationRequestBody = z.infer<typeof CreateConversationRequestBody>;
 export const CreateConversationRequestBody = ConversationCreateProps;
