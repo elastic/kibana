@@ -6,7 +6,7 @@
  */
 
 import URL from 'url';
-import { ObservabilityOnboardingUsername } from '../../../server/test_helpers/create_observability_onboarding_users/authentication';
+import { ObservabilityOnboardingUsername } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users/authentication';
 
 export type InstallationStep =
   | 'ea-download'

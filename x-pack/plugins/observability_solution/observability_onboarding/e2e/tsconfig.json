@@ -1,6 +1,6 @@
 {
   "extends": "../../../../../tsconfig.base.json",
-  "include": ["**/*", "../server/**/*"],
+  "include": ["**/*"],
   "exclude": ["tmp", "target/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
@@ -11,6 +11,7 @@
     { "path": "../../../test/tsconfig.json" },
     "@kbn/test",
     "@kbn/dev-utils",
-    "@kbn/cypress-config"
+    "@kbn/cypress-config",
+    "@kbn/observability-onboarding-plugin"
   ]
 }

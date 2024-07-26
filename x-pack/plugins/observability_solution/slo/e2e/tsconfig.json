@@ -10,7 +10,7 @@
   "kbn_references": [
     "@kbn/test",
     "@kbn/ftr-common-functional-services",
-    "@kbn/synthetics-plugin/e2e",
     "@kbn/data-forge",
+    "@kbn/synthetics-e2e",
   ]
 }

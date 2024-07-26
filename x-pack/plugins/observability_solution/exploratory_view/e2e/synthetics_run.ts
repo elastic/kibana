@@ -12,7 +12,7 @@ import { argv } from './parse_args_params';
 const { headless, grep, bail: pauseOnError } = argv;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaConfig = await readConfigFile(require.resolve('@kbn/synthetics-plugin/e2e/config'));
+  const kibanaConfig = await readConfigFile(require.resolve('@kbn/synthetics-e2e/config'));
 
   return {
     ...kibanaConfig.getAll(),
