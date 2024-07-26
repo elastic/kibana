@@ -99,11 +99,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionScanEnabled: false,
 
   /**
-   * Enables top charts on Alerts Page
-   */
-  alertsPageChartsEnabled: true,
-
-  /**
    * Enables the alert type column in KPI visualizations on Alerts Page
    */
   alertTypeEnabled: false,
