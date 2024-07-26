@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Install Prepackaged Timelines API
-  version: '2023-10-31'
+  version: 8.9.0
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -12,9 +12,7 @@ servers:
 paths:
   /api/timeline/_prepackaged:
     post:
-      x-labels: [serverless, ess]
-      x-codegen-enabled: true
-      operationId: InstallPrepackedTimelines
+      operationId: installPrepackedTimelines
       summary: Installs prepackaged timelines.
       tags:
         - access:securitySolution
@@ -25,22 +23,23 @@ paths:
           application/json:
             schema:
               type: object
-              required: [timelinesToInstall, timelinesToUpdate, prepackagedTimelines]
               properties:
                 timelinesToInstall:
                   type: array
                   items:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelines'
-                    nullable: true
+                    allOf:
+                    - $ref: '../model/components.yaml#/components/schemas/ImportTimelines'
+                    - nullable: true
                 timelinesToUpdate:
                   type: array
                   items:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelines'
-                    nullable: true
+                    allOf:
+                    - $ref: '../model/components.yaml#/components/schemas/ImportTimelines'
+                    - nullable: true
                 prepackagedTimelines:
                   type: array
                   items:
-                    $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+                    $ref: '../model/components.yaml#/components/schemas/SavedTimeline'
       responses:
         '200':
           description: Indicates the installation of prepackaged timelines was successful.
@@ -48,10 +47,11 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [data]
                 properties:
                   data:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+                    $ref: '../model/components.yaml#/components/schemas/ImportTimelineResult'
+                required:
+                  - data
         '500':
           description: Indicates the installation of prepackaged timelines was unsuccessful.
           content:

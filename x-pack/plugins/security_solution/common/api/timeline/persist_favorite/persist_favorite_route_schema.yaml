@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Favorite API
-  version: '2023-10-31'
+  version: 8.9.0
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -12,9 +12,7 @@ servers:
 paths:
   /api/timeline/_favorite:
     patch:
-      x-labels: [serverless, ess]
-      x-codegen-enabled: true
-      operationId: PersistFavoriteRoute
+      operationId: persistFavoriteRoute
       summary: Persists a given users favorite status of a timeline.
       tags:
         - access:securitySolution
@@ -25,7 +23,6 @@ paths:
           application/json:
             schema:
               type: object
-              required: [timelineId, templateTimelineId, templateTimelineVersion, timelineType]
               properties:
                 timelineId:
                   type: string
@@ -37,8 +34,9 @@ paths:
                   type: number
                   nullable: true
                 timelineType:
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
-                  nullable: true
+                  allOf:
+                    - $ref: '../model/components.yaml#/components/schemas/TimelineType'
+                    - nullable: true
       responses:
         '200':
           description: Indicates the favorite status was successfully updated.
@@ -46,14 +44,14 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [data]
                 properties:
                   data:
                     type: object
-                    required: [persistFavorite]
                     properties:
                       persistFavorite:
-                        $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
+                        $ref: '../model/components.yaml#/components/schemas/FavoriteTimelineResponse'
+                required:
+                  - data
         '403':
           description: Indicates the user does not have the required permissions to persist the favorite status.
           content:
