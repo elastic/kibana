@@ -55,14 +55,14 @@ export function isStringType(type: unknown) {
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
   return (
     typeof type === 'string' &&
-    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as typeof ESQL_NUMBER_TYPES[number])
+    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
   );
 }
 
 export function isNumericDecimalType(type: unknown): type is ESQLNumericLiteralType {
   return (
     typeof type === 'string' &&
-    ESQL_NUMERIC_DECIMAL_TYPES.includes(type as typeof ESQL_NUMERIC_DECIMAL_TYPES[number])
+    ESQL_NUMERIC_DECIMAL_TYPES.includes(type as (typeof ESQL_NUMERIC_DECIMAL_TYPES)[number])
   );
 }
 
