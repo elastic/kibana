@@ -307,29 +307,13 @@ export const ESMaxPeriodFilterExistsAggRT = rt.type({
       field: rt.string,
     }),
   }),
-  aggs: rt.union([
-    rt.type({
-      period: rt.type({
-        max: rt.type({
-          field: rt.string,
-        }),
-      }),
-    }),
-    rt.type({
-      min: rt.type({
-        min: rt.type({
-          field: rt.string,
-        }),
-      }),
-    }),
-    rt.type({
+  aggs: rt.type({
+    period: rt.type({
       max: rt.type({
-        max: rt.type({
-          field: rt.string,
-        }),
+        field: rt.string,
       }),
     }),
-  ]),
+  }),
 });
 
 export interface SnapshotTermsWithAggregation {

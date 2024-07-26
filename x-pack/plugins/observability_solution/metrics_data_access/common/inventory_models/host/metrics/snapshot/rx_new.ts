@@ -12,43 +12,25 @@ export const rxNew: MetricsUIAggregation = {
       field: 'host.network.ingress.bytes',
     },
   },
-  rx_min_timestamp: {
-    filter: {
-      exists: {
-        field: 'host.network.ingress.bytes',
-      },
-    },
-    aggs: {
-      min: {
-        min: {
-          field: '@timestamp',
-        },
-      },
+  min_timestamp: {
+    min: {
+      field: '@timestamp',
     },
   },
-  rx_max_timestamp: {
-    filter: {
-      exists: {
-        field: 'host.network.ingress.bytes',
-      },
-    },
-    aggs: {
-      max: {
-        max: {
-          field: '@timestamp',
-        },
-      },
+  max_timestamp: {
+    max: {
+      field: '@timestamp',
     },
   },
   rxNew: {
     bucket_script: {
       buckets_path: {
         value: 'rx_sum',
-        minTime: 'rx_min_timestamp>min',
-        maxTime: 'rx_max_timestamp>max',
+        minTime: 'min_timestamp',
+        maxTime: 'max_timestamp',
       },
       script: {
-        source: '(params.value / ((params.maxTime - params.minTime) / 1000))',
+        source: 'params.value / ((params.maxTime - params.minTime) / 1000)',
         lang: 'painless',
       },
       gap_policy: 'skip',

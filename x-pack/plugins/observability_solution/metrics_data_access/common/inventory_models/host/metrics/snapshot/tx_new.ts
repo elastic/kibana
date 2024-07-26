@@ -12,43 +12,25 @@ export const txNew: MetricsUIAggregation = {
       field: 'host.network.egress.bytes',
     },
   },
-  tx_min_timestamp: {
-    filter: {
-      exists: {
-        field: 'host.network.egress.bytes',
-      },
-    },
-    aggs: {
-      min: {
-        min: {
-          field: '@timestamp',
-        },
-      },
+  min_timestamp: {
+    min: {
+      field: '@timestamp',
     },
   },
-  tx_max_timestamp: {
-    filter: {
-      exists: {
-        field: 'host.network.egress.bytes',
-      },
-    },
-    aggs: {
-      max: {
-        max: {
-          field: '@timestamp',
-        },
-      },
+  max_timestamp: {
+    max: {
+      field: '@timestamp',
     },
   },
   txNew: {
     bucket_script: {
       buckets_path: {
         value: 'tx_sum',
-        minTime: 'tx_min_timestamp>min',
-        maxTime: 'tx_max_timestamp>max',
+        minTime: 'min_timestamp',
+        maxTime: 'max_timestamp',
       },
       script: {
-        source: '(params.value / ((params.maxTime - params.minTime) / 1000))',
+        source: 'params.value / ((params.maxTime - params.minTime) / 1000)',
         lang: 'painless',
       },
       gap_policy: 'skip',
