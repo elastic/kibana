@@ -81,8 +81,10 @@ export type FunctionSubtype =
   | 'unary-expression' // -a, +a, NOT a, ...
   | 'binary-expression'; // a + b, a - b, a * b, ...
 
-export interface ESQLFunction<Subtype extends FunctionSubtype = FunctionSubtype>
-  extends ESQLAstBaseItem {
+export interface ESQLFunction<
+  Subtype extends FunctionSubtype = FunctionSubtype,
+  Name extends string = string
+> extends ESQLAstBaseItem<Name> {
   type: 'function';
 
   /**
@@ -103,10 +105,22 @@ export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
   args: [ESQLAstItem];
 }
 
-export interface ESQLBinaryExpression extends ESQLFunction<'binary-expression'> {
+export interface ESQLBinaryExpression
+  extends ESQLFunction<'binary-expression', BinaryExpressionOperator> {
   subtype: 'binary-expression';
   args: [ESQLAstItem, ESQLAstItem];
 }
+
+export type BinaryExpressionOperator =
+  | BinaryExpressionArithmeticOperator
+  | BinaryExpressionAssignmentOperator
+  | BinaryExpressionComparisonOperator
+  | BinaryExpressionRegexOperator;
+
+export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
+export type BinaryExpressionAssignmentOperator = '=';
+export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
+export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
 
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
