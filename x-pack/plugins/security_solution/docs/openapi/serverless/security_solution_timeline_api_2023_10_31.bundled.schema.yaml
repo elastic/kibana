@@ -1473,4 +1473,3 @@ components:
       type: http
 security:
   - BasicAuth: []
-tags: !<tag:yaml.org,2002:js/undefined> ''
