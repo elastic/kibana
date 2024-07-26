@@ -95,7 +95,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
         core
       ),
       {
-        maxWidth: 'm',
+        maxWidth: 500,
         ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
         onClose: () => {
