@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList']);
+  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList', 'svlCommonPage']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
