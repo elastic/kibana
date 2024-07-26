@@ -59,8 +59,7 @@ jest.mock('../hooks', () => ({
   }),
 }));
 
-// FLAKY: https://github.com/elastic/kibana/issues/189004
-describe.skip('ManageAgentPoliciesModal', () => {
+describe('ManageAgentPoliciesModal', () => {
   let testRenderer: TestRenderer;
   const mockOnClose = jest.fn();
   const mockPolicies = [{ name: 'Test policy', revision: 2, id: 'policy1' }] as AgentPolicy[];
