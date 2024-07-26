@@ -299,6 +299,7 @@ export const previewRulesRoute = (
                 },
               })) as { state: TState });
 
+              console.log('LOGGED STATUS CHANGES', JSON.stringify(loggedStatusChanges, null, 2));
               const errors = loggedStatusChanges
                 .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
                 .map((item) => item.message ?? 'Unknown Error');
@@ -455,6 +456,7 @@ export const previewRulesRoute = (
               );
               break;
             case 'machine_learning':
+              console.log('IN RULE PREVIEW FOR MACHINE_LEARNING RULE');
               const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
               await runExecutors(
                 mlAlertType.executor,

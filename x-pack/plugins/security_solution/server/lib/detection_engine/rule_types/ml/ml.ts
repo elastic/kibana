@@ -77,6 +77,7 @@ export const mlExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('mlExecutor', async () => {
+    console.log('ML EXECUTOR');
     if (ml == null) {
       throw new Error('ML plugin unavailable during rule execution');
     }
