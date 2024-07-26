@@ -345,8 +345,18 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         const allPreviewAlerts = await es.search({
           index: '.preview.alerts-security.alerts-*',
-          query: { match_all: {} },
+          size: 1000,
+          query: {
+            bool: {
+              filter: {
+                term: {
+                  'kibana.alert.rule.type': 'machine_learning',
+                },
+              },
+            },
+          },
         });
+
         console.log('preview alerts', JSON.stringify(allPreviewAlerts, null, 2));
 
         expect(previewAlerts).toHaveLength(1);
