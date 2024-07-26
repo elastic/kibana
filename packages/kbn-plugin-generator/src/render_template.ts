@@ -58,9 +58,6 @@ export async function renderTemplates({
   const defaultTemplateData = {
     name: answers.name,
 
-    internalPlugin: !!answers.internal,
-    thirdPartyPlugin: !answers.internal,
-
     hasServer: !!answers.server,
     hasUi: !!answers.ui,
 
@@ -85,12 +82,7 @@ export async function renderTemplates({
     // exclude files from the template based on selected options, patterns
     // are matched without the .ejs extension
     excludeFiles(
-      ([] as string[]).concat(
-        answers.ui ? [] : 'public/**/*',
-        answers.ui && !answers.internal ? [] : ['translations/**/*', '.i18nrc.json'],
-        answers.server ? [] : 'server/**/*',
-        !answers.internal ? [] : ['.eslintrc.js', 'tsconfig.json', 'package.json', '.gitignore']
-      )
+      ([] as string[]).concat(answers.ui ? [] : 'public/**/*', answers.server ? [] : 'server/**/*')
     ),
 
     // render .ejs templates and rename to not use .ejs extension

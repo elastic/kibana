@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  InferenceAPIConfigResponse,
+  ELASTIC_MODEL_DEFINITIONS,
+} from '@kbn/ml-trained-models-utils';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
 import { ServiceProviderKeys } from '../../types';
 import { ModelBadge } from './model_badge';
 import * as i18n from './translations';
@@ -38,13 +41,31 @@ export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => 
       ? serviceSettings.model
       : undefined;
 
+  const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
+
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" wrap alignItems="center">
       {modelId && (
         <EuiFlexItem grow={false}>
           <ModelBadge model={modelId} />
         </EuiFlexItem>
       )}
+
+      {isEligibleForMITBadge && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType="popout"
+            iconSide="right"
+            href={ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl ?? ''}
+            target="_blank"
+            data-test-subj={'mit-license-badge'}
+          >
+            {i18n.MIT_LICENSE}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="xs">
           {endpointModelAtrributes(endpoint)}
