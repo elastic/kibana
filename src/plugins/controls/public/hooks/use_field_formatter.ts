@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import { pluginServices } from '../services';
 
 export const useFieldFormatter = ({

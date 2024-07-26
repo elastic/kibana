@@ -93,9 +93,11 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           if (!fieldSpec || !changedOption.key) {
-            return; // this should never happen, but early return for type safety
+            // this should never happen, but early return for type safety
+            // eslint-disable-next-line no-console
+            console.warn(OptionsListStrings.popover.getInvalidSelectionMessage());
+            return;
           }
-
           setSelectableOptions(newSuggestions);
           const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
           optionsList.dispatch.deselectOption(key);

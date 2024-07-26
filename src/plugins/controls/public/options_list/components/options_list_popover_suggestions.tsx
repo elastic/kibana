@@ -199,7 +199,10 @@ export const OptionsListPopoverSuggestions = ({
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, _, changedOption) => {
             if (!fieldSpec || !changedOption.key) {
-              return; // this should never happen, but early return for type safety
+              // this should never happen, but early return for type safety
+              // eslint-disable-next-line no-console
+              console.warn(OptionsListStrings.popover.getInvalidSelectionMessage());
+              return;
             }
             setSelectableOptions(newSuggestions);
             if (changedOption.key === 'exists-option') {
