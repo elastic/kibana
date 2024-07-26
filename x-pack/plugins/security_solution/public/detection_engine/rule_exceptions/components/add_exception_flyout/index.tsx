@@ -60,7 +60,7 @@ import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/tran
 import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
-import { isSubmitDisabled, prepareNewItemsForSubmition, prepareToCloseAlerts } from './helpers';
+import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`
@@ -381,7 +381,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     if (submitNewExceptionItems == null) return;
 
     try {
-      const { listsToAddTo, addToLists, addToRules, items } = prepareNewItemsForSubmition({
+      const { listsToAddTo, addToLists, addToRules, items } = prepareNewItemsForSubmission({
         sharedListToAddTo,
         addExceptionToRadioSelection,
         exceptionListsToAddTo,

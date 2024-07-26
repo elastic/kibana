@@ -25,7 +25,7 @@ describe('Exception flyout header', () => {
           <ExceptionFlyoutHeader
             listType={ExceptionListTypeEnum.ENDPOINT}
             titleId={'someId'}
-            dataTestSubjId={'someDataTestId'}
+            dataTestSubjId={'addExceptionConfirmButton'}
           />
         </TestProviders>
       );
@@ -41,7 +41,7 @@ describe('Exception flyout header', () => {
           <ExceptionFlyoutHeader
             listType={ExceptionListTypeEnum.RULE_DEFAULT}
             titleId={'someId'}
-            dataTestSubjId={'someDataTestId'}
+            dataTestSubjId={'addExceptionConfirmButton'}
           />
         </TestProviders>
       );
@@ -57,7 +57,7 @@ describe('Exception flyout header', () => {
           <ExceptionFlyoutHeader
             listType={ExceptionListTypeEnum.DETECTION}
             titleId={'someId'}
-            dataTestSubjId={'someDataTestId'}
+            dataTestSubjId={'addExceptionConfirmButton'}
           />
         </TestProviders>
       );
@@ -76,7 +76,7 @@ describe('Exception flyout header', () => {
             isEdit
             listType={ExceptionListTypeEnum.ENDPOINT}
             titleId={'someId'}
-            dataTestSubjId={'someDataTestId'}
+            dataTestSubjId={'addExceptionConfirmButton'}
           />
         </TestProviders>
       );
@@ -93,7 +93,7 @@ describe('Exception flyout header', () => {
             isEdit
             listType={ExceptionListTypeEnum.RULE_DEFAULT}
             titleId={'someId'}
-            dataTestSubjId={'someDataTestId'}
+            dataTestSubjId={'addExceptionConfirmButton'}
           />
         </TestProviders>
       );
@@ -110,7 +110,7 @@ describe('Exception flyout header', () => {
             isEdit
             listType={ExceptionListTypeEnum.DETECTION}
             titleId={'someId'}
-            dataTestSubjId={'someDataTestId'}
+            dataTestSubjId={'addExceptionConfirmButton'}
           />
         </TestProviders>
       );
