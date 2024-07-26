@@ -185,8 +185,7 @@ export const getTimesliderControlFactory = (
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      // overwrite the `width` attribute because time slider should always have a width of large
-      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
+      const defaultControl = initializeDefaultControlApi(initialState);
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)

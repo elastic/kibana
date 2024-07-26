@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 
@@ -76,7 +75,6 @@ const controlGroupPanels = {
       title: 'Message',
       grow: true,
       width: 'medium',
-      searchString: 'this',
       enhancements: {},
     },
   },
@@ -253,17 +251,23 @@ export const ReactControlExample = ({
     };
   }, [controlGroupFilters$, filters$, unifiedSearchFilters$]);
 
-  const [unsavedChanges, setUnsavedChanges] = useState<object | undefined>(undefined);
+  const [unsavedChanges, setUnsavedChanges] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (!controlGroupApi) {
       return;
     }
-    const subscription = controlGroupApi.unsavedChanges.subscribe(
-      (unsavedChanges) => {
-        setUnsavedChanges(unsavedChanges);
-        console.log('unsavedChanges', unsavedChanges);
+    const subscription = controlGroupApi.unsavedChanges.subscribe((nextUnsavedChanges) => {
+      if (!nextUnsavedChanges) {
+        setUnsavedChanges(undefined);
+        return;
       }
-    );
+
+      // JSON.stringify removes keys where value is `undefined`
+      // switch `undefined` to `null` to see when value has been cleared
+      const replacer = (key: unknown, value: unknown) =>
+        typeof value === 'undefined' ? null : value;
+      setUnsavedChanges(JSON.stringify(nextUnsavedChanges, replacer, '  '));
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -353,9 +357,7 @@ export const ReactControlExample = ({
         </EuiFlexItem>
         {unsavedChanges !== undefined && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={<pre>{JSON.stringify(unsavedChanges, null, ' ')}</pre>}
-            >
+            <EuiToolTip content={<pre>{unsavedChanges}</pre>}>
               <EuiBadge color="warning">Unsaved changes</EuiBadge>
             </EuiToolTip>
           </EuiFlexItem>
