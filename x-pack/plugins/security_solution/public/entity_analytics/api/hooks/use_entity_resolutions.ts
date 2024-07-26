@@ -57,3 +57,5 @@ export const useEntityResolutions = (entity: SearchEntity) => {
 
   return { resolutions, markResolved };
 };
+
+export type UseEntityResolution = ReturnType<typeof useEntityResolutions>;
