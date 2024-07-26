@@ -52,6 +52,9 @@ export const topItemsHandlerFactory =
     // This will store the combined count of detected log patterns and keywords
     let fieldValuePairsCount = 0;
 
+    if (requestBody.overrides?.remainingTextFieldCandidates) {
+      textFieldCandidates.push(...requestBody.overrides?.remainingTextFieldCandidates);
+    }
     const topCategories: SignificantItem[] = [];
 
     topCategories.push(
@@ -87,8 +90,6 @@ export const topItemsHandlerFactory =
       ) ?? [])
     );
 
-    const fieldsToSample = new Set<string>();
-
     let remainingKeywordFieldCandidates: string[];
     let loadingStepSizeTopTerms = PROGRESS_STEP_P_VALUES;
 
@@ -104,7 +105,7 @@ export const topItemsHandlerFactory =
       remainingKeywordFieldCandidates = keywordFieldCandidates;
     }
 
-    logDebugMessage('Fetch p-values.');
+    logDebugMessage('Fetch top items.');
 
     const topTermsQueue = queue(async function (fieldCandidate: string) {
       stateHandler.loaded((1 / keywordFieldCandidatesCount) * loadingStepSizeTopTerms, false);
@@ -134,11 +135,7 @@ export const topItemsHandlerFactory =
       );
 
       if (fetchedTopTerms.length > 0) {
-        fetchedTopTerms.forEach((d) => {
-          fieldsToSample.add(d.fieldName);
-        });
         topTerms.push(...fetchedTopTerms);
-
         responseStream.push(addSignificantItems(fetchedTopTerms));
       }
 

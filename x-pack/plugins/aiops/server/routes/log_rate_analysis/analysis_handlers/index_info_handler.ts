@@ -40,81 +40,81 @@ export const indexInfoHandlerFactory =
 
     let zeroDocsFallback = false;
 
-    if (
-      !requestBody.overrides?.remainingKeywordFieldCandidates &&
-      !requestBody.overrides?.remainingTextFieldCandidates
-    ) {
-      logDebugMessage('Fetch index information.');
-      responseStream.push(
-        updateLoadingState({
-          ccsWarning: false,
-          loaded: stateHandler.loaded(),
-          loadingState: i18n.translate(
-            'xpack.aiops.logRateAnalysis.loadingState.loadingIndexInformation',
-            {
-              defaultMessage: 'Loading index information.',
-            }
-          ),
-        })
-      );
+    logDebugMessage('Fetch index information.');
+    responseStream.push(
+      updateLoadingState({
+        ccsWarning: false,
+        loaded: stateHandler.loaded(),
+        loadingState: i18n.translate(
+          'xpack.aiops.logRateAnalysis.loadingState.loadingIndexInformation',
+          {
+            defaultMessage: 'Loading index information.',
+          }
+        ),
+      })
+    );
 
-      try {
-        const indexInfo = await fetchIndexInfo({
-          esClient,
-          abortSignal,
-          arguments: {
-            ...requestBody,
-            textFieldCandidatesOverrides: ['message', 'error.message'],
-          },
-        });
+    const skipFieldCandidates =
+      Array.isArray(requestBody.overrides?.remainingKeywordFieldCandidates) ||
+      Array.isArray(requestBody.overrides?.remainingTextFieldCandidates);
 
-        logDebugMessage(`Baseline document count: ${indexInfo.baselineTotalDocCount}`);
-        logDebugMessage(`Deviation document count: ${indexInfo.deviationTotalDocCount}`);
+    try {
+      const indexInfo = await fetchIndexInfo({
+        esClient,
+        abortSignal,
+        arguments: {
+          ...requestBody,
+          textFieldCandidatesOverrides: ['message', 'error.message'],
+          skipFieldCandidates,
+        },
+      });
 
-        keywordFieldCandidates.push(...indexInfo.keywordFieldCandidates);
-        keywordFieldCandidatesCount = keywordFieldCandidates.length;
-        textFieldCandidates.push(...indexInfo.textFieldCandidates);
-        textFieldCandidatesCount = textFieldCandidates.length;
-        zeroDocsFallback = indexInfo.zeroDocsFallback;
-      } catch (e) {
-        if (!isRequestAbortedError(e)) {
-          logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
-          responseStream.pushError(`Failed to fetch index information.`);
-        }
-        responseStream.end();
-        return;
+      logDebugMessage(`Baseline document count: ${indexInfo.baselineTotalDocCount}`);
+      logDebugMessage(`Deviation document count: ${indexInfo.deviationTotalDocCount}`);
+
+      keywordFieldCandidates.push(...indexInfo.keywordFieldCandidates);
+      keywordFieldCandidatesCount = keywordFieldCandidates.length;
+      textFieldCandidates.push(...indexInfo.textFieldCandidates);
+      textFieldCandidatesCount = textFieldCandidates.length;
+      zeroDocsFallback = indexInfo.zeroDocsFallback;
+    } catch (e) {
+      if (!isRequestAbortedError(e)) {
+        logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
+        responseStream.pushError(`Failed to fetch index information.`);
       }
+      responseStream.end();
+      return;
+    }
 
-      stateHandler.loaded(LOADED_FIELD_CANDIDATES, false);
+    stateHandler.loaded(LOADED_FIELD_CANDIDATES, false);
 
-      responseStream.pushPingWithTimeout();
+    responseStream.pushPingWithTimeout();
 
-      responseStream.push(
-        updateLoadingState({
-          ccsWarning: false,
-          loaded: stateHandler.loaded(),
-          loadingState: i18n.translate(
-            'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldCandidates',
-            {
-              defaultMessage:
-                'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
-              values: {
-                fieldCandidatesCount: keywordFieldCandidatesCount + textFieldCandidatesCount,
-              },
-            }
-          ),
-        })
-      );
+    responseStream.push(
+      updateLoadingState({
+        ccsWarning: false,
+        loaded: stateHandler.loaded(),
+        loadingState: i18n.translate(
+          'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldCandidates',
+          {
+            defaultMessage:
+              'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
+            values: {
+              fieldCandidatesCount: keywordFieldCandidatesCount + textFieldCandidatesCount,
+            },
+          }
+        ),
+      })
+    );
 
-      responseStream.push(setZeroDocsFallback(zeroDocsFallback));
+    responseStream.push(setZeroDocsFallback(zeroDocsFallback));
 
-      if (keywordFieldCandidatesCount === 0) {
-        responseStream.endWithUpdatedLoadingState();
-      } else if (stateHandler.shouldStop()) {
-        logDebugMessage('shouldStop after fetching field candidates.');
-        responseStream.end();
-        return;
-      }
+    if (!skipFieldCandidates && keywordFieldCandidatesCount === 0) {
+      responseStream.endWithUpdatedLoadingState();
+    } else if (stateHandler.shouldStop()) {
+      logDebugMessage('shouldStop after fetching field candidates.');
+      responseStream.end();
+      return;
     }
 
     return { keywordFieldCandidates, textFieldCandidates, zeroDocsFallback };

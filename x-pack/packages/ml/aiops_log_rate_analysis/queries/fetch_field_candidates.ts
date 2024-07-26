@@ -25,12 +25,16 @@ export const SUPPORTED_ES_FIELD_TYPES = [
 
 export const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
 
+// This override is meant to be used to force certain fields to be considered as
+// text fields when both text and keyword type is available.
+export interface FetchFieldCandidatesParamsArguments {
+  textFieldCandidatesOverrides?: string[];
+}
+
 export interface FetchFieldCandidatesParams {
   esClient: ElasticsearchClient;
   abortSignal?: AbortSignal;
-  arguments: AiopsLogRateAnalysisSchema & {
-    textFieldCandidatesOverrides: string[];
-  };
+  arguments: AiopsLogRateAnalysisSchema & FetchFieldCandidatesParamsArguments;
 }
 
 export interface FetchFieldCandidatesResponse {
