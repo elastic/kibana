@@ -41,6 +41,10 @@ info:
     GET kbn:/api/data_views
 
     ```
+
+
+    For more information about the console, refer to [Run API
+    requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
   version: 1.0.2
   license:
     name: Elastic License 2.0
@@ -55,6 +59,7 @@ servers:
         default: localhost:5601
   - url: http://localhost:5601
     description: local
+  - url: http://localhost:5622
 tags:
   - name: APM agent keys
     description: >
@@ -86,6 +91,8 @@ tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
     x-displayName: slo
+  - name: system
+    x-displayName: system
 paths:
   /api/apm/agent_keys:
     post:
@@ -259,404 +266,11 @@ paths:
                             type: string
                       '@timestamp':
                         type: string
-  /s/{spaceId}/api/actions/connector:
-    post:
-      summary: Create a connector
-      operationId: createConnectorWithSpaceId
-      description: >
-        You must have `all` privileges for the **Actions and Connectors**
-        feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Connectors_create_connector_request'
-            examples:
-              createEmailConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_email_connector_request
-              createIndexConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_index_connector_request
-              createWebhookConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_webhook_connector_request
-              createXmattersConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_xmatters_connector_request
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
-              examples:
-                createEmailConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_email_connector_response
-                createIndexConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_index_connector_response
-                createWebhookConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_webhook_connector_response
-                createXmattersConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_xmatters_connector_response
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions/connector/{connectorId}:
-    get:
-      summary: Get connector information
-      operationId: getConnectorWithSpaceId
-      description: >
-        You must have `read` privileges for the **Actions and Connectors**
-        feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_connector_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
-              examples:
-                getConnectorResponse:
-                  $ref: '#/components/examples/Connectors_get_connector_response'
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-        '404':
-          $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-    delete:
-      summary: Delete a connector
-      operationId: deleteConnectorWithSpaceId
-      description: >
-        You must have `all` privileges for the **Actions and Connectors**
-        feature in the **Management** section of the Kibana feature privileges.
-        WARNING: When you delete a connector, it cannot be recovered.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_connector_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-        '404':
-          $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-    post:
-      summary: Create a connector
-      operationId: createConnectorIdWithSpaceId
-      description: >
-        You must have `all` privileges for the **Actions and Connectors**
-        feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_space_id'
-        - in: path
-          name: connectorId
-          description: >-
-            A UUID v1 or v4 identifier for the connector. If you omit this
-            parameter, an identifier is randomly generated.
-          required: true
-          schema:
-            type: string
-            example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Connectors_create_connector_request'
-            examples:
-              createIndexConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_create_index_connector_request
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
-              examples:
-                createIndexConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_create_index_connector_response
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-    put:
-      summary: Update a connector
-      operationId: updateConnectorWithSpaceId
-      description: >
-        You must have `all` privileges for the **Actions and Connectors**
-        feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_connector_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Connectors_update_connector_request'
-            examples:
-              updateIndexConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_update_index_connector_request
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Connectors_connector_response_properties'
-        '400':
-          $ref: '#/components/responses/Connectors_401'
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-        '404':
-          $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions/connectors:
-    get:
-      summary: Get all connectors
-      operationId: getConnectorsWithSpaceId
-      description: >
-        You must have `read` privileges for the **Actions and Connectors**
-        feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: >-
-                    #/components/schemas/Connectors_connector_response_properties
-              examples:
-                getConnectorsResponse:
-                  $ref: '#/components/examples/Connectors_get_connectors_response'
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions/connector_types:
-    get:
-      summary: Get all connector types
-      operationId: getConnectorTypesWithSpaceId
-      description: |
-        You do not need any Kibana feature privileges to run this API.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_space_id'
-        - in: query
-          name: feature_id
-          description: >-
-            A filter to limit the retrieved connector types to those that
-            support a specific feature (such as alerting or cases).
-          schema:
-            $ref: '#/components/schemas/Connectors_features'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                title: Get connector types response body properties
-                description: The properties vary for each connector type.
-                type: array
-                items:
-                  type: object
-                  properties:
-                    enabled:
-                      type: boolean
-                      description: >-
-                        Indicates whether the connector type is enabled in
-                        Kibana.
-                      example: true
-                    enabled_in_config:
-                      type: boolean
-                      description: >-
-                        Indicates whether the connector type is enabled in the
-                        Kibana `.yml` file.
-                      example: true
-                    enabled_in_license:
-                      type: boolean
-                      description: >-
-                        Indicates whether the connector is enabled in the
-                        license.
-                      example: true
-                    id:
-                      $ref: '#/components/schemas/Connectors_connector_types'
-                    minimum_license_required:
-                      type: string
-                      description: The license that is required to use the connector type.
-                      example: basic
-                    name:
-                      type: string
-                      description: The name of the connector type.
-                      example: Index
-                    supported_feature_ids:
-                      type: array
-                      description: >-
-                        The Kibana features that are supported by the connector
-                        type.
-                      items:
-                        $ref: '#/components/schemas/Connectors_features'
-                      example:
-                        - alerting
-                        - uptime
-                        - siem
-              examples:
-                getConnectorTypesResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_get_connector_types_response
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions/connector/{connectorId}/_execute:
-    post:
-      summary: Run a connector
-      operationId: runConnectorWithSpaceId
-      description: >
-        You can use this API to test an action that involves interaction with
-        Kibana services or integrations with third-party systems. You must have
-        `read` privileges for the **Actions and Connectors** feature in the
-        **Management** section of the Kibana feature privileges. If you use an
-        index connector, you must also have `all`, `create`, `index`, or `write`
-        indices privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_connector_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Connectors_run_connector_request'
-            examples:
-              runIndexConnectorRequest:
-                $ref: '#/components/examples/Connectors_run_index_connector_request'
-              runJiraConnectorRequest:
-                $ref: '#/components/examples/Connectors_run_jira_connector_request'
-              runServerLogConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_run_server_log_connector_request
-              runServiceNowITOMConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_run_servicenow_itom_connector_request
-              runSlackConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_run_slack_api_connector_request
-              runSwimlaneConnectorRequest:
-                $ref: >-
-                  #/components/examples/Connectors_run_swimlane_connector_request
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - connector_id
-                  - status
-                properties:
-                  connector_id:
-                    type: string
-                    description: The identifier for the connector.
-                  data:
-                    oneOf:
-                      - type: object
-                        description: Information returned from the action.
-                        additionalProperties: true
-                      - type: array
-                        description: An array of information returned from the action.
-                        items:
-                          type: object
-                  message:
-                    type: string
-                  service_message:
-                    type: string
-                  status:
-                    type: string
-                    description: The status of the action.
-                    enum:
-                      - error
-                      - ok
-              examples:
-                runIndexConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_run_index_connector_response
-                runJiraConnectorResponse:
-                  $ref: '#/components/examples/Connectors_run_jira_connector_response'
-                runServerLogConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_run_server_log_connector_response
-                runServiceNowITOMConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_run_servicenow_itom_connector_response
-                runSlackConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_run_slack_api_connector_response
-                runSwimlaneConnectorResponse:
-                  $ref: >-
-                    #/components/examples/Connectors_run_swimlane_connector_response
-        '401':
-          $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
   /api/actions/connector:
     post:
-      summary: Create a connector
+      summary: Create a connector with a random ID
       operationId: createConnector
+      description: The connector identifier is randomly generated.
       tags:
         - connectors
       parameters:
@@ -702,9 +316,6 @@ paths:
                     #/components/examples/Connectors_create_xmatters_connector_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
   /api/actions/connector/{connectorId}:
     get:
       summary: Get a connector information
@@ -727,9 +338,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
     delete:
       summary: Delete a connector
       operationId: deleteConnector
@@ -745,9 +353,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
     post:
       summary: Create a connector
       operationId: createConnectorId
@@ -787,9 +392,6 @@ paths:
                     #/components/examples/Connectors_create_index_connector_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
     put:
       summary: Update a connector
       operationId: updateConnector
@@ -821,9 +423,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
   /api/actions/connector/{connectorId}/_execute:
     post:
       summary: Run a connector
@@ -929,9 +528,6 @@ paths:
                     #/components/examples/Connectors_run_swimlane_connector_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
   /api/actions/connectors:
     get:
       summary: Get all connectors
@@ -953,9 +549,6 @@ paths:
                   $ref: '#/components/examples/Connectors_get_connectors_response'
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
   /api/actions/connector_types:
     get:
       summary: Get all connector types
@@ -1028,10 +621,7 @@ paths:
                     #/components/examples/Connectors_get_connector_types_generativeai_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions/action/{actionId}:
+  /api/actions/action/{actionId}:
     delete:
       summary: Delete a connector
       operationId: legacyDeleteConnector
@@ -1044,15 +634,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
         - $ref: '#/components/parameters/Connectors_action_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
       responses:
         '204':
           description: Indicates a successful call.
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
     get:
       summary: Get connector information
       operationId: legacyGetConnector
@@ -1062,15 +648,11 @@ paths:
         - connectors
       parameters:
         - $ref: '#/components/parameters/Connectors_action_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
       responses:
         '200':
           $ref: '#/components/responses/Connectors_200_actions'
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
     put:
       summary: Update a connector
       operationId: legacyUpdateConnector
@@ -1081,7 +663,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
         - $ref: '#/components/parameters/Connectors_action_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
       requestBody:
         required: true
         content:
@@ -1109,10 +690,7 @@ paths:
           $ref: '#/components/responses/Connectors_200_actions'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions:
+  /api/actions:
     get:
       summary: Get all connectors
       operationId: legacyGetConnectors
@@ -1120,8 +698,6 @@ paths:
       description: Deprecated in 7.13.0. Use the get all connectors API instead.
       tags:
         - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1133,9 +709,6 @@ paths:
                   $ref: '#/components/schemas/Connectors_action_response_properties'
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
     post:
       summary: Create a connector
       operationId: legacyCreateConnector
@@ -1145,7 +718,6 @@ paths:
         - connectors
       parameters:
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
-        - $ref: '#/components/parameters/Connectors_space_id'
       requestBody:
         required: true
         content:
@@ -1177,10 +749,7 @@ paths:
           $ref: '#/components/responses/Connectors_200_actions'
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions/list_action_types:
+  /api/actions/list_action_types:
     get:
       summary: Get connector types
       operationId: legacyGetConnectorTypes
@@ -1188,8 +757,6 @@ paths:
       description: Deprecated in 7.13.0. Use the get all connector types API instead.
       tags:
         - connectors
-      parameters:
-        - $ref: '#/components/parameters/Connectors_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1229,10 +796,7 @@ paths:
                       description: The name of the connector type.
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/actions/action/{actionId}/_execute:
+  /api/actions/action/{actionId}/_execute:
     post:
       summary: Run a connector
       operationId: legacyRunConnector
@@ -1243,7 +807,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
         - $ref: '#/components/parameters/Connectors_action_id'
-        - $ref: '#/components/parameters/Connectors_space_id'
       requestBody:
         required: true
         content:
@@ -1284,573 +847,10 @@ paths:
                     description: The status of the action.
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_basicAuth: []
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/data_views:
-    get:
-      summary: Get all data views
-      operationId: getAllDataViews
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        name:
-                          type: string
-                        namespaces:
-                          type: array
-                          items:
-                            type: string
-                        title:
-                          type: string
-                        typeMeta:
-                          type: object
-              examples:
-                getAllDataViewsResponse:
-                  $ref: '#/components/examples/Data_views_get_data_views_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view:
-    post:
-      summary: Create a data view
-      operationId: createDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Data_views_create_data_view_request_object'
-            examples:
-              createDataViewRequest:
-                $ref: '#/components/examples/Data_views_create_data_view_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_data_view_response_object'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}:
-    get:
-      summary: Get a data view
-      operationId: getDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_data_view_response_object'
-              examples:
-                getDataViewResponse:
-                  $ref: '#/components/examples/Data_views_get_data_view_response'
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    delete:
-      summary: Delete a data view
-      operationId: deleteDataView
-      description: >
-        WARNING: When you delete a data view, it cannot be recovered. This
-        functionality is in technical preview and may be changed or removed in a
-        future release. Elastic will work to fix any issues, but features in
-        technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    post:
-      summary: Update a data view
-      operationId: updateDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Data_views_update_data_view_request_object'
-            examples:
-              updateDataViewRequest:
-                $ref: '#/components/examples/Data_views_update_data_view_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_data_view_response_object'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/default:
-    get:
-      summary: Get the default data view identifier
-      operationId: getDefaultDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view_id:
-                    type: string
-              examples:
-                getDefaultDataViewResponse:
-                  $ref: >-
-                    #/components/examples/Data_views_get_default_data_view_response
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    post:
-      summary: Sets the default data view identifier
-      operationId: setDefaultDatailView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - data_view_id
-              properties:
-                data_view_id:
-                  type: string
-                  nullable: true
-                  description: >
-                    The data view identifier. NOTE: The API does not validate
-                    whether it is a valid identifier. Use `null` to unset the
-                    default data view.
-                force:
-                  type: boolean
-                  description: Update an existing default data view identifier.
-                  default: false
-            examples:
-              setDefaultDataViewRequest:
-                $ref: '#/components/examples/Data_views_set_default_data_view_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  acknowledged:
-                    type: boolean
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}/fields:
-    post:
-      summary: Update data view fields metadata
-      operationId: updateFieldsMetadata
-      description: >
-        Update fields presentation metadata such as count, customLabel and
-        format. This functionality is in technical preview and may be changed or
-        removed in a future release. Elastic will work to fix any issues, but
-        features in technical preview are not subject to the support SLA of
-        official GA features. You can update multiple fields in one request.
-        Updates are merged with persisted metadata. To remove existing metadata,
-        specify null as the value.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - fields
-              properties:
-                fields:
-                  description: The field object.
-                  type: object
-            examples:
-              updateFieldsMetadataRequest:
-                $ref: '#/components/examples/Data_views_update_field_metadata_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  acknowledged:
-                    type: boolean
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field:
-    post:
-      summary: Create a runtime field
-      operationId: createRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-                - runtimeField
-              properties:
-                name:
-                  type: string
-                  description: |
-                    The name for a runtime field.
-                runtimeField:
-                  type: object
-                  description: |
-                    The runtime field definition object.
-            examples:
-              createRuntimeFieldRequest:
-                $ref: '#/components/examples/Data_views_create_runtime_field_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    put:
-      summary: Create or update a runtime field
-      operationId: createUpdateRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_space_id'
-        - name: viewId
-          in: path
-          description: |
-            The ID of the data view fields you want to update.
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-                - runtimeField
-              properties:
-                name:
-                  type: string
-                  description: |
-                    The name for a runtime field.
-                runtimeField:
-                  type: object
-                  description: |
-                    The runtime field definition object.
-            examples:
-              updateRuntimeFieldRequest:
-                $ref: '#/components/examples/Data_views_create_runtime_field_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view:
-                    type: object
-                  fields:
-                    type: array
-                    items:
-                      type: object
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
-    get:
-      summary: Get a runtime field
-      operationId: getRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_field_name'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view:
-                    type: object
-                  fields:
-                    type: array
-                    items:
-                      type: object
-              examples:
-                getRuntimeFieldResponse:
-                  $ref: '#/components/examples/Data_views_get_runtime_field_response'
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    delete:
-      summary: Delete a runtime field from a data view
-      operationId: deleteRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_field_name'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    post:
-      summary: Update a runtime field
-      operationId: updateRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_field_name'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - runtimeField
-              properties:
-                runtimeField:
-                  type: object
-                  description: |
-                    The runtime field definition object.
-
-                    You can update following fields:
-
-                    - `type`
-                    - `script`
-            examples:
-              updateRuntimeFieldRequest:
-                $ref: '#/components/examples/Data_views_update_runtime_field_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views:
     get:
-      summary: Get all data views in the default space
+      summary: Get all data views
       operationId: getAllDataViewsDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       responses:
@@ -1887,18 +887,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view:
     post:
-      summary: Create a data view in the default space
-      operationId: createDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
+      summary: Create a data view
+      operationId: createDataViewDefaultw
       tags:
         - data views
       parameters:
@@ -1925,18 +917,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}:
     get:
-      summary: Get a data view in the default space
+      summary: Get a data view
       operationId: getDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1957,18 +941,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     delete:
-      summary: Delete a data view from the default space
+      summary: Delete a data view
       operationId: deleteDataViewDefault
-      description: >
-        WARNING: When you delete a data view, it cannot be recovered. This
-        functionality is in technical preview and may be changed or removed in a
-        future release. Elastic will work to fix any issues, but features in
-        technical preview are not subject to the support SLA of official GA
-        features.
+      description: |
+        WARNING: When you delete a data view, it cannot be recovered.
       tags:
         - data views
       parameters:
@@ -1983,17 +960,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     post:
-      summary: Update a data view in the default space
+      summary: Update a data view
       operationId: updateDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -2021,21 +990,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}/fields:
     post:
-      summary: Update data view fields metadata in the default space
+      summary: Update data view fields metadata
       operationId: updateFieldsMetadataDefault
       description: >
         Update fields presentation metadata such as count, customLabel,
-        customDescription, and format. This functionality is in technical
-        preview and may be changed or removed in a future release. Elastic will
-        work to fix any issues, but features in technical preview are not
-        subject to the support SLA of official GA features. You can update
-        multiple fields in one request. Updates are merged with persisted
-        metadata. To remove existing metadata, specify null as the value.
+        customDescription, and format.
       tags:
         - data views
       parameters:
@@ -2072,18 +1033,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
-      summary: Create a runtime field in the default space
+      summary: Create a runtime field
       operationId: createRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -2117,17 +1070,9 @@ paths:
             application/json:
               schema:
                 type: object
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     put:
-      summary: Create or update a runtime field in the default space
+      summary: Create or update a runtime field
       operationId: createUpdateRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -2180,18 +1125,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
-      summary: Get a runtime field in the default space
+      summary: Get a runtime field
       operationId: getRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -2220,17 +1157,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     delete:
-      summary: Delete a runtime field from a data view in the default space
+      summary: Delete a runtime field from a data view
       operationId: deleteRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -2245,17 +1174,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     post:
-      summary: Update a runtime field in the default space
+      summary: Update a runtime field
       operationId: updateRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -2291,18 +1212,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/default:
     get:
-      summary: Get the default data view in the default space
+      summary: Get the default data view
       operationId: getDefaultDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       responses:
@@ -2325,17 +1238,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     post:
-      summary: Set the default data view in the default space
+      summary: Set the default data view
       operationId: setDefaultDatailViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -2379,9 +1284,93 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
+  /api/data_views/swap_references:
+    post:
+      summary: Swap saved object references
+      operationId: swapDataViewsDefault
+      description: >
+        Changes saved object references from one data view identifier to
+        another. WARNING: Misuse can break large numbers of saved objects!
+        Practicing with a backup is recommended.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Data_views_swap_data_view_request_object'
+            examples:
+              swapDataViewRequest:
+                $ref: '#/components/examples/Data_views_swap_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleteStatus:
+                    type: object
+                    properties:
+                      deletePerformed:
+                        type: boolean
+                      remainingRefs:
+                        type: integer
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
+  /api/data_views/swap_references/_preview:
+    post:
+      summary: Preview a saved object reference swap
+      operationId: previewSwapDataViewsDefault
+      description: >
+        Preview the impact of swapping saved object references from one data
+        view identifier to another.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Data_views_swap_data_view_request_object'
+            examples:
+              previewSwapDataViewRequest:
+                $ref: >-
+                  #/components/examples/Data_views_preview_swap_data_view_request
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
   /api/ml/saved_objects/sync:
     get:
       summary: Sync saved objects in the default space
@@ -4034,50 +3023,63 @@ paths:
       security:
         - SLOs_basicAuth: []
         - SLOs_apiKeyAuth: []
+  /api/status:
+    get:
+      operationId: /api/status#0
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: Set to "true" to get the response in v7 format.
+          in: query
+          name: v7format
+          required: false
+          schema:
+            type: boolean
+        - description: Set to "true" to get the response in v8 format.
+          in: query
+          name: v8format
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_response'
+                  - $ref: >-
+                      #/components/schemas/Kibana_HTTP_APIs_core_status_redactedResponse
+                description: >-
+                  Kibana's operational status. A minimal response is sent for
+                  unauthorized users.
+          description: Overall status is OK and Kibana should be functioning normally.
+        '503':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_response'
+                  - $ref: >-
+                      #/components/schemas/Kibana_HTTP_APIs_core_status_redactedResponse
+                description: >-
+                  Kibana's operational status. A minimal response is sent for
+                  unauthorized users.
+          description: >-
+            Kibana or some of it's essential services are unavailable. Kibana
+            may be degraded or unavailable.
+      summary: Get Kibana's current status
+      tags:
+        - system
+      security:
+        - Kibana_HTTP_APIs_basicAuth: []
 components:
-  securitySchemes:
-    Connectors_basicAuth:
-      type: http
-      scheme: basic
-    Connectors_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-    Data_views_basicAuth:
-      type: http
-      scheme: basic
-    Data_views_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
-    Machine_learning_APIs_basicAuth:
-      type: http
-      scheme: basic
-    Machine_learning_APIs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: ApiKey
-    Saved_objects_basicAuth:
-      type: http
-      scheme: basic
-    Saved_objects_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-    SLOs_basicAuth:
-      type: http
-      scheme: basic
-    SLOs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     Connectors_kbn_xsrf:
       schema:
@@ -4086,16 +3088,6 @@ components:
       name: kbn-xsrf
       description: Cross-site request forgery protection
       required: true
-    Connectors_space_id:
-      in: path
-      name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
     Connectors_connector_id:
       in: path
       name: connectorId
@@ -4112,16 +3104,6 @@ components:
       schema:
         type: string
         example: c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
-    Data_views_space_id:
-      in: path
-      name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
     Data_views_kbn_xsrf:
       schema:
         type: string
@@ -7219,50 +6201,6 @@ components:
         - $ref: '#/components/schemas/Connectors_update_connector_request_torq'
         - $ref: '#/components/schemas/Connectors_update_connector_request_webhook'
         - $ref: '#/components/schemas/Connectors_update_connector_request_xmatters'
-    Connectors_features:
-      type: string
-      description: |
-        The feature that uses the connector.
-      enum:
-        - alerting
-        - cases
-        - generativeAIForSecurity
-        - generativeAIForObservability
-        - generativeAIForSearchPlayground
-        - siem
-        - uptime
-    Connectors_connector_types:
-      title: Connector types
-      type: string
-      description: >-
-        The type of connector. For example, `.email`, `.index`, `.jira`,
-        `.opsgenie`, or `.server-log`.
-      enum:
-        - .bedrock
-        - .gemini
-        - .cases-webhook
-        - .d3security
-        - .email
-        - .gen-ai
-        - .index
-        - .jira
-        - .opsgenie
-        - .pagerduty
-        - .resilient
-        - .sentinelone
-        - .servicenow
-        - .servicenow-itom
-        - .servicenow-sir
-        - .server-log
-        - .slack
-        - .slack_api
-        - .swimlane
-        - .teams
-        - .tines
-        - .torq
-        - .webhook
-        - .xmatters
-      example: .server-log
     Connectors_run_connector_params_acknowledge_resolve_pagerduty:
       title: PagerDuty connector parameters
       description: Test an action that acknowledges or resolves a PagerDuty alert.
@@ -7328,7 +6266,7 @@ components:
             type: string
           description: >
             A list of "carbon copy" email addresses. Addresses can be specified
-            in `user@host-name` format or in name `<user@host-name>` format
+            in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
@@ -8198,6 +7136,50 @@ components:
                     #/components/schemas/Connectors_run_connector_subaction_issuetypes
                   pushToService: >-
                     #/components/schemas/Connectors_run_connector_subaction_pushtoservice
+    Connectors_features:
+      type: string
+      description: |
+        The feature that uses the connector.
+      enum:
+        - alerting
+        - cases
+        - generativeAIForSecurity
+        - generativeAIForObservability
+        - generativeAIForSearchPlayground
+        - siem
+        - uptime
+    Connectors_connector_types:
+      title: Connector types
+      type: string
+      description: >-
+        The type of connector. For example, `.email`, `.index`, `.jira`,
+        `.opsgenie`, or `.server-log`.
+      enum:
+        - .bedrock
+        - .gemini
+        - .cases-webhook
+        - .d3security
+        - .email
+        - .gen-ai
+        - .index
+        - .jira
+        - .opsgenie
+        - .pagerduty
+        - .resilient
+        - .sentinelone
+        - .servicenow
+        - .servicenow-itom
+        - .servicenow-sir
+        - .server-log
+        - .slack
+        - .slack_api
+        - .swimlane
+        - .teams
+        - .tines
+        - .torq
+        - .webhook
+        - .xmatters
+      example: .server-log
     Connectors_action_response_properties:
       title: Action response properties
       description: The properties vary depending on the action type.
@@ -8267,6 +7249,19 @@ components:
     Data_views_runtimefieldmap:
       type: object
       description: A map of runtime field definitions by field name.
+      required:
+        - script
+        - type
+      properties:
+        script:
+          type: object
+          properties:
+            source:
+              type: string
+              description: Script for the runtime field.
+        type:
+          type: string
+          description: Mapping type of the runtime field.
     Data_views_sourcefilters:
       type: array
       description: The array of field names you want to filter out in Discover.
@@ -8293,6 +7288,16 @@ components:
       description: >-
         When you use rollup indices, contains the field list for the rollup data
         view API endpoints.
+      required:
+        - aggs
+        - params
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
     Data_views_create_data_view_request_object:
       title: Create data view request
       type: object
@@ -8323,7 +7328,9 @@ components:
             namespaces:
               $ref: '#/components/schemas/Data_views_namespaces'
             runtimeFieldMap:
-              $ref: '#/components/schemas/Data_views_runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/Data_views_sourcefilters'
             timeFieldName:
@@ -8342,6 +7349,19 @@ components:
             Override an existing data view if a data view with the provided
             title already exists.
           default: false
+    Data_views_typemeta_response:
+      type: object
+      description: >-
+        When you use rollup indices, contains the field list for the rollup data
+        view API endpoints.
+      nullable: true
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
     Data_views_data_view_response_object:
       title: Data view response properties
       type: object
@@ -8368,7 +7388,9 @@ components:
             namespaces:
               $ref: '#/components/schemas/Data_views_namespaces'
             runtimeFieldMap:
-              $ref: '#/components/schemas/Data_views_runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/Data_views_sourcefilters'
             timeFieldName:
@@ -8376,7 +7398,7 @@ components:
             title:
               $ref: '#/components/schemas/Data_views_title'
             typeMeta:
-              $ref: '#/components/schemas/Data_views_typemeta'
+              $ref: '#/components/schemas/Data_views_typemeta_response'
             version:
               type: string
               example: WzQ2LDJd
@@ -8420,7 +7442,9 @@ components:
             name:
               type: string
             runtimeFieldMap:
-              $ref: '#/components/schemas/Data_views_runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/Data_views_sourcefilters'
             timeFieldName:
@@ -8435,6 +7459,37 @@ components:
           type: boolean
           description: Reloads the data view fields after the data view is updated.
           default: false
+    Data_views_swap_data_view_request_object:
+      title: Data view reference swap request
+      type: object
+      required:
+        - fromId
+        - toId
+      properties:
+        delete:
+          type: boolean
+          description: Deletes referenced saved object if all references are removed.
+        forId:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          description: Limit the affected saved objects to one or more by identifier.
+        forType:
+          type: string
+          description: Limit the affected saved objects by type.
+        fromId:
+          type: string
+          description: The saved object reference to change.
+        fromType:
+          type: string
+          description: >
+            Specify the type of the saved object reference to alter. The default
+            value is `index-pattern` for data views.
+        toId:
+          type: string
+          description: New saved object reference value to replace the old value.
     Machine_learning_APIs_mlSyncResponseSuccess:
       type: boolean
       description: The success or failure of the synchronization.
@@ -9865,6 +8920,273 @@ components:
                 description: The SLO instance identifier
                 type: string
                 example: 8853df00-ae2e-11ed-90af-09bb6422b258
+    Kibana_HTTP_APIs_core_status_redactedResponse:
+      additionalProperties: false
+      description: A minimal representation of Kibana's operational status.
+      properties:
+        status:
+          additionalProperties: false
+          properties:
+            overall:
+              additionalProperties: false
+              properties:
+                level:
+                  description: Service status levels as human and machine readable values.
+                  enum:
+                    - available
+                    - degraded
+                    - unavailable
+                    - critical
+                  type: string
+              required:
+                - level
+              type: object
+          required:
+            - overall
+          type: object
+      required:
+        - status
+      type: object
+    Kibana_HTTP_APIs_core_status_response:
+      additionalProperties: false
+      description: >-
+        Kibana's operational status as well as a detailed breakdown of plugin
+        statuses indication of various loads (like event loop utilization and
+        network traffic) at time of request.
+      properties:
+        metrics:
+          additionalProperties: false
+          description: Metric groups collected by Kibana.
+          properties:
+            collection_interval_in_millis:
+              description: The interval at which metrics should be collected.
+              type: number
+            elasticsearch_client:
+              additionalProperties: false
+              description: Current network metrics of Kibana's Elasticsearch client.
+              properties:
+                totalActiveSockets:
+                  description: Count of network sockets currently in use.
+                  type: number
+                totalIdleSockets:
+                  description: Count of network sockets currently idle.
+                  type: number
+                totalQueuedRequests:
+                  description: Count of requests not yet assigned to sockets.
+                  type: number
+              required:
+                - totalActiveSockets
+                - totalIdleSockets
+                - totalQueuedRequests
+              type: object
+            last_updated:
+              description: The time metrics were collected.
+              type: string
+          required:
+            - elasticsearch_client
+            - last_updated
+            - collection_interval_in_millis
+          type: object
+        name:
+          description: Kibana instance name.
+          type: string
+        status:
+          additionalProperties: false
+          properties:
+            core:
+              additionalProperties: false
+              description: Statuses of core Kibana services.
+              properties:
+                elasticsearch:
+                  additionalProperties: false
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: >-
+                        Service status levels as human and machine readable
+                        values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: >-
+                        An unstructured set of extra metadata about this
+                        service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
+                  type: object
+                savedObjects:
+                  additionalProperties: false
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: >-
+                        Service status levels as human and machine readable
+                        values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: >-
+                        An unstructured set of extra metadata about this
+                        service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
+                  type: object
+              required:
+                - elasticsearch
+                - savedObjects
+              type: object
+            overall:
+              additionalProperties: false
+              properties:
+                detail:
+                  description: Human readable detail of the service status.
+                  type: string
+                documentationUrl:
+                  description: A URL to further documentation regarding this service.
+                  type: string
+                level:
+                  description: Service status levels as human and machine readable values.
+                  enum:
+                    - available
+                    - degraded
+                    - unavailable
+                    - critical
+                  type: string
+                meta:
+                  additionalProperties: {}
+                  description: An unstructured set of extra metadata about this service.
+                  type: object
+                summary:
+                  description: A human readable summary of the service status.
+                  type: string
+              required:
+                - level
+                - summary
+                - meta
+              type: object
+            plugins:
+              additionalProperties:
+                additionalProperties: false
+                properties:
+                  detail:
+                    description: Human readable detail of the service status.
+                    type: string
+                  documentationUrl:
+                    description: A URL to further documentation regarding this service.
+                    type: string
+                  level:
+                    description: >-
+                      Service status levels as human and machine readable
+                      values.
+                    enum:
+                      - available
+                      - degraded
+                      - unavailable
+                      - critical
+                    type: string
+                  meta:
+                    additionalProperties: {}
+                    description: An unstructured set of extra metadata about this service.
+                    type: object
+                  summary:
+                    description: A human readable summary of the service status.
+                    type: string
+                required:
+                  - level
+                  - summary
+                  - meta
+                type: object
+              description: A dynamic mapping of plugin ID to plugin status.
+              type: object
+          required:
+            - overall
+            - core
+            - plugins
+          type: object
+        uuid:
+          description: >-
+            Unique, generated Kibana instance UUID. This UUID should persist
+            even if the Kibana process restarts.
+          type: string
+        version:
+          additionalProperties: false
+          properties:
+            build_date:
+              description: The date and time of this build.
+              type: string
+            build_flavor:
+              description: >-
+                The build flavour determines configuration and behavior of
+                Kibana. On premise users will almost always run the
+                "traditional" flavour, while other flavours are reserved for
+                Elastic-specific use cases.
+              enum:
+                - serverless
+                - traditional
+              type: string
+            build_hash:
+              description: >-
+                A unique hash value representing the git commit of this Kibana
+                build.
+              type: string
+            build_number:
+              description: >-
+                A monotonically increasing number, each subsequent build will
+                have a higher number.
+              type: number
+            build_snapshot:
+              description: Whether this build is a snapshot build.
+              type: boolean
+            number:
+              description: A semantic version number.
+              type: string
+          required:
+            - number
+            - build_hash
+            - build_number
+            - build_snapshot
+            - build_flavor
+            - build_date
+          type: object
+      required:
+        - name
+        - uuid
+        - version
+        - status
+        - metrics
+      type: object
   examples:
     Connectors_create_email_connector_request:
       summary: Create an email connector.
@@ -9993,60 +9315,37 @@ components:
         name: updated-connector
         config:
           index: updated-index
-    Connectors_get_connectors_response:
-      summary: A list of connectors
+    Connectors_run_cases_webhook_connector_request:
+      summary: Run a Webhook - Case Management connector to create a case.
       value:
-        - id: preconfigured-email-connector
-          name: my-preconfigured-email-notification
-          connector_type_id: .email
-          is_preconfigured: true
-          is_deprecated: false
-          referenced_by_count: 0
-          is_system_action: false
-        - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
-          name: my-index-connector
-          config:
-            index: test-index
-            refresh: false
-            executionTimeField: null
-          connector_type_id: .index
-          is_preconfigured: false
-          is_deprecated: false
-          referenced_by_count: 2
-          is_missing_secrets: false
-          is_system_action: false
-    Connectors_get_connector_types_response:
-      summary: A list of connector types
+        params:
+          subAction: pushToService
+          subActionParams:
+            comments:
+              - commentId: 1
+                comment: A comment about the incident.
+            incident:
+              title: Case title
+              description: Description of the incident.
+              tags:
+                - tag1
+                - tag2
+              severity: low
+              status: open
+              id: caseID
+    Connectors_run_email_connector_request:
+      summary: Send an email message from an email connector.
       value:
-        - id: .swimlane
-          name: Swimlane
-          enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          minimum_license_required: gold
-          supported_feature_ids:
-            - alerting
-            - cases
-            - siem
-        - id: .index
-          name: Index
-          enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          minimum_license_required: basic
-          supported_feature_ids:
-            - alerting
-            - uptime
-            - siem
-        - id: .server-log
-          name: Server log
-          enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          minimum_license_required: basic
-          supported_feature_ids:
-            - alerting
-            - uptime
+        params:
+          bcc:
+            - user1@example.com
+          cc:
+            - user2@example.com
+            - user3@example.com
+          message: Test email message.
+          subject: Test message subject
+          to:
+            - user4@example.com
     Connectors_run_index_connector_request:
       summary: Run an index connector.
       value:
@@ -10060,6 +9359,17 @@ components:
       value:
         params:
           subAction: issueTypes
+    Connectors_run_pagerduty_connector_request:
+      summary: Run a PagerDuty connector to trigger an alert.
+      value:
+        params:
+          eventAction: trigger
+          summary: A brief event summary
+          links:
+            - href: http://example.com/pagerduty
+              text: An example link
+          customDetails:
+            my_data_1: test data
     Connectors_run_server_log_connector_request:
       summary: Run a server log connector.
       value:
@@ -10099,6 +9409,45 @@ components:
               caseId: '1000'
               caseName: Case name
               description: Description of the incident.
+    Connectors_run_cases_webhook_connector_response:
+      summary: >-
+        Response from a pushToService action for a Webhook - Case Management
+        connector.
+      value:
+        connector_id: 1824b5b8-c005-4dcc-adac-57f92db46459
+        data:
+          id: 100665
+          title: TEST-29034
+          url: https://example.com/browse/TEST-29034
+          pushedDate: '2023-12-05T19:43:36.360Z'
+          comments:
+            - commentId: 1
+              pushedDate: '2023-12-05T19:43:36.360Z'
+        status: ok
+    Connectors_run_email_connector_response:
+      summary: Response for sending a message from an email connector.
+      value:
+        connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
+        data:
+          accepted:
+            - user1@example.com
+            - user2@example.com
+            - user3@example.com
+            - user4@example.com
+          envelope:
+            from: tester@example.com
+            to:
+              - user1@example.com
+              - user2@example.com
+              - user3@example.com
+              - user4@example.com
+          envelopeTime: 8
+          messageTime: 3
+          messageSize: 729
+          response: 250 Message queued as QzEXKcGJ
+          messageId: <08a92d29-642a-0706-750c-de5996bd5cf3@example.com>
+          rejected: []
+        status: ok
     Connectors_run_index_connector_response:
       summary: Response from running an index connector.
       value:
@@ -10137,6 +9486,15 @@ components:
             name: Bug
           - id: 10000
             name: Epic
+        status: ok
+    Connectors_run_pagerduty_connector_response:
+      summary: Response from running a PagerDuty connector.
+      value:
+        connector_id: 45de9f70-954f-4608-b12a-db7cf808e49d
+        data:
+          dedup_key: 5115e138b26b484a81eaea779faa6016
+          message: Event processed
+          status: success
         status: ok
     Connectors_run_server_log_connector_response:
       summary: Response from running a server log connector.
@@ -10235,96 +9593,28 @@ components:
             - commentId: 1
               pushedDate: '2022-09-08T16:52:27.865Z'
         status: ok
-    Connectors_run_cases_webhook_connector_request:
-      summary: Run a Webhook - Case Management connector to create a case.
+    Connectors_get_connectors_response:
+      summary: A list of connectors
       value:
-        params:
-          subAction: pushToService
-          subActionParams:
-            comments:
-              - commentId: 1
-                comment: A comment about the incident.
-            incident:
-              title: Case title
-              description: Description of the incident.
-              tags:
-                - tag1
-                - tag2
-              severity: low
-              status: open
-              id: caseID
-    Connectors_run_email_connector_request:
-      summary: Send an email message from an email connector.
-      value:
-        params:
-          bcc:
-            - user1@example.com
-          cc:
-            - user2@example.com
-            - user3@example.com
-          message: Test email message.
-          subject: Test message subject
-          to:
-            - user4@example.com
-    Connectors_run_pagerduty_connector_request:
-      summary: Run a PagerDuty connector to trigger an alert.
-      value:
-        params:
-          eventAction: trigger
-          summary: A brief event summary
-          links:
-            - href: http://example.com/pagerduty
-              text: An example link
-          customDetails:
-            my_data_1: test data
-    Connectors_run_cases_webhook_connector_response:
-      summary: >-
-        Response from a pushToService action for a Webhook - Case Management
-        connector.
-      value:
-        connector_id: 1824b5b8-c005-4dcc-adac-57f92db46459
-        data:
-          id: 100665
-          title: TEST-29034
-          url: https://example.com/browse/TEST-29034
-          pushedDate: '2023-12-05T19:43:36.360Z'
-          comments:
-            - commentId: 1
-              pushedDate: '2023-12-05T19:43:36.360Z'
-        status: ok
-    Connectors_run_email_connector_response:
-      summary: Response for sending a message from an email connector.
-      value:
-        connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
-        data:
-          accepted:
-            - user1@example.com
-            - user2@example.com
-            - user3@example.com
-            - user4@example.com
-          envelope:
-            from: tester@example.com
-            to:
-              - user1@example.com
-              - user2@example.com
-              - user3@example.com
-              - user4@example.com
-          envelopeTime: 8
-          messageTime: 3
-          messageSize: 729
-          response: 250 Message queued as QzEXKcGJ
-          messageId: <08a92d29-642a-0706-750c-de5996bd5cf3@example.com>
-          rejected: []
-        status: ok
-    Connectors_run_pagerduty_connector_response:
-      summary: Response from running a PagerDuty connector.
-      value:
-        connector_id: 45de9f70-954f-4608-b12a-db7cf808e49d
-        data:
-          dedup_key: 5115e138b26b484a81eaea779faa6016
-          message: Event processed
-          status: success
-        status: ok
+        - id: preconfigured-email-connector
+          name: my-preconfigured-email-notification
+          connector_type_id: .email
+          is_preconfigured: true
+          is_deprecated: false
+          referenced_by_count: 0
+          is_system_action: false
+        - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
+          name: my-index-connector
+          config:
+            index: test-index
+            refresh: false
+            executionTimeField: null
+          connector_type_id: .index
+          is_preconfigured: false
+          is_deprecated: false
+          referenced_by_count: 2
+          is_missing_secrets: false
+          is_system_action: false
     Connectors_get_connector_types_generativeai_response:
       summary: A list of connector types for the `generativeAI` feature.
       value:
@@ -11328,17 +10618,8 @@ components:
           allowNoIndex: false
           name: Kibana Sample Data eCommerce
         refresh_fields: true
-    Data_views_get_default_data_view_response:
-      summary: The get default data view API returns the default data view identifier.
-      value:
-        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-    Data_views_set_default_data_view_request:
-      summary: Set the default data view identifier.
-      value:
-        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-        force: true
     Data_views_update_field_metadata_request:
-      summary: Update multiple metadata fields.
+      summary: Update metadata for multiple fields.
       value:
         fields:
           field1:
@@ -11863,6 +11144,28 @@ components:
         runtimeField:
           script:
             source: emit(doc["bar"].value)
+    Data_views_get_default_data_view_response:
+      summary: The get default data view API returns the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    Data_views_set_default_data_view_request:
+      summary: Set the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+        force: true
+    Data_views_swap_data_view_request:
+      summary: >-
+        Swap references from data view ID "abcd-efg" to "xyz-123" and remove the
+        data view that is no longer referenced.
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
+        delete: true
+    Data_views_preview_swap_data_view_request:
+      summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
@@ -12036,6 +11339,37 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Connectors_action_response_properties'
+  securitySchemes:
+    Machine_learning_APIs_basicAuth:
+      type: http
+      scheme: basic
+    Machine_learning_APIs_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+    Saved_objects_basicAuth:
+      type: http
+      scheme: basic
+    Saved_objects_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+    SLOs_basicAuth:
+      type: http
+      scheme: basic
+    SLOs_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+    Kibana_HTTP_APIs_apiKeyAuth:
+      in: header
+      name: Authorization
+      type: apiKey
+    Kibana_HTTP_APIs_basicAuth:
+      scheme: basic
+      type: http
 x-tagGroups:
   - name: APM UI
     tags:
@@ -12056,3 +11390,6 @@ x-tagGroups:
   - name: SLOs
     tags:
       - slo
+  - name: Kibana HTTP APIs
+    tags:
+      - system

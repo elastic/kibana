@@ -64,6 +64,7 @@ servers:
   - url: /
   - url: http://localhost:5601
     description: local
+  - url: http://localhost:5622
 tags:
   - name: APM agent keys
     description: >
@@ -95,6 +96,8 @@ tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
     x-displayName: slo
+  - name: system
+    x-displayName: system
 paths:
   /api/apm/agent_keys:
     post:
@@ -270,8 +273,9 @@ paths:
                         type: string
   /api/actions/connector:
     post:
-      summary: Create a connector
+      summary: Create a connector with a random ID
       operationId: createConnector
+      description: The connector identifier is randomly generated.
       tags:
         - connectors
       parameters:
@@ -317,8 +321,6 @@ paths:
                     #/components/examples/Connectors_create_xmatters_connector_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/actions/connector/{connectorId}:
     get:
       summary: Get a connector information
@@ -341,8 +343,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_apiKeyAuth: []
     delete:
       summary: Delete a connector
       operationId: deleteConnector
@@ -358,8 +358,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_apiKeyAuth: []
     post:
       summary: Create a connector
       operationId: createConnectorId
@@ -399,8 +397,6 @@ paths:
                     #/components/examples/Connectors_create_index_connector_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
     put:
       summary: Update a connector
       operationId: updateConnector
@@ -432,8 +428,6 @@ paths:
           $ref: '#/components/responses/Connectors_401'
         '404':
           $ref: '#/components/responses/Connectors_404'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/actions/connectors:
     get:
       summary: Get all connectors
@@ -455,8 +449,6 @@ paths:
                   $ref: '#/components/examples/Connectors_get_connectors_response'
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
   /api/actions/connector_types:
     get:
       summary: Get all connector types
@@ -529,572 +521,10 @@ paths:
                     #/components/examples/Connectors_get_connector_types_generativeai_response
         '401':
           $ref: '#/components/responses/Connectors_401'
-      security:
-        - Connectors_apiKeyAuth: []
-  /s/{spaceId}/api/data_views:
-    get:
-      summary: Get all data views
-      operationId: getAllDataViews
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        name:
-                          type: string
-                        namespaces:
-                          type: array
-                          items:
-                            type: string
-                        title:
-                          type: string
-                        typeMeta:
-                          type: object
-              examples:
-                getAllDataViewsResponse:
-                  $ref: '#/components/examples/Data_views_get_data_views_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view:
-    post:
-      summary: Create a data view
-      operationId: createDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Data_views_create_data_view_request_object'
-            examples:
-              createDataViewRequest:
-                $ref: '#/components/examples/Data_views_create_data_view_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_data_view_response_object'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}:
-    get:
-      summary: Get a data view
-      operationId: getDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_data_view_response_object'
-              examples:
-                getDataViewResponse:
-                  $ref: '#/components/examples/Data_views_get_data_view_response'
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    delete:
-      summary: Delete a data view
-      operationId: deleteDataView
-      description: >
-        WARNING: When you delete a data view, it cannot be recovered. This
-        functionality is in technical preview and may be changed or removed in a
-        future release. Elastic will work to fix any issues, but features in
-        technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    post:
-      summary: Update a data view
-      operationId: updateDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Data_views_update_data_view_request_object'
-            examples:
-              updateDataViewRequest:
-                $ref: '#/components/examples/Data_views_update_data_view_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_data_view_response_object'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/default:
-    get:
-      summary: Get the default data view identifier
-      operationId: getDefaultDataView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view_id:
-                    type: string
-              examples:
-                getDefaultDataViewResponse:
-                  $ref: >-
-                    #/components/examples/Data_views_get_default_data_view_response
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    post:
-      summary: Sets the default data view identifier
-      operationId: setDefaultDatailView
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - data_view_id
-              properties:
-                data_view_id:
-                  type: string
-                  nullable: true
-                  description: >
-                    The data view identifier. NOTE: The API does not validate
-                    whether it is a valid identifier. Use `null` to unset the
-                    default data view.
-                force:
-                  type: boolean
-                  description: Update an existing default data view identifier.
-                  default: false
-            examples:
-              setDefaultDataViewRequest:
-                $ref: '#/components/examples/Data_views_set_default_data_view_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  acknowledged:
-                    type: boolean
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}/fields:
-    post:
-      summary: Update data view fields metadata
-      operationId: updateFieldsMetadata
-      description: >
-        Update fields presentation metadata such as count, customLabel and
-        format. This functionality is in technical preview and may be changed or
-        removed in a future release. Elastic will work to fix any issues, but
-        features in technical preview are not subject to the support SLA of
-        official GA features. You can update multiple fields in one request.
-        Updates are merged with persisted metadata. To remove existing metadata,
-        specify null as the value.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - fields
-              properties:
-                fields:
-                  description: The field object.
-                  type: object
-            examples:
-              updateFieldsMetadataRequest:
-                $ref: '#/components/examples/Data_views_update_field_metadata_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  acknowledged:
-                    type: boolean
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field:
-    post:
-      summary: Create a runtime field
-      operationId: createRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-                - runtimeField
-              properties:
-                name:
-                  type: string
-                  description: |
-                    The name for a runtime field.
-                runtimeField:
-                  type: object
-                  description: |
-                    The runtime field definition object.
-            examples:
-              createRuntimeFieldRequest:
-                $ref: '#/components/examples/Data_views_create_runtime_field_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    put:
-      summary: Create or update a runtime field
-      operationId: createUpdateRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
-        - $ref: '#/components/parameters/Data_views_space_id'
-        - name: viewId
-          in: path
-          description: |
-            The ID of the data view fields you want to update.
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-                - runtimeField
-              properties:
-                name:
-                  type: string
-                  description: |
-                    The name for a runtime field.
-                runtimeField:
-                  type: object
-                  description: |
-                    The runtime field definition object.
-            examples:
-              updateRuntimeFieldRequest:
-                $ref: '#/components/examples/Data_views_create_runtime_field_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view:
-                    type: object
-                  fields:
-                    type: array
-                    items:
-                      type: object
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-  /s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
-    get:
-      summary: Get a runtime field
-      operationId: getRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_field_name'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data_view:
-                    type: object
-                  fields:
-                    type: array
-                    items:
-                      type: object
-              examples:
-                getRuntimeFieldResponse:
-                  $ref: '#/components/examples/Data_views_get_runtime_field_response'
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    delete:
-      summary: Delete a runtime field from a data view
-      operationId: deleteRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_field_name'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-        '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
-    post:
-      summary: Update a runtime field
-      operationId: updateRuntimeField
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      tags:
-        - data views
-      parameters:
-        - $ref: '#/components/parameters/Data_views_field_name'
-        - $ref: '#/components/parameters/Data_views_view_id'
-        - $ref: '#/components/parameters/Data_views_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - runtimeField
-              properties:
-                runtimeField:
-                  type: object
-                  description: |
-                    The runtime field definition object.
-
-                    You can update following fields:
-
-                    - `type`
-                    - `script`
-            examples:
-              updateRuntimeFieldRequest:
-                $ref: '#/components/examples/Data_views_update_runtime_field_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views:
     get:
-      summary: Get all data views in the default space
+      summary: Get all data views
       operationId: getAllDataViewsDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       responses:
@@ -1131,18 +561,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view:
     post:
-      summary: Create a data view in the default space
-      operationId: createDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
+      summary: Create a data view
+      operationId: createDataViewDefaultw
       tags:
         - data views
       parameters:
@@ -1169,18 +591,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}:
     get:
-      summary: Get a data view in the default space
+      summary: Get a data view
       operationId: getDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1201,18 +615,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     delete:
-      summary: Delete a data view from the default space
+      summary: Delete a data view
       operationId: deleteDataViewDefault
-      description: >
-        WARNING: When you delete a data view, it cannot be recovered. This
-        functionality is in technical preview and may be changed or removed in a
-        future release. Elastic will work to fix any issues, but features in
-        technical preview are not subject to the support SLA of official GA
-        features.
+      description: |
+        WARNING: When you delete a data view, it cannot be recovered.
       tags:
         - data views
       parameters:
@@ -1227,17 +634,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     post:
-      summary: Update a data view in the default space
+      summary: Update a data view
       operationId: updateDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1265,21 +664,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}/fields:
     post:
-      summary: Update data view fields metadata in the default space
+      summary: Update data view fields metadata
       operationId: updateFieldsMetadataDefault
       description: >
         Update fields presentation metadata such as count, customLabel,
-        customDescription, and format. This functionality is in technical
-        preview and may be changed or removed in a future release. Elastic will
-        work to fix any issues, but features in technical preview are not
-        subject to the support SLA of official GA features. You can update
-        multiple fields in one request. Updates are merged with persisted
-        metadata. To remove existing metadata, specify null as the value.
+        customDescription, and format.
       tags:
         - data views
       parameters:
@@ -1316,18 +707,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
-      summary: Create a runtime field in the default space
+      summary: Create a runtime field
       operationId: createRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1361,17 +744,9 @@ paths:
             application/json:
               schema:
                 type: object
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     put:
-      summary: Create or update a runtime field in the default space
+      summary: Create or update a runtime field
       operationId: createUpdateRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1424,18 +799,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
-      summary: Get a runtime field in the default space
+      summary: Get a runtime field
       operationId: getRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1464,17 +831,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     delete:
-      summary: Delete a runtime field from a data view in the default space
+      summary: Delete a runtime field from a data view
       operationId: deleteRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1489,17 +848,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     post:
-      summary: Update a runtime field in the default space
+      summary: Update a runtime field
       operationId: updateRuntimeFieldDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1535,18 +886,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
   /api/data_views/default:
     get:
-      summary: Get the default data view in the default space
+      summary: Get the default data view
       operationId: getDefaultDataViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       responses:
@@ -1569,17 +912,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
     post:
-      summary: Set the default data view in the default space
+      summary: Set the default data view
       operationId: setDefaultDatailViewDefault
-      description: >
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
       tags:
         - data views
       parameters:
@@ -1623,9 +958,93 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
-      security:
-        - Data_views_basicAuth: []
-        - Data_views_apiKeyAuth: []
+  /api/data_views/swap_references:
+    post:
+      summary: Swap saved object references
+      operationId: swapDataViewsDefault
+      description: >
+        Changes saved object references from one data view identifier to
+        another. WARNING: Misuse can break large numbers of saved objects!
+        Practicing with a backup is recommended.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Data_views_swap_data_view_request_object'
+            examples:
+              swapDataViewRequest:
+                $ref: '#/components/examples/Data_views_swap_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleteStatus:
+                    type: object
+                    properties:
+                      deletePerformed:
+                        type: boolean
+                      remainingRefs:
+                        type: integer
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
+  /api/data_views/swap_references/_preview:
+    post:
+      summary: Preview a saved object reference swap
+      operationId: previewSwapDataViewsDefault
+      description: >
+        Preview the impact of swapping saved object references from one data
+        view identifier to another.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/Data_views_kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Data_views_swap_data_view_request_object'
+            examples:
+              previewSwapDataViewRequest:
+                $ref: >-
+                  #/components/examples/Data_views_preview_swap_data_view_request
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
   /api/ml/saved_objects/sync:
     get:
       summary: Sync machine learning saved objects
@@ -2559,47 +1978,63 @@ paths:
       security:
         - SLOs_basicAuth: []
         - SLOs_apiKeyAuth: []
+  /api/status:
+    get:
+      operationId: /api/status#0
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: Set to "true" to get the response in v7 format.
+          in: query
+          name: v7format
+          required: false
+          schema:
+            type: boolean
+        - description: Set to "true" to get the response in v8 format.
+          in: query
+          name: v8format
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_response'
+                  - $ref: >-
+                      #/components/schemas/Kibana_HTTP_APIs_core_status_redactedResponse
+                description: >-
+                  Kibana's operational status. A minimal response is sent for
+                  unauthorized users.
+          description: Overall status is OK and Kibana should be functioning normally.
+        '503':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_response'
+                  - $ref: >-
+                      #/components/schemas/Kibana_HTTP_APIs_core_status_redactedResponse
+                description: >-
+                  Kibana's operational status. A minimal response is sent for
+                  unauthorized users.
+          description: >-
+            Kibana or some of it's essential services are unavailable. Kibana
+            may be degraded or unavailable.
+      summary: Get Kibana's current status
+      tags:
+        - system
+      security:
+        - Kibana_HTTP_APIs_basicAuth: []
 components:
-  securitySchemes:
-    Connectors_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
-    Data_views_basicAuth:
-      type: http
-      scheme: basic
-    Data_views_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
-    Machine_learning_APIs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: ApiKey
-    Serverless_saved_objects_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
-    SLOs_basicAuth:
-      type: http
-      scheme: basic
-    SLOs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     Connectors_kbn_xsrf:
       schema:
@@ -2616,16 +2051,6 @@ components:
       schema:
         type: string
         example: df770e30-8b8b-11ed-a780-3b746c987a81
-    Data_views_space_id:
-      in: path
-      name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
     Data_views_kbn_xsrf:
       schema:
         type: string
@@ -5832,6 +5257,19 @@ components:
     Data_views_runtimefieldmap:
       type: object
       description: A map of runtime field definitions by field name.
+      required:
+        - script
+        - type
+      properties:
+        script:
+          type: object
+          properties:
+            source:
+              type: string
+              description: Script for the runtime field.
+        type:
+          type: string
+          description: Mapping type of the runtime field.
     Data_views_sourcefilters:
       type: array
       description: The array of field names you want to filter out in Discover.
@@ -5858,6 +5296,16 @@ components:
       description: >-
         When you use rollup indices, contains the field list for the rollup data
         view API endpoints.
+      required:
+        - aggs
+        - params
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
     Data_views_create_data_view_request_object:
       title: Create data view request
       type: object
@@ -5888,7 +5336,9 @@ components:
             namespaces:
               $ref: '#/components/schemas/Data_views_namespaces'
             runtimeFieldMap:
-              $ref: '#/components/schemas/Data_views_runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/Data_views_sourcefilters'
             timeFieldName:
@@ -5907,6 +5357,19 @@ components:
             Override an existing data view if a data view with the provided
             title already exists.
           default: false
+    Data_views_typemeta_response:
+      type: object
+      description: >-
+        When you use rollup indices, contains the field list for the rollup data
+        view API endpoints.
+      nullable: true
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
     Data_views_data_view_response_object:
       title: Data view response properties
       type: object
@@ -5933,7 +5396,9 @@ components:
             namespaces:
               $ref: '#/components/schemas/Data_views_namespaces'
             runtimeFieldMap:
-              $ref: '#/components/schemas/Data_views_runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/Data_views_sourcefilters'
             timeFieldName:
@@ -5941,7 +5406,7 @@ components:
             title:
               $ref: '#/components/schemas/Data_views_title'
             typeMeta:
-              $ref: '#/components/schemas/Data_views_typemeta'
+              $ref: '#/components/schemas/Data_views_typemeta_response'
             version:
               type: string
               example: WzQ2LDJd
@@ -5985,7 +5450,9 @@ components:
             name:
               type: string
             runtimeFieldMap:
-              $ref: '#/components/schemas/Data_views_runtimefieldmap'
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Data_views_runtimefieldmap'
             sourceFilters:
               $ref: '#/components/schemas/Data_views_sourcefilters'
             timeFieldName:
@@ -6000,6 +5467,37 @@ components:
           type: boolean
           description: Reloads the data view fields after the data view is updated.
           default: false
+    Data_views_swap_data_view_request_object:
+      title: Data view reference swap request
+      type: object
+      required:
+        - fromId
+        - toId
+      properties:
+        delete:
+          type: boolean
+          description: Deletes referenced saved object if all references are removed.
+        forId:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          description: Limit the affected saved objects to one or more by identifier.
+        forType:
+          type: string
+          description: Limit the affected saved objects by type.
+        fromId:
+          type: string
+          description: The saved object reference to change.
+        fromType:
+          type: string
+          description: >
+            Specify the type of the saved object reference to alter. The default
+            value is `index-pattern` for data views.
+        toId:
+          type: string
+          description: New saved object reference value to replace the old value.
     Machine_learning_APIs_mlSyncResponseSuccess:
       type: boolean
       description: The success or failure of the synchronization.
@@ -7473,6 +6971,273 @@ components:
                 description: The SLO instance identifier
                 type: string
                 example: 8853df00-ae2e-11ed-90af-09bb6422b258
+    Kibana_HTTP_APIs_core_status_redactedResponse:
+      additionalProperties: false
+      description: A minimal representation of Kibana's operational status.
+      properties:
+        status:
+          additionalProperties: false
+          properties:
+            overall:
+              additionalProperties: false
+              properties:
+                level:
+                  description: Service status levels as human and machine readable values.
+                  enum:
+                    - available
+                    - degraded
+                    - unavailable
+                    - critical
+                  type: string
+              required:
+                - level
+              type: object
+          required:
+            - overall
+          type: object
+      required:
+        - status
+      type: object
+    Kibana_HTTP_APIs_core_status_response:
+      additionalProperties: false
+      description: >-
+        Kibana's operational status as well as a detailed breakdown of plugin
+        statuses indication of various loads (like event loop utilization and
+        network traffic) at time of request.
+      properties:
+        metrics:
+          additionalProperties: false
+          description: Metric groups collected by Kibana.
+          properties:
+            collection_interval_in_millis:
+              description: The interval at which metrics should be collected.
+              type: number
+            elasticsearch_client:
+              additionalProperties: false
+              description: Current network metrics of Kibana's Elasticsearch client.
+              properties:
+                totalActiveSockets:
+                  description: Count of network sockets currently in use.
+                  type: number
+                totalIdleSockets:
+                  description: Count of network sockets currently idle.
+                  type: number
+                totalQueuedRequests:
+                  description: Count of requests not yet assigned to sockets.
+                  type: number
+              required:
+                - totalActiveSockets
+                - totalIdleSockets
+                - totalQueuedRequests
+              type: object
+            last_updated:
+              description: The time metrics were collected.
+              type: string
+          required:
+            - elasticsearch_client
+            - last_updated
+            - collection_interval_in_millis
+          type: object
+        name:
+          description: Kibana instance name.
+          type: string
+        status:
+          additionalProperties: false
+          properties:
+            core:
+              additionalProperties: false
+              description: Statuses of core Kibana services.
+              properties:
+                elasticsearch:
+                  additionalProperties: false
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: >-
+                        Service status levels as human and machine readable
+                        values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: >-
+                        An unstructured set of extra metadata about this
+                        service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
+                  type: object
+                savedObjects:
+                  additionalProperties: false
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: >-
+                        Service status levels as human and machine readable
+                        values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: >-
+                        An unstructured set of extra metadata about this
+                        service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
+                  type: object
+              required:
+                - elasticsearch
+                - savedObjects
+              type: object
+            overall:
+              additionalProperties: false
+              properties:
+                detail:
+                  description: Human readable detail of the service status.
+                  type: string
+                documentationUrl:
+                  description: A URL to further documentation regarding this service.
+                  type: string
+                level:
+                  description: Service status levels as human and machine readable values.
+                  enum:
+                    - available
+                    - degraded
+                    - unavailable
+                    - critical
+                  type: string
+                meta:
+                  additionalProperties: {}
+                  description: An unstructured set of extra metadata about this service.
+                  type: object
+                summary:
+                  description: A human readable summary of the service status.
+                  type: string
+              required:
+                - level
+                - summary
+                - meta
+              type: object
+            plugins:
+              additionalProperties:
+                additionalProperties: false
+                properties:
+                  detail:
+                    description: Human readable detail of the service status.
+                    type: string
+                  documentationUrl:
+                    description: A URL to further documentation regarding this service.
+                    type: string
+                  level:
+                    description: >-
+                      Service status levels as human and machine readable
+                      values.
+                    enum:
+                      - available
+                      - degraded
+                      - unavailable
+                      - critical
+                    type: string
+                  meta:
+                    additionalProperties: {}
+                    description: An unstructured set of extra metadata about this service.
+                    type: object
+                  summary:
+                    description: A human readable summary of the service status.
+                    type: string
+                required:
+                  - level
+                  - summary
+                  - meta
+                type: object
+              description: A dynamic mapping of plugin ID to plugin status.
+              type: object
+          required:
+            - overall
+            - core
+            - plugins
+          type: object
+        uuid:
+          description: >-
+            Unique, generated Kibana instance UUID. This UUID should persist
+            even if the Kibana process restarts.
+          type: string
+        version:
+          additionalProperties: false
+          properties:
+            build_date:
+              description: The date and time of this build.
+              type: string
+            build_flavor:
+              description: >-
+                The build flavour determines configuration and behavior of
+                Kibana. On premise users will almost always run the
+                "traditional" flavour, while other flavours are reserved for
+                Elastic-specific use cases.
+              enum:
+                - serverless
+                - traditional
+              type: string
+            build_hash:
+              description: >-
+                A unique hash value representing the git commit of this Kibana
+                build.
+              type: string
+            build_number:
+              description: >-
+                A monotonically increasing number, each subsequent build will
+                have a higher number.
+              type: number
+            build_snapshot:
+              description: Whether this build is a snapshot build.
+              type: boolean
+            number:
+              description: A semantic version number.
+              type: string
+          required:
+            - number
+            - build_hash
+            - build_number
+            - build_snapshot
+            - build_flavor
+            - build_date
+          type: object
+      required:
+        - name
+        - uuid
+        - version
+        - status
+        - metrics
+      type: object
   examples:
     Connectors_create_email_connector_request:
       summary: Create an email connector.
@@ -8626,17 +8391,8 @@ components:
           allowNoIndex: false
           name: Kibana Sample Data eCommerce
         refresh_fields: true
-    Data_views_get_default_data_view_response:
-      summary: The get default data view API returns the default data view identifier.
-      value:
-        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-    Data_views_set_default_data_view_request:
-      summary: Set the default data view identifier.
-      value:
-        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-        force: true
     Data_views_update_field_metadata_request:
-      summary: Update multiple metadata fields.
+      summary: Update metadata for multiple fields.
       value:
         fields:
           field1:
@@ -9161,6 +8917,28 @@ components:
         runtimeField:
           script:
             source: emit(doc["bar"].value)
+    Data_views_get_default_data_view_response:
+      summary: The get default data view API returns the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    Data_views_set_default_data_view_request:
+      summary: Set the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+        force: true
+    Data_views_swap_data_view_request:
+      summary: >-
+        Swap references from data view ID "abcd-efg" to "xyz-123" and remove the
+        data view that is no longer referenced.
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
+        delete: true
+    Data_views_preview_swap_data_view_request:
+      summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
@@ -9284,6 +9062,34 @@ components:
                 example: 404
                 enum:
                   - 404
+  securitySchemes:
+    Machine_learning_APIs_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+    Serverless_saved_objects_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        Serverless APIs support only key-based authentication. You must create
+        an API key and use the encoded value in the request header. For example:
+        'Authorization: ApiKey base64AccessApiKey'.
+    SLOs_basicAuth:
+      type: http
+      scheme: basic
+    SLOs_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+    Kibana_HTTP_APIs_apiKeyAuth:
+      in: header
+      name: Authorization
+      type: apiKey
+    Kibana_HTTP_APIs_basicAuth:
+      scheme: basic
+      type: http
 x-tagGroups:
   - name: APM UI
     tags:
@@ -9304,3 +9110,6 @@ x-tagGroups:
   - name: SLOs
     tags:
       - slo
+  - name: Kibana HTTP APIs
+    tags:
+      - system

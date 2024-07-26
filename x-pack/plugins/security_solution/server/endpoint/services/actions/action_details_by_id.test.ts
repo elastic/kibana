@@ -126,11 +126,9 @@ describe('When using `getActionDetailsById()', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        body: {
-          query: {
-            bool: {
-              filter: [{ term: { action_id: '123' } }],
-            },
+        query: {
+          bool: {
+            filter: [{ term: { action_id: '123' } }],
           },
         },
       }),
