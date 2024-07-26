@@ -1279,6 +1279,7 @@
     "@kbn/ambient-ftr-types": "link:packages/kbn-ambient-ftr-types",
     "@kbn/ambient-storybook-types": "link:packages/kbn-ambient-storybook-types",
     "@kbn/ambient-ui-types": "link:packages/kbn-ambient-ui-types",
+    "@kbn/apm-ftr-e2e": "link:x-pack/plugins/observability_solution/apm/ftr_e2e",
     "@kbn/apm-synthtrace": "link:packages/kbn-apm-synthtrace",
     "@kbn/apm-synthtrace-client": "link:packages/kbn-apm-synthtrace-client",
     "@kbn/axe-config": "link:packages/kbn-axe-config",

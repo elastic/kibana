@@ -78,6 +78,8 @@
       "@kbn/apm-data-access-plugin/*": ["x-pack/plugins/observability_solution/apm_data_access/*"],
       "@kbn/apm-data-view": ["packages/kbn-apm-data-view"],
       "@kbn/apm-data-view/*": ["packages/kbn-apm-data-view/*"],
+      "@kbn/apm-ftr-e2e": ["x-pack/plugins/observability_solution/apm/ftr_e2e"],
+      "@kbn/apm-ftr-e2e/*": ["x-pack/plugins/observability_solution/apm/ftr_e2e/*"],
       "@kbn/apm-plugin": ["x-pack/plugins/observability_solution/apm"],
       "@kbn/apm-plugin/*": ["x-pack/plugins/observability_solution/apm/*"],
       "@kbn/apm-synthtrace": ["packages/kbn-apm-synthtrace"],

@@ -13,6 +13,7 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/dev-utils",
     "@kbn/axe-config",
-    "@kbn/cypress-config"
+    "@kbn/cypress-config",
+    "@kbn/apm-plugin"
   ]
 }
