@@ -75,3 +75,5 @@ export const createDrilldownTemplatesFromSiblings = (
 
   return templates;
 };
+
+export const drilldownMaxWidth = 500;

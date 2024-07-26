@@ -34,7 +34,11 @@ import {
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { StartDependencies } from '../../../../plugin';
-import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
+import {
+  createDrilldownTemplatesFromSiblings,
+  drilldownMaxWidth,
+  ensureNestedTriggers,
+} from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -126,7 +130,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
         core
       ),
       {
-        maxWidth: 500,
+        maxWidth: drilldownMaxWidth,
         ownFocus: true,
         'data-test-subj': 'createDrilldownFlyout',
         onClose: () => {
