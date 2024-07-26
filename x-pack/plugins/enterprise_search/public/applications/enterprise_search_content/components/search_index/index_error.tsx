@@ -66,7 +66,7 @@ function hasProperties(field: MappingProperty): field is MappingPropertyBase {
 }
 
 function isLocalModel(model: InferenceServiceSettings): model is LocalInferenceServiceSettings {
-  return Boolean((model as LocalInferenceServiceSettings).service_settings.model_id);
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
 }
 
 export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
