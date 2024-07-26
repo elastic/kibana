@@ -339,9 +339,16 @@ export class MonacoEditorActionsProvider {
     // get the current request on this line
     const currentRequests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
     const currentRequest = currentRequests.at(0);
+
     // if there is no request, suggest method
     if (!currentRequest) {
       return AutocompleteType.METHOD;
+    }
+
+    // if the current request doesn't have a method, the request is not valid
+    // and shouldn't have an autocomplete type
+    if (!currentRequest.method) {
+      return null;
     }
 
     // if on the 1st line of the request, suggest method, url or url_params depending on the content
@@ -368,12 +375,6 @@ export class MonacoEditorActionsProvider {
         return AutocompleteType.PATH;
       }
       // if more than 2 tokens, no suggestions
-      return null;
-    }
-
-    // if the current request doesn't have a method, the request is not valid
-    // and shouldn't have an autocomplete type
-    if (!currentRequest.method) {
       return null;
     }
 
