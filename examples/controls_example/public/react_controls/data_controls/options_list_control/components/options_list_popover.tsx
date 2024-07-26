@@ -18,8 +18,8 @@ import { OptionsListPopoverSuggestions } from './options_list_popover_suggestion
 export const OptionsListPopover = () => {
   const { api, displaySettings } = useOptionsListContext();
 
-  const [fieldSpec, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
-    api.fieldSpec,
+  const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
+    api.field$,
     api.availableOptions$,
     api.invalidSelections$,
     api.dataLoading
@@ -32,7 +32,7 @@ export const OptionsListPopover = () => {
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >
-      {fieldSpec?.type !== 'boolean' && !displaySettings.hideActionBar && (
+      {field?.type !== 'boolean' && !displaySettings.hideActionBar && (
         <OptionsListPopoverActionBar
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}

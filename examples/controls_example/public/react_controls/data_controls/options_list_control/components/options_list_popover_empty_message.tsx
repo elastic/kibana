@@ -21,21 +21,21 @@ export const OptionsListPopoverEmptyMessage = ({
 }) => {
   const { api, stateManager } = useOptionsListContext();
 
-  const [searchTechnique, searchStringValid, fieldSpec] = useBatchedPublishingSubjects(
+  const [searchTechnique, searchStringValid, field] = useBatchedPublishingSubjects(
     stateManager.searchTechnique,
     stateManager.searchStringValid,
-    api.fieldSpec
+    api.field$
   );
 
   const noResultsMessage = useMemo(() => {
     if (showOnlySelected) {
       return OptionsListStrings.popover.getSelectionsEmptyMessage();
     }
-    if (!searchStringValid && fieldSpec && searchTechnique) {
-      return OptionsListStrings.popover.getInvalidSearchMessage(fieldSpec.type);
+    if (!searchStringValid && field && searchTechnique) {
+      return OptionsListStrings.popover.getInvalidSearchMessage(field.type);
     }
     return OptionsListStrings.popover.getEmptyMessage();
-  }, [showOnlySelected, fieldSpec, searchStringValid, searchTechnique]);
+  }, [showOnlySelected, field, searchStringValid, searchTechnique]);
 
   return (
     <EuiSelectableMessage

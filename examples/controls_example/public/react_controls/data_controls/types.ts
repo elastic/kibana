@@ -8,7 +8,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
@@ -24,8 +24,8 @@ import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
-export interface PublishesFieldSpec {
-  fieldSpec: PublishingSubject<FieldSpec | undefined>;
+export interface PublishesField {
+  field$: PublishingSubject<DataViewField | undefined>;
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
@@ -33,7 +33,7 @@ export type DataControlApi = DefaultControlApi &
   Omit<PublishesPanelTitle, 'hidePanelTitle'> & // control titles cannot be hidden
   HasEditCapabilities &
   PublishesDataViews &
-  PublishesFieldSpec &
+  PublishesField &
   PublishesFilters & {
     setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
   };

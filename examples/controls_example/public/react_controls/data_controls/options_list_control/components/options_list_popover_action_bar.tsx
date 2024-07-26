@@ -41,7 +41,7 @@ export const OptionsListPopoverActionBar = ({
     searchStringValid,
     invalidSelections,
     totalCardinality,
-    fieldSpec,
+    field,
     allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
     stateManager.searchString,
@@ -49,14 +49,14 @@ export const OptionsListPopoverActionBar = ({
     stateManager.searchStringValid,
     api.invalidSelections$,
     api.totalCardinality$,
-    api.fieldSpec,
+    api.field$,
     api.parentApi.allowExpensiveQueries$
   );
 
   const compatibleSearchTechniques = useMemo(() => {
-    if (!fieldSpec) return [];
-    return getCompatibleSearchTechniques(fieldSpec.type);
-  }, [fieldSpec]);
+    if (!field) return [];
+    return getCompatibleSearchTechniques(field.type);
+  }, [field]);
 
   const defaultSearchTechnique = useMemo(
     () => searchTechnique ?? compatibleSearchTechniques[0],

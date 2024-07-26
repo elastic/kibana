@@ -24,6 +24,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopover } from './options_list_popover';
@@ -45,7 +46,7 @@ export const OptionsListControl = ({
     existsSelected,
     selectedOptions,
     invalidSelections,
-    fieldSpec,
+    field,
     loading,
     panelTitle,
     fieldFormatter,
@@ -54,17 +55,14 @@ export const OptionsListControl = ({
     stateManager.existsSelected,
     stateManager.selectedOptions,
     api.invalidSelections$,
-    api.fieldSpec,
+    api.field$,
     api.dataLoading,
     api.panelTitle,
     api.fieldFormatter
   );
   const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultPanelTitle);
 
-  const delimiter = useMemo(
-    () => OptionsListStrings.control.getSeparator(fieldSpec?.type),
-    [fieldSpec]
-  );
+  const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
 
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
@@ -90,8 +88,7 @@ export const OptionsListControl = ({
               ) : (
                 <>
                   {selectedOptions?.length
-                    ? selectedOptions.map((value: string | number, i, { length }) => {
-                        // TODO: Fix types once https://github.com/elastic/kibana/pull/188789 is merged
+                    ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
                         const text = `${fieldFormatter(value)}${
                           i + 1 === length ? '' : delimiter
                         } `;

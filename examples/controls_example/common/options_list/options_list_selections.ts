@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 export type OptionsListSelection = string | number;
 
-export const getSelectionAsFieldType = (field: FieldSpec, key: string): OptionsListSelection => {
+export const getSelectionAsFieldType = (
+  field: DataViewField,
+  key: string
+): OptionsListSelection => {
   const storeAsNumber = field.type === 'number' || field.type === 'date';
   return storeAsNumber ? +key : key;
 };

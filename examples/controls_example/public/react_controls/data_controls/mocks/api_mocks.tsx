@@ -9,17 +9,18 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
+import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 import { OptionsListSearchTechnique } from '../../../../common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '../../../../common/options_list/suggestions_sorting';
-import { OptionsListDisplaySettings, OptionsListSelection } from '../options_list_control/types';
+import { OptionsListDisplaySettings } from '../options_list_control/types';
 
 export const getOptionsListMocks = () => {
   return {
     api: {
       uuid: 'testControl',
-      fieldSpec: new BehaviorSubject<FieldSpec | undefined>({ type: 'string' } as FieldSpec),
+      field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
       availableOptions$: new BehaviorSubject<OptionsListSuggestions | undefined>(undefined),
       invalidSelections$: new BehaviorSubject<Set<OptionsListSelection>>(new Set([])),
       totalCardinality$: new BehaviorSubject<number | undefined>(undefined),

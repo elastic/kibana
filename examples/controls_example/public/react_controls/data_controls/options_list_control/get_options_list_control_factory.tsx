@@ -126,13 +126,13 @@ export const getOptionsListControlFactory = (
       /** Validate the search string as the user types */
       const validSearchStringSubscription = combineLatest([
         debouncedSearchString,
-        dataControl.api.fieldSpec,
+        dataControl.api.field$,
         searchTechnique$,
-      ]).subscribe(([newSearchString, fieldSpec, searchTechnique]) => {
+      ]).subscribe(([newSearchString, field, searchTechnique]) => {
         searchStringValid$.next(
           isValidSearch({
             searchString: newSearchString,
-            fieldType: fieldSpec?.type,
+            fieldType: field?.type,
             searchTechnique,
           })
         );
@@ -283,13 +283,13 @@ export const getOptionsListControlFactory = (
         availableOptions$,
         invalidSelections$,
         deselectOption: (key: string | undefined) => {
-          const fieldSpec = api.fieldSpec.getValue();
-          if (!key || !fieldSpec) {
+          const field = api.field$.getValue();
+          if (!key || !field) {
             api.setBlockingError(new Error('Error when making selection'));
             return;
           }
 
-          const keyAsType = getSelectionAsFieldType(fieldSpec, key);
+          const keyAsType = getSelectionAsFieldType(field, key);
 
           // delete from selections
           const selectedOptions = selections$.getValue() ?? [];
@@ -310,8 +310,8 @@ export const getOptionsListControlFactory = (
           const existsSelected = Boolean(existsSelected$.getValue());
           const selectedOptions = selections$.getValue() ?? [];
           const singleSelect = singleSelect$.getValue();
-          const fieldSpec = api.fieldSpec.getValue();
-          if (!key || !fieldSpec) {
+          const field = api.field$.getValue();
+          if (!key || !field) {
             api.setBlockingError(new Error('Error when making selection'));
             return;
           }
@@ -327,7 +327,7 @@ export const getOptionsListControlFactory = (
           }
 
           // the order of these checks matters, so be careful if rearranging them
-          const keyAsType = getSelectionAsFieldType(fieldSpec, key);
+          const keyAsType = getSelectionAsFieldType(field, key);
           if (showOnlySelected || selectedOptions.includes(keyAsType)) {
             componentApi.deselectOption(key);
           } else if (singleSelect) {

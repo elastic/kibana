@@ -30,7 +30,7 @@ export function fetchAndValidate$({
   services,
   stateManager,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews' | 'fieldSpec' | 'setBlockingError' | 'parentApi'> &
+  api: Pick<OptionsListControlApi, 'dataViews' | 'field$' | 'setBlockingError' | 'parentApi'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       controlFetch$: Observable<ControlFetchContext>;
       loadingSuggestions$: BehaviorSubject<boolean>;
@@ -44,7 +44,7 @@ export function fetchAndValidate$({
 
   return combineLatest([
     api.dataViews,
-    api.fieldSpec,
+    api.field$,
     api.controlFetch$,
     api.parentApi.allowExpensiveQueries$,
     api.debouncedSearchString,
@@ -69,7 +69,7 @@ export function fetchAndValidate$({
       async ([
         [
           dataViews,
-          fieldSpec,
+          field,
           controlFetchContext,
           allowExpensiveQueries,
           searchString,
@@ -83,8 +83,8 @@ export function fetchAndValidate$({
         const dataView = dataViews?.[0];
         if (
           !dataView ||
-          !fieldSpec ||
-          !isValidSearch({ searchString, fieldType: fieldSpec.type, searchTechnique })
+          !field ||
+          !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
         ) {
           return { suggestions: [] };
         }
@@ -99,7 +99,7 @@ export function fetchAndValidate$({
           runPastTimeout,
           searchTechnique,
           selectedOptions,
-          field: fieldSpec,
+          field: field.toSpec(),
           size: requestSize,
           allowExpensiveQueries,
           ...controlFetchContext,

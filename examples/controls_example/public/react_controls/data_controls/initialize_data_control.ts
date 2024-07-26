@@ -10,7 +10,11 @@ import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, first, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE, FieldSpec } from '@kbn/data-views-plugin/common';
+import {
+  DataView,
+  DataViewField,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+} from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
@@ -49,7 +53,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const fieldSpec = new BehaviorSubject<FieldSpec | undefined>(undefined);
+  const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
     String(toFormat)
   );
@@ -111,9 +115,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
         clearBlockingError();
       }
 
-      const spec = field?.toSpec();
-      fieldSpec.next(spec);
+      field$.next(field);
       defaultPanelTitle.next(field ? field.displayName || field.name : nextFieldName);
+      const spec = field?.toSpec();
       if (spec) {
         fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
       }
@@ -169,7 +173,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     panelTitle,
     defaultPanelTitle,
     dataViews,
-    fieldSpec,
+    field$,
     fieldFormatter,
     onEdit,
     filters$,

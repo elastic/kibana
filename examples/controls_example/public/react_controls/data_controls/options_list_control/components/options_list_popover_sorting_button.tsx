@@ -58,18 +58,18 @@ export const OptionsListPopoverSortingButton = ({
   const { api, stateManager } = useOptionsListContext();
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
-  const [sort, fieldSpec] = useBatchedPublishingSubjects(stateManager.sort, api.fieldSpec);
+  const [sort, field] = useBatchedPublishingSubjects(stateManager.sort, api.field$);
 
   const selectedSort = useMemo(() => sort ?? OPTIONS_LIST_DEFAULT_SORT, [sort]);
 
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
-    return getCompatibleSortingTypes(fieldSpec?.type).map((key) => {
+    return getCompatibleSortingTypes(field?.type).map((key) => {
       return {
         onFocusBadge: false,
         data: { sortBy: key },
         checked: key === selectedSort.by ? 'on' : undefined,
         'data-test-subj': `optionsList__sortBy_${key}`,
-        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(fieldSpec?.type),
+        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(field?.type),
       } as SortByItem;
     });
   });
