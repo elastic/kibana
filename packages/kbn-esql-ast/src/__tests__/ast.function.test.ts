@@ -7,6 +7,7 @@
  */
 
 import { getAstAndSyntaxErrors as parse } from '../ast_parser';
+import { Walker } from '../walker';
 
 describe('function AST nodes', () => {
   describe('"variadic-call"', () => {
@@ -102,6 +103,20 @@ describe('function AST nodes', () => {
           },
         ]);
       }
+    });
+
+    it('assignment in ENRICH .. WITH clause', () => {
+      const query = 'FROM a | ENRICH b ON c WITH d = e';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === '=');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'binary-expression',
+        name: '=',
+        args: [expect.any(Object), expect.any(Object)],
+      });
     });
   });
 });

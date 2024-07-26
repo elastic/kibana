@@ -194,7 +194,7 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
           }
         }
         if (args.length) {
-          const fn = createFunction('=', clause);
+          const fn = createFunction('=', clause, undefined, 'binary-expression');
           fn.args.push(args[0], args[1] ? [args[1]] : []);
           option.args.push(fn);
         }

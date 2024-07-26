@@ -24,14 +24,13 @@ export interface WalkerOptions {
   visitLiteral?: (node: ESQLLiteral) => void;
 }
 
+export type WalkerAstNode = ESQLAstNode | ESQLAstNode[];
+
 export class Walker {
   /**
    * Walks the AST and calls the appropriate visitor functions.
    */
-  public static readonly walk = (
-    node: ESQLAstNode | ESQLAstNode[],
-    options: WalkerOptions
-  ): Walker => {
+  public static readonly walk = (node: WalkerAstNode, options: WalkerOptions): Walker => {
     const walker = new Walker(options);
     walker.walk(node);
     return walker;
@@ -42,7 +41,7 @@ export class Walker {
    *
    * @param node AST node to extract parameters from.
    */
-  public static readonly params = (node: ESQLAstNode | ESQLAstNode[]): ESQLParamLiteral[] => {
+  public static readonly params = (node: WalkerAstNode): ESQLParamLiteral[] => {
     const params: ESQLParamLiteral[] = [];
     Walker.walk(node, {
       visitLiteral: (param) => {
@@ -52,6 +51,28 @@ export class Walker {
       },
     });
     return params;
+  };
+
+  /**
+   * Finds the first function that matches the predicate.
+   *
+   * @param node AST node from which to search for a function
+   * @param predicate Callback function to determine if the function is found
+   * @returns The first function that matches the predicate
+   */
+  public static readonly findFunction = (
+    node: WalkerAstNode,
+    predicate: (node: ESQLFunction) => boolean
+  ): ESQLFunction | undefined => {
+    let found: ESQLFunction | undefined;
+    Walker.walk(node, {
+      visitFunction: (func) => {
+        if (!found && predicate(func)) {
+          found = func;
+        }
+      },
+    });
+    return found;
   };
 
   constructor(protected readonly options: WalkerOptions) {}
