@@ -41,7 +41,6 @@ export function ObservabilityOnboardingFlow() {
         <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
           <Routes>
             <Route path="/auto-detect">
-              <BackButton />
               <AutoDetectPanel />
             </Route>
             <Route path="/systemLogs">
@@ -56,7 +55,6 @@ export function ObservabilityOnboardingFlow() {
               <KubernetesPanel />
             </Route>
             <Route path="/otel-logs">
-              <BackButton />
               <OtelLogsPanel />
             </Route>
             <Route>
