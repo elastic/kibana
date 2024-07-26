@@ -912,6 +912,95 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.useSearchAlertsQuery",
+        "type": "Function",
+        "tags": [
+          "external"
+        ],
+        "label": "useSearchAlertsQuery",
+        "description": [
+          "\nQuery alerts\n\nWhen testing components that depend on this hook, prefer mocking the {@link searchAlerts} function instead of the hook itself."
+        ],
+        "signature": [
+          "({ data, ...params }: { fields?: ",
+          "QueryDslFieldAndFormat",
+          "[] | undefined; featureIds: ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.AlertConsumers",
+            "text": "AlertConsumers"
+          },
+          "[]; data: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataPluginApi",
+            "section": "def-public.DataPublicPluginStart",
+            "text": "DataPublicPluginStart"
+          },
+          "; runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined; sort?: ",
+          "SortCombinations",
+          "[] | undefined; query?: Pick<",
+          "QueryDslQueryContainer",
+          ", \"ids\" | \"bool\"> | undefined; pageSize?: number | undefined; pageIndex?: number | undefined; }) => ",
+          "UseQueryResult",
+          "<",
+          "SearchAlertsResult",
+          ", unknown>"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_search_alerts_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.useSearchAlertsQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ data, ...params }",
+            "description": [],
+            "signature": [
+              "{ fields?: ",
+              "QueryDslFieldAndFormat",
+              "[] | undefined; featureIds: ",
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.AlertConsumers",
+                "text": "AlertConsumers"
+              },
+              "[]; data: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              },
+              "; runtimeMappings?: ",
+              "MappingRuntimeFields",
+              " | undefined; sort?: ",
+              "SortCombinations",
+              "[] | undefined; query?: Pick<",
+              "QueryDslQueryContainer",
+              ", \"ids\" | \"bool\"> | undefined; pageSize?: number | undefined; pageIndex?: number | undefined; }"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_search_alerts_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-common.useUpdateRule",
         "type": "Function",
         "tags": [],
@@ -3013,6 +3102,48 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.EsQuerySnapshot",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsQuerySnapshot",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/common/types/alerts_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.EsQuerySnapshot.request",
+            "type": "Array",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/alerts_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.EsQuerySnapshot.response",
+            "type": "Array",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/alerts_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-common.FilterContextType",
         "type": "Interface",
         "tags": [],
@@ -3115,7 +3246,7 @@
             "section": "def-common.ControlGroupInput",
             "text": "ControlGroupInput"
           },
-          ", \"query\" | \"filters\" | \"timeRange\" | \"chainingSystem\">"
+          ", \"timeRange\" | \"query\" | \"filters\" | \"chainingSystem\">"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "deprecated": false,
@@ -3529,6 +3660,45 @@
             "label": "hasPermanentEncryptionKey",
             "description": [],
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_health_check.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.LegacyField",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyField",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/common/types/alerts_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.LegacyField.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/alerts_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.LegacyField.value",
+            "type": "Array",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/types/alerts_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5879,6 +6049,21 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.queryKeyPrefix",
+        "type": "Array",
+        "tags": [],
+        "label": "queryKeyPrefix",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_search_alerts_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-common.ResolvedRule",
         "type": "Type",
         "tags": [],
@@ -6132,6 +6317,37 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.SanitizedRuleAction",
+        "type": "Type",
+        "tags": [],
+        "label": "SanitizedRuleAction",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.RuleAction",
+            "text": "RuleAction"
+          },
+          ", \"alertsFilter\"> & { alertsFilter?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.SanitizedAlertsFilter",
+            "text": "SanitizedAlertsFilter"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-alerting-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-common.SystemAction",
         "type": "Type",
         "tags": [],
@@ -6171,6 +6387,45 @@
           "<Config, Secrets> & { isPreconfigured: false; isSystemAction: false; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.UseSearchAlertsQueryParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UseSearchAlertsQueryParams",
+        "description": [],
+        "signature": [
+          "{ fields?: ",
+          "QueryDslFieldAndFormat",
+          "[] | undefined; featureIds: ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.AlertConsumers",
+            "text": "AlertConsumers"
+          },
+          "[]; data: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataPluginApi",
+            "section": "def-public.DataPublicPluginStart",
+            "text": "DataPublicPluginStart"
+          },
+          "; runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined; sort?: ",
+          "SortCombinations",
+          "[] | undefined; query?: Pick<",
+          "QueryDslQueryContainer",
+          ", \"ids\" | \"bool\"> | undefined; pageSize?: number | undefined; pageIndex?: number | undefined; }"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_search_alerts_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
-
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import {
@@ -115,6 +113,7 @@ function getAgentPolicyCreateMock() {
   return soClient;
 }
 let mockedLogger: jest.Mocked<Logger>;
+
 describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
@@ -790,7 +789,7 @@ describe('Agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -865,7 +864,7 @@ describe('Agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -1231,6 +1230,7 @@ describe('Agent policy', () => {
       mockedGetFullAgentPolicy.mockResolvedValue({
         id: 'policy123',
         revision: 1,
+        namespaces: ['mySpace'],
         inputs: [
           {
             id: 'input-123',
@@ -1283,10 +1283,16 @@ describe('Agent policy', () => {
             }),
             expect.objectContaining({
               '@timestamp': expect.anything(),
-              data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+              data: {
+                id: 'policy123',
+                inputs: [{ id: 'input-123' }],
+                revision: 1,
+                namespaces: ['mySpace'],
+              },
               default_fleet_server: false,
               policy_id: 'policy123',
               revision_idx: 1,
+              namespaces: ['mySpace'],
             }),
           ],
           refresh: 'wait_for',
