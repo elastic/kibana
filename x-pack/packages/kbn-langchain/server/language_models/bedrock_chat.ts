@@ -51,7 +51,13 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
                 anthropicVersion: inputBody.anthropic_version,
               },
             },
-          })) as { data: Readable };
+          })) as { data: Readable; status: string; message?: string; serviceMessage?: string };
+
+          if (data.status === 'error') {
+            throw new Error(
+              `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
+            );
+          }
 
           return {
             body: Readable.toWeb(data.data),
@@ -72,7 +78,18 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
               anthropicVersion: inputBody.anthropic_version,
             },
           },
-        })) as { status: string; data: { message: string } };
+        })) as {
+          status: string;
+          data: { message: string };
+          message?: string;
+          serviceMessage?: string;
+        };
+
+        if (data.status === 'error') {
+          throw new Error(
+            `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
+          );
+        }
 
         return {
           ok: data.status === 'ok',
