@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getDefaultAppState', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginAsViewer();
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     describe('ES|QL mode', () => {
@@ -27,8 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example-logs',
           },
         });
-        await PageObjects.common.navigateToApp('discover', {
-          hash: `/?_a=${state}`,
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const columns = await PageObjects.discover.getColumnHeaders();
@@ -43,7 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render default columns and row height', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
         await dataViews.switchTo('my-example-logs');
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const columns = await PageObjects.discover.getColumnHeaders();
