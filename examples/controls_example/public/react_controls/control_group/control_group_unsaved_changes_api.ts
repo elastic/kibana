@@ -47,12 +47,12 @@ export function initializeControlGroupUnsavedChanges(
         controlGroupUnsavedChanges.api.unsavedChanges,
         childrenUnsavedChanges$(children$),
       ]).pipe(
-        map(([unsavedControlGroupState, unsavedControlState]) => {
+        map(([unsavedControlGroupState, unsavedControlsState]) => {
           const unsavedChanges: { [key: string]: unknown } = unsavedControlGroupState
             ? { ...unsavedControlGroupState }
             : {};
-          if (unsavedControlState) {
-            unsavedChanges.controls = unsavedControlState;
+          if (unsavedControlsState) {
+            unsavedChanges.controls = unsavedControlsState;
           }
           return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
         })
