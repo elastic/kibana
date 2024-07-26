@@ -50,7 +50,7 @@ export const ControlRenderer = <
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<StateType> // TODO: Use these to calculate unsaved changes
         ): ApiType => {
-          const fullApi = {
+          return {
             ...apiRegistration,
             uuid,
             parentApi,
@@ -58,9 +58,6 @@ export const ControlRenderer = <
             resetUnsavedChanges: () => {},
             type: factory.type,
           } as unknown as ApiType;
-
-          onApiAvailable?.(fullApi);
-          return fullApi;
         };
         const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {};
 
@@ -77,6 +74,8 @@ export const ControlRenderer = <
           if (ignore) {
             return;
           }
+
+          onApiAvailable?.(api);
 
           setComponent(
             React.forwardRef<typeof api, { className: string }>((props, ref) => {
