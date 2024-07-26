@@ -4,6 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
+  # Clean up server definitions
   - target: '$.servers.*'
     description: Remove all servers so we can add our own.
     remove: true
@@ -14,6 +15,100 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
+  # Remove duplicate paths
+  - target: "$.paths['/s/{spaceId}/api/saved_objects/_import']"
+    description: Remove duplicate path
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/saved_objects/_export']"
+    description: Remove duplicate path
+    remove: true
+  # Remove internal paths
+  - target: "$.paths['/s/{spaceId}/internal/observability/slos/_historical_summary']"
+    description: Remove internal path
+    remove: true
+  - target: "$.paths['/s/{spaceId}/internal/observability/slos/_definitions']"
+    description: Remove internal path
+    remove: true
+  # Remove operation-level security definitions
+  - target: "$.paths['/api/ml/saved_objects/sync']['get'].security"
+    description: Remove ML security definitions
+    remove: true
+  - target: "$.paths['/api/status']['get'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/encrypted_saved_objects/_rotate_key']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_create']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_delete']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_get']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_resolve']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_update']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_export']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_find']['get'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_import']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_resolve_import_errors']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}/{id}']['get'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}/{id}']['post'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}/{id}']['put'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/resolve/{type}/{id}']['get'].security"
+    description: Remove saved object security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos']['post'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos']['get'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}']['get'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}']['put'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}']['delete'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}/enable']['post'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}/disable']['post'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}/_reset']['post'].security"
+    description: Remove slo security definitions
+    remove: true
+  - target: "$.paths['/s/{spaceId}/api/observability/slos/_delete_instances']['post'].security"
+    description: Remove slo security definitions
+    remove: true
+  # Add a document-level security definition
   - target: '$.components.securitySchemes'
     description: Add an API key security scheme
     update:
@@ -27,4 +122,8 @@ actions:
     update:
       security:
         - apiKeyAuth: []
-
+  # Mark all operations as beta
+  - target: '$.paths[*][*]'
+    description: Add x-beta
+    update:
+      x-beta: true

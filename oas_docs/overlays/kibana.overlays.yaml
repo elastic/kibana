@@ -14,6 +14,60 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
+  - target: "$.paths['/s/{spaceId}/api/ml/saved_objects/sync']"
+    description: Remove duplicate path
+    remove: true
+  - target: "$.paths['/api/ml/saved_objects/sync']['get'].security"
+    description: Remove ML security definitions
+    remove: true
+  - target: "$.paths['/api/status']['get'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/encrypted_saved_objects/_rotate_key']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_create']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_delete']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_get']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_resolve']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_bulk_update']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_export']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_find']['get'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_import']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/_resolve_import_errors']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}/{id}']['get'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}/{id}']['post'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/{type}/{id}']['put'].security"
+    description: Remove system security definitions
+    remove: true
+  - target: "$.paths['/api/saved_objects/resolve/{type}/{id}']['get'].security"
+    description: Remove system security definitions
+    remove: true
   - target: '$.components.securitySchemes'
     description: Add an API key security scheme
     update:
