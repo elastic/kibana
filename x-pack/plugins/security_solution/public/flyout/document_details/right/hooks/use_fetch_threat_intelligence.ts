@@ -15,7 +15,7 @@ import {
   getEnrichmentFields,
   parseExistingEnrichments,
   timelineDataToEnrichment,
-} from '../../../../common/components/event_details/cti_details/helpers';
+} from '../../shared/utils/threat_intelligence';
 import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 

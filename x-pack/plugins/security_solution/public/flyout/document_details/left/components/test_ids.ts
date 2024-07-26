@@ -61,9 +61,28 @@ export const HOST_DETAILS_INFO_TEST_ID = 'host-overview' as const;
 
 /* Threat Intelligence */
 
-export const THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID = `threat-match-detected` as const;
+export const THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID =
+  `${PREFIX}ThreatIntelligenceThreatMatchDetected` as const;
 export const THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID =
   `${PREFIX}ThreatIntelligenceDetailsLoading` as const;
+export const THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID =
+  `${PREFIX}ThreatIntelligenceEnrichedWithThreatIntel` as const;
+export const THREAT_INTELLIGENCE_MATCHES_TEST_ID =
+  `${PREFIX}ThreatIntelligenceMatchesWithNoType` as const;
+export const THREAT_INTELLIGENCE_NO_ENRICHMENTS_FOUND_TEST_ID =
+  `${PREFIX}ThreatIntelligenceNoEnrichmentFound` as const;
+export const THREAT_INTELLIGENCE_ENRICHMENTS_TITLE_TEST_ID =
+  `${PREFIX}ThreatIntelligenceEnrichmentTitle` as const;
+export const THREAT_INTELLIGENCE_LOADING_ENRICHMENTS_TEST_ID =
+  `${PREFIX}ThreatIntelligenceLoadingEnrichment` as const;
+export const THREAT_INTELLIGENCE_ENRICHMENTS_BUTTON_CONTENT_TEST_ID =
+  `${PREFIX}ThreatIntelligenceEnrichmentButtonContent` as const;
+export const THREAT_INTELLIGENCE_ENRICHMENTS_ACCORDION_TABLE_TEST_ID =
+  `${PREFIX}ThreatIntelligenceEnrichmentAccordionTable` as const;
+export const THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID =
+  `${PREFIX}ThreatIntelligenceEnrichmentRangePicker` as const;
+export const THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID =
+  `${PREFIX}ThreatIntelligenceEnrichmentRefreshButton` as const;
 
 /* Correlations */
 
