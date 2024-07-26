@@ -14,4 +14,4 @@ export const ML_USAGE_EVENT = {
   EXPORTED_DATA_FRAME_ANALYTICS_JOBS: 'exported_data_frame_analytics_jobs',
 } as const;
 
-export type MlUsageEvent = typeof ML_USAGE_EVENT[keyof typeof ML_USAGE_EVENT];
+export type MlUsageEvent = (typeof ML_USAGE_EVENT)[keyof typeof ML_USAGE_EVENT];
