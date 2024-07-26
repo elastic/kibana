@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, Fragment } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -46,7 +46,6 @@ export const RowMenuControlCell = ({
       ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
         return (
           <EuiContextMenuItem
-            key={id}
             data-test-subj={dataTestSubj ?? `unifiedDataTable_rowMenu_${id}`}
             disabled={disabled}
             icon={iconType}
@@ -95,7 +94,11 @@ export const RowMenuControlCell = ({
         size="s"
         items={rowControlColumns.map((rowControlColumn) => {
           const Control = getControlComponent(rowControlColumn.id);
-          return rowControlColumn.renderControl(Control, rowProps);
+          return (
+            <Fragment key={rowControlColumn.id}>
+              {rowControlColumn.renderControl(Control, rowProps)}
+            </Fragment>
+          );
         })}
       />
     </EuiPopover>

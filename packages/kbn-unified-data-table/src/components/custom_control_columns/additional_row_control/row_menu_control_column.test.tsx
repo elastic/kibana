@@ -11,6 +11,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
+import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { UnifiedDataTableContext } from '../../../table_context';
 
 describe('getRowMenuControlColumn', () => {
@@ -27,7 +28,11 @@ describe('getRowMenuControlColumn', () => {
         <Control label={`test-${rowProps.rowIndex}`} iconType="heart" onClick={mockClick} />
       )),
     };
-    const rowMenuControlColumn = getRowMenuControlColumn([props]);
+    const rowMenuControlColumn = getRowMenuControlColumn([
+      props,
+      mockRowAdditionalLeadingControls[0],
+      mockRowAdditionalLeadingControls[1],
+    ]);
     const RowMenuControlColumn =
       rowMenuControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
     render(
@@ -47,6 +52,9 @@ describe('getRowMenuControlColumn', () => {
     expect(menuButton).toBeInTheDocument();
 
     menuButton.click();
+
+    expect(screen.getByTestId('exampleRowControl-visBarVerticalStacked')).toBeInTheDocument();
+    expect(screen.getByTestId('exampleRowControl-heart')).toBeInTheDocument();
 
     const button = screen.getByTestId('unifiedDataTable_rowMenu_test_row_menu_control');
     expect(button).toBeInTheDocument();
