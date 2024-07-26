@@ -14,12 +14,16 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { openAIFunctionAgentPrompt, structuredChatAgentPrompt } from './prompts';
+import {
+  bedrockToolCallingAgentPrompt,
+  geminiToolCallingAgentPrompt,
+  openAIFunctionAgentPrompt,
+  structuredChatAgentPrompt,
+} from './prompts';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -126,16 +130,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     ? createToolCallingAgent({
         llm,
         tools,
-        prompt: ChatPromptTemplate.fromMessages([
-          [
-            'system',
-            'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax.\n\n' +
-              `The final response will be the only output the user sees and should be a complete answer to the user's question, as if you were responding to the user's initial question, which is "{input}". The final response should never be empty.`,
-          ],
-          ['placeholder', '{chat_history}'],
-          ['human', '{input}'],
-          ['placeholder', '{agent_scratchpad}'],
-        ]),
+        prompt:
+          llmType === 'bedrock' ? bedrockToolCallingAgentPrompt : geminiToolCallingAgentPrompt,
         streamRunnable: isStream,
       })
     : await createStructuredChatAgent({
