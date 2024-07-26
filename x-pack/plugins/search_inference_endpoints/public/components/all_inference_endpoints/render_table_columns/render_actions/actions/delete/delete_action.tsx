@@ -35,7 +35,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
   return (
     <>
       <EuiButtonIcon
-        aria-label={i18n.translate('xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint', {
+        aria-label={i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
           defaultMessage: 'Delete inference endpoint {selectedEndpointName}',
           values: { selectedEndpointName: selectedEndpoint?.endpoint.model_id },
         })}
