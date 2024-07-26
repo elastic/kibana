@@ -66,7 +66,7 @@ function hasProperties(field: MappingProperty): field is MappingPropertyBase {
 }
 
 function isLocalModel(model: InferenceServiceSettings): model is LocalInferenceServiceSettings {
-  return Boolean((model as LocalInferenceServiceSettings).service_settings.model_id);
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
 }
 
 export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
@@ -124,7 +124,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
             if (!modelStats || modelStats.deployment_stats?.state !== 'started') {
               return {
                 error: i18n.translate(
-                  'xpack.enterpriseSearch.indexOverview.indexErrors.missingModelError',
+                  'xpack.enterpriseSearch.indexOverview.indexErrors.modelNotDeployedError',
                   {
                     defaultMessage:
                       'Model {modelId} for inference endpoint {inferenceId} in field {fieldName} has not been started',
