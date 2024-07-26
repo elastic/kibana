@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Draft Timeline API
-  version: '2023-10-31'
+  version: 8.9.0
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -12,9 +12,7 @@ servers:
 paths:
   /api/timeline/_draft:
     post:
-      x-labels: [serverless, ess]
-      x-codegen-enabled: true
-      operationId: CleanDraftTimelines
+      operationId: cleanDraftTimelines
       summary: Retrieves a draft timeline or timeline template.
       description: |
         Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
@@ -27,10 +25,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [timelineType]
               properties:
                 timelineType:
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+                  $ref: '../model/components.yaml#/components/schemas/TimelineType'
       responses:
         '200':
           description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
@@ -38,18 +35,17 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [data]
                 properties:
                   data:
                     type: object
-                    required: [persistTimeline]
                     properties:
                       persistTimeline:
                         type: object
-                        required: [timeline]
                         properties:
                           timeline:
-                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                            $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
+                required:
+                  - data
         '403':
           description: Indicates that the user does not have the required permissions to create a draft timeline.
           content:
