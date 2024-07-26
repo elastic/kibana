@@ -236,6 +236,7 @@ export const SpaceAssignedRolesTable = ({
 
   const tableHeader = useMemo<EuiInMemoryTableProps<Role>['childrenBetween']>(() => {
     const pageSize = pagination.size;
+    const pageIndex = pagination.index;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -251,8 +252,11 @@ export const SpaceAssignedRolesTable = ({
                         defaultMessage:
                           'Showing: {pageItemLength} of {rolesInViewCount} | Selected: {selectedCount} roles',
                         values: {
-                          pageItemLength:
-                            rolesInView.length < pageSize ? rolesInView.length : pageSize,
+                          pageItemLength: Math.floor(
+                            rolesInView.length / (pageSize * (pageIndex + 1))
+                          )
+                            ? pageSize * (pageIndex + 1)
+                            : rolesInView.length % pageSize,
                           rolesInViewCount: rolesInView.length,
                           selectedCount: selectedRoles.length,
                         },
