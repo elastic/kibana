@@ -86,16 +86,8 @@ export type ControlGroupEditorState = Pick<
   'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
-export type ControlGroupSerializedState = Omit<
-  ControlGroupRuntimeState,
-  | 'labelPosition'
-  | 'ignoreParentSettings'
-  | 'defaultControlGrow'
-  | 'defaultControlWidth'
-  | 'anyChildHasUnsavedChanges'
-  | 'initialChildControlState'
-  | 'autoApplySelections'
-> & {
+export type ControlGroupSerializedState = {
+  chainingSystem: ControlGroupChainingSystem;
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;
