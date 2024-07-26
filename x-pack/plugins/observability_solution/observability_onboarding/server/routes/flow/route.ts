@@ -206,7 +206,6 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       plugins,
       kibanaVersion,
     } = resources;
-    const c = await context.resolve(['core']);
     const coreStart = await core.start();
 
     const {
@@ -231,16 +230,12 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
         },
       }),
       createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
-
-      c.core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
-      // securityPluginStart.authc.apiKeys.create(
-      //   request,
-      //   createInstallApiKey(`onboarding_install_${name}`)
-      // ),
+      (
+        await context.resolve(['core'])
+      ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
       getAgentVersion(fleetPluginStart, kibanaVersion),
     ]);
 
-    console.log('hi i ran!');
     if (!installApiKey) {
       throw Boom.notFound('License does not allow API key creation.');
     }
