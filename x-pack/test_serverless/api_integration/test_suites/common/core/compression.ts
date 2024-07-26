@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { Response as supertestResponse } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
@@ -22,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('accept-encoding', 'gzip')
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
+        .then((response: supertestResponse) => {
           expect(response.header).to.have.property('content-encoding', 'gzip');
         });
     });
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(svlCommonApi.getInternalRequestHeader())
         .set('referer', 'https://some-host.com')
         .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
+        .then((response: supertestResponse) => {
           expect(response.header).to.have.property('content-encoding', 'gzip');
         });
     });
