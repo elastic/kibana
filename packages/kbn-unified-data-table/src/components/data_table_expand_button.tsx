@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
-import { DataTableRowControl } from './data_table_row_control';
+import { DataTableRowControl, Size } from './data_table_row_control';
 import { useControlColumn } from '../hooks/use_control_column';
 
 /**
@@ -48,7 +48,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   }
 
   return (
-    <DataTableRowControl>
+    <DataTableRowControl size={Size.normal}>
       <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
         <EuiButtonIcon
           id={rowIndex === 0 ? tourStep : undefined}

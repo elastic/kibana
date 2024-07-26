@@ -14,8 +14,9 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
-import { DataTableRowControl } from '../../data_table_row_control';
+import { DataTableRowControl, Size } from '../../data_table_row_control';
 import type { RowControlColumn, RowControlProps } from '../../../types';
+import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 export const RowControlCell = ({
@@ -30,7 +31,7 @@ export const RowControlCell = ({
     () =>
       ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
         return (
-          <DataTableRowControl>
+          <DataTableRowControl size={Size.normal}>
             <EuiToolTip content={label} delay="long">
               <EuiButtonIcon
                 data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
@@ -61,7 +62,7 @@ export const getRowControlColumn = (
 
   return {
     id: `additionalRowControl_${id}`,
-    width: 24,
+    width: DEFAULT_CONTROL_COLUMN_WIDTH,
     headerCellRender:
       headerCellRender ??
       (() => (

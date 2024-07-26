@@ -22,7 +22,11 @@ import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton } from './data_table_document_selection';
-import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
+import {
+  defaultTimeColumnWidth,
+  ROWS_HEIGHT_OPTIONS,
+  DEFAULT_CONTROL_COLUMN_WIDTH,
+} from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
@@ -53,7 +57,7 @@ export const SELECT_ROW = 'select';
 
 const openDetails = {
   id: OPEN_DETAILS,
-  width: 26,
+  width: DEFAULT_CONTROL_COLUMN_WIDTH,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>
@@ -68,7 +72,7 @@ const openDetails = {
 
 const select = {
   id: SELECT_ROW,
-  width: 26,
+  width: DEFAULT_CONTROL_COLUMN_WIDTH,
   rowCellRender: SelectButton,
   headerCellRender: () => (
     <EuiScreenReaderOnly>

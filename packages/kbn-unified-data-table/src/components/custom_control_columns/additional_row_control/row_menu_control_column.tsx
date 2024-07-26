@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, Fragment } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -16,12 +16,12 @@ import {
   EuiPopover,
   EuiScreenReaderOnly,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { DataTableRowControl } from '../../data_table_row_control';
+import { DataTableRowControl, Size } from '../../data_table_row_control';
 import type { RowControlColumn, RowControlProps } from '../../../types';
+import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 /**
@@ -34,7 +34,6 @@ export const RowMenuControlCell = ({
   rowControlColumns: RowControlColumn[];
 }) => {
   const rowProps = useControlColumn(props);
-  const { euiTheme } = useEuiTheme();
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
 
   const buttonLabel = i18n.translate('unifiedDataTable.grid.additionalRowActions', {
@@ -66,7 +65,7 @@ export const RowMenuControlCell = ({
     <EuiPopover
       id="rowMenuActionsPopover"
       button={
-        <DataTableRowControl>
+        <DataTableRowControl size={Size.normal}>
           <EuiToolTip content={buttonLabel} delay="long">
             <EuiButtonIcon
               size="xs"
@@ -79,7 +78,9 @@ export const RowMenuControlCell = ({
               iconType="boxesVertical"
               color="text"
               css={css`
-                margin-top: -${euiTheme.size.xs}; // to align with other controls
+                .euiDataGridRowCell__content--defaultHeight & {
+                  margin-top: 2px; // to align with other controls
+                }
               `}
             />
           </EuiToolTip>
@@ -110,7 +111,7 @@ export const getRowMenuControlColumn = (
 ): EuiDataGridControlColumn => {
   return {
     id: 'additionalRowControl_menuControl',
-    width: 24,
+    width: DEFAULT_CONTROL_COLUMN_WIDTH,
     headerCellRender: () => (
       <EuiScreenReaderOnly>
         <span>
