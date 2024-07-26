@@ -19,7 +19,6 @@ import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
-import { executeEditAction } from './edit_action_helpers';
 import { Embeddable } from '../../embeddable';
 
 // datasourceMap and visualizationMap setters/getters
@@ -106,17 +105,5 @@ export async function executeCreateAction({
     },
   });
   // open the flyout if embeddable has been created successfully
-  if (embeddable) {
-    const deletePanel = () => {
-      api.removePanel(embeddable.id);
-    };
-
-    executeEditAction({
-      embeddable,
-      startDependencies: deps,
-      isNewPanel: true,
-      deletePanel,
-      ...core,
-    });
-  }
+  embeddable?.onEdit();
 }

@@ -78,7 +78,7 @@ export interface EditConfigPanelProps {
   /** The flyout is used for adding a new panel by scratch */
   isNewPanel?: boolean;
   /** Handler for deleting the embeddable, used in case a user cancels a newly created chart */
-  deletePanel?: () => void;
+  onStopEditing?: (isCancel: boolean, state: LensRuntimeState | undefined) => void;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
   /** Optional callback for apply flyout button */

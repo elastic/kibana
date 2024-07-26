@@ -9,6 +9,7 @@ import { apiHasAppContext, apiPublishesViewMode } from '@kbn/presentation-publis
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -19,6 +20,8 @@ import {
 import { emptySerializer } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { ReactiveConfigs } from './initialize_observables';
+import { setupPanelManagement } from '../inline_editing/panel_management';
+import { mountPanel } from '../inline_editing/mount';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -79,6 +82,8 @@ export function initializeEditApi(
       });
     };
 
+  const panelManagementApi = setupPanelManagement(uuid, parentApi);
+
   const openInlineEditor = prepareInlineEditPanel(
     uuid,
     getState,
@@ -86,41 +91,50 @@ export function initializeEditApi(
     startDependencies,
     inspectorApi,
     navigateToLensEditor,
-    hasRenderCompleted$
+    hasRenderCompleted$,
+    panelManagementApi
   );
-
   const { uiSettings, capabilities, data } = startDependencies;
+
+  const canEdit = () => {
+    if (viewMode$.getValue() !== 'edit') {
+      return false;
+    }
+    // if ESQL check one it is in TextBased mode &&
+    if (isTextBasedLanguage(getState()) && !uiSettings.get(ENABLE_ESQL)) {
+      return false;
+    }
+    return (
+      Boolean(capabilities.visualize.save) ||
+      (!getState().savedObjectId &&
+        Boolean(capabilities.dashboard?.showWriteControls) &&
+        Boolean(capabilities.visualize.show))
+    );
+  };
+
   return {
     comparators: {},
     serialize: emptySerializer,
     cleanup: noop,
     api: {
       supportedTriggers,
-      // TODO: resolve this problem in an elegant way
-      // Defining the onEdit action enables the default Panel edit action, registered at dashboard level,
-      // who will call by default
-      // await api.onEdit()
-      // we do not want that and rather need to pass thru a custom edit action defined at Lens
-      // level to provide the inline editing capabilities
-      // onEdit: async () => {
-
-      // },
+      onEdit: async () => {
+        const rootEmbeddable = parentApi;
+        const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+        const ConfigPanel = await openInlineEditor();
+        if (ConfigPanel) {
+          mountPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
+        }
+      },
       // This function needs to be exposed in order to be called by the Lens custom edit action
-      openConfigPanel: openInlineEditor,
+      openConfigPanel: async (container?: HTMLElement | null) => {
+        const ConfigPanel = await openInlineEditor();
+        if (ConfigPanel) {
+          mountPanel(ConfigPanel, startDependencies.coreStart, undefined, undefined, container);
+        }
+      },
       isEditingEnabled: () => {
-        if (viewMode$.getValue() !== 'edit') {
-          return false;
-        }
-        // if ESQL check one it is in TextBased mode &&
-        if (isTextBasedLanguage(getState()) && !uiSettings.get(ENABLE_ESQL)) {
-          return false;
-        }
-        return (
-          Boolean(capabilities.visualize.save) ||
-          (!getState().savedObjectId &&
-            Boolean(capabilities.dashboard?.showWriteControls) &&
-            Boolean(capabilities.visualize.show))
-        );
+        return canEdit() && panelManagementApi.isEditingEnabled();
       },
       getEditHref: async () => {
         const currentState = getState();

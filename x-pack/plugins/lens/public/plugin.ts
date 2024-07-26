@@ -110,6 +110,8 @@ import type {
   LensTopNavMenuEntryGenerator,
   VisualizeEditorContext,
   Suggestion,
+  DatasourceMap,
+  VisualizationMap,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
@@ -145,7 +147,7 @@ import { ChartType } from './lens_suggestions_api';
 // import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
 // import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
-import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
+// import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
 
 export type { SaveProps } from './app_plugin';
 
@@ -310,8 +312,13 @@ export class LensPlugin {
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
-  private initDependenciesForApi: () => void = () => {};
   private locator?: LensAppLocator;
+
+  // Note: this method will be overwritten in the setup flow
+  private initEditorFrameService = async (): Promise<{
+    datasourceMap: DatasourceMap;
+    visualizationMap: VisualizationMap;
+  }> => ({ datasourceMap: {}, visualizationMap: {} });
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -338,24 +345,11 @@ export class LensPlugin {
       );
       const { core: coreStart, plugins } = startServices();
 
-      await this.initParts(
-        core,
-        data,
-        charts,
-        expressions,
-        fieldFormats,
-        plugins.fieldFormats.deserialize
-      );
-      const [visualizationMap, datasourceMap] = await Promise.all([
-        this.editorFrameService!.loadVisualizations(),
-        this.editorFrameService!.loadDatasources(),
+      const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
+      const [{ getLensAttributeService }, eventAnnotationService] = await Promise.all([
+        import('./async_services'),
+        plugins.eventAnnotation.getService(),
       ]);
-      const [
-        { setVisualizationMap, setDatasourceMap, getLensAttributeService },
-        eventAnnotationService,
-      ] = await Promise.all([import('./async_services'), plugins.eventAnnotation.getService()]);
-      setDatasourceMap(datasourceMap);
-      setVisualizationMap(visualizationMap);
 
       if (plugins.usageCollection) {
         setUsageCollectionStart(plugins.usageCollection);
@@ -545,7 +539,8 @@ export class LensPlugin {
 
     urlForwarding.forwardApp(APP_ID, APP_ID);
 
-    this.initDependenciesForApi = async () => {
+    // Note: this overwrites a method defined above
+    this.initEditorFrameService = async () => {
       const { plugins } = startServices();
       await this.initParts(
         core,
@@ -555,6 +550,15 @@ export class LensPlugin {
         fieldFormats,
         plugins.fieldFormats.deserialize
       );
+      // This needs to be executed before the import call to avoid race conditions
+      const [visualizationMap, datasourceMap] = await Promise.all([
+        this.editorFrameService!.loadVisualizations(),
+        this.editorFrameService!.loadDatasources(),
+      ]);
+      const { setVisualizationMap, setDatasourceMap } = await import('./async_services');
+      setDatasourceMap(datasourceMap);
+      setVisualizationMap(visualizationMap);
+      return { datasourceMap, visualizationMap };
     };
 
     return {
@@ -683,10 +687,6 @@ export class LensPlugin {
       )(core.application)
     );
 
-    const editInLensAction = new ConfigureInLensPanelAction(startDependencies, core);
-    // dashboard edit panel action
-    startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
-
     // Allows the Lens embeddable to easily open the inline editing flyout
     const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
     // embeddable inline edit panel action
@@ -749,13 +749,8 @@ export class LensPlugin {
         const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } = await import(
           './async_services'
         );
-        if (!this.editorFrameService) {
-          await this.initDependenciesForApi();
-        }
-        const [visualizationMap, datasourceMap] = await Promise.all([
-          this.editorFrameService!.loadVisualizations(),
-          this.editorFrameService!.loadDatasources(),
-        ]);
+
+        const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
@@ -773,13 +768,7 @@ export class LensPlugin {
       },
       EditLensConfigPanelApi: async () => {
         const { getEditLensConfiguration } = await import('./async_services');
-        if (!this.editorFrameService) {
-          this.initDependenciesForApi();
-        }
-        const [visualizationMap, datasourceMap] = await Promise.all([
-          this.editorFrameService!.loadVisualizations(),
-          this.editorFrameService!.loadDatasources(),
-        ]);
+        const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
         const Component = await getEditLensConfiguration(
           core,
           startDependencies,

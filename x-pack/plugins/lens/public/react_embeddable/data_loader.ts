@@ -148,10 +148,8 @@ export function loadEmbeddableData(
     });
   }
 
-  const subscriptions: Subscription[] = [];
-
-  // On unified search changes, reload
-  subscriptions.push(
+  const subscriptions: Subscription[] = [
+    // on data change from the parentApi, reload
     fetch$(api).subscribe(async (data) => {
       const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
       unifiedSearch$.next({
@@ -163,15 +161,19 @@ export function loadEmbeddableData(
       });
 
       reload();
-    })
-  );
+    }),
+    // On state change, reload
+    // this is used to refresh the chart on inline editing
+    state$.subscribe(reload),
 
-  // On state change, reload
-  // this is used to refresh the chart on inline editing
-  subscriptions.push(state$.subscribe(reload));
-
-  // When the mode changes, reload
-  subscriptions.push(viewMode$.subscribe(reload));
+    // reload on view mode change only if drilldowns are set
+    viewMode$.subscribe(() => {
+      // only reload if drilldowns are set
+      if (getState().enhancements?.dynamicActions) {
+        reload();
+      }
+    }),
+  ];
 
   return {
     getUserMessages,

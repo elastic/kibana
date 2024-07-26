@@ -175,7 +175,7 @@ interface ViewInDiscoverCallbacks {
 }
 
 interface InlineEditing {
-  openConfigPanel: (isNewPanel?: boolean, deletePanel?: () => void) => Promise<JSX.Element | null>;
+  openConfigPanel: (container: HTMLElement | null) => void;
 }
 
 interface IntegrationCallbacks {

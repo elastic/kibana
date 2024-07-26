@@ -71,7 +71,7 @@ export function LensEditConfigurationFlyout({
   displayFlyoutHeader,
   canEditTextBasedQuery,
   isNewPanel,
-  deletePanel,
+  onStopEditing,
   hidesSuggestions,
   onApplyCb,
   onCancelCb,
@@ -190,15 +190,12 @@ export function LensEditConfigurationFlyout({
       }
     }
     // for a newly created chart, I want cancelling to also remove the panel
-    if (isNewPanel && deletePanel) {
-      deletePanel();
-    }
+    onStopEditing?.(true, undefined);
     onCancelCb?.();
     closeFlyout?.();
   }, [
     attributesChanged,
-    isNewPanel,
-    deletePanel,
+    onStopEditing,
     closeFlyout,
     visualization.activeId,
     savedObjectId,

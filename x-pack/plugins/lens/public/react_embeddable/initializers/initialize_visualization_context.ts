@@ -8,6 +8,7 @@
 import type { VisualizationContext, VisualizationContextHelper } from '../types';
 
 export function initializeVisualizationContext(): VisualizationContextHelper {
+  // TODO: this will likely be merged together with the state$ observable
   let visualizationContext: VisualizationContext = {
     doc: undefined,
     mergedSearchContext: {},
