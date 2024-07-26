@@ -90,7 +90,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             ...config,
-            defaultModel: 'gpt-4',
+            defaultModel: 'gpt-4o',
           },
         });
       });
