@@ -74,7 +74,8 @@ export function SecuritySolutionServerlessUtils({
       const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader;
 
       if (!apiKeyHeader) {
-        new Error(`API key for role [${role}] is not available`);
+        new Error(`API key for role [${role}] is not available, SecureBsearch cannot be created`);
+        return SecureBsearch;
       }
 
       const send = <T extends IEsSearchResponse>(sendOptions: SendOptions): Promise<T> => {
