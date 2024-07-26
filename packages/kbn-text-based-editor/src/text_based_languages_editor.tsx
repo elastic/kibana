@@ -91,7 +91,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
   const [timePickerDate, setTimePickerDate] = useState(moment());
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
-  const [measuredContentWidth, setMeasuredContentWidth] = useState(0);
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
@@ -226,8 +225,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(editorMessages.errors.length),
     Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
-    Boolean(editorIsInline),
-    isHistoryOpen
+    Boolean(editorIsInline)
   );
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -269,10 +267,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     [editorHeight]
   );
-
-  const restoreInitialMode = () => {
-    setIsCodeEditorExpandedFocused(false);
-  };
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
@@ -505,11 +499,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   // use a ref because editorDidMount is only called once, and the reference
   // to the state becomes stale after re-renders.
   const onLayoutChange = (layoutInfoEvent: monaco.editor.EditorLayoutInfo) => {
-    if (layoutInfoEvent.contentWidth !== measuredContentWidth) {
-      const nextMeasuredWidth = layoutInfoEvent.contentWidth;
-      setMeasuredContentWidth(nextMeasuredWidth);
-    }
-
     if (layoutInfoEvent.width !== measuredEditorWidth) {
       setMeasuredEditorWidth(layoutInfoEvent.width);
     }
@@ -565,7 +554,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
         <EuiOutsideClickDetector
           onOutsideClick={() => {
-            restoreInitialMode();
+            setIsCodeEditorExpandedFocused(false);
           }}
         >
           <div css={styles.resizableContainer}>
@@ -637,8 +626,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     );
 
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
-                    setMeasuredContentWidth(editor.getContentWidth());
-
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });

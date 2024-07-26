@@ -18,8 +18,7 @@ export const textBasedLanguageEditorStyles = (
   hasErrors: boolean,
   hasWarning: boolean,
   isCodeEditorExpandedFocused: boolean,
-  editorIsInline: boolean,
-  historyIsOpen: boolean
+  editorIsInline: boolean
 ) => {
   const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
 
