@@ -864,9 +864,10 @@ describe('autocomplete', () => {
         }
       }
 
-      // Currently, autocomplete only suggests the literal suggestions
-      // but the function definition technically accepts text and keywords in generall
-      // so it should suggest valid options like concat("year", "_of_era")
+      // The above test fails cause it expects nested functions like
+      // DATE_EXTRACT(concat("aligned_day_","of_week_in_month"), date) to also be suggested
+      // which is actually valid according to func signature
+      // but currently, our autocomplete only suggests the literal suggestions
       if (['date_extract', 'date_diff'].includes(fn.name)) {
         const firstParam = fn.signatures[0].params[0];
         const suggestedConstants = firstParam?.literalSuggestions || firstParam?.literalOptions;
