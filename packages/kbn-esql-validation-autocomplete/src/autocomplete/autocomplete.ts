@@ -146,14 +146,15 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
  * @param text
  * @returns
  */
-function countBracketsUnclosed(bracketType: '(' | '[' | '"', text: string) {
+function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
   const stack = [];
-  const closingBrackets = { '(': ')', '[': ']', '"': '"' };
-  for (const char of text) {
-    if (char === bracketType) {
-      stack.push(bracketType);
-    } else if (char === closingBrackets[bracketType]) {
+  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
+  for (let i = 0; i < text.length; i++) {
+    const substr = text.substring(i, i + bracketType.length);
+    if (substr === closingBrackets[bracketType] && stack.length) {
       stack.pop();
+    } else if (substr === bracketType) {
+      stack.push(bracketType);
     }
   }
   return stack.length;
@@ -174,6 +175,7 @@ function correctQuerySyntax(_query: string, context: EditorContext) {
   const unclosedRoundBrackets = countBracketsUnclosed('(', query);
   const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
   const unclosedQuotes = countBracketsUnclosed('"', query);
+  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
   const charThatNeedMarkers = [',', ':'];
@@ -190,6 +192,7 @@ function correctQuerySyntax(_query: string, context: EditorContext) {
   // if there are unclosed brackets, close them
   if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
     for (const [char, count] of [
+      ['"""', unclosedTripleQuotes],
       ['"', unclosedQuotes],
       [')', unclosedRoundBrackets],
       [']', unclosedSquaredBrackets],
