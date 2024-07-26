@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Dispatch, useCallback, useMemo } from 'react';
+import React, { Dispatch, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTableColumn,
@@ -244,11 +244,12 @@ export function Table<T extends UserContentCommonSchema>({
     />
   );
 
-  const { data: favorites, isError: favoritesError } = favoritesEnabled
-    ? // ok to use a conditional hook here because this component favoritesEnabled is static and will not change between renders
+  const [initialFavoritesEnabled] = useState({ favoritesEnabled });
+  const { data: favorites, isError: favoritesError } = initialFavoritesEnabled
+    ? // ok to use a conditional hook here because in this component favoritesEnabled is static and will not change between renders
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useFavorites({ enabled: favoritesEnabled })
-    : { data: undefined, isError: false };
+    : { data: undefined, isError: true };
 
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
