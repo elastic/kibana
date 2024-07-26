@@ -25,7 +25,7 @@ const activeNodes: ChromeProjectNavigationNode[][] = [];
 
 export const getServicesMock = (): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
-  const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
+  const basePath = { prepend: jest.fn((path: string) => `/base${path}`), remove: jest.fn() };
   const recentlyAccessed$ = new BehaviorSubject([]);
   const eventTracker = new EventTracker({ reportEvent: jest.fn() });
 

@@ -21,8 +21,9 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
-import type { NavigateToUrlFn } from '../../types';
+import type { BasePathService, NavigateToUrlFn } from '../../types';
 import { useNavigation } from '../navigation';
+import { EventTracker } from '../../analytics';
 import { useAccordionState } from '../hooks';
 import {
   DEFAULT_IS_COLLAPSIBLE,
@@ -175,6 +176,17 @@ const renderPanelOpener = (
   return items;
 };
 
+const getCurrentActiveNodeHref = (
+  activeNodes: ChromeProjectNavigationNode[][],
+  basePath: BasePathService
+) => {
+  const [nodes] = activeNodes;
+  const activeNode = nodes[nodes.length - 1];
+  if (activeNode && activeNode.href) {
+    return basePath.remove(activeNode.href);
+  }
+};
+
 const getEuiProps = (
   _navNode: ChromeProjectNavigationNode,
   deps: {
@@ -183,6 +195,8 @@ const getEuiProps = (
     treeDepth: number;
     getIsCollapsed: (path: string) => boolean;
     activeNodes: ChromeProjectNavigationNode[][];
+    eventTracker: EventTracker;
+    basePath: BasePathService;
   }
 ): {
   navNode: ChromeProjectNavigationNode;
@@ -192,7 +206,15 @@ const getEuiProps = (
   dataTestSubj: string;
   spaceBefore?: EuiThemeSize | null;
 } & Pick<EuiCollapsibleNavItemProps, 'linkProps' | 'onClick'> => {
-  const { navigateToUrl, closePanel, treeDepth, getIsCollapsed, activeNodes } = deps;
+  const {
+    navigateToUrl,
+    closePanel,
+    treeDepth,
+    getIsCollapsed,
+    activeNodes,
+    eventTracker,
+    basePath,
+  } = deps;
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const { path, href, onClick: customOnClick, isCollapsible = DEFAULT_IS_COLLAPSIBLE } = navNode;
 
@@ -239,6 +261,11 @@ const getEuiProps = (
         href,
         external: isExternal,
         onClick: (e) => {
+          if (href) {
+            const prevHref = getCurrentActiveNodeHref(activeNodes, basePath);
+            eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, prevHref });
+          }
+
           if (customOnClick) {
             customOnClick(e);
             return;
@@ -253,6 +280,11 @@ const getEuiProps = (
     : undefined;
 
   const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+    if (href) {
+      const prevHref = getCurrentActiveNodeHref(activeNodes, basePath);
+      eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, prevHref });
+    }
+
     if (customOnClick) {
       customOnClick(e);
       return;
@@ -293,6 +325,8 @@ function nodeToEuiCollapsibleNavProps(
     treeDepth: number;
     getIsCollapsed: (path: string) => boolean;
     activeNodes: ChromeProjectNavigationNode[][];
+    eventTracker: EventTracker;
+    basePath: BasePathService;
   }
 ): {
   items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced>;
@@ -369,7 +403,7 @@ interface Props {
 
 export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode }) => {
   const { activeNodes } = useNavigation();
-  const { navigateToUrl } = useServices();
+  const { navigateToUrl, eventTracker, basePath } = useServices();
   const [items, setItems] = useState<EuiCollapsibleNavSubItemProps[] | undefined>();
 
   const { navNode } = useMemo(
@@ -394,8 +428,10 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       treeDepth: 0,
       getIsCollapsed,
       activeNodes,
+      eventTracker,
+      basePath,
     });
-  }, [navNode, navigateToUrl, closePanel, getIsCollapsed, activeNodes]);
+  }, [navNode, navigateToUrl, closePanel, getIsCollapsed, activeNodes, eventTracker, basePath]);
 
   const { items: topLevelItems } = props;
 

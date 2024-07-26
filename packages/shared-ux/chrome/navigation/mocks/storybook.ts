@@ -36,7 +36,7 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
 
     return {
       ...params,
-      basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
+      basePath: { prepend: (suffix: string) => `/basepath${suffix}`, remove: () => '' },
       navigateToUrl,
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
       activeNodes$: params.activeNodes$ ?? new BehaviorSubject([]),

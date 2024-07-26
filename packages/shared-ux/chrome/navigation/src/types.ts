@@ -17,7 +17,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { EventTracker } from './analytics';
 
-type BasePathService = Pick<IBasePath, 'prepend'>;
+export type BasePathService = Pick<IBasePath, 'prepend' | 'remove'>;
 
 /**
  * @internal
