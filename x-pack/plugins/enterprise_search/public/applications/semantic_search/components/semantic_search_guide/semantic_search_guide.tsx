@@ -236,7 +236,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.setupInferenceEndpoint.title"
-                defaultMessage="Set up an inference endpoint"
+                defaultMessage="Set up an embedding model"
               />
             </h2>
           </EuiTitle>
@@ -245,7 +245,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.setupInferenceEndpoint.description"
-                defaultMessage="Start by setting up an inference endpoint to manage the machine learning model for your task. This may take a while to complete depending on the model you choose and your ML node configuration."
+                defaultMessage="To transform your text into embeddings within Elasticsearch, use an inference endpoint to access popular embedding models from Elastic, Amazon, OpenAI, and more. Start by setting up the inference endpoint to manage the model for your task. This may take a while to complete depending on the model you choose and your ML node configuration."
               />
             </p>
             <p>
