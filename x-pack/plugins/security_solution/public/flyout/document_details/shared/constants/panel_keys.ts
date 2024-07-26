@@ -8,4 +8,7 @@
 export const DocumentDetailsRightPanelKey = 'document-details-right' as const;
 export const DocumentDetailsLeftPanelKey = 'document-details-left' as const;
 export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as const;
+
 export const DocumentDetailsIsolateHostPanelKey = 'document-details-isolate-host' as const;
+export const DocumentDetailsAlertReasonPanelKey = 'document-details-alert-reason' as const;
+export const DocumentDetailsRuleOverviewPanelKey = 'document-details-rule-overview' as const;

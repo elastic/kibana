@@ -20,10 +20,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole(VIEWER_ROLE);
     });
 
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
-    });
-
     describe('User details', async () => {
       it('should display correct user details', async () => {
         await pageObjects.common.navigateToApp('security_account');
@@ -33,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const actualFullname = await pageObjects.userProfiles.getProfileFullname();
         const actualEmail = await pageObjects.userProfiles.getProfileEmail();
 
-        expect(actualFullname).to.be(userData.fullname);
+        expect(actualFullname).to.be(userData.full_name);
         expect(actualEmail).to.be(userData.email);
       });
 

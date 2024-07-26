@@ -13,10 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type {
-  IconType,
-  RecursivePartial,
   EuiDataGridCellValueElementProps,
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridProps,
@@ -43,7 +40,6 @@ import {
 } from '@kbn/actions-plugin/common';
 import {
   ActionGroup,
-  RuleActionParam,
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
   RuleSystemAction,
@@ -52,18 +48,18 @@ import {
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
-  AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
   RuleTypeMetaData,
-  ActionVariable,
   RuleLastRun,
   MaintenanceWindow,
   SanitizedRuleAction as RuleAction,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type {
+  RuleRegistrySearchRequestPagination,
+  EcsFieldsResponse,
+} from '@kbn/rule-registry-plugin/common';
 import {
   QueryDslQueryContainer,
   SortCombinations,
@@ -71,7 +67,15 @@ import {
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
-import { TypeRegistry } from './application/type_registry';
+import {
+  ValidationResult,
+  UserConfiguredActionConnector,
+  ActionConnector,
+  ActionTypeRegistryContract,
+  EsQuerySnapshot,
+} from '@kbn/alerts-ui-shared/src/common/types';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -100,6 +104,26 @@ import { TimelineItem } from './application/sections/alerts_table/bulk_actions/c
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
 import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+
+export type {
+  GenericValidationResult,
+  ValidationResult,
+  ConnectorValidationError,
+  ConnectorValidationFunc,
+  ActionConnectorFieldsProps,
+  ActionConnectorProps,
+  SystemAction,
+  PreConfiguredActionConnector,
+  UserConfiguredActionConnector,
+  ActionConnector,
+  ActionParamsProps,
+  ActionReadOnlyElementProps,
+  CustomConnectorSelectionItem,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+} from '@kbn/alerts-ui-shared/src/common/types';
+
+export { ActionConnectorMode } from '@kbn/alerts-ui-shared/src/common/types';
 
 export type { ActionVariables, RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 
@@ -139,7 +163,6 @@ export type {
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
-  AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
   RuleTypeMetaData,
@@ -175,27 +198,8 @@ export {
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type ActionTypeRegistryContract<
-  ActionConnector = unknown,
-  ActionParams = unknown
-> = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
 export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<AlertTableConfigRegistry>;
-
-export interface ConnectorValidationError {
-  message: ReactNode;
-}
-
-export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
-export interface ActionConnectorFieldsProps {
-  readOnly: boolean;
-  isEdit: boolean;
-  registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
-}
-export interface ActionReadOnlyElementProps {
-  connectorId: string;
-  connectorName: string;
-}
 
 export enum RuleFlyoutCloseReason {
   SAVED,
@@ -206,11 +210,6 @@ export interface BulkEditResponse {
   rules: Rule[];
   errors: BulkOperationError[];
   total: number;
-}
-
-export enum ActionConnectorMode {
-  Test = 'test',
-  ActionForm = 'actionForm',
 }
 
 export interface BulkOperationResponse {
@@ -243,25 +242,6 @@ export type BulkDisableParams = BulkDisableParamsWithoutHttp & {
   http: HttpSetup;
 };
 
-export interface ActionParamsProps<TParams> {
-  actionParams: Partial<TParams>;
-  index: number;
-  editAction: (key: string, value: RuleActionParam, index: number) => void;
-  errors: IErrorObject;
-  ruleTypeId?: string;
-  messageVariables?: ActionVariable[];
-  defaultMessage?: string;
-  useDefaultMessage?: boolean;
-  actionConnector?: ActionConnector;
-  isLoading?: boolean;
-  isDisabled?: boolean;
-  selectedActionGroupId?: string;
-  showEmailSubjectAndMessage?: boolean;
-  executionMode?: ActionConnectorMode;
-  onBlur?: (field?: string) => void;
-  producerId?: string;
-}
-
 export interface Pagination {
   index: number;
   size: number;
@@ -271,86 +251,6 @@ export interface Sorting {
   field: string;
   direction: string;
 }
-
-interface CustomConnectorSelectionItem {
-  getText: (actionConnector: ActionConnector) => string;
-  getComponent: (
-    actionConnector: ActionConnector
-  ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
-}
-
-export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
-  id: string;
-  iconClass: IconType;
-  selectMessage: string;
-  actionTypeTitle?: string;
-  validateParams: (
-    actionParams: ActionParams
-  ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
-  actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<ActionConnectorFieldsProps>
-  > | null;
-  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
-  actionReadOnlyExtraComponent?: React.LazyExoticComponent<
-    ComponentType<ActionReadOnlyElementProps>
-  >;
-  defaultActionParams?: RecursivePartial<ActionParams>;
-  defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
-  customConnectorSelectItem?: CustomConnectorSelectionItem;
-  isExperimental?: boolean;
-  subtype?: Array<{ id: string; name: string }>;
-  convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
-  hideInUi?: boolean;
-  modalWidth?: number;
-  isSystemActionType?: boolean;
-}
-
-export interface GenericValidationResult<T> {
-  errors: Record<Extract<keyof T, string>, string[] | unknown>;
-}
-
-export interface ValidationResult {
-  errors: Record<string, any>;
-}
-
-export interface ActionConnectorProps<Config, Secrets> {
-  secrets: Secrets;
-  id: string;
-  actionTypeId: string;
-  name: string;
-  referencedByCount?: number;
-  config: Config;
-  isPreconfigured: boolean;
-  isDeprecated: boolean;
-  isSystemAction: boolean;
-  isMissingSecrets?: boolean;
-}
-
-export type PreConfiguredActionConnector = Omit<
-  ActionConnectorProps<never, never>,
-  'config' | 'secrets'
-> & {
-  isPreconfigured: true;
-  isSystemAction: false;
-};
-
-export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProps<
-  Config,
-  Secrets
-> & {
-  isPreconfigured: false;
-  isSystemAction: false;
-};
-
-export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
-  isSystemAction: true;
-  isPreconfigured: false;
-};
-
-export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
-  | PreConfiguredActionConnector
-  | SystemAction
-  | UserConfiguredActionConnector<Config, Secrets>;
 
 export type ActionConnectorWithoutId<
   Config = Record<string, unknown>,
@@ -368,7 +268,7 @@ export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nex
 
 export type RuleSnoozeSettings = Pick<
   Rule,
-  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
+  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule' | 'name'
 >;
 
 export interface RuleTableItem extends Rule {
@@ -590,19 +490,20 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
-  pagination: RuleRegistrySearchRequestPagination;
+  pageIndex: number;
+  pageSize: number;
   sort: SortCombinations[];
   isLoading: boolean;
   alerts: Alerts;
   oldAlertsData: FetchAlertData['oldAlertsData'];
   ecsAlertsData: FetchAlertData['ecsAlertsData'];
-  getInspectQuery: GetInspectQuery;
-  refetch: () => void;
+  querySnapshot?: EsQuerySnapshot;
+  refetchAlerts: () => void;
   alertsCount: number;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   renderCellPopover?: ReturnType<GetRenderCellPopover>;
-  fieldFormats: FieldFormatsRegistry;
+  fieldFormats: FieldFormatsStart;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;

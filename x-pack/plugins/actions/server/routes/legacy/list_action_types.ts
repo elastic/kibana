@@ -27,6 +27,8 @@ export const listActionTypesRoute = (
       options: {
         access: 'public',
         summary: `Get connector types`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {},
     },

@@ -32,6 +32,7 @@ export enum Aggregators {
   RATE = 'rate',
   P95 = 'p95',
   P99 = 'p99',
+  LAST_VALUE = 'last_value',
 }
 export const aggType = fromEnum('Aggregators', Aggregators);
 export type AggType = rt.TypeOf<typeof aggType>;
@@ -106,16 +107,6 @@ export enum InfraFormatterType {
   percent = 'percent',
 }
 
-export interface Group {
-  field: string;
-  value: string;
-}
-
-export interface TimeRange {
-  from?: string;
-  to?: string;
-}
-
 export interface SearchConfigurationType {
   index: SerializedSearchSourceFields;
   query: {
@@ -134,11 +125,6 @@ export interface SearchConfigurationWithExtractedReferenceType {
   };
   filter?: Filter[];
 }
-
-// Custom threshold alert types
-
-// Alert fields['kibana.alert.group] type
-export type GroupBy = Group[];
 
 /*
  * Utils

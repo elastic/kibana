@@ -14,7 +14,9 @@ import {
   EuiOutsideClickDetector,
   EuiToolTip,
   useEuiTheme,
+  EuiDatePicker,
 } from '@elastic/eui';
+import moment from 'moment';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -23,6 +25,7 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationPopover,
@@ -32,6 +35,7 @@ import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } fro
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { EditorFooter } from './editor_footer';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
@@ -56,6 +60,7 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
+import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
 
 import './overwrite.scss';
 
@@ -77,7 +82,7 @@ export interface TextBasedLanguagesEditorProps {
    * The text based queries are relying on adhoc dataviews which
    * can have an @timestamp timefield or nothing
    */
-  detectTimestamp?: boolean;
+  detectedTimestamp?: string;
   /** Array of errors */
   errors?: Error[];
   /** Warning string as it comes from ES */
@@ -123,6 +128,7 @@ interface TextBasedEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -140,6 +146,7 @@ let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
 let lines = 1;
+let isDatePickerOpen = false;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -147,7 +154,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onTextLangQuerySubmit,
   expandCodeEditor,
   isCodeEditorExpanded,
-  detectTimestamp = false,
+  detectedTimestamp,
   errors: serverErrors,
   warning: serverWarning,
   isLoading,
@@ -163,12 +170,20 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideQueryHistory,
   hideHeaderWhenExpanded,
 }: TextBasedLanguagesEditorProps) {
+  const popoverRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    docLinks,
+    core,
+    fieldsMetadata,
+  } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const [code, setCode] = useState<string>(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState<string | null>(null);
@@ -177,7 +192,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
-
+  const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
+  const [timePickerDate, setTimePickerDate] = useState(moment());
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
   const [measuredContentWidth, setMeasuredContentWidth] = useState(0);
 
@@ -221,7 +237,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && allowQueryCancellation) {
+    if (isQueryLoading && isLoading && allowQueryCancellation) {
       abortController?.abort();
       setIsQueryLoading(false);
     } else {
@@ -235,7 +251,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+  }, [
+    isQueryLoading,
+    isLoading,
+    allowQueryCancellation,
+    abortController,
+    onTextLangQuerySubmit,
+    language,
+  ]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -274,6 +297,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setIsHistoryOpen(status);
   }, []);
 
+  const openTimePickerPopover = useCallback(() => {
+    const currentCursorPosition = editor1.current?.getPosition();
+    const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
+    if (currentCursorPosition && editorCoords) {
+      const editorPosition = editor1.current!.getScrolledVisiblePosition(currentCursorPosition);
+      const editorTop = editorCoords.top;
+      const editorLeft = editorCoords.left;
+
+      // Calculate the absolute position of the popover
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
+      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+
+      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      isDatePickerOpen = true;
+      popoverRef.current?.focus();
+    }
+  }, []);
+
   // Registers a command to redirect users to the index management page
   // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
   monaco.editor.registerCommand('esql.policies.create', (...args) => {
@@ -281,6 +322,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       path: 'data/index_management/enrich_policies/create',
       openInNewTab: true,
     });
+  });
+
+  monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
+    openTimePickerPopover();
   });
 
   const styles = textBasedLanguageEditorStyles(
@@ -391,7 +436,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
     const fn = memoize(
-      (...args: [DataViewsPublicPluginStart]) => ({
+      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args),
       }),
@@ -405,7 +450,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, queryString);
-        const sources = await memoizedSources(dataViews).result;
+        const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -423,7 +468,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               undefined,
               abortController
             ).result;
-            return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            const columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
           }
@@ -445,11 +491,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     memoizedSources,
     dataSourcesCache,
     dataViews,
+    core,
     esqlFieldsCache,
     memoizedFieldsFromESQL,
     expressions,
     abortController,
     indexManagementApiService,
+    fieldsMetadata,
   ]);
 
   const parseMessages = useCallback(async () => {
@@ -666,40 +714,41 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [language, documentationSections]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
-    automaticLayout: true,
     accessibilitySupport: 'off',
+    autoIndent: 'none',
+    automaticLayout: true,
+    fixedOverflowWidgets: true,
     folding: false,
     fontSize: 14,
-    padding: {
-      top: 8,
-      bottom: 8,
-    },
-    scrollBeyondLastLine: false,
-    quickSuggestions: true,
-    minimap: { enabled: false },
-    wordWrap: 'on',
-    lineNumbers: showLineNumbers ? 'on' : 'off',
-    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
-    lineDecorationsWidth: 12,
-    autoIndent: 'none',
-    wrappingIndent: 'none',
-    lineNumbersMinChars: 3,
-    overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
-    scrollbar: {
-      horizontal: 'hidden',
-      vertical: 'auto',
-    },
-    overviewRulerBorder: false,
     // this becomes confusing with multiple markers, so quick fixes
     // will be proposed only within the tooltip
     lightbulb: {
       enabled: false,
     },
+    lineDecorationsWidth: 12,
+    lineNumbers: showLineNumbers ? 'on' : 'off',
+    lineNumbersMinChars: 3,
+    minimap: { enabled: false },
+    overviewRulerLanes: 0,
+    overviewRulerBorder: false,
+    padding: {
+      top: 8,
+      bottom: 8,
+    },
+    quickSuggestions: true,
     readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+    renderLineHighlight: !isCodeEditorExpanded ? 'none' : 'line',
+    renderLineHighlightOnlyWhenFocus: true,
+    scrollbar: {
+      horizontal: 'hidden',
+      vertical: 'auto',
+    },
+    scrollBeyondLastLine: false,
+    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
+    wordWrap: 'on',
+    wrappingIndent: 'none',
   };
 
   if (isCompactFocused) {
@@ -741,7 +790,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   <EuiButtonIcon
                     iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
                     color="text"
-                    size="s"
+                    size="xs"
                     data-test-subj="TextBasedLangEditor-toggleWordWrap"
                     aria-label={
                       isWrappedInPipes
@@ -784,7 +833,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       }
                       buttonProps={{
                         color: 'text',
-                        size: 's',
+                        size: 'xs',
                         'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
@@ -798,7 +847,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 )}
               </EuiFlexItem>
               {!Boolean(hideMinimizeButton) && (
-                <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+                <EuiFlexItem grow={false}>
                   <EuiToolTip
                     position="top"
                     content={i18n.translate(
@@ -818,7 +867,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         }
                       )}
                       data-test-subj="TextBasedLangEditor-minimize"
-                      size="s"
+                      size="xs"
                       onClick={() => {
                         expandCodeEditor(false);
                         updateLinesFromModel = false;
@@ -912,6 +961,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
+                      if (isDatePickerOpen) {
+                        setPopoverPosition({});
+                      }
                     });
 
                     editor.onDidFocusEditorText(() => {
@@ -963,7 +1015,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     onErrorClick={onErrorClick}
                     runQuery={onQuerySubmit}
                     updateQuery={onQueryUpdate}
-                    detectTimestamp={detectTimestamp}
+                    detectedTimestamp={detectedTimestamp}
                     editorIsInline={editorIsInline}
                     disableSubmitAction={disableSubmitAction}
                     hideRunQueryText={hideRunQueryText}
@@ -1013,6 +1065,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
+                          transform: 'none !important',
                         },
                       }}
                     />
@@ -1042,6 +1095,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                       borderLeft: 'transparent !important',
+                      transform: 'none !important',
                     }}
                   />
                 </EuiToolTip>
@@ -1060,7 +1114,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onErrorClick={onErrorClick}
           runQuery={onQuerySubmit}
           updateQuery={onQueryUpdate}
-          detectTimestamp={detectTimestamp}
+          detectedTimestamp={detectedTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
@@ -1083,6 +1137,65 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onKeyDownResizeHandler={onKeyDownResizeHandler}
           editorIsInline={editorIsInline}
         />
+      )}
+
+      {createPortal(
+        Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
+          <div
+            tabIndex={0}
+            style={{
+              ...popoverPosition,
+              backgroundColor: euiTheme.colors.emptyShade,
+              borderRadius: euiTheme.border.radius.small,
+              position: 'absolute',
+              overflow: 'auto',
+            }}
+            ref={popoverRef}
+            data-test-subj="TextBasedLangEditor-timepicker-popover"
+          >
+            <EuiDatePicker
+              selected={timePickerDate}
+              autoFocus
+              onChange={(date) => {
+                if (date) {
+                  setTimePickerDate(date);
+                }
+              }}
+              onSelect={(date, event) => {
+                if (date && event) {
+                  const currentCursorPosition = editor1.current?.getPosition();
+                  const lineContent = editorModel.current?.getLineContent(
+                    currentCursorPosition?.lineNumber ?? 0
+                  );
+                  const contentAfterCursor = lineContent?.substring(
+                    (currentCursorPosition?.column ?? 0) - 1,
+                    lineContent.length + 1
+                  );
+
+                  const addition = `"${date.toISOString()}"${contentAfterCursor}`;
+                  editor1.current?.executeEdits('time', [
+                    {
+                      range: {
+                        startLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        startColumn: currentCursorPosition?.column ?? 0,
+                        endLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        endColumn: (currentCursorPosition?.column ?? 0) + addition.length + 1,
+                      },
+                      text: addition,
+                      forceMoveMarkers: true,
+                    },
+                  ]);
+                  setPopoverPosition({});
+                  isDatePickerOpen = false;
+                }
+              }}
+              inline
+              showTimeSelect={true}
+              shadow={true}
+            />
+          </div>
+        ),
+        document.body
       )}
     </>
   );

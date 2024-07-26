@@ -18,8 +18,7 @@ import type {
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
-  columnExists,
-  getColumnHit,
+  lookupColumn,
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
@@ -42,6 +41,8 @@ import {
   getAllFunctions,
   isSingleItem,
   nonNullable,
+  getColumnExists,
+  findPreviousWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -70,6 +71,8 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
   buildValueDefinitions,
+  getDateLiterals,
+  buildFieldsDefinitionsWithMetadata,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -84,11 +87,16 @@ import {
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
   getQueryForFields,
+  getSourcesFromCommands,
   isAggFunctionUsedAlready,
+  removeQuoteForSuggestedSources,
 } from './helper';
-import { FunctionArgSignature } from '../definitions/types';
+import { FunctionParameter } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
+type GetDataStreamsForIntegrationFn = (
+  sourceName: string
+) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[]
@@ -171,9 +179,8 @@ export async function suggest(
   const charThatNeedMarkers = [',', ':'];
   if (
     (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    (context.triggerKind === 0 &&
-      unclosedRoundBrackets === 0 &&
-      getLastCharFromTrimmed(innerText) !== '_') ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
     (context.triggerCharacter === ' ' &&
       (isMathFunction(innerText, offset) ||
         isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
@@ -203,6 +210,7 @@ export async function suggest(
     resourceRetriever
   );
   const getSources = getSourcesRetriever(resourceRetriever);
+  const getDatastreamsForIntegration = getDatastreamsForIntegrationRetriever(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -223,6 +231,7 @@ export async function suggest(
       ast,
       astContext,
       getSources,
+      getDatastreamsForIntegration,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -281,7 +290,7 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
   return {
     getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitions(fields);
+      return buildFieldsDefinitionsWithMetadata(fields);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -303,7 +312,23 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     const list = (await helper()) || [];
     // hide indexes that start with .
-    return buildSourcesDefinitions(list.filter(({ hidden }) => !hidden).map(({ name }) => name));
+    return buildSourcesDefinitions(
+      list
+        .filter(({ hidden }) => !hidden)
+        .map(({ name, dataStreams, title }) => {
+          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title };
+        })
+    );
+  };
+}
+
+function getDatastreamsForIntegrationRetriever(
+  resourceRetriever?: ESQLCallbacks
+): GetDataStreamsForIntegrationFn {
+  const helper = getSourcesHelper(resourceRetriever);
+  return async (sourceName: string) => {
+    const list = (await helper()) || [];
+    return list.find(({ name }) => name === sourceName)?.dataStreams;
   };
 }
 
@@ -321,7 +346,9 @@ function workoutBuiltinOptions(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): { skipAssign: boolean } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
-  return { skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnHit(nodeArg.name, references)) };
+  return {
+    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg, references)),
+  };
 }
 
 function areCurrentArgsValid(
@@ -388,7 +415,7 @@ function extractFinalTypeFromArg(
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = getColumnHit(arg.name, references);
+      const hit = lookupColumn(arg, references);
       if (hit) {
         return hit.type;
       }
@@ -475,6 +502,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: GetSourceFn,
+  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -829,9 +857,34 @@ async function getExpressionSuggestionsByType(
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        // FROM <suggest>
-        // @TODO: filter down the suggestions here based on other existing sources defined
-        suggestions.push(...(await getSources()));
+        const index = getSourcesFromCommands(commands, 'index');
+        const canRemoveQuote = isNewExpression && innerText.includes('"');
+        // Function to add suggestions based on canRemoveQuote
+        const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
+          suggestions.push(
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions)
+          );
+        };
+
+        if (index && index.text && index.text !== EDITOR_MARKER) {
+          const source = index.text.replace(EDITOR_MARKER, '');
+          const dataStreams = await getDatastreamsForIntegration(source);
+
+          if (dataStreams) {
+            // Integration name, suggest the datastreams
+            await addSuggestionsBasedOnQuote(
+              buildSourcesDefinitions(
+                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+              )
+            );
+          } else {
+            // Not an integration, just a partial source name
+            await addSuggestionsBasedOnQuote(await getSources());
+          }
+        } else {
+          // FROM <suggest> or no index/text
+          await addSuggestionsBasedOnQuote(await getSources());
+        }
       }
     }
   }
@@ -1036,7 +1089,11 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+
   const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
@@ -1129,10 +1186,10 @@ async function getFunctionArgsSuggestions(
   const isUnknownColumn =
     arg &&
     isColumnItem(arg) &&
-    !columnExists(arg, {
+    !getColumnExists(arg, {
       fields: fieldsMap,
       variables: variablesExcludingCurrentCommandOnes,
-    }).hit;
+    });
   if (noArgDefined || isUnknownColumn) {
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
@@ -1206,7 +1263,7 @@ async function getFunctionArgsSuggestions(
       (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
     );
 
-    const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) => {
+    const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
       return Array.from(new Set(paramDefs.map(({ type }) => type)));
     };
 
@@ -1276,7 +1333,7 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ text, ...rest }) => ({
     ...rest,
-    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', text),
+    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && text !== '', text),
   }));
 }
 
@@ -1395,7 +1452,11 @@ async function getOptionArgsSuggestions(
   if (command.name === 'enrich') {
     if (option.name === 'on') {
       // if it's a new expression, suggest fields to match on
-      if (isNewExpression || (option && isAssignment(option.args[0]) && !option.args[1])) {
+      if (
+        isNewExpression ||
+        findPreviousWord(innerText) === 'ON' ||
+        (option && isAssignment(option.args[0]) && !option.args[1])
+      ) {
         const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
         if (policyName) {
           const policyMetadata = await getPolicyMetadata(policyName);
@@ -1428,7 +1489,7 @@ async function getOptionArgsSuggestions(
           innerText
         );
 
-        if (isNewExpression) {
+        if (isNewExpression || findPreviousWord(innerText) === 'WITH') {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyEnhancedVariables)));
         }
 
@@ -1480,7 +1541,10 @@ async function getOptionArgsSuggestions(
   }
 
   if (command.name === 'dissect') {
-    if (option.args.length < 1 && optionDef) {
+    if (
+      option.args.filter((arg) => !(isSingleItem(arg) && arg.type === 'unknown')).length < 1 &&
+      optionDef
+    ) {
       suggestions.push(colonCompleteItem, semiColonCompleteItem);
     }
   }
@@ -1488,7 +1552,14 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    if (isNewExpression) {
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else if (existingFields.size > 0) {
+      if (filteredMetaFields.length > 0) {
+        suggestions.push(commaCompleteItem);
+      }
+      suggestions.push(pipeCompleteItem);
+    }
   }
 
   if (command.name === 'stats') {

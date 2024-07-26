@@ -133,6 +133,8 @@ export const serverReturnedNodeEventsInCategory = actionCreator<{
    * The category that `events` have in common.
    */
   readonly eventCategory: string;
+
+  readonly agentId: string;
 }>('SERVER_RETURNED_NODE_EVENTS_IN_CATEGORY');
 
 /**

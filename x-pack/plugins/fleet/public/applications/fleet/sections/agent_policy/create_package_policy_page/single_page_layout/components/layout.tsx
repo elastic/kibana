@@ -251,7 +251,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiDescriptionList>
     ) : undefined;
 
-    const maxWidth = 770;
+    const maxWidth = 800;
     return (
       <WithHeaderLayout
         restrictHeaderWidth={maxWidth}

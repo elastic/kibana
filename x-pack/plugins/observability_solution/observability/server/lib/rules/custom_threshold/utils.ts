@@ -17,7 +17,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { Alert } from '@kbn/alerts-as-data-utils';
-import type { Group } from '../../../../common/custom_threshold_rule/types';
+import type { Group } from '../../../../common/typings';
 import { ObservabilityConfig } from '../../..';
 import { AlertExecutionDetails } from './types';
 
@@ -167,7 +167,7 @@ export const hasAdditionalContext = (
 ): boolean => {
   return groupBy
     ? Array.isArray(groupBy)
-      ? groupBy.every((group) => validGroups.includes(group))
+      ? groupBy.some((group) => validGroups.includes(group))
       : validGroups.includes(groupBy)
     : false;
 };

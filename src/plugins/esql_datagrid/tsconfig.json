@@ -22,10 +22,9 @@
     "@kbn/core",
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/i18n",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-notifications-browser",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",

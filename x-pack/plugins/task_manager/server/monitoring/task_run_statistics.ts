@@ -35,7 +35,7 @@ import {
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
-} from './task_run_calcultors';
+} from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
@@ -190,7 +190,8 @@ export function createTaskRunAggregator(
         (taskEvent: TaskLifecycleEvent) =>
           isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
       ),
-      map(() => new Date().toISOString())
+      map(() => new Date().toISOString()),
+      startWith(new Date().toISOString())
     ),
     // get the average ratio of polled tasks by their persistency
     taskPollingLifecycle.events.pipe(

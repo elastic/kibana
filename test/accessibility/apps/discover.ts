@@ -122,8 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // adding a11y tests for the new data grid
     it('a11y test on single document view', async () => {
-      await testSubjects.click('docTableExpandToggleColumn');
-      await PageObjects.discover.clickDocViewerTab('doc_view_table');
+      await dataGrid.clickRowToggle();
       await a11y.testAppSnapshot();
     });
 
@@ -134,15 +133,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for actions on a field', async () => {
       await PageObjects.discover.clickDocViewerTab('doc_view_table');
-      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
-        await testSubjects.click('openFieldActionsButton-Cancelled'); // Open the actions
-      } else {
-        await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
-      }
+      await dataGrid.expandFieldNameCellInFlyout('Cancelled');
       await a11y.testAppSnapshot();
-      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
-        await testSubjects.click('openFieldActionsButton-Cancelled'); // Close the actions
-      }
+      await browser.pressKeys(browser.keys.ESCAPE);
     });
 
     it('a11y test for data-grid table with columns', async () => {

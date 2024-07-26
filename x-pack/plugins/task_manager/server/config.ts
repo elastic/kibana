@@ -6,9 +6,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { getTaskClaimer } from './task_claimers';
 
 export const MAX_WORKERS_LIMIT = 100;
+export const DEFAULT_CAPACITY = 10;
+export const MAX_CAPACITY = 50;
+export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
@@ -27,6 +29,7 @@ export const DEFAULT_METRICS_RESET_INTERVAL = 30 * 1000; // 30 seconds
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
 export const CLAIM_STRATEGY_DEFAULT = 'default';
+export const CLAIM_STRATEGY_MGET = 'unsafe_mget';
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -64,6 +67,8 @@ const requestTimeoutsConfig = schema.object({
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
+    /* The number of normal cost tasks that this Kibana instance will run simultaneously */
+    capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
     ephemeral_tasks: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       /* How many requests can Task Manager buffer before it rejects new requests. */
@@ -81,11 +86,12 @@ export const configSchema = schema.object(
       min: 1,
     }),
     /* The maximum number of tasks that this Kibana instance will run simultaneously. */
-    max_workers: schema.number({
-      defaultValue: DEFAULT_MAX_WORKERS,
-      // disable the task manager rather than trying to specify it with 0 workers
-      min: 1,
-    }),
+    max_workers: schema.maybe(
+      schema.number({
+        // disable the task manager rather than trying to specify it with 0 workers
+        min: 1,
+      })
+    ),
     /* The interval at which monotonically increasing metrics counters will reset */
     metrics_reset_interval: schema.number({
       defaultValue: DEFAULT_METRICS_RESET_INTERVAL,
@@ -164,11 +170,6 @@ export const configSchema = schema.object(
         config.monitored_stats_required_freshness < config.poll_interval
       ) {
         return `The specified monitored_stats_required_freshness (${config.monitored_stats_required_freshness}) is invalid, as it is below the poll_interval (${config.poll_interval})`;
-      }
-      try {
-        getTaskClaimer(config.claim_strategy);
-      } catch (err) {
-        return `The claim strategy is invalid: ${err.message}`;
       }
     },
   }

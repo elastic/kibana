@@ -18,7 +18,7 @@ import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export type Api = DefaultEmbeddableApi<{}>;
 
-export const factory: ReactEmbeddableFactory<{}, Api> = {
+export const factory: ReactEmbeddableFactory<{}, {}, Api> = {
   type: FILTER_DEBUGGER_EMBEDDABLE_ID,
   deserializeState: () => {
     return {};

@@ -16,11 +16,6 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
   border-radius: 4px;
 }
 
-.c14 svg {
-  position: relative;
-  top: -1px;
-}
-
 .c12,
 .c12 * {
   display: inline-block;
@@ -123,6 +118,11 @@ tr:hover .c4:focus::before {
 
 .c6 {
   vertical-align: top;
+}
+
+.c14 svg {
+  position: relative;
+  top: -1px;
 }
 
 .c23 {

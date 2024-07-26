@@ -14,19 +14,15 @@ import { unionWithNullType } from '../../../utility_types';
 /*
  *  Note Types
  */
-const SavedNoteRuntimeType = runtimeTypes.intersection([
-  runtimeTypes.type({
-    timelineId: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    eventId: unionWithNullType(runtimeTypes.string),
-    note: unionWithNullType(runtimeTypes.string),
-    created: unionWithNullType(runtimeTypes.number),
-    createdBy: unionWithNullType(runtimeTypes.string),
-    updated: unionWithNullType(runtimeTypes.number),
-    updatedBy: unionWithNullType(runtimeTypes.string),
-  }),
-]);
+const SavedNoteRuntimeType = runtimeTypes.partial({
+  timelineId: unionWithNullType(runtimeTypes.string),
+  eventId: unionWithNullType(runtimeTypes.string),
+  note: unionWithNullType(runtimeTypes.string),
+  created: unionWithNullType(runtimeTypes.number),
+  createdBy: unionWithNullType(runtimeTypes.string),
+  updated: unionWithNullType(runtimeTypes.number),
+  updatedBy: unionWithNullType(runtimeTypes.string),
+});
 
 /**
  * Note Saved object type with metadata

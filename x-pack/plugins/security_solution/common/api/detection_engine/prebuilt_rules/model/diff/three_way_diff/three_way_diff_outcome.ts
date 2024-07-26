@@ -27,6 +27,12 @@ export enum ThreeWayDiffOutcome {
 
   /** Customized rule, the value has changed in the target version and is not equal to the current version. */
   CustomizedValueCanUpdate = 'BASE=A, CURRENT=B, TARGET=C',
+
+  /** Missing  base, the value hasn't changed in the target version. */
+  MissingBaseNoUpdate = 'BASE=-, CURRENT=A, TARGET=A',
+
+  /** Missing  base, the value changed in the target version. */
+  MissingBaseCanUpdate = 'BASE=-, CURRENT=A, TARGET=B',
 }
 
 export const determineDiffOutcome = <TValue>(
@@ -38,15 +44,59 @@ export const determineDiffOutcome = <TValue>(
   const baseEqlTarget = isEqual(baseVersion, targetVersion);
   const currentEqlTarget = isEqual(currentVersion, targetVersion);
 
-  if (baseVersion === MissingVersion) {
+  return getThreeWayDiffOutcome({
+    baseEqlCurrent,
+    baseEqlTarget,
+    currentEqlTarget,
+    hasBaseVersion: baseVersion !== MissingVersion,
+  });
+};
+
+/**
+ * Determines diff outcomes of array fields that do not care about order (e.g. `[1, 2 , 3] === [3, 2, 1]`)
+ */
+export const determineOrderAgnosticDiffOutcome = <TValue>(
+  baseVersion: TValue[] | MissingVersion,
+  currentVersion: TValue[],
+  targetVersion: TValue[]
+): ThreeWayDiffOutcome => {
+  const baseSet = baseVersion === MissingVersion ? MissingVersion : new Set<TValue>(baseVersion);
+  const currentSet = new Set<TValue>(currentVersion);
+  const targetSet = new Set<TValue>(targetVersion);
+  const baseEqlCurrent = isEqual(baseSet, currentSet);
+  const baseEqlTarget = isEqual(baseSet, targetSet);
+  const currentEqlTarget = isEqual(currentSet, targetSet);
+
+  return getThreeWayDiffOutcome({
+    baseEqlCurrent,
+    baseEqlTarget,
+    currentEqlTarget,
+    hasBaseVersion: baseVersion !== MissingVersion,
+  });
+};
+
+interface DetermineDiffOutcomeProps {
+  baseEqlCurrent: boolean;
+  baseEqlTarget: boolean;
+  currentEqlTarget: boolean;
+  hasBaseVersion: boolean;
+}
+
+const getThreeWayDiffOutcome = ({
+  baseEqlCurrent,
+  baseEqlTarget,
+  currentEqlTarget,
+  hasBaseVersion,
+}: DetermineDiffOutcomeProps): ThreeWayDiffOutcome => {
+  if (!hasBaseVersion) {
     /**
      * We couldn't find the base version of the rule in the package so further
-     * version comparison is not possible. We assume that the rule is not
+     * version comparison is not possible. We assume that the rule is
      * customized and the value can be updated if there's an update.
      */
     return currentEqlTarget
-      ? ThreeWayDiffOutcome.StockValueNoUpdate
-      : ThreeWayDiffOutcome.StockValueCanUpdate;
+      ? ThreeWayDiffOutcome.MissingBaseNoUpdate
+      : ThreeWayDiffOutcome.MissingBaseCanUpdate;
   }
 
   if (baseEqlCurrent) {
@@ -67,6 +117,7 @@ export const determineDiffOutcome = <TValue>(
 export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolean => {
   return (
     diffCase === ThreeWayDiffOutcome.StockValueCanUpdate ||
-    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate
+    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
+    diffCase === ThreeWayDiffOutcome.MissingBaseCanUpdate
   );
 };

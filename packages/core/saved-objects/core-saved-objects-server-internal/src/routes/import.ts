@@ -36,6 +36,9 @@ export const registerImportRoute = (
     {
       path: '/_import',
       options: {
+        summary: `Import saved objects`,
+        tags: ['oas-tag:saved objects'],
+        access: 'public',
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',

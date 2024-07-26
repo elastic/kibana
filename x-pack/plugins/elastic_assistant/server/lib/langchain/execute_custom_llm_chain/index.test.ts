@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+
 import { loggerMock } from '@kbn/logging-mocks';
-import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import { initializeAgentExecutorWithOptions, AgentExecutor } from 'langchain/agents';
 
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientBedrockChatModel,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import { AgentExecutorParams } from '../executors/types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
@@ -26,6 +31,7 @@ jest.mock('@kbn/langchain/server', () => {
   return {
     ...original,
     ActionsClientChatOpenAI: jest.fn(),
+    ActionsClientBedrockChatModel: jest.fn(),
     ActionsClientSimpleChatModel: jest.fn(),
   };
 });
@@ -46,6 +52,7 @@ const mockCall = jest.fn().mockImplementation(() =>
   })
 );
 const mockInvoke = jest.fn().mockImplementation(() => Promise.resolve());
+
 jest.mock('langchain/agents');
 
 jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
@@ -84,7 +91,7 @@ const mockRequest: KibanaRequest<unknown, unknown, any, any> = { body: {} } as K
   any // eslint-disable-line @typescript-eslint/no-explicit-any
 >;
 
-const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
+const actionsClient = actionsClientMock.create();
 const mockLogger = loggerMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -95,8 +102,8 @@ const esStoreMock = new ElasticsearchStore(
   mockTelemetry
 );
 const defaultProps: AgentExecutorParams<true> = {
-  actions: mockActions,
-  isEnabledKnowledgeBase: true,
+  actionsClient,
+  bedrockChatEnabled: false,
   connectorId: mockConnectorId,
   esClient: esClientMock,
   esStore: esStoreMock,
@@ -111,7 +118,14 @@ const bedrockProps = {
   ...defaultProps,
   llmType: 'bedrock',
 };
+const bedrockChatProps = {
+  ...defaultProps,
+  bedrockChatEnabled: true,
+  llmType: 'bedrock',
+};
 const executorMock = initializeAgentExecutorWithOptions as jest.Mock;
+const agentExecutorMock = AgentExecutor as unknown as jest.Mock;
+
 describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,6 +135,10 @@ describe('callAgentExecutor', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       invoke: (props: any, more: any) => mockInvoke({ ...props, agentType }, more),
     }));
+    agentExecutorMock.mockReturnValue({
+      call: mockCall,
+      invoke: mockInvoke,
+    });
   });
 
   describe('callAgentExecutor', () => {
@@ -151,11 +169,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor(defaultProps);
 
         expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: false,
           temperature: 0.2,
           llmType: 'openai',
@@ -189,11 +206,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor({ ...defaultProps, isStream: true });
 
         expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: true,
           temperature: 0.2,
           llmType: 'openai',
@@ -213,11 +229,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor(bedrockProps);
 
         expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: false,
           temperature: 0,
           llmType: 'bedrock',
@@ -253,11 +268,10 @@ describe('callAgentExecutor', () => {
         await callAgentExecutor({ ...bedrockProps, isStream: true });
 
         expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
-          actions: mockActions,
+          actionsClient,
           connectorId: mockConnectorId,
           logger: mockLogger,
           maxRetries: 0,
-          request: mockRequest,
           streaming: true,
           temperature: 0,
           llmType: 'bedrock',
@@ -269,6 +283,60 @@ describe('callAgentExecutor', () => {
         expect(mockInvoke.mock.calls[0][0].agentType).toEqual(
           'structured-chat-zero-shot-react-description'
         );
+      });
+    });
+  });
+
+  describe('BedrockChat', () => {
+    describe('when the agent is not streaming', () => {
+      it('creates an instance of ActionsClientBedrockChatModel with the expected context from the request', async () => {
+        await callAgentExecutor(bedrockChatProps);
+
+        expect(ActionsClientBedrockChatModel).toHaveBeenCalledWith({
+          actionsClient,
+          connectorId: mockConnectorId,
+          logger: mockLogger,
+          maxRetries: 0,
+          signal: undefined,
+          model: undefined,
+          streaming: false,
+          temperature: 0,
+          llmType: 'bedrock',
+        });
+      });
+
+      it('returns the expected response', async () => {
+        const result = await callAgentExecutor(bedrockChatProps);
+
+        expect(result).toEqual({
+          body: {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            status: 'ok',
+            replacements: {},
+            trace_data: undefined,
+          },
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      });
+    });
+    describe('when the agent is streaming', () => {
+      it('creates an instance of ActionsClientBedrockChatModel with the expected context from the request', async () => {
+        await callAgentExecutor({ ...bedrockChatProps, isStream: true });
+
+        expect(ActionsClientBedrockChatModel).toHaveBeenCalledWith({
+          actionsClient,
+          connectorId: mockConnectorId,
+          logger: mockLogger,
+          maxRetries: 0,
+          signal: undefined,
+          model: undefined,
+          streaming: true,
+          temperature: 0,
+          llmType: 'bedrock',
+        });
       });
     });
   });

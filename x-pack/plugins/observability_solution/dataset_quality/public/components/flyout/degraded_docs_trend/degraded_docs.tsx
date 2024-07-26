@@ -56,7 +56,7 @@ export function DegradedDocs({
     if (breakdown.dataViewField && !breakdown.fieldSupportsBreakdown) {
       // TODO: If needed, notify user that the field is not breakable
     }
-  }, [setBreakdownDataViewField, breakdown.dataViewField, breakdown.fieldSupportsBreakdown]);
+  }, [setBreakdownDataViewField, breakdown]);
 
   return (
     <EuiPanel hasBorder grow={false}>
@@ -101,7 +101,7 @@ export function DegradedDocs({
 const degradedDocsTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.flyoutDegradedDocsTooltip"
-    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset."
+    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your data set."
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>

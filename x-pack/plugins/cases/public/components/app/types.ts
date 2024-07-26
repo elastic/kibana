@@ -21,4 +21,5 @@ export interface CasesRoutesProps {
    */
   refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
   timelineIntegration?: CasesTimelineIntegration;
+  onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
 }

@@ -7,12 +7,11 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { useConnectorSetup } from '../connectorland/connector_setup';
 
 import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
@@ -40,7 +39,7 @@ jest.mock('./use_conversation');
 const renderAssistant = (extraProps = {}, providerProps = {}) =>
   render(
     <TestProviders>
-      <Assistant chatHistoryVisible={false} setChatHistoryVisible={jest.fn()} {...extraProps} />
+      <Assistant chatHistoryVisible={true} setChatHistoryVisible={jest.fn()} {...extraProps} />
     </TestProviders>
   );
 
@@ -63,20 +62,27 @@ const mockData = {
   },
 };
 const mockDeleteConvo = jest.fn();
+const mockGetDefaultConversation = jest.fn().mockReturnValue(mockData.welcome_id);
+const clearConversation = jest.fn();
 const mockUseConversation = {
+  clearConversation: clearConversation.mockResolvedValue(mockData.welcome_id),
   getConversation: jest.fn(),
-  getDefaultConversation: jest.fn().mockReturnValue(mockData.welcome_id),
+  getDefaultConversation: mockGetDefaultConversation,
   deleteConversation: mockDeleteConvo,
   setApiConfig: jest.fn().mockResolvedValue({}),
 };
 
+const refetchResults = jest.fn();
+
 describe('Assistant', () => {
-  beforeAll(() => {
+  let persistToLocalStorage: jest.Mock;
+  let persistToSessionStorage: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    persistToLocalStorage = jest.fn();
+    persistToSessionStorage = jest.fn();
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
-    jest.mocked(useConnectorSetup).mockReturnValue({
-      comments: [],
-      prompt: <></>,
-    });
 
     jest.mocked(PromptEditor).mockReturnValue(null);
     jest.mocked(QuickPrompts).mockReturnValue(null);
@@ -89,13 +95,14 @@ describe('Assistant', () => {
     ];
     jest.mocked(useLoadConnectors).mockReturnValue({
       isFetched: true,
+      isFetchedAfterMount: true,
       data: connectors,
     } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
 
     jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
       data: mockData,
       isLoading: false,
-      refetch: jest.fn().mockResolvedValue({
+      refetch: refetchResults.mockResolvedValue({
         isLoading: false,
         data: {
           ...mockData,
@@ -107,16 +114,6 @@ describe('Assistant', () => {
       }),
       isFetched: true,
     } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
-  });
-
-  let persistToLocalStorage: jest.Mock;
-  let persistToSessionStorage: jest.Mock;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    persistToLocalStorage = jest.fn();
-    persistToSessionStorage = jest.fn();
-
     jest
       .mocked(useLocalStorage)
       .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
@@ -220,19 +217,28 @@ describe('Assistant', () => {
 
     it('should delete conversation when delete button is clicked', async () => {
       renderAssistant();
-      await act(async () => {
-        fireEvent.click(
-          within(screen.getByTestId('conversation-selector')).getByTestId(
-            'comboBoxToggleListButton'
-          )
-        );
-      });
-
       const deleteButton = screen.getAllByTestId('delete-option')[0];
       await act(async () => {
         fireEvent.click(deleteButton);
       });
-      expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.welcome_id.id);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+
+      await waitFor(() => {
+        expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
+      });
+    });
+    it('should refetchConversationsState after clear chat history button click', async () => {
+      renderAssistant();
+      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('clear-chat'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
+        expect(clearConversation).toHaveBeenCalled();
+        expect(refetchResults).toHaveBeenCalled();
+      });
     });
   });
   describe('when selected conversation changes and some connectors are loaded', () => {
@@ -248,7 +254,7 @@ describe('Assistant', () => {
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
 
-      const previousConversationButton = screen.getByLabelText('Previous conversation');
+      const previousConversationButton = await screen.findByText(mockData.electric_sheep_id.title);
 
       expect(previousConversationButton).toBeInTheDocument();
       await act(async () => {
@@ -284,13 +290,13 @@ describe('Assistant', () => {
         isFetched: true,
       } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
 
-      const { getByLabelText } = renderAssistant();
+      const { findByText } = renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
 
-      const previousConversationButton = getByLabelText('Previous conversation');
+      const previousConversationButton = await findByText(mockData.electric_sheep_id.title);
 
       expect(previousConversationButton).toBeInTheDocument();
 
@@ -310,7 +316,7 @@ describe('Assistant', () => {
       renderAssistant({ setConversationTitle });
 
       await act(async () => {
-        fireEvent.click(screen.getByLabelText('Previous conversation'));
+        fireEvent.click(await screen.findByText(mockData.electric_sheep_id.title));
       });
 
       expect(setConversationTitle).toHaveBeenLastCalledWith('electric sheep');
@@ -340,7 +346,7 @@ describe('Assistant', () => {
       } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
       renderAssistant();
 
-      const previousConversationButton = screen.getByLabelText('Previous conversation');
+      const previousConversationButton = await screen.findByText('updated title');
       await act(async () => {
         fireEvent.click(previousConversationButton);
       });

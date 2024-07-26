@@ -89,6 +89,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-exception-list-components",
+    "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/saved-objects-tagging-plugin",
@@ -145,7 +146,6 @@
     "@kbn/grouping",
     "@kbn/securitysolution-data-table",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",
@@ -206,5 +206,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
+    "@kbn/integration-assistant-plugin",
+    "@kbn/avc-banner",
   ]
 }
