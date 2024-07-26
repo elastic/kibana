@@ -47,7 +47,7 @@ export const RowMenuControlCell = ({
         return (
           <EuiContextMenuItem
             key={id}
-            data-test-subj={dataTestSubj ?? `unifiedDataTable_remainingRowControl_${id}`}
+            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowMenu_${id}`}
             disabled={disabled}
             icon={iconType}
             color={color}
@@ -65,7 +65,7 @@ export const RowMenuControlCell = ({
 
   return (
     <EuiPopover
-      id="remainingRowActionsPopover"
+      id="rowMenuActionsPopover"
       button={
         <DataTableRowControl>
           <EuiToolTip content={buttonLabel} delay="long">
