@@ -17,6 +17,7 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
+import { getFunctionSignatures } from '../../definitions/helpers';
 
 export interface Integration {
   name: string;
@@ -127,7 +128,7 @@ export function getFunctionSignaturesByReturnType(
   {
     agg,
     grouping,
-    evalMath,
+    scalar,
     builtin,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
@@ -135,14 +136,14 @@ export function getFunctionSignaturesByReturnType(
   }: {
     agg?: boolean;
     grouping?: boolean;
-    evalMath?: boolean;
+    scalar?: boolean;
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: string[],
   ignored?: string[],
   option?: string
-) {
+): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
     : [_expectedReturnType];
@@ -157,7 +158,7 @@ export function getFunctionSignaturesByReturnType(
     list.push(...groupingFunctionDefinitions);
   }
   // eval functions (eval is a special keyword in JS)
-  if (evalMath) {
+  if (scalar) {
     list.push(...evalFunctionDefinitions);
   }
   if (builtin) {
@@ -203,13 +204,25 @@ export function getFunctionSignaturesByReturnType(
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map(({ type, name, signatures }) => {
+    .map<PartialSuggestionWithText>((definition) => {
+      const { type, name, signatures } = definition;
+
       if (type === 'builtin') {
-        return signatures.some(({ params }) => params.length > 1)
-          ? `${name.toUpperCase()} $0`
-          : name.toUpperCase();
+        return {
+          text: signatures.some(({ params }) => params.length > 1)
+            ? `${name.toUpperCase()} $0`
+            : name.toUpperCase(),
+          label: name.toUpperCase(),
+        };
       }
-      return `${name.toUpperCase()}($0)`;
+      const printedSignatures = getFunctionSignatures(definition, {
+        withTypes: true,
+        capitalize: true,
+      });
+      return {
+        text: `${name.toUpperCase()}($0)`,
+        label: printedSignatures[0].declaration,
+      };
     });
 }
 
@@ -300,11 +313,28 @@ export const setup = async (caret = '/') => {
     );
   };
 
-  const assertSuggestions = async (query: string, expected: string[], opts?: SuggestOptions) => {
+  const assertSuggestions = async (
+    query: string,
+    expected: Array<string | PartialSuggestionWithText>,
+    opts?: SuggestOptions
+  ) => {
     const result = await suggest(query, opts);
     const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    expect(resultTexts).toEqual([...expected].sort());
+    const expectedTexts = expected
+      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+      .sort();
+
+    expect(resultTexts).toEqual(expectedTexts);
+
+    const expectedNonStringSuggestions = expected.filter(
+      (suggestion) => typeof suggestion !== 'string'
+    ) as PartialSuggestionWithText[];
+
+    for (const expectedSuggestion of expectedNonStringSuggestions) {
+      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+    }
   };
 
   return {

@@ -35,7 +35,7 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
+export function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
   return shouldBeQuotedText(text, options)
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
@@ -49,7 +49,7 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
-  const fullSignatures = getFunctionSignatures(fn);
+  const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
     label: fullSignatures[0].declaration,
     text: `${fn.name.toUpperCase()}($0)`,
@@ -69,7 +69,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
 export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
-    label: fn.name,
+    label: fn.name.toUpperCase(),
     text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
     kind: 'Operator',
@@ -265,7 +265,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: label,
+    text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
