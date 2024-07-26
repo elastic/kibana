@@ -31,6 +31,10 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
+  cpuTotal: {
+    formatter: InfraFormatterType.percent,
+    template: '{{value}}',
+  },
   diskIOReadBytes: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}/s',

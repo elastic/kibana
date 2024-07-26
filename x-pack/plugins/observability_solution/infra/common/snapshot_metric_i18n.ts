@@ -12,8 +12,12 @@ import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 // Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
 // these may need to be translated differently depending on language, e.g. still capitalizing "CPU"
 const TranslationsLowercase = {
+  CPUUsageTotal: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageTotalText', {
+    defaultMessage: 'CPU usage (total)',
+  }),
+
   CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
-    defaultMessage: 'CPU usage',
+    defaultMessage: 'CPU usage (user/system)',
   }),
 
   MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
@@ -98,6 +102,12 @@ export const toMetricOpt = (
   metric: SnapshotMetricType
 ): { text: string; textLC: string; value: SnapshotMetricType } | undefined => {
   switch (metric) {
+    case 'cpuTotal':
+      return {
+        text: Translations.CPUUsageTotal,
+        textLC: TranslationsLowercase.CPUUsageTotal,
+        value: 'cpuTotal',
+      };
     case 'cpu':
       return {
         text: Translations.CPUUsage,

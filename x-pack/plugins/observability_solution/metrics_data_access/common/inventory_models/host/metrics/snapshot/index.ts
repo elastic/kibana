@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cpuTotal } from './cpu_total';
 import { cpu } from './cpu';
 import { diskLatency } from './disk_latency';
 import { diskSpaceUsage } from './disk_space_usage';
@@ -19,6 +20,7 @@ import { rx } from './rx';
 import { tx } from './tx';
 
 export const snapshot = {
+  cpuTotal,
   cpu,
   diskLatency,
   diskSpaceUsage,
