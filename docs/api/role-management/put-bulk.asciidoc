@@ -1,4 +1,4 @@
-[[role-management-api-put-bulk-role]]
+[[role-management-api-put-bulk]]
 === Bulk create or update roles API
 ++++
 <titleabbrev>Bulk create or update roles API</titleabbrev>
