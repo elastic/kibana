@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiCodeBlock, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { EntityResolutionSuggestion } from '@kbn/elastic-assistant-common';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -68,10 +68,10 @@ const entityColumns: Array<EuiBasicTableColumn<EntityResolutionSuggestion>> = [
 
     render: (name: string) => <EuiText>{name}</EuiText>,
   },
-  {
-    field: 'document',
-    name: 'Document',
+  //   {
+  //     field: 'document',
+  //     name: 'Document',
 
-    render: (document: {}) => <EuiCodeBlock>{JSON.stringify(document)}</EuiCodeBlock>,
-  },
+  //     render: (document: {}) => <EuiCodeBlock>{JSON.stringify(document)}</EuiCodeBlock>,
+  //   },
 ];
