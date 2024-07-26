@@ -5,14 +5,55 @@
  * 2.0.
  */
 
-import type { SearchEntity } from '@kbn/elastic-assistant-common';
+import type { EntityResolutionCandidate, SearchEntity } from '@kbn/elastic-assistant-common';
 import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
+
+import type { RelatedEntityRelation } from '../../../../common/api/entity_analytics/entity_store/relations/common.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const useEntityResolutions = (entity: SearchEntity) => {
-  const { fetchEntityResolutions } = useEntityAnalyticsRoutes();
+  const { fetchEntityCandidates, fetchEntityRelations, createEntityRelation } =
+    useEntityAnalyticsRoutes();
 
-  return useQuery(['EA_LLM_ENTITY_RESOLUTION', entity], () =>
-    fetchEntityResolutions({ name: entity.name, type: entity.type })
+  const resolutions = useQuery(['EA_LLM_ENTITY_RESOLUTION', entity], () =>
+    Promise.all([
+      fetchEntityCandidates({ name: entity.name, type: entity.type }),
+      fetchEntityRelations({ name: entity.name, type: entity.type }),
+    ]).then(([{ suggestions = [] }, relations]) => {
+      const marked = (relation: RelatedEntityRelation) => (candidate: EntityResolutionCandidate) =>
+        relations.some(
+          (r) =>
+            r.relation === relation &&
+            r.entity.name === entity.name &&
+            r.related_entity.id === candidate.id
+        );
+      const same = suggestions.filter(marked('is_same'));
+      const different = suggestions.filter(marked('is_different'));
+      const candidates = suggestions.filter(
+        (candidate) => !same.includes(candidate) && !different.includes(candidate)
+      );
+
+      return { candidates, marked: { same, different }, relations };
+    })
   );
+
+  const markResolved = useCallback(
+    (target: SearchEntity & { id: string }, relation: RelatedEntityRelation) => {
+      createEntityRelation({
+        entity: {
+          name: entity.name,
+        },
+        entity_type: entity.type,
+        relation,
+        related_entity: {
+          name: target.name,
+          id: target.id,
+        },
+      }).then(() => resolutions.refetch());
+    },
+    [createEntityRelation, entity.name, entity.type, resolutions]
+  );
+
+  return { resolutions, markResolved };
 };

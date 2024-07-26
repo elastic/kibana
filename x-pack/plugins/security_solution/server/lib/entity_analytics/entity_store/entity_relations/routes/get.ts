@@ -21,6 +21,7 @@ export const getRelatedEntitiesRoute = (router: EntityAnalyticsRoutesDeps['route
       options: {
         tags: ['access:securitySolution'],
       },
+      enableQueryVersion: true,
     })
     .addVersion(
       {

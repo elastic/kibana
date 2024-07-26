@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -24,28 +25,39 @@ interface Props {
 }
 
 export const EntityResolutionTab = ({ username }: Props) => {
-  const entities = useEntityResolutions({ name: username, type: 'user' });
+  const { resolutions, markResolved } = useEntityResolutions({ name: username, type: 'user' });
 
   return (
     <>
       <EuiTitle>
         <h2>{'Observed Data'}</h2>
       </EuiTitle>
-      {entities.isLoading && <EuiLoadingSpinner size="xl" />}
-      {entities.data?.suggestions?.map(({ entity, confidence, document, id, reason }) => {
+      {resolutions.isLoading && <EuiLoadingSpinner size="xl" />}
+      {resolutions.data?.candidates?.map(({ entity, confidence, document, id, reason }) => {
+        if (!entity || !document || !id) return null;
         return (
           <EuiPanel hasBorder>
             <EuiFlexGroup justifyContent="spaceEvenly" direction="column">
               <EuiFlexGroup justifyContent="flexStart">
-                <EuiFlexItem>{entity?.name}</EuiFlexItem>
+                <EuiFlexItem>{entity.name}</EuiFlexItem>
 
                 <EuiFlexItem>{confidence}</EuiFlexItem>
                 <EuiFlexItem>{reason}</EuiFlexItem>
-                {/* {!entity.resolved && (
-                <EuiButton size="s" fill>
-                {'Mark as resolved'}
+
+                <EuiButtonEmpty
+                  size="m"
+                  onClick={() =>
+                    markResolved({ id, type: 'user', name: entity.name }, 'is_different')
+                  }
+                >
+                  {'Mark as different'}
+                </EuiButtonEmpty>
+                <EuiButton
+                  size="m"
+                  onClick={() => markResolved({ id, type: 'user', name: entity.name }, 'is_same')}
+                >
+                  {'Confirm as Same'}
                 </EuiButton>
-                )} */}
               </EuiFlexGroup>
               <EuiText>{reason}</EuiText>
               <EuiCodeBlock language="json">{JSON.stringify(document)}</EuiCodeBlock>

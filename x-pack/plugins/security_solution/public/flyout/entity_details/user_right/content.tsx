@@ -54,7 +54,7 @@ export const UserPanelContent = ({
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
-  const entityResolutions = useEntityResolutions({ name: userName, type: 'user' });
+  const { resolutions } = useEntityResolutions({ name: userName, type: 'user' });
 
   return (
     <FlyoutBody>
@@ -74,15 +74,26 @@ export const UserPanelContent = ({
         entity={{ name: userName, type: 'user' }}
         onChange={onAssetCriticalityChange}
       />
-      <EuiPanel hasBorder>
-        {entityResolutions.isLoading ? (
+      {resolutions.isLoading ? (
+        <EuiPanel hasBorder>
           <EuiLoadingSpinner size="xl" />
-        ) : (
-          <div onClick={() => openDetailsPanel?.(EntityDetailsLeftPanelTab.OBSERVED_DATA)}>
-            <EuiText>{`Found ${entityResolutions.data?.suggestions?.length} candidates`}</EuiText>
-          </div>
-        )}
-      </EuiPanel>
+        </EuiPanel>
+      ) : (
+        <EuiPanel
+          hasBorder
+          onClick={() => openDetailsPanel?.(EntityDetailsLeftPanelTab.OBSERVED_DATA)}
+        >
+          {resolutions.data && resolutions.data.candidates.length > 0 && (
+            <EuiText>{`Found ${resolutions.data?.candidates.length} candidates`}</EuiText>
+          )}
+          {resolutions.data?.marked.same.map(({ entity }) => {
+            if (!entity) return null;
+
+            return <EuiText>{entity.name}</EuiText>;
+          })}
+        </EuiPanel>
+      )}
+
       <EuiSpacer size="m" />
       <ObservedEntity
         observedData={observedUser}

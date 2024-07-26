@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { ENTITY_RESOLUTION } from '@kbn/elastic-assistant-plugin/common/constants';
 import type { EntityResolutionPostResponse, SearchEntity } from '@kbn/elastic-assistant-common';
+import type { EntityRelationRecord } from '../../../common/api/entity_analytics/entity_store/relations/common.gen';
 import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
@@ -44,6 +45,7 @@ import {
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { ENTITY_STORE_GET_RELATIONS_URL } from '../../../common/entity_analytics/entity_store/constants';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -234,7 +236,7 @@ export const useEntityAnalyticsRoutes = () => {
     /**
      * Fetches entity candidates
      */
-    const fetchEntityResolutions = async (entity: SearchEntity) =>
+    const fetchEntityCandidates = async (entity: SearchEntity) =>
       http.fetch<EntityResolutionPostResponse>(ENTITY_RESOLUTION, {
         version: '1',
         method: 'POST',
@@ -253,8 +255,28 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
-     * Fetched entity resolution candidates
+     * Fetched entity relations
      */
+    const fetchEntityRelations = async (entity: SearchEntity) =>
+      http.fetch<EntityRelationRecord[]>(ENTITY_STORE_GET_RELATIONS_URL, {
+        version: '1',
+        method: 'GET',
+        query: {
+          entity_type: entity.type,
+          entity_name: entity.name,
+          size: 10,
+        },
+      });
+
+    /**
+     * Create entity relation
+     */
+    const createEntityRelation = async (relation: EntityRelationRecord) =>
+      http.fetch<EntityRelationRecord[]>(ENTITY_STORE_GET_RELATIONS_URL, {
+        version: '1',
+        method: 'POST',
+        body: JSON.stringify(relation),
+      });
 
     return {
       fetchRiskScorePreview,
@@ -271,7 +293,9 @@ export const useEntityAnalyticsRoutes = () => {
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
-      fetchEntityResolutions,
+      fetchEntityCandidates,
+      fetchEntityRelations,
+      createEntityRelation,
     };
   }, [http]);
 };
