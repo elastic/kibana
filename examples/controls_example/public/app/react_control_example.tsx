@@ -12,6 +12,7 @@ import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
   EuiCodeBlock,
@@ -356,11 +357,32 @@ export const ReactControlExample = ({
           />
         </EuiFlexItem>
         {unsavedChanges !== undefined && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={<pre>{unsavedChanges}</pre>}>
-              <EuiBadge color="warning">Unsaved changes</EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={<pre>{unsavedChanges}</pre>}>
+                <EuiBadge color="warning">Unsaved changes</EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                isDisabled={!controlGroupApi}
+                onClick={() => {
+                  controlGroupApi?.resetUnsavedChanges();
+                }}
+              >
+                Reset
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => {
+                  saveNotification$.next();
+                }}
+              >
+                Submit
+              </EuiButton>
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
