@@ -29,8 +29,7 @@ api-docs-serverless: ## Generate only kibana.serverless.yaml
 	
 .PHONY: api-docs-lint
 api-docs-lint: ## Run spectral API docs linter 
-	@npx @stoplight/spectral-cli lint "output/kibana.serverless.yaml" --ruleset ".spectral.yaml"
-	@npx @stoplight/spectral-cli lint "output/kibana.yaml" --ruleset ".spectral.yaml"
+	@npx @stoplight/spectral-cli lint "output/*.yaml" --ruleset ".spectral.yaml"
 
 .PHONY: api-docs-lint-stateful
 api-docs-lint-stateful: ## Run spectral API docs linter on kibana.yaml

@@ -30,9 +30,6 @@ actions:
     description: Remove internal path
     remove: true
   # Remove operation-level security definitions
-  - target: "$.paths['/api/ml/saved_objects/sync']['get'].security"
-    description: Remove ML security definitions
-    remove: true
   - target: "$.paths['/api/status']['get'].security"
     description: Remove system security definitions
     remove: true
