@@ -12,7 +12,9 @@ import type { RuleParams } from '../../../rule_schema';
 
 import { isThresholdParams } from '../utils';
 
-const suppressionDurationToSeconds = (duration: AlertSuppressionDuration | undefined): number => {
+export const suppressionDurationToSeconds = (
+  duration: AlertSuppressionDuration | undefined
+): number => {
   if (!duration) {
     return -1;
   }
@@ -23,6 +25,8 @@ const suppressionDurationToSeconds = (duration: AlertSuppressionDuration | undef
       return duration.value * 60;
     case 'h':
       return duration.value * 60 * 60;
+    default:
+      return -1;
   }
 };
 
