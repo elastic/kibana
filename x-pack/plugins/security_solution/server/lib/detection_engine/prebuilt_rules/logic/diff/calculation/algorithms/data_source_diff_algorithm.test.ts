@@ -14,6 +14,7 @@ import {
   ThreeWayMergeOutcome,
   MissingVersion,
   DataSourceType,
+  ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine';
 import { dataSourceDiffAlgorithm } from './data_source_diff_algorithm';
 
@@ -42,7 +43,7 @@ describe('dataSourceDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -61,7 +62,7 @@ describe('dataSourceDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -88,7 +89,7 @@ describe('dataSourceDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -116,7 +117,7 @@ describe('dataSourceDiffAlgorithm', () => {
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -140,7 +141,7 @@ describe('dataSourceDiffAlgorithm', () => {
           merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -159,7 +160,7 @@ describe('dataSourceDiffAlgorithm', () => {
           merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -188,7 +189,7 @@ describe('dataSourceDiffAlgorithm', () => {
         merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
-        has_conflict: false,
+        conflict: ThreeWayDiffConflict.NONE,
       })
     );
   });
@@ -222,7 +223,7 @@ describe('dataSourceDiffAlgorithm', () => {
           merged_version: expectedMergedVersion,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Merged,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
         })
       );
     });
@@ -240,8 +241,8 @@ describe('dataSourceDiffAlgorithm', () => {
         expect.objectContaining({
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Conflict,
-          has_conflict: true,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
         })
       );
     });
@@ -265,8 +266,8 @@ describe('dataSourceDiffAlgorithm', () => {
         expect.objectContaining({
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Conflict,
-          has_conflict: true,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
         })
       );
     });
@@ -287,8 +288,8 @@ describe('dataSourceDiffAlgorithm', () => {
         expect.objectContaining({
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Conflict,
-          has_conflict: true,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
         })
       );
     });
@@ -312,8 +313,8 @@ describe('dataSourceDiffAlgorithm', () => {
         expect.objectContaining({
           merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Conflict,
-          has_conflict: true,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
         })
       );
     });
@@ -337,10 +338,12 @@ describe('dataSourceDiffAlgorithm', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
+          has_base_version: false,
+          base_version: undefined,
           merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+          diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.NONE,
         })
       );
     });
@@ -359,10 +362,12 @@ describe('dataSourceDiffAlgorithm', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
+          has_base_version: false,
+          base_version: undefined,
           merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
-          has_conflict: false,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
         })
       );
     });

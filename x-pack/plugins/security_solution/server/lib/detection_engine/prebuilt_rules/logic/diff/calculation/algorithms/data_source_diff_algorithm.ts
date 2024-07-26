@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { union, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
   RuleDataSource,
@@ -20,6 +20,7 @@ import {
   MissingVersion,
   DataSourceType,
   determineOrderAgnosticDiffOutcome,
+  ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { mergeDedupedArrays } from './helpers';
 
@@ -65,33 +66,37 @@ export const dataSourceDiffAlgorithm = (
 
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
-  const { mergeOutcome, mergedVersion } = mergeVersions({
-    baseVersion,
+  const hasBaseVersion = baseVersion !== MissingVersion;
+
+  const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
+    baseVersion: hasBaseVersion ? baseVersion : undefined,
     currentVersion,
     targetVersion,
     diffOutcome,
   });
 
   return {
-    base_version: baseVersion,
+    has_base_version: hasBaseVersion,
+    base_version: hasBaseVersion ? baseVersion : undefined,
     current_version: currentVersion,
     target_version: targetVersion,
     merged_version: mergedVersion,
+    merge_outcome: mergeOutcome,
 
     diff_outcome: diffOutcome,
-    merge_outcome: mergeOutcome,
+    conflict,
     has_update: valueCanUpdate,
-    has_conflict: mergeOutcome === ThreeWayMergeOutcome.Conflict,
   };
 };
 
 interface MergeResult {
   mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: RuleDataSource;
+  conflict: ThreeWayDiffConflict;
 }
 
 interface MergeArgs {
-  baseVersion: RuleDataSource | MissingVersion;
+  baseVersion: RuleDataSource | undefined;
   currentVersion: RuleDataSource;
   targetVersion: RuleDataSource;
   diffOutcome: ThreeWayDiffOutcome;
@@ -103,55 +108,39 @@ const mergeVersions = ({
   targetVersion,
   diffOutcome,
 }: MergeArgs): MergeResult => {
-  const dedupedBaseVersion =
-    baseVersion !== MissingVersion ? getDedupedDataSourceVersion(baseVersion) : MissingVersion;
+  const dedupedBaseVersion = baseVersion ? getDedupedDataSourceVersion(baseVersion) : baseVersion;
   const dedupedCurrentVersion = getDedupedDataSourceVersion(currentVersion);
   const dedupedTargetVersion = getDedupedDataSourceVersion(targetVersion);
 
   switch (diffOutcome) {
+    // Scenario -AA is treated as scenario AAA:
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: {
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
       return {
+        conflict: ThreeWayDiffConflict.NONE,
         mergeOutcome: ThreeWayMergeOutcome.Current,
         mergedVersion: dedupedCurrentVersion,
       };
-    }
-    case ThreeWayDiffOutcome.StockValueCanUpdate: {
+
+    case ThreeWayDiffOutcome.StockValueCanUpdate:
       return {
+        conflict: ThreeWayDiffConflict.NONE,
         mergeOutcome: ThreeWayMergeOutcome.Target,
         mergedVersion: dedupedTargetVersion,
       };
-    }
-    case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      if (dedupedBaseVersion === MissingVersion) {
-        if (
-          dedupedCurrentVersion.type === DataSourceType.index_patterns &&
-          dedupedTargetVersion.type === DataSourceType.index_patterns
-        ) {
-          return {
-            mergeOutcome: ThreeWayMergeOutcome.Merged,
-            mergedVersion: {
-              type: DataSourceType.index_patterns,
-              index_patterns: union(
-                dedupedCurrentVersion.index_patterns,
-                dedupedTargetVersion.index_patterns
-              ),
-            },
-          };
-        }
-        return {
-          mergeOutcome: ThreeWayMergeOutcome.Conflict,
-          mergedVersion: dedupedCurrentVersion,
-        };
-      }
 
+    case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       if (
+        dedupedBaseVersion &&
         dedupedBaseVersion.type === DataSourceType.index_patterns &&
         dedupedCurrentVersion.type === DataSourceType.index_patterns &&
         dedupedTargetVersion.type === DataSourceType.index_patterns
       ) {
         return {
+          conflict: ThreeWayDiffConflict.SOLVABLE,
           mergeOutcome: ThreeWayMergeOutcome.Merged,
           mergedVersion: {
             type: DataSourceType.index_patterns,
@@ -164,8 +153,20 @@ const mergeVersions = ({
         };
       }
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Conflict,
+        conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+        mergeOutcome: ThreeWayMergeOutcome.Current,
         mergedVersion: dedupedCurrentVersion,
+      };
+    }
+
+    // Scenario -AB is treated as scenario ABC, but marked as
+    // SOLVABLE, and returns the target version as the merged version
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
+      return {
+        mergedVersion: targetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
       };
     }
     default:
