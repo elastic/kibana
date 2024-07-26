@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';

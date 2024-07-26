@@ -62,6 +62,7 @@ export type ControlGroupApi = PresentationContainer &
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+    untilInitialized: () => Promise<void>;
   };
 
 export interface ControlGroupRuntimeState {

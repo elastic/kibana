@@ -7,13 +7,10 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import deepEqual from 'react-fast-compare';
-
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
@@ -58,7 +55,7 @@ export const getRangesliderControlFactory = (
         </>
       );
     },
-    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
@@ -125,10 +122,7 @@ export const getRangesliderControlFactory = (
         dataControl.stateManager.fieldName,
         dataControl.stateManager.dataViewId,
       ])
-        .pipe(
-          distinctUntilChanged(deepEqual),
-          skip(1) // skip first filter output because it will have been applied in initialize
-        )
+        .pipe(skip(1))
         .subscribe(() => {
           step$.next(1);
           value$.next(undefined);
@@ -205,6 +199,10 @@ export const getRangesliderControlFactory = (
       }).subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
+
+      if (initialState.value !== undefined) {
+        await dataControl.untilFiltersInitialized();
+      }
 
       return {
         api,

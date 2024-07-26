@@ -296,7 +296,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('schedule manual rule run action', () => {
+    describe('@skipInServerless @skipInServerlessMKI schedule manual rule run action', () => {
       it('should return all existing and enabled rules as succeeded', async () => {
         const intervalInMinutes = 25;
         const interval = `${intervalInMinutes}m`;
