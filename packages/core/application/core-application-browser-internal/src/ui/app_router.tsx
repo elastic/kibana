@@ -10,7 +10,7 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Router, Routes, Route, RouterProvider } from '@kbn/shared-ux-router';
 import { History } from 'history';
-import { EMPTY, Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -18,8 +18,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { HttpServiceStart } from '@kbn/core-http-server';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -34,8 +33,7 @@ interface Props {
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
   hasCustomBranding$?: Observable<boolean>;
-  http: HttpServiceStart;
-  executionContext: KibanaExecutionContext;
+  appId$: BehaviorSubject<string | undefined>;
 }
 
 interface Params {
@@ -52,7 +50,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   appStatuses$,
   setIsMounting,
   hasCustomBranding$,
-  executionContext,
+  appId$,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
@@ -61,11 +59,12 @@ export const AppRouter: FunctionComponent<Props> = ({
   );
 
   const showPlainSpinner = useObservable(hasCustomBranding$ ?? EMPTY, false);
+  const { context$, get, set, clear } = new ExecutionContextService().start({ curApp$: appId$ });
 
   return (
     <KibanaErrorBoundaryProvider analytics={analytics}>
       <KibanaErrorBoundary>
-        <RouterProvider executionContext={executionContext}>
+        <RouterProvider context$={context$} get={get} set={set} clear={clear}>
           <Router history={history}>
             <Routes>
               {[...mounters].map(([appId, mounter]) => (

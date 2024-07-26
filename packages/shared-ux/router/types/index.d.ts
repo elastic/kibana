@@ -15,9 +15,8 @@ export interface SharedUXRouterServices {
 
 // packages/core/execution-context/core-execution-context-browser/src/types.ts
 export interface KibanaSharedUXRouterProviderDeps {
-  executionContext: Partial<KibanaExecutionContext>;
-  //   context$: Observable<KibanaExecutionContext>;
-  //   set(c$: KibanaExecutionContext): void;
-  //   get(): KibanaExecutionContext;
-  //   clear(): void;
+  context$: Observable<KibanaExecutionContext>;
+  set(c$: KibanaExecutionContext): void;
+  get(): KibanaExecutionContext;
+  clear(): void;
 }
