@@ -21,6 +21,7 @@ import {
   OptionsListDisplaySettings,
 } from '../types';
 import { OptionsListPopover } from './options_list_popover';
+import { BehaviorSubject } from 'rxjs';
 
 describe('Options list popover', () => {
   const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
@@ -245,6 +246,58 @@ describe('Options list popover', () => {
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
       const availableOptions = within(availableOptionsList).getAllByRole('option');
       expect(availableOptions[0]).toHaveTextContent('Exists. Checked option.');
+    });
+  });
+
+  describe('field formatter', () => {
+    const mocks = getOptionsListMocks();
+    const mockedFormatter = jest
+      .fn()
+      .mockImplementation((value: string | number) => `formatted:${value}`);
+    mocks.api.fieldFormatter = new BehaviorSubject(
+      mockedFormatter as (value: string | number) => string
+    );
+
+    afterEach(() => {
+      mockedFormatter.mockClear();
+    });
+
+    test('uses field formatter on suggestions', async () => {
+      mocks.api.availableOptions$.next([
+        { value: 1000, docCount: 1 },
+        { value: 123456789, docCount: 4 },
+      ]);
+      mocks.api.fieldSpec.next({
+        name: 'Test number field',
+        type: 'number',
+      } as FieldSpec);
+      const popover = mountComponent(mocks);
+
+      expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1000);
+      expect(mockedFormatter).toHaveBeenNthCalledWith(2, 123456789);
+      const options = await popover.findAllByRole('option');
+      expect(options[0].textContent).toEqual('Exists');
+      expect(
+        options[1].getElementsByClassName('euiSelectableListItem__text')[0].textContent
+      ).toEqual('formatted:1000');
+      expect(
+        options[2].getElementsByClassName('euiSelectableListItem__text')[0].textContent
+      ).toEqual('formatted:123456789');
+    });
+
+    test('converts string to number for date field', async () => {
+      mocks.api.availableOptions$.next([
+        { value: 1721283696000, docCount: 1 },
+        { value: 1721295533000, docCount: 2 },
+      ]);
+      mocks.api.fieldSpec.next({
+        name: 'Test date field',
+        type: 'date',
+      } as FieldSpec);
+
+      mountComponent(mocks);
+      expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1721283696000);
+      expect(mockedFormatter).toHaveBeenNthCalledWith(2, 1721295533000);
     });
   });
 
