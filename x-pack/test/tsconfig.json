@@ -175,6 +175,7 @@
     "@kbn/securitysolution-lists-common",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/entityManager-plugin",
-    "@kbn/osquery-plugin"
+    "@kbn/osquery-plugin",
+    "@kbn/entities-schema"
   ]
 }
