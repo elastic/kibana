@@ -23,7 +23,13 @@ const mockDispatch = jest.fn();
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
     core: { application: {} },
-    docLinks: {},
+    docLinks: {
+      links: {
+        enterpriseSearch: {
+          inferenceApiCreate: 'https://abc.com/inference-api-create',
+        },
+      },
+    },
     plugins: {
       ml: {
         mlApi: {
@@ -93,7 +99,7 @@ describe('SelectInferenceId', () => {
 
   it('should contain the buttons for InferenceEndpoint management', () => {
     find('inferenceIdButton').simulate('click');
-    expect(exists('addInferenceEndpointButton')).toBe(true);
+    expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
     expect(exists('manageInferenceEndpointButton')).toBe(true);
   });
 

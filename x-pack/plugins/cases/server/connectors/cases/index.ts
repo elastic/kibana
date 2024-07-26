@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AlertingConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -56,7 +60,11 @@ export const getCasesConnectorType = ({
     config: CasesConnectorConfigSchema,
     secrets: CasesConnectorSecretsSchema,
   },
-  supportedFeatureIds: [UptimeConnectorFeatureId, AlertingConnectorFeatureId],
+  supportedFeatureIds: [
+    UptimeConnectorFeatureId,
+    AlertingConnectorFeatureId,
+    SecurityConnectorFeatureId,
+  ],
   minimumLicenseRequired: 'platinum' as const,
   isSystemActionType: true,
   getKibanaPrivileges: ({ params } = { params: { subAction: 'run', subActionParams: {} } }) => {
