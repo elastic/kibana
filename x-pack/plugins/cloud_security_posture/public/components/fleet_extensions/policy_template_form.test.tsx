@@ -1671,7 +1671,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
-      // select agent-based and check for ARM template option
+      // select agentless and check for ARM template option
       userEvent.click(setupTechnologySelector);
       const agentlessOption = getByRole('option', { name: /agentless/i });
       await waitForEuiPopoverOpen();

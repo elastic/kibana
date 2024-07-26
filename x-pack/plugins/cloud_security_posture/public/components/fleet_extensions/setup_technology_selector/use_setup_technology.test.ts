@@ -63,7 +63,7 @@ describe('useSetupTechnology', () => {
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
-    it('calls handleSetupTechnologyChange when setupTechnology changes', async () => {
+    it('calls handleSetupTechnologyChange when setupTechnology changes', () => {
       const handleSetupTechnologyChangeMock = jest.fn();
       const { result } = renderHook(() =>
         useSetupTechnology({

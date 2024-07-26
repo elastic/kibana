@@ -53,7 +53,7 @@ export const SetupTechnologySelector = ({
       />
     );
     return (
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem css={{ paddingTop: !isDropDownDisplay ? euiTheme.size.xs : undefined }}>
           <EuiBetaBadge
@@ -69,7 +69,7 @@ export const SetupTechnologySelector = ({
               'xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay.techPreviewBadge.tooltip',
               {
                 defaultMessage:
-                  'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                  'This functionality is in technical preview and may be changed in a future release. Please help us by reporting any bugs.',
               }
             )}
           />
