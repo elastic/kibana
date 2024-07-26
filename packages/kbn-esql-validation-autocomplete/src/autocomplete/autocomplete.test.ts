@@ -20,6 +20,10 @@ import { FunctionParameter } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
+import { SuggestionRawDefinition } from './types';
+import { getFunctionSignatures } from '../definitions/helpers';
+
+export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
 
 interface Integration {
   name: string;
@@ -196,13 +200,25 @@ function getFunctionSignaturesByReturnType(
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map(({ type, name, signatures }) => {
+    .map<PartialSuggestionWithText>((definition) => {
+      const { type, name, signatures } = definition;
+
       if (type === 'builtin') {
-        return signatures.some(({ params }) => params.length > 1)
-          ? `${name.toUpperCase()} $0`
-          : name.toUpperCase();
+        return {
+          text: signatures.some(({ params }) => params.length > 1)
+            ? `${name.toUpperCase()} $0`
+            : name.toUpperCase(),
+          label: name.toUpperCase(),
+        };
       }
-      return `${name.toUpperCase()}($0)`;
+      const printedSignatures = getFunctionSignatures(definition, {
+        withTypes: true,
+        capitalize: true,
+      });
+      return {
+        text: `${name.toUpperCase()}($0)`,
+        label: printedSignatures[0].declaration,
+      };
     });
 }
 
@@ -271,14 +287,14 @@ function getPolicyFields(policyName: string) {
 describe('autocomplete', () => {
   type TestArgs = [
     string,
-    string[],
+    Array<string | PartialSuggestionWithText>,
     (string | number)?,
     Parameters<typeof createCustomCallbackMocks>?
   ];
 
   const testSuggestionsFn = (
     statement: string,
-    expected: string[],
+    expected: Array<string | PartialSuggestionWithText>,
     triggerCharacter: string | number = '',
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
@@ -312,10 +328,22 @@ describe('autocomplete', () => {
           callbackMocks
         );
 
-        const sortedSuggestions = suggestions.map((suggestion) => suggestion.text).sort();
-        const sortedExpected = expected.sort();
+        const sortedSuggestionTexts = suggestions.map((suggestion) => suggestion.text).sort();
+        const sortedExpectedTexts = expected
+          .map((suggestion) =>
+            typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''
+          )
+          .sort();
 
-        expect(sortedSuggestions).toEqual(sortedExpected);
+        expect(sortedSuggestionTexts).toEqual(sortedExpectedTexts);
+        const expectedNonStringSuggestions = expected.filter(
+          (suggestion) => typeof suggestion !== 'string'
+        ) as PartialSuggestionWithText[];
+
+        for (const expectedSuggestion of expectedNonStringSuggestions) {
+          const suggestion = suggestions.find((s) => s.text === expectedSuggestion.text);
+          expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+        }
       }
     );
   };
@@ -786,13 +814,12 @@ describe('autocomplete', () => {
     ]);
 
     // expect "bucket" NOT to be suggested for its own parameter
-    testSuggestions(
-      'from a | stats by bucket(',
-      [
-        ...getFieldNamesByType(['number', 'date']),
-        ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }),
-      ].map((field) => `${field},`)
-    );
+    testSuggestions('from a | stats by bucket(', [
+      ...getFieldNamesByType(['number', 'date']).map((field) => `${field},`),
+      ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { evalMath: true }).map(
+        (s) => ({ ...s, text: s.text + ',' })
+      ),
+    ]);
 
     testSuggestions('from a | stats avg(b) by numberField % 2 ', [',', '|']);
 
@@ -1104,7 +1131,7 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('string').map((v) => `${v},`),
       ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }, undefined, [
         'concat',
-      ]).map((v) => `${v},`),
+      ]).map((v) => ({ ...v, text: `${v.text},` })),
     ]);
     testSuggestions('from a | eval a=concat(stringField, ', [
       ...getFieldNamesByType('string'),
@@ -1124,7 +1151,7 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('ip').map((v) => `${v},`),
       ...getFunctionSignaturesByReturnType('eval', 'ip', { evalMath: true }, undefined, [
         'cidr_match',
-      ]).map((v) => `${v},`),
+      ]).map((v) => ({ ...v, text: `${v.text},` })),
     ]);
     testSuggestions('from a | eval a=cidr_match(ipField, ', [
       ...getFieldNamesByType('string'),
@@ -1201,25 +1228,29 @@ describe('autocomplete', () => {
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
+              const addCommaIfRequired = (s: string | PartialSuggestionWithText) => {
+                // don't add commas to the empty string or if there are no more required args
+                if (!requiresMoreArgs || s === '' || (typeof s === 'object' && s.text === '')) {
+                  return s;
+                }
+                return typeof s === 'string' ? `${s},` : { ...s, text: `${s.text},` };
+              };
+
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-                        (f) => (requiresMoreArgs ? `${f},` : f)
-                      ),
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
                         getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
-                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-                        requiresMoreArgs ? `${d},` : d
                       ),
-                    ]
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+                    ].map(addCommaIfRequired)
               );
               testSuggestions(
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
@@ -1228,20 +1259,16 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-                        (f) => (requiresMoreArgs ? `${f},` : f)
-                      ),
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
                         getTypesFromParamDefs(acceptsFieldParamDefs),
                         { evalMath: true },
                         undefined,
                         [fn.name]
-                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-                        requiresMoreArgs ? `${d},` : d
                       ),
-                    ]
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+                    ].map(addCommaIfRequired)
               );
             }
           });
@@ -1283,13 +1310,14 @@ describe('autocomplete', () => {
           'number',
         ]),
       ]);
+
       testSuggestions(
         'from a | eval var0=date_trunc()',
         [
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
           ...getFunctionSignaturesByReturnType('eval', 'date', { evalMath: true }, undefined, [
             'date_trunc',
-          ]).map((t) => `${t},`),
+          ]).map((t) => ({ ...t, text: `${t.text},` })),
           ...getFieldNamesByType('date').map((t) => `${t},`),
         ],
         '('
