@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { InferenceStatsResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service/trained_models';
 import { useKibana } from './use_kibana';
 import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../common/constants';
 
@@ -17,7 +18,7 @@ export const useTrainedModelStats = () => {
     queryFn: async () => {
       const response = await services.ml?.mlApi?.trainedModels.getTrainedModelStats();
 
-      return response;
+      return response || ({ count: 0, trained_model_stats: [] } as InferenceStatsResponse);
     },
   });
 };

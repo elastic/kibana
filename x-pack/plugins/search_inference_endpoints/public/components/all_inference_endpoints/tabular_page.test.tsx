@@ -10,6 +10,8 @@ import { screen } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../../common/constants';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const inferenceEndpoints = [
   {
@@ -43,8 +45,15 @@ jest.mock('../../hooks/use_delete_endpoint', () => ({
 }));
 
 describe('When the tabular page is loaded', () => {
+  const queryClient = new QueryClient();
+  queryClient.setQueryData([TRAINED_MODEL_STATS_QUERY_KEY], {
+    trained_model_stats: [{ model_id: '.elser_model_2', deployment_stats: { state: 'started' } }],
+  });
+  const wrapper = ({ children }: { children: React.ReactNode }) => {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  };
   beforeEach(() => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+    render(wrapper({ children: <TabularPage inferenceEndpoints={inferenceEndpoints} /> }));
   });
 
   it('should display all model_ids in the table', () => {

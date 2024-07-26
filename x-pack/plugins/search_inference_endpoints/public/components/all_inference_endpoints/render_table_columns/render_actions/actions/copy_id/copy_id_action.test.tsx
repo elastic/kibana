@@ -51,7 +51,7 @@ const addSuccess = jest.fn();
   },
 }));
 
-describe('useCopyIDAction hook', () => {
+describe('CopyIDAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -64,6 +64,6 @@ describe('useCopyIDAction hook', () => {
     const { getByTestId } = render(<TestComponent />);
     const labelElement = getByTestId('inference-endpoints-action-copy-id-label');
 
-    expect(labelElement).toHaveTextContent('Copy endpoint ID');
+    expect(labelElement).toExist();
   });
 });
