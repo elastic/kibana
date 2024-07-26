@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
       if (await isServerlessKibanaFlavor(kbnClient)) {
         log.info('login for serverless environment');
         const pageObjects = getPageObjects(['svlCommonPage']);
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginWithRole('endpoint_operations_analyst');
       }
     });
     loadTestFile(require.resolve('./endpoint_list'));
