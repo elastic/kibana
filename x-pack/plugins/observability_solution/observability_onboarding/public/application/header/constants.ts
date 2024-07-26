@@ -27,7 +27,7 @@ export const headerContent: Record<string, CustomHeaderSection> = {
       'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.kubernetes.caption.description',
       {
         defaultMessage:
-          'This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host',
+          'This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host.',
       }
     ),
   },
