@@ -22,9 +22,7 @@ export const useFieldFormatter = ({
   const {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
-  const [fieldFormatter, setFieldFormatter] = useState(
-    () => (toFormat: OptionsListSelection) => toFormat
-  );
+  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: any) => String(toFormat));
 
   /**
    * derive field formatter from fieldSpec and dataViewId
@@ -37,7 +35,7 @@ export const useFieldFormatter = ({
       setFieldFormatter(
         () =>
           dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: OptionsListSelection) => toFormat)
+          ((toFormat: any) => String(toFormat))
       );
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);

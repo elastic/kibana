@@ -41,7 +41,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
       return {
         key: String(key),
-        label: String(fieldFormatter(key)),
+        label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
         'data-test-subj': `optionsList-control-invalid-selection-${key}`,
