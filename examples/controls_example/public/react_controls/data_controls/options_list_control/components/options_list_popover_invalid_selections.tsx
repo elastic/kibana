@@ -40,7 +40,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     /* This useEffect makes selectableOptions responsive to unchecking options */
     const options: EuiSelectableOption[] = Array.from(invalidSelections).map((key) => {
       return {
-        key,
+        key: String(key),
         label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
@@ -91,7 +91,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          api.deselectOption(changedOption.key ?? changedOption.label);
+          api.deselectOption(changedOption.key);
         }}
       >
         {(list) => list}

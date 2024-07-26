@@ -22,11 +22,11 @@ import {
 import { ControlGroupApi } from '../control_group/types';
 import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types';
 
-export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: string) => string);
+export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
 export interface PublishesFieldSpec {
   fieldSpec: PublishingSubject<FieldSpec | undefined>;
-  fieldFormatter: PublishingSubject<FieldFormatConvertFunction | ((toFormat: string) => string)>;
+  fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
 export type DataControlApi = DefaultControlApi &

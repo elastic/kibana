@@ -95,8 +95,8 @@ export const OptionsListPopoverSuggestions = ({
       }
 
       return {
-        key: suggestion.value,
-        label: fieldFormatter(suggestion.value) ?? suggestion.value,
+        key: String(suggestion.value),
+        label: String(fieldFormatter(suggestion.value) ?? suggestion.value),
         checked: (selectedOptions ?? []).includes(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
@@ -192,9 +192,8 @@ export const OptionsListPopoverSuggestions = ({
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, _, changedOption) => {
-            const key = changedOption.key ?? changedOption.label;
             setSelectableOptions(newSuggestions);
-            api.makeSelection(key, showOnlySelected);
+            api.makeSelection(changedOption.key, showOnlySelected);
           }}
         >
           {(list) => list}

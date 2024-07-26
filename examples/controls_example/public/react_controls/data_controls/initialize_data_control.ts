@@ -50,8 +50,8 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const fieldSpec = new BehaviorSubject<FieldSpec | undefined>(undefined);
-  const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>(
-    (toFormat: string) => toFormat
+  const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
+    String(toFormat)
   );
 
   const stateManager: ControlStateManager<DefaultDataControlState> = {

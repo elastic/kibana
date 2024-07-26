@@ -19,6 +19,10 @@ import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
+import {
+  getSelectionAsFieldType,
+  OptionsListSelection,
+} from '../../../../common/options_list/options_list_selections';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';
@@ -32,7 +36,7 @@ import {
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
-import { OptionsListControlApi, OptionsListControlState, OptionsListSelection } from './types';
+import { OptionsListControlApi, OptionsListControlState } from './types';
 
 export const getOptionsListControlFactory = (
   services: DataControlServices
@@ -278,10 +282,18 @@ export const getOptionsListControlFactory = (
         totalCardinality$,
         availableOptions$,
         invalidSelections$,
-        deselectOption: (key: string) => {
+        deselectOption: (key: string | undefined) => {
+          const fieldSpec = api.fieldSpec.getValue();
+          if (!key || !fieldSpec) {
+            api.setBlockingError(new Error('Error when making selection'));
+            return;
+          }
+
+          const keyAsType = getSelectionAsFieldType(fieldSpec, key);
+
           // delete from selections
           const selectedOptions = selections$.getValue() ?? [];
-          const itemIndex = (selections$.getValue() ?? []).indexOf(key);
+          const itemIndex = (selections$.getValue() ?? []).indexOf(keyAsType);
           if (itemIndex !== -1) {
             const newSelections = [...selectedOptions];
             newSelections.splice(itemIndex, 1);
@@ -289,34 +301,44 @@ export const getOptionsListControlFactory = (
           }
           // delete from invalid selections
           const currentInvalid = invalidSelections$.getValue();
-          if (currentInvalid.has(key)) {
-            currentInvalid.delete(key);
+          if (currentInvalid.has(keyAsType)) {
+            currentInvalid.delete(keyAsType);
             invalidSelections$.next(new Set(currentInvalid));
           }
         },
-        makeSelection: (key: string, showOnlySelected: boolean) => {
+        makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
           const existsSelected = Boolean(existsSelected$.getValue());
           const selectedOptions = selections$.getValue() ?? [];
           const singleSelect = singleSelect$.getValue();
+          const fieldSpec = api.fieldSpec.getValue();
+          if (!key || !fieldSpec) {
+            api.setBlockingError(new Error('Error when making selection'));
+            return;
+          }
 
-          // the order of these checks matters, so be careful if rearranging them
           if (key === 'exists-option') {
+            // if selecting exists, then deselect everything else
             existsSelected$.next(!existsSelected);
             if (!existsSelected) {
               selections$.next([]);
               invalidSelections$.next(new Set([]));
             }
-          } else if (showOnlySelected || selectedOptions.includes(key)) {
+            return;
+          }
+
+          // the order of these checks matters, so be careful if rearranging them
+          const keyAsType = getSelectionAsFieldType(fieldSpec, key);
+          if (showOnlySelected || selectedOptions.includes(keyAsType)) {
             componentApi.deselectOption(key);
           } else if (singleSelect) {
             // replace selection
-            selections$.next([key]);
+            selections$.next([keyAsType]);
             if (existsSelected) existsSelected$.next(false);
           } else {
             // select option
             if (!selectedOptions) selections$.next([]);
             if (existsSelected) existsSelected$.next(false);
-            selections$.next([...selectedOptions, key]);
+            selections$.next([...selectedOptions, keyAsType]);
           }
         },
       };

@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
-import { DataControlApi, DefaultDataControlState } from '../types';
 
-export type OptionsListSelection = string | number;
+import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+import { DataControlApi, DefaultDataControlState } from '../types';
 
 export interface OptionsListDisplaySettings {
   placeholder?: string;
@@ -52,7 +53,7 @@ interface PublishesOptions {
 
 export type OptionsListComponentApi = OptionsListControlApi &
   PublishesOptions & {
-    deselectOption: (key: string) => void;
-    makeSelection: (key: string, showOnlySelected: boolean) => void;
+    deselectOption: (key: string | undefined) => void;
+    makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: BehaviorSubject<null>;
   };
