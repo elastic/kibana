@@ -150,18 +150,18 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
   } as VisualizeSavedVisInputState;
 };
 
-export const serializeState = ({
-  serializedVis, // Serialize the vis before passing it to this function for easier testing
-  titles,
-  id,
-  savedObjectProperties,
-  linkedToLibrary,
-}: {
+export const serializeState: (props: {
   serializedVis: SerializedVis;
   titles: SerializedTitles;
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
+}) => Required<SerializedPanelState<VisualizeSerializedState>> = ({
+  serializedVis, // Serialize the vis before passing it to this function for easier testing
+  titles,
+  id,
+  savedObjectProperties,
+  linkedToLibrary,
 }) => {
   const titlesWithDefaults = {
     title: '',
@@ -202,7 +202,7 @@ export const serializeState = ({
             : {}),
         },
       },
-    },
+    } as VisualizeSavedVisInputState,
     references,
   };
 };

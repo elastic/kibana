@@ -25,15 +25,14 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { get, isEmpty, isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import React, { useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
-import { getInspector, getTimeFilter, getUiActions } from '../services';
+import { getInspector, getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
-import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_handler';
 import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
@@ -187,32 +186,6 @@ export const getVisualizeEmbeddableFactory: (
             titlesApi.setPanelTitle(visUpdates.title);
           }
         },
-        subscribeToSerializedStateChanges: (listener) => serializedVis$.subscribe(listener),
-        subscribeToVisInstance: (listener) => vis$.subscribe(listener),
-        subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
-        subscribeToVisData: (listener) => visData$.subscribe(listener),
-        subscribeToHasInspector: (listener) =>
-          inspectorAdapters$.subscribe((value) => listener(!isEmpty(value))),
-        subscribeToNavigateToLens: (listener) =>
-          vis$
-            .pipe(
-              switchMap((vis) => {
-                return (async () => {
-                  if (!vis.type.navigateToLens) return;
-                  const expressionVariables = await vis.type.getExpressionVariables?.(
-                    vis,
-                    getTimeFilter()
-                  );
-                  if (!expressionVariables?.canNavigateToLens) return;
-                  const navigateToLens: NavigateToLensFn = async (timefilter) =>
-                    vis.type.navigateToLens!(vis, timefilter);
-                  return navigateToLens;
-                })();
-              })
-            )
-            .subscribe(async (navigateToLensFn) => {
-              if (navigateToLensFn) listener(navigateToLensFn);
-            }),
         openInspector: () => {
           const adapters = inspectorAdapters$.getValue();
           if (!adapters) return;

@@ -19,7 +19,6 @@ import { DeepPartial } from '@kbn/utility-types';
 import { HasVisualizeConfig } from '../embeddable';
 import type { Vis, VisParams, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
-import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_handler';
 
 export type ExtraSavedObjectProperties = Pick<
   VisSavedObject,
@@ -76,12 +75,6 @@ export type VisualizeApi = HasEditCapabilities &
   HasInspectorAdapters &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
-    subscribeToSerializedStateChanges: (listener: () => void) => void;
-    subscribeToVisInstance: (listener: (vis: Vis<VisParams>) => void) => void;
-    subscribeToInitialRender: (listener: () => void) => void;
-    subscribeToVisData: (listener: (data: unknown) => void) => void;
-    subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;
-    subscribeToNavigateToLens: (listener: (navigateFn: NavigateToLensFn) => void) => void;
     openInspector: () => OverlayRef | undefined;
     saveToLibrary: (title: string) => Promise<string>;
     canLinkToLibrary: () => boolean;

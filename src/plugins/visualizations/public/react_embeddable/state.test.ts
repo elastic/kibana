@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { serializeState, deserializeSavedVisState } from './state';
+import { VisualizeSavedVisInputState } from './types';
 
 describe('visualize_embeddable state', () => {
   test('extracts saved search references for search source state and does not store them in state', () => {
@@ -37,7 +39,7 @@ describe('visualize_embeddable state', () => {
         title: 'owo',
       },
       titles: {},
-    });
+    }) as SerializedPanelState<VisualizeSavedVisInputState>;
     expect(references).toEqual([
       {
         type: 'search',
@@ -76,7 +78,7 @@ describe('visualize_embeddable state', () => {
         title: 'owo',
       },
       titles: {},
-    });
+    }) as SerializedPanelState<VisualizeSavedVisInputState>;
     expect(references).toEqual([
       {
         type: 'index-pattern',
