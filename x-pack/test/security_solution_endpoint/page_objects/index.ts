@@ -17,7 +17,7 @@ import { EndpointPolicyPageProvider } from './policy_page';
 import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { FleetIntegrations } from './fleet_integrations_page';
 import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
-import { SvlCommonPageProvider } from './svl_common_page';
+import { SvlCommonPageProvider } from '../../../test_serverless/functional/page_objects/svl_common_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,

@@ -19,6 +19,8 @@ import {
 } from './supertest_with_cert';
 import { SecuritySolutionEndpointDataStreamHelpers } from '../../common/services/security_solution/endpoint_data_stream_helpers';
 import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution/endpoint_registry_helpers';
+import { SvlUserManagerProvider } from '../../../test_serverless/shared/services/svl_user_manager';
+import { SvlCommonApiServiceProvider } from '../../../test_serverless/shared/services/svl_common_api';
 
 export const services = {
   ...xPackFunctionalServices,
@@ -39,4 +41,7 @@ export const svlServices = {
 
   supertest: KibanaSupertestWithCertProvider,
   supertestWithoutAuth: KibanaSupertestWithCertWithoutAuthProvider,
+
+  svlCommonApi: SvlCommonApiServiceProvider,
+  svlUserManager: SvlUserManagerProvider,
 };
