@@ -152,6 +152,7 @@ export const applicationUsageSchema = {
   fleet: commonSchema,
   integrations: commonSchema,
   ingestManager: commonSchema,
+  investigate: commonSchema,
   lens: commonSchema,
   maps: commonSchema,
   ml: commonSchema,

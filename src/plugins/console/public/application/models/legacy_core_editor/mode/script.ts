@@ -44,4 +44,4 @@ export class ScriptMode extends TextMode {
   this.autoOutdent = function (state: unknown, doc: string, row: string) {
     this.$outdent.autoOutdent(doc, row);
   };
-}.call(ScriptMode.prototype));
+}).call(ScriptMode.prototype);

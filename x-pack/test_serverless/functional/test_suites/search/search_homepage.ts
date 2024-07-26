@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Enable Homepage Feature Flag
       await uiSettings.setUiSetting(roleAuthc, HOMEPAGE_FF_UI_SETTING, true);
 
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
     });
 
     after(async () => {

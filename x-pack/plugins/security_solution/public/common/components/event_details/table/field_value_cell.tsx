@@ -13,6 +13,7 @@ import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import type { EventFieldsData, FieldsData } from '../types';
+import { getFieldFormat } from '../get_field_format';
 
 export interface FieldValueCellProps {
   contextId: string;
@@ -69,7 +70,7 @@ export const FieldValueCell = React.memo(
                   <FormattedFieldValue
                     contextId={`${contextId}-${eventId}-${data.field}-${i}-${value}`}
                     eventId={eventId}
-                    fieldFormat={data.format}
+                    fieldFormat={getFieldFormat(data)}
                     fieldName={data.field}
                     fieldFromBrowserField={fieldFromBrowserField}
                     fieldType={data.type}

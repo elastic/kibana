@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Asset Criticality Bulk Upsert Schema
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';

@@ -10,9 +10,7 @@ import { INDEX_PATTERNS } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const templateMock = {
-  settings: {
-    number_of_shards: 1,
-  },
+  settings: {},
   mappings: {
     properties: {
       host_name: {

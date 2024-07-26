@@ -10,7 +10,13 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'discover',
+    'unifiedFieldList',
+    'svlCommonPage',
+  ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
@@ -18,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getRowIndicatorProvider', () => {
     before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 

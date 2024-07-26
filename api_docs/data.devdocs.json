@@ -3151,7 +3151,7 @@
             "description": [],
             "signature": [
               "SearchRequest",
-              "[]"
+              "<Record<string, any>>[]"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": false,
@@ -3572,14 +3572,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -4590,7 +4582,7 @@
         "signature": [
           "(searchRequest: ",
           "SearchRequest",
-          ", dependencies: { getConfig: ",
+          "<Record<string, any>>, dependencies: { getConfig: ",
           {
             "pluginId": "@kbn/data-service",
             "scope": "common",
@@ -4614,12 +4606,13 @@
           {
             "parentPluginId": "data",
             "id": "def-public.getSearchParamsFromRequest.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "searchRequest",
             "description": [],
             "signature": [
-              "SearchRequest"
+              "SearchRequest",
+              "<Record<string, any>>"
             ],
             "path": "src/plugins/data/common/search/search_source/fetch/get_search_params.ts",
             "deprecated": false,
@@ -7220,7 +7213,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"meta\" | \"rows\" | \"columns\">; relation?: ",
+              ", \"meta\" | \"columns\" | \"rows\">; relation?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7259,7 +7252,7 @@
                     "section": "def-common.Datatable",
                     "text": "Datatable"
                   },
-                  ", \"meta\" | \"rows\" | \"columns\">; relation?: ",
+                  ", \"meta\" | \"columns\" | \"rows\">; relation?: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -8205,28 +8198,28 @@
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -9613,7 +9606,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "[]; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -24558,28 +24551,28 @@
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
