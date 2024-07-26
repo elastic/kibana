@@ -156,12 +156,17 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200)
           .then((response) => {
             const { errors, created } = response.body;
-            expect(created).to.be(undefined);
-            expect(errors).to.have.property('role_with_privileges_dls_fls');
-            expect(errors.role_with_privileges_dls_fls.type).to.be('security_exception');
-            expect(errors.role_with_privileges_dls_fls.reason).to.contain(
-              `current license is non-compliant for [field and document level security]`
-            );
+            if (basic) {
+              expect(created).to.be(undefined);
+              expect(errors).to.have.property('role_with_privileges_dls_fls');
+              expect(errors.role_with_privileges_dls_fls.type).to.be('security_exception');
+              expect(errors.role_with_privileges_dls_fls.reason).to.contain(
+                `current license is non-compliant for [field and document level security]`
+              );
+            } else {
+              expect(created).to.eql(['role_with_privileges_dls_fls']);
+              expect(errors).to.be(undefined);
+            }
           });
       });
 
