@@ -293,7 +293,7 @@ export const SemanticSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.semanticSearch.guide.createIndex.description"
-                defaultMessage="Start by creating an index with one or more {semanticText} fields."
+                defaultMessage="Now you need to create an index with one or more {semanticText} fields."
                 values={{ semanticText: <EuiCode>semantic_text</EuiCode> }}
               />
             </p>
