@@ -103,7 +103,6 @@ import {
   IndexPatternMap,
   GetCompatibleCellValueActions,
   UserMessage,
-  UseHandledMessage,
   IndexPatternRef,
   FramePublicAPI,
   AddUserMessages,
@@ -186,7 +185,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
-  customBadgeMessages?: (userMessages: UserMessage[]) => UseHandledMessage[];
+  customBadgeMessages?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 export type LensByValueInput = {
@@ -615,22 +614,12 @@ export class Embeddable
   private handleExternalUserMessage = (messages: UserMessage[]) => {
     if (this.input.customBadgeMessages) {
       // we need something else to better identify those errors
-      const messagesToHandle = messages.filter(
-        (message) =>
-          message.displayLocations.some((d) => d.id === 'embeddableBadge') &&
-          message.severity === 'error'
+      const messagesToHandle = messages.filter((message) =>
+        message.displayLocations.some((d) => d.id === 'embeddableBadge')
       );
 
       if (messagesToHandle.length > 0) {
-        const userHandledMessages = this.input.customBadgeMessages(messagesToHandle);
-        return userHandledMessages.map((userMessage, index) => {
-          const originalMessage = messagesToHandle[index];
-
-          return {
-            ...originalMessage,
-            ...userMessage,
-          };
-        });
+        return this.input.customBadgeMessages(messagesToHandle);
       }
     }
 

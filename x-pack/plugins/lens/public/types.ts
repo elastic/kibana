@@ -307,9 +307,6 @@ export interface UserMessage {
   displayLocations: UserMessageDisplayLocation[];
 }
 
-export type UseHandledMessage = Pick<UserMessage, 'hidePopoverIcon' | 'longMessage'> & {
-  severity?: UserMessage['severity'];
-};
 export interface UserMessageFilters {
   severity?: UserMessage['severity'];
   dimensionId?: string;
