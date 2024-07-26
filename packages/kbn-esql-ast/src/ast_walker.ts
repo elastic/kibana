@@ -557,7 +557,7 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
 
 export function visitField(ctx: FieldContext) {
   if (ctx.qualifiedName() && ctx.ASSIGN()) {
-    const fn = createFunction(ctx.ASSIGN()!.getText(), ctx);
+    const fn = createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
     fn.args.push(
       createColumn(ctx.qualifiedName()!),
       collectBooleanExpression(ctx.booleanExpression())

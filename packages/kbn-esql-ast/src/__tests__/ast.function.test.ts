@@ -209,5 +209,19 @@ describe('function AST nodes', () => {
         args: [expect.any(Object), expect.any(Object)],
       });
     });
+
+    it('assignment in STATS', () => {
+      const query = 'FROM a | STATS b = c';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === '=');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'binary-expression',
+        name: '=',
+        args: [expect.any(Object), expect.any(Object)],
+      });
+    });
   });
 });
