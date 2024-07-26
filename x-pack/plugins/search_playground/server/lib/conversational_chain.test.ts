@@ -435,7 +435,10 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' } },
+            {
+              metadata: { _id: '1', _index: 'index' },
+              pageContent: expect.any(String),
+            },
             {
               metadata: { _id: '1', _index: 'website' },
               pageContent: expect.any(String),
@@ -446,8 +449,8 @@ describe('conversational chain', () => {
       ],
       // Even with body_content of 1000, the token count should be below or equal to model limit of 100
       expectedTokens: [
-        { type: 'context_token_count', count: 65 },
-        { type: 'prompt_token_count', count: 99 },
+        { type: 'context_token_count', count: 63 },
+        { type: 'prompt_token_count', count: 97 },
       ],
       expectedHasClipped: true,
       expectedSearchRequest: [
