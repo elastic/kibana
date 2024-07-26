@@ -124,7 +124,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
             if (!modelStats || modelStats.deployment_stats?.state !== 'started') {
               return {
                 error: i18n.translate(
-                  'xpack.enterpriseSearch.indexOverview.indexErrors.missingModelError',
+                  'xpack.enterpriseSearch.indexOverview.indexErrors.modelNotDeployedError',
                   {
                     defaultMessage:
                       'Model {modelId} for inference endpoint {inferenceId} in field {fieldName} has not been started',
