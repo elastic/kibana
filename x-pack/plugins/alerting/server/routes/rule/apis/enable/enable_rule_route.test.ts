@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { enableRuleRoute } from './enable_rule';
+import { enableRuleRoute } from './enable_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';

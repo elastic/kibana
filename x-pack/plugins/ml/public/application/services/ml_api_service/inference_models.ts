@@ -31,5 +31,18 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
       });
       return result;
     },
+    /**
+     * Gets all inference endpoints
+     */
+    async getAllInferenceEndpoints() {
+      const result = await httpService.http<{
+        endpoints: estypes.InferenceModelConfigContainer[];
+      }>({
+        path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
+        method: 'GET',
+        version: '1',
+      });
+      return result;
+    },
   };
 }
