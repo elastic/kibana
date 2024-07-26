@@ -21,7 +21,7 @@ import { emptySerializer } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { ReactiveConfigs } from './initialize_observables';
 import { setupPanelManagement } from '../inline_editing/panel_management';
-import { mountPanel } from '../inline_editing/mount';
+import { mountInlineEditPanel } from '../inline_editing/mount';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -66,6 +66,9 @@ export function initializeEditApi(
     viewMode$.next(parentApi.viewMode.getValue());
   }
 
+  /**
+   * Inline editing section
+   */
   const navigateToLensEditor =
     (stateTransfer: EmbeddableStateTransfer, skipAppLeave?: boolean) => async () => {
       const parentApiContext = parentApi.getAppContext();
@@ -85,15 +88,19 @@ export function initializeEditApi(
   const panelManagementApi = setupPanelManagement(uuid, parentApi);
 
   const openInlineEditor = prepareInlineEditPanel(
-    uuid,
     getState,
     updateState,
     startDependencies,
+    hasRenderCompleted$,
+    panelManagementApi,
     inspectorApi,
     navigateToLensEditor,
-    hasRenderCompleted$,
-    panelManagementApi
+    uuid
   );
+
+  /**
+   * The rest of the edit stuff
+   */
   const { uiSettings, capabilities, data } = startDependencies;
 
   const canEdit = () => {
@@ -123,16 +130,12 @@ export function initializeEditApi(
         const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
         const ConfigPanel = await openInlineEditor();
         if (ConfigPanel) {
-          mountPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
+          mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
         }
       },
-      // This function needs to be exposed in order to be called by the Lens custom edit action
-      openConfigPanel: async (container?: HTMLElement | null) => {
-        const ConfigPanel = await openInlineEditor();
-        if (ConfigPanel) {
-          mountPanel(ConfigPanel, startDependencies.coreStart, undefined, undefined, container);
-        }
-      },
+      /**
+       * Check everything here: user/app permissions and the current inline editing state
+       */
       isEditingEnabled: () => {
         return canEdit() && panelManagementApi.isEditingEnabled();
       },

@@ -43,7 +43,6 @@ export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
 export * from './editor_frame_service/editor_frame';
 export * from './editor_frame_service';
-export * from './embeddable';
 export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
 export * from './app_plugin/save_modal_container';

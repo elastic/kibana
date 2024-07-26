@@ -174,17 +174,13 @@ interface ViewInDiscoverCallbacks {
   getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs | undefined;
 }
 
-interface InlineEditing {
-  openConfigPanel: (container: HTMLElement | null) => void;
-}
-
 interface IntegrationCallbacks {
   isTextBasedLanguage: () => boolean | undefined;
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
 }
 
 export type LensApiCallbacks = Simplify<
-  LensCallbacks & ViewInDiscoverCallbacks & InlineEditing & IntegrationCallbacks
+  LensCallbacks & ViewInDiscoverCallbacks & IntegrationCallbacks
 >;
 
 export interface LensUnifiedSearchContext {

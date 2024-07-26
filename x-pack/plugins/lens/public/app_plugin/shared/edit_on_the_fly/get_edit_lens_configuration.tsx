@@ -151,10 +151,9 @@ export async function getEditLensConfiguration(
     displayFlyoutHeader,
     canEditTextBasedQuery,
     isNewPanel,
-    onStopEditing,
     hidesSuggestions,
-    onApplyCb,
-    onCancelCb,
+    onApply,
+    onCancel,
     hideTimeFilterInfo,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
@@ -223,9 +222,8 @@ export async function getEditLensConfiguration(
       hidesSuggestions,
       setCurrentAttributes,
       isNewPanel,
-      onStopEditing,
-      onApplyCb,
-      onCancelCb,
+      onApply,
+      onCancel,
       hideTimeFilterInfo,
     };
 

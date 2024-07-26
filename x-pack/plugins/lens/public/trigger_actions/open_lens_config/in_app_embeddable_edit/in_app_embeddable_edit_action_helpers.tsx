@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { mountPanel } from '../../../react_embeddable/inline_editing/mount';
+import { generateId } from '../../../id_generator';
+import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
+import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
+import { mountInlineEditPanel } from '../../../react_embeddable/inline_editing/mount';
 import { LensRuntimeState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import { extractReferencesFromState } from '../../../utils';
 import type { LensChartLoadEvent } from './types';
+
+const asyncNoop = async () => {};
 
 export function isEmbeddableEditActionCompatible(
   core: CoreStart,
@@ -48,82 +51,28 @@ export async function executeEditEmbeddableAction({
     throw new IncompatibleActionError();
   }
 
-  const { getEditLensConfiguration, getVisualizationMap, getDatasourceMap } = await import(
-    '../../../async_services'
-  );
-  const visualizationMap = getVisualizationMap();
-  const datasourceMap = getDatasourceMap();
-  const query = attributes.state.query;
-  const activeDatasourceId = isOfAggregateQueryType(query) ? 'textBased' : 'formBased';
-
-  const onUpdatePanelState = (
-    datasourceState: unknown,
-    visualizationState: unknown,
-    visualizationType?: string
-  ) => {
-    if (attributes.state) {
-      const datasourceStates = {
-        ...attributes.state.datasourceStates,
-        [activeDatasourceId]: datasourceState,
-      };
-
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates: Object.fromEntries(
-          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
-        ),
-        visualizationState,
-        activeVisualization: visualizationType ? visualizationMap[visualizationType] : undefined,
-      });
-
-      const attrs = {
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: visualizationState,
-          datasourceStates,
-        },
-        references,
-        visualizationType: visualizationType ?? attributes.visualizationType,
-      } as LensRuntimeState['attributes'];
-
-      onUpdate(attrs);
+  const uuid = generateId();
+  const panelManagementApi = setupPanelManagement(uuid);
+  const openInlineEditor = prepareInlineEditPanel(
+    () => ({
+      attributes,
+    }),
+    (newState: LensRuntimeState) => onUpdate(newState.attributes),
+    { coreStart: core, ...deps },
+    lensEvent?.renderComplete$,
+    panelManagementApi,
+    {
+      getInspectorAdapters: () => lensEvent?.adapters,
+      inspect(): OverlayRef {
+        return { close: asyncNoop, onClose: Promise.resolve() };
+      },
+      closeInspector: asyncNoop,
     }
-  };
-
-  const onUpdateSuggestion = (attrs: LensRuntimeState['attributes']) => {
-    const newAttributes = {
-      ...attributes,
-      ...attrs,
-    };
-    onUpdate(newAttributes);
-  };
-
-  const Component = await getEditLensConfiguration(core, deps, visualizationMap, datasourceMap);
-
-  mountPanel(
-    <Component
-      attributes={attributes}
-      updatePanelState={onUpdatePanelState}
-      lensAdapters={lensEvent?.adapters}
-      renderComplete$={lensEvent?.renderComplete$}
-      displayFlyoutHeader
-      datasourceId={activeDatasourceId}
-      onApplyCb={onApply}
-      onCancelCb={onCancel}
-      canEditTextBasedQuery={activeDatasourceId === 'textBased'}
-      updateSuggestion={onUpdateSuggestion}
-      hideTimeFilterInfo={true}
-    />,
-    core,
-    undefined,
-    undefined,
-    container
   );
+
+  const ConfigPanel = await openInlineEditor();
+  if (ConfigPanel) {
+    // no need to pass the uuid in this use case
+    mountInlineEditPanel(ConfigPanel, core, undefined, undefined, container);
+  }
 }

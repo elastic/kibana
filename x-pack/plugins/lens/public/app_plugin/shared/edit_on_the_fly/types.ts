@@ -77,14 +77,12 @@ export interface EditConfigPanelProps {
   canEditTextBasedQuery?: boolean;
   /** The flyout is used for adding a new panel by scratch */
   isNewPanel?: boolean;
-  /** Handler for deleting the embeddable, used in case a user cancels a newly created chart */
-  onStopEditing?: (isCancel: boolean, state: LensRuntimeState | undefined) => void;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
-  /** Optional callback for apply flyout button */
-  onApplyCb?: (attrs: LensRuntimeState['attributes']) => void;
-  /** Optional callback for cancel flyout button */
-  onCancelCb?: () => void;
+  /** Apply button handler */
+  onApply: (attrs: LensRuntimeState['attributes']) => void;
+  /** Cancel button handler */
+  onCancel: () => void;
   // in cases where the embeddable is not filtered by time
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;

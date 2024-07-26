@@ -19,7 +19,7 @@ import ReactDOM from 'react-dom';
  * @param uuid
  * @param container
  */
-export function mountPanel(
+export function mountInlineEditPanel(
   ConfigPanel: JSX.Element,
   coreStart: CoreStart,
   overlayTracker: TracksOverlays | undefined,

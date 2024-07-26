@@ -124,8 +124,7 @@ import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
-import type { LensEmbeddableInput } from './embeddable';
-import { LensEmbeddableStartServices } from './react_embeddable/types';
+import { LensEmbeddableStartServices, LensSerializedState } from './react_embeddable/types';
 import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
@@ -258,7 +257,7 @@ export interface LensPublicStart {
    * @experimental
    */
   navigateToPrefilledEditor: (
-    input: LensEmbeddableInput | undefined,
+    input: LensSerializedState | undefined,
     options?: {
       openInNewTab?: boolean;
       originatingApp?: string;
@@ -766,9 +765,11 @@ export class LensPlugin {
           },
         };
       },
+      // TODO: remove this in faviour of the custom action thing
+      // This is currently used in Discover by the unified histogram plugin
       EditLensConfigPanelApi: async () => {
-        const { getEditLensConfiguration } = await import('./async_services');
         const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
+        const { getEditLensConfiguration } = await import('./async_services');
         const Component = await getEditLensConfiguration(
           core,
           startDependencies,

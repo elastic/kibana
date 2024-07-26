@@ -71,10 +71,9 @@ export function LensEditConfigurationFlyout({
   displayFlyoutHeader,
   canEditTextBasedQuery,
   isNewPanel,
-  onStopEditing,
   hidesSuggestions,
-  onApplyCb,
-  onCancelCb,
+  onApply: onApplyCallback,
+  onCancel: onCancelCallback,
   hideTimeFilterInfo,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
@@ -189,13 +188,10 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
-    // for a newly created chart, I want cancelling to also remove the panel
-    onStopEditing?.(true, undefined);
-    onCancelCb?.();
+    onCancelCallback();
     closeFlyout?.();
   }, [
     attributesChanged,
-    onStopEditing,
     closeFlyout,
     visualization.activeId,
     savedObjectId,
@@ -204,7 +200,7 @@ export function LensEditConfigurationFlyout({
     updatePanelState,
     updateSuggestion,
     updateByRefInput,
-    onCancelCb,
+    onCancelCallback,
   ]);
 
   const onApply = useCallback(() => {
@@ -226,7 +222,7 @@ export function LensEditConfigurationFlyout({
       visualizationState: visualization.state,
       activeVisualization,
     });
-    const attrs = {
+    const attrs: LensRuntimeState['attributes'] = {
       ...attributes,
       state: {
         ...attributes.state,
@@ -254,13 +250,13 @@ export function LensEditConfigurationFlyout({
       trackUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCb?.(attrs as LensRuntimeState);
+    onApplyCallback?.(attrs);
     closeFlyout?.();
   }, [
     visualization.activeId,
     savedObjectId,
     closeFlyout,
-    onApplyCb,
+    onApplyCallback,
     datasourceStates,
     visualization.state,
     activeVisualization,
