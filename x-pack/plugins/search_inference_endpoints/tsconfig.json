@@ -29,7 +29,6 @@
     "@kbn/doc-links",
     "@kbn/console-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/ml-error-utils"
   ],
   "exclude": [
     "target/**/*",
