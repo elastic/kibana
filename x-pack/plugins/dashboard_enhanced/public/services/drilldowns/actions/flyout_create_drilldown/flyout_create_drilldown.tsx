@@ -36,7 +36,7 @@ import React from 'react';
 import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
-  drilldownMaxWidth,
+  DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
 
@@ -130,7 +130,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
         core
       ),
       {
-        maxWidth: drilldownMaxWidth,
+        maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'createDrilldownFlyout',
         onClose: () => {

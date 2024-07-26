@@ -34,7 +34,7 @@ import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
-  drilldownMaxWidth,
+  DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
 
@@ -99,7 +99,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
         core
       ),
       {
-        maxWidth: drilldownMaxWidth,
+        maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
         onClose: () => {
