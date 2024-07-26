@@ -10,7 +10,6 @@ ENV OPENSSL_PATH=${HOME}/openssl
 ENV OPENSSL_VERSION='3.0.8'
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
 ENV OPENSSL_MODULES=${OPENSSL_PATH}/lib/ossl-modules
-ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
 
 RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl make gcc
 
