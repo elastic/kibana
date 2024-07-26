@@ -4,6 +4,7 @@ get:
   tags:
     - connectors
   parameters:
+    # - $ref: '../components/headers/elastic_api_version.yaml'
     - $ref: '../components/parameters/connector_id.yaml'
   responses:
     '200':
@@ -27,6 +28,7 @@ delete:
     - connectors
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
+    # - $ref: '../components/headers/elastic_api_version.yaml'
     - $ref: '../components/parameters/connector_id.yaml'
   responses:
     '204':
@@ -42,6 +44,7 @@ post:
   tags:
     - connectors
   parameters:
+    # - $ref: '../components/headers/elastic_api_version.yaml'
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - in: path
       name: connectorId
@@ -80,6 +83,7 @@ put:
   tags:
     - connectors
   parameters:
+    # - $ref: '../components/headers/elastic_api_version.yaml'
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/connector_id.yaml'
   requestBody:
