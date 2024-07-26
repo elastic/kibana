@@ -34,7 +34,7 @@ run(async ({ log }) => {
     }
   }
 
-  const updatedJson = updateVscodeConfig(
+  const updatedJson = await updateVscodeConfig(
     MANAGED_CONFIG_KEYS,
     dedent`
         Some settings in this file are managed by @kbn/dev-utils. When a setting is managed it is preceeded

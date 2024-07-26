@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Readable } from 'stream';
 import type { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class CoreHttpPlugin implements Plugin {
@@ -87,6 +88,32 @@ export class CoreHttpPlugin implements Plugin {
           },
         });
       });
+
+    router.get(
+      {
+        path: '/api/core_http/error_stream',
+        validate: false,
+      },
+      async (ctx, req, res) => {
+        return res.customError({
+          body: Readable.from(['error stream'], { objectMode: false }),
+          statusCode: 501,
+        });
+      }
+    );
+
+    router.get(
+      {
+        path: '/api/core_http/error_buffer',
+        validate: false,
+      },
+      async (ctx, req, res) => {
+        return res.customError({
+          body: Buffer.from('error buffer', 'utf8'),
+          statusCode: 501,
+        });
+      }
+    );
   }
 
   public start() {}

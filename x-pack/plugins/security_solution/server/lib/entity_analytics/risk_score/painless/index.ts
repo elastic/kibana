@@ -10,7 +10,7 @@ import { flow } from 'lodash';
 
 const PHASES = ['init', 'map', 'combine', 'reduce'] as const;
 
-type Phase = typeof PHASES[number];
+type Phase = (typeof PHASES)[number];
 export type PainlessScripts = Record<Phase, string>;
 
 const removeNewlines = (content: string) => content.replace(/\n/g, '');

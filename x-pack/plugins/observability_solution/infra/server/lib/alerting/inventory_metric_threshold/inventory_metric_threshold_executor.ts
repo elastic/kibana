@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Group } from '@kbn/observability-alerting-rule-utils';
 import {
   ALERT_REASON,
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
@@ -64,11 +66,12 @@ export type InventoryMetricThresholdAlertContext = AlertContext; // no specific 
 
 export type InventoryMetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
-  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold'
+  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold' | 'kibana.alert.group'
 > & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
 };
 
 export const createInventoryMetricThresholdExecutor =
