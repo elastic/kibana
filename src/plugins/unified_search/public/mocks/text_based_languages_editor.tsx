@@ -22,7 +22,7 @@ function createEditor() {
           uiSettings: { get: () => {} },
         }}
       >
-        <TextBasedLanguagesEditor {...props} isDarkMode={false} />
+        <TextBasedLanguagesEditor {...props} />
       </KibanaContextProvider>
     );
   };
