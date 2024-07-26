@@ -4,7 +4,7 @@
 <titleabbrev>Update data view</titleabbrev>
 ++++
 
-experimental[] Update part of an data view. Only the specified fields are updated in the
+Update part of an data view. Only the specified fields are updated in the
 data view. Unspecified fields stay as they are persisted.
 
 [NOTE]

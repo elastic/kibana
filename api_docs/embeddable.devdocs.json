@@ -14858,6 +14858,10 @@
               "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
             },
             {
+              "plugin": "investigateApp",
+              "path": "x-pack/plugins/observability_solution/investigate_app/public/widgets/embeddable_widget/register_embeddable_widget.tsx"
+            },
+            {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
             },

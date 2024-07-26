@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
+
 import { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -13,8 +16,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
-import { first, of, skip } from 'rxjs';
+
 import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { RangesliderControlState } from './types';
@@ -55,7 +57,7 @@ describe('RangesliderControlApi', () => {
 
   mockDataViews.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
-      throw new Error(`Simulated error: no data view found for id ${id}`);
+      throw new Error(`no data view found for id ${id}`);
     }
     return {
       id,
@@ -93,7 +95,7 @@ describe('RangesliderControlApi', () => {
 
   describe('filters$', () => {
     test('should not set filters$ when value is not provided', (done) => {
-      const { api } = factory.buildControl(
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataView',
           fieldName: 'myFieldName',
@@ -102,14 +104,11 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toBeUndefined();
-        done();
-      });
+      expect(api.filters$.value).toBeUndefined();
     });
 
-    test('should set filters$ when value is provided', (done) => {
-      const { api } = factory.buildControl(
+    test('should set filters$ when value is provided', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -119,31 +118,45 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toEqual([
-          {
-            meta: {
-              field: 'myFieldName',
-              index: 'myDataViewId',
-              key: 'myFieldName',
-              params: {
+      expect(api.filters$.value).toEqual([
+        {
+          meta: {
+            field: 'myFieldName',
+            index: 'myDataViewId',
+            key: 'myFieldName',
+            params: {
+              gte: 5,
+              lte: 10,
+            },
+            type: 'range',
+          },
+          query: {
+            range: {
+              myFieldName: {
                 gte: 5,
                 lte: 10,
               },
-              type: 'range',
-            },
-            query: {
-              range: {
-                myFieldName: {
-                  gte: 5,
-                  lte: 10,
-                },
-              },
             },
           },
-        ]);
-        done();
-      });
+        },
+      ]);
+    });
+
+    test('should set blocking error when data view is not found', async () => {
+      const { api } = await factory.buildControl(
+        {
+          dataViewId: 'notGonnaFindMeDataView',
+          fieldName: 'myFieldName',
+          value: ['5', '10'],
+        },
+        getMockedBuildApi(uuid, factory, controlGroupApi),
+        uuid,
+        controlGroupApi
+      );
+      expect(api.filters$.value).toBeUndefined();
+      expect(api.blockingError.value?.message).toEqual(
+        'no data view found for id notGonnaFindMeDataView'
+      );
     });
   });
 
@@ -152,7 +165,7 @@ describe('RangesliderControlApi', () => {
       totalResults = 0; // simulate no results by returning hits total of zero
       min = null; // simulate no results by returning min aggregation value of null
       max = null; // simulate no results by returning max aggregation value of null
-      const { Component } = factory.buildControl(
+      const { Component } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -171,7 +184,7 @@ describe('RangesliderControlApi', () => {
 
   describe('min max', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
-      const { Component } = factory.buildControl(
+      const { Component } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -191,8 +204,8 @@ describe('RangesliderControlApi', () => {
   });
 
   describe('step state', () => {
-    test('default value provided when state.step is undefined', () => {
-      const { api } = factory.buildControl(
+    test('default value provided when state.step is undefined', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -205,8 +218,8 @@ describe('RangesliderControlApi', () => {
       expect(serializedState.rawState.step).toBe(1);
     });
 
-    test('retains value from initial state', () => {
-      const { api } = factory.buildControl(
+    test('retains value from initial state', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
