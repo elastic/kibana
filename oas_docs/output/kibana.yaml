@@ -100,7 +100,7 @@ tags:
   - name: system
     x-displayName: system
 paths:
-  /s/{spaceId}/api/alerting/rule:
+  /api/alerting/rule:
     post:
       summary: Create a rule with a random identifier
       operationId: createRule
@@ -122,7 +122,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
       requestBody:
         required: true
         content:
@@ -178,10 +177,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_404_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}:
+  /api/alerting/rule/{ruleId}:
     get:
       summary: Get rule details
       operationId: getRule
@@ -197,7 +193,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -220,9 +215,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_404_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
     delete:
       summary: Delete a rule
       operationId: deleteRule
@@ -239,7 +231,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -255,9 +246,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_404_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
     post:
       summary: Create a rule
       operationId: createRuleId
@@ -281,7 +269,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: ruleId
           description: >
@@ -340,9 +327,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_404_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
     put:
       summary: Update a rule
       operationId: updateRule
@@ -370,7 +354,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       requestBody:
         required: true
         content:
@@ -402,10 +385,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_404_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}/_disable:
+  /api/alerting/rule/{ruleId}/_disable:
     post:
       summary: Disable a rule
       operationId: disableRule
@@ -420,7 +400,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -436,10 +415,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_404_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}/_enable:
+  /api/alerting/rule/{ruleId}/_enable:
     post:
       summary: Enable a rule
       operationId: enableRule
@@ -460,7 +436,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -476,10 +451,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rules/_find:
+  /api/alerting/rules/_find:
     get:
       summary: Find rule information
       operationId: findRules
@@ -494,7 +466,6 @@ paths:
       tags:
         - alerting
       parameters:
-        - $ref: '#/components/parameters/Alerting_space_id'
         - name: default_search_operator
           in: query
           description: The default operator to use for the simple_query_string.
@@ -610,12 +581,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/_health:
+  /api/alerting/_health:
     get:
-      summary: Get the alerting framework health status
+      summary: Get the alerting framework health
       operationId: getAlertingHealth
       description: >
         You must have `read` privileges for the **Management > Stack Rules**
@@ -623,8 +591,6 @@ paths:
         > Machine Learning**, **Observability**, or **Security** features.
       tags:
         - alerting
-      parameters:
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -704,10 +670,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule_types:
+  /api/alerting/rule_types:
     get:
       summary: Get the rule types
       operationId: getRuleTypes
@@ -721,8 +684,6 @@ paths:
         `monitoring_user` built-in role.
       tags:
         - alerting
-      parameters:
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1008,10 +969,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all:
+  /api/alerting/rule/{ruleId}/_mute_all:
     post:
       summary: Mute all alerts
       operationId: muteAllAlerts
@@ -1029,7 +987,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -1039,10 +996,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all:
+  /api/alerting/rule/{ruleId}/_unmute_all:
     post:
       summary: Unmute all alerts
       operationId: unmuteAllAlerts
@@ -1060,7 +1014,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -1070,10 +1023,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key:
+  /api/alerting/rule/{ruleId}/_update_api_key:
     post:
       summary: Update the API key for a rule
       operationId: updateRuleAPIKey
@@ -1085,7 +1035,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1095,10 +1044,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_400_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute:
+  /api/alerting/rule/{ruleId}/alert/{alertId}/_mute:
     post:
       summary: Mute an alert
       operationId: muteAlert
@@ -1115,7 +1061,6 @@ paths:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_alert_id'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -1125,10 +1070,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute:
+  /api/alerting/rule/{ruleId}/alert/{alertId}/_unmute:
     post:
       summary: Unmute an alert
       operationId: unmuteAlert
@@ -1145,7 +1087,6 @@ paths:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
         - $ref: '#/components/parameters/Alerting_alert_id'
         - $ref: '#/components/parameters/Alerting_rule_id'
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -1155,10 +1096,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alert/{alertId}:
+  /api/alerts/alert/{alertId}:
     delete:
       summary: Delete an alert
       operationId: legaryDeleteAlert
@@ -1170,7 +1108,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: The identifier for the alert.
@@ -1187,9 +1124,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
     get:
       summary: Get an alert by identifier
       operationId: legacyGetAlert
@@ -1198,7 +1132,6 @@ paths:
       tags:
         - alerting
       parameters:
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: The identifier for the alert.
@@ -1219,9 +1152,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
     post:
       summary: Create an alert
       operationId: legacyCreateAlert
@@ -1240,7 +1170,6 @@ paths:
           schema:
             type: string
             example: 41893910-6bca-11eb-9e0d-85d233e3ee35
-        - $ref: '#/components/parameters/Alerting_space_id'
       requestBody:
         required: true
         content:
@@ -1356,9 +1285,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
     put:
       summary: Update an alert
       operationId: legacyUpdateAlert
@@ -1368,7 +1294,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: The identifier for the alert.
@@ -1473,10 +1398,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alert/{alertId}/_disable:
+  /api/alerts/alert/{alertId}/_disable:
     post:
       summary: Disable an alert
       operationId: legacyDisableAlert
@@ -1486,7 +1408,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: The identifier for the alert.
@@ -1503,10 +1424,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alert/{alertId}/_enable:
+  /api/alerts/alert/{alertId}/_enable:
     post:
       summary: Enable an alert
       operationId: legacyEnableAlert
@@ -1516,7 +1434,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: The identifier for the alert.
@@ -1533,10 +1450,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alert/{alertId}/_mute_all:
+  /api/alerts/alert/{alertId}/_mute_all:
     post:
       summary: Mute all alert instances
       operationId: legacyMuteAllAlertInstances
@@ -1546,7 +1460,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: The identifier for the alert.
@@ -1563,10 +1476,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all:
+  /api/alerts/alert/{alertId}/_unmute_all:
     post:
       summary: Unmute all alert instances
       operationId: legacyUnmuteAllAlertInstances
@@ -1576,7 +1486,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: The identifier for the alert.
@@ -1593,10 +1502,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alerts/_find:
+  /api/alerts/alerts/_find:
     get:
       summary: Get a paginated set of alerts
       operationId: legacyFindAlerts
@@ -1610,7 +1516,6 @@ paths:
       tags:
         - alerting
       parameters:
-        - $ref: '#/components/parameters/Alerting_space_id'
         - name: default_search_operator
           in: query
           description: The default operator to use for the `simple_query_string`.
@@ -1720,19 +1625,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alerts/_health:
+  /api/alerts/alerts/_health:
     get:
-      summary: Get the alerting framework health status
+      summary: Get the alerting framework health
       operationId: legacyGetAlertingHealth
       deprecated: true
       description: Deprecated in 7.13.0. Use the get alerting framework health API instead.
       tags:
         - alerting
-      parameters:
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1809,10 +1709,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alerts/list_alert_types:
+  /api/alerts/alerts/list_alert_types:
     get:
       summary: Get the alert types
       operationId: legacyGetAlertTypes
@@ -1820,8 +1717,6 @@ paths:
       description: Deprecated in 7.13.0. Use the get rule types API instead.
       tags:
         - alerting
-      parameters:
-        - $ref: '#/components/parameters/Alerting_space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1931,10 +1826,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute:
+  /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute:
     post:
       summary: Mute an alert instance
       operationId: legacyMuteAlertInstance
@@ -1944,7 +1836,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: An identifier for the alert.
@@ -1968,10 +1859,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
-  /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute:
+  /api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute:
     post:
       summary: Unmute an alert instance
       operationId: legacyUnmuteAlertInstance
@@ -1981,7 +1869,6 @@ paths:
         - alerting
       parameters:
         - $ref: '#/components/parameters/Alerting_kbn_xsrf'
-        - $ref: '#/components/parameters/Alerting_space_id'
         - in: path
           name: alertId
           description: An identifier for the alert.
@@ -2005,9 +1892,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Alerting_401_response'
-      security:
-        - Alerting_basicAuth: []
-        - Alerting_apiKeyAuth: []
   /api/apm/agent_keys:
     post:
       summary: Create an APM agent key
@@ -6158,30 +6042,6 @@ paths:
       security:
         - Kibana_HTTP_APIs_basicAuth: []
 components:
-  securitySchemes:
-    Alerting_basicAuth:
-      type: http
-      scheme: basic
-    Alerting_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-    Saved_objects_basicAuth:
-      type: http
-      scheme: basic
-    Saved_objects_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-    Kibana_HTTP_APIs_apiKeyAuth:
-      in: header
-      name: Authorization
-      type: apiKey
-    Kibana_HTTP_APIs_basicAuth:
-      scheme: basic
-      type: http
   parameters:
     Alerting_kbn_xsrf:
       schema:
@@ -6190,16 +6050,6 @@ components:
       name: kbn-xsrf
       description: Cross-site request forgery protection
       required: true
-    Alerting_space_id:
-      in: path
-      name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
     Alerting_rule_id:
       in: path
       name: ruleId
@@ -22291,6 +22141,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Connectors_action_response_properties'
+  securitySchemes:
+    Saved_objects_basicAuth:
+      type: http
+      scheme: basic
+    Saved_objects_apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+    Kibana_HTTP_APIs_apiKeyAuth:
+      in: header
+      name: Authorization
+      type: apiKey
+    Kibana_HTTP_APIs_basicAuth:
+      scheme: basic
+      type: http
 x-tagGroups:
   - name: Alerting
     tags:
