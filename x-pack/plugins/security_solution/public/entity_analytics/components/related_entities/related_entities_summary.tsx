@@ -40,8 +40,8 @@ export const RelatedEntitiesSummaryContent: React.FC<Props> = ({ resolutions, on
     return <EuiLoadingSpinner size="xl" />;
   }
 
-  if (!resolutions.data || resolutions.data.candidates.length === 0) {
-    return <EuiText>{'No related entities found'}</EuiText>;
+  if (!resolutions.data) {
+    return <EuiText>{'No data found'}</EuiText>;
   }
 
   return (

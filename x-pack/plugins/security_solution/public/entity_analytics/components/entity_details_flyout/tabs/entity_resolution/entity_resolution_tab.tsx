@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +19,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import type { EntityResolutionSuggestion } from '@kbn/elastic-assistant-common';
@@ -46,12 +44,6 @@ export const EntityResolutionTab = ({ username }: Props) => {
 
   return (
     <>
-      {/* <EuiTitle size="l">
-        <h2>
-          <EuiText>{'Observed Data'}</EuiText>
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" /> */}
       <EuiPageHeader paddingSize="l" pageTitle="Observed Data" />
       <EuiPageSection color="subdued">
         <EuiText>{'Related Entities'}</EuiText>
