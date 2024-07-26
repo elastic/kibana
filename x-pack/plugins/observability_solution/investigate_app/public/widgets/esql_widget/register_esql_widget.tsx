@@ -10,11 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  EsqlWidgetParameters,
-  GlobalWidgetParameters,
-  WidgetRenderAPI,
-} from '@kbn/investigate-plugin/public';
+import type { EsqlWidgetParameters, GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
@@ -38,7 +34,6 @@ interface Props {
   columns: ESQLSearchResponse['columns'];
   allColumns: ESQLSearchResponse['all_columns'];
   values: ESQLSearchResponse['values'];
-  blocks: WidgetRenderAPI['blocks'];
   dateHistogramResults?: {
     query: string;
     columns: ESQLSearchResponse['columns'];
@@ -54,7 +49,6 @@ export function EsqlWidget({
   columns,
   allColumns,
   values,
-  blocks,
   dateHistogramResults,
 }: Props) {
   const {
@@ -223,7 +217,6 @@ export function registerEsqlWidget({
     async ({ parameters, signal }) => {
       const {
         esql: esqlQuery,
-        query,
         filters,
         timeRange,
         suggestion: suggestionFromParameters,
@@ -233,7 +226,6 @@ export function registerEsqlWidget({
 
       const esFilters = [
         getEsFilterFromOverrides({
-          query,
           filters,
           timeRange,
         }),
@@ -286,7 +278,6 @@ export function registerEsqlWidget({
           values={values}
           suggestion={suggestion}
           esqlQuery={widget.parameters.esql}
-          blocks={blocks}
           dateHistogramResults={dateHistogram}
         />
       );

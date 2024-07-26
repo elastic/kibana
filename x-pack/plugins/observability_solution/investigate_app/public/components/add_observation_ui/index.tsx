@@ -21,19 +21,19 @@ const emptyPreview = css`
   padding: 36px 0px 36px 0px;
 `;
 
-export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Props) {
+export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const [isExpanded, setIsExpanded] = React.useState(false);
-  const [esqlQuery, setEsqlQuery] = React.useState('FROM *');
-  const [submittedEsqlQuery, setSubmittedEsqlQuery] = React.useState(esqlQuery);
+  const [query, setQuery] = React.useState({ esql: '' });
+  const [submittedQuery, setSubmittedQuery] = React.useState({ esql: '' });
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
   const resetState = () => {
     setIsExpanded(false);
     setIsPreviewOpen(false);
-    setEsqlQuery('FROM *');
-    setSubmittedEsqlQuery('FROM *');
+    setQuery({ esql: '' });
+    setSubmittedQuery({ esql: '' });
   };
 
   if (!isOpen) {
@@ -73,13 +73,13 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <TextBasedLangEditor
-                  query={{ esql: esqlQuery }}
-                  onTextLangQueryChange={(nextQuery) => {
-                    setIsPreviewOpen(true);
-                    setEsqlQuery(nextQuery.esql);
-                  }}
+                  query={query}
+                  onTextLangQueryChange={setQuery}
                   onTextLangQuerySubmit={async (nextSubmittedQuery) => {
-                    setSubmittedEsqlQuery(nextSubmittedQuery?.esql ?? '');
+                    if (nextSubmittedQuery) {
+                      setSubmittedQuery(nextSubmittedQuery);
+                      setIsPreviewOpen(true);
+                    }
                   }}
                   errors={undefined}
                   warning={undefined}
@@ -88,7 +88,7 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
                   }}
                   isCodeEditorExpanded={isExpanded}
                   hideMinimizeButton={false}
-                  editorIsInline
+                  editorIsInline={false}
                   hideRunQueryText
                   isLoading={false}
                   disableSubmitAction
@@ -119,9 +119,8 @@ export function AddObservationUI({ onWidgetAdd, timeRange, query, filters }: Pro
               ) : (
                 <EsqlWidgetPreview
                   filters={filters}
-                  esqlQuery={submittedEsqlQuery}
+                  esqlQuery={submittedQuery.esql}
                   timeRange={timeRange}
-                  query={query}
                   onWidgetAdd={(widget) => {
                     resetState();
                     return onWidgetAdd(widget);

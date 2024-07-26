@@ -48,8 +48,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     },
   } = useKibana();
 
-  const [_displayedKuery, setDisplayedKuery] = useState('');
-
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
 
   const [range, setRange] = useDateRange();
@@ -92,10 +90,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   }, [revision]);
 
   useEffect(() => {
-    setDisplayedKuery(revision?.parameters.query.query ?? '');
-  }, [revision?.parameters.query.query]);
-
-  useEffect(() => {
     if (
       revision?.parameters.timeRange.from &&
       revision?.parameters.timeRange.to &&
@@ -134,7 +128,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           loading: item.loading,
           overrides: item.locked
             ? getOverridesFromGlobalParameters(
-                pick(item.parameters, 'filters', 'query', 'timeRange'),
+                pick(item.parameters, 'filters', 'timeRange'),
                 revision.parameters,
                 uiSettings.get<string>(DATE_FORMAT_ID) ?? 'Browser'
               )
@@ -199,7 +193,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
               <AddNoteUI
                 user={user}
                 filters={revision.parameters.filters}
-                query={revision.parameters.query}
                 timeRange={revision.parameters.timeRange}
                 onWidgetAdd={(widget) => {
                   return createWidgetRef.current(widget);
@@ -209,7 +202,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           </EuiFlexGroup>
           <AddObservationUI
             filters={revision.parameters.filters}
-            query={revision.parameters.query}
             timeRange={revision.parameters.timeRange}
             onWidgetAdd={(widget) => {
               return createWidgetRef.current(widget);
