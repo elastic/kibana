@@ -60,7 +60,8 @@ export class ControlsExamplePlugin
       ]);
       return getOptionsListControlFactory({
         core: coreStart,
-        dataService: depsStart.data,
+        data: depsStart.data,
+        dataViews: depsStart.data.dataViews,
       });
     });
 
@@ -73,7 +74,8 @@ export class ControlsExamplePlugin
 
       return getSearchEmbeddableFactory({
         core: coreStart,
-        dataViewsService: depsStart.data.dataViews,
+        data: depsStart.data,
+        dataViews: depsStart.data.dataViews,
       });
     });
 

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -94,7 +94,7 @@ describe('RangesliderControlApi', () => {
   });
 
   describe('filters$', () => {
-    test('should not set filters$ when value is not provided', (done) => {
+    test('should not set filters$ when value is not provided', async () => {
       const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataView',

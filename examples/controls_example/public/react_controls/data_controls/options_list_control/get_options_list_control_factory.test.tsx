@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { first, firstValueFrom, skip } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -67,8 +66,8 @@ describe('Options List Control Api', () => {
   });
 
   describe('filters$', () => {
-    test('should not set filters$ when selectedOptions is not provided', (done) => {
-      const { api } = factory.buildControl(
+    test('should not set filters$ when selectedOptions is not provided', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -77,15 +76,11 @@ describe('Options List Control Api', () => {
         uuid,
         controlGroupApi
       );
-
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toBeUndefined();
-        done();
-      });
+      expect(api.filters$.value).toBeUndefined();
     });
 
-    test('should set filters$ when selectedOptions is provided', (done) => {
-      const { api } = factory.buildControl(
+    test('should set filters$ when selectedOptions is provided', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -95,40 +90,37 @@ describe('Options List Control Api', () => {
         uuid,
         controlGroupApi
       );
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toEqual([
-          {
-            meta: {
-              index: 'myDataViewId',
-              key: 'myFieldName',
-              params: ['cool', 'test'],
-              type: 'phrases',
-            },
-            query: {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    match_phrase: {
-                      myFieldName: 'cool',
-                    },
+      expect(api.filters$.value).toEqual([
+        {
+          meta: {
+            index: 'myDataViewId',
+            key: 'myFieldName',
+            params: ['cool', 'test'],
+            type: 'phrases',
+          },
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match_phrase: {
+                    myFieldName: 'cool',
                   },
-                  {
-                    match_phrase: {
-                      myFieldName: 'test',
-                    },
+                },
+                {
+                  match_phrase: {
+                    myFieldName: 'test',
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        ]);
-        done();
-      });
+        },
+      ]);
     });
 
-    test('should set filters$ when exists is selected', (done) => {
-      const { api } = factory.buildControl(
+    test('should set filters$ when exists is selected', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -138,26 +130,23 @@ describe('Options List Control Api', () => {
         uuid,
         controlGroupApi
       );
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toEqual([
-          {
-            meta: {
-              index: 'myDataViewId',
-              key: 'myFieldName',
-            },
-            query: {
-              exists: {
-                field: 'myFieldName',
-              },
+      expect(api.filters$.value).toEqual([
+        {
+          meta: {
+            index: 'myDataViewId',
+            key: 'myFieldName',
+          },
+          query: {
+            exists: {
+              field: 'myFieldName',
             },
           },
-        ]);
-        done();
-      });
+        },
+      ]);
     });
 
-    test('should set filters$ when exclude is selected', (done) => {
-      const { api } = factory.buildControl(
+    test('should set filters$ when exclude is selected', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -168,23 +157,20 @@ describe('Options List Control Api', () => {
         uuid,
         controlGroupApi
       );
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toEqual([
-          {
-            meta: {
-              index: 'myDataViewId',
-              key: 'myFieldName',
-              negate: true,
-            },
-            query: {
-              exists: {
-                field: 'myFieldName',
-              },
+      expect(api.filters$.value).toEqual([
+        {
+          meta: {
+            index: 'myDataViewId',
+            key: 'myFieldName',
+            negate: true,
+          },
+          query: {
+            exists: {
+              field: 'myFieldName',
             },
           },
-        ]);
-        done();
-      });
+        },
+      ]);
     });
   });
 
@@ -200,7 +186,7 @@ describe('Options List Control Api', () => {
     });
 
     test('clicking another option unselects "Exists"', async () => {
-      const { Component } = factory.buildControl(
+      const { Component } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -226,7 +212,7 @@ describe('Options List Control Api', () => {
     });
 
     test('clicking "Exists" unselects all other selections', async () => {
-      const { Component } = factory.buildControl(
+      const { Component } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -258,7 +244,7 @@ describe('Options List Control Api', () => {
     });
 
     test('deselects when showOnlySelected is true', async () => {
-      const { Component, api } = factory.buildControl(
+      const { Component, api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -286,8 +272,7 @@ describe('Options List Control Api', () => {
       expect(control.queryByTestId('optionsList-control-selection-bark')).toBeNull();
       expect(control.queryByTestId('optionsList-control-selection-meow')).toBeNull();
 
-      const filter = await firstValueFrom(api.filters$);
-      expect(filter).toEqual([
+      expect(api.filters$.value).toEqual([
         {
           meta: {
             index: 'myDataViewId',
@@ -303,7 +288,7 @@ describe('Options List Control Api', () => {
     });
 
     test('replace selection when singleSelect is true', async () => {
-      const { Component, api } = factory.buildControl(
+      const { Component, api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -317,8 +302,7 @@ describe('Options List Control Api', () => {
 
       const control = render(<Component className={'controlPanel'} />);
 
-      let filter = await firstValueFrom(api.filters$.pipe(skip(1)));
-      expect(filter).toEqual([
+      expect(api.filters$.value).toEqual([
         {
           meta: {
             index: 'myDataViewId',
@@ -345,8 +329,7 @@ describe('Options List Control Api', () => {
       expect(control.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
 
-      filter = await firstValueFrom(api.filters$);
-      expect(filter).toEqual([
+      expect(api.filters$.value).toEqual([
         {
           meta: {
             index: 'myDataViewId',

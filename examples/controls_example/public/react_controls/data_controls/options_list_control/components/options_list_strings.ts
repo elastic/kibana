@@ -7,10 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OptionsListSearchTechnique } from '../../../common/options_list/suggestions_searching';
+import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
 
 export const OptionsListStrings = {
   control: {
+    getDisplayName: () =>
+      i18n.translate('controls.optionsList.displayName', {
+        defaultMessage: 'Options list',
+      }),
     getSeparator: (type?: string) => {
       if (['date', 'number'].includes(type ?? '')) {
         return i18n.translate('controls.optionsList.control.dateSeparator', {

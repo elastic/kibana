@@ -66,7 +66,7 @@ const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
   [searchControlId]: {
     type: SEARCH_CONTROL_TYPE,
-    order: 4,
+    order: 3,
     grow: true,
     width: 'medium',
     explicitInput: {
@@ -94,7 +94,7 @@ const controlGroupPanels = {
   },
   [timesliderControlId]: {
     type: TIMESLIDER_CONTROL_TYPE,
-    order: 3,
+    order: 4,
     grow: true,
     width: 'medium',
     explicitInput: {

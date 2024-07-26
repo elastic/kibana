@@ -7,15 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import deepEqual from 'react-fast-compare';
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  skip,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
@@ -23,15 +15,15 @@ import {
   OptionsListSuccessResponse,
   OptionsListSuggestions,
 } from '@kbn/controls-plugin/common/options_list/types';
-import { i18n } from '@kbn/i18n';
+import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
+import { OptionsListStrings } from './components/options_list_strings';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
@@ -48,10 +40,7 @@ export const getOptionsListControlFactory = (
   return {
     type: OPTIONS_LIST_CONTROL_TYPE,
     getIconType: () => 'editorChecklist',
-    getDisplayName: () =>
-      i18n.translate('controls.optionsList.displayName', {
-        defaultMessage: 'Options list',
-      }),
+    getDisplayName: OptionsListStrings.control.getDisplayName,
     isFieldCompatible: (field) => {
       return (
         !field.spec.scripted &&
@@ -60,7 +49,7 @@ export const getOptionsListControlFactory = (
       );
     },
     CustomOptionsComponent: OptionsListEditorOptions,
-    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       /** Serializable state - i.e. the state that is saved with the control */
       const searchTechnique$ = new BehaviorSubject<OptionsListSearchTechnique | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
@@ -151,7 +140,6 @@ export const getOptionsListControlFactory = (
         dataControl.stateManager.dataViewId,
       ])
         .pipe(
-          distinctUntilChanged(deepEqual),
           skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {
@@ -238,10 +226,7 @@ export const getOptionsListControlFactory = (
       const api = buildApi(
         {
           ...dataControl.api,
-          getTypeDisplayName: () =>
-            i18n.translate('controlsExamples.searchControl.displayName', {
-              defaultMessage: 'Search',
-            }),
+          getTypeDisplayName: OptionsListStrings.control.getDisplayName,
           serializeState: () => {
             const { rawState: dataControlState, references } = dataControl.serialize();
             return {
@@ -335,6 +320,11 @@ export const getOptionsListControlFactory = (
           }
         },
       };
+
+      if (initialState.selectedOptions?.length || initialState.existsSelected) {
+        // has selections, so wait for initialization of filters
+        await dataControl.untilFiltersInitialized();
+      }
 
       return {
         api,
