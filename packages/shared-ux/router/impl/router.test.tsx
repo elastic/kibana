@@ -12,12 +12,16 @@ import { KibanaSharedUXRouterProviderDeps } from '@kbn/shared-ux-router-types';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
 describe('<RouterProvider', () => {
-  let http: KibanaSharedUXRouterProviderDeps['http'];
+  let mockContext$: KibanaSharedUXRouterProviderDeps['context$'];
+
   beforeEach(() => {
-    http = executionContextServiceMock.createInternalSetupContract();
+    mockContext$ = executionContextServiceMock;
   });
 
-  it('should change pageName on new page', async () => {
-    const component = render(<RouterProvider http={http} />);
+  it('should render', async () => {
+    const { findByTestId } = render(
+      <RouterProvider context$={mockContext$} set={jest.fn()} get={jest.fn()} clear={jest.fn()} />
+    );
+    expect(findByTestId('router-shared-ux')).toBeTruthy();
   });
 });

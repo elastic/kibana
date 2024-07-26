@@ -42,7 +42,7 @@ export const MemoryRouter = ({ children, ...props }: MemoryRouterProps) => (
 );
 
 export const Router = ({ children, ...props }: RouterProps) => (
-  <ReactRouter {...props}>
+  <ReactRouter {...props} data-test-subj="router-shared-ux">
     <CompatRouter>{children}</CompatRouter>
   </ReactRouter>
 );
