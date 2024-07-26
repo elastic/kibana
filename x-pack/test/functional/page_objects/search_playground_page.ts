@@ -54,6 +54,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('connectLLMButton');
       },
 
+      async expectPlaygroundLLMConnectorOptionsExists() {
+        await testSubjects.existOrFail('create-connector-flyout');
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.existOrFail('.bedrock-card');
+        await testSubjects.existOrFail('.gen-ai-card');
+      },
+
       async expectPlaygroundStartChatPageIndexButtonExists() {
         await testSubjects.existOrFail('createIndexButton');
       },
