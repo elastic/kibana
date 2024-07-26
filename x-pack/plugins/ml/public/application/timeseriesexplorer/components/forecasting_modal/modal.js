@@ -40,12 +40,11 @@ export function Modal(props) {
 
   useEffect(
     function prepMlNodeCheck() {
-      const getNodeCount = async () => {
-        const { count } = await getMlNodeCount(mlApiServices);
-        setMlNodesAvailable(count > 0);
-      };
-
-      getNodeCount().catch(console.error);
+      getMlNodeCount(mlApiServices)
+        .then(({ count, lazyNodeCount }) => {
+          setMlNodesAvailable(count !== 0 || lazyNodeCount !== 0);
+        })
+        .catch(console.error);
     },
     [mlApiServices]
   );

@@ -17,8 +17,9 @@ interface Props {
 }
 
 export const ForecastButton: FC<Props> = ({ isDisabled, onClick, mode = 'full' }) => {
-  return mode === 'full' ? (
-    <EuiButton
+  const Button = mode === 'full' ? EuiButton : EuiButtonEmpty;
+  return (
+    <Button
       onClick={onClick}
       isDisabled={isDisabled}
       data-test-subj="mlSingleMetricViewerButtonForecast"
@@ -27,17 +28,6 @@ export const ForecastButton: FC<Props> = ({ isDisabled, onClick, mode = 'full' }
         id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastButtonLabel"
         defaultMessage="Forecast"
       />
-    </EuiButton>
-  ) : (
-    <EuiButtonEmpty
-      onClick={onClick}
-      isDisabled={isDisabled}
-      data-test-subj="mlSingleMetricViewerButtonForecast"
-    >
-      <FormattedMessage
-        id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastButtonLabel"
-        defaultMessage="Forecast"
-      />
-    </EuiButtonEmpty>
+    </Button>
   );
 };

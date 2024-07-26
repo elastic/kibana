@@ -108,8 +108,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const job = useMemo(() => {
     if (props.selectedJob !== undefined) return props.selectedJob;
     return mlJobService.getJob(props.anomaly.jobId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.anomaly.jobId, props.selectedJob?.job_id]);
+  }, [props.anomaly.jobId, props.selectedJob]);
 
   const categorizationFieldName = job.analysis_config.categorization_field_name;
   const datafeedIndices = job.datafeed_config!.indices;

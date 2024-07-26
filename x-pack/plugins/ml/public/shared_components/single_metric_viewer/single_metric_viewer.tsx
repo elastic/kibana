@@ -122,8 +122,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
               mlApiServices.getJobs({ jobId: selectedJobId }),
               mlApiServices.getJobStats({ jobId: selectedJobId }),
             ]);
-            const job = jobs[0];
-            setSelectedJobWrapper({ job, stats: jobStats[0] });
+            setSelectedJobWrapper({ job: jobs[0], stats: jobStats[0] });
           } catch (e) {
             if (onError) {
               onError(new Error(errorMessage));
@@ -156,8 +155,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
     return mlTimeSeriesExplorerService?.getAutoZoomDuration(
       selectedJobWrapper.job.analysis_config?.bucket_span
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mlTimeSeriesExplorerService, selectedJobWrapper?.job?.job_id]);
+  }, [mlTimeSeriesExplorerService, selectedJobWrapper]);
 
   const appStateHandler = useCallback(
     (action: string, payload?: Zoom | ForecastId) => {

@@ -14,13 +14,8 @@ let lazyMlNodeCount: number = 0;
 let userHasPermissionToViewMlNodeCount: boolean = false;
 
 export async function getMlNodeCount(mlApiServices?: MlApiServices): Promise<MlNodeCount> {
-  let nodes;
   try {
-    if (mlApiServices) {
-      nodes = await mlApiServices.mlNodeCount();
-    } else {
-      nodes = await ml.mlNodeCount();
-    }
+    const nodes = await (mlApiServices ?? ml).mlNodeCount();
     mlNodeCount = nodes.count;
     lazyMlNodeCount = nodes.lazyNodeCount;
     userHasPermissionToViewMlNodeCount = true;

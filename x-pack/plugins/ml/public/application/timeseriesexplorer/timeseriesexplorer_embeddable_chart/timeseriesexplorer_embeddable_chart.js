@@ -28,6 +28,7 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
+import { ML_JOB_AGGREGATION, aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 
 import {
   EuiCallOut,
@@ -58,7 +59,6 @@ import {
 } from '../timeseriesexplorer_constants';
 import { getControlsForDetector } from '../get_controls_for_detector';
 import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/timeseries_chart_with_tooltip';
-import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMetricDetector } from '../get_function_description';
 import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
 import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
@@ -294,7 +294,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             // Add a detector property to each anomaly.
             // Default to functionDescription if no description available.
             // TODO - when job_service is moved server_side, move this to server endpoint.
-            const jobDetectors = get(selectedJob.analysis_config, 'detectors', []);
+            const jobDetectors = selectedJob.analysis_config.detectors;
             const detector = jobDetectors[anomaly.detectorIndex];
             anomaly.detector = get(
               detector,
@@ -568,12 +568,14 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         // Plus query for forecast data if there is a forecastId stored in the appState.
         if (selectedForecastId !== undefined) {
           awaitingCount++;
-          let aggType = undefined;
           const detector = selectedJob.analysis_config.detectors[detectorIndex];
           const esAgg = mlFunctionToESAggregation(detector.function);
-          if (modelPlotEnabled === false && (esAgg === 'sum' || esAgg === 'count')) {
-            aggType = { avg: 'sum', max: 'sum', min: 'sum' };
-          }
+          const aggType =
+            modelPlotEnabled === false &&
+            (esAgg === ML_JOB_AGGREGATION.SUM || esAgg === ML_JOB_AGGREGATION.COUNT)
+              ? { avg: 'sum', max: 'sum', min: 'sum' }
+              : undefined;
+
           this.mlForecastService
             .getForecastData(
               selectedJob,
@@ -1032,26 +1034,24 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   </EuiFlexItem>
                 )}
 
-                {arePartitioningFieldsProvided &&
-                  selectedJob &&
-                  shouldShowForecastButton === true && (
-                    <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
-                      <ForecastingModal
-                        buttonMode={'empty'}
-                        job={selectedJob}
-                        jobState={selectedJobStats.state}
-                        earliestRecordTimestamp={
-                          selectedJobStats.data_counts.earliest_record_timestamp
-                        }
-                        latestRecordTimestamp={selectedJobStats.data_counts.latest_record_timestamp}
-                        detectorIndex={selectedDetectorIndex}
-                        entities={entityControls}
-                        setForecastId={this.setForecastId}
-                        className="forecast-controls"
-                        onForecastComplete={onForecastComplete}
-                      />
-                    </EuiFlexItem>
-                  )}
+                {arePartitioningFieldsProvided && selectedJob && shouldShowForecastButton === true && (
+                  <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
+                    <ForecastingModal
+                      buttonMode={'empty'}
+                      job={selectedJob}
+                      jobState={selectedJobStats.state}
+                      earliestRecordTimestamp={
+                        selectedJobStats.data_counts.earliest_record_timestamp
+                      }
+                      latestRecordTimestamp={selectedJobStats.data_counts.latest_record_timestamp}
+                      detectorIndex={selectedDetectorIndex}
+                      entities={entityControls}
+                      setForecastId={this.setForecastId}
+                      className="forecast-controls"
+                      onForecastComplete={onForecastComplete}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
 
               <TimeSeriesChartWithTooltips

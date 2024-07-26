@@ -51,11 +51,11 @@ export const initializeSingleMetricViewerControls = (
 
   const serializeSingleMetricViewerState = (): SingleMetricViewerControlsState => {
     return {
-      jobIds: jobIds.value,
-      forecastId: forecastId.value,
-      selectedDetectorIndex: selectedDetectorIndex.value,
-      selectedEntities: selectedEntities.value,
-      functionDescription: functionDescription?.value,
+      jobIds: jobIds.getValue(),
+      forecastId: forecastId.getValue(),
+      selectedDetectorIndex: selectedDetectorIndex.getValue(),
+      selectedEntities: selectedEntities.getValue(),
+      functionDescription: functionDescription?.getValue(),
     };
   };
 
