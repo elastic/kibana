@@ -108,8 +108,9 @@ export const createMlAlertType = (
         experimentalFeatures,
       });
 
-      console.error('ML EXECUTOR STATE', JSON.stringify(state, null, 2));
-      console.error('ML EXECUTOR RESULT', JSON.stringify(result, null, 2));
+      const { logger } = createOptions;
+      logger.error(`ML EXECUTOR STATE: ${JSON.stringify(state, null, 2)}`);
+      logger.error(`ML EXECUTOR RESULT: ${JSON.stringify(result, null, 2)}`);
       return { ...result, state };
     },
   };

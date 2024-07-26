@@ -77,7 +77,7 @@ export const mlExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('mlExecutor', async () => {
-    console.error('ML EXECUTOR');
+    ruleExecutionLogger.error('ML EXECUTOR');
     if (ml == null) {
       throw new Error('ML plugin unavailable during rule execution');
     }
@@ -88,11 +88,11 @@ export const mlExecutor = async ({
     const summaryJobs = await ml
       .jobServiceProvider(fakeRequest, services.savedObjectsClient)
       .jobsSummary(ruleParams.machineLearningJobId);
-    console.error('ALL ML JOBS SUMMARY', JSON.stringify(summaryJobs, null, 2));
+    ruleExecutionLogger.error('ALL ML JOBS SUMMARY', JSON.stringify(summaryJobs, null, 2));
     const jobSummaries = summaryJobs.filter((job) =>
       ruleParams.machineLearningJobId.includes(job.id)
     );
-    console.error('RELEVANT ML JOBS SUMMARY', JSON.stringify(jobSummaries, null, 2));
+    ruleExecutionLogger.error('RELEVANT ML JOBS SUMMARY', JSON.stringify(jobSummaries, null, 2));
 
     if (
       jobSummaries.length < 1 ||
@@ -117,6 +117,7 @@ export const mlExecutor = async ({
 
     let anomalyResults: AnomalyResults;
     try {
+      ruleExecutionLogger.error('finding ML signals...');
       anomalyResults = await findMlSignals({
         ml,
         // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
@@ -130,7 +131,10 @@ export const mlExecutor = async ({
         maxSignals: tuple.maxSignals,
         exceptionFilter,
       });
-      console.error('ML Alert search results:', JSON.stringify(anomalyResults, null, 2));
+      ruleExecutionLogger.error(
+        'ML Alert search results:',
+        JSON.stringify(anomalyResults, null, 2)
+      );
     } catch (error) {
       if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
         result.userError = true;

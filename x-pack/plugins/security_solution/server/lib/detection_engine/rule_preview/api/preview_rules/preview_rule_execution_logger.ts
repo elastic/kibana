@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+
 import type {
   IRuleMonitoringService,
   RuleExecutionContext,
@@ -16,18 +18,19 @@ export interface IPreviewRuleExecutionLogger {
 }
 
 export const createPreviewRuleExecutionLogger = (
-  loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>
+  loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>,
+  logger?: Logger
 ): IPreviewRuleExecutionLogger => {
   return {
     factory: ({ context }) => {
       const spyLogger = {
         context,
 
-        trace: console.error,
-        debug: console.error,
-        info: console.error,
-        warn: console.error,
-        error: console.error,
+        trace: logger?.error ?? console.error,
+        debug: logger?.error ?? console.error,
+        info: logger?.error ?? console.error,
+        warn: logger?.error ?? console.error,
+        error: logger?.error ?? console.error,
 
         logStatusChange: (args: StatusChangeArgs): Promise<void> => {
           loggedStatusChanges.push({ ...context, ...args });

@@ -138,7 +138,10 @@ export const previewRulesRoute = (
           const previewId = uuidv4();
           const username = security?.authc.getCurrentUser(request)?.username;
           const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
-          const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
+          const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(
+            loggedStatusChanges,
+            logger
+          );
           const runState: Record<string, unknown> = {};
           const logs: RulePreviewLogs[] = [];
           let isAborted = false;
@@ -299,7 +302,9 @@ export const previewRulesRoute = (
                 },
               })) as { state: TState });
 
-              console.error('LOGGED STATUS CHANGES', JSON.stringify(loggedStatusChanges, null, 2));
+              logger.error(
+                `LOGGED STATUS CHANGES: ${JSON.stringify(loggedStatusChanges, null, 2)}`
+              );
               const errors = loggedStatusChanges
                 .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
                 .map((item) => item.message ?? 'Unknown Error');
@@ -456,7 +461,7 @@ export const previewRulesRoute = (
               );
               break;
             case 'machine_learning':
-              console.error('IN RULE PREVIEW FOR MACHINE_LEARNING RULE');
+              logger.error('IN RULE PREVIEW FOR MACHINE_LEARNING RULE');
               const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
               await runExecutors(
                 mlAlertType.executor,
