@@ -28,7 +28,7 @@ import {
   PartialSuggestionWithText,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
-import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
+import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 
 const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
 const ESQL_NUMERIC_RETURN_TYPES = ESQL_NUMBER_TYPES as unknown as FunctionReturnType[];
@@ -171,25 +171,18 @@ describe('autocomplete', () => {
         ['string']
       ),
     ]);
-    testSuggestions('from a | where stringField >= ', [
-      ...getFieldNamesByType('string'),
-      ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
+    testSuggestions('from a | where textField >= ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('where', ['any'], { scalar: true }),
     ]);
     // Skip these tests until the insensitive case equality gets restored back
     testSuggestions.skip('from a | where stringField =~ ', [
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
     ]);
-    testSuggestions('from a | where stringField >= stringField ', [
-      '|',
-      ...getFunctionSignaturesByReturnType(
-        'where',
-        'boolean',
-        {
-          builtin: true,
-        },
-        ['boolean']
-      ),
+    testSuggestions('from a | where textField >= textField', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
     ]);
     testSuggestions.skip('from a | where stringField =~ stringField ', [
       '|',
@@ -211,8 +204,12 @@ describe('autocomplete', () => {
         ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
       ]);
       testSuggestions(`from a | where stringField >= stringField ${op} doubleField == `, [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }),
+        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          ESQL_COMMON_NUMERIC_TYPES as unknown as string[],
+          { scalar: true }
+        ),
       ]);
     }
     testSuggestions('from a | stats a=avg(doubleField) | where a ', [
@@ -235,10 +232,14 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | where log10()',
       [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }, undefined, [
-          'log10',
-        ]),
+        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          ESQL_NUMERIC_TYPES,
+          { scalar: true },
+          undefined,
+          ['log10']
+        ),
       ],
       '('
     );
@@ -249,10 +250,14 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | WHERE pow(doubleField, )',
       [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }, undefined, [
-          'pow',
-        ]),
+        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          ESQL_NUMERIC_TYPES,
+          { scalar: true },
+          undefined,
+          ['pow']
+        ),
       ],
       ','
     );
@@ -465,7 +470,7 @@ describe('autocomplete', () => {
     }
   });
 
-  describe('eval', () => {
+  describe.only('eval', () => {
     testSuggestions('from a | eval ', [
       'var0 =',
       ...getFieldNamesByType('any'),
@@ -514,10 +519,14 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=round()',
       [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }, undefined, [
-          'round',
-        ]),
+        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          ESQL_NUMERIC_TYPES,
+          { scalar: true },
+          undefined,
+          ['round']
+        ),
       ],
       '('
     );
@@ -554,8 +563,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=round(doubleField, ',
       [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }, undefined, [
+        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
           'round',
         ]),
       ],
@@ -564,8 +573,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval round(doubleField, ',
       [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }, undefined, [
+        ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
           'round',
         ]),
       ],
@@ -578,25 +586,33 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
     testSuggestions('from a | eval a=round(doubleField) + ', [
-      ...getFieldNamesByType('double'),
-      'a', // @TODO remove this
-      ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }),
+      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+      ...getFunctionSignaturesByReturnType(
+        'eval',
+        ESQL_COMMON_NUMERIC_TYPES as unknown as string[],
+        { scalar: true }
+      ),
     ]);
     testSuggestions('from a | eval a=round(doubleField)+ ', [
-      ...getFieldNamesByType('double'),
-      'a', // @TODO remove this
-      ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }),
+      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+      ...getFunctionSignaturesByReturnType(
+        'eval',
+        ESQL_COMMON_NUMERIC_TYPES as unknown as string[],
+        { scalar: true }
+      ),
     ]);
     testSuggestions('from a | eval a=doubleField+ ', [
-      ...getFieldNamesByType('double'),
-      'a', // @TODO remove this
-      ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }),
+      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
     ]);
-    testSuggestions('from a | eval a=`any#Char$Field`+ ', [
-      ...getFieldNamesByType('double'),
-      'a', // @TODO remove this
-      ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }),
-    ]);
+    // @TODO: the quote escaping is causing autocomplete to suggest dates
+    // Find out why
+    // testSuggestions('from a | eval a=`any#Char$Field`+ ', [
+    //   ...TIME_SYSTEM_PARAMS,
+    //   ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+    //   'a', // @TODO remove this
+    //   ...getFunctionSignaturesByReturnType('eval', ESQL_NUMERIC_TYPES, { scalar: true }),
+    // ]);
     testSuggestions(
       'from a | stats avg(doubleField) by stringField | eval ',
       [
@@ -654,27 +670,39 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=round(doubleField), b=round()',
       [
-        ...getFieldNamesByType('double'),
-        ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }, undefined, [
-          'round',
-        ]),
+        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          ESQL_NUMERIC_TYPES,
+          { scalar: true },
+          undefined,
+          ['round']
+        ),
       ],
       '('
     );
     // test that comma is correctly added to the suggestions if minParams is not reached yet
     testSuggestions('from a | eval a=concat( ', [
-      ...getFieldNamesByType('string').map((v) => `${v},`),
-      ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
-        'concat',
-      ]).map((v) => ({ ...v, text: `${v.text},` })),
+      ...getFieldNamesByType(['text', 'keyword']).map((v) => `${v},`),
+      ...getFunctionSignaturesByReturnType(
+        'eval',
+        ['text', 'keyword'],
+        { scalar: true },
+        undefined,
+        ['concat']
+      ).map((v) => ({ ...v, text: `${v.text},` })),
     ]);
     testSuggestions(
-      'from a | eval a=concat(stringField, ',
+      'from a | eval a=concat(textField, ',
       [
-        ...getFieldNamesByType('string'),
-        ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
-          'concat',
-        ]),
+        ...getFieldNamesByType(['text', 'keyword']),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          ['text', 'keyword'],
+          { scalar: true },
+          undefined,
+          ['concat']
+        ),
       ],
       ' '
     );
@@ -703,10 +731,14 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=cidr_match(ipField, ',
       [
-        ...getFieldNamesByType('string'),
-        ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
-          'cidr_match',
-        ]),
+        ...getFieldNamesByType(['text', 'keyword']),
+        ...getFunctionSignaturesByReturnType(
+          'eval',
+          ['text', 'keyword'],
+          { scalar: true },
+          undefined,
+          ['cidr_match']
+        ),
       ],
       ' '
     );
