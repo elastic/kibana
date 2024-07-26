@@ -16,6 +16,7 @@ import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constant
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type {
   BulkActionEditPayload,
