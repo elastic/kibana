@@ -16,9 +16,9 @@ import { createInterface } from 'readline';
 import { getDataPath } from '@kbn/utils';
 import { fromEvent, merge, of, timer } from 'rxjs';
 import { catchError, map, reduce, takeUntil, tap } from 'rxjs/operators';
+import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
-import { ChromiumArchivePaths } from '../paths';
 import { args } from './args';
 
 const paths = new ChromiumArchivePaths();
