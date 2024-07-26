@@ -21,6 +21,12 @@ components:
       # enum default value is temporarily unsupported by the code generator
       # default: default
       description: The type of data provider to create. Valid values are `default` and `template`.
+    TemplateTimelineType:
+      type: string
+      enum:
+        - elastic
+        - custom
+      description: The type of the timeline template.
     SavedTimeline:
       type: object
       properties:

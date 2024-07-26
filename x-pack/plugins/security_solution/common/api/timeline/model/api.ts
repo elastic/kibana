@@ -42,7 +42,7 @@ export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
 
 import { ErrorSchema } from './error_schema';
 import type { DataProviderType } from './components.gen';
-import { DataProviderTypeEnum } from './components.gen';
+import { DataProviderTypeEnum, TemplateTimelineTypeEnum } from './components.gen';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -297,14 +297,9 @@ const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
  * Timeline template type
  */
 
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
-}
-
 export const TemplateTimelineTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TemplateTimelineType.elastic),
-  runtimeTypes.literal(TemplateTimelineType.custom),
+  runtimeTypes.literal(TemplateTimelineTypeEnum.elastic),
+  runtimeTypes.literal(TemplateTimelineTypeEnum.custom),
 ]);
 
 export const TemplateTimelineTypeLiteralWithNullRt = unionWithNullType(

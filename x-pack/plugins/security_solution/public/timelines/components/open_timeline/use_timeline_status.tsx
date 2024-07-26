@@ -13,11 +13,8 @@ import type {
   TemplateTimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
 } from '../../../../common/api/timeline';
-import {
-  TimelineStatus,
-  TimelineType,
-  TemplateTimelineType,
-} from '../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TemplateTimelineTypeEnum } from '../../../../common/api/timeline/model/components.gen';
 
 import * as i18n from './translations';
 import type { TemplateTimelineFilter } from './types';
@@ -52,7 +49,7 @@ export const useTimelineStatus = ({
     () =>
       templateTimelineType == null
         ? null
-        : templateTimelineType === TemplateTimelineType.elastic
+        : templateTimelineType === TemplateTimelineTypeEnum.elastic
         ? TimelineStatus.immutable
         : TimelineStatus.active,
     [templateTimelineType]
@@ -61,14 +58,14 @@ export const useTimelineStatus = ({
   const filters = useMemo(
     () => [
       {
-        id: TemplateTimelineType.elastic,
+        id: TemplateTimelineTypeEnum.elastic,
         name: i18n.FILTER_ELASTIC_TIMELINES,
         disabled: !isTemplateFilterEnabled,
         withNext: true,
         count: elasticTemplateTimelineCount ?? undefined,
       },
       {
-        id: TemplateTimelineType.custom,
+        id: TemplateTimelineTypeEnum.custom,
         name: i18n.FILTER_CUSTOM_TIMELINES,
         disabled: !isTemplateFilterEnabled,
         withNext: false,
@@ -108,7 +105,7 @@ export const useTimelineStatus = ({
   }, [templateTimelineType, filters, isTemplateFilterEnabled, onFilterClicked]);
 
   const installPrepackagedTimelines = useCallback(async () => {
-    if (templateTimelineType !== TemplateTimelineType.custom) {
+    if (templateTimelineType !== TemplateTimelineTypeEnum.custom) {
       await installPrepackedTimelines();
     }
   }, [templateTimelineType]);

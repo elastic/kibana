@@ -32,6 +32,14 @@ export const DataProviderType = z.enum(['default', 'template']);
 export type DataProviderTypeEnum = typeof DataProviderType.enum;
 export const DataProviderTypeEnum = DataProviderType.enum;
 
+/**
+ * The type of the timeline template.
+ */
+export type TemplateTimelineType = z.infer<typeof TemplateTimelineType>;
+export const TemplateTimelineType = z.enum(['elastic', 'custom']);
+export type TemplateTimelineTypeEnum = typeof TemplateTimelineType.enum;
+export const TemplateTimelineTypeEnum = TemplateTimelineType.enum;
+
 export type ColumnHeaderResult = z.infer<typeof ColumnHeaderResult>;
 export const ColumnHeaderResult = z.object({
   aggregatable: z.boolean().optional(),
