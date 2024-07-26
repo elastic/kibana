@@ -60,9 +60,45 @@ export interface ESQLCommandMode extends ESQLAstBaseItem {
   type: 'mode';
 }
 
-export interface ESQLFunction extends ESQLAstBaseItem {
+/**
+ * We coalesce all function calls and expressions into a single "function"
+ * node type. This subtype is used to distinguish between different types
+ * of function calls and expressions.
+ *
+ * - `variadic-call` is a function call with any number of arguments: fn(a, b, c, ...)
+ * - `unary-expression` is a unary expression: -a, +a, NOT a, ...
+ * - `binary-expression` is a binary expression: a + b, a - b, a * b, ...
+ */
+export type FunctionSubtype =
+  | 'variadic-call' // fn(a, b, c, ...)
+  | 'unary-expression' // -a, +a, NOT a, ...
+  | 'binary-expression'; // a + b, a - b, a * b, ...
+
+export interface ESQLFunction<Subtype extends FunctionSubtype = 'variadic-call'>
+  extends ESQLAstBaseItem {
   type: 'function';
+
+  /**
+   * Default is 'variadic-call'.
+   */
+  subtype?: Subtype;
+
   args: ESQLAstItem[];
+}
+
+export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'> {
+  subtype: 'variadic-call';
+  args: ESQLAstItem[];
+}
+
+export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+  subtype: 'unary-expression';
+  args: [ESQLAstItem];
+}
+
+export interface ESQLBinaryExpression extends ESQLFunction<'binary-expression'> {
+  subtype: 'binary-expression';
+  args: [ESQLAstItem, ESQLAstItem];
 }
 
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
