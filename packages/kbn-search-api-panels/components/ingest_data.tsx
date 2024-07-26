@@ -73,6 +73,9 @@ export const IngestData: React.FC<IngestDataProps> = ({
           application={application}
           consolePlugin={consolePlugin}
           sharePlugin={sharePlugin}
+          consoleTitle={i18n.translate('searchApiPanels.welcomeBanner.ingestData.title', {
+            defaultMessage: 'Ingest data',
+          })}
         />
       }
       links={[]}

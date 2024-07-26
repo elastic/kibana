@@ -1541,7 +1541,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ) {
     const updatePackagePolicy = updatePackageInputs(
       {
-        ...omit(packagePolicy, 'id'),
+        ...omit(packagePolicy, 'id', 'spaceId'),
         inputs: packagePolicy.inputs,
         package: {
           ...packagePolicy.package!,
@@ -1626,7 +1626,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     const updatedPackagePolicy = updatePackageInputs(
       {
-        ...omit(packagePolicy, 'id'),
+        ...omit(packagePolicy, 'id', 'spaceId'),
         inputs: packagePolicy.inputs,
         package: {
           ...packagePolicy.package!,
@@ -1881,6 +1881,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 const omitted = {
                   ...omit(result, [
                     'id',
+                    'spaceId',
                     'version',
                     'revision',
                     'updated_at',

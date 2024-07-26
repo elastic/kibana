@@ -173,8 +173,8 @@ describe('TelemetrySender', () => {
     });
   });
   describe('sendIfDue', () => {
-    let originalFetch: typeof window['fetch'];
-    let mockFetch: jest.Mock<typeof window['fetch']>;
+    let originalFetch: (typeof window)['fetch'];
+    let mockFetch: jest.Mock<(typeof window)['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;
@@ -236,8 +236,8 @@ describe('TelemetrySender', () => {
   });
 
   describe('sendUsageData', () => {
-    let originalFetch: typeof window['fetch'];
-    let mockFetch: jest.Mock<typeof window['fetch']>;
+    let originalFetch: (typeof window)['fetch'];
+    let mockFetch: jest.Mock<(typeof window)['fetch']>;
     let consoleWarnMock: jest.SpyInstance;
 
     beforeAll(() => {

@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
+  generateHistoryBackfillTransformId,
   generateHistoryTransformId,
   generateLatestTransformId,
 } from './helpers/generate_component_id';
@@ -37,7 +38,36 @@ export async function stopAndDeleteHistoryTransform(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot stop or delete history transform [${definition.id}]`);
+    logger.error(`Cannot stop or delete history transform [${definition.id}]: ${e}`);
+    throw e;
+  }
+}
+
+export async function stopAndDeleteHistoryBackfillTransform(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    const historyBackfillTransformId = generateHistoryBackfillTransformId(definition);
+    await retryTransientEsErrors(
+      () =>
+        esClient.transform.stopTransform(
+          { transform_id: historyBackfillTransformId, wait_for_completion: true, force: true },
+          { ignore: [409, 404] }
+        ),
+      { logger }
+    );
+    await retryTransientEsErrors(
+      () =>
+        esClient.transform.deleteTransform(
+          { transform_id: historyBackfillTransformId, force: true },
+          { ignore: [404] }
+        ),
+      { logger }
+    );
+  } catch (e) {
+    logger.error(`Cannot stop or delete history backfill transform [${definition.id}]: ${e}`);
     throw e;
   }
 }

@@ -1146,7 +1146,7 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ") => { field: \"message\" | \"error.message\" | \"event.original\"; value: string | undefined; } | { field: undefined; value?: undefined; }"
+          ") => { field: \"message\" | \"event.original\" | \"error.message\"; value: string | undefined; } | { field: undefined; value?: undefined; }"
         ],
         "path": "packages/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
         "deprecated": false,
@@ -1389,6 +1389,43 @@
               }
             ],
             "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogLevelBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "LogLevelBadge",
+        "description": [],
+        "signature": [
+          "({ logLevel, fallback, \"data-test-subj\": dataTestSubj, ...badgeProps }: Omit<",
+          "EuiBadgeProps",
+          ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogLevelBadge.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  logLevel,\n  fallback,\n  'data-test-subj': dataTestSubj = 'logLevelBadge',\n  ...badgeProps\n}",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiBadgeProps",
+              ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

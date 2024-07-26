@@ -66,6 +66,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
         return "I've successfully saved this entry to your knowledge base. You can ask me to recall this information at any time.";
       },
       tags: ['knowledge-base'],
-    });
+      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
+    }) as unknown as DynamicStructuredTool;
   },
 };
