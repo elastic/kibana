@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Patch Timeline API
-  version: '2023-10-31'
+  version: 8.9.0
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -12,9 +12,7 @@ servers:
 paths:
   /api/timeline:
     patch:
-      x-labels: [serverless, ess]
-      x-codegen-enabled: true
-      operationId: PatchTimeline
+      operationId: patchTimeline
       summary: Updates an existing timeline.
       description: Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
       tags:
@@ -26,16 +24,13 @@ paths:
           application/json:
             schema:
               type: object
-              required: [timelineId, version, timeline]
               properties:
                 timelineId:
                   type: string
-                  nullable: true
                 version:
                   type: string
-                  nullable: true
                 timeline:
-                  $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+                  $ref: '../model/components.yaml#/components/schemas/SavedTimeline'
       responses:
         '200':
           description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
@@ -43,18 +38,17 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [data]
                 properties:
                   data:
                     type: object
-                    required: [persistTimeline]
                     properties:
                       persistTimeline:
                         type: object
-                        required: [timeline]
                         properties:
                           timeline:
-                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                            $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
+                required:
+                  - data
         '405':
           description: Indicates that the user does not have the required access to create a draft timeline.
           content:
