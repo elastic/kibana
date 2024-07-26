@@ -139,7 +139,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
           );
         } else {
           // replace the control with a new one of the updated type
-          controlGroup.replacePanel(controlId, { panelType: newType, initialState });
+          controlGroup.replacePanel(controlId, { panelType: newType, initialState: newState });
         }
       },
       initialState: {

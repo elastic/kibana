@@ -83,6 +83,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
           },
           response: {
             [200]: {
+              description: 'OK response oas-test-version-1',
               body: () =>
                 schema.object(
                   { fooResponseWithDescription: schema.string() },
@@ -101,6 +102,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
             [200]: {
+              description: 'OK response oas-test-version-2',
               body: () => schema.stream({ meta: { description: 'stream response' } }),
               bodyContentType: 'application/octet-stream',
             },

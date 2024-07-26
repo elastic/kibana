@@ -14,6 +14,8 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useSessionStorage } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../../../plugin';
 import { selectDynamicSettings } from '../../../state/settings';
 import {
   selectSyntheticsAlerts,
@@ -21,7 +23,7 @@ import {
 } from '../../../state/alert_rules/selectors';
 import { selectMonitorListState } from '../../../state';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
-import { useSyntheticsSettingsContext, useSyntheticsStartPlugins } from '../../../contexts';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boolean }) => {
@@ -40,7 +42,8 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     loaded: monitorsLoaded,
   } = useSelector(selectMonitorListState);
 
-  const syntheticsLocators = useSyntheticsStartPlugins()?.share?.url.locators;
+  const syntheticsLocators = useKibana<ClientPluginsStart>().services.share?.url.locators;
+
   const locator = syntheticsLocators?.get(syntheticsSettingsLocatorID);
 
   const { data: url } = useFetcher(() => {

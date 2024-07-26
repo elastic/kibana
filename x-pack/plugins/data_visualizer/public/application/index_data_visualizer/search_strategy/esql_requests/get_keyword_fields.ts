@@ -9,7 +9,7 @@ import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
-import { appendToESQLQuery, getEarliestLatestParams } from '@kbn/esql-utils';
+import { appendToESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
@@ -32,7 +32,7 @@ export const getESQLKeywordFieldStats = async ({
   timeRange,
 }: Params) => {
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
-  const namedParams = getEarliestLatestParams(esqlBaseQuery, timeRange);
+  const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
   const keywordFields = columns.map((field) => {
     const query = appendToESQLQuery(
       esqlBaseQuery,

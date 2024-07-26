@@ -22,6 +22,6 @@ export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
-  getEarliestLatestParams,
-  hasEarliestLatestParams,
+  getStartEndParams,
+  hasStartEndParams,
 } from './utils/run_query';

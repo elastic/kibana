@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/integration-import-plugin",
-  "owner": "@elastic/security-solution",
+  "owner": "@elastic/security-scalability",
   "description": "Plugin implementing the Integration Import API and UI",
   "plugin": {
     "id": "integrationImport",

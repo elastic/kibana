@@ -6,7 +6,6 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { SetupRouteOptions } from '../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import {
@@ -44,9 +43,8 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
           return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
         }
 
-        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-        const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-        const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const soClient = (await context.core).savedObjects.client;
 
         const entityDiscoveryState = await Promise.all(
           builtInDefinitions.map(async (builtInDefinition) => {

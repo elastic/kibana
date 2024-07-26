@@ -26,7 +26,13 @@
             "text": "ActionDefinition"
           },
           "<",
-          "ActionContext",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
           ">"
         ],
         "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
@@ -188,7 +194,13 @@
             "description": [],
             "signature": [
               "(context: ",
-              "ActionContext",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.EmbeddableApiContext",
+                "text": "EmbeddableApiContext"
+              },
               ") => Promise<boolean>"
             ],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
@@ -203,7 +215,13 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "ActionContext"
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.EmbeddableApiContext",
+                    "text": "EmbeddableApiContext"
+                  }
                 ],
                 "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,
@@ -222,7 +240,13 @@
             "description": [],
             "signature": [
               "(context: ",
-              "ActionContext",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.EmbeddableApiContext",
+                "text": "EmbeddableApiContext"
+              },
               ") => Promise<void>"
             ],
             "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
@@ -237,7 +261,13 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "ActionContext"
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.EmbeddableApiContext",
+                    "text": "EmbeddableApiContext"
+                  }
                 ],
                 "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
                 "deprecated": false,

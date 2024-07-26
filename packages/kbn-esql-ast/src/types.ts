@@ -12,20 +12,27 @@ export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstItem;
 
+/**
+ * Represents an *expression* in the AST.
+ */
 export type ESQLSingleAstItem =
-  | ESQLFunction
+  | ESQLFunction // "function call expression"
   | ESQLCommandOption
-  | ESQLSource
-  | ESQLColumn
+  | ESQLSource // "source identifier expression"
+  | ESQLColumn // "field identifier expression"
   | ESQLTimeInterval
-  | ESQLList
-  | ESQLLiteral
+  | ESQLList // "list expression"
+  | ESQLLiteral // "literal expression"
   | ESQLCommandMode
-  | ESQLInlineCast
+  | ESQLInlineCast // "inline cast expression"
   | ESQLUnknownItem;
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
 
+/**
+ * An array of AST nodes represents different things in different contexts.
+ * For example, in command top level arguments it is treated as an "assignment expression".
+ */
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
 export interface ESQLLocation {

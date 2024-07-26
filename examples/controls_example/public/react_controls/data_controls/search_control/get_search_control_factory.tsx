@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -65,17 +65,15 @@ export const getSearchControlFactory = ({
         (field.spec.esTypes ?? []).includes('text')
       );
     },
-    CustomOptionsComponent: ({ initialState, updateState }) => {
-      const [searchTechnique, setSearchTechnique] = useState(initialState.searchTechnique);
-
+    CustomOptionsComponent: ({ currentState, updateState }) => {
+      const searchTechnique = currentState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE;
       return (
         <EuiFormRow label={'Searching'} data-test-subj="searchControl__searchOptionsRadioGroup">
           <EuiRadioGroup
             options={allSearchOptions}
-            idSelected={searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE}
+            idSelected={searchTechnique}
             onChange={(id) => {
               const newSearchTechnique = id as SearchControlTechniques;
-              setSearchTechnique(newSearchTechnique);
               updateState({ searchTechnique: newSearchTechnique });
             }}
           />

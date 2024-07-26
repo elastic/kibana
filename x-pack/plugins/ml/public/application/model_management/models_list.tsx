@@ -50,7 +50,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
 import { dynamic } from '@kbn/shared-ux-utility';
 import useMountedState from 'react-use/lib/useMountedState';
-import { getModelStateColor } from './get_model_state_color';
+import { getModelStateColor, getModelDeploymentState } from './get_model_state';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
@@ -88,7 +88,11 @@ export type ModelItem = TrainedModelConfigResponse & {
   origin_job_exists?: boolean;
   deployment_ids: string[];
   putModelConfig?: object;
-  state: ModelState;
+  state: ModelState | undefined;
+  /**
+   * Description of the current model state
+   */
+  stateDescription?: string;
   recommended?: boolean;
   /**
    * Model name, e.g. elser
@@ -374,14 +378,17 @@ export const ModelsList: FC<Props> = ({
             ...modelStats[0],
             deployment_stats: modelStats.map((d) => d.deployment_stats).filter(isDefined),
           };
+
+          // Extract deployment ids from deployment stats
           model.deployment_ids = modelStats
             .map((v) => v.deployment_stats?.deployment_id)
             .filter(isDefined);
-          model.state = model.stats.deployment_stats?.some(
-            (v) => v.state === DEPLOYMENT_STATE.STARTED
-          )
-            ? DEPLOYMENT_STATE.STARTED
-            : null;
+
+          model.state = getModelDeploymentState(model);
+          model.stateDescription = model.stats.deployment_stats.reduce((acc, c) => {
+            if (acc) return acc;
+            return c.reason ?? '';
+          }, '');
         });
 
         const elasticModels = models.filter((model) =>
