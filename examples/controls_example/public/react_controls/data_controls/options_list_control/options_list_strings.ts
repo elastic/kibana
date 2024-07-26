@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
+import { OptionsListSearchTechnique } from '../../../../common/options_list/suggestions_searching';
 
 export const OptionsListStrings = {
   control: {
@@ -44,6 +44,10 @@ export const OptionsListStrings = {
         values: {
           invalidSelectionCount,
         },
+      }),
+    getInvalidSelectionMessage: () =>
+      i18n.translate('controls.optionsList.popover.selectionError', {
+        defaultMessage: 'There was an error when making your selection',
       }),
   },
   editor: {

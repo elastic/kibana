@@ -27,7 +27,7 @@ import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
-import { OptionsListStrings } from './components/options_list_strings';
+import { OptionsListStrings } from './options_list_strings';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
@@ -285,7 +285,9 @@ export const getOptionsListControlFactory = (
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
           if (!key || !field) {
-            api.setBlockingError(new Error('Error when making selection'));
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
             return;
           }
 
@@ -312,7 +314,9 @@ export const getOptionsListControlFactory = (
           const singleSelect = singleSelect$.getValue();
           const field = api.field$.getValue();
           if (!key || !field) {
-            api.setBlockingError(new Error('Error when making selection'));
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
             return;
           }
 

@@ -22,7 +22,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
-import { OptionsListStrings } from './options_list_strings';
+import { OptionsListStrings } from '../options_list_strings';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;

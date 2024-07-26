@@ -11,7 +11,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiScreenReaderOnly, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
-import { OptionsListStrings } from './options_list_strings';
+import { OptionsListStrings } from '../options_list_strings';
 
 export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentCount: number }) => {
   const { euiTheme } = useEuiTheme();

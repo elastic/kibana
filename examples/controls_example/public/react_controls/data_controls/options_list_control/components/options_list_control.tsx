@@ -28,7 +28,7 @@ import { OptionsListSelection } from '../../../../../common/options_list/options
 import { MIN_POPOVER_WIDTH } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopover } from './options_list_popover';
-import { OptionsListStrings } from './options_list_strings';
+import { OptionsListStrings } from '../options_list_strings';
 
 import './options_list.scss';
 
