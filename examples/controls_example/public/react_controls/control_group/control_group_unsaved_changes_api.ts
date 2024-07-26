@@ -7,17 +7,50 @@
  */
 
 import { childrenUnsavedChanges$, PresentationContainer } from '@kbn/presentation-containers';
-import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import {
+  apiPublishesUnsavedChanges,
+  initializeUnsavedChanges,
+  PublishesUnsavedChanges,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { combineLatest, map } from 'rxjs';
+import { ControlsInOrder } from './init_controls_manager';
+import { ControlGroupRuntimeState } from './types';
+
+type ControlGroupComparatorState = Pick<
+  ControlGroupRuntimeState,
+  'autoApplySelections' | 'chainingSystem' | 'ignoreParentSettings' | 'labelPosition'
+> & {
+  controlsInOrder: ControlsInOrder;
+};
 
 export function initializeControlGroupUnsavedChanges(
-  children$: PresentationContainer['children$']
+  children$: PresentationContainer['children$'],
+  comparators: StateComparators<ControlGroupComparatorState>,
+  parentApi: unknown
 ) {
+  const controlGroupUnsavedChanges = initializeUnsavedChanges<ControlGroupComparatorState>(
+    {
+      autoApplySelections: comparators.autoApplySelections[0].value,
+      chainingSystem: comparators.chainingSystem[0].value,
+      controlsInOrder: comparators.controlsInOrder[0].value,
+      ignoreParentSettings: comparators.ignoreParentSettings[0].value,
+      labelPosition: comparators.labelPosition[0].value,
+    } as ControlGroupComparatorState,
+    parentApi,
+    comparators
+  );
+  
   return {
     api: {
-      unsavedChanges: combineLatest([childrenUnsavedChanges$(children$)]).pipe(
-        map(([unsavedControlState]) => {
-          const unsavedChanges: { [key: string]: unknown } = {};
+      unsavedChanges: combineLatest([
+        controlGroupUnsavedChanges.api.unsavedChanges,
+        childrenUnsavedChanges$(children$),
+      ]).pipe(
+        map(([unsavedControlGroupState, unsavedControlState]) => {
+          const unsavedChanges: { [key: string]: unknown } = unsavedControlGroupState
+            ? { ...unsavedControlGroupState }
+            : {};
           if (unsavedControlState) {
             unsavedChanges.controls = unsavedControlState;
           }
@@ -25,6 +58,7 @@ export function initializeControlGroupUnsavedChanges(
         })
       ),
       resetUnsavedChanges: () => {
+        controlGroupUnsavedChanges.api.resetUnsavedChanges();
         Object.values(children$.value).forEach((controlApi) => {
           if (apiPublishesUnsavedChanges(controlApi)) controlApi.resetUnsavedChanges();
         });

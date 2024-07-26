@@ -32,7 +32,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
-import { initControlsManager } from './init_controls_manager';
+import { ControlsInOrder, initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup } from './serialization_utils';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
@@ -86,7 +86,29 @@ export const getControlGroupEmbeddableFactory = (services: {
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
-      const unsavedChanges = initializeControlGroupUnsavedChanges(controlsManager.api.children$);
+      const unsavedChanges = initializeControlGroupUnsavedChanges(
+        controlsManager.api.children$,
+        {
+          autoApplySelections: [
+            autoApplySelections$,
+            (next: boolean) => autoApplySelections$.next(next),
+          ],
+          chainingSystem: [
+            chainingSystem$,
+            (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
+          ],
+          controlsInOrder: [
+            controlsManager.controlsInOrder$,
+            (next: ControlsInOrder) => controlsManager.controlsInOrder$.next(next),
+          ],
+          ignoreParentSettings: [
+            ignoreParentSettings$,
+            (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
+          ],
+          labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
+        },
+        parentApi
+      );
 
       const api = setApi({
         ...controlsManager.api,
