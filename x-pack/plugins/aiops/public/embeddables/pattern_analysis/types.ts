@@ -47,7 +47,7 @@ export type PatternAnalysisEmbeddableApi = DefaultEmbeddableApi<PatternAnalysisE
 
 export interface PatternAnalysisEmbeddableState extends SerializedTitles, SerializedTimeRange {
   dataViewId: string;
-  fieldName: string;
+  fieldName: string | undefined;
   minimumTimeRangeOption: MinimumTimeRangeOption;
   randomSamplerMode: RandomSamplerOption;
   randomSamplerProbability: RandomSamplerProbability;

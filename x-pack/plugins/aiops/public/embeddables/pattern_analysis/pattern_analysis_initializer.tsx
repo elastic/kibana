@@ -21,7 +21,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -62,17 +62,21 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
     },
   } = useAiopsAppContext();
 
-  const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
-
-  const [formInput, setFormInput] = useState<FormControlsProps>(
+  const [formInput, setFormInput] = useState<PatternAnalysisEmbeddableRuntimeState>(
     pick(
       initialInput ?? {
         minimumTimeRangeOption: '1 week',
         randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
         randomSamplerProbability: DEFAULT_PROBABILITY,
       },
-      ['fieldName', 'minimumTimeRangeOption', 'randomSamplerMode', 'randomSamplerProbability']
-    ) as FormControlsProps
+      [
+        'dataViewId',
+        'fieldName',
+        'minimumTimeRangeOption',
+        'randomSamplerMode',
+        'randomSamplerProbability',
+      ]
+    ) as PatternAnalysisEmbeddableRuntimeState
   );
   const [isFormValid, setIsFormValid] = useState(true);
 
@@ -87,15 +91,28 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             },
           })
         : '',
-      dataViewId,
     };
-  }, [formInput, dataViewId]);
+  }, [formInput]);
 
   useEffect(
     function previewChanges() {
-      onPreview(updatedProps);
+      if (isFormValid && updatedProps.fieldName !== undefined) {
+        onPreview(updatedProps);
+      }
     },
-    [onPreview, updatedProps]
+    [isFormValid, onPreview, updatedProps]
+  );
+
+  const setDataViewId = useCallback(
+    (dataViewId: string | undefined) => {
+      setFormInput({
+        ...formInput,
+        dataViewId: dataViewId ?? '',
+        fieldName: undefined,
+      });
+      setIsFormValid(false);
+    },
+    [formInput]
   );
 
   return (
@@ -129,10 +146,10 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             })}
           >
             <IndexPatternSelect
-              autoFocus={!dataViewId}
+              autoFocus={!formInput.dataViewId}
               fullWidth
               compressed
-              indexPatternId={dataViewId}
+              indexPatternId={formInput.dataViewId}
               placeholder={i18n.translate(
                 'xpack.aiops.embeddablePatternAnalysis.config.dataViewSelectorPlaceholder',
                 {
@@ -144,11 +161,10 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViewId={dataViewId}>
+          <DataSourceContextProvider dataViewId={formInput.dataViewId}>
             <EuiSpacer />
 
             <FormControls
-              dataViewId={dataViewId}
               formInput={formInput}
               onChange={setFormInput}
               onValidationChange={setIsFormValid}
@@ -182,7 +198,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
                   defaultMessage: 'Apply changes',
                 }
               )}
-              isDisabled={!isFormValid || !dataViewId}
+              isDisabled={!isFormValid}
               iconType="check"
               data-test-subj="aiopsPatternAnalysisConfirmButton"
             >
@@ -198,17 +214,12 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   );
 };
 
-export type FormControlsProps = Pick<
-  PatternAnalysisEmbeddableRuntimeState,
-  'fieldName' | 'minimumTimeRangeOption' | 'randomSamplerMode' | 'randomSamplerProbability'
->;
-
 export const FormControls: FC<{
-  dataViewId: string;
-  formInput: FormControlsProps;
-  onChange: (update: FormControlsProps) => void;
+  formInput: PatternAnalysisEmbeddableRuntimeState;
+  onChange: (update: PatternAnalysisEmbeddableRuntimeState) => void;
   onValidationChange: (isValid: boolean) => void;
-}> = ({ dataViewId, formInput, onChange, onValidationChange }) => {
+}> = ({ formInput, onChange, onValidationChange }) => {
+  const dataViewId = formInput.dataViewId;
   const {
     data: { dataViews },
   } = useAiopsAppContext();
@@ -249,7 +260,7 @@ export const FormControls: FC<{
 
   useEffect(
     function validateForm() {
-      onValidationChange(selectedField !== null);
+      onValidationChange(selectedField !== null && formInput.dataViewId !== undefined);
     },
     [selectedField, formInput, onValidationChange]
   );

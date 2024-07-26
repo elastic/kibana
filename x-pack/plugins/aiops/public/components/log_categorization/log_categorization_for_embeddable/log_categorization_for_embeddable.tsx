@@ -165,6 +165,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     if (
       loading === true ||
       fieldName === null ||
+      fieldName === undefined ||
       timeField === undefined ||
       earliest === undefined ||
       latest === undefined ||
@@ -230,6 +231,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
       setFieldValidationResult(validationResult);
       const { categories, hasExamples } = categorizationResult;
+
+      // eslint-disable-next-line no-console
+      console.log('categories', categories);
 
       if (timeRange.useSubAgg) {
         const categoriesInBucket = categorizationResult.categories
