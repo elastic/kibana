@@ -27,7 +27,14 @@ export const enableRuleRoute = (
         summary: 'Enable a rule',
       },
       validate: {
-        params: enableRuleRequestParamsSchemaV1,
+        request: {
+          params: enableRuleRequestParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
