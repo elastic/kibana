@@ -173,7 +173,7 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/entityManager-plugin",
     "@kbn/osquery-plugin",
-    "@kbn/securitysolution-exceptions-common",
+    "@kbn/entities-schema",
     "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin"
   ]
