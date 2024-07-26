@@ -17,7 +17,10 @@ import type { CommandDefinition, FunctionDefinition } from './types';
  */
 export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
-  { withTypes }: { withTypes: boolean } = { withTypes: true }
+  { withTypes, capitalize }: { withTypes: boolean; capitalize?: boolean } = {
+    withTypes: true,
+    capitalize: false,
+  }
 ) {
   return signatures.map(({ params, returnType, minParams }) => {
     // for functions with a minimum number of args, repeat the last arg multiple times
@@ -25,7 +28,7 @@ export function getFunctionSignatures(
     const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
     const extraArg = Array(minParamsToAdd || 1).fill(params[Math.max(params.length - 1, 0)]);
     return {
-      declaration: `${name}(${params
+      declaration: `${capitalize ? name.toUpperCase() : name}(${params
         .map((arg) => printArguments(arg, withTypes))
         .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
         withTypes ? `: ${returnType}` : ''

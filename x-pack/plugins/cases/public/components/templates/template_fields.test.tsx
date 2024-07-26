@@ -13,7 +13,8 @@ import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { TemplateFields } from './template_fields';
 
-describe('Template fields', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187854
+describe.skip('Template fields', () => {
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
   const formDefaultValue = { templateTags: [] };

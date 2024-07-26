@@ -31,6 +31,7 @@ import {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { type Group } from '@kbn/observability-alerting-rule-utils';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
@@ -77,7 +78,6 @@ import {
   LogThresholdRuleTypeParams,
   positiveComparators,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
-import { Group } from '../../../../common/alerting/types';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
