@@ -284,7 +284,7 @@ export function convertResponseContentToChatGenerationChunk(
   });
 }
 
-export function convertAuthorToRole(author: string): typeof POSSIBLE_ROLES[number] {
+export function convertAuthorToRole(author: string): (typeof POSSIBLE_ROLES)[number] {
   switch (author) {
     /**
      *  Note: Gemini currently is not supporting system messages

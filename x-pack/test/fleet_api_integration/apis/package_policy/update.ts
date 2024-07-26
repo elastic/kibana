@@ -6,11 +6,16 @@
  */
 import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
+import {
+  skipIfNoDockerRegistry,
+  isDockerRegistryEnabledOrSkipped,
+  enableSecrets,
+} from '../../helpers';
 import { testUsers } from '../test_users';
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -58,20 +63,26 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId: string;
     let packagePolicyId2: string;
     let packagePolicyId3: string;
+    let packagePolicySecretsId: string;
+    let packagePolicySecrets: any;
     let endpointPackagePolicyId: string;
     let inputOnlyPackagePolicyId: string;
 
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     before(async function () {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
       }
+
+      await enableSecrets(providerContext);
+
+      await supertest.delete(`/api/fleet/epm/packages/endpoint/8.6.1`).set('kbn-xsrf', 'xxxx');
       const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
         await Promise.all([
           supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
@@ -212,6 +223,34 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
+
+      const { body: secretsPackagePolicyResponse } = await supertest
+        .post(`/api/fleet/package_policies?format=simplified`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'secrets-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          inputs: {
+            'secrets-test_input': {
+              vars: {
+                input_var_secret: 'input_var_secret_value',
+              },
+            },
+          },
+          vars: {
+            package_var_non_secret: 'package_var_non_secret_value',
+            package_var_secret: 'package_var_secret_value',
+          },
+          force: true,
+          package: {
+            name: 'secrets',
+            version: '1.1.0',
+          },
+        });
+      packagePolicySecrets = secretsPackagePolicyResponse.item;
+      packagePolicySecretsId = secretsPackagePolicyResponse.item.id;
 
       const { body: inputOnlyPolicyResponse } = await supertest
         .post(`/api/fleet/package_policies`)
@@ -540,6 +579,32 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should return 200 and disable an input that has all disabled streams', async function () {
+      const { body } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: {
+                    type: 'logs',
+                    dataset: 'test.some_logs',
+                  },
+                },
+              ],
+              type: 'single_input',
+            },
+          ],
+        })
+        .expect(200);
+      expect(body.item.inputs[0].enabled).to.eql(false);
+    });
+
     it('should allow to override inputs', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
@@ -618,6 +683,25 @@ export default function (providerContext: FtrProviderContext) {
             package: {
               name: 'with_required_variables',
               version: '0.1.0',
+            },
+          })
+          .expect(200);
+      });
+
+      it('should work with secret values', async function () {
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicySecretsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: packagePolicySecrets.inputs,
+            vars: packagePolicySecrets.vars,
+            package: {
+              name: 'secrets',
+              version: '1.1.0',
             },
           })
           .expect(200);
@@ -828,6 +912,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const installation = await getInstallationSavedObject('integration_to_input', '2.0.0');
+
         expectIdArraysEqual(installation.installed_es, [
           // assets from version 1.0.0
           { id: 'logs-integration_to_input.log', type: 'index_template' },
