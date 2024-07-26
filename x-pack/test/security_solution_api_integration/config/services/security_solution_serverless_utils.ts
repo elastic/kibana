@@ -74,8 +74,7 @@ export function SecuritySolutionServerlessUtils({
       const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader;
 
       if (!apiKeyHeader) {
-        new Error(`API key for role [${role}] is not available, SecureBsearch cannot be created`);
-        return SecureBsearch;
+        log.error(`API key for role [${role}] is not available, SecureBsearch cannot be created`);
       }
 
       const send = <T extends IEsSearchResponse>(sendOptions: SendOptions): Promise<T> => {
@@ -84,7 +83,7 @@ export function SecuritySolutionServerlessUtils({
           ...rest,
           // We need super test WITHOUT auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
           supertestWithoutAuth: supertest.agent(kbnUrl),
-          apiKeyHeader,
+          apiKeyHeader: apiKeyHeader ?? { Authorization: '' },
           internalOrigin: 'Kibana',
         };
         return SecureBsearch.send(serverlessSendOptions);
