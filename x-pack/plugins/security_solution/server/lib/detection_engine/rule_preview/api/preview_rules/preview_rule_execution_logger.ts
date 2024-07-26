@@ -23,11 +23,11 @@ export const createPreviewRuleExecutionLogger = (
       const spyLogger = {
         context,
 
-        trace: console.log,
-        debug: console.log,
-        info: console.log,
-        warn: console.log,
-        error: console.log,
+        trace: console.error,
+        debug: console.error,
+        info: console.error,
+        warn: console.error,
+        error: console.error,
 
         logStatusChange: (args: StatusChangeArgs): Promise<void> => {
           loggedStatusChanges.push({ ...context, ...args });
