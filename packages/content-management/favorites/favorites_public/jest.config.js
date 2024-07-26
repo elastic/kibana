@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/content-management/favorites/favorites_public-public'],
+  roots: ['<rootDir>/packages/content-management/favorites/favorites_public'],
 };

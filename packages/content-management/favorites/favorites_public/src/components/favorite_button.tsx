@@ -75,19 +75,20 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
  * @param euiTheme
  */
 export const cssFavoriteHoverWithinEuiTableRow = (euiTheme: EuiThemeComputed) => css`
-  .euiTableRow .cm-favorite-button--empty {
-    visibility: hidden;
-    opacity: 0;
-    ${euiCanAnimate} {
-      transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+  @media (hover: hover) {
+    .euiTableRow .cm-favorite-button--empty {
+      visibility: hidden;
+      opacity: 0;
+      ${euiCanAnimate} {
+        transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+      }
     }
-  }
-
-  .euiTableRow:hover,
-  .euiTableRow:focus-within {
-    .cm-favorite-button--empty {
-      visibility: visible;
-      opacity: 1;
+    .euiTableRow:hover,
+    .euiTableRow:focus-within {
+      .cm-favorite-button--empty {
+        visibility: visible;
+        opacity: 1;
+      }
     }
   }
 `;
