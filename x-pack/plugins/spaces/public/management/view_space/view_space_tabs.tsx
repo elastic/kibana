@@ -15,6 +15,7 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
+import { filterRolesAssignedToSpace } from './utils';
 import type { Space } from '../../../common';
 
 // FIXME: rename to EditSpaceTab
@@ -95,6 +96,8 @@ export const getTabs = ({
   ];
 
   if (canUserViewRoles) {
+    const rolesAssignedToSpace = filterRolesAssignedToSpace(roles, space);
+
     tabsDefinition.push({
       id: TAB_ID_ROLES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {
@@ -102,13 +105,13 @@ export const getTabs = ({
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {roles.length}
+          {rolesAssignedToSpace.length}
         </EuiNotificationBadge>
       ),
       content: (
         <SuspenseViewSpaceAssignedRoles
           space={space}
-          roles={roles}
+          roles={rolesAssignedToSpace}
           features={features}
           isReadOnly={!canUserModifyRoles}
         />

@@ -38,8 +38,17 @@ interface ISpaceAssignedRolesTableProps {
   onAssignNewRoleClick: () => Promise<void>;
 }
 
-export const isReservedRole = (role: Role) => {
-  return role.metadata?._reserved;
+/**
+ * @description checks if the passed role qualifies as one that can
+ * be edited by a user with sufficient permissions
+ */
+export const isEditableRole = (role: Role) => {
+  return !(
+    role.metadata?._reserved ||
+    role.kibana.reduce((acc, cur) => {
+      return cur.spaces.includes('*') || acc;
+    }, false)
+  );
 };
 
 const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'isReadOnly'>) => {
@@ -100,6 +109,8 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
         {
           type: 'icon',
           icon: 'lock',
+          href: '#',
+          target: '_self',
           name: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.reservedIndictor.title',
             {
@@ -108,10 +119,7 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
           ),
           isPrimary: true,
           enabled: () => false,
-          available: (rowRecord) => isReservedRole(rowRecord),
-          onClick() {
-            return null;
-          },
+          available: (rowRecord) => !isEditableRole(rowRecord),
         },
         {
           type: 'icon',
@@ -125,7 +133,7 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
           isPrimary: true,
           description: 'Click this action to edit the role privileges of this user for this space.',
           showOnHover: true,
-          available: (rowRecord) => !isReservedRole(rowRecord),
+          available: (rowRecord) => isEditableRole(rowRecord),
           onClick: () => {
             window.alert('Not yet implemented.');
           },
@@ -143,8 +151,8 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
           ),
           description: 'Click this action to remove the user from this space.',
           showOnHover: true,
-          available: (rowRecord) => !isReservedRole(rowRecord),
-          onClick: () => {
+          available: (rowRecord) => isEditableRole(rowRecord),
+          onClick: (rowRecord, event) => {
             window.alert('Not yet implemented.');
           },
         },
@@ -181,7 +189,7 @@ export const SpaceAssignedRolesTable = ({
   const [rolesInView, setRolesInView] = useState<Role[]>(assignedRoles);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
   const [isBulkActionContextOpen, setBulkActionContextOpen] = useState(false);
-  const selectableRoles = useRef(rolesInView.filter((role) => !isReservedRole(role)));
+  const selectableRoles = useRef(rolesInView.filter((role) => isEditableRole(role)));
   const [pagination, setPagination] = useState<CriteriaWithPagination<Role>['page']>({
     index: 0,
     size: 10,
@@ -193,6 +201,8 @@ export const SpaceAssignedRolesTable = ({
         setRolesInView(
           assignedRoles.filter((role) => role.name.includes(query.text.toLowerCase()))
         );
+      } else {
+        setRolesInView(assignedRoles);
       }
     },
     [assignedRoles]
@@ -306,19 +316,24 @@ export const SpaceAssignedRolesTable = ({
                 />
               </EuiPopover>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="pagesSelect"
-                onClick={setSelectedRoles.bind(null, selectableRoles.current)}
-              >
-                {i18n.translate('xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles', {
-                  defaultMessage: 'Select all {selectableRolesCount} roles',
-                  values: {
-                    selectableRolesCount: selectableRoles.current.length,
-                  },
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {Boolean(selectableRoles.current.length) && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="pagesSelect"
+                  onClick={setSelectedRoles.bind(null, selectableRoles.current)}
+                >
+                  {i18n.translate(
+                    'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
+                    {
+                      defaultMessage: 'Select all {selectableRolesCount} roles',
+                      values: {
+                        selectableRolesCount: selectableRoles.current.length,
+                      },
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -338,7 +353,7 @@ export const SpaceAssignedRolesTable = ({
 
   const selection: EuiTableSelectionType<Role> = {
     selected: selectedRoles,
-    selectable: (role: Role) => !isReservedRole(role),
+    selectable: (role: Role) => isEditableRole(role),
     selectableMessage: (selectable: boolean, role: Role) =>
       !selectable ? `${role.name} is reserved` : `Select ${role.name}`,
     onSelectionChange,
