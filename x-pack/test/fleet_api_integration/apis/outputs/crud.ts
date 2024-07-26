@@ -13,7 +13,7 @@ import {
 } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidV4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { enableSecrets, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -44,21 +44,6 @@ export default function (providerContext: FtrProviderContext) {
       });
     } catch (err) {
       // index doesn't exist
-    }
-  };
-
-  const enableSecrets = async () => {
-    try {
-      await kibanaServer.savedObjects.update({
-        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-        id: 'fleet-default-settings',
-        attributes: {
-          secret_storage_requirements_met: true,
-        },
-        overwrite: false,
-      });
-    } catch (e) {
-      throw e;
     }
   };
 
@@ -194,7 +179,7 @@ export default function (providerContext: FtrProviderContext) {
     let fleetServerPolicyWithCustomOutputId: string;
 
     before(async function () {
-      await enableSecrets();
+      await enableSecrets(providerContext);
       await enableOutputSecrets();
       await kibanaServer.spaces
         .create({

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,
@@ -88,13 +86,10 @@ export const postKnowledgeBaseRoute = (
           await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, soClient });
 
           return response.ok({ body: { success: true } });
-        } catch (err) {
-          logger.log(err);
-          const error = transformError(err);
-
+        } catch (error) {
           return resp.error({
             body: error.message,
-            statusCode: error.statusCode,
+            statusCode: 500,
           });
         }
       }

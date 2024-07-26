@@ -19,6 +19,7 @@ import type {
   CreatePackagePolicyRequestSchema,
   PackagePolicy,
   PackagePolicyInput,
+  NewPackagePolicyInput,
 } from '../../../types';
 import { appContextService } from '../../../services';
 import { agentPolicyService, licenseService, outputService } from '../../../services';
@@ -26,6 +27,7 @@ import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../common/constants
 import { getAllowedOutputTypesForIntegration } from '../../../../common/services/output_helpers';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
+import type { NewPackagePolicyInputStream } from '../../../../common';
 
 export function isSimplifiedCreatePackagePolicyRequest(
   body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
@@ -148,4 +150,34 @@ export async function renameAgentlessAgentPolicy(
       `Failed to update agent policy name for agentless policy: ${error.message}`
     );
   }
+}
+
+function areAllInputStreamDisabled(streams: NewPackagePolicyInputStream[]) {
+  return streams.reduce((acc, stream, i) => {
+    return !stream.enabled && acc;
+  }, true);
+}
+
+/**
+ *
+ * Check if one input is enabled but all of its streams are disabled
+ * If true, switch input.enabled to false
+ */
+export function alignInputsAndStreams(
+  packagePolicyInputs: PackagePolicyInput[] | NewPackagePolicyInput[]
+) {
+  return packagePolicyInputs.map((input) => {
+    if (
+      input.enabled === true &&
+      input?.streams.length > 0 &&
+      areAllInputStreamDisabled(input.streams)
+    ) {
+      const newInput = {
+        ...input,
+        enabled: false,
+      };
+      return newInput;
+    }
+    return input;
+  });
 }

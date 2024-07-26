@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
         {
           searchQuery:
-            'cloud.provider : "azure" and rule.benchmark.rule_number : "7.1" and result.evaluation : "failed"',
+            'cloud.provider : "azure" and rule.benchmark.rule_number : "9.1" and result.evaluation : "failed"',
           provider: 'azure',
           expectedRowsCount: 1,
           expectedGroupCount: '1 cloud account',

@@ -15,6 +15,7 @@ export enum BasicAggregations {
   max = 'max',
   min = 'min',
   sum = 'sum',
+  value_count = 'value_count',
   cardinality = 'cardinality',
   last_value = 'last_value',
   std_deviation = 'std_deviation',

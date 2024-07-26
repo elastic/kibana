@@ -10,13 +10,13 @@
  * This type contains a unions of all supported font labels, or the the name of
  * the font the user would see in a UI.
  */
-export type FontLabel = typeof fonts[number]['label'];
+export type FontLabel = (typeof fonts)[number]['label'];
 
 /**
  * This type contains a union of all supported font values, equivalent to the CSS
  * `font-value` property.
  */
-export type FontValue = typeof fonts[number]['value'];
+export type FontValue = (typeof fonts)[number]['value'];
 
 /**
  * An interface representing a font in Canvas, with a textual label and the CSS

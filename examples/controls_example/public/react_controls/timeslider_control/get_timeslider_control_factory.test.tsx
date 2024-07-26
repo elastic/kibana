@@ -63,13 +63,13 @@ describe('TimesliderControlApi', () => {
     });
   });
 
-  test('Should set timeslice to undefined when state does not provide percentage of timeRange', () => {
-    const { api } = factory.buildControl({}, buildApiMock, uuid, controlGroupApi);
+  test('Should set timeslice to undefined when state does not provide percentage of timeRange', async () => {
+    const { api } = await factory.buildControl({}, buildApiMock, uuid, controlGroupApi);
     expect(api.timeslice$.value).toBe(undefined);
   });
 
-  test('Should set timeslice to values within time range when state provides percentage of timeRange', () => {
-    const { api } = factory.buildControl(
+  test('Should set timeslice to values within time range when state provides percentage of timeRange', async () => {
+    const { api } = await factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
@@ -84,7 +84,7 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Should update timeslice when time range changes', async () => {
-    const { api } = factory.buildControl(
+    const { api } = await factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
@@ -108,7 +108,7 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking previous button should advance timeslice backward', async () => {
-    const { api } = factory.buildControl(
+    const { api } = await factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
@@ -130,7 +130,7 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking previous button should wrap when time range start is reached', async () => {
-    const { api } = factory.buildControl(
+    const { api } = await factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
@@ -153,7 +153,7 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking next button should advance timeslice forward', async () => {
-    const { api } = factory.buildControl(
+    const { api } = await factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
@@ -175,7 +175,7 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking next button should wrap when time range end is reached', async () => {
-    const { api } = factory.buildControl(
+    const { api } = await factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
@@ -199,7 +199,7 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Resetting state with comparators should reset timeslice', async () => {
-    const { api } = factory.buildControl(
+    const { api } = await factory.buildControl(
       {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
