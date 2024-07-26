@@ -614,17 +614,35 @@ export class Embeddable
   private handleExternalUserMessage = (messages: UserMessage[]) => {
     if (this.input.customBadgeMessages) {
       // we need something else to better identify those errors
-      const messagesToHandle = messages.filter((message) =>
-        message.displayLocations.some((d) => d.id === 'embeddableBadge')
+      const { messagesToHandle, originalMessages } = messages.reduce<{
+        messagesToHandle: UserMessage[];
+        originalMessages: UserMessage[];
+      }>(
+        (acc, message) => {
+          const hasEmbeddableBadge = message.displayLocations.some(
+            (d) => d.id === 'embeddableBadge'
+          );
+
+          if (hasEmbeddableBadge) {
+            acc.messagesToHandle.push(message);
+          } else {
+            acc.originalMessages.push(message);
+          }
+
+          return acc;
+        },
+        { messagesToHandle: [], originalMessages: [] }
       );
 
       if (messagesToHandle.length > 0) {
-        return this.input.customBadgeMessages(messagesToHandle);
+        const customBadgeMessages = this.input.customBadgeMessages(messagesToHandle);
+        return [...originalMessages, ...customBadgeMessages];
       }
     }
 
     return messages;
   };
+
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     const userMessages: UserMessage[] = [];
     userMessages.push(

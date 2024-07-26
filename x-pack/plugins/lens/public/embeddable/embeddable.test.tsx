@@ -32,8 +32,7 @@ import { act } from 'react-dom/test-utils';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { Visualization } from '../types';
 import { createMockDatasource, createMockVisualization } from '../mocks';
-import * as applicationUserMessages from '../app_plugin/get_application_user_messages';
-import { FIELD_NOT_FOUND } from '../user_messages_ids';
+import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
 
 jest.mock('@kbn/inspector-plugin/public', () => ({
   isAvailable: false,
@@ -274,55 +273,88 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
   });
 
-  it('should not call', async () => {
+  it('should override embeddableBadge message', async () => {
     const getBadgeMessage = jest.fn(
       (): ReturnType<NonNullable<LensEmbeddableInput['customBadgeMessages']>> => [
         {
           uniqueId: FIELD_NOT_FOUND,
           severity: 'warning',
           fixableInEditor: true,
-          displayLocations: [{ id: 'embeddableBadge' }],
-          longMessage: 'lmao',
+          displayLocations: [
+            { id: 'embeddableBadge' },
+            { id: 'dimensionButton', dimensionId: '1' },
+          ],
+          longMessage: 'custom',
           shortMessage: '',
           hidePopoverIcon: true,
         },
       ]
     );
 
-    jest.spyOn(applicationUserMessages, 'getApplicationUserMessages').mockReturnValue([
+    const embeddable = new Embeddable(
+      getEmbeddableProps({
+        datasourceMap: {
+          ...defaultDatasourceMap,
+          [defaultDatasourceId]: {
+            ...defaultDatasourceMap[defaultDatasourceId],
+            getUserMessages: jest.fn(() => [
+              {
+                uniqueId: FIELD_NOT_FOUND,
+                severity: 'error',
+                fixableInEditor: true,
+                displayLocations: [
+                  { id: 'embeddableBadge' },
+                  { id: 'dimensionButton', dimensionId: '1' },
+                ],
+                longMessage: 'original',
+                shortMessage: '',
+              },
+              {
+                uniqueId: FIELD_WRONG_TYPE,
+                severity: 'error',
+                fixableInEditor: true,
+                displayLocations: [{ id: 'visualization' }],
+                longMessage: 'original',
+                shortMessage: '',
+              },
+            ]),
+          },
+        },
+      }),
       {
-        uniqueId: FIELD_NOT_FOUND,
-        severity: 'error',
-        fixableInEditor: true,
-        displayLocations: [{ id: 'embeddableBadge' }],
-        longMessage: 'lol',
-        shortMessage: '',
-      },
-    ]);
-
-    const embeddable = new Embeddable(getEmbeddableProps({}), {
-      customBadgeMessages: getBadgeMessage as LensEmbeddableInput['customBadgeMessages'],
-    } as LensEmbeddableInput);
+        customBadgeMessages: getBadgeMessage as LensEmbeddableInput['customBadgeMessages'],
+      } as LensEmbeddableInput
+    );
 
     const getUserMessagesSpy = jest.spyOn(embeddable, 'getUserMessages');
     await embeddable.initializeSavedVis({} as LensEmbeddableInput);
 
     embeddable.render(mountpoint);
 
-    expect(getBadgeMessage).toHaveBeenCalled();
-
-    const finalMessages = getUserMessagesSpy.mock.results.at(-1)?.value;
-    expect(finalMessages).toEqual([
-      {
-        displayLocations: [{ id: 'embeddableBadge' }],
-        fixableInEditor: true,
-        hidePopoverIcon: true,
-        longMessage: 'lmao',
-        severity: 'warning',
-        shortMessage: '',
-        uniqueId: FIELD_NOT_FOUND,
-      },
-    ]);
+    expect(getUserMessagesSpy.mock.results.flatMap((r) => r.value)).toEqual(
+      expect.arrayContaining([
+        {
+          uniqueId: FIELD_WRONG_TYPE,
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          longMessage: 'original',
+          shortMessage: '',
+        },
+        {
+          uniqueId: FIELD_NOT_FOUND,
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [
+            { id: 'embeddableBadge' },
+            { id: 'dimensionButton', dimensionId: '1' },
+          ],
+          longMessage: 'custom',
+          shortMessage: '',
+          hidePopoverIcon: true,
+        },
+      ])
+    );
   });
 
   it('should not render the vis if loaded saved object conflicts', async () => {
