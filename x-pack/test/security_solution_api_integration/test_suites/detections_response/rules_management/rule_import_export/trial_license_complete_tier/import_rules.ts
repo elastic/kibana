@@ -1513,5 +1513,15 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
       });
     });
+
+    describe('supporting prebuilt rule customization', () => {
+      it('allows rules with "immutable: true"', async () => {});
+      it('rejects rules without a rule_id', async () => {});
+
+      describe('calculation of the rule_source fields', () => {
+        it('calculates a version of 1 for custom rules');
+        it('rejects a prebuilt rule with an unspecified version');
+      });
+    });
   });
 };
