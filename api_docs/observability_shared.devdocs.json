@@ -3138,6 +3138,20 @@
             "path": "x-pack/plugins/observability_solution/observability_shared/public/components/tags_list/tags_list.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.disableExpand",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableExpand",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3517,7 +3531,9 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; topSearchBar?: React.ReactNode; }"
+          " | undefined; topSearchBar?: React.ReactNode; } & Pick<",
+          "EuiEmptyPromptProps",
+          ", \"paddingSize\">"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3586,7 +3602,9 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; topSearchBar?: React.ReactNode; }"
+          " | undefined; topSearchBar?: React.ReactNode; } & Pick<",
+          "EuiEmptyPromptProps",
+          ", \"paddingSize\">"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,

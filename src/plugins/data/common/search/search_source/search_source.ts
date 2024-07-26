@@ -649,9 +649,12 @@ export class SearchSource {
 
     switch (key) {
       case 'filter':
-        return addToRoot('filters', (data.filters || []).concat(val));
+        return addToRoot(
+          'filters',
+          (typeof data.filters === 'function' ? data.filters() : data.filters || []).concat(val)
+        );
       case 'query':
-        return addToRoot(key, (data[key] || []).concat(val));
+        return addToRoot(key, (data.query || []).concat(val));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -662,7 +665,7 @@ export class SearchSource {
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
-        const fields = [...new Set((data[key] || []).concat(val))];
+        const fields = [...new Set((data.fieldsFromSource || []).concat(val))];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -709,8 +712,14 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: DataView) {
-    return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
+  private getIndexType(index?: DataView | string) {
+    return this.shouldOverwriteDataViewType
+      ? this.overwriteDataViewType
+      : this.getDataView(index)?.type;
+  }
+
+  private getDataView(index?: DataView | string): DataView | undefined {
+    return typeof index !== 'string' ? index : undefined;
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
@@ -782,25 +791,24 @@ export class SearchSource {
 
   private flatten() {
     const { getConfig } = this.dependencies;
-    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
+    const metaFields = getConfig<string[]>(UI_SETTINGS.META_FIELDS) ?? [];
 
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
     const { body, index } = searchRequest;
+    const dataView = this.getDataView(index);
 
     // get some special field types from the index pattern
-    const { docvalueFields, scriptFields, runtimeFields } = index
-      ? index.getComputedFields()
-      : {
-          docvalueFields: [],
-          scriptFields: {},
-          runtimeFields: {},
-        };
+    const { docvalueFields, scriptFields, runtimeFields } = dataView?.getComputedFields() ?? {
+      docvalueFields: [],
+      scriptFields: {},
+      runtimeFields: {},
+    };
     const fieldListProvided = !!body.fields;
 
     // set defaults
     const _source =
-      index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
+      index && !body.hasOwnProperty('_source') ? dataView?.getSourceFiltering() : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
@@ -892,7 +900,7 @@ export class SearchSource {
       runtime_mappings: runtimeFields,
       script_fields: scriptedFields,
       fields: this.getFieldsList({
-        index,
+        index: dataView,
         fields,
         docvalueFields: body.docvalue_fields,
         fieldsFromSource,
@@ -960,7 +968,12 @@ export class SearchSource {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
     };
-    return buildEsQuery(index, query, filters, esQueryConfigs);
+    return buildEsQuery(
+      this.getDataView(index),
+      query,
+      typeof filters === 'function' ? filters() : filters,
+      esQueryConfigs
+    );
   }
 
   private getRemainingFields({
@@ -1157,6 +1170,7 @@ export class SearchSource {
   toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
+    const dataView = this.getDataView(index);
 
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
@@ -1164,7 +1178,7 @@ export class SearchSource {
 
     const ast = buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
-        q: query?.map(queryToAst),
+        q: query?.filter(isOfQueryType).map(queryToAst),
         filters: filters && filtersToAst(filters),
       }),
     ]).toAst();
@@ -1181,7 +1195,7 @@ export class SearchSource {
     const aggConfigs =
       aggs instanceof AggConfigs
         ? aggs
-        : index && aggs && this.dependencies.aggs.createAggConfigs(index, aggs);
+        : dataView && aggs && this.dependencies.aggs.createAggConfigs(dataView, aggs);
 
     if (aggConfigs) {
       ast.chain.push(...aggConfigs.toExpressionAst().chain);
@@ -1190,7 +1204,7 @@ export class SearchSource {
         buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
           size: body?.size,
           dsl: JSON.stringify({}),
-          index: index?.id,
+          index: typeof index === 'string' ? index : `${dataView?.id}`,
         }).toAst()
       );
     }
