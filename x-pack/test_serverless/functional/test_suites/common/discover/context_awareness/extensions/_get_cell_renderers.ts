@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getCellRenderers', () => {
     before(async () => {
+      await PageObjects.svlCommonPage.loginAsViewer();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 

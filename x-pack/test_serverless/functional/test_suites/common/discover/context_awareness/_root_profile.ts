@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
     });
+
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp', async () => {
