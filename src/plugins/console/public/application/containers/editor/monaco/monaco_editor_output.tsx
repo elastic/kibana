@@ -78,7 +78,6 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           })
           .join('\n')
       );
-      console.log(data);
       if (isMultipleRequest) {
         // If there are multiple responses, add decorations for their status codes
         const decorations = getStatusCodeDecorations(data);
