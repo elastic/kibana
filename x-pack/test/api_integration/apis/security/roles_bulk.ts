@@ -11,6 +11,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
+  const config = getService('config');
+  const basic = config.get('esTestCluster.license') === 'basic';
 
   describe('Roles Bulk', () => {
     describe('Create Roles', () => {
@@ -120,6 +122,47 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
+      });
+
+      it(`should ${basic ? 'not' : ''} create a role with kibana and FLS/DLS elasticsearch
+        privileges on ${basic ? 'basic' : 'trial'} licenses`, async () => {
+        await supertest
+          .post('/api/security/roles')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            roles: {
+              role_with_privileges_dls_fls: {
+                metadata: {
+                  foo: 'test-metadata',
+                },
+                elasticsearch: {
+                  cluster: ['manage'],
+                  indices: [
+                    {
+                      field_security: {
+                        grant: ['*'],
+                        except: ['geo.*'],
+                      },
+                      names: ['logstash-*'],
+                      privileges: ['read', 'view_index_metadata'],
+                      query: `{ "match": { "geo.src": "CN" } }`,
+                    },
+                  ],
+                  run_as: ['watcher_user'],
+                },
+              },
+            },
+          })
+          .expect(200)
+          .then((response) => {
+            const { errors, created } = response.body;
+            expect(created).to.be(undefined);
+            expect(errors).to.have.property('role_with_privileges_dls_fls');
+            expect(errors.role_with_privileges_dls_fls.type).to.be('security_exception');
+            expect(errors.role_with_privileges_dls_fls.reason).to.contain(
+              `current license is non-compliant for [field and document level security]`
+            );
+          });
       });
 
       it('should return noop if roles exist and did not change', async () => {

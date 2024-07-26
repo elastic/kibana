@@ -57,14 +57,15 @@ export function definePostRolesRoutes({
         const esClient = (await context.core).elasticsearch.client;
         const features = await getFeatures();
 
+        const { roles } = request.body;
         const validatedRolesNames = [];
-        const errors: RolesErrorsDetails = {};
+        const kibanaErrors: RolesErrorsDetails = {};
 
-        for (const [roleName, role] of Object.entries(request.body.roles)) {
+        for (const [roleName, role] of Object.entries(roles)) {
           const { validationErrors } = validateKibanaPrivileges(features, role.kibana);
 
           if (validationErrors.length) {
-            errors[roleName] = {
+            kibanaErrors[roleName] = {
               type: 'kibana_privilege_validation_exception',
               reason: `Role cannot be updated due to validation errors: ${JSON.stringify(
                 validationErrors
@@ -86,7 +87,7 @@ export function definePostRolesRoutes({
           validatedRolesNames.map((roleName) => [
             roleName,
             transformPutPayloadToElasticsearchRole(
-              request.body.roles[roleName],
+              roles[roleName],
               authz.applicationName,
               rawRoles[roleName] ? rawRoles[roleName].applications : []
             ),
@@ -100,14 +101,13 @@ export function definePostRolesRoutes({
         });
 
         for (const roleName of [...(esResponse.created ?? []), ...(esResponse.updated ?? [])]) {
-          if (roleGrantsSubFeaturePrivileges(features, request.body.roles[roleName])) {
+          if (roleGrantsSubFeaturePrivileges(features, roles[roleName])) {
             getFeatureUsageService().recordSubFeaturePrivilegeUsage();
           }
         }
 
-        const hasAnyErrors = Object.keys(errors).length || esResponse.errors?.count;
-
         const { created, noop, updated, errors: esErrors } = esResponse;
+        const hasAnyErrors = Object.keys(kibanaErrors).length || esErrors?.count;
 
         return response.ok({
           body: {
@@ -115,7 +115,7 @@ export function definePostRolesRoutes({
             noop,
             updated,
             ...(hasAnyErrors && {
-              errors: { ...errors, ...(esErrors?.details ?? {}) },
+              errors: { ...kibanaErrors, ...(esErrors?.details ?? {}) },
             }),
           },
         });
