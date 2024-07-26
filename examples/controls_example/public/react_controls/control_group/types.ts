@@ -87,7 +87,7 @@ export type ControlGroupEditorState = Pick<
   'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
-export type ControlGroupSerializedState = {
+export interface ControlGroupSerializedState {
   chainingSystem: ControlGroupChainingSystem;
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
@@ -97,4 +97,4 @@ export type ControlGroupSerializedState = {
   // In runtime state, we refer to the inverse of this property as `autoApplySelections`
   // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
   showApplySelections: boolean | undefined;
-};
+}

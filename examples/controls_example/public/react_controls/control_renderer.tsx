@@ -36,7 +36,7 @@ export const ControlRenderer = <
   isControlGroupInitialized: boolean;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
-  
+
   const [component, setComponent] = useState<undefined | React.FC<{ className: string }>>(
     undefined
   );
@@ -72,12 +72,7 @@ export const ControlRenderer = <
           } as unknown as ApiType;
         };
 
-        return await factory.buildControl(
-          initialState as StateType,
-          buildApi,
-          uuid,
-          parentApi
-        );
+        return await factory.buildControl(initialState as StateType, buildApi, uuid, parentApi);
       }
 
       buildControl()

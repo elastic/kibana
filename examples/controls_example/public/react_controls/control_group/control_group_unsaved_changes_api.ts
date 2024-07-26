@@ -40,7 +40,7 @@ export function initializeControlGroupUnsavedChanges(
     parentApi,
     comparators
   );
-  
+
   return {
     api: {
       unsavedChanges: combineLatest([
