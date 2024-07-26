@@ -207,7 +207,6 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       kibanaVersion,
     } = resources;
     const coreStart = await core.start();
-
     const {
       elasticsearch: { client },
     } = await context.core;
