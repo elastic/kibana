@@ -57,7 +57,7 @@ export const useTableColumns = () => {
         return null;
       },
       sortable: false,
-      width: '265px',
+      width: '185px',
     },
     {
       field: 'type',
@@ -70,7 +70,7 @@ export const useTableColumns = () => {
         return null;
       },
       sortable: false,
-      width: '265px',
+      width: '185px',
     },
     actions,
   ];
