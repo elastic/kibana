@@ -11,15 +11,46 @@
  *
  * info:
  *   title: Asset Criticality List Schema
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';
 
 import { AssetCriticalityRecord } from './common.gen';
 
-export type AssetCriticalityListResponse = z.infer<typeof AssetCriticalityListResponse>;
-export const AssetCriticalityListResponse = z.object({
+export type FindAssetCriticalityRecordsRequestQuery = z.infer<
+  typeof FindAssetCriticalityRecordsRequestQuery
+>;
+export const FindAssetCriticalityRecordsRequestQuery = z.object({
+  /**
+   * The field to sort by.
+   */
+  sort_field: z.enum(['id_value', 'id_field', 'criticality_level', '@timestamp']).optional(),
+  /**
+   * The order to sort by.
+   */
+  sort_direction: z.enum(['asc', 'desc']).optional(),
+  /**
+   * The page number to return.
+   */
+  page: z.coerce.number().int().min(1).optional(),
+  /**
+   * The number of records to return per page.
+   */
+  per_page: z.coerce.number().int().min(1).max(1000).optional(),
+  /**
+   * The kuery to filter by.
+   */
+  kuery: z.string().optional(),
+});
+export type FindAssetCriticalityRecordsRequestQueryInput = z.input<
+  typeof FindAssetCriticalityRecordsRequestQuery
+>;
+
+export type FindAssetCriticalityRecordsResponse = z.infer<
+  typeof FindAssetCriticalityRecordsResponse
+>;
+export const FindAssetCriticalityRecordsResponse = z.object({
   records: z.array(AssetCriticalityRecord),
   page: z.number().int().min(1),
   per_page: z.number().int().min(1).max(1000),

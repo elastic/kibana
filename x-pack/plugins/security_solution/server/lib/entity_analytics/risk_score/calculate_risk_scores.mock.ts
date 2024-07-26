@@ -7,7 +7,7 @@
 
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { EntityRiskLevelsEnum } from '../../../../common/api/entity_analytics/common';
 

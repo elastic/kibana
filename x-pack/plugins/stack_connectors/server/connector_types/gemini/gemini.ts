@@ -13,10 +13,13 @@ import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_fr
 import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 
+import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import {
   RunActionParamsSchema,
   RunApiResponseSchema,
+  RunActionRawResponseSchema,
   InvokeAIActionParamsSchema,
+  InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
 } from '../../../common/gemini/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
@@ -25,12 +28,15 @@ import {
   Secrets,
   RunActionParams,
   RunActionResponse,
+  RunActionRawResponse,
   RunApiResponse,
   DashboardActionParams,
   DashboardActionResponse,
   StreamingResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
+  InvokeAIRawActionParams,
+  InvokeAIRawActionResponse,
 } from '../../../common/gemini/types';
 import {
   SUB_ACTION,
@@ -55,6 +61,7 @@ interface Payload {
     temperature: number;
     maxOutputTokens: number;
   };
+  safety_settings: Array<{ category: string; threshold: string }>;
 }
 
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
@@ -104,15 +111,31 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     });
 
     this.registerSubAction({
+      name: SUB_ACTION.INVOKE_AI_RAW,
+      method: 'invokeAIRaw',
+      schema: InvokeAIRawActionParamsSchema,
+    });
+
+    this.registerSubAction({
       name: SUB_ACTION.INVOKE_STREAM,
       method: 'invokeStream',
       schema: InvokeAIActionParamsSchema,
     });
   }
 
-  protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
+  protected getResponseErrorMessage(
+    error: AxiosError<{
+      error?: { code?: number; message?: string; status?: string };
+      message?: string;
+    }>
+  ): string {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
+    }
+    if (error.response?.data?.error) {
+      return `API Error: ${
+        error.response?.data?.error.status ? `${error.response.data.error.status}: ` : ''
+      }${error.response?.data?.error.message ? `${error.response.data.error.message}` : ''}`;
     }
     if (
       error.response.status === 400 &&
@@ -193,7 +216,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     model: reqModel,
     signal,
     timeout,
-  }: RunActionParams): Promise<RunActionResponse> {
+    raw,
+  }: RunActionParams): Promise<RunActionResponse | RunActionRawResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
@@ -209,10 +233,15 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       },
       signal,
       timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-      responseSchema: RunApiResponseSchema,
+      responseSchema: raw ? RunActionRawResponseSchema : RunApiResponseSchema,
     } as SubActionRequestParams<RunApiResponse>;
 
     const response = await this.request(requestArgs);
+
+    if (raw) {
+      return response.data;
+    }
+
     const candidate = response.data.candidates[0];
     const usageMetadata = response.data.usageMetadata;
     const completionText = candidate.content.parts[0].text;
@@ -264,6 +293,24 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return { message: res.completion, usageMetadata: res.usageMetadata };
   }
 
+  public async invokeAIRaw({
+    messages,
+    model,
+    temperature = 0,
+    signal,
+    timeout,
+  }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
+    const res = await this.runApi({
+      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+      model,
+      signal,
+      timeout,
+      raw: true,
+    });
+
+    return res;
+  }
+
   /**
    *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
    *  request to the Gemini API with the formatted messages and model. It then returns a Transform stream
@@ -279,21 +326,21 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     temperature = 0,
     signal,
     timeout,
+    tools,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const res = (await this.streamAPI({
-      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+    return (await this.streamAPI({
+      body: JSON.stringify({ ...formatGeminiPayload(messages, temperature), tools }),
       model,
       stopSequences,
       signal,
       timeout,
     })) as unknown as IncomingMessage;
-    return res;
   }
 }
 
 /** Format the json body to meet Gemini payload requirements */
 const formatGeminiPayload = (
-  data: Array<{ role: string; content: string }>,
+  data: Array<{ role: string; content: string; parts: MessagePart[] }>,
   temperature: number
 ): Payload => {
   const payload: Payload = {
@@ -302,26 +349,38 @@ const formatGeminiPayload = (
       temperature,
       maxOutputTokens: DEFAULT_TOKEN_LIMIT,
     },
+    safety_settings: [
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        // without setting threshold, the model will block responses about suspicious alerts
+        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+      },
+    ],
   };
   let previousRole: string | null = null;
 
   for (const row of data) {
     const correctRole = row.role === 'assistant' ? 'model' : 'user';
-    if (correctRole === 'user' && previousRole === 'user') {
-      /** Append to the previous 'user' content
-       * This is to ensure that multiturn requests alternate between user and model
-       */
-      payload.contents[payload.contents.length - 1].parts[0].text += ` ${row.content}`;
+    // if data is already preformatted by ActionsClientGeminiChatModel
+    if (row.parts) {
+      payload.contents.push(row);
     } else {
-      // Add a new entry
-      payload.contents.push({
-        role: correctRole,
-        parts: [
-          {
-            text: row.content,
-          },
-        ],
-      });
+      if (correctRole === 'user' && previousRole === 'user') {
+        /** Append to the previous 'user' content
+         * This is to ensure that multiturn requests alternate between user and model
+         */
+        payload.contents[payload.contents.length - 1].parts[0].text += ` ${row.content}`;
+      } else {
+        // Add a new entry
+        payload.contents.push({
+          role: correctRole,
+          parts: [
+            {
+              text: row.content,
+            },
+          ],
+        });
+      }
     }
     previousRole = correctRole;
   }

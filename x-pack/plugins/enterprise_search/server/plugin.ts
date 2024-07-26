@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -229,6 +229,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             enterpriseSearchApplications: showEnterpriseSearch,
             enterpriseSearchAISearch: showEnterpriseSearch,
             enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchSemanticSearch: showEnterpriseSearch,
             enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -241,6 +242,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             enterpriseSearchApplications: showEnterpriseSearch,
             enterpriseSearchAISearch: showEnterpriseSearch,
             enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchSemanticSearch: showEnterpriseSearch,
             enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
