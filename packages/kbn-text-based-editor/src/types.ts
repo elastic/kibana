@@ -41,8 +41,6 @@ export interface TextBasedLanguagesEditorProps {
   isLoading?: boolean;
   /** Disables the editor */
   isDisabled?: boolean;
-  /** Indicator if the editor is on dark mode */
-  isDarkMode?: boolean;
   dataTestSubj?: string;
   /** Hide the Run query information which appears on the footer*/
   hideRunQueryText?: boolean;
