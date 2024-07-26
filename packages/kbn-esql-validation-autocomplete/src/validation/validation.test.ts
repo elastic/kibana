@@ -11995,12 +11995,12 @@ describe('validation logic', () => {
 
       describe('count_distinct', () => {
         testErrorsAndWarnings(
-          'from a_index | stats count_distinct(null, null, null, null, null, null, null, null, null)',
+          'from a_index | stats count_distinct(null, null, null, null, null, null, null, null)',
           []
         );
 
         testErrorsAndWarnings(
-          'row nullVar = null | stats count_distinct(nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar)',
+          'row nullVar = null | stats count_distinct(nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar)',
           []
         );
       });

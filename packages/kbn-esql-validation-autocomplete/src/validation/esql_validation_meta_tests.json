@@ -31678,12 +31678,12 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats count_distinct(null, null, null, null, null, null, null, null, null)",
+      "query": "from a_index | stats count_distinct(null, null, null, null, null, null, null, null)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row nullVar = null | stats count_distinct(nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar)",
+      "query": "row nullVar = null | stats count_distinct(nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar)",
       "error": [],
       "warning": []
     },
