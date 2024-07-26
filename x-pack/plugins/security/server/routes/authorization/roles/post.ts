@@ -12,7 +12,7 @@ import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
-type RolesErrorResponse = Record<
+type RolesErrorsDetails = Record<
   string,
   {
     type: string;
@@ -26,7 +26,7 @@ interface ESRolesResponse {
   updated?: string[];
   errors?: {
     count: number;
-    details: RolesErrorResponse;
+    details: RolesErrorsDetails;
   };
 }
 
@@ -58,7 +58,7 @@ export function definePostRolesRoutes({
         const features = await getFeatures();
 
         const validatedRolesNames = [];
-        const errors: RolesErrorResponse = {};
+        const errors: RolesErrorsDetails = {};
 
         for (const [roleName, role] of Object.entries(request.body.roles)) {
           const { validationErrors } = validateKibanaPrivileges(features, role.kibana);
@@ -107,13 +107,15 @@ export function definePostRolesRoutes({
 
         const hasAnyErrors = Object.keys(errors).length || esResponse.errors?.count;
 
+        const { created, noop, updated, errors: esErrors } = esResponse;
+
         return response.ok({
           body: {
-            created: esResponse.created,
-            noop: esResponse.noop,
-            updated: esResponse.updated,
+            created,
+            noop,
+            updated,
             ...(hasAnyErrors && {
-              errors: { ...errors, ...(esResponse.errors?.details ?? {}) },
+              errors: { ...errors, ...(esErrors?.details ?? {}) },
             }),
           },
         });
