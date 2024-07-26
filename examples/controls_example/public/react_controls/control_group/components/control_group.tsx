@@ -98,28 +98,6 @@ export function ControlGroup({
     };
   }, [controlGroupApi]);
 
-  function renderApplyButton() {
-    return !autoApplySelections ? (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={ControlGroupStrings.management.getApplyButtonTitle(hasUnappliedSelections)}
-        >
-          <EuiButtonIcon
-            size="m"
-            disabled={!hasUnappliedSelections}
-            iconSize="m"
-            display="fill"
-            color={'success'}
-            iconType={'check'}
-            data-test-subj="controlGroup--applyFiltersButton"
-            aria-label={ControlGroupStrings.management.getApplyButtonTitle(hasUnappliedSelections)}
-            onClick={applySelections}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    ) : null;
-  }
-
   return (
     <EuiPanel borderRadius="m" paddingSize="none" color={draggingId ? 'success' : 'transparent'}>
       <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
@@ -159,7 +137,27 @@ export function ControlGroup({
             ) : null}
           </DragOverlay>
         </DndContext>
-        {renderApplyButton()}
+        {!autoApplySelections && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={ControlGroupStrings.management.getApplyButtonTitle(hasUnappliedSelections)}
+            >
+              <EuiButtonIcon
+                size="m"
+                disabled={!hasUnappliedSelections}
+                iconSize="m"
+                display="fill"
+                color={'success'}
+                iconType={'check'}
+                data-test-subj="controlGroup--applyFiltersButton"
+                aria-label={ControlGroupStrings.management.getApplyButtonTitle(
+                  hasUnappliedSelections
+                )}
+                onClick={applySelections}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
