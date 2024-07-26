@@ -183,6 +183,7 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
+            console.log('STATE TRANSFER', id);
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
@@ -245,7 +246,7 @@ export const getTopNavConfig = (
 
     const state = {
       input: {
-        savedVis: vis.serialize(),
+        serializedVis: vis.serialize(),
       } as VisualizeInput,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
@@ -514,7 +515,7 @@ export const getTopNavConfig = (
 
                   const state = {
                     input: {
-                      savedVis: {
+                      serializedVis: {
                         ...vis.serialize(),
                         title: newTitle,
                         description: newDescription,

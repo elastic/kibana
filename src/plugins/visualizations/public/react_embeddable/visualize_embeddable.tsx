@@ -40,6 +40,7 @@ import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import {
   ExtraSavedObjectProperties,
+  isVisualizeSavedObjectState,
   VisualizeApi,
   VisualizeOutputState,
   VisualizeRuntimeState,
@@ -53,7 +54,15 @@ export const getVisualizeEmbeddableFactory: (
 ) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState,
-  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+  buildEmbeddable: async (initialState: unknown, buildApi, uuid, parentApi) => {
+    // Handle state transfer from legacy visualize editor, which uses the legacy visualize embeddable and doesn't
+    // produce a snapshot state. If buildEmbeddable is passed only a savedObjectId in the state, this means deserializeState
+    // was never run, and it needs to be invoked manually
+    const state = isVisualizeSavedObjectState(initialState)
+      ? await deserializeState({
+          rawState: initialState,
+        })
+      : (initialState as VisualizeRuntimeState);
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
     const renderCount$ = new BehaviorSubject<number>(0);
