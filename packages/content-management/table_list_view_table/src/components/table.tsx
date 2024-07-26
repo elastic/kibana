@@ -244,7 +244,11 @@ export function Table<T extends UserContentCommonSchema>({
     />
   );
 
-  const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
+  const { data: favorites, isError: favoritesError } = favoritesEnabled
+    ? // ok to use a conditional hook here because this component favoritesEnabled is static and will not change between renders
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useFavorites({ enabled: favoritesEnabled })
+    : { data: undefined, isError: false };
 
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
