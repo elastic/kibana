@@ -131,7 +131,7 @@ export const AlertsOverview = ({
           featureIds={alertFeatureIds}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
-          pageSize={5}
+          initialPageSize={5}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

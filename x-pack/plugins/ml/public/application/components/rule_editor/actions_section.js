@@ -24,6 +24,7 @@ import {
 import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+// TODO: add onForceTimeShift action
 export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateChange }) {
   return (
     <React.Fragment>

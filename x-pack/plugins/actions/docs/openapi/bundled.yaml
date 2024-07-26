@@ -10,341 +10,15 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: /
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: connectors
     description: Connector APIs enable you to create and manage connectors.
 paths:
-  /s/{spaceId}/api/actions/connector:
-    post:
-      summary: Create a connector
-      operationId: createConnectorWithSpaceId
-      description: |
-        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/create_connector_request'
-            examples:
-              createEmailConnectorRequest:
-                $ref: '#/components/examples/create_email_connector_request'
-              createIndexConnectorRequest:
-                $ref: '#/components/examples/create_index_connector_request'
-              createWebhookConnectorRequest:
-                $ref: '#/components/examples/create_webhook_connector_request'
-              createXmattersConnectorRequest:
-                $ref: '#/components/examples/create_xmatters_connector_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/connector_response_properties'
-              examples:
-                createEmailConnectorResponse:
-                  $ref: '#/components/examples/create_email_connector_response'
-                createIndexConnectorResponse:
-                  $ref: '#/components/examples/create_index_connector_response'
-                createWebhookConnectorResponse:
-                  $ref: '#/components/examples/create_webhook_connector_response'
-                createXmattersConnectorResponse:
-                  $ref: '#/components/examples/create_xmatters_connector_response'
-        '401':
-          $ref: '#/components/responses/401'
-  /s/{spaceId}/api/actions/connector/{connectorId}:
-    get:
-      summary: Get connector information
-      operationId: getConnectorWithSpaceId
-      description: |
-        You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/connector_id'
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/connector_response_properties'
-              examples:
-                getConnectorResponse:
-                  $ref: '#/components/examples/get_connector_response'
-        '401':
-          $ref: '#/components/responses/401'
-        '404':
-          $ref: '#/components/responses/404'
-    delete:
-      summary: Delete a connector
-      operationId: deleteConnectorWithSpaceId
-      description: |
-        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/connector_id'
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-        '401':
-          $ref: '#/components/responses/401'
-        '404':
-          $ref: '#/components/responses/404'
-    post:
-      summary: Create a connector
-      operationId: createConnectorIdWithSpaceId
-      description: |
-        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-        - in: path
-          name: connectorId
-          description: A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.
-          required: true
-          schema:
-            type: string
-            example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/create_connector_request'
-            examples:
-              createIndexConnectorRequest:
-                $ref: '#/components/examples/create_index_connector_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/connector_response_properties'
-              examples:
-                createIndexConnectorResponse:
-                  $ref: '#/components/examples/create_index_connector_response'
-        '401':
-          $ref: '#/components/responses/401'
-    put:
-      summary: Update a connector
-      operationId: updateConnectorWithSpaceId
-      description: |
-        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/connector_id'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/update_connector_request'
-            examples:
-              updateIndexConnectorRequest:
-                $ref: '#/components/examples/update_index_connector_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/connector_response_properties'
-        '400':
-          $ref: '#/components/responses/401'
-        '401':
-          $ref: '#/components/responses/401'
-        '404':
-          $ref: '#/components/responses/404'
-  /s/{spaceId}/api/actions/connectors:
-    get:
-      summary: Get all connectors
-      operationId: getConnectorsWithSpaceId
-      description: |
-        You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/connector_response_properties'
-              examples:
-                getConnectorsResponse:
-                  $ref: '#/components/examples/get_connectors_response'
-        '401':
-          $ref: '#/components/responses/401'
-  /s/{spaceId}/api/actions/connector_types:
-    get:
-      summary: Get all connector types
-      operationId: getConnectorTypesWithSpaceId
-      description: |
-        You do not need any Kibana feature privileges to run this API.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/space_id'
-        - in: query
-          name: feature_id
-          description: A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).
-          schema:
-            $ref: '#/components/schemas/features'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                title: Get connector types response body properties
-                description: The properties vary for each connector type.
-                type: array
-                items:
-                  type: object
-                  properties:
-                    enabled:
-                      type: boolean
-                      description: Indicates whether the connector type is enabled in Kibana.
-                      example: true
-                    enabled_in_config:
-                      type: boolean
-                      description: Indicates whether the connector type is enabled in the Kibana `.yml` file.
-                      example: true
-                    enabled_in_license:
-                      type: boolean
-                      description: Indicates whether the connector is enabled in the license.
-                      example: true
-                    id:
-                      $ref: '#/components/schemas/connector_types'
-                    minimum_license_required:
-                      type: string
-                      description: The license that is required to use the connector type.
-                      example: basic
-                    name:
-                      type: string
-                      description: The name of the connector type.
-                      example: Index
-                    supported_feature_ids:
-                      type: array
-                      description: The Kibana features that are supported by the connector type.
-                      items:
-                        $ref: '#/components/schemas/features'
-                      example:
-                        - alerting
-                        - uptime
-                        - siem
-              examples:
-                getConnectorTypesResponse:
-                  $ref: '#/components/examples/get_connector_types_response'
-        '401':
-          $ref: '#/components/responses/401'
-  /s/{spaceId}/api/actions/connector/{connectorId}/_execute:
-    post:
-      summary: Run a connector
-      operationId: runConnectorWithSpaceId
-      description: |
-        You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.
-      tags:
-        - connectors
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/connector_id'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/run_connector_request'
-            examples:
-              runIndexConnectorRequest:
-                $ref: '#/components/examples/run_index_connector_request'
-              runJiraConnectorRequest:
-                $ref: '#/components/examples/run_jira_connector_request'
-              runServerLogConnectorRequest:
-                $ref: '#/components/examples/run_server_log_connector_request'
-              runServiceNowITOMConnectorRequest:
-                $ref: '#/components/examples/run_servicenow_itom_connector_request'
-              runSlackConnectorRequest:
-                $ref: '#/components/examples/run_slack_api_connector_request'
-              runSwimlaneConnectorRequest:
-                $ref: '#/components/examples/run_swimlane_connector_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - connector_id
-                  - status
-                properties:
-                  connector_id:
-                    type: string
-                    description: The identifier for the connector.
-                  data:
-                    oneOf:
-                      - type: object
-                        description: Information returned from the action.
-                        additionalProperties: true
-                      - type: array
-                        description: An array of information returned from the action.
-                        items:
-                          type: object
-                  message:
-                    type: string
-                  service_message:
-                    type: string
-                  status:
-                    type: string
-                    description: The status of the action.
-                    enum:
-                      - error
-                      - ok
-              examples:
-                runIndexConnectorResponse:
-                  $ref: '#/components/examples/run_index_connector_response'
-                runJiraConnectorResponse:
-                  $ref: '#/components/examples/run_jira_connector_response'
-                runServerLogConnectorResponse:
-                  $ref: '#/components/examples/run_server_log_connector_response'
-                runServiceNowITOMConnectorResponse:
-                  $ref: '#/components/examples/run_servicenow_itom_connector_response'
-                runSlackConnectorResponse:
-                  $ref: '#/components/examples/run_slack_api_connector_response'
-                runSwimlaneConnectorResponse:
-                  $ref: '#/components/examples/run_swimlane_connector_response'
-        '401':
-          $ref: '#/components/responses/401'
   /api/actions/connector:
     post:
-      summary: Create a connector
+      summary: Create a connector with a random ID
       operationId: createConnector
+      description: The connector identifier is randomly generated.
       tags:
         - connectors
       parameters:
@@ -654,7 +328,7 @@ paths:
                   $ref: '#/components/examples/get_connector_types_generativeai_response'
         '401':
           $ref: '#/components/responses/401'
-  /s/{spaceId}/api/actions/action/{actionId}:
+  /api/actions/action/{actionId}:
     delete:
       summary: Delete a connector
       operationId: legacyDeleteConnector
@@ -666,7 +340,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/action_id'
-        - $ref: '#/components/parameters/space_id'
       responses:
         '204':
           description: Indicates a successful call.
@@ -681,7 +354,6 @@ paths:
         - connectors
       parameters:
         - $ref: '#/components/parameters/action_id'
-        - $ref: '#/components/parameters/space_id'
       responses:
         '200':
           $ref: '#/components/responses/200_actions'
@@ -697,7 +369,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/action_id'
-        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -721,7 +392,7 @@ paths:
           $ref: '#/components/responses/200_actions'
         '404':
           $ref: '#/components/responses/404'
-  /s/{spaceId}/api/actions:
+  /api/actions:
     get:
       summary: Get all connectors
       operationId: legacyGetConnectors
@@ -729,8 +400,6 @@ paths:
       description: Deprecated in 7.13.0. Use the get all connectors API instead.
       tags:
         - connectors
-      parameters:
-        - $ref: '#/components/parameters/space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -751,7 +420,6 @@ paths:
         - connectors
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -778,7 +446,7 @@ paths:
           $ref: '#/components/responses/200_actions'
         '401':
           $ref: '#/components/responses/401'
-  /s/{spaceId}/api/actions/list_action_types:
+  /api/actions/list_action_types:
     get:
       summary: Get connector types
       operationId: legacyGetConnectorTypes
@@ -786,8 +454,6 @@ paths:
       description: Deprecated in 7.13.0. Use the get all connector types API instead.
       tags:
         - connectors
-      parameters:
-        - $ref: '#/components/parameters/space_id'
       responses:
         '200':
           description: Indicates a successful call.
@@ -821,7 +487,7 @@ paths:
                       description: The name of the connector type.
         '401':
           $ref: '#/components/responses/401'
-  /s/{spaceId}/api/actions/action/{actionId}/_execute:
+  /api/actions/action/{actionId}/_execute:
     post:
       summary: Run a connector
       operationId: legacyRunConnector
@@ -832,7 +498,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/action_id'
-        - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
         content:
@@ -872,15 +537,6 @@ paths:
         '401':
           $ref: '#/components/responses/401'
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     kbn_xsrf:
       schema:
@@ -889,14 +545,6 @@ components:
       name: kbn-xsrf
       description: Cross-site request forgery protection
       required: true
-    space_id:
-      in: path
-      name: spaceId
-      description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
     connector_id:
       in: path
       name: connectorId
@@ -3672,48 +3320,6 @@ components:
         - $ref: '#/components/schemas/update_connector_request_torq'
         - $ref: '#/components/schemas/update_connector_request_webhook'
         - $ref: '#/components/schemas/update_connector_request_xmatters'
-    features:
-      type: string
-      description: |
-        The feature that uses the connector.
-      enum:
-        - alerting
-        - cases
-        - generativeAIForSecurity
-        - generativeAIForObservability
-        - generativeAIForSearchPlayground
-        - siem
-        - uptime
-    connector_types:
-      title: Connector types
-      type: string
-      description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
-      enum:
-        - .bedrock
-        - .gemini
-        - .cases-webhook
-        - .d3security
-        - .email
-        - .gen-ai
-        - .index
-        - .jira
-        - .opsgenie
-        - .pagerduty
-        - .resilient
-        - .sentinelone
-        - .servicenow
-        - .servicenow-itom
-        - .servicenow-sir
-        - .server-log
-        - .slack
-        - .slack_api
-        - .swimlane
-        - .teams
-        - .tines
-        - .torq
-        - .webhook
-        - .xmatters
-      example: .server-log
     run_connector_params_acknowledge_resolve_pagerduty:
       title: PagerDuty connector parameters
       description: Test an action that acknowledges or resolves a PagerDuty alert.
@@ -3775,7 +3381,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
@@ -4502,6 +4108,48 @@ components:
                   issues: '#/components/schemas/run_connector_subaction_issues'
                   issueTypes: '#/components/schemas/run_connector_subaction_issuetypes'
                   pushToService: '#/components/schemas/run_connector_subaction_pushtoservice'
+    features:
+      type: string
+      description: |
+        The feature that uses the connector.
+      enum:
+        - alerting
+        - cases
+        - generativeAIForSecurity
+        - generativeAIForObservability
+        - generativeAIForSearchPlayground
+        - siem
+        - uptime
+    connector_types:
+      title: Connector types
+      type: string
+      description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
+      enum:
+        - .bedrock
+        - .gemini
+        - .cases-webhook
+        - .d3security
+        - .email
+        - .gen-ai
+        - .index
+        - .jira
+        - .opsgenie
+        - .pagerduty
+        - .resilient
+        - .sentinelone
+        - .servicenow
+        - .servicenow-itom
+        - .servicenow-sir
+        - .server-log
+        - .slack
+        - .slack_api
+        - .swimlane
+        - .teams
+        - .tines
+        - .torq
+        - .webhook
+        - .xmatters
+      example: .server-log
     action_response_properties:
       title: Action response properties
       description: The properties vary depending on the action type.
@@ -4652,60 +4300,37 @@ components:
         name: updated-connector
         config:
           index: updated-index
-    get_connectors_response:
-      summary: A list of connectors
+    run_cases_webhook_connector_request:
+      summary: Run a Webhook - Case Management connector to create a case.
       value:
-        - id: preconfigured-email-connector
-          name: my-preconfigured-email-notification
-          connector_type_id: .email
-          is_preconfigured: true
-          is_deprecated: false
-          referenced_by_count: 0
-          is_system_action: false
-        - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
-          name: my-index-connector
-          config:
-            index: test-index
-            refresh: false
-            executionTimeField: null
-          connector_type_id: .index
-          is_preconfigured: false
-          is_deprecated: false
-          referenced_by_count: 2
-          is_missing_secrets: false
-          is_system_action: false
-    get_connector_types_response:
-      summary: A list of connector types
+        params:
+          subAction: pushToService
+          subActionParams:
+            comments:
+              - commentId: 1
+                comment: A comment about the incident.
+            incident:
+              title: Case title
+              description: Description of the incident.
+              tags:
+                - tag1
+                - tag2
+              severity: low
+              status: open
+              id: caseID
+    run_email_connector_request:
+      summary: Send an email message from an email connector.
       value:
-        - id: .swimlane
-          name: Swimlane
-          enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          minimum_license_required: gold
-          supported_feature_ids:
-            - alerting
-            - cases
-            - siem
-        - id: .index
-          name: Index
-          enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          minimum_license_required: basic
-          supported_feature_ids:
-            - alerting
-            - uptime
-            - siem
-        - id: .server-log
-          name: Server log
-          enabled: true
-          enabled_in_config: true
-          enabled_in_license: true
-          minimum_license_required: basic
-          supported_feature_ids:
-            - alerting
-            - uptime
+        params:
+          bcc:
+            - user1@example.com
+          cc:
+            - user2@example.com
+            - user3@example.com
+          message: Test email message.
+          subject: Test message subject
+          to:
+            - user4@example.com
     run_index_connector_request:
       summary: Run an index connector.
       value:
@@ -4719,6 +4344,17 @@ components:
       value:
         params:
           subAction: issueTypes
+    run_pagerduty_connector_request:
+      summary: Run a PagerDuty connector to trigger an alert.
+      value:
+        params:
+          eventAction: trigger
+          summary: A brief event summary
+          links:
+            - href: http://example.com/pagerduty
+              text: An example link
+          customDetails:
+            my_data_1: test data
     run_server_log_connector_request:
       summary: Run a server log connector.
       value:
@@ -4756,6 +4392,43 @@ components:
               caseId: '1000'
               caseName: Case name
               description: Description of the incident.
+    run_cases_webhook_connector_response:
+      summary: Response from a pushToService action for a Webhook - Case Management connector.
+      value:
+        connector_id: 1824b5b8-c005-4dcc-adac-57f92db46459
+        data:
+          id: 100665
+          title: TEST-29034
+          url: https://example.com/browse/TEST-29034
+          pushedDate: '2023-12-05T19:43:36.360Z'
+          comments:
+            - commentId: 1
+              pushedDate: '2023-12-05T19:43:36.360Z'
+        status: ok
+    run_email_connector_response:
+      summary: Response for sending a message from an email connector.
+      value:
+        connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
+        data:
+          accepted:
+            - user1@example.com
+            - user2@example.com
+            - user3@example.com
+            - user4@example.com
+          envelope:
+            from: tester@example.com
+            to:
+              - user1@example.com
+              - user2@example.com
+              - user3@example.com
+              - user4@example.com
+          envelopeTime: 8
+          messageTime: 3
+          messageSize: 729
+          response: 250 Message queued as QzEXKcGJ
+          messageId: <08a92d29-642a-0706-750c-de5996bd5cf3@example.com>
+          rejected: []
+        status: ok
     run_index_connector_response:
       summary: Response from running an index connector.
       value:
@@ -4794,6 +4467,15 @@ components:
             name: Bug
           - id: 10000
             name: Epic
+        status: ok
+    run_pagerduty_connector_response:
+      summary: Response from running a PagerDuty connector.
+      value:
+        connector_id: 45de9f70-954f-4608-b12a-db7cf808e49d
+        data:
+          dedup_key: 5115e138b26b484a81eaea779faa6016
+          message: Event processed
+          status: success
         status: ok
     run_server_log_connector_response:
       summary: Response from running a server log connector.
@@ -4889,94 +4571,28 @@ components:
             - commentId: 1
               pushedDate: '2022-09-08T16:52:27.865Z'
         status: ok
-    run_cases_webhook_connector_request:
-      summary: Run a Webhook - Case Management connector to create a case.
+    get_connectors_response:
+      summary: A list of connectors
       value:
-        params:
-          subAction: pushToService
-          subActionParams:
-            comments:
-              - commentId: 1
-                comment: A comment about the incident.
-            incident:
-              title: Case title
-              description: Description of the incident.
-              tags:
-                - tag1
-                - tag2
-              severity: low
-              status: open
-              id: caseID
-    run_email_connector_request:
-      summary: Send an email message from an email connector.
-      value:
-        params:
-          bcc:
-            - user1@example.com
-          cc:
-            - user2@example.com
-            - user3@example.com
-          message: Test email message.
-          subject: Test message subject
-          to:
-            - user4@example.com
-    run_pagerduty_connector_request:
-      summary: Run a PagerDuty connector to trigger an alert.
-      value:
-        params:
-          eventAction: trigger
-          summary: A brief event summary
-          links:
-            - href: http://example.com/pagerduty
-              text: An example link
-          customDetails:
-            my_data_1: test data
-    run_cases_webhook_connector_response:
-      summary: Response from a pushToService action for a Webhook - Case Management connector.
-      value:
-        connector_id: 1824b5b8-c005-4dcc-adac-57f92db46459
-        data:
-          id: 100665
-          title: TEST-29034
-          url: https://example.com/browse/TEST-29034
-          pushedDate: '2023-12-05T19:43:36.360Z'
-          comments:
-            - commentId: 1
-              pushedDate: '2023-12-05T19:43:36.360Z'
-        status: ok
-    run_email_connector_response:
-      summary: Response for sending a message from an email connector.
-      value:
-        connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
-        data:
-          accepted:
-            - user1@example.com
-            - user2@example.com
-            - user3@example.com
-            - user4@example.com
-          envelope:
-            from: tester@example.com
-            to:
-              - user1@example.com
-              - user2@example.com
-              - user3@example.com
-              - user4@example.com
-          envelopeTime: 8
-          messageTime: 3
-          messageSize: 729
-          response: 250 Message queued as QzEXKcGJ
-          messageId: <08a92d29-642a-0706-750c-de5996bd5cf3@example.com>
-          rejected: []
-        status: ok
-    run_pagerduty_connector_response:
-      summary: Response from running a PagerDuty connector.
-      value:
-        connector_id: 45de9f70-954f-4608-b12a-db7cf808e49d
-        data:
-          dedup_key: 5115e138b26b484a81eaea779faa6016
-          message: Event processed
-          status: success
-        status: ok
+        - id: preconfigured-email-connector
+          name: my-preconfigured-email-notification
+          connector_type_id: .email
+          is_preconfigured: true
+          is_deprecated: false
+          referenced_by_count: 0
+          is_system_action: false
+        - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
+          name: my-index-connector
+          config:
+            index: test-index
+            refresh: false
+            executionTimeField: null
+          connector_type_id: .index
+          is_preconfigured: false
+          is_deprecated: false
+          referenced_by_count: 2
+          is_missing_secrets: false
+          is_system_action: false
     get_connector_types_generativeai_response:
       summary: A list of connector types for the `generativeAI` feature.
       value:
