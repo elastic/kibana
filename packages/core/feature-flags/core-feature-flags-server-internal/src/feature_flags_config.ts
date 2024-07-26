@@ -7,15 +7,26 @@
  */
 
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
+/**
+ * @private
+ */
 const configSchema = schema.object({
   overrides: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
-export type FeatureFlagsConfig = TypeOf<typeof configSchema>;
+/**
+ * @private
+ */
+export interface FeatureFlagsConfig {
+  overrides?: Record<string, unknown>;
+}
 
-export const featureFlagsConfig: ServiceConfigDescriptor = {
+/**
+ * @private
+ */
+export const featureFlagsConfig: ServiceConfigDescriptor<FeatureFlagsConfig> = {
   path: 'feature_flags',
   schema: configSchema,
 };

@@ -36,25 +36,25 @@ export class FeatureFlagsService {
   private overrides: Record<string, unknown> = {};
   private context: EvaluationContext = { kind: 'multi' };
 
-  constructor(core: CoreContext) {
+  constructor(private readonly core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
     this.featureFlagsClient = OpenFeature.getClient();
     OpenFeature.setLogger(this.logger.get('open-feature'));
-
-    // Register "overrides" to be changed via the dynamic config endpoint (enabled in test environments only)
-    core.configService.addDynamicConfigPaths(featureFlagsConfig.path, ['overrides']);
-
-    core.configService
-      .atPath<FeatureFlagsConfig>(featureFlagsConfig.path)
-      .subscribe(({ overrides = {} }) => {
-        this.overrides = overrides;
-      });
   }
 
   /**
    * Setup lifecycle method
    */
   public setup(): InternalFeatureFlagsSetup {
+    // Register "overrides" to be changed via the dynamic config endpoint (enabled in test environments only)
+    this.core.configService.addDynamicConfigPaths(featureFlagsConfig.path, ['overrides']);
+
+    this.core.configService
+      .atPath<FeatureFlagsConfig>(featureFlagsConfig.path)
+      .subscribe(({ overrides = {} }) => {
+        this.overrides = overrides;
+      });
+
     return {
       getOverrides: () => this.overrides,
       setProvider: (provider) => {
