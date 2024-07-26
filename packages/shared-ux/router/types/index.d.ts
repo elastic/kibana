@@ -7,18 +7,17 @@
  */
 
 import { SharedUXRouterService } from '@kbn/shared-ux-router/services';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 export interface SharedUXRouterServices {
   services: SharedUXRouterService;
 }
 
+// packages/core/execution-context/core-execution-context-browser/src/types.ts
 export interface KibanaSharedUXRouterProviderDeps {
-  http: {
-    executionContext: {
-      context$: Observable<KibanaExecutionContext>;
-      set(c$: KibanaExecutionContext): void;
-      get(): KibanaExecutionContext;
-      clear(): void;
-    };
-  };
+  executionContext: Partial<KibanaExecutionContext>;
+  //   context$: Observable<KibanaExecutionContext>;
+  //   set(c$: KibanaExecutionContext): void;
+  //   get(): KibanaExecutionContext;
+  //   clear(): void;
 }

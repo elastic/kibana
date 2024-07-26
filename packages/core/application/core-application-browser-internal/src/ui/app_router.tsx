@@ -19,6 +19,7 @@ import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { HttpServiceStart } from '@kbn/core-http-server';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -34,6 +35,7 @@ interface Props {
   setIsMounting: (isMounting: boolean) => void;
   hasCustomBranding$?: Observable<boolean>;
   http: HttpServiceStart;
+  executionContext: KibanaExecutionContext;
 }
 
 interface Params {
@@ -50,7 +52,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   appStatuses$,
   setIsMounting,
   hasCustomBranding$,
-  http,
+  executionContext,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
@@ -63,7 +65,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   return (
     <KibanaErrorBoundaryProvider analytics={analytics}>
       <KibanaErrorBoundary>
-        <RouterProvider http={http}>
+        <RouterProvider executionContext={executionContext}>
           <Router history={history}>
             <Routes>
               {[...mounters].map(([appId, mounter]) => (

@@ -21,7 +21,7 @@ export const SharedUXRouterDepsProvider: FC<PropsWithChildren<SharedUXRouterServ
 
 export const RouterProvider: FC<PropsWithChildren<KibanaSharedUXRouterProviderDeps>> = ({
   children,
-  http,
+  executionContext,
 }) => {
   const parentContext = useContext(Context);
   const value: SharedUXRouterServices = useMemo(() => {
@@ -30,9 +30,9 @@ export const RouterProvider: FC<PropsWithChildren<KibanaSharedUXRouterProviderDe
     }
 
     return {
-      services: http,
+      services: executionContext,
     };
-  }, [parentContext, http]);
+  }, [parentContext, executionContext]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 

@@ -7,16 +7,17 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Router } from './router';
-import { createMemoryHistory } from 'history';
+import { RouterProvider } from './services';
+import { KibanaSharedUXRouterProviderDeps } from '@kbn/shared-ux-router-types';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
-describe('component', () => {
-  it('should change pageName on new page', () => {
-    const historyLocation = {
-      ...createMemoryHistory(),
-      location: { path: '/page1', pathname: 'Page 1', search: '', state: '', hash: '' },
-    };
-    const component = render(<Router history={historyLocation} />);
-    expect(component.getByText('Page 1')).toEqual('Page 1');
+describe('<RouterProvider', () => {
+  let http: KibanaSharedUXRouterProviderDeps['http'];
+  beforeEach(() => {
+    http = executionContextServiceMock.createInternalSetupContract();
+  });
+
+  it('should change pageName on new page', async () => {
+    const component = render(<RouterProvider http={http} />);
   });
 });

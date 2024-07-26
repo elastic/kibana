@@ -31,7 +31,7 @@ import type {
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { HttpServiceStart } from '@kbn/core-http-server';
+import { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -60,7 +60,7 @@ export interface StartDeps {
   theme: ThemeServiceStart;
   overlays: OverlayStart;
   customBranding: CustomBrandingStart;
-  httpStart: HttpServiceStart;
+  executionContext: ExecutionContextStart;
 }
 
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
@@ -121,6 +121,7 @@ export class ApplicationService {
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
   private hasCustomBranding$: Observable<boolean> | undefined;
+  private executionContext: ExecutionContextStart;
 
   public setup({
     http: { basePath },
@@ -232,7 +233,7 @@ export class ApplicationService {
     overlays,
     theme,
     customBranding,
-    httpStart,
+    executionContext,
   }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
@@ -240,6 +241,7 @@ export class ApplicationService {
 
     this.overlayStart$.next(overlays);
     this.hasCustomBranding$ = customBranding.hasCustomBranding$.pipe(takeUntil(this.stop$));
+    this.executionContext = executionContext;
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);
 
@@ -377,7 +379,7 @@ export class ApplicationService {
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
             hasCustomBranding$={this.hasCustomBranding$}
-            http={httpStart}
+            executionContext={this.executionContext}
           />
         );
       },
