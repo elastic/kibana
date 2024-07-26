@@ -978,7 +978,7 @@ const fieldTypesToConstants: Record<SupportedFieldType, string> = {
   counter_integer: '5',
   counter_long: '5',
   counter_double: '5.5',
-  datetime: 'to_datetime("2021-01-01T00:00:00Z")',
+  date: 'to_datetime("2021-01-01T00:00:00Z")',
   date_period: 'to_date_period("2021-01-01/2021-01-02")',
   boolean: 'true',
   version: 'to_version("1.0.0")',

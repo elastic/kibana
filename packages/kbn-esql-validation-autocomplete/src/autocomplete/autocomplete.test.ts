@@ -28,10 +28,14 @@ import {
   PartialSuggestionWithText,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
-import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
+import {
+  ESQL_COMMON_NUMERIC_TYPES as UNCASTED_ESQL_COMMON_NUMERIC_TYPES,
+  ESQL_NUMBER_TYPES,
+} from '@kbn/esql-ast/src/constants';
 
 const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
-const ESQL_NUMERIC_RETURN_TYPES = ESQL_NUMBER_TYPES as unknown as FunctionReturnType[];
+const ESQL_COMMON_NUMERIC_TYPES =
+  UNCASTED_ESQL_COMMON_NUMERIC_TYPES as unknown as FunctionReturnType[];
 
 describe('autocomplete', () => {
   type TestArgs = [
@@ -205,11 +209,7 @@ describe('autocomplete', () => {
       ]);
       testSuggestions(`from a | where stringField >= stringField ${op} doubleField == `, [
         ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType(
-          'where',
-          ESQL_COMMON_NUMERIC_TYPES as unknown as string[],
-          { scalar: true }
-        ),
+        ...getFunctionSignaturesByReturnType('where', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
       ]);
     }
     testSuggestions('from a | stats a=avg(doubleField) | where a ', [
@@ -563,7 +563,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=round(doubleField, ',
       [
-        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFieldNamesByType('integer'),
         ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
           'round',
         ]),
@@ -587,19 +587,11 @@ describe('autocomplete', () => {
     ]);
     testSuggestions('from a | eval a=round(doubleField) + ', [
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType(
-        'eval',
-        ESQL_COMMON_NUMERIC_TYPES as unknown as string[],
-        { scalar: true }
-      ),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
     ]);
     testSuggestions('from a | eval a=round(doubleField)+ ', [
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType(
-        'eval',
-        ESQL_COMMON_NUMERIC_TYPES as unknown as string[],
-        { scalar: true }
-      ),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
     ]);
     testSuggestions('from a | eval a=doubleField+ ', [
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
@@ -753,7 +745,7 @@ describe('autocomplete', () => {
           ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
           ...getFunctionSignaturesByReturnType(
             'eval',
-            ESQL_NUMERIC_RETURN_TYPES,
+            ESQL_NUMERIC_TYPES,
             { scalar: true },
             undefined,
             ['round']
@@ -795,7 +787,7 @@ describe('autocomplete', () => {
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionDefinitions) {
       // skip this fn for the moment as it's quite hard to test
-      if (fn.name !== 'bucket') {
+      if (!['bucket', 'date_extract', 'date_diff'].includes(fn.name)) {
         for (const signature of fn.signatures) {
           signature.params.forEach((param, i) => {
             if (i < signature.params.length) {
@@ -870,6 +862,22 @@ describe('autocomplete', () => {
             }
           });
         }
+      }
+
+      // Currently, autocomplete only suggests the literal suggestions
+      // but the function definition technically accepts text and keywords in generall
+      // so it should suggest valid options like concat("year", "_of_era")
+      if (['date_extract', 'date_diff'].includes(fn.name)) {
+        const firstParam = fn.signatures[0].params[0];
+        const suggestedConstants = firstParam?.literalSuggestions || firstParam?.literalOptions;
+        const requiresMoreArgs = true;
+
+        testSuggestions(
+          `from a | eval ${fn.name}(`,
+          suggestedConstants?.length
+            ? [...suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)]
+            : []
+        );
       }
     }
 
