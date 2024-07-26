@@ -53,7 +53,7 @@ Props description:
 | **consumer** | (optional)string | Name of the UnifiedDataTable consumer component or application. |
 | **componentsTourSteps** | (optional)Record<string,string> | Optional key/value pairs to set guided onboarding steps ids for a data table components included to guided tour. |
 | **showDensitySelector** | (optional)boolean | Optional boolean to toggle whether or not to show the density selector. |
-| **onUpdateDensity** | (optional)(EuiDataGridStyle) => void; | Optional callback when the density configuration is modified. |
+| **onUpdateDataGridDensity** | (optional)(DataGridDensity) => void; | Optional callback when the data grid density configuration is modified. |
 
 *Required **services** list:
 ```

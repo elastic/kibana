@@ -629,8 +629,18 @@ export const UnifiedDataTable = ({
   const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
     storage,
     consumer,
-    onUpdateDataGridDensity
+    onUpdateDataGridDensity,
   });
+
+  const gridStyle = useMemo<EuiDataGridStyle>(
+    () => ({
+      ...DATA_GRID_STYLE_DEFAULT,
+      ...DATA_GRID_DENSITY_STYLE_MAP[dataGridDensity],
+      onChange: onChangeDataGridDensity,
+      ...gridStyleOverride,
+    }),
+    [dataGridDensity, onChangeDataGridDensity, gridStyleOverride]
+  );
 
   /**
    * Cell rendering
@@ -973,7 +983,7 @@ export const UnifiedDataTable = ({
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
         <>
-          {showDensitySelector ? <EuiHorizontalRule margin="s" /> : ''}
+          {showDensitySelector ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
             rowHeightLines={rowHeightLines}
@@ -1078,13 +1088,6 @@ export const UnifiedDataTable = ({
       </div>
     );
   }
-
-  const gridStyle: EuiDataGridStyle = {
-    ...DATA_GRID_STYLE_DEFAULT,
-    ...DATA_GRID_DENSITY_STYLE_MAP[dataGridDensity],
-    onChange: onChangeDataGridDensity,
-    ...gridStyleOverride,
-  };
 
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
