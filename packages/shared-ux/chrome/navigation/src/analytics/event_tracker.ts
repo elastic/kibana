@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnalyticsServiceStart } from '@kbn/core/public';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 
 export enum EventType {
   CLICK_NAVLINK = 'click_navlink',

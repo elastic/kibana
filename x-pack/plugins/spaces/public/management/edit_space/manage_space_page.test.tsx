@@ -20,6 +20,7 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { EnabledFeatures } from './enabled_features';
 import { ManageSpacePage } from './manage_space_page';
+import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 
@@ -48,6 +49,9 @@ featuresStart.getFeatures.mockResolvedValue([
   }),
 ]);
 
+const reportEvent = jest.fn();
+const eventTracker = new EventTracker({ reportEvent });
+
 describe('ManageSpacePage', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -75,6 +79,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
       />
     );
@@ -124,6 +129,7 @@ describe('ManageSpacePage', () => {
         }}
         allowFeatureVisibility
         solutionNavExperiment={Promise.resolve(true)}
+        eventTracker={eventTracker}
       />
     );
 
@@ -154,6 +160,7 @@ describe('ManageSpacePage', () => {
             spaces: { manage: true },
           }}
           allowFeatureVisibility
+          eventTracker={eventTracker}
         />
       );
 
@@ -180,6 +187,7 @@ describe('ManageSpacePage', () => {
           }}
           allowFeatureVisibility
           solutionNavExperiment={Promise.resolve(false)}
+          eventTracker={eventTracker}
         />
       );
 
@@ -209,6 +217,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
       />
     );
@@ -238,6 +247,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility={false}
       />
     );
@@ -282,6 +292,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
       />
     );
@@ -350,6 +361,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
       />
     );
@@ -399,6 +411,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
       />
     );
@@ -436,6 +449,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
       />
     );
@@ -497,6 +511,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        eventTracker={eventTracker}
         allowFeatureVisibility
       />
     );
