@@ -42,5 +42,6 @@ export const findMlSignals = async ({
     maxRecords: maxSignals,
     exceptionFilter,
   };
+  console.log('ML Alert search params:', JSON.stringify(params, null, 2));
   return getAnomalies(params, mlAnomalySearch);
 };

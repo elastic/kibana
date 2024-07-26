@@ -107,6 +107,9 @@ export const createMlAlertType = (
         isAlertSuppressionActive,
         experimentalFeatures,
       });
+
+      console.log('ML EXECUTOR STATE', JSON.stringify(state, null, 2));
+      console.log('ML EXECUTOR RESULT', JSON.stringify(result, null, 2));
       return { ...result, state };
     },
   };

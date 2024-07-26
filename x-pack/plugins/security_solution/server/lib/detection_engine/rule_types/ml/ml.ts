@@ -87,9 +87,11 @@ export const mlExecutor = async ({
     const summaryJobs = await ml
       .jobServiceProvider(fakeRequest, services.savedObjectsClient)
       .jobsSummary(ruleParams.machineLearningJobId);
+    console.log('ALL ML JOBS SUMMARY', JSON.stringify(summaryJobs, null, 2));
     const jobSummaries = summaryJobs.filter((job) =>
       ruleParams.machineLearningJobId.includes(job.id)
     );
+    console.log('RELEVANT ML JOBS SUMMARY', JSON.stringify(jobSummaries, null, 2));
 
     if (
       jobSummaries.length < 1 ||
@@ -127,6 +129,7 @@ export const mlExecutor = async ({
         maxSignals: tuple.maxSignals,
         exceptionFilter,
       });
+      console.log('ML Alert search results:', JSON.stringify(anomalyResults, null, 2));
     } catch (error) {
       if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
         result.userError = true;
