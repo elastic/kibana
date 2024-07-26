@@ -25,7 +25,7 @@ import { TimelineType } from '../../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline, getDisplayValue } from './helpers';
-import { DataProviderType } from './data_provider';
+import { DataProviderTypeEnum } from '../../../../../common/api/timeline/model/components.gen';
 import { timelineSelectors } from '../../../store';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
 
@@ -125,7 +125,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             operator=":"
             timelineId={timelineId}
             value=""
-            type={DataProviderType.default}
+            type={DataProviderTypeEnum.default}
             providerId={`${timelineId}-${uuidv4()}`}
           />
         ),
@@ -143,7 +143,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             operator=":"
             timelineId={timelineId}
             value=""
-            type={DataProviderType.template}
+            type={DataProviderTypeEnum.template}
             providerId={`${timelineId}-${uuidv4()}`}
           />
         ),
@@ -194,7 +194,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         operator=":"
         timelineId={timelineId}
         value=""
-        type={DataProviderType.default}
+        type={DataProviderTypeEnum.default}
         providerId={`${timelineId}-${uuidv4()}`}
       />
     );

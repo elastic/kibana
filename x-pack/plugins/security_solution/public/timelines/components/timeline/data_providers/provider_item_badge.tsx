@@ -22,7 +22,10 @@ import type { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 import type { DataProvidersAnd, QueryOperator } from './data_provider';
-import { DataProviderType } from './data_provider';
+import {
+  type DataProviderType,
+  DataProviderTypeEnum,
+} from '../../../../../common/api/timeline/model/components.gen';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
 import { timelineDefaults } from '../../../store/defaults';
 
@@ -71,7 +74,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     toggleTypeProvider,
     displayValue,
     val,
-    type = DataProviderType.default,
+    type = DataProviderTypeEnum.default,
     wrapperRef,
   }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);

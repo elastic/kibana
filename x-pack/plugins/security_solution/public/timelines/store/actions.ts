@@ -12,9 +12,9 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SessionViewConfig } from '../../../common/types';
 import type {
   DataProvider,
-  DataProviderType,
   QueryOperator,
 } from '../components/timeline/data_providers/data_provider';
+import { type DataProviderType } from '../../../common/api/timeline/model/components.gen';
 
 import type { KqlMode, TimelineModel } from './model';
 import type { InitialyzeTimelineSettings, InsertTimeline } from './types';

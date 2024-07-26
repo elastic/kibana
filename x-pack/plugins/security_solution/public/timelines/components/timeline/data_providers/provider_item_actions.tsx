@@ -17,7 +17,11 @@ import type { BrowserFields } from '../../../../common/containers/source';
 
 import type { OnDataProviderEdited } from '../events';
 import type { QueryOperator } from './data_provider';
-import { DataProviderType, EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
+import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
+import {
+  type DataProviderType,
+  DataProviderTypeEnum,
+} from '../../../../../common/api/timeline/model/components.gen';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 
 import * as i18n from './translations';
@@ -143,7 +147,7 @@ export const getProviderActions = ({
             disabled: isLoading || operator === IS_ONE_OF_OPERATOR,
             icon: 'visText',
             name:
-              type === DataProviderType.template
+              type === DataProviderTypeEnum.template
                 ? i18n.CONVERT_TO_FIELD
                 : i18n.CONVERT_TO_TEMPLATE_FIELD,
             onClick: toggleType,

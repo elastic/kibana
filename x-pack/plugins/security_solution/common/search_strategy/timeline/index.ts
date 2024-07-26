@@ -6,12 +6,8 @@
  */
 
 import type { SortField, Maybe } from '../common';
-import type {
-  DataProviderType,
-  TimelineType,
-  TimelineStatus,
-  RowRendererId,
-} from '../../api/timeline/model/api';
+import type { TimelineType, TimelineStatus, RowRendererId } from '../../api/timeline/model/api';
+import type { DataProviderType } from '../../api/timeline/model/components.gen';
 
 export * from './events';
 

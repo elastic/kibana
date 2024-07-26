@@ -22,12 +22,8 @@ import type {
   PinnedEvent,
   Note,
 } from '../../../../common/api/timeline';
-import {
-  RowRendererId,
-  DataProviderType,
-  TimelineStatus,
-  TimelineType,
-} from '../../../../common/api/timeline';
+import { RowRendererId, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 
@@ -181,9 +177,9 @@ const getTemplateTimelineId = (
 };
 
 const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => {
-  if (dataProvider.type === DataProviderType.template) {
+  if (dataProvider.type === DataProviderTypeEnum.template) {
     return deepMerge(dataProvider, {
-      type: DataProviderType.default,
+      type: DataProviderTypeEnum.default,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       enabled: dataProvider.queryMatch!.operator !== IS_OPERATOR,
       queryMatch: {

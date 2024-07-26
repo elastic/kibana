@@ -13,7 +13,8 @@ import type {
   DataProvider,
   DataProvidersAnd,
 } from '../components/timeline/data_providers/data_provider';
-import { IS_OPERATOR, DataProviderType } from '../components/timeline/data_providers/data_provider';
+import { IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
+import { DataProviderTypeEnum } from '../../../common/api/timeline/model/components.gen';
 import { defaultColumnHeaderType } from '../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -1218,7 +1219,7 @@ describe('Timeline', () => {
       const update = updateTimelineProviderType({
         id: 'foo',
         providerId: '123',
-        type: DataProviderType.template, // value we are updating from default to template
+        type: DataProviderTypeEnum.template, // value we are updating from default to template
         timelineById: timelineByIdMock,
       });
       expect(update).toBe(timelineByIdMock);
@@ -1228,7 +1229,7 @@ describe('Timeline', () => {
       const update = updateTimelineProviderType({
         id: 'foo',
         providerId: '123',
-        type: DataProviderType.template, // value we are updating from default to template
+        type: DataProviderTypeEnum.template, // value we are updating from default to template
         timelineById: timelineByIdTemplateMock,
       });
       expect(update).not.toBe(timelineByIdTemplateMock);
@@ -1238,7 +1239,7 @@ describe('Timeline', () => {
       const update = updateTimelineProviderType({
         id: 'foo',
         providerId: '123',
-        type: DataProviderType.template, // value we are updating from default to template
+        type: DataProviderTypeEnum.template, // value we are updating from default to template
         timelineById: timelineByIdTemplateMock,
       });
       expect(update.foo.dataProviders).not.toBe(timelineByIdTemplateMock.foo.dataProviders);
@@ -1248,7 +1249,7 @@ describe('Timeline', () => {
       const update = updateTimelineProviderType({
         id: 'foo',
         providerId: '123',
-        type: DataProviderType.template,
+        type: DataProviderTypeEnum.template,
         timelineById: timelineByIdTemplateMock,
       });
       const expected: TimelineById = {
@@ -1263,7 +1264,7 @@ describe('Timeline', () => {
                 value: '{}',
                 operator: IS_OPERATOR,
               },
-              type: DataProviderType.template,
+              type: DataProviderTypeEnum.template,
             },
           ],
           timelineType: TimelineType.template,
@@ -1278,7 +1279,7 @@ describe('Timeline', () => {
         {
           ...basicDataProvider,
           id: '456',
-          type: DataProviderType.template,
+          type: DataProviderTypeEnum.template,
         },
       ];
 
@@ -1292,14 +1293,14 @@ describe('Timeline', () => {
       const update = updateTimelineProviderType({
         id: 'foo',
         providerId: '123',
-        type: DataProviderType.template, // value we are updating from default to template
+        type: DataProviderTypeEnum.template, // value we are updating from default to template
         timelineById: multiDataProviderMock,
       });
       const expected = [
         {
           ...basicDataProvider,
           name: '',
-          type: DataProviderType.template,
+          type: DataProviderTypeEnum.template,
           queryMatch: {
             field: '',
             value: '{}',
@@ -1309,7 +1310,7 @@ describe('Timeline', () => {
         {
           ...basicDataProvider,
           id: '456',
-          type: DataProviderType.template,
+          type: DataProviderTypeEnum.template,
         },
       ];
       expect(update.foo.dataProviders).toEqual(expected);

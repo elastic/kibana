@@ -9,9 +9,8 @@ import { TimelineType } from '../../../../common/api/timeline';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
-
 import {
   getStringArray,
   replaceTemplateFieldFromQuery,
@@ -414,7 +413,7 @@ describe('helpers', () => {
         mockDataProvider.id = 'Braden';
         mockDataProvider.name = 'Braden';
         mockDataProvider.queryMatch.value = '{host.name}';
-        mockDataProvider.type = DataProviderType.template;
+        mockDataProvider.type = DataProviderTypeEnum.template;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
@@ -434,7 +433,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
 
@@ -444,7 +443,7 @@ describe('helpers', () => {
         mockDataProvider.id = 'Braden';
         mockDataProvider.name = 'Braden';
         mockDataProvider.queryMatch.value = '{host.name}';
-        mockDataProvider.type = DataProviderType.default;
+        mockDataProvider.type = DataProviderTypeEnum.default;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
@@ -464,7 +463,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
 
@@ -479,7 +478,7 @@ describe('helpers', () => {
         mockDataProvider.id = 'Braden';
         mockDataProvider.name = 'Braden';
         mockDataProvider.queryMatch.value = '{host.name}';
-        mockDataProvider.type = DataProviderType.template;
+        mockDataProvider.type = DataProviderTypeEnum.template;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           dupTimelineDetails,
@@ -499,7 +498,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
 
@@ -509,7 +508,7 @@ describe('helpers', () => {
         mockDataProvider.id = 'my-id';
         mockDataProvider.name = 'Rebecca';
         mockDataProvider.queryMatch.value = 'Rebecca';
-        mockDataProvider.type = DataProviderType.default;
+        mockDataProvider.type = DataProviderTypeEnum.default;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
@@ -529,7 +528,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
     });

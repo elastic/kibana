@@ -16,11 +16,11 @@ import type {
   QueryOperator,
   QueryMatch,
 } from '../components/timeline/data_providers/data_provider';
+import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_providers/data_provider';
 import {
-  DataProviderType,
-  IS_OPERATOR,
-  EXISTS_OPERATOR,
-} from '../components/timeline/data_providers/data_provider';
+  type DataProviderType,
+  DataProviderTypeEnum,
+} from '../../../common/api/timeline/model/components.gen';
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
@@ -971,14 +971,17 @@ const updateTypeAndProvider = (
               ? {
                   ...andProvider,
                   type,
-                  name: type === DataProviderType.template ? `${andProvider.queryMatch.field}` : '',
+                  name:
+                    type === DataProviderTypeEnum.template ? `${andProvider.queryMatch.field}` : '',
                   queryMatch: {
                     ...andProvider.queryMatch,
                     displayField: undefined,
                     displayValue: undefined,
                     value:
-                      type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
-                    operator: (type === DataProviderType.template
+                      type === DataProviderTypeEnum.template
+                        ? `{${andProvider.queryMatch.field}}`
+                        : '',
+                    operator: (type === DataProviderTypeEnum.template
                       ? IS_OPERATOR
                       : EXISTS_OPERATOR) as QueryOperator,
                   },
@@ -995,13 +998,13 @@ const updateTypeProvider = (type: DataProviderType, providerId: string, timeline
       ? {
           ...provider,
           type,
-          name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
+          name: type === DataProviderTypeEnum.template ? `${provider.queryMatch.field}` : '',
           queryMatch: {
             ...provider.queryMatch,
             displayField: undefined,
             displayValue: undefined,
-            value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
-            operator: (type === DataProviderType.template
+            value: type === DataProviderTypeEnum.template ? `{${provider.queryMatch.field}}` : '',
+            operator: (type === DataProviderTypeEnum.template
               ? IS_OPERATOR
               : EXISTS_OPERATOR) as QueryOperator,
           },
@@ -1018,7 +1021,7 @@ export const updateTimelineProviderType = ({
 }: UpdateTimelineProviderTypeParams): TimelineById => {
   const timeline = timelineById[id];
 
-  if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
+  if (timeline.timelineType !== TimelineType.template && type === DataProviderTypeEnum.template) {
     // Not supported, timeline template cannot have template type providers
     return timelineById;
   }

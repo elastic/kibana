@@ -16,7 +16,7 @@ import type {
   DataProvider,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -171,13 +171,13 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
         dataProvider.queryMatch.displayValue = undefined;
       }
     }
-    dataProvider.type = DataProviderType.default;
+    dataProvider.type = DataProviderTypeEnum.default;
     return dataProvider;
   }
 
   if (timelineType === TimelineType.template) {
     if (
-      dataProvider.type === DataProviderType.template &&
+      dataProvider.type === DataProviderTypeEnum.template &&
       dataProvider.queryMatch.operator === ':'
     ) {
       const newValue = getStringArray(dataProvider.queryMatch.field, eventData);
@@ -191,12 +191,12 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
       dataProvider.queryMatch.value = newValue[0];
       dataProvider.queryMatch.displayField = undefined;
       dataProvider.queryMatch.displayValue = undefined;
-      dataProvider.type = DataProviderType.default;
+      dataProvider.type = DataProviderTypeEnum.default;
 
       return dataProvider;
     }
 
-    dataProvider.type = dataProvider.type ?? DataProviderType.default;
+    dataProvider.type = dataProvider.type ?? DataProviderTypeEnum.default;
 
     return dataProvider;
   }

@@ -41,6 +41,8 @@ export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
 ]);
 
 import { ErrorSchema } from './error_schema';
+import type { DataProviderType } from './components.gen';
+import { DataProviderTypeEnum } from './components.gen';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -133,14 +135,9 @@ const SavedDataProviderQueryMatchRuntimeType = runtimeTypes.partial({
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
 });
 
-export enum DataProviderType {
-  default = 'default',
-  template = 'template',
-}
-
 export const DataProviderTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(DataProviderType.default),
-  runtimeTypes.literal(DataProviderType.template),
+  runtimeTypes.literal(DataProviderTypeEnum.default),
+  runtimeTypes.literal(DataProviderTypeEnum.template),
 ]);
 
 const SavedDataProviderRuntimeType = runtimeTypes.partial({
