@@ -6,73 +6,70 @@
  * Side Public License, v 1.
  */
 
-import type { EuiDataGridStyle } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
-import { useDataGridStyle } from './use_data_grid_style';
+import { useDataGridDensity, DataGridDensity } from './use_data_grid_density';
+import { DATA_GRID_STYLE_EXPANDED } from '../constants';
 
 const localStorageMock = {
   get: jest.fn(),
   set: jest.fn(),
 };
 
-describe('useDataGridStyle', () => {
+describe('useDataGridDensity', () => {
   beforeEach(() => {
     localStorageMock.get.mockClear();
     localStorageMock.set.mockClear();
   });
 
   it('should read from local storage', () => {
-    localStorageMock.get.mockReturnValue({ foo: 'bar' });
+    localStorageMock.get.mockReturnValue(DataGridDensity.NORMAL);
     const { result } = renderHook(() =>
-      useDataGridStyle({
+      useDataGridDensity({
         storage: localStorageMock as unknown as Storage,
         consumer: 'discover',
       })
     );
     const {
-      current: { dataGridStyle },
+      current: { dataGridDensity },
     } = result;
-    expect(dataGridStyle).toMatchInlineSnapshot(`
-      Object {
-        "foo": "bar",
-      }
-    `);
+    expect(dataGridDensity).toBe(DataGridDensity.NORMAL);
   });
 
-  it('should update local storage when onChangeDataGridStyle is called', () => {
+  it('should update local storage when onChangeDataGridDensity is called', () => {
     const { result } = renderHook(() =>
-      useDataGridStyle({
+      useDataGridDensity({
         storage: localStorageMock as unknown as Storage,
         consumer: 'discover',
       })
     );
     const {
-      current: { onChangeDataGridStyle },
+      current: { onChangeDataGridDensity },
     } = result;
 
-    const newValue: EuiDataGridStyle = { border: 'all', footer: 'shade' };
-    onChangeDataGridStyle(newValue);
+    onChangeDataGridDensity(DATA_GRID_STYLE_EXPANDED);
 
-    expect(localStorageMock.set).toBeCalledWith('discover:dataGridStyle', newValue);
+    expect(localStorageMock.set).toBeCalledWith(
+      'discover:dataGridDensity',
+      DataGridDensity.EXPANDED
+    );
   });
 
-  it('should call provided onUpdateDataGridStyle with the updated value', () => {
-    const onUpdateDataGridStyle = jest.fn();
+  it('should call provided onUpdateDataGridDensity with the updated value', () => {
+    const onUpdateDataGridDensity = jest.fn();
     const { result } = renderHook(() =>
-      useDataGridStyle({
+      useDataGridDensity({
         storage: localStorageMock as unknown as Storage,
         consumer: 'discover',
-        onUpdateDataGridStyle,
+        onUpdateDataGridDensity,
       })
     );
     const {
-      current: { onChangeDataGridStyle },
+      current: { onChangeDataGridDensity },
     } = result;
 
-    const newValue: EuiDataGridStyle = { border: 'all', footer: 'shade' };
-    onChangeDataGridStyle(newValue);
+    onChangeDataGridDensity(DATA_GRID_STYLE_EXPANDED);
 
-    expect(onUpdateDataGridStyle).toBeCalledWith(newValue);
+    expect(onUpdateDataGridDensity).toBeCalledWith(DataGridDensity.EXPANDED);
   });
 });

@@ -49,6 +49,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
+  DATA_GRID_DENSITY_STYLE_MAP,
+  DataGridDensity,
+  useDataGridDensity,
+} from '../hooks/use_data_grid_density';
+import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
   DataTableColumnsMeta,
@@ -75,6 +80,7 @@ import {
 } from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
+  DATA_GRID_STYLE_DEFAULT,
   DEFAULT_ROWS_PER_PAGE,
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
@@ -90,7 +96,6 @@ import {
   getColorIndicatorControlColumn,
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
-import { useDataGridStyle } from '../hooks/use_data_grid_style';
 
 export type SortOrder = [string, string];
 
@@ -238,9 +243,9 @@ export interface UnifiedDataTableProps {
    */
   showDensitySelector?: boolean;
   /**
-   * Callback when the data grid style configuration is modified
+   * Callback when the data grid density configuration is modified
    */
-  onUpdateDataGridStyle?: (dataGridStyle: EuiDataGridStyle) => void;
+  onUpdateDataGridDensity?: (dataGridDensity: DataGridDensity) => void;
   /**
    * Is text base lang mode enabled
    */
@@ -477,7 +482,7 @@ export const UnifiedDataTable = ({
   renderCellPopover,
   getRowIndicator,
   showDensitySelector = false,
-  onUpdateDataGridStyle,
+  onUpdateDataGridDensity,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -621,10 +626,10 @@ export const UnifiedDataTable = ({
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
 
-  const { dataGridStyle, onChangeDataGridStyle } = useDataGridStyle({
+  const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
     storage,
     consumer,
-    onUpdateDataGridStyle,
+    onUpdateDataGridDensity
   });
 
   /**
@@ -642,7 +647,7 @@ export const UnifiedDataTable = ({
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
-        isCompressed: dataGridStyle.fontSize === 's',
+        isCompressed: dataGridDensity === DataGridDensity.COMPACT,
       }),
     [
       dataView,
@@ -653,7 +658,7 @@ export const UnifiedDataTable = ({
       fieldFormats,
       externalCustomRenderers,
       isPlainRecord,
-      dataGridStyle,
+      dataGridDensity,
     ]
   );
 
@@ -1075,8 +1080,9 @@ export const UnifiedDataTable = ({
   }
 
   const gridStyle: EuiDataGridStyle = {
-    ...dataGridStyle,
-    onChange: onChangeDataGridStyle,
+    ...DATA_GRID_STYLE_DEFAULT,
+    ...DATA_GRID_DENSITY_STYLE_MAP[dataGridDensity],
+    onChange: onChangeDataGridDensity,
     ...gridStyleOverride,
   };
 
