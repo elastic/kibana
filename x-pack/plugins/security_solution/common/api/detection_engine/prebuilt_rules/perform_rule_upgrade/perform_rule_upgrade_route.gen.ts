@@ -16,34 +16,183 @@
 
 import { z } from 'zod';
 
-import { RuleSignatureId, RuleVersion } from '../../model/rule_schema/common_attributes.gen';
+import {
+  RuleSignatureId,
+  RuleVersion,
+  RuleName,
+  RuleTagArray,
+  RuleDescription,
+  Severity,
+  SeverityMapping,
+  RiskScore,
+  RiskScoreMapping,
+  RuleReferenceArray,
+  RuleFalsePositiveArray,
+  ThreatArray,
+  InvestigationGuide,
+  SetupGuide,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  MaxSignals,
+  BuildingBlockType,
+  RuleIntervalFrom,
+  RuleInterval,
+  RuleExceptionList,
+  RuleNameOverride,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  IndexPatternArray,
+  DataViewId,
+  RuleQuery,
+  QueryLanguage,
+  RuleFilterArray,
+  SavedQueryId,
+  KqlQueryLanguage,
+} from '../../model/rule_schema/common_attributes.gen';
+import {
+  MachineLearningJobId,
+  AnomalyThreshold,
+} from '../../model/rule_schema/specific_attributes/ml_attributes.gen';
+import {
+  ThreatQuery,
+  ThreatMapping,
+  ThreatIndex,
+  ThreatFilters,
+  ThreatIndicatorPath,
+} from '../../model/rule_schema/specific_attributes/threat_match_attributes.gen';
+import {
+  NewTermsFields,
+  HistoryWindowStart,
+} from '../../model/rule_schema/specific_attributes/new_terms_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { ErrorSchema } from '../../model/error_schema.gen';
 
-export type PickVersionValues = z.infer<typeof PickVersionValues>;
-export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET']);
-export type PickVersionValuesEnum = typeof PickVersionValues.enum;
-export const PickVersionValuesEnum = PickVersionValues.enum;
+export type RulePickVersionValues = z.infer<typeof RulePickVersionValues>;
+export const RulePickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
+export type RulePickVersionValuesEnum = typeof RulePickVersionValues.enum;
+export const RulePickVersionValuesEnum = RulePickVersionValues.enum;
+
+export type FieldPickVersionValues = z.infer<typeof FieldPickVersionValues>;
+export const FieldPickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED', 'RESOLVED']);
+export type FieldPickVersionValuesEnum = typeof FieldPickVersionValues.enum;
+export const FieldPickVersionValuesEnum = FieldPickVersionValues.enum;
+
+export type FieldUpgradeRequest = z.infer<typeof FieldUpgradeRequest>;
+export const FieldUpgradeRequest = z.object({
+  pick_version: z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED', 'RESOLVED']),
+  resolved_value: z
+    .union([
+      RuleName,
+      RuleTagArray,
+      RuleDescription,
+      Severity,
+      SeverityMapping,
+      RiskScore,
+      RiskScoreMapping,
+      RuleReferenceArray,
+      RuleFalsePositiveArray,
+      ThreatArray,
+      InvestigationGuide,
+      SetupGuide,
+      RelatedIntegrationArray,
+      RequiredFieldArray,
+      RequiredFieldArray,
+      MaxSignals,
+      BuildingBlockType,
+      RuleIntervalFrom,
+      RuleInterval,
+      RuleExceptionList,
+      RuleNameOverride,
+      TimestampOverride,
+      TimestampOverrideFallbackDisabled,
+      TimelineTemplateId,
+      TimelineTemplateTitle,
+      IndexPatternArray,
+      DataViewId,
+      RuleQuery,
+      QueryLanguage,
+      RuleFilterArray,
+      SavedQueryId,
+      MachineLearningJobId,
+      AnomalyThreshold,
+      AnomalyThreshold,
+      ThreatQuery,
+      ThreatMapping,
+      ThreatIndex,
+      ThreatFilters,
+      ThreatIndicatorPath,
+      KqlQueryLanguage,
+      NewTermsFields,
+      HistoryWindowStart,
+    ])
+    .optional(),
+});
 
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
   rule_id: RuleSignatureId,
   revision: z.number(),
   version: RuleVersion,
-  pick_version: PickVersionValues.optional(),
+  pick_version: RulePickVersionValues.optional(),
+  fields: z
+    .object({
+      name: FieldUpgradeRequest.optional(),
+      tags: FieldUpgradeRequest.optional(),
+      description: FieldUpgradeRequest.optional(),
+      severity: FieldUpgradeRequest.optional(),
+      severity_mapping: FieldUpgradeRequest.optional(),
+      risk_score: FieldUpgradeRequest.optional(),
+      risk_score_mapping: FieldUpgradeRequest.optional(),
+      references: FieldUpgradeRequest.optional(),
+      false_positives: FieldUpgradeRequest.optional(),
+      threat: FieldUpgradeRequest.optional(),
+      note: FieldUpgradeRequest.optional(),
+      setup: FieldUpgradeRequest.optional(),
+      related_integrations: FieldUpgradeRequest.optional(),
+      required_fields: FieldUpgradeRequest.optional(),
+      max_signals: FieldUpgradeRequest.optional(),
+      building_block_type: FieldUpgradeRequest.optional(),
+      from: FieldUpgradeRequest.optional(),
+      interval: FieldUpgradeRequest.optional(),
+      exceptions_list: FieldUpgradeRequest.optional(),
+      rule_name_override: FieldUpgradeRequest.optional(),
+      timestamp_override: FieldUpgradeRequest.optional(),
+      timestamp_override_fallback_disabled: FieldUpgradeRequest.optional(),
+      timeline_id: FieldUpgradeRequest.optional(),
+      timeline_title: FieldUpgradeRequest.optional(),
+      index: FieldUpgradeRequest.optional(),
+      data_view_id: FieldUpgradeRequest.optional(),
+      query: FieldUpgradeRequest.optional(),
+      language: FieldUpgradeRequest.optional(),
+      filters: FieldUpgradeRequest.optional(),
+      saved_id: FieldUpgradeRequest.optional(),
+      machine_learning_job_id: FieldUpgradeRequest.optional(),
+      anomaly_threshold: FieldUpgradeRequest.optional(),
+      threat_query: FieldUpgradeRequest.optional(),
+      threat_mapping: FieldUpgradeRequest.optional(),
+      threat_index: FieldUpgradeRequest.optional(),
+      threat_filters: FieldUpgradeRequest.optional(),
+      threat_indicator_path: FieldUpgradeRequest.optional(),
+      threat_language: FieldUpgradeRequest.optional(),
+      new_terms_fields: FieldUpgradeRequest.optional(),
+      history_window_start: FieldUpgradeRequest.optional(),
+    })
+    .optional(),
 });
 
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;
 export const UpgradeSpecificRulesRequest = z.object({
   mode: z.literal('SPECIFIC_RULES'),
   rules: z.array(RuleUpgradeSpecifier),
-  pick_version: PickVersionValues.optional(),
+  pick_version: RulePickVersionValues.optional(),
 });
 
 export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
 export const UpgradeAllRulesRequest = z.object({
   mode: z.literal('ALL_RULES'),
-  pick_version: PickVersionValues.optional(),
+  pick_version: RulePickVersionValues.optional(),
 });
 
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;

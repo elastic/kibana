@@ -30,9 +30,13 @@ paths:
 
 components:
   schemas:
-    PickVersionValues:
+    RulePickVersionValues:
       type: string
-      enum: [BASE, CURRENT, TARGET]
+      enum: [BASE, CURRENT, TARGET, MERGED]
+
+    FieldPickVersionValues:
+      type: string
+      enum: [BASE, CURRENT, TARGET, MERGED, RESOLVED]
 
     RuleUpgradeSpecifier:
       type: object
@@ -48,7 +52,143 @@ components:
         version:
           $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleVersion'
         pick_version:
-          $ref: '#/components/schemas/PickVersionValues'
+          $ref: '#/components/schemas/RulePickVersionValues'
+        fields:
+          type: object
+          properties:
+            name:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            tags:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            description:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            severity:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            severity_mapping:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            risk_score:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            risk_score_mapping:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            references:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            false_positives:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            note:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            setup:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            related_integrations:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            required_fields:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            max_signals:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            building_block_type:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            from:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            interval:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            exceptions_list:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            rule_name_override:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timestamp_override:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timestamp_override_fallback_disabled:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timeline_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            timeline_title:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            index:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            data_view_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            query:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            language:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            filters:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            saved_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            machine_learning_job_id:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            anomaly_threshold:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_query:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_mapping:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_index:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_filters:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_indicator_path:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            threat_language:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            new_terms_fields:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+            history_window_start:
+              $ref: '#/components/schemas/FieldUpgradeRequest'
+
+    FieldUpgradeRequest:
+      type: object
+      required:
+        - pick_version
+      properties:
+        pick_version:
+          type: string
+          enum: [BASE, CURRENT, TARGET, MERGED, RESOLVED]
+        resolved_value:
+          oneOf:
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleName'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleDescription'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SeverityMapping'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RiskScore'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RiskScoreMapping'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleReferenceArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleFalsePositiveArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/ThreatArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/InvestigationGuide'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SetupGuide'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/MaxSignals'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/BuildingBlockType'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleIntervalFrom'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleInterval'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleExceptionList'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleNameOverride'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimestampOverride'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimestampOverrideFallbackDisabled'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateId'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateTitle'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/DataViewId'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleQuery'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/QueryLanguage'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+            - $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/MachineLearningJobId'
+            - $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/AnomalyThreshold'
+            - $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/AnomalyThreshold'
+            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatQuery'
+            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatMapping'
+            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndex'
+            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatFilters'
+            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndicatorPath'
+            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage' # threat_language
+            - $ref: '../../model/rule_schema/specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/NewTermsFields'
+            - $ref: '../../model/rule_schema/specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/HistoryWindowStart'
 
     UpgradeSpecificRulesRequest:
       type: object
@@ -64,7 +204,7 @@ components:
           items:
             $ref: '#/components/schemas/RuleUpgradeSpecifier'
         pick_version:
-          $ref: '#/components/schemas/PickVersionValues'
+          $ref: '#/components/schemas/RulePickVersionValues'
 
     UpgradeAllRulesRequest:
       type: object
@@ -75,7 +215,7 @@ components:
           type: string
           enum: [ALL_RULES]
         pick_version:
-          $ref: '#/components/schemas/PickVersionValues'
+          $ref: '#/components/schemas/RulePickVersionValues'
 
     SkipRuleUpgradeReason:
       type: string
