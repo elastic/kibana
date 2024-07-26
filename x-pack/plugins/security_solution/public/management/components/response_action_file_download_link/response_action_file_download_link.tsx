@@ -138,7 +138,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }, [action, agentId]);
 
     const {
-      isFetching,
+      isLoading,
       data: fileInfo,
       error,
     } = useGetFileInfo(action, undefined, {
@@ -149,7 +149,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       return null;
     }
 
-    if (isFetching) {
+    if (isLoading) {
       return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
     }
 

@@ -65,6 +65,13 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
         <EuiContextMenuItem
           key={language.id}
           icon={`${assetBasePath}/${language.iconType}`}
+          aria-label={i18n.translate(
+            'searchApiPanels.welcomeBanner.codeBox.selectChangeAriaLabel',
+            {
+              defaultMessage: 'Change language to {languageName} for every instance on this page',
+              values: { languageName: language.name },
+            }
+          )}
           onClick={() => {
             if (setSelectedLanguage) {
               setSelectedLanguage(language);

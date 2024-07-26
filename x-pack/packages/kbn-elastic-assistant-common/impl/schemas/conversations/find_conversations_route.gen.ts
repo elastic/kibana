@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Find Conversations API endpoint
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from 'zod';

@@ -46,7 +46,7 @@ export const executionType = {
   STANDARD: 'standard',
   BACKFILL: 'backfill',
 } as const;
-export type ExecutionType = typeof executionType[keyof typeof executionType];
+export type ExecutionType = (typeof executionType)[keyof typeof executionType];
 
 interface BackfillOpts {
   id: string;

@@ -35,7 +35,7 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
+export function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
   return shouldBeQuotedText(text, options)
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
@@ -265,7 +265,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: label,
+    text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -394,11 +394,39 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
 }
 
 export function getDateLiterals() {
-  return buildConstantsDefinitions(
-    TIME_SYSTEM_PARAMS,
-    i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
-      defaultMessage: 'Named parameter',
-    }),
-    '1A'
-  );
+  return [
+    ...buildConstantsDefinitions(
+      TIME_SYSTEM_PARAMS,
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
+        defaultMessage: 'Named parameter',
+      }),
+      '1A'
+    ),
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePickerLabel',
+        {
+          defaultMessage: 'Choose from the time picker',
+        }
+      ),
+      text: '',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+        {
+          defaultMessage: 'Click to choose',
+        }
+      ),
+      sortText: '1A',
+      command: {
+        id: 'esql.timepicker.choose',
+        title: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+          {
+            defaultMessage: 'Click to choose',
+          }
+        ),
+      },
+    } as SuggestionRawDefinition,
+  ];
 }

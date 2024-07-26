@@ -434,7 +434,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async getAxesCountByPosition(
-    axesPosition: typeof Position[keyof typeof Position],
+    axesPosition: (typeof Position)[keyof typeof Position],
     selector: string
   ) {
     const yAxes = (await this.getEsChartDebugState(selector))?.axes?.y ?? [];

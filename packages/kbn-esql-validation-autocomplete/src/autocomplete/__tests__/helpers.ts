@@ -15,7 +15,7 @@ import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext } from '../types';
+import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 
 export interface Integration {
@@ -27,6 +27,13 @@ export interface Integration {
     title?: string;
   }>;
 }
+
+export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+
+export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
+  text: '',
+  label: 'Choose from the time picker',
+};
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
@@ -120,7 +127,7 @@ export function getFunctionSignaturesByReturnType(
   {
     agg,
     grouping,
-    evalMath,
+    scalar,
     builtin,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
@@ -128,7 +135,7 @@ export function getFunctionSignaturesByReturnType(
   }: {
     agg?: boolean;
     grouping?: boolean;
-    evalMath?: boolean;
+    scalar?: boolean;
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
@@ -150,7 +157,7 @@ export function getFunctionSignaturesByReturnType(
     list.push(...groupingFunctionDefinitions);
   }
   // eval functions (eval is a special keyword in JS)
-  if (evalMath) {
+  if (scalar) {
     list.push(...evalFunctionDefinitions);
   }
   if (builtin) {
@@ -224,7 +231,7 @@ export function getLiteralsByType(_type: string | string[]) {
 
 export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return requestedType.includes('date') ? TIME_SYSTEM_PARAMS : [];
+  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
 
 export function createCustomCallbackMocks(

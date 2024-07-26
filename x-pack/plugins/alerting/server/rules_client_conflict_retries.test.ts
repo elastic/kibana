@@ -161,7 +161,7 @@ async function enable(success: boolean) {
   setupRawRuleMocks({}, { enabled: false });
 
   try {
-    await rulesClient.enable({ id: MockRuleId });
+    await rulesClient.enableRule({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }

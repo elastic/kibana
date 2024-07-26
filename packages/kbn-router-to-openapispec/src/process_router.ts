@@ -12,6 +12,7 @@ import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/co
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
+  getXsrfHeaderForMethod,
   assignToPaths,
   extractContentType,
   extractTags,
@@ -41,7 +42,10 @@ export const processRouter = (
       const validationSchemas = extractValidationSchemaFromRoute(route);
       const contentType = extractContentType(route.options?.body);
 
-      let parameters: undefined | OpenAPIV3.ParameterObject[] = [];
+      const parameters: OpenAPIV3.ParameterObject[] = [
+        getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
+        ...getXsrfHeaderForMethod(route.method, route.options),
+      ];
       if (validationSchemas) {
         let pathObjects: OpenAPIV3.ParameterObject[] = [];
         let queryObjects: OpenAPIV3.ParameterObject[] = [];
@@ -53,11 +57,7 @@ export const processRouter = (
         if (reqQuery) {
           queryObjects = converter.convertQuery(reqQuery);
         }
-        parameters = [
-          getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
-          ...pathObjects,
-          ...queryObjects,
-        ];
+        parameters.push(...pathObjects, ...queryObjects);
       }
 
       const operation: OpenAPIV3.OperationObject = {

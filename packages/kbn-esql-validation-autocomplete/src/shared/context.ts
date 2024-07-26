@@ -20,10 +20,10 @@ import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
   isColumnItem,
-  getLastCharFromTrimmed,
   getFunctionDefinition,
   isSourceItem,
   isSettingItem,
+  pipePrecedesCurrentWord,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -172,12 +172,12 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       return { type: 'setting' as const, command, node, option, setting };
     }
   }
-  if (!command || (queryString.length <= offset && getLastCharFromTrimmed(queryString) === '|')) {
+  if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }
 
-  if (command && command.args.length) {
+  if (command && isOptionItem(command.args[command.args.length - 1])) {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
     }

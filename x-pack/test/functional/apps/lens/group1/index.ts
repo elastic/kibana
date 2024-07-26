@@ -17,7 +17,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 1', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189057
+  describe.skip('lens app - group 1', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';

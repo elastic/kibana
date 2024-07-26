@@ -395,7 +395,7 @@ describe('DetectionRulesClient.updateRule', () => {
 
     await detectionRulesClient.updateRule({ ruleUpdate });
 
-    expect(rulesClient.enable).toHaveBeenCalledWith(
+    expect(rulesClient.enableRule).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
       })
