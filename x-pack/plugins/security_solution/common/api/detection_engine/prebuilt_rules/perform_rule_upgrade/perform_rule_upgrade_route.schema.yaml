@@ -17,7 +17,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PerformRuleUpgradeRequestBody'
+              oneOf:
+                - $ref: '#/components/schemas/UpgradeAllRulesRequest'
+                - $ref: '#/components/schemas/UpgradeSpecificRulesRequest'
       responses:
         200:
           description: Indicates a successful call.
@@ -74,11 +76,6 @@ components:
           enum: [ALL_RULES]
         pick_version:
           $ref: '#/components/schemas/PickVersionValues'
-
-    PerformRuleUpgradeRequestBody:
-      oneOf:
-        - $ref: '#/components/schemas/UpgradeAllRulesRequest'
-        - $ref: '#/components/schemas/UpgradeSpecificRulesRequest'
 
     SkipRuleUpgradeReason:
       type: string

@@ -46,12 +46,6 @@ export const UpgradeAllRulesRequest = z.object({
   pick_version: PickVersionValues.optional(),
 });
 
-export type PerformRuleUpgradeRequestBody = z.infer<typeof PerformRuleUpgradeRequestBody>;
-export const PerformRuleUpgradeRequestBody = z.union([
-  UpgradeAllRulesRequest,
-  UpgradeSpecificRulesRequest,
-]);
-
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
 export const SkipRuleUpgradeReason = z.literal('RULE_UP_TO_DATE');
 
@@ -77,7 +71,10 @@ export const PerformRuleUpgradeResponseBody = z.object({
 });
 
 export type PerformRuleUpgradeRequestBody = z.infer<typeof PerformRuleUpgradeRequestBody>;
-export const PerformRuleUpgradeRequestBody = PerformRuleUpgradeRequestBody;
+export const PerformRuleUpgradeRequestBody = z.union([
+  UpgradeAllRulesRequest,
+  UpgradeSpecificRulesRequest,
+]);
 export type PerformRuleUpgradeRequestBodyInput = z.input<typeof PerformRuleUpgradeRequestBody>;
 
 export type PerformRuleUpgradeResponse = z.infer<typeof PerformRuleUpgradeResponse>;
