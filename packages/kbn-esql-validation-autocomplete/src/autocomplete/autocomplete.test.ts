@@ -470,7 +470,7 @@ describe('autocomplete', () => {
     }
   });
 
-  describe.only('eval', () => {
+  describe('eval', () => {
     testSuggestions('from a | eval ', [
       'var0 =',
       ...getFieldNamesByType('any'),
