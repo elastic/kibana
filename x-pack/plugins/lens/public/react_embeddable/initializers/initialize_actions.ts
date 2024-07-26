@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
   AggregateQuery,
@@ -19,7 +20,7 @@ import { PublishingSubject, getUnchangingComparator } from '@kbn/presentation-pu
 import { Visualization } from '../..';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
-import { LensEmbeddableDeps } from '../../embeddable';
+
 import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
 import { emptySerializer } from '../helper';
@@ -50,7 +51,13 @@ function getViewUnderlyingDataArgs({
   activeVisualizationState: unknown;
   activeData: TableInspectorAdapter | undefined;
   dataViews: IndexPatternMap;
-  capabilities: LensEmbeddableDeps['capabilities'];
+  capabilities: {
+    canSaveVisualizations: boolean;
+    canOpenVisualizations: boolean;
+    canSaveDashboards: boolean;
+    navLinks: Capabilities['navLinks'];
+    discover: Capabilities['discover'];
+  };
   query: ExecutionContextSearch['query'];
   filters: Filter[];
   timeRange: TimeRange;

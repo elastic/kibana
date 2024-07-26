@@ -7,12 +7,13 @@
 
 import { LensPlugin } from './plugin';
 
-export { isLensApi } from './embeddable/interfaces/lens_api';
-export type {
-  EmbeddableComponentProps,
-  EmbeddableComponent,
-  TypedLensByValueInput,
-} from './embeddable/embeddable_component';
+export { isLensApi } from './react_embeddable/type_guards';
+export type { LensApi, LensSerializedState, LensRuntimeState } from './react_embeddable/types';
+// export type {
+//   EmbeddableComponentProps,
+//   EmbeddableComponent,
+//   TypedLensByValueInput,
+// } from './embeddable/embeddable_component';
 export type {
   XYState,
   XYReferenceLineLayerConfig,
@@ -108,14 +109,6 @@ export type {
 } from '@kbn/expression-xy-plugin/common';
 
 export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_lens_config/in_app_embeddable_edit/types';
-
-export type {
-  LensApi,
-  LensEmbeddableInput,
-  LensSavedObjectAttributes,
-  Embeddable,
-  LensEmbeddableOutput,
-} from './embeddable';
 
 export type { ChartInfo } from './chart_info_api';
 

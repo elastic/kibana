@@ -64,7 +64,6 @@ import {
   Visualization,
   VisualizationMap,
 } from '../types';
-// import { LensSavedObjectAttributes } from '../embeddable';
 import { LensPluginStartDependencies } from '../plugin';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 

@@ -14,21 +14,19 @@ import type {
   LensSavedObject,
   LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences,
 } from '../common/content_management';
-import type {
-  LensSavedObjectAttributes,
-} from './embeddable/embeddable';
 import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
 import { DOC_TYPE } from '../common/constants';
 import { SharingSavedObjectProps } from './types';
+import { LensSavedObjectAttributes } from './react_embeddable/types';
 
 type Reference = LensSavedObject['references'][number];
 
-type checkDuplicateTitleProps = OnSaveProps & {
+type CheckDuplicateTitleProps = OnSaveProps & {
   id?: string;
   displayName: string;
   lastSavedTitle: string;
   copyOnSave: boolean;
-}
+};
 
 export interface LensAttributesService {
   loadFromLibrary: (savedObjectId: string) => Promise<{
@@ -41,7 +39,7 @@ export interface LensAttributesService {
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
-  checkForDuplicateTitle: (props: checkDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
+  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
 }
 
 export const savedObjectToEmbeddableAttributes = (
@@ -89,7 +87,7 @@ export function getLensAttributeService(
       references: Reference[],
       savedObjectId?: string
     ) => {
-      const {savedObjectId: newId} = await savedObjectStore.save({
+      const { savedObjectId: newId } = await savedObjectStore.save({
         ...attributes,
         state: attributes.state as LensSavedObjectAttributes['state'],
         references,
@@ -105,22 +103,24 @@ export function getLensAttributeService(
       lastSavedTitle = '',
       copyOnSave = false,
       id,
-    }: checkDuplicateTitleProps) => {
-      return { isDuplicate: await checkForDuplicateTitle(
-        {
-          id,
-          title: newTitle,
-          isTitleDuplicateConfirmed,
-          displayName,
-          lastSavedTitle,
-          copyOnSave,
-        },
-        onTitleDuplicate,
-        {
-          client: savedObjectStore,
-          ...core,
-        }
-      )};
+    }: CheckDuplicateTitleProps) => {
+      return {
+        isDuplicate: await checkForDuplicateTitle(
+          {
+            id,
+            title: newTitle,
+            isTitleDuplicateConfirmed,
+            displayName,
+            lastSavedTitle,
+            copyOnSave,
+          },
+          onTitleDuplicate,
+          {
+            client: savedObjectStore,
+            ...core,
+          }
+        ),
+      };
     },
   };
 }
