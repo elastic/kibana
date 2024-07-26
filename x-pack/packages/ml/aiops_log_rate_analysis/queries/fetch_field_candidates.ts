@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-import { containsECSIdentifierFields, filterByECSFields } from '../ecs_fields';
+import { containsECSIdentifierField, filterByECSFields } from '../ecs_fields';
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 // Supported field names for text fields for log rate analysis.
@@ -33,7 +33,8 @@ export interface FetchFieldCandidatesParams {
   };
 }
 
-interface FetchFieldCandidatesResponse {
+export interface FetchFieldCandidatesResponse {
+  isECS: boolean;
   keywordFieldCandidates: string[];
   selectedKeywordFieldCandidates: string[];
   textFieldCandidates: string[];
@@ -106,13 +107,16 @@ export const fetchFieldCandidates = async ({
     );
   });
 
+  const isECS = containsECSIdentifierField(keywordFieldCandidates);
+
   return {
+    isECS,
     // all keyword field candidates
     keywordFieldCandidates: keywordFieldCandidates.sort(),
     // preselection:
     // - if we identify an ECS schema, filter by custom ECS whitelist
     // - if not, take the first 100 fields
-    selectedKeywordFieldCandidates: containsECSIdentifierFields(keywordFieldCandidates)
+    selectedKeywordFieldCandidates: isECS
       ? filterByECSFields(keywordFieldCandidates).sort()
       : keywordFieldCandidates.sort().slice(0, 100),
     // text field candidates

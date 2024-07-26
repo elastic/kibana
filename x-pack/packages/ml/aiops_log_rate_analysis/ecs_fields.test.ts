@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { containsECSIdentifierFields, filterByECSFields } from './ecs_fields';
+import { containsECSIdentifierField, filterByECSFields } from './ecs_fields';
 
 describe('containsECSIdentifierFields', () => {
   it('should return true if the array contains all ECS identifier fields', () => {
-    const fields = ['host.name', 'service.name', 'log.level', 'other.field'];
-    expect(containsECSIdentifierFields(fields)).toBe(true);
+    const fields = ['host.name', 'service.name', 'log.level', 'other.field', 'ecs.version'];
+    expect(containsECSIdentifierField(fields)).toBe(true);
   });
 
   it('should return false if the array does not contain all ECS identifier fields', () => {
     const fields = ['host.name', 'service.name', 'non.ecs.field1', 'another.non.ecs.field'];
-    expect(containsECSIdentifierFields(fields)).toBe(false);
+    expect(containsECSIdentifierField(fields)).toBe(false);
   });
 
   it('should return false for an empty array', () => {
     const fields: string[] = [];
-    expect(containsECSIdentifierFields(fields)).toBe(false);
+    expect(containsECSIdentifierField(fields)).toBe(false);
   });
 });
 

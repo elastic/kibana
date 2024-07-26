@@ -190,11 +190,11 @@ const ecsFields = [
   'user_agent.version',
 ];
 
-const ecsFieldsMustHave = [
-  'host.name', // Name of the host where the event originated
-  'service.name', // Name of the service generating the event
-  'log.level', // Severity level of the log event
-];
+// Must have field to identify an index as ECS compliant.
+// The only other field that's required is `@timestamp` but that's not
+// part of the list since it's not a field that can be used for analysis.
+// https://www.elastic.co/guide/en/ecs/1.12/ecs-ecs.html
+const ecsIdentifierField = 'ecs.version';
 
 // These are the fields that are expected to be nested within other ECS fields.
 const ecsPostfixes = [
@@ -228,8 +228,8 @@ const ecsPostfixes = [
   '.user.roles',
 ];
 
-export function containsECSIdentifierFields(fieldsArray: string[]): boolean {
-  return ecsFieldsMustHave.every((d) => fieldsArray.includes(d));
+export function containsECSIdentifierField(fieldsArray: string[]): boolean {
+  return fieldsArray.includes(ecsIdentifierField);
 }
 
 export function filterByECSFields(fieldsArray: string[]) {

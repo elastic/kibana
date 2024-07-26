@@ -8,9 +8,47 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
+import { i18n } from '@kbn/i18n';
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
+
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
+import type { FetchFieldCandidatesResponse } from '../queries/fetch_field_candidates';
+
+const ecsIdentifiedMessage = i18n.translate(
+  'xpack.aiops.logRateAnalysis.fieldCandidates.ecsIdentifiedMessage',
+  {
+    defaultMessage: 'The source documents were identified as ECS compliant.',
+  }
+);
+
+const fieldsDropdownHintMessage = i18n.translate(
+  'xpack.aiops.logRateAnalysis.fieldCandidates.fieldsDropdownHintMessage',
+  {
+    defaultMessage: 'Use the "Fields" dropdown to adjust the selection.',
+  }
+);
+
+const getFieldSelectionMessage = (
+  isECS: boolean,
+  allItemsCount: number,
+  selectedItemsCount: number
+): string | undefined => {
+  if (allItemsCount <= selectedItemsCount || selectedItemsCount < 2) return;
+
+  const ecsMessage = isECS ? `${ecsIdentifiedMessage} ` : '';
+
+  const fieldsSelectedMessage = i18n.translate(
+    'xpack.aiops.logRateAnalysis.fieldCandidates.fieldsSelectedMessage',
+    {
+      defaultMessage:
+        '{selectedItemsCount} out of {allItemsCount} fields were preselected for the analysis.',
+      values: { selectedItemsCount, allItemsCount },
+    }
+  );
+
+  return `${ecsMessage}${fieldsSelectedMessage} ${fieldsDropdownHintMessage}`;
+};
 
 export interface FetchFieldCandidatesParams {
   http: HttpSetup;
@@ -30,7 +68,7 @@ export const fetchFieldCandidates = createAsyncThunk(
     const { http, abortCtrl, body, headers } = options;
 
     // Get field candidates so we're able to populate the field selection dropdown.
-    const fieldCandidates = await http.post<FetchFieldCandidatesResponse>(
+    const fieldCandidatesResp = await http.post<FetchFieldCandidatesResponse>(
       AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS_FIELD_CANDIDATES,
       {
         signal: abortCtrl.current.signal,
@@ -40,11 +78,12 @@ export const fetchFieldCandidates = createAsyncThunk(
       }
     );
     const {
+      isECS,
       keywordFieldCandidates,
       textFieldCandidates,
       selectedKeywordFieldCandidates,
       selectedTextFieldCandidates,
-    } = fieldCandidates;
+    } = fieldCandidatesResp;
 
     const fieldFilterUniqueItems = [...keywordFieldCandidates, ...textFieldCandidates].sort();
     const fieldFilterUniqueSelectedItems = [
@@ -57,6 +96,11 @@ export const fetchFieldCandidates = createAsyncThunk(
 
     thunkApi.dispatch(
       setAllFieldCandidates({
+        fieldSelectionMessage: getFieldSelectionMessage(
+          isECS,
+          fieldFilterUniqueItems.length,
+          fieldFilterUniqueSelectedItems.length
+        ),
         fieldFilterUniqueItems,
         fieldFilterSkippedItems,
         keywordFieldCandidates,
@@ -68,15 +112,9 @@ export const fetchFieldCandidates = createAsyncThunk(
   }
 );
 
-export interface FetchFieldCandidatesResponse {
-  keywordFieldCandidates: string[];
-  selectedKeywordFieldCandidates: string[];
-  textFieldCandidates: string[];
-  selectedTextFieldCandidates: string[];
-}
-
 export interface FieldCandidatesState {
   isLoading: boolean;
+  fieldSelectionMessage?: string;
   fieldFilterUniqueItems: string[];
   fieldFilterSkippedItems: string[];
   keywordFieldCandidates: string[];

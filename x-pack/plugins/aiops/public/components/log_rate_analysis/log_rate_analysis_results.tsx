@@ -175,7 +175,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.logRateAnalysisStream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
-  const { currentAnalysisType, currentAnalysisWindowParameters } = data;
+  const { currentAnalysisWindowParameters } = data;
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
@@ -471,13 +471,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           />
         </EuiFlexItem>
       </ProgressControls>
-      {showLogRateAnalysisResultsTable && currentAnalysisType !== undefined && (
-        <>
-          <EuiSpacer size="s" />
-          <LogRateAnalysisTypeCallOut analysisType={currentAnalysisType} />
-          <EuiSpacer size="xs" />
-        </>
-      )}
+
+      <LogRateAnalysisTypeCallOut />
+
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
