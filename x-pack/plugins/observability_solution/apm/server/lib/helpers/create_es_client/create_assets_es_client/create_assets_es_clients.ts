@@ -14,7 +14,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 
-const ENTITIES_INDEX_NAME = '.entities.v1.latest.builtin_services*';
+const ENTITIES_LATEST_INDEX_NAME = '.entities.v1.latest.builtin_services*';
 const ENTITIES_HISTORY_INDEX_NAME = '.entities.v1.history.builtin_services*';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
@@ -30,7 +30,7 @@ export function cancelEsRequestOnAbort<T extends Promise<any>>(
 }
 
 export interface EntitiesESClient {
-  search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+  searchLatest<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
     operationName: string,
     searchRequest: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
@@ -77,11 +77,11 @@ export async function createEntitiesESClient({
   }
 
   return {
-    search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    searchLatest<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      return search(ENTITIES_INDEX_NAME, operationName, searchRequest);
+      return search(ENTITIES_LATEST_INDEX_NAME, operationName, searchRequest);
     },
 
     searchHistory<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
@@ -98,7 +98,7 @@ export async function createEntitiesESClient({
         .map((params) => {
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
-              index: [ENTITIES_INDEX_NAME],
+              index: [ENTITIES_LATEST_INDEX_NAME],
             },
             {
               ...params.body,

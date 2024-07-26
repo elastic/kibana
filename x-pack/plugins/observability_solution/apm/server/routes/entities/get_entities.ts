@@ -53,7 +53,7 @@ export async function getEntities({
   size: number;
 }) {
   const entities = (
-    await entitiesESClient.search(`get_entities`, {
+    await entitiesESClient.searchLatest(`get_entities`, {
       body: {
         size,
         track_total_hits: false,
