@@ -76,6 +76,7 @@ export class AstListener implements ESQLParserListener {
     this.ast.push(commandAst);
     commandAst.text = ctx.getText();
     if (textExistsAndIsValid(ctx.INFO().getText())) {
+      // TODO: these probably should not be functions, instead use "column", like: INFO <identifier>?
       commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
     }
   }

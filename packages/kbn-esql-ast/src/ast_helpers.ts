@@ -42,6 +42,7 @@ import type {
   ESQLInlineCast,
   ESQLUnknownItem,
   ESQLNumericLiteralType,
+  FunctionSubtype,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -219,12 +220,13 @@ export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInt
   };
 }
 
-export function createFunction(
+export function createFunction<Subtype extends FunctionSubtype>(
   name: string,
   ctx: ParserRuleContext,
-  customPosition?: ESQLLocation
-): ESQLFunction {
-  return {
+  customPosition?: ESQLLocation,
+  subtype?: Subtype
+): ESQLFunction<Subtype> {
+  const node: ESQLFunction<Subtype> = {
     type: 'function',
     name,
     text: ctx.getText(),
@@ -232,6 +234,10 @@ export function createFunction(
     args: [],
     incomplete: Boolean(ctx.exception),
   };
+  if (subtype) {
+    node.subtype = subtype;
+  }
+  return node;
 }
 
 function walkFunctionStructure(
