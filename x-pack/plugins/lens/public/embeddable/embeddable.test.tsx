@@ -278,8 +278,12 @@ describe('embeddable', () => {
     const getBadgeMessage = jest.fn(
       (): ReturnType<NonNullable<LensEmbeddableInput['customBadgeMessages']>> => [
         {
+          uniqueId: FIELD_NOT_FOUND,
           severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'embeddableBadge' }],
           longMessage: 'lmao',
+          shortMessage: '',
           hidePopoverIcon: true,
         },
       ]
@@ -316,7 +320,7 @@ describe('embeddable', () => {
         longMessage: 'lmao',
         severity: 'warning',
         shortMessage: '',
-        uniqueId: 'field_not_found',
+        uniqueId: FIELD_NOT_FOUND,
       },
     ]);
   });
