@@ -30,6 +30,7 @@ describe('Options list sorting button', () => {
     } as State;
   };
 
+  const updateState = jest.fn();
   const mountComponent = ({
     initialState,
     field,
@@ -41,13 +42,41 @@ describe('Options list sorting button', () => {
       <OptionsListEditorOptions
         initialState={initialState}
         field={field}
-        updateState={jest.fn()}
+        updateState={updateState}
         setControlEditorValid={jest.fn()}
         parentApi={parentApi}
       />
     );
     return component;
   };
+
+  test('run past timeout', () => {
+    const component = mountComponent({
+      initialState: getMockedState({ runPastTimeout: false }),
+      field: { type: 'string' } as DataViewField,
+    });
+    const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
+    expect(toggle.getAttribute('aria-checked')).toBe('false');
+    userEvent.click(toggle);
+    expect(updateState).toBeCalledWith({ runPastTimeout: true });
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
+  });
+
+  test('selection options', () => {
+    const component = mountComponent({
+      initialState: getMockedState({ singleSelect: true }),
+      field: { type: 'string' } as DataViewField,
+    });
+
+    const multiSelect = component.container.querySelector('input#multi');
+    expect(multiSelect).not.toBeChecked();
+    expect(component.container.querySelector('input#single')).toBeChecked();
+
+    userEvent.click(multiSelect!);
+    expect(updateState).toBeCalledWith({ singleSelect: false });
+    expect(multiSelect).toBeChecked();
+    expect(component.container.querySelector('input#single')).not.toBeChecked();
+  });
 
   describe('custom search options', () => {
     test('do not show custom search options when `allowExpensiveQueries` is false', async () => {
@@ -121,8 +150,6 @@ describe('Options list sorting button', () => {
     });
 
     describe('responds to field type changing', () => {
-      const updateState = jest.fn();
-
       test('reset back to initial state when valid', async () => {
         const initialState = getMockedState({ searchTechnique: 'exact' });
         const parentApi = getMockedControlGroupApi();

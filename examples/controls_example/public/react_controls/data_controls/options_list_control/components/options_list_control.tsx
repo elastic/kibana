@@ -147,6 +147,7 @@ export const OptionsListControl = ({
     fieldFormatter,
     delimiter,
     invalidSelections,
+    api.uuid,
   ]);
 
   const button = (

@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { first, skip } from 'rxjs';
+import React from 'react';
+import { first, firstValueFrom, skip } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { act, render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
@@ -24,6 +26,8 @@ describe('Options List Control Api', () => {
   const mockDataViews = dataViewPluginMocks.createStartContract();
   const mockCore = coreMock.createStart();
 
+  const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+
   mockDataViews.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
@@ -32,7 +36,6 @@ describe('Options List Control Api', () => {
       spec: {
         id: 'myDataViewId',
         fields: {
-          ...stubFieldSpecMap,
           myFieldName: {
             name: 'myFieldName',
             customLabel: 'My field name',
@@ -45,6 +48,14 @@ describe('Options List Control Api', () => {
         title: 'logstash-*',
         timeFieldName: '@timestamp',
       },
+    });
+    stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
+      return {
+        getConverterFor: () => {
+          return (value: string) => `${value}:formatted`;
+        },
+        toJSON: (value: any) => JSON.stringify(value),
+      };
     });
     return stubDataView;
   });
@@ -114,6 +125,240 @@ describe('Options List Control Api', () => {
         ]);
         done();
       });
+    });
+
+    test('should set filters$ when exists is selected', (done) => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
+        },
+        getMockedBuildApi(uuid, factory, controlGroupApi),
+        uuid,
+        controlGroupApi
+      );
+      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
+        expect(filter).toEqual([
+          {
+            meta: {
+              index: 'myDataViewId',
+              key: 'myFieldName',
+            },
+            query: {
+              exists: {
+                field: 'myFieldName',
+              },
+            },
+          },
+        ]);
+        done();
+      });
+    });
+
+    test('should set filters$ when exclude is selected', (done) => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
+          exclude: true,
+        },
+        getMockedBuildApi(uuid, factory, controlGroupApi),
+        uuid,
+        controlGroupApi
+      );
+      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
+        expect(filter).toEqual([
+          {
+            meta: {
+              index: 'myDataViewId',
+              key: 'myFieldName',
+              negate: true,
+            },
+            query: {
+              exists: {
+                field: 'myFieldName',
+              },
+            },
+          },
+        ]);
+        done();
+      });
+    });
+  });
+
+  describe('make selection', () => {
+    beforeAll(() => {
+      mockCore.http.fetch = jest.fn().mockResolvedValue({
+        suggestions: [
+          { value: 'woof', docCount: 10 },
+          { value: 'bark', docCount: 15 },
+          { value: 'meow', docCount: 12 },
+        ],
+      });
+    });
+
+    test('clicking another option unselects "Exists"', async () => {
+      const { Component } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
+        },
+        getMockedBuildApi(uuid, factory, controlGroupApi),
+        uuid,
+        controlGroupApi
+      );
+
+      const control = render(<Component className={'controlPanel'} />);
+      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await waitFor(() => {
+        expect(control.getAllByRole('option').length).toBe(4);
+      });
+
+      expect(control.getByTestId('optionsList-control-selection-exists')).toBeChecked();
+      const option = control.getByTestId('optionsList-control-selection-woof');
+      userEvent.click(option);
+      await waitOneTick();
+      expect(control.getByTestId('optionsList-control-selection-exists')).not.toBeChecked();
+      expect(option).toBeChecked();
+    });
+
+    test('clicking "Exists" unselects all other selections', async () => {
+      const { Component } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          selectedOptions: ['woof', 'bark'],
+        },
+        getMockedBuildApi(uuid, factory, controlGroupApi),
+        uuid,
+        controlGroupApi
+      );
+
+      const control = render(<Component className={'controlPanel'} />);
+      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await waitFor(() => {
+        expect(control.getAllByRole('option').length).toEqual(4);
+      });
+
+      const existsOption = control.getByTestId('optionsList-control-selection-exists');
+      expect(existsOption).not.toBeChecked();
+      expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+      expect(control.getByTestId('optionsList-control-selection-bark')).toBeChecked();
+      expect(control.getByTestId('optionsList-control-selection-meow')).not.toBeChecked();
+
+      userEvent.click(existsOption);
+      await waitOneTick();
+      expect(existsOption).toBeChecked();
+      expect(control.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
+      expect(control.getByTestId('optionsList-control-selection-bark')).not.toBeChecked();
+      expect(control.getByTestId('optionsList-control-selection-meow')).not.toBeChecked();
+    });
+
+    test('deselects when showOnlySelected is true', async () => {
+      const { Component, api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          selectedOptions: ['woof', 'bark'],
+        },
+        getMockedBuildApi(uuid, factory, controlGroupApi),
+        uuid,
+        controlGroupApi
+      );
+
+      const control = render(<Component className={'controlPanel'} />);
+      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await waitFor(() => {
+        expect(control.getAllByRole('option').length).toEqual(4);
+      });
+      userEvent.click(control.getByTestId('optionsList-control-show-only-selected'));
+
+      expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+      expect(control.getByTestId('optionsList-control-selection-bark')).toBeChecked();
+      expect(control.queryByTestId('optionsList-control-selection-meow')).toBeNull();
+
+      userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
+      await waitOneTick();
+      expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+      expect(control.queryByTestId('optionsList-control-selection-bark')).toBeNull();
+      expect(control.queryByTestId('optionsList-control-selection-meow')).toBeNull();
+
+      const filter = await firstValueFrom(api.filters$);
+      expect(filter).toEqual([
+        {
+          meta: {
+            index: 'myDataViewId',
+            key: 'myFieldName',
+          },
+          query: {
+            match_phrase: {
+              myFieldName: 'woof',
+            },
+          },
+        },
+      ]);
+    });
+
+    test('replace selection when singleSelect is true', async () => {
+      const { Component, api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          singleSelect: true,
+          selectedOptions: ['woof'],
+        },
+        getMockedBuildApi(uuid, factory, controlGroupApi),
+        uuid,
+        controlGroupApi
+      );
+
+      const control = render(<Component className={'controlPanel'} />);
+
+      let filter = await firstValueFrom(api.filters$.pipe(skip(1)));
+      expect(filter).toEqual([
+        {
+          meta: {
+            index: 'myDataViewId',
+            key: 'myFieldName',
+          },
+          query: {
+            match_phrase: {
+              myFieldName: 'woof',
+            },
+          },
+        },
+      ]);
+
+      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await waitFor(() => {
+        expect(control.getAllByRole('option').length).toEqual(4);
+      });
+      expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+      expect(control.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
+      expect(control.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
+      userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
+      await waitOneTick();
+      expect(control.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
+      expect(control.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
+      expect(control.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
+
+      filter = await firstValueFrom(api.filters$);
+      expect(filter).toEqual([
+        {
+          meta: {
+            index: 'myDataViewId',
+            key: 'myFieldName',
+          },
+          query: {
+            match_phrase: {
+              myFieldName: 'bark',
+            },
+          },
+        },
+      ]);
     });
   });
 });

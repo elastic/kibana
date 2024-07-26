@@ -217,48 +217,6 @@ describe('Options list popover', () => {
   });
 
   describe('"Exists" option', () => {
-    // test('clicking another option unselects "Exists"', async () => {
-    //   const mocks = getOptionsListMocks();
-    //   mocks.api.availableOptions$.next([
-    //     { value: 'woof', docCount: 5 },
-    //     { value: 'bark', docCount: 75 },
-    //   ]);
-    //   const popover = mountComponent(mocks);
-    //   mocks.stateManager.existsSelected.next(true);
-    //   await waitOneTick();
-
-    //   const woofOption = popover.getByTestId('optionsList-control-selection-woof');
-    //   act(() => userEvent.click(woofOption));
-    //   ex
-
-    //   const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-    //   const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
-    //   const selectedOptions = within(availableOptionsList).getAllByRole('option', {
-    //     checked: true,
-    //   });
-    //   expect(selectedOptions).toHaveLength(1);
-    //   expect(selectedOptions[0]).toHaveTextContent('woof. Checked option.');
-    // });
-
-    // test('clicking "Exists" unselects all other selections', async () => {
-    //   const selections = ['woof', 'bark'];
-    //   const popover = await mountComponent({
-    //     explicitInput: { existsSelected: false, selectedOptions: selections },
-    //   });
-    //   const existsOption = popover.getByTestId('optionsList-control-selection-exists');
-    //   let availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-    //   let checkedOptions = within(availableOptionsDiv).getAllByRole('option', { checked: true });
-    //   expect(checkedOptions).toHaveLength(2);
-    //   expect(checkedOptions[0]).toHaveTextContent('woof. Checked option.');
-    //   expect(checkedOptions[1]).toHaveTextContent('bark. Checked option.');
-
-    //   userEvent.click(existsOption);
-    //   availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
-    //   checkedOptions = within(availableOptionsDiv).getAllByRole('option', { checked: true });
-    //   expect(checkedOptions).toHaveLength(1);
-    //   expect(checkedOptions[0]).toHaveTextContent('Exists. Checked option.');
-    // });
-
     test('if existsSelected = false and no suggestions, then "Exists" does not show up', async () => {
       const mocks = getOptionsListMocks();
       mocks.api.availableOptions$.next([]);
