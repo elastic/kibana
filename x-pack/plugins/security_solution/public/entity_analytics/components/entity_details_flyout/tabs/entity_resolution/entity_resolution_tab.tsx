@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import type { EntityResolutionSuggestion } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/css';
 import { useEntityResolutions } from '../../../../api/hooks/use_entity_resolutions';
 
 interface Props {
@@ -42,13 +43,21 @@ export const EntityResolutionTab = ({ username }: Props) => {
     markResolved({ id, type: 'user', name }, relation);
   };
 
+  if (resolutions.isLoading) {
+    return (
+      <>
+        <EuiPageHeader paddingSize="l" pageTitle="Observed Data" />
+        <EuiPageSection color="subdued" />
+        <EuiLoadingSpinner size="xl" />
+      </>
+    );
+  }
+
   return (
     <>
       <EuiPageHeader paddingSize="l" pageTitle="Observed Data" />
       <EuiPageSection color="subdued">
-        <EuiText>{'Related Entities'}</EuiText>
-
-        {resolutions.isLoading && <EuiLoadingSpinner size="xl" />}
+        <EuiText>{'Candidate Entities'}</EuiText>
         {resolutions.data?.candidates?.map((candidate) => (
           <EntityItem
             key={candidate.id}
@@ -60,6 +69,10 @@ export const EntityResolutionTab = ({ username }: Props) => {
             isCandidate
           />
         ))}
+
+        <EuiSpacer size="m" />
+        <EuiText>{'Related Entities'}</EuiText>
+
         {resolutions.data?.marked.same.map((candidate) => (
           <EntityItem
             key={candidate.id}
@@ -100,42 +113,49 @@ const EntityItem: React.FC<ItemProps> = ({
     <>
       <EuiPanel hasBorder>
         <EuiFlexGroup justifyContent="spaceEvenly" direction="column">
-          <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-            <EuiFlexItem>
-              <EuiText size="m">{entity.name}</EuiText>
-            </EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+              <EuiFlexItem
+                css={css`
+                  max-width: 150px;
+                `}
+              >
+                <EuiText size="m">{entity.name}</EuiText>
+              </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexStart">
-                <EuiText>{'Confidence:'}</EuiText>
-                <EuiBadge color="default">{confidence}</EuiBadge>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
-            {isCandidate && (
-              <>
-                <EuiButtonEmpty
-                  size="m"
-                  isLoading={updating[id]}
-                  onClick={() => resolve(id, entity.name, 'is_different')}
-                >
-                  {'Mark as different'}
-                </EuiButtonEmpty>
-                <EuiButton
-                  size="m"
-                  iconType="check"
-                  isLoading={updating[id]}
-                  onClick={() => resolve(id, entity.name, 'is_same')}
-                >
-                  {'Confirm as Same'}
-                </EuiButton>
-              </>
-            )}
-            <EuiButtonIcon
-              onClick={() => toggleExpanded(id)}
-              iconType="expand"
-              aria-label="Expand"
-            />
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="flexStart">
+                  <EuiText>{'Confidence:'}</EuiText>
+                  <EuiBadge color="default">{confidence}</EuiBadge>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              {isCandidate && (
+                <>
+                  <EuiButtonEmpty
+                    size="m"
+                    isLoading={updating[id]}
+                    onClick={() => resolve(id, entity.name, 'is_different')}
+                  >
+                    {'Mark as different'}
+                  </EuiButtonEmpty>
+                  <EuiButton
+                    size="m"
+                    iconType="check"
+                    isLoading={updating[id]}
+                    onClick={() => resolve(id, entity.name, 'is_same')}
+                  >
+                    {'Confirm as Same'}
+                  </EuiButton>
+                </>
+              )}
+              <EuiButtonIcon
+                onClick={() => toggleExpanded(id)}
+                iconType="expand"
+                aria-label="Expand"
+              />
+            </EuiFlexGroup>
           </EuiFlexGroup>
           {expanded[id] && <EuiCodeBlock language="json">{JSON.stringify(document)}</EuiCodeBlock>}
         </EuiFlexGroup>
