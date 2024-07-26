@@ -58,7 +58,7 @@ const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
           >
             {i18n.MIT_LICENSE}
           </EuiBadge>
-        ) : null}
+        ) : null}{' '}
         {endpointModelAtrributes(endpoint)}
       </EuiText>
     </>
