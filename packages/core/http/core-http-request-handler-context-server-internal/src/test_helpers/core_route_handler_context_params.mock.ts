@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -15,6 +16,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export const createCoreRouteHandlerContextParamsMock = () => {
   return {
+    featureFlags: coreFeatureFlagsMock.createStart(),
     elasticsearch: elasticsearchServiceMock.createInternalStart(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),

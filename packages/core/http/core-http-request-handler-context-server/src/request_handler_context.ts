@@ -13,6 +13,7 @@ import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-s
 import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-server';
+import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
 
 /**
  * The `core` context provided to route handler.
@@ -31,6 +32,7 @@ import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-se
 export interface CoreRequestHandlerContext {
   savedObjects: SavedObjectsRequestHandlerContext;
   elasticsearch: ElasticsearchRequestHandlerContext;
+  featureFlags: FeatureFlagsRequestHandlerContext;
   uiSettings: UiSettingsRequestHandlerContext;
   deprecations: DeprecationsRequestHandlerContext;
   security: SecurityRequestHandlerContext;

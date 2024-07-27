@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { EvaluationContext, FeatureFlagsSetup, FeatureFlagsStart } from './src/contracts';
-export type { FeatureFlagDefinition, FeatureFlagDefinitions } from './src/feature_flag_definition';
-export type { FeatureFlagsRequestHandlerContext } from './src/request_handler_context';
+import type { FeatureFlagsStart } from '..';
+
+export type FeatureFlagsRequestHandlerContext = Pick<
+  FeatureFlagsStart,
+  'getBooleanValue' | 'getStringValue' | 'getNumberValue'
+>;

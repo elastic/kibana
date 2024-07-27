@@ -108,10 +108,6 @@
         },
         {
           "id": "kibDevDocsEmbeddables"
-        },
-        {
-          "id": "kibCloudExperimentsPlugin",
-          "label": "A/B testing on Elastic Cloud"
         }
       ]
     },
@@ -177,6 +173,10 @@
         },
         {
           "id": "kibDevTutorialCcsSetup"
+        },
+        {
+          "id": "kibFeatureFlagsService",
+          "label": "Feature Flags"
         }
       ]
     },

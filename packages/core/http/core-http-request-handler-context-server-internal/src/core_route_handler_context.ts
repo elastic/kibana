@@ -32,12 +32,15 @@ import {
   CoreUserProfileRouteHandlerContext,
   type InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-server-internal';
+import { CoreFeatureFlagsRouteHandlerContext } from '@kbn/core-feature-flags-server-internal';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
  * @internal
  */
 export interface CoreRouteHandlerContextParams {
+  featureFlags: FeatureFlagsStart;
   elasticsearch: InternalElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
@@ -52,6 +55,7 @@ export interface CoreRouteHandlerContextParams {
  * @internal
  */
 export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
+  #featureFlags?: CoreFeatureFlagsRouteHandlerContext;
   #elasticsearch?: CoreElasticsearchRouteHandlerContext;
   #savedObjects?: CoreSavedObjectsRouteHandlerContext;
   #uiSettings?: CoreUiSettingsRouteHandlerContext;
@@ -63,6 +67,13 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
     private readonly coreStart: CoreRouteHandlerContextParams,
     private readonly request: KibanaRequest
   ) {}
+
+  public get featureFlags() {
+    if (!this.#featureFlags) {
+      this.#featureFlags = new CoreFeatureFlagsRouteHandlerContext(this.coreStart.featureFlags);
+    }
+    return this.#featureFlags;
+  }
 
   public get elasticsearch() {
     if (!this.#elasticsearch) {
