@@ -33,7 +33,7 @@ export class FeatureFlagsExamplePlugin implements Plugin {
 
   public start(core: CoreStart) {
     // Promise form: when we need to fetch it once, like in an HTTP request
-    Promise.all([
+    void Promise.all([
       core.featureFlags.getBooleanValue('example-boolean', false),
       core.featureFlags.getStringValue('example-string', 'white'),
       core.featureFlags.getNumberValue('example-number', 1),

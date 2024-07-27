@@ -37,7 +37,7 @@ export function createInternalCoreSetupMock() {
     context: contextServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
-    featureFlags: coreFeatureFlagsMock.createSetup(),
+    featureFlags: coreFeatureFlagsMock.createInternalSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),

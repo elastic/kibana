@@ -66,11 +66,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
    */
   test('detecting all the settings that have opted-in for dynamic in-memory updates', () => {
     expect(getListOfDynamicConfigPaths()).toStrictEqual([
+      // Making testing easier by having the ability of overriding the feature flags without the need to restart
+      'feature_flags.overrides',
       // We need this for enriching our Perf tests with more valuable data regarding the steps of the test
       // Also helpful in Cloud & Serverless testing because we can't control the labels in those offerings
       'telemetry.labels',
-      // Making testing easier by having the ability of overriding the feature flags without the need to restart
-      'feature_flags.overrides',
     ]);
   });
 });
