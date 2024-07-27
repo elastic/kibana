@@ -26,7 +26,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }
 
   return definition.metadata.reduce((acc, def) => {
-    const destination = def.destination || def.source;
+    const destination = def.destination;
     const optionalFieldPath = destination.replaceAll('.', '?.');
     const next = `
       if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
@@ -161,6 +161,31 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         index_name_prefix: `${generateHistoryIndexName(definition)}.`,
         date_rounding: 'M',
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@platform`,
+      },
+    },
+
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@custom`,
       },
     },
   ];

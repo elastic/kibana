@@ -17,7 +17,7 @@ interface JobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: typeof EDITOR_MODE[keyof typeof EDITOR_MODE];
+  mode?: (typeof EDITOR_MODE)[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
   onChange?: CodeEditorProps['onChange'];
 }

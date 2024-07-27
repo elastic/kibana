@@ -9,11 +9,9 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_RIGHT_SECTION,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_TITLE,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_LINK,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_RIGHT_SECTION,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_TITLE,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
 import {
@@ -68,24 +66,12 @@ describe(
         .should('have.text', 'Entities')
         .and('have.class', 'euiButtonGroupButton-isSelected');
 
-      // github.com/elastic/security-team/issues/9933
-      // Comment out when feature flag 'entityAlertPreviewEnabled' is enabled
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_TITLE).should(
-        'contain.text',
-        'test'
-      );
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_RIGHT_SECTION).should(
         'contain.text',
         'Related hosts: 0'
       );
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('exist');
 
-      // github.com/elastic/security-team/issues/9933
-      // Comment out when feature flag 'entityAlertPreviewEnabled' is enabled
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_TITLE).should(
-        'contain.text',
-        'siem-kibana'
-      );
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_RIGHT_SECTION).should(
         'contain.text',
         'Related users: 0'
@@ -93,9 +79,7 @@ describe(
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('exist');
     });
 
-    // github.com/elastic/security-team/issues/9933
-    // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-    it.skip('should open host preview when click on host details title', () => {
+    it('should open host preview when click on host details title', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_LINK).should(
         'contain.text',
         'siem-kibana'
@@ -115,9 +99,7 @@ describe(
       cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
     });
 
-    // github.com/elastic/security-team/issues/9933
-    // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-    it.skip('should open user preview when click on user details title', () => {
+    it('should open user preview when click on user details title', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK).should('contain.text', 'test');
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK).click();
 

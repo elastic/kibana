@@ -372,8 +372,8 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [
         { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['asc', 'desc'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['nulls first', 'nulls last'] },
+        { name: 'direction', type: 'string', optional: true, values: ['ASC', 'DESC'] },
+        { name: 'nulls', type: 'string', optional: true, values: ['NULLS FIRST', 'NULLS LAST'] },
       ],
     },
   },

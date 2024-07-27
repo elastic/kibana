@@ -23,7 +23,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Cases List', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
 
       await svlSecNavigation.navigateToLandingPage();
 
@@ -33,7 +33,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
-      await svlCommonPage.forceLogout();
     });
 
     describe('empty state', () => {

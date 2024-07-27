@@ -18,7 +18,7 @@ import {
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
 
-  const { status, error, loaded } = useSelector(selectOverviewStatus);
+  const { status, error, loaded, loading } = useSelector(selectOverviewStatus);
 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
@@ -37,5 +37,6 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   return {
     status,
     error,
+    loading,
   };
 }

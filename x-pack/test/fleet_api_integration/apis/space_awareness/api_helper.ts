@@ -10,6 +10,7 @@ import type { Agent } from 'supertest';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
+  CreatePackagePolicyResponse,
   GetAgentPoliciesResponse,
   GetAgentsResponse,
   GetOneAgentPolicyResponse,
@@ -29,6 +30,7 @@ import {
   GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
+import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
 
 export class SpaceTestApiClient {
   constructor(private readonly supertest: Agent) {}
@@ -59,6 +61,18 @@ export class SpaceTestApiClient {
         inactivity_timeout: 24 * 1000,
         ...data,
       })
+      .expect(200);
+
+    return res;
+  }
+  async createPackagePolicy(
+    spaceId?: string,
+    data: Partial<SimplifiedPackagePolicy & { package: { name: string; version: string } }> = {}
+  ): Promise<CreatePackagePolicyResponse> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
       .expect(200);
 
     return res;
@@ -173,6 +187,32 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  async updateAgent(agentId: string, data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async deleteAgent(agentId: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async bulkUpdateAgentTags(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_update_agent_tags`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
   // Enrollment Settings
   async getEnrollmentSettings(spaceId?: string): Promise<GetEnrollmentSettingsResponse> {
     const { body: res } = await this.supertest
@@ -218,6 +258,18 @@ export class SpaceTestApiClient {
   ) {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force })
+      .expect(200);
+
+    return res;
+  }
+  async uninstallPackage(
+    { pkgName, pkgVersion, force }: { pkgName: string; pkgVersion: string; force?: boolean },
+    spaceId?: string
+  ) {
+    const { body: res } = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force })
       .expect(200);

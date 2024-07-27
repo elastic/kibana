@@ -55,6 +55,7 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   INFERENCE_ENDPOINTS_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
 import {
   CreatIndexLocatorDefinition,
@@ -381,6 +382,27 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
       },
       title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
+      appRoute: SEMANTIC_SEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: SEMANTIC_SEARCH_PLUGIN.LOGO,
+      id: SEMANTIC_SEARCH_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(SEMANTIC_SEARCH_PLUGIN.NAME);
+
+        this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchSemanticSearch } = await import('./applications/semantic_search');
+
+        return renderApp(EnterpriseSearchSemanticSearch, kibanaDeps, pluginData);
+      },
+      title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({

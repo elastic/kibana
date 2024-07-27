@@ -194,6 +194,12 @@ export interface DataViewsServicePublicMethods {
    */
   find: (search: string, size?: number) => Promise<DataView[]>;
   /**
+   * Find and load lazy data views by title.
+   * @param search - Search string
+   * @param size - Number of results to return
+   */
+  findLazy: (search: string, size?: number) => Promise<DataViewLazy[]>;
+  /**
    * Get data view by id.
    * @param id - Id of the data view to get.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
@@ -437,6 +443,25 @@ export class DataViewsService {
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
       return await this.get(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
+  /**
+   * Find and load lazy data views by title.
+   * @param search Search string
+   * @param size  Number of data views to return
+   * @returns DataViewLazy[]
+   */
+  findLazy = async (search: string, size: number = 10): Promise<DataViewLazy[]> => {
+    const savedObjects = await this.savedObjectsClient.find({
+      fields: ['title'],
+      search,
+      searchFields: ['title', 'name'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.getDataViewLazy(savedObject.id);
     });
     return await Promise.all(getIndexPatternPromises);
   };
