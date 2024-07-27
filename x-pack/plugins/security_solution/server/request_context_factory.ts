@@ -69,6 +69,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -126,6 +127,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
         return createDetectionRulesClient({
           rulesClient,
+          actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
         });

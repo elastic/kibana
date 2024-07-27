@@ -10,6 +10,7 @@ export const momentMock = {
   locale: jest.fn(() => 'default-locale'),
   tz: {
     setDefault: jest.fn(),
+    guess: jest.fn(),
     zone: jest.fn(
       (z) => [{ name: 'tz1' }, { name: 'tz2' }, { name: 'tz3' }].find((f) => z === f.name) || null
     ),

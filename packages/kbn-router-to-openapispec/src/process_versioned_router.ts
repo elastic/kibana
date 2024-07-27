@@ -12,6 +12,7 @@ import {
   VersionedRouterRoute,
   unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
+import type { RouteMethod } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
@@ -26,6 +27,7 @@ import {
   getVersionedContentTypeString,
   extractTags,
   mergeResponseContent,
+  getXsrfHeaderForMethod,
 } from './util';
 
 export const processVersionedRouter = (
@@ -79,7 +81,12 @@ export const processVersionedRouter = (
         if (reqQuery) {
           queryObjects = converter.convertQuery(reqQuery);
         }
-        parameters = [getVersionedHeaderParam(version, versions), ...pathObjects, ...queryObjects];
+        parameters = [
+          getVersionedHeaderParam(version, versions),
+          ...getXsrfHeaderForMethod(route.method as RouteMethod, route.options.options),
+          ...pathObjects,
+          ...queryObjects,
+        ];
       }
 
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);

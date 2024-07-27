@@ -6491,7 +6491,7 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          "; status: ",
+          "; description: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -6499,7 +6499,7 @@
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
           },
-          "; description: string | null; language: string | null; pipeline?: ",
+          "; language: string | null; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -18560,6 +18560,73 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.github.features.FeatureName.SYNC_RULES",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.SYNC_RULES]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.github.features.FeatureName.SYNC_RULES.advanced",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "advanced",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.github.features.FeatureName.SYNC_RULES.advanced.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.github.features.FeatureName.SYNC_RULES.basic",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "basic",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.github.features.FeatureName.SYNC_RULES.basic.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
                     "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.github.features.FeatureName.INCREMENTAL_SYNC",
                     "type": "Object",
                     "tags": [],
@@ -19629,6 +19696,73 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.gmail.features.FeatureName.SYNC_RULES",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.SYNC_RULES]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.gmail.features.FeatureName.SYNC_RULES.advanced",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "advanced",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.gmail.features.FeatureName.SYNC_RULES.advanced.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.gmail.features.FeatureName.SYNC_RULES.basic",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "basic",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.gmail.features.FeatureName.SYNC_RULES.basic.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  },
                   {
                     "parentPluginId": "@kbn/search-connectors",
                     "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.gmail.features.FeatureName.DOCUMENT_LEVEL_SECURITY",
@@ -30874,7 +31008,7 @@
                             "label": "enabled",
                             "description": [],
                             "signature": [
-                              "false"
+                              "true"
                             ],
                             "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                             "deprecated": false,
@@ -34286,7 +34420,7 @@
                             "label": "enabled",
                             "description": [],
                             "signature": [
-                              "false"
+                              "true"
                             ],
                             "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                             "deprecated": false,
@@ -35395,7 +35529,75 @@
                 "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": []
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.features.FeatureName.SYNC_RULES",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.SYNC_RULES]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.features.FeatureName.SYNC_RULES.advanced",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "advanced",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.features.FeatureName.SYNC_RULES.advanced.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.features.FeatureName.SYNC_RULES.basic",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "basic",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.notion.features.FeatureName.SYNC_RULES.basic.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               },
               {
                 "parentPluginId": "@kbn/search-connectors",
@@ -36861,6 +37063,73 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.onedrive.features.FeatureName.SYNC_RULES",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.SYNC_RULES]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.onedrive.features.FeatureName.SYNC_RULES.advanced",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "advanced",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.onedrive.features.FeatureName.SYNC_RULES.advanced.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.onedrive.features.FeatureName.SYNC_RULES.basic",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "basic",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.onedrive.features.FeatureName.SYNC_RULES.basic.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  },
                   {
                     "parentPluginId": "@kbn/search-connectors",
                     "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.onedrive.features.FeatureName.DOCUMENT_LEVEL_SECURITY",
@@ -44179,7 +44448,7 @@
                             "label": "enabled",
                             "description": [],
                             "signature": [
-                              "false"
+                              "true"
                             ],
                             "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                             "deprecated": false,
@@ -45861,7 +46130,75 @@
                 "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": []
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.s3.features.FeatureName.SYNC_RULES",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.SYNC_RULES]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.s3.features.FeatureName.SYNC_RULES.advanced",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "advanced",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.s3.features.FeatureName.SYNC_RULES.advanced.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.s3.features.FeatureName.SYNC_RULES.basic",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "basic",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.s3.features.FeatureName.SYNC_RULES.basic.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               },
               {
                 "parentPluginId": "@kbn/search-connectors",
@@ -45909,6 +46246,73 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.salesforce.features.FeatureName.SYNC_RULES",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.SYNC_RULES]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.salesforce.features.FeatureName.SYNC_RULES.advanced",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "advanced",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.salesforce.features.FeatureName.SYNC_RULES.advanced.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.salesforce.features.FeatureName.SYNC_RULES.basic",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "basic",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.salesforce.features.FeatureName.SYNC_RULES.basic.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  },
                   {
                     "parentPluginId": "@kbn/search-connectors",
                     "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.salesforce.features.FeatureName.INCREMENTAL_SYNC",

@@ -13,8 +13,16 @@ import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
-  rule_id: schema.string(),
-  alert_id: schema.string(),
+  rule_id: schema.string({
+    meta: {
+      description: 'The identifier for the rule.',
+    },
+  }),
+  alert_id: schema.string({
+    meta: {
+      description: 'The identifier for the alert.',
+    },
+  }),
 });
 
 const rewriteParamsReq: RewriteRequestCase<MuteOptions> = ({

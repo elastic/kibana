@@ -25,7 +25,7 @@ const components = [
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: 'fake_hosts',
+  name: 'metrics-fake_hosts@template',
   template: { ...template, composed_of: components.map(({ name }) => name) },
   components,
 };

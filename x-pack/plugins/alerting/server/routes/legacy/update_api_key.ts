@@ -42,7 +42,7 @@ export const updateApiKeyRoute = (
         const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         try {
-          await rulesClient.updateApiKey({ id });
+          await rulesClient.updateRuleApiKey({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
