@@ -10,7 +10,7 @@ setup_fips() {
 
   if [ -n "$FIPS" ] && [ "$FIPS" == "1" ]; then
     echo "FIPS mode enabled"
-    yq "xpack.security.experimental.fipsMode.enabled: true" $KBN_CONFIG_FILE
+    yq ".xpack.security.experimental.fipsMode.enabled = true" -i $KBN_CONFIG_FILE
 
     # Patch node_modules so we can start Kibana in dev mode
     sed -i 's/hashType = hashType || '\''md5'\'';/hashType = hashType || '\''sha1'\'';/g' node_modules/file-loader/node_modules/loader-utils/lib/getHashDigest.js
@@ -22,7 +22,7 @@ setup_fips() {
   else
     echo "FIPS mode disabled"
 
-    yq "xpack.security.experimental.fipsMode.enabled: false" $KBN_CONFIG_FILE
+    yq ".xpack.security.experimental.fipsMode.enabled = false" -i $KBN_CONFIG_FILE
   fi
 }
 
