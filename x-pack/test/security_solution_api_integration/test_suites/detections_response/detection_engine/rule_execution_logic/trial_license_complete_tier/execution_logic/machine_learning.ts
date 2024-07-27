@@ -21,6 +21,7 @@ import {
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_ANCESTORS,
@@ -71,6 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
   const retry = getService('retry');
+  const ml = getService('ml');
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
@@ -95,6 +97,8 @@ export default ({ getService }: FtrProviderContext) => {
       await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await ml.api.waitForJobState(mlJobId, JOB_STATE.OPENED);
+      await ml.api.waitForDatafeedState(`datafeed-${mlJobId}`, DATAFEED_STATE.STARTED);
     });
 
     after(async () => {
