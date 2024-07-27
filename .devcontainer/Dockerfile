@@ -13,7 +13,11 @@ RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl mak
 
 RUN locale-gen en_US.UTF-8
 
-# Install Oh My Zsh and plugins
+# YQ setup
+RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
+  chmod +x /usr/bin/yq
+
+# Oh My Zsh setup
 RUN if [ ! -d "$HOME/.oh-my-zsh" ]; then \
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"; \
   fi && \
@@ -47,7 +51,7 @@ RUN set -e ; \
 
 WORKDIR ${KBN_DIR}
 
-# Install and setup NVM and Nodejs
+# Node and NVM setup
 COPY .node-version /tmp/
 RUN mkdir -p $NVM_DIR && \ 
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
@@ -60,9 +64,6 @@ RUN mkdir -p $NVM_DIR && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.bashrc && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.zshrc  && \
   chown -R 1000:1000 "${HOME}/.npm"
-
-RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
-  chmod +x /usr/bin/yq
 
 # This is for documentation. Ports are exposed via devcontainer.json
 EXPOSE 9200 5601
