@@ -12,6 +12,7 @@ import type {
   FeatureFlagsService,
   InternalFeatureFlagsSetup,
 } from '@kbn/core-feature-flags-server-internal';
+import { of } from 'rxjs';
 
 const createFeatureFlagsInternalSetup = (): jest.Mocked<InternalFeatureFlagsSetup> => {
   return {
@@ -33,9 +34,9 @@ const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
     getBooleanValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
     getNumberValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
     getStringValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
-    getBooleanValue$: jest.fn(),
-    getStringValue$: jest.fn(),
-    getNumberValue$: jest.fn(),
+    getBooleanValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    getStringValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    getNumberValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
   };
 };
 

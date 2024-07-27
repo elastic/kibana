@@ -143,3 +143,16 @@ feature_flags.overrides:
 
 > [!WARNING]  
 > There is no validation regarding the variations nor the type of the flags. Use these overrides with caution.
+
+### Dynamic config
+
+When running in our test environments, the overrides can be updated without restarting Kibana via the HTTP `PUT /internal/core/_settings`:
+
+```
+PUT /internal/core/_settings
+{
+  "feature_flags.overrides": {
+    "my-feature-flag": "my-forced-value"
+  }
+}
+```

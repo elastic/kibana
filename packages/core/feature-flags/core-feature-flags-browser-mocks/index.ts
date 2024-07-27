@@ -9,6 +9,7 @@
 import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { FeatureFlagsService } from '@kbn/core-feature-flags-browser-internal';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { of } from 'rxjs';
 
 const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
   return {
@@ -19,11 +20,13 @@ const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
 
 const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
   return {
-    addHandler: jest.fn(),
     appendContext: jest.fn().mockImplementation(Promise.resolve),
-    getBooleanValue: jest.fn(),
-    getNumberValue: jest.fn(),
-    getStringValue: jest.fn(),
+    getBooleanValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getNumberValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getStringValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getBooleanValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    getStringValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+    getNumberValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
   };
 };
 
