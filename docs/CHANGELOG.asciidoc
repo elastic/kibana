@@ -150,6 +150,27 @@ Observability::
 For information about the {kib} 8.14.0 release, review the following information.
 
 [float]
+[[known-issues-8.14.0]]
+=== Known issues
+
+[discrete]
+[[known-issue-186969]]
+.Creating or editing APM, {observability} and {stack-monitor-app} rules fails
+[%collapsible]
+====
+*Details* +
+When you attempt to create or edit some rule types in **{stack-manage-app}** > **{rules-ui}**, the request will fail with errors similar to `Cannot read properties of undefined (reading 'eui')` or `e.theme.eui is undefined`.
+Refer to https://github.com/elastic/kibana/issues/186969[#186969]
+
+*Impact* +
+This known issue impacts only {observability}, {stack-monitor-app}, and APM and {user-experience} rules.
+
+*Workaround* +
+To work around this issue for {observability} and APM and {user-experience} rules, create them from the {observability} *Alerts* page.
+Refer to <<apm-alerts>> and {observability-guide}/create-alerts-rules.html[Create and manage {observability} rules].
+====
+
+[float]
 [[breaking-changes-8.14.0]]
 === Breaking changes
 
