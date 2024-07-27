@@ -130,8 +130,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'enterpriseSearch.ui.enabled (boolean)',
-        // No PII. This is an escape patch to override the flag resolution mechanism for testing or quick fixes.
-        'feature_flags.overrides (record)',
         'home.disableWelcomeScreen (boolean)',
         'management.deeplinks.navLinkStatus (string)',
         'map.emsFileApiUrl (string)',
