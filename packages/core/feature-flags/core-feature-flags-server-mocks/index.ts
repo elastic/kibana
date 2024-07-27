@@ -7,7 +7,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type {
+  FeatureFlagsRequestHandlerContext,
+  FeatureFlagsSetup,
+  FeatureFlagsStart,
+} from '@kbn/core-feature-flags-server';
 import type {
   FeatureFlagsService,
   InternalFeatureFlagsSetup,
@@ -40,6 +44,14 @@ const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
   };
 };
 
+const createRequestHandlerContext = (): jest.Mocked<FeatureFlagsRequestHandlerContext> => {
+  return {
+    getBooleanValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getNumberValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getStringValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+  };
+};
+
 const createFeatureFlagsServiceMock = (): jest.Mocked<PublicMethodsOf<FeatureFlagsService>> => {
   return {
     setup: jest.fn().mockImplementation(createFeatureFlagsInternalSetup),
@@ -53,4 +65,5 @@ export const coreFeatureFlagsMock = {
   createInternalSetup: createFeatureFlagsInternalSetup,
   createSetup: createFeatureFlagsSetup,
   createStart: createFeatureFlagsStart,
+  createRequestHandlerContext,
 };

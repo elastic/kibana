@@ -22,6 +22,7 @@ import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycl
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -120,6 +121,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
 
 function createCoreRequestHandlerContextMock() {
   return {
+    featureFlags: coreFeatureFlagsMock.createRequestHandlerContext(),
     savedObjects: {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),
