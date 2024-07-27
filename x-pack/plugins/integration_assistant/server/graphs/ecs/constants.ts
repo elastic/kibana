@@ -2248,3 +2248,14 @@ export const ECS_EXAMPLE_ANSWER = {
     },
   },
 };
+
+export const ECS_RESERVED = [
+  'ecs.version',
+  'error.message',
+  'event.category',
+  'event.created',
+  'event.dataset',
+  'event.ingested',
+  'event.original',
+  'event.type',
+];

@@ -64,6 +64,11 @@ describe('requests_utils', () => {
         name: 'variable2',
         value: 'test2',
       },
+      {
+        id: '3',
+        name: 'variable3',
+        value: '{"match_all": {}}',
+      },
     ];
 
     describe('replaces variables in the url', () => {
@@ -96,11 +101,20 @@ describe('requests_utils', () => {
       const request = {
         method: 'GET',
         url: '${variable1}',
-        data: [JSON.stringify({ '${variable1}': '${variable2}' }, null, 2)],
+        data: [
+          JSON.stringify(
+            { '${variable1}': '${variable2}', '${variable2}': '${variable3}' },
+            null,
+            2
+          ),
+        ],
       };
       it('works with several variables', () => {
         const result = replaceRequestVariables(request, variables);
-        expect(result.data[0]).toBe(JSON.stringify({ test1: 'test2' }, null, 2));
+        expect(JSON.parse(result.data[0])).toMatchObject({
+          test1: 'test2',
+          test2: { match_all: {} },
+        });
       });
     });
   });
