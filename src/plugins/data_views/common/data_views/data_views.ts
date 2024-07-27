@@ -315,6 +315,7 @@ export interface DataViewsServicePublicMethods {
   getAllDataViewLazy: () => Promise<DataViewLazy[]>;
 
   getDataViewLazy: (id: string) => Promise<DataViewLazy>;
+  getDataViewLazyFromCache: (id: string) => DataViewLazy;
 
   createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
 
@@ -1011,6 +1012,10 @@ export class DataViewsService {
       this.dataViewLazyCache.set(id, dataViewLazyPromise);
       return dataViewLazyPromise;
     }
+  };
+
+  getDataViewLazyFromCache = (id: string) => {
+    return this.dataViewLazyCache.get(id);
   };
 
   /**

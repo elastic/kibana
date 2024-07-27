@@ -22,13 +22,15 @@ export async function removeFields(
     notifications: NotificationsStart;
   }
 ) {
-  // removing from dataViewLazy as well to keep in sync
-  // only persisted dataViews need to be kept in sync
-  if (dataView.id && dataView.isPersisted() && !(dataView instanceof DataViewLazy)) {
-    const lazy = await services.dataViews.getDataViewLazy(dataView.id);
-    fieldNames.forEach((fieldName) => {
-      lazy.removeRuntimeField(fieldName);
-    });
+  // if we're not handed a DataViewLazy, then check to see if there's one in use
+  // it'll be in the cache
+  if (dataView.id && !(dataView instanceof DataViewLazy)) {
+    const lazy = await services.dataViews.getDataViewLazyFromCache(dataView.id);
+    if (lazy) {
+      fieldNames.forEach((fieldName) => {
+        lazy.removeRuntimeField(fieldName);
+      });
+    }
   }
   fieldNames.forEach((fieldName) => {
     dataView.removeRuntimeField(fieldName);
