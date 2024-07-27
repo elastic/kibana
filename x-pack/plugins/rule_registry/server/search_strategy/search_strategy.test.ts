@@ -7,7 +7,6 @@
 import { of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
 import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
@@ -79,6 +78,13 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     const authorizationMock = alertingAuthorizationMock.create();
     alerting.getAlertingAuthorizationWithRequest.mockResolvedValue(authorizationMock);
     alerting.getAlertIndicesAlias = getAlertIndicesAliasMock;
+    alerting.listTypes.mockReturnValue(
+      // @ts-expect-error: rule type properties are not needed for the test
+      new Map([
+        ['.es-query', {}],
+        ['siem.esqlRule', {}],
+      ])
+    );
 
     data.search.getSearchStrategy.mockImplementation(() => {
       return {
@@ -114,7 +120,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     getAuthorizedRuleTypesMock.mockResolvedValue([]);
     getAlertIndicesAliasMock.mockReturnValue(['observability-logs']);
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
+      ruleTypeIds: ['.es-query'],
     };
     const options = {};
     const deps = {
@@ -132,7 +138,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   it('should return an empty response if no valid indices are found', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
+      ruleTypeIds: ['.es-query'],
     };
     const options = {};
     const deps = {
@@ -150,9 +156,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(result).toBe(EMPTY_RESPONSE);
   });
 
-  it('should not apply rbac filters for siem', async () => {
+  it('should not apply rbac filters for siem rule types', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.SIEM],
+      ruleTypeIds: ['siem.esqlRule'],
     };
     const options = {};
     const deps = {
@@ -170,9 +176,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(getAuthzFilterSpy).not.toHaveBeenCalled();
   });
 
-  it('should throw an error if requesting multiple featureIds and one is SIEM', async () => {
+  it('should throw an error if requesting multiple rule types and one is for siem', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
+      ruleTypeIds: ['.es-query', 'siem.esqlRule'],
     };
     const options = {};
     const deps = {
@@ -197,7 +203,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   it('should use internal user when requesting o11y alerts as RBAC is applied', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
+      ruleTypeIds: ['.es-query'],
     };
     const options = {};
     const deps = {
@@ -217,7 +223,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.SIEM],
+      ruleTypeIds: ['siem.esqlRule'],
     };
     const options = {};
     const deps = {
@@ -238,7 +244,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   it('should support pagination', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
+      ruleTypeIds: ['.es-query'],
       pagination: {
         pageSize: 10,
         pageIndex: 0,
@@ -267,7 +273,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   it('should support sorting', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
+      ruleTypeIds: ['.es-query'],
       sort: [
         {
           test: {
@@ -296,7 +302,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   it('passes the query ids if provided', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.SIEM],
+      ruleTypeIds: ['siem.esqlRule'],
       query: {
         ids: { values: ['test-id'] },
       },
@@ -356,7 +362,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   it('passes the fields if provided', async () => {
     const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.SIEM],
+      ruleTypeIds: ['siem.esqlRule'],
       query: {
         ids: { values: ['test-id'] },
       },
