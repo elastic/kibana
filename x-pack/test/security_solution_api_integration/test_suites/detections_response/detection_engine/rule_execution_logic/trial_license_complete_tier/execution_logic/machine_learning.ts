@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
     severity: 'critical',
     type: 'machine_learning',
     anomaly_threshold: 30,
-    interval: '30s',
+    interval: '1m',
     machine_learning_job_id: mlJobId,
     from: '1900-01-01T00:00:00.000Z',
     rule_id: 'ml-rule-id',
