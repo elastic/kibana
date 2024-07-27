@@ -75,7 +75,6 @@ export type {
   FeatureFlagsStart,
   FeatureFlagsSetup,
 } from '@kbn/core-feature-flags-server';
-export { ServerProviderEvents } from '@kbn/core-feature-flags-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
