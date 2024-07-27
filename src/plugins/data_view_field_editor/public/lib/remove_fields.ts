@@ -23,7 +23,8 @@ export async function removeFields(
   }
 ) {
   // removing from dataViewLazy as well to keep in sync
-  if (dataView.id && !(dataView instanceof DataViewLazy)) {
+  // only persisted dataViews need to be kept in sync
+  if (dataView.id && dataView.isPersisted() && !(dataView instanceof DataViewLazy)) {
     const lazy = await services.dataViews.getDataViewLazy(dataView.id);
     fieldNames.forEach((fieldName) => {
       lazy.removeRuntimeField(fieldName);
