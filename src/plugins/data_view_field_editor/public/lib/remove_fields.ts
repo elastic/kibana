@@ -10,18 +10,25 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { NotificationsStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DataView, UsageCollectionStart } from '../shared_imports';
+import { DataView, DataViewLazy, UsageCollectionStart } from '../shared_imports';
 import { pluginName } from '../constants';
 
 export async function removeFields(
   fieldNames: string[],
-  dataView: DataView,
+  dataView: DataView | DataViewLazy,
   services: {
     dataViews: DataViewsPublicPluginStart;
     usageCollection: UsageCollectionStart;
     notifications: NotificationsStart;
   }
 ) {
+  // removing from dataViewLazy as well to keep in sync
+  if (dataView.id && !(dataView instanceof DataViewLazy)) {
+    const lazy = await services.dataViews.getDataViewLazy(dataView.id);
+    fieldNames.forEach((fieldName) => {
+      lazy.removeRuntimeField(fieldName);
+    });
+  }
   fieldNames.forEach((fieldName) => {
     dataView.removeRuntimeField(fieldName);
   });
