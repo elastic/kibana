@@ -12,7 +12,7 @@ import type { FavoritesClientPublic } from './favorites_client';
 
 interface FavoritesContextValue {
   favoritesClient?: FavoritesClientPublic;
-  notifyError: (title: JSX.Element, text?: string) => void;
+  notifyError?: (title: JSX.Element, text?: string) => void;
 }
 
 const FavoritesContext = React.createContext<FavoritesContextValue | null>(null);
@@ -31,14 +31,10 @@ export const FavoritesContextProvider: React.FC<FavoritesContextValue> = ({
 
 export const useFavoritesContext = () => {
   const context = React.useContext(FavoritesContext);
-  if (!context) {
-    throw new Error('useFavoritesContext must be used within a FavoritesContextProvider');
-  }
   return context;
 };
 
 export const useFavoritesClient = () => {
   const context = useFavoritesContext();
-  if (!context.favoritesClient) throw new Error('No favorites client found in context');
-  return context.favoritesClient;
+  return context?.favoritesClient;
 };

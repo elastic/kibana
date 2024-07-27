@@ -19,27 +19,42 @@ const favoritesKeys = {
 
 export const useFavorites = ({ enabled = true }: { enabled?: boolean } = { enabled: true }) => {
   const favoritesClient = useFavoritesClient();
+
+  if (!favoritesClient && enabled) {
+    throw new Error(
+      `useFavorites: favoritesClient is not available. Make sure you have wrapped your component with FavoritesContextProvider`
+    );
+  }
+
   return useQuery(
-    favoritesKeys.byType(favoritesClient.getFavoriteType()),
-    () => favoritesClient.getFavorites(),
+    favoritesKeys.byType(favoritesClient?.getFavoriteType() ?? 'never'),
+    () => favoritesClient!.getFavorites(),
     { enabled }
   );
 };
 
 export const useAddFavorite = () => {
-  const favoritesClient = useFavoritesClient();
-  const notifyError = useFavoritesContext().notifyError;
+  const favoritesContext = useFavoritesContext();
+
+  if (!favoritesContext) {
+    throw new Error(
+      `useAddFavorite: favoritesContext is not available. Make sure you have wrapped your component with FavoritesContextProvider`
+    );
+  }
+
+  const favoritesClient = favoritesContext.favoritesClient;
+  const notifyError = favoritesContext.notifyError;
   const queryClient = useQueryClient();
   return useMutation(
     ({ id }: { id: string }) => {
-      return favoritesClient.addFavorite({ id });
+      return favoritesClient!.addFavorite({ id });
     },
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(favoritesKeys.byType(favoritesClient.getFavoriteType()));
+        queryClient.invalidateQueries(favoritesKeys.byType(favoritesClient!.getFavoriteType()));
       },
       onError: (error: Error) => {
-        notifyError(
+        notifyError?.(
           <>
             {i18n.translate('contentManagement.favorites.addFavoriteError', {
               defaultMessage: 'Error adding to starred',
@@ -53,19 +68,27 @@ export const useAddFavorite = () => {
 };
 
 export const useRemoveFavorite = () => {
-  const favoritesClient = useFavoritesClient();
-  const notifyError = useFavoritesContext().notifyError;
+  const favoritesContext = useFavoritesContext();
+
+  if (!favoritesContext) {
+    throw new Error(
+      `useAddFavorite: favoritesContext is not available. Make sure you have wrapped your component with FavoritesContextProvider`
+    );
+  }
+
+  const favoritesClient = favoritesContext.favoritesClient;
+  const notifyError = favoritesContext.notifyError;
   const queryClient = useQueryClient();
   return useMutation(
     ({ id }: { id: string }) => {
-      return favoritesClient.removeFavorite({ id });
+      return favoritesClient!.removeFavorite({ id });
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(favoritesKeys.byType(favoritesClient.getFavoriteType()));
+        queryClient.invalidateQueries(favoritesKeys.byType(favoritesClient!.getFavoriteType()));
       },
       onError: (error: Error) => {
-        notifyError(
+        notifyError?.(
           <>
             {i18n.translate('contentManagement.favorites.removeFavoriteError', {
               defaultMessage: 'Error removing from starred',
