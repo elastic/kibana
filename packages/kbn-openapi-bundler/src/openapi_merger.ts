@@ -7,7 +7,7 @@
  */
 
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
+
 import { mergeDocuments } from './bundler/merge_documents';
 import { logger } from './logger';
 import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
@@ -16,13 +16,21 @@ import { writeDocuments } from './utils/write_documents';
 import { resolveGlobs } from './utils/resolve_globs';
 import { bundleDocument } from './bundler/bundle_document';
 import { withNamespaceComponentsProcessor } from './bundler/processor_sets';
+import { readDocument } from './utils/read_document';
+import { PrototypeDoc } from './prototype_doc';
+import { validatePrototypeDocument } from './validate_prototype_document';
 
 export interface MergerConfig {
   sourceGlobs: string[];
   outputFilePath: string;
-  options?: {
-    mergedSpecInfo?: Partial<OpenAPIV3.InfoObject>;
-  };
+  options?: MergerOptions;
+}
+
+interface MergerOptions {
+  /**
+   * OpenAPI document itself or path to the document
+   */
+  prototypeDoc?: PrototypeDoc | string;
 }
 
 export const merge = async ({
@@ -33,6 +41,13 @@ export const merge = async ({
   if (sourceGlobs.length < 1) {
     throw new Error('As minimum one source glob is expected');
   }
+
+  const prototypeDocument: PrototypeDoc | undefined =
+    typeof options?.prototypeDoc === 'string'
+      ? await readDocument(options.prototypeDoc)
+      : options?.prototypeDoc;
+
+  validatePrototypeDocument(prototypeDocument);
 
   logger.info(chalk.bold(`Merging OpenAPI specs`));
   logger.info(
@@ -52,13 +67,18 @@ export const merge = async ({
 
   const blankOasDocumentFactory = (oasVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
-      title: 'Merged OpenAPI specs',
-      version: 'not specified',
-      ...(options?.mergedSpecInfo ?? {}),
+      info: prototypeDocument?.info ? { ...DEFAULT_INFO, ...prototypeDocument.info } : DEFAULT_INFO,
+      servers: prototypeDocument?.servers,
+      security: prototypeDocument?.security,
+      components: {
+        securitySchemes: prototypeDocument?.components?.securitySchemes,
+      },
     });
 
   const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasDocumentFactory, {
     splitDocumentsByVersion: false,
+    skipServers: Boolean(prototypeDocument?.servers),
+    skipSecurity: Boolean(prototypeDocument?.security),
   });
   // Only one document is expected when `splitDocumentsByVersion` is set to `false`
   const mergedDocument = Array.from(resultDocumentsMap.values())[0];
@@ -80,3 +100,8 @@ async function bundleDocuments(schemaFilePaths: string[]): Promise<ResolvedDocum
     )
   );
 }
+
+const DEFAULT_INFO = {
+  title: 'Merged OpenAPI specs',
+  version: 'not specified',
+} as const;
