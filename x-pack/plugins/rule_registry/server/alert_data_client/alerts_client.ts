@@ -15,9 +15,7 @@ import {
   ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
-  isValidFeatureId,
   STATUS_VALUES,
-  ValidFeatureId,
   ALERT_STATUS_RECOVERED,
   ALERT_END,
   ALERT_STATUS_ACTIVE,
@@ -1158,43 +1156,6 @@ export class AlertsClient {
       return indices;
     } catch (exc) {
       const errMessage = `getAuthorizedAlertsIndices failed to get authorized rule types: ${exc}`;
-      this.logger.error(errMessage);
-      throw Boom.failedDependency(errMessage);
-    }
-  }
-
-  public async getFeatureIdsByRegistrationContexts(
-    RegistrationContexts: string[]
-  ): Promise<string[]> {
-    try {
-      const featureIds =
-        this.ruleDataService.findFeatureIdsByRegistrationContexts(RegistrationContexts);
-
-      if (featureIds.length > 0) {
-        const augmentedRuleTypes = await this.authorization.getAllAuthorizedRuleTypes({
-          operations: [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
-          authorizationEntity: AlertingAuthorizationEntity.Alert,
-        });
-
-        // As long as the user can read a minimum of one type of rule type produced by the provided feature,
-        // the user should be provided that features' alerts index.
-        // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
-        const authorizedFeatures = new Set<string>();
-        for (const [ruleTypeId] of augmentedRuleTypes.authorizedRuleTypes.entries()) {
-          const ruleType = this.getRuleType(ruleTypeId);
-          authorizedFeatures.add(ruleType.producer);
-        }
-
-        const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
-          (feature): feature is ValidFeatureId =>
-            featureIds.includes(feature) && isValidFeatureId(feature)
-        );
-
-        return validAuthorizedFeatures;
-      }
-      return featureIds;
-    } catch (exc) {
-      const errMessage = `getFeatureIdsByRegistrationContexts failed to get feature ids: ${exc}`;
       this.logger.error(errMessage);
       throw Boom.failedDependency(errMessage);
     }
