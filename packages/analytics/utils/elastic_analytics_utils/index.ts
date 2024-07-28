@@ -8,4 +8,4 @@
 
 export { buildShipperHeaders } from './src/build_headers';
 export { buildShipperUrl } from './src/build_url';
-export type { BuildUrlOptions } from './src/types';
+export type { BuildShipperUrlOptions } from './src/types';

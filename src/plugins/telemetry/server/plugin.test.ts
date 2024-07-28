@@ -10,6 +10,7 @@ import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server'
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
+import { buildShipperHeaders, buildShipperUrl } from '@kbn/elastic-analytics-utils';
 import { TelemetryPlugin } from './plugin';
 import type { NodeRoles } from '@kbn/core-node-server';
 
@@ -47,7 +48,13 @@ describe('TelemetryPlugin', () => {
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3ServerShipper,
-          { channelName: 'kibana-server', version: 'version', sendTo: 'staging' }
+          {
+            channelName: 'kibana-server',
+            version: 'version',
+            sendTo: 'staging',
+            buildShipperUrl,
+            buildShipperHeaders,
+          }
         );
       });
 
@@ -62,7 +69,13 @@ describe('TelemetryPlugin', () => {
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3ServerShipper,
-          { channelName: 'kibana-server', version: 'version', sendTo: 'production' }
+          {
+            channelName: 'kibana-server',
+            version: 'version',
+            sendTo: 'production',
+            buildShipperUrl,
+            buildShipperHeaders,
+          }
         );
       });
     });

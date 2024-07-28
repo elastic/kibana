@@ -13,6 +13,7 @@ import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { buildShipperHeaders, buildShipperUrl } from '@kbn/elastic-analytics-utils';
 import { isSyntheticsMonitorMock } from './plugin.test.mock';
 import { TelemetryPlugin } from './plugin';
 
@@ -69,7 +70,13 @@ describe('TelemetryPlugin', () => {
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3BrowserShipper,
-          { channelName: 'kibana-browser', version: 'version', sendTo: 'staging' }
+          {
+            channelName: 'kibana-browser',
+            version: 'version',
+            sendTo: 'staging',
+            buildShipperUrl,
+            buildShipperHeaders,
+          }
         );
       });
 
@@ -81,7 +88,13 @@ describe('TelemetryPlugin', () => {
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3BrowserShipper,
-          { channelName: 'kibana-browser', version: 'version', sendTo: 'production' }
+          {
+            channelName: 'kibana-browser',
+            version: 'version',
+            sendTo: 'production',
+            buildShipperUrl,
+            buildShipperHeaders,
+          }
         );
       });
     });
