@@ -549,8 +549,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
           if (spec.beforeSave) {
-            // todo I don't think this is used
-            await spec.beforeSave(await testSubjects.find('formatRow'));
+            await spec.beforeSave();
           }
         });
       });
@@ -605,7 +604,7 @@ interface FieldFormatEditorSpecDescriptor {
    * Use it set specific configuration params for applied field formatter
    * @param formatRowContainer - field format editor container
    */
-  beforeSave?: (formatRowContainer: WebElementWrapper) => Promise<void>;
+  beforeSave?: () => Promise<void>;
 
   /**
    * An expected formatted value rendered by Discover app,
