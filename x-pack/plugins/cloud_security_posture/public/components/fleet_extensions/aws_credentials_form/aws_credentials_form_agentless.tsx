@@ -207,24 +207,25 @@ export const AwsCredentialsFormAgentless = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE && showCloudCredentialsButton && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiButton
-            data-test-subj="launchCloudFormationAgentlessButton"
-            target="_blank"
-            iconSide="left"
-            iconType="launch"
-            href={automationCredentialTemplate}
-          >
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
-              defaultMessage="Launch CloudFormation"
-            />
-          </EuiButton>
-          <EuiSpacer size="m" />
-        </>
-      )}
+      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
+        showCloudCredentialsButton && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiButton
+              data-test-subj="launchCloudFormationAgentlessButton"
+              target="_blank"
+              iconSide="left"
+              iconType="launch"
+              href={automationCredentialTemplate}
+            >
+              <FormattedMessage
+                id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+                defaultMessage="Launch CloudFormation"
+              />
+            </EuiButton>
+            <EuiSpacer size="m" />
+          </>
+        )}
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}

@@ -1,12 +1,13 @@
 openapi: 3.0.0
 info:
-  title: Bulk Actions API endpoint
-  version: '1'
+  title: Bulk Prompts Actions API endpoint
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/prompts/_bulk_action:
+  /api/security_ai_assistant/prompts/_bulk_action:
     post:
-      operationId: PerformBulkAction
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PerformBulkAction
       summary: Applies a bulk action to multiple prompts
       description: The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
       tags:
@@ -33,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BulkCrudActionResponse'
+                $ref: '#/components/schemas/PromptsBulkCrudActionResponse'
         400:
           description: Generic Error
           content:
@@ -50,12 +51,12 @@ paths:
 
 components:
   schemas:
-    BulkActionSkipReason:
+    PromptsBulkActionSkipReason:
       type: string
       enum:
         - PROMPT_FIELD_NOT_MODIFIED
 
-    BulkActionSkipResult:
+    PromptsBulkActionSkipResult:
       type: object
       properties:
         id:
@@ -63,7 +64,7 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/BulkActionSkipReason'
+          $ref: '#/components/schemas/PromptsBulkActionSkipReason'
       required:
         - id
         - skip_reason
@@ -149,7 +150,7 @@ components:
           type: string
           description: Kibana space
 
-    BulkCrudActionResults:
+    PromptsBulkCrudActionResults:
       type: object
       properties:
         updated:
@@ -167,7 +168,7 @@ components:
         skipped:
           type: array
           items:
-            $ref: '#/components/schemas/BulkActionSkipResult'
+            $ref: '#/components/schemas/PromptsBulkActionSkipResult'
       required:
         - updated
         - created
@@ -191,7 +192,7 @@ components:
         - succeeded
         - total
 
-    BulkCrudActionResponse:
+    PromptsBulkCrudActionResponse:
       type: object
       properties:
         success:
@@ -206,7 +207,7 @@ components:
           type: object
           properties:
             results:
-              $ref: '#/components/schemas/BulkCrudActionResults'
+              $ref: '#/components/schemas/PromptsBulkCrudActionResults'
             summary:
               $ref: '#/components/schemas/BulkCrudActionSummary'
             errors:
@@ -218,7 +219,6 @@ components:
             - summary
       required:
         - attributes
-
 
     BulkActionBase:
       x-inline: true
