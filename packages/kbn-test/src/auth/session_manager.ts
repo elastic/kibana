@@ -55,7 +55,6 @@ export class SamlSessionManager {
   constructor(options: SamlSessionManagerOptions) {
     this.isCloud = options.isCloud;
     this.log = options.log;
-    // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
     const hostOptionsWithoutAuth = {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,
