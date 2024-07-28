@@ -1258,6 +1258,9 @@ export class DataViewsService {
         indexPattern.version = response.version;
       })
       .catch(async (err) => {
+        if (err?.body?.statusCode === 403) {
+          throw new DataViewInsufficientAccessError(indexPattern.id);
+        }
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.getDataViewLazy(indexPattern.id!);
           // What keys changed from now and what the server returned
@@ -1327,14 +1330,18 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
-    /*
-    if (!(await this.getCanSave())) {
-      throw new DataViewInsufficientAccessError(indexPatternId);
-    }
-    */
-    this.dataViewCache.delete(indexPatternId);
-    this.dataViewLazyCache.delete(indexPatternId);
-    return this.savedObjectsClient.delete(indexPatternId);
+    return this.savedObjectsClient
+      .delete(indexPatternId)
+      .then(() => {
+        this.dataViewCache.delete(indexPatternId);
+        this.dataViewLazyCache.delete(indexPatternId);
+      })
+      .catch((err) => {
+        if (err?.body?.statusCode === 403) {
+          throw new DataViewInsufficientAccessError(indexPatternId);
+        }
+        throw err;
+      });
   }
 
   private async getDefaultDataViewId() {

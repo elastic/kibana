@@ -61,6 +61,7 @@ describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
   let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: PersistenceAPI;
+  let savedObjectsClientNoAccess: PersistenceAPI;
   let SOClientGetDelay = 0;
   let apiClient: IDataViewsApiClient;
   const uiSettings = {
@@ -118,9 +119,15 @@ describe('IndexPatterns', () => {
       scriptedFieldsEnabled: true,
     });
 
+    savedObjectsClientNoAccess = {
+      ...savedObjectsClient,
+      delete: jest.fn(() => Promise.reject({ body: { statusCode: 403 } }) as Promise<any>),
+      update: jest.fn(() => Promise.reject({ body: { statusCode: 403 } }) as Promise<any>),
+    } as PersistenceAPI;
+
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
+      savedObjectsClient: savedObjectsClientNoAccess,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -592,7 +599,11 @@ describe('IndexPatterns', () => {
 
   test('updateSavedObject will throw if insufficient access', async () => {
     await expect(
-      indexPatternsNoAccess.updateSavedObject({ id: 'id' } as unknown as DataView)
+      indexPatternsNoAccess.updateSavedObject({
+        id: 'id',
+        getAsSavedObjectBody: jest.fn(() => ({})),
+        getOriginalSavedObjectBody: jest.fn(() => ({})),
+      } as unknown as DataView)
     ).rejects.toMatchSnapshot();
   });
 
@@ -827,7 +838,7 @@ describe('IndexPatterns', () => {
 
     test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
       uiSettings.get = jest.fn().mockResolvedValue(null);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([
+      savedObjectsClientNoAccess.find = jest.fn().mockResolvedValue([
         {
           id: 'id1',
           version: 'a',
@@ -840,7 +851,7 @@ describe('IndexPatterns', () => {
         },
       ]);
 
-      savedObjectsClient.get = jest
+      savedObjectsClientNoAccess.get = jest
         .fn()
         .mockImplementation((id: string) =>
           Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
