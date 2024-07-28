@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import {
   getEntityHistoryIndexTemplateV1,
   getEntityLatestIndexTemplateV1,
-} from '../../../common/helpers';
+} from './templates/helpers';
 import {
   createAndInstallHistoryIngestPipeline,
   createAndInstallLatestIngestPipeline,

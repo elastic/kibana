@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import {
   getEntityHistoryIndexTemplateV1,
   getEntityLatestIndexTemplateV1,
-} from '../../../common/helpers';
+} from './templates/helpers';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIndices } from './delete_index';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';

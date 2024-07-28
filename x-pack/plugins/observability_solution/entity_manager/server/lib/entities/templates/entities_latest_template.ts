@@ -6,14 +6,13 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getEntityLatestIndexTemplateV1 } from '../../../../common/helpers';
+import { getEntityLatestIndexTemplateV1, getCustomLatestTemplateComponents } from './helpers';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_INDEX_PREFIX_V1,
 } from '../../../../common/constants_entities';
-import { getCustomLatestTemplateComponents } from '../../../templates/components/helpers';
 
 export const getEntitiesLatestIndexTemplateConfig = (
   definitionId: string
