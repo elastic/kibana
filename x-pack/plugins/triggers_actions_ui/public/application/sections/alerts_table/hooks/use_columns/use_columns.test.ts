@@ -6,7 +6,6 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
 
@@ -35,7 +34,7 @@ const mockStorage = {
 
 describe('useColumn', () => {
   const id = 'useColumnTest';
-  const featureIds: AlertConsumers[] = [AlertConsumers.LOGS, AlertConsumers.APM];
+  const ruleTypeIds: string[] = ['apm', 'logs'];
   let storage = { current: new Storage(mockStorage) };
 
   const getStorageAlertsTableByDefaultColumns = (defaultColumns: EuiDataGridColumn[]) => {
@@ -116,7 +115,7 @@ describe('useColumn', () => {
     const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
       useColumns({
         defaultColumns,
-        featureIds,
+        ruleTypeIds,
         id,
         storageAlertsTable: localStorageAlertsTable,
         storage,
@@ -145,7 +144,7 @@ describe('useColumn', () => {
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -165,7 +164,7 @@ describe('useColumn', () => {
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -192,7 +191,7 @@ describe('useColumn', () => {
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -208,7 +207,7 @@ describe('useColumn', () => {
       const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns: localDefaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -243,7 +242,7 @@ describe('useColumn', () => {
       const { result, waitFor } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -260,7 +259,7 @@ describe('useColumn', () => {
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -279,7 +278,7 @@ describe('useColumn', () => {
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -306,7 +305,7 @@ describe('useColumn', () => {
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,
@@ -337,7 +336,7 @@ describe('useColumn', () => {
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
         useColumns({
           defaultColumns,
-          featureIds,
+          ruleTypeIds,
           id,
           storageAlertsTable: localStorageAlertsTable,
           storage,

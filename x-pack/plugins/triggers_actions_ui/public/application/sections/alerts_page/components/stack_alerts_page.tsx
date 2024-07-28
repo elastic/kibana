@@ -77,7 +77,7 @@ const PageContent = () => {
     alertsTableConfigurationRegistry,
   } = useKibana().services;
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
-  const [activeFeatureFilters, setActiveFeatureFilters] = useState<AlertConsumers[]>([]);
+  const [activeRuleTypeFilters, setActiveRuleTypeFilters] = useState<string[]>([]);
 
   const ruleStats = useRuleStats();
   const {
@@ -87,22 +87,25 @@ const PageContent = () => {
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 
   const browsingSiem = useMemo(
-    () => activeFeatureFilters.length === 1 && activeFeatureFilters[0] === AlertConsumers.SIEM,
-    [activeFeatureFilters]
+    () => activeRuleTypeFilters.length === 1 && activeRuleTypeFilters[0] === AlertConsumers.SIEM,
+    [activeRuleTypeFilters]
   );
+
   const filteringBySolution = useMemo(
-    () => activeFeatureFilters.length > 0,
-    [activeFeatureFilters.length]
+    () => activeRuleTypeFilters.length > 0,
+    [activeRuleTypeFilters.length]
   );
+
   const featureIds = useMemo(
     () =>
       filteringBySolution
         ? browsingSiem
           ? [AlertConsumers.SIEM]
-          : activeFeatureFilters
+          : activeRuleTypeFilters
         : NON_SIEM_FEATURE_IDS,
-    [activeFeatureFilters, browsingSiem, filteringBySolution]
+    [activeRuleTypeFilters, browsingSiem, filteringBySolution]
   );
+
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];
     if (Object.values(ruleTypeIdsByFeatureId).length > 0) {
@@ -184,22 +187,22 @@ const PageContent = () => {
         <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="stackAlertsPageContent">
           <UrlSyncedAlertsSearchBar
             appName={ALERTS_PAGE_ID}
-            featureIds={featureIds}
+            ruleTypeIds={ruleTypeIds}
             showFilterControls
             showFilterBar
             quickFilters={quickFilters}
-            onActiveFeatureFiltersChange={setActiveFeatureFilters}
+            onActiveRuleTypeFiltersChange={setActiveRuleTypeFilters}
             onEsQueryChange={setEsQuery}
           />
           <Suspense fallback={<EuiLoadingSpinner />}>
             <AlertsTable
               // Here we force a rerender when switching feature ids to prevent the data grid
               // columns alignment from breaking after a change in the number of columns
-              key={featureIds.join()}
+              key={ruleTypeIds.join()}
               id="stack-alerts-page-table"
               configurationId={tableConfigurationId}
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              featureIds={featureIds}
+              ruleTypeIds={ruleTypeIds}
               query={esQuery}
               showAlertStatusWithFlapping
               initialPageSize={20}

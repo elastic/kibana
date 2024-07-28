@@ -14,14 +14,13 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
-  ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 
 export interface Props {
   http: HttpSetup | undefined;
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
   ruleId: string;
   dateRange: {
     from: string;
@@ -49,7 +48,7 @@ export const EMPTY_ALERTS_HISTORY = {
 };
 
 export function useAlertsHistory({
-  featureIds,
+  ruleTypeIds,
   ruleId,
   dateRange,
   http,
@@ -62,7 +61,7 @@ export function useAlertsHistory({
         throw new Error('Http client is missing');
       }
       return fetchTriggeredAlertsHistory({
-        featureIds,
+        ruleTypeIds,
         http,
         ruleId,
         dateRange,
@@ -99,14 +98,14 @@ interface AggsESResponse {
 }
 
 export async function fetchTriggeredAlertsHistory({
-  featureIds,
+  ruleTypeIds,
   http,
   ruleId,
   dateRange,
   signal,
   instanceId,
 }: {
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
   http: HttpSetup;
   ruleId: string;
   dateRange: {
@@ -121,7 +120,7 @@ export async function fetchTriggeredAlertsHistory({
       signal,
       body: JSON.stringify({
         size: 0,
-        feature_ids: featureIds,
+        rule_type_ids: ruleTypeIds,
         query: {
           bool: {
             must: [

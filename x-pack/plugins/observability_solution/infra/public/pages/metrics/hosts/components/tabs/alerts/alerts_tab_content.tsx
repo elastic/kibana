@@ -10,6 +10,7 @@ import { AlertConsumers, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
+import { INFRA_RULE_TYPE_IDS } from '../../../../../../../common/alerting/metrics/types';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -19,7 +20,6 @@ import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
-  infraAlertFeatureIds,
 } from '../../../../../../components/shared/alerts/constants';
 import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
 import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
@@ -79,7 +79,7 @@ export const AlertsTabContent = () => {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={infraAlertFeatureIds}
+              ruleTypeIds={INFRA_RULE_TYPE_IDS}
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
@@ -134,7 +134,7 @@ const MemoAlertSummaryWidget = React.memo(
     return (
       <AlertSummaryWidget
         chartProps={chartProps}
-        featureIds={infraAlertFeatureIds}
+        ruleTypeIds={INFRA_RULE_TYPE_IDS}
         filter={alertsQuery}
         fullSize
         timeRange={summaryTimeRange}

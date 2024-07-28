@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -71,7 +70,8 @@ describe('getGroupAggregations()', () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertsClient.find = jest.fn();
 
-    const featureIds = [AlertConsumers.STACK_ALERTS];
+    const ruleTypeIds = ['.es-query'];
+
     const groupByField = 'kibana.alert.rule.name';
     const aggregations = {
       usersCount: {
@@ -83,7 +83,7 @@ describe('getGroupAggregations()', () => {
     const filters = [{ range: { '@timestamp': { gte: 'now-1d/d', lte: 'now/d' } } }];
 
     await alertsClient.getGroupAggregations({
-      featureIds,
+      ruleTypeIds,
       groupByField,
       aggregations,
       filters,
@@ -92,7 +92,7 @@ describe('getGroupAggregations()', () => {
     });
 
     expect(alertsClient.find).toHaveBeenCalledWith({
-      featureIds,
+      ruleTypeIds,
       aggs: {
         groupByFields: {
           terms: {
@@ -143,7 +143,7 @@ describe('getGroupAggregations()', () => {
 
     expect(() =>
       alertsClient.getGroupAggregations({
-        featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+        ruleTypeIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
         groupByField: 'kibana.alert.rule.name',
         pageIndex: 101,
         pageSize: 50,
@@ -153,7 +153,7 @@ describe('getGroupAggregations()', () => {
     );
     expect(() =>
       alertsClient.getGroupAggregations({
-        featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+        ruleTypeIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
         groupByField: 'kibana.alert.rule.name',
         pageIndex: 10,
         pageSize: 5000,

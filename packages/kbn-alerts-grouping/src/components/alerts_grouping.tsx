@@ -60,7 +60,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   const {
     groupingId,
     services,
-    featureIds,
+    ruleTypeIds,
     defaultGroupingOptions,
     defaultFilters,
     globalFilters,
@@ -73,7 +73,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
 
   const { dataViews: alertDataViews } = useAlertDataView({
-    featureIds,
+    ruleTypeIds,
     dataViewsService: dataViews,
     http,
     toasts: notifications.toasts,
@@ -245,7 +245,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
  *
  * return (
  *   <AlertsGrouping
- *     featureIds={[...]}
+ *     ruleTypeIds={[...]}
  *     globalQuery={{ query: ..., language: 'kql' }}
  *     globalFilters={...}
  *     from={...}

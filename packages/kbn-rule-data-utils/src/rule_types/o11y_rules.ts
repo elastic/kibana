@@ -19,3 +19,5 @@ export enum ApmRuleType {
   TransactionDuration = 'apm.transaction_duration',
   Anomaly = 'apm.anomaly',
 }
+
+export const APM_RULE_TYPE_IDS = Object.values(ApmRuleType);

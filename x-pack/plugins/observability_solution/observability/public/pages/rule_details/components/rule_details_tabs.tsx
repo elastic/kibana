@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Query, BoolQuery } from '@kbn/es-query';
 import { useKibana } from '../../../utils/kibana_react';
@@ -38,7 +37,7 @@ interface Props {
         bool: BoolQuery;
       }
     | undefined;
-  featureIds: AlertConsumers[] | undefined;
+  ruleTypeIds?: string[];
   rule: Rule<RuleTypeParams>;
   ruleId: string;
   ruleType: any;
@@ -49,7 +48,7 @@ interface Props {
 export function RuleDetailsTabs({
   activeTabId,
   esQuery,
-  featureIds,
+  ruleTypeIds,
   rule,
   ruleId,
   ruleType,
@@ -90,12 +89,12 @@ export function RuleDetailsTabs({
 
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && featureIds && (
+              {esQuery && ruleTypeIds && (
                 <AlertsStateTable
                   alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                   configurationId={RULE_DETAILS_ALERTS_TABLE_CONFIG_ID}
                   id={RULE_DETAILS_PAGE_ID}
-                  featureIds={featureIds}
+                  ruleTypeIds={ruleTypeIds}
                   query={esQuery}
                   showAlertStatusWithFlapping
                   cellContext={{ observabilityRuleTypeRegistry }}

@@ -15,7 +15,7 @@ import {
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import moment from 'moment';
-import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/observability-plugin/common/constants';
 import { typedSearch } from '../utils/queries';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
@@ -115,7 +115,7 @@ export class GetSLOsOverview {
       }),
 
       this.racClient.getAlertSummary({
-        featureIds: observabilityAlertFeatureIds,
+        ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
         gte: moment().subtract(24, 'hours').toISOString(),
         lte: moment().toISOString(),
         filter: [

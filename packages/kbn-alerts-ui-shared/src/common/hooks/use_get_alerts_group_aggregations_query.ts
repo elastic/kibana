@@ -45,7 +45,7 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
  * The provided `aggregations` are applied within `groupByFields`. Here the `groupByField` runtime
  * field can be used to perform grouping-based aggregations.
  *
- * Applies alerting RBAC through featureIds.
+ * Applies alerting RBAC through ruleTypeIds.
  */
 export const useGetAlertsGroupAggregationsQuery = <T>({
   http,
@@ -57,7 +57,7 @@ export const useGetAlertsGroupAggregationsQuery = <T>({
     if (error) {
       toasts.addDanger(
         i18n.translate(
-          'alertsUIShared.hooks.useFindAlertsQuery.unableToFetchAlertsGroupingAggregations',
+          'alertsUIShared.hooks.useGetAlertsGroupAggregationsQuery.unableToFetchAlertsGroupingAggregations',
           {
             defaultMessage: 'Unable to fetch alerts grouping aggregations',
           }

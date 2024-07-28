@@ -22,6 +22,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -274,7 +275,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       configurationId: configId,
       // stores separate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
-      featureIds: ['siem'],
+      ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
       query: finalBoolQuery,
       gridStyle,
       shouldHighlightRow,

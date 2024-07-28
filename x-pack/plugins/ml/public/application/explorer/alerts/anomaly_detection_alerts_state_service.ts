@@ -21,7 +21,6 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
-  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { getSeverityColor } from '@kbn/ml-anomaly-utils';
@@ -30,6 +29,7 @@ import {
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
   ML_ALERT_TYPES,
+  ML_RULE_TYPE_IDS,
 } from '../../../../common/constants/alerts';
 import { StateService } from '../../services/state_service';
 import type { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
@@ -175,7 +175,7 @@ export class AnomalyDetectionAlertsStateService extends StateService {
             return this.data.search
               .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
                 {
-                  featureIds: [AlertConsumers.ML],
+                  ruleTypeIds: ML_RULE_TYPE_IDS,
                   query,
                 },
                 { strategy: 'privateRuleRegistryAlertsSearchStrategy' }

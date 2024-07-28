@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
@@ -32,7 +32,7 @@ export function SloDetailsAlerts({ slo }: Props) {
             configurationId={AlertConsumers.OBSERVABILITY}
             id={SLO_ALERTS_TABLE_ID}
             data-test-subj="alertTable"
-            featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
+            ruleTypeIds={[SLO_BURN_RATE_RULE_TYPE_ID]}
             query={{
               bool: {
                 filter: [

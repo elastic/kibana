@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { renderHook } from '@testing-library/react-hooks/dom';
 import { useAlertDataViews } from './use_alert_data_view';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -47,12 +45,7 @@ const wrapper = ({ children }: { children: Node }) => (
 );
 
 describe('useAlertDataView', () => {
-  const observabilityAlertFeatureIds: ValidFeatureId[] = [
-    AlertConsumers.APM,
-    AlertConsumers.INFRASTRUCTURE,
-    AlertConsumers.LOGS,
-    AlertConsumers.UPTIME,
-  ];
+  const ruleTypeIds = ['.es-query'];
 
   beforeEach(() => {
     fetchAlertIndexNames.mockResolvedValue([
@@ -75,15 +68,15 @@ describe('useAlertDataView', () => {
       dataview: undefined,
     };
 
-    const { result } = renderHook(() => useAlertDataViews(observabilityAlertFeatureIds), {
+    const { result } = renderHook(() => useAlertDataViews(ruleTypeIds), {
       wrapper,
     });
 
     await waitFor(() => expect(result.current).toEqual(mockedAsyncDataView));
   });
 
-  it('fetch index names + fields for the provided o11y featureIds', async () => {
-    renderHook(() => useAlertDataViews(observabilityAlertFeatureIds), {
+  it('fetch index names + fields for the provided o11y ruleTypeIds', async () => {
+    renderHook(() => useAlertDataViews(ruleTypeIds), {
       wrapper,
     });
 
@@ -92,7 +85,7 @@ describe('useAlertDataView', () => {
   });
 
   it('only fetch index names for security featureId', async () => {
-    renderHook(() => useAlertDataViews([AlertConsumers.SIEM]), {
+    renderHook(() => useAlertDataViews(['siem.esqlRule']), {
       wrapper,
     });
 
@@ -100,13 +93,10 @@ describe('useAlertDataView', () => {
     expect(fetchAlertFields).toHaveBeenCalledTimes(0);
   });
 
-  it('Do not fetch anything if security and o11y featureIds are mixed together', async () => {
-    const { result } = renderHook(
-      () => useAlertDataViews([AlertConsumers.SIEM, AlertConsumers.LOGS]),
-      {
-        wrapper,
-      }
-    );
+  it('Do not fetch anything if security and o11y ruleTypeIds are mixed together', async () => {
+    const { result } = renderHook(() => useAlertDataViews(['siem.esqlRule', 'logs']), {
+      wrapper,
+    });
 
     await waitFor(() =>
       expect(result.current).toEqual({
@@ -121,7 +111,7 @@ describe('useAlertDataView', () => {
   it('if fetch throws error return no data', async () => {
     fetchAlertIndexNames.mockRejectedValue('error');
 
-    const { result } = renderHook(() => useAlertDataViews(observabilityAlertFeatureIds), {
+    const { result } = renderHook(() => useAlertDataViews(ruleTypeIds), {
       wrapper,
     });
 

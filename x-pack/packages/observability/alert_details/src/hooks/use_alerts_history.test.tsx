@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
@@ -44,7 +43,7 @@ describe('useAlertsHistory', () => {
       () =>
         useAlertsHistory({
           http,
-          featureIds: [AlertConsumers.APM],
+          ruleTypeIds: ['apm'],
           ruleId,
           dateRange: { from: start, to: end },
         }),
@@ -70,7 +69,7 @@ describe('useAlertsHistory', () => {
       () =>
         useAlertsHistory({
           http,
-          featureIds: [AlertConsumers.APM],
+          ruleTypeIds: ['apm'],
           ruleId,
           dateRange: { from: start, to: end },
         }),
@@ -134,7 +133,7 @@ describe('useAlertsHistory', () => {
       () =>
         useAlertsHistory({
           http,
-          featureIds: [AlertConsumers.APM],
+          ruleTypeIds: ['apm'],
           ruleId,
           dateRange: { from: start, to: end },
         }),
@@ -174,7 +173,7 @@ describe('useAlertsHistory', () => {
       () =>
         useAlertsHistory({
           http,
-          featureIds: [AlertConsumers.APM],
+          ruleTypeIds: ['apm'],
           ruleId,
           dateRange: { from: start, to: end },
           instanceId: 'instance-1',
@@ -223,7 +222,7 @@ describe('useAlertsHistory', () => {
       () =>
         useAlertsHistory({
           http,
-          featureIds: [AlertConsumers.APM],
+          ruleTypeIds: ['apm'],
           ruleId,
           dateRange: { from: start, to: end },
           instanceId: '*',

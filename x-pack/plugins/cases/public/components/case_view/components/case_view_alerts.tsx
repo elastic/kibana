@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -49,7 +50,7 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
         )
       : '';
 
-  const alertStateProps = useMemo(
+  const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,

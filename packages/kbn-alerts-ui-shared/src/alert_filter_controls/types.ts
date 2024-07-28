@@ -14,7 +14,6 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export type FilterUrlFormat = Record<
   string,
@@ -42,7 +41,7 @@ export interface FilterGroupProps
   extends Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'> {
   spaceId?: string;
   dataViewId: string | null;
-  featureIds: AlertConsumers[];
+  ruleTypeIds: string[];
   /**
    * Filters changed callback
    */

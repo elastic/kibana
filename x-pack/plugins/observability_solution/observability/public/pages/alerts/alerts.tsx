@@ -32,7 +32,10 @@ import {
 } from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import { observabilityAlertFeatureIds } from '../../../common/constants';
+import {
+  observabilityAlertFeatureIds,
+  OBSERVABILITY_RULE_TYPE_IDS,
+} from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
@@ -232,7 +235,7 @@ function InternalAlertsPage() {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertSummaryWidget
-              featureIds={observabilityAlertFeatureIds}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
@@ -245,7 +248,7 @@ function InternalAlertsPage() {
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
                 id={ALERTS_TABLE_ID}
-                featureIds={observabilityAlertFeatureIds}
+                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
                 query={esQuery}
                 showAlertStatusWithFlapping
                 initialPageSize={ALERTS_PER_PAGE}

@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
@@ -18,7 +17,7 @@ interface ActionAlertsFilterQueryProps {
   state?: AlertsFilter['query'];
   onChange: (update?: AlertsFilter['query']) => void;
   appName: string;
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
   ruleTypeId?: string;
 }
 
@@ -26,7 +25,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
   state,
   onChange,
   appName,
-  featureIds,
+  ruleTypeIds,
   ruleTypeId,
 }) => {
   const [query, setQuery] = useState(state ?? { kql: '', filters: [] });
@@ -80,7 +79,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
           <EuiSpacer size="s" />
           <AlertsSearchBar
             appName={appName}
-            featureIds={featureIds}
+            ruleTypeIds={ruleTypeIds}
             ruleTypeId={ruleTypeId}
             disableQueryLanguageSwitcher={true}
             query={query.kql}

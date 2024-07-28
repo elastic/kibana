@@ -54,7 +54,7 @@ describe('CaseUI View Page activity tab', () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
         configurationId: 'securitySolution-case',
-        featureIds: ['siem'],
+        ruleTypeIds: ['siem'],
         id: 'case-details-alerts-securitySolution',
         query: {
           ids: {
@@ -88,7 +88,7 @@ describe('CaseUI View Page activity tab', () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
         configurationId: 'case-details-alerts-observability',
-        featureIds: ['observability'],
+        ruleTypeIds: ['observability'],
         id: 'case-details-alerts-observability',
         query: {
           ids: {

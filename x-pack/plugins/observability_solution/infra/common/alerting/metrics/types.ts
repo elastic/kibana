@@ -18,6 +18,8 @@ export enum InfraRuleType {
   InventoryThreshold = 'metrics.alert.inventory.threshold',
 }
 
+export const INFRA_RULE_TYPE_IDS = Object.values(InfraRuleType);
+
 export enum Aggregators {
   COUNT = 'count',
   AVERAGE = 'avg',

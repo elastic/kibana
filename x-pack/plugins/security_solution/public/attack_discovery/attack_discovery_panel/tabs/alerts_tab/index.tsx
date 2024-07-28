@@ -6,7 +6,8 @@
  */
 
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
-import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import React, { useMemo } from 'react';
 
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../common/constants';
@@ -39,12 +40,12 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
 
   const configId = ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE; // show the same row-actions as in the case view
 
-  const alertStateProps = useMemo(
+  const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
       id: `attack-discovery-alerts-${attackDiscovery.id}`,
-      featureIds: [AlertConsumers.SIEM],
+      ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
       query: alertIdsQuery,
       showAlertStatusWithFlapping: false,
     }),

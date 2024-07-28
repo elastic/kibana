@@ -30,7 +30,6 @@ import {
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
@@ -213,20 +212,20 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     return [...new Set(validRuleTypes.map((ruleType) => ruleType.category))];
   }, [validRuleTypes]);
 
-  const featureIds = useMemo(() => {
+  const ruleTypeIds = useMemo(() => {
     if (!Array.isArray(validRuleTypes) || !Array.isArray(categoryIds) || !mounted) {
       return [];
     }
 
-    const featureIdsSet = new Set<ValidFeatureId>();
+    const uniqueRuleTypeIds = new Set<string>();
 
     validRuleTypes.forEach((ruleType) => {
       if (categoryIds.includes(ruleType.category)) {
-        featureIdsSet.add(ruleType.producer as ValidFeatureId);
+        uniqueRuleTypeIds.add(ruleType.id);
       }
     });
 
-    return [...featureIdsSet];
+    return [...uniqueRuleTypeIds];
   }, [validRuleTypes, categoryIds, mounted]);
 
   const onCategoryIdsChange = useCallback(
@@ -466,7 +465,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <UseField path="scopedQuery">
               {() => (
                 <MaintenanceWindowScopedQuery
-                  featureIds={featureIds}
+                  ruleTypeIds={ruleTypeIds}
                   query={query}
                   filters={filters}
                   isLoading={isLoadingRuleTypes}

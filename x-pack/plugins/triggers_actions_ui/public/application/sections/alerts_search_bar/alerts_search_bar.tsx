@@ -27,7 +27,7 @@ const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,
-  featureIds,
+  ruleTypeIds,
   ruleTypeId,
   query,
   filters,
@@ -52,7 +52,7 @@ export function AlertsSearchBar({
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { dataViews, loading } = useAlertDataViews(featureIds ?? []);
+  const { dataViews, loading } = useAlertDataViews(ruleTypeIds ?? []);
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns =
@@ -64,7 +64,7 @@ export function AlertsSearchBar({
   });
 
   const isSecurity =
-    (featureIds && featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM)) ||
+    (ruleTypeIds && ruleTypeIds.length === 1 && ruleTypeIds[0].startsWith('siem.')) ||
     (ruleType &&
       ruleTypeId &&
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);

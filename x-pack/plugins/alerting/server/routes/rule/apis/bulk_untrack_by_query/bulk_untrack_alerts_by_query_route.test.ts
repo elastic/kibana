@@ -45,7 +45,7 @@ describe('bulkUntrackAlertsByQueryRoute', () => {
           },
         },
       ],
-      feature_ids: ['o11y'],
+      rule_type_ids: ['o11y'],
     };
 
     const [context, req, res] = mockHandlerArguments(
@@ -62,7 +62,7 @@ describe('bulkUntrackAlertsByQueryRoute', () => {
     expect(rulesClient.bulkUntrackAlerts.mock.calls[0]).toEqual([
       {
         query: requestBody.query,
-        featureIds: requestBody.feature_ids,
+        ruleTypeIds: requestBody.rule_type_ids,
         isUsingQuery: true,
       },
     ]);

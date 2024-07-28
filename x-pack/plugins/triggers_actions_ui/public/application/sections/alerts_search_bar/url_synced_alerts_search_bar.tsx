@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { BoolQuery } from '@kbn/es-query';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
@@ -35,7 +34,7 @@ export interface UrlSyncedAlertsSearchBarProps
   > {
   showFilterControls?: boolean;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
-  onActiveFeatureFiltersChange?: (value: AlertConsumers[]) => void;
+  onActiveRuleTypeFiltersChange?: (value: string[]) => void;
 }
 
 /**
@@ -44,7 +43,7 @@ export interface UrlSyncedAlertsSearchBarProps
 export const UrlSyncedAlertsSearchBar = ({
   showFilterControls = false,
   onEsQueryChange,
-  onActiveFeatureFiltersChange,
+  onActiveRuleTypeFiltersChange,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
@@ -85,11 +84,9 @@ export const UrlSyncedAlertsSearchBar = ({
 
   useEffect(() => {
     try {
-      onActiveFeatureFiltersChange?.([
+      onActiveRuleTypeFiltersChange?.([
         ...new Set(
-          filters
-            .flatMap((f) => (f as AlertsFeatureIdsFilter).meta.alertsFeatureIds)
-            .filter(nonNullable)
+          filters.flatMap((f) => (f as AlertsFeatureIdsFilter).meta.ruleTypeIds).filter(nonNullable)
         ),
       ]);
       onEsQueryChange(
@@ -112,7 +109,7 @@ export const UrlSyncedAlertsSearchBar = ({
     controlFilters,
     filters,
     kuery,
-    onActiveFeatureFiltersChange,
+    onActiveRuleTypeFiltersChange,
     onEsQueryChange,
     onKueryChange,
     rangeFrom,

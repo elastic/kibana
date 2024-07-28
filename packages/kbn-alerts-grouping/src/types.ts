@@ -7,7 +7,6 @@
  */
 
 import type { Filter, Query } from '@kbn/es-query';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -60,9 +59,9 @@ export interface AlertsGroupingProps<T extends Record<string, unknown> = {}> {
    */
   defaultGroupingOptions: GroupOption[];
   /**
-   * The alerting feature ids this grouping covers
+   * The alerting rule type ids this grouping covers
    */
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
   /**
    * Time filter start
    */

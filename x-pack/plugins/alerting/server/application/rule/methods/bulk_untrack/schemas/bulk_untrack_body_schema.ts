@@ -11,5 +11,5 @@ export const bulkUntrackBodySchema = schema.object({
   indices: schema.maybe(schema.arrayOf(schema.string())),
   alertUuids: schema.maybe(schema.arrayOf(schema.string())),
   query: schema.maybe(schema.arrayOf(schema.any())),
-  featureIds: schema.maybe(schema.arrayOf(schema.string())),
+  ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
 });

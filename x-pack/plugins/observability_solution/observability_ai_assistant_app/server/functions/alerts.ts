@@ -10,6 +10,7 @@ import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/observability-plugin/common/constants';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
@@ -59,15 +60,6 @@ const OMITTED_ALERT_FIELDS = [
   'kibana.space_ids',
   'kibana.alert.time_range',
   'kibana.version',
-] as const;
-
-const DEFAULT_FEATURE_IDS = [
-  'apm',
-  'infrastructure',
-  'logs',
-  'uptime',
-  'slo',
-  'observability',
 ] as const;
 
 export function registerAlertsFunction({
@@ -137,7 +129,7 @@ export function registerAlertsFunction({
   functions.registerFunction(
     {
       name: 'alerts',
-      description: `Get alerts for Observability.  Make sure get_alerts_dataset_info was called before.      
+      description: `Get alerts for Observability.  Make sure get_alerts_dataset_info was called before.
         Use this to get open (and optionally recovered) alerts for Observability assets, like services,
         hosts or containers.
         Display the response in tabular format if appropriate.
@@ -181,7 +173,7 @@ export function registerAlertsFunction({
       const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
 
       const response = await alertsClient.find({
-        featureIds: DEFAULT_FEATURE_IDS as unknown as string[],
+        ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
         query: {
           bool: {
             filter: [

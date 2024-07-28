@@ -35,7 +35,7 @@ describe('getAlertSummaryRoute', () => {
           requestMock.create({
             method: 'post',
             path: `${BASE_RAC_ALERTS_API_PATH}/_alert_summary`,
-            body: { gte: 4, lte: 3, featureIds: ['logs'] },
+            body: { gte: 4, lte: 3, ruleTypeIds: ['logs'] },
           }),
           context
         )
@@ -52,7 +52,7 @@ describe('getAlertSummaryRoute', () => {
           body: {
             gte: '2020-12-16T15:00:00.000Z',
             lte: '2020-12-16',
-            featureIds: ['logs'],
+            ruleTypeIds: ['logs'],
           },
         }),
         context
@@ -76,7 +76,7 @@ describe('getAlertSummaryRoute', () => {
           body: {
             gte: '2020-12-16T15:00:00.000Z',
             lte: '2020-12-16T16:00:00.000Z',
-            featureIds: ['logs'],
+            ruleTypeIds: ['logs'],
             fixed_interval: 'xx',
           },
         }),
@@ -102,7 +102,7 @@ describe('getAlertSummaryRoute', () => {
             body: {
               gte: '2020-12-16T15:00:00.000Z',
               lte: '2020-12-16T16:00:00.000Z',
-              featureIds: ['logs'],
+              ruleTypeIds: ['logs'],
               boop: 'unknown',
             },
           }),

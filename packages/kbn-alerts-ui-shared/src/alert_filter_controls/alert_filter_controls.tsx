@@ -11,7 +11,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { EuiFlexItem } from '@elastic/eui';
 import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { HttpStart } from '@kbn/core-http-browser';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -23,12 +22,12 @@ import { FilterControlConfig } from './types';
 
 export type AlertFilterControlsProps = Omit<
   ComponentProps<typeof FilterGroup>,
-  'dataViewId' | 'defaultControls' | 'featureIds' | 'Storage'
+  'dataViewId' | 'defaultControls' | 'ruleTypeIds' | 'Storage'
 > & {
   /**
-   * The feature ids used to get the correct alert data view(s)
+   * The rule type ids used to get the correct alert data view(s)
    */
-  featureIds?: AlertConsumers[];
+  ruleTypeIds?: string[];
   /**
    * An array of default control configurations
    */
@@ -56,7 +55,7 @@ export type AlertFilterControlsProps = Omit<
  *
  * <AlertFilterControls
  *   // Data view configuration
- *   featureIds={[AlertConsumers.STACK_ALERTS]}
+ *   ruleTypeIds={['.es-query']}
  *   dataViewSpec={{
  *     id: 'unified-alerts-dv',
  *     title: '.alerts-*',
@@ -81,7 +80,7 @@ export type AlertFilterControlsProps = Omit<
  */
 export const AlertFilterControls = (props: AlertFilterControlsProps) => {
   const {
-    featureIds = [AlertConsumers.STACK_ALERTS],
+    ruleTypeIds = [],
     defaultControls = DEFAULT_CONTROLS,
     dataViewSpec,
     onFiltersChange,
@@ -95,7 +94,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
   } = props;
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
   const { dataViews: alertDataViews, loading: loadingDataViews } = useAlertDataView({
-    featureIds,
+    ruleTypeIds,
     dataViewsService: dataViews,
     http,
     toasts,
@@ -155,7 +154,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
     <FilterGroup
       dataViewId={dataViewSpec?.id || null}
       onFiltersChange={handleFilterChanges}
-      featureIds={featureIds}
+      ruleTypeIds={ruleTypeIds}
       {...restFilterItemGroupProps}
       Storage={storage}
       defaultControls={defaultControls}

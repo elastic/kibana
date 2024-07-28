@@ -12,6 +12,7 @@ import {
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { UPTIME_RULE_TYPES } from '@kbn/uptime-plugin/common/constants/uptime_alerts';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
@@ -21,13 +22,6 @@ import {
   uptimeSettingsObjectType,
 } from './saved_objects/synthetics_settings';
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
-
-const UPTIME_RULE_TYPES = [
-  'xpack.uptime.alerts.tls',
-  'xpack.uptime.alerts.tlsCertificate',
-  'xpack.uptime.alerts.monitorStatus',
-  'xpack.uptime.alerts.durationAnomaly',
-];
 
 const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
 

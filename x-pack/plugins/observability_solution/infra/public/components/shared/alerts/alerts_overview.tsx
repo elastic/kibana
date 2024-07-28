@@ -12,10 +12,11 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { INFRA_RULE_TYPE_IDS } from '../../../../common/alerting/metrics/types';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
-import { ALERT_STATUS_ALL, infraAlertFeatureIds } from './constants';
+import { ALERT_STATUS_ALL } from './constants';
 import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import AlertsStatusFilter from './alerts_status_filter';
 import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
@@ -27,8 +28,6 @@ interface AlertsOverviewProps {
   onRangeSelection?: HostsStateUpdater;
   assetType?: InventoryItemType;
 }
-
-const alertFeatureIds = [...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY];
 
 export const AlertsOverview = ({
   assetId,
@@ -115,7 +114,7 @@ export const AlertsOverview = ({
       <EuiFlexItem>
         <AlertSummaryWidget
           chartProps={chartProps}
-          featureIds={infraAlertFeatureIds}
+          ruleTypeIds={INFRA_RULE_TYPE_IDS}
           filter={alertsEsQuery}
           timeRange={summaryTimeRange}
           onLoaded={onLoaded}
@@ -128,7 +127,7 @@ export const AlertsOverview = ({
           alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
           id={'assetDetailsAlertsTable'}
           configurationId={AlertConsumers.OBSERVABILITY}
-          featureIds={alertFeatureIds}
+          ruleTypeIds={INFRA_RULE_TYPE_IDS}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
           initialPageSize={5}

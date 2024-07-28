@@ -12,7 +12,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { ObservabilityAlertSearchBarProps, Services } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { observabilityAlertFeatureIds } from '../../../common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '../../../common/constants';
 import { render } from '../../utils/test_helper';
 
 const getAlertsSearchBarMock = jest.fn();
@@ -69,7 +69,7 @@ describe('ObservabilityAlertSearchBar', () => {
     expect(getAlertsSearchBarMock).toHaveBeenCalledWith(
       expect.objectContaining({
         appName: 'testAppName',
-        featureIds: observabilityAlertFeatureIds,
+        ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
         rangeFrom: 'now-15m',
         rangeTo: 'now',
         query: '',

@@ -42,7 +42,7 @@ const DEFAULT_FILTERS: Filter[] = [];
  */
 export const AlertsGroupingLevel = memo(
   <T extends Record<string, unknown> = {}>({
-    featureIds,
+    ruleTypeIds,
     defaultFilters = DEFAULT_FILTERS,
     from,
     getGrouping,
@@ -82,7 +82,7 @@ export const AlertsGroupingLevel = memo(
 
     const aggregationsQuery = useMemo<UseGetAlertsGroupAggregationsQueryProps['params']>(() => {
       return {
-        featureIds,
+        ruleTypeIds,
         groupByField: selectedGroup,
         aggregations: getAggregationsByGroupingField(selectedGroup)?.reduce(
           (acc, val) => Object.assign(acc, val),
@@ -103,12 +103,12 @@ export const AlertsGroupingLevel = memo(
         pageSize,
       };
     }, [
-      featureIds,
       filters,
       from,
       getAggregationsByGroupingField,
       pageIndex,
       pageSize,
+      ruleTypeIds,
       selectedGroup,
       to,
     ]);

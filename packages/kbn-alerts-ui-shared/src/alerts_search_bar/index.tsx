@@ -20,7 +20,7 @@ const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 export const AlertsSearchBar = ({
   appName,
   disableQueryLanguageSwitcher = false,
-  featureIds,
+  ruleTypeIds,
   ruleTypeId,
   query,
   filters,
@@ -41,7 +41,7 @@ export const AlertsSearchBar = ({
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataViews, loading } = useAlertDataView({
-    featureIds: featureIds ?? [],
+    ruleTypeIds,
     http,
     toasts,
     dataViewsService,
@@ -63,7 +63,7 @@ export const AlertsSearchBar = ({
   });
 
   const isSecurity =
-    (featureIds && featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM)) ||
+    (ruleTypeIds && ruleTypeIds.length === 1 && ruleTypeIds[0].startsWith('siem.')) ||
     (ruleType &&
       ruleTypeId &&
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);

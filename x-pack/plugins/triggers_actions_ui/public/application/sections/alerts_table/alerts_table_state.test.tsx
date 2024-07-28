@@ -9,12 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
-import {
-  AlertConsumers,
-  ALERT_CASE_IDS,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -340,7 +335,7 @@ describe('AlertsTableState', () => {
     alertsTableConfigurationRegistry: alertsTableConfigurationRegistryMock,
     configurationId: PLUGIN_ID,
     id: PLUGIN_ID,
-    featureIds: [AlertConsumers.LOGS],
+    ruleTypeIds: ['logs'],
     query: {},
     columns,
     pagination: {

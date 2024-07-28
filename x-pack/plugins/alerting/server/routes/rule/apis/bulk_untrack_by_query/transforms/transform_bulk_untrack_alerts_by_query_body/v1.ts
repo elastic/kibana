@@ -9,8 +9,8 @@ import type { BulkUntrackByQueryRequestBodyV1 } from '../../../../../../../commo
 
 export const transformBulkUntrackAlertsByQueryBody = ({
   query,
-  feature_ids: featureIds,
+  rule_type_ids: ruleTypeIds,
 }: BulkUntrackByQueryRequestBodyV1) => ({
   query,
-  featureIds,
+  ruleTypeIds,
 });
