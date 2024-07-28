@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEmpty, pick } from 'lodash';
+import { pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertingAuthorizationEntity } from '../../../../authorization/types';
@@ -46,7 +46,7 @@ export async function findRules<Params extends RuleParams = never>(
 ): Promise<FindResult<Params>> {
   const { options, excludeFromPublicApi = false, includeSnoozeData = false } = params || {};
 
-  const { fields, filterConsumers, ...restOptions } = options || {};
+  const { fields, filterRuleTypeIds, ...restOptions } = options || {};
 
   try {
     if (params) {
@@ -58,11 +58,11 @@ export async function findRules<Params extends RuleParams = never>(
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts,
-      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
-    );
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      filterOpts: alertingAuthorizationFilterOpts,
+      ruleTypeIds: filterRuleTypeIds,
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

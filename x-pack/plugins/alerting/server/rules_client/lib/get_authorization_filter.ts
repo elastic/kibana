@@ -20,10 +20,10 @@ export const getAuthorizationFilter = async (
     const authorizationTuple = await withSpan(
       { name: 'authorization.getFindAuthorizationFilter', type: 'rules' },
       () =>
-        context.authorization.getFindAuthorizationFilter(
-          AlertingAuthorizationEntity.Rule,
-          alertingAuthorizationFilterOpts
-        )
+        context.authorization.getFindAuthorizationFilter({
+          authorizationEntity: AlertingAuthorizationEntity.Rule,
+          filterOpts: alertingAuthorizationFilterOpts,
+        })
     );
     return authorizationTuple.filter;
   } catch (error) {

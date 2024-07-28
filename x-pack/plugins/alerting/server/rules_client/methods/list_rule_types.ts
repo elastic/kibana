@@ -18,11 +18,11 @@ export async function listRuleTypes(
 ): Promise<RegistryAlertTypeWithAuth[]> {
   const registeredRuleTypes = context.ruleTypeRegistry.list();
 
-  const authorizedRuleTypes = await context.authorization.getAuthorizedRuleTypes(
-    new Set(Array.from(registeredRuleTypes.keys()).map((id) => id)),
-    [ReadOperations.Get, WriteOperations.Create],
-    AlertingAuthorizationEntity.Rule
-  );
+  const authorizedRuleTypes = await context.authorization.getAuthorizedRuleTypes({
+    authorizationEntity: AlertingAuthorizationEntity.Rule,
+    operations: [ReadOperations.Get, WriteOperations.Create],
+    ruleTypeIds: Array.from(registeredRuleTypes.keys()).map((id) => id),
+  });
 
   return Array.from(authorizedRuleTypes.entries())
     .filter(([id, _]) => context.ruleTypeRegistry.has(id))

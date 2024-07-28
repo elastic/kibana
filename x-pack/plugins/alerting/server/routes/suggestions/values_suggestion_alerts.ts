@@ -80,10 +80,10 @@ export function registerAlertsValueSuggestionsRoute(
 
         try {
           const authorization = rulesClient.getAuthorization();
-          authorizationTuple = await authorization.getFindAuthorizationFilter(
-            AlertingAuthorizationEntity.Alert,
-            alertingAuthorizationFilterOpts
-          );
+          authorizationTuple = await authorization.getFindAuthorizationFilter({
+            authorizationEntity: AlertingAuthorizationEntity.Alert,
+            filterOpts: alertingAuthorizationFilterOpts,
+          });
 
           authorizedRuleType = await authorization.getAllAuthorizedRuleTypesFindOperation(
             AlertingAuthorizationEntity.Alert,

@@ -6,7 +6,6 @@
  */
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { isEmpty } from 'lodash';
 import { findRulesSo } from '../../../../data/rule';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -22,15 +21,15 @@ export async function aggregateRules<T = Record<string, unknown>>(
   params: AggregateParams<T>
 ): Promise<T> {
   const { options = {}, aggs } = params;
-  const { filter, page = 1, perPage = 0, filterConsumers, ...restOptions } = options;
+  const { filter, page = 1, perPage = 0, ruleTypeIds, ...restOptions } = options;
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts,
-      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
-    );
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      filterOpts: alertingAuthorizationFilterOpts,
+      ruleTypeIds,
+    });
     validateRuleAggregationFields(aggs);
     aggregateOptionsSchema.validate(options);
   } catch (error) {

@@ -32,7 +32,7 @@ export interface SetAlertsToUntrackedParams {
   alertUuids?: string[];
   query?: QueryDslQueryContainer[];
   spaceId?: RulesClientContext['spaceId'];
-  featureIds?: string[];
+  ruleTypeIds?: string[];
   isUsingQuery?: boolean;
   getAllAuthorizedRuleTypesFindOperation?: RulesClientContext['authorization']['getAllAuthorizedRuleTypesFindOperation'];
   getAlertIndicesAlias?: RulesClientContext['getAlertIndicesAlias'];
@@ -155,17 +155,17 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
 };
 
 const getAuthorizedAlertsIndices = async ({
-  featureIds,
+  ruleTypeIds,
   getAllAuthorizedRuleTypesFindOperation,
   getAlertIndicesAlias,
   spaceId,
   logger,
 }: SetAlertsToUntrackedParamsWithDep) => {
   try {
-    const authorizedRuleTypes = await getAllAuthorizedRuleTypesFindOperation?.(
-      AlertingAuthorizationEntity.Alert,
-      new Set(featureIds)
-    );
+    const authorizedRuleTypes = await getAllAuthorizedRuleTypesFindOperation?.({
+      authorizationEntity: AlertingAuthorizationEntity.Alert,
+      ruleTypeIds,
+    });
 
     if (authorizedRuleTypes) {
       return getAlertIndicesAlias?.(
