@@ -34,7 +34,6 @@ export async function getESQLAdHocDataview(
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
-
   const dataView = await dataViewsService.create({
     title: indexPattern,
     type: ESQL_TYPE,
