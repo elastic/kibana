@@ -10,6 +10,6 @@ import { createIndexPatternService } from './index_pattern_service';
 
 export function registerServices(params: RegisterServicesParams) {
   return {
-    indexPatternService: createIndexPatternService(params),
+    indexPatternService: createIndexPatternService(),
   };
 }

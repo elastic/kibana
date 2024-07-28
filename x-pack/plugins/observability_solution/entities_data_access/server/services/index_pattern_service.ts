@@ -13,18 +13,29 @@ import {
   ENTITY_LATEST,
   SO_ENTITY_DEFINITION_TYPE,
 } from '../../common';
-import { RegisterServicesParams } from '../types';
 
 type SchemaVersionString = `v${number}`;
 
-interface Options {
+export interface EntityIndexPatternService {
+  indexPattern(options?: Options): string;
+  indexPatternByDefinitionId(definitionId: string, options?: Options): string;
+  indexPatternByType(
+    type: string,
+    options: Options & { soClient: SavedObjectsClientContract }
+  ): Promise<string>;
+}
+
+export interface Options {
   datasets?: 'all' | typeof ENTITY_LATEST | typeof ENTITY_HISTORY;
   schemaVersion?: SchemaVersionString | SchemaVersionString[] | 'all';
 }
 
-function translateDatasetsOption(datasets: Options['datasets']) {
+function translateDatasetsOption(datasets: Options['datasets'], useWildcard = true) {
   if (!datasets || datasets === 'all') {
-    return ['*'] as const;
+    if (useWildcard) {
+      return ['*'] as const;
+    }
+    return [ENTITY_LATEST, ENTITY_HISTORY] as const;
   }
   return [datasets] as const;
 }
@@ -38,50 +49,40 @@ function translateSchemaVersionOption(schemaVersion: Options['schemaVersion']) {
 }
 
 async function findAllDefinitionsByType(type: string, soClient: SavedObjectsClientContract) {
+  let total = 0;
+  let page = 1;
   const definitions = [];
 
-  let response = await soClient.find<EntityDefinition>({
-    type: SO_ENTITY_DEFINITION_TYPE,
-    page: 1,
-    filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.type:(${type})`,
-  });
-
-  const total = response.total;
-  let page = response.page;
-  definitions.push(...response.saved_objects);
-
-  while (definitions.length < total) {
-    response = await soClient.find<EntityDefinition>({
+  do {
+    const response = await soClient.find<EntityDefinition>({
+      page,
       type: SO_ENTITY_DEFINITION_TYPE,
-      page: page + 1,
       filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.type:(${type})`,
     });
 
-    definitions.push(...response.saved_objects);
-    page = response.page;
-  }
+    definitions.push(...response.saved_objects.map(({ attributes }) => attributes.id));
+    total = response.total;
+    page = page + 1;
+  } while (definitions.length < total);
 
-  return definitions.map((definition) => definition.attributes.id);
+  return definitions;
 }
 
-export function createIndexPatternService(params: RegisterServicesParams) {
+export function createIndexPatternService(): EntityIndexPatternService {
   function indexPattern(options?: Options) {
     const datasets = translateDatasetsOption(options?.datasets);
     const schemaVersion = translateSchemaVersionOption(options?.schemaVersion);
 
     return datasets
       .map((dataset) =>
-        schemaVersion.map(
-          (version) =>
-            `.${ENTITY_BASE_PREFIX}.${version}.${dataset}${dataset === 'history' ? '.*' : ''}`
-        )
+        schemaVersion.map((version) => `.${ENTITY_BASE_PREFIX}.${version}.${dataset}.*`)
       )
       .flat()
       .join(',');
   }
 
   function indexPatternByDefinitionId(definitionId: string, options?: Options) {
-    const datasets = translateDatasetsOption(options?.datasets);
+    const datasets = translateDatasetsOption(options?.datasets, false);
     const schemaVersion = translateSchemaVersionOption(options?.schemaVersion);
 
     return datasets
@@ -99,7 +100,7 @@ export function createIndexPatternService(params: RegisterServicesParams) {
 
   async function indexPatternByType(
     type: string,
-    options: Partial<Options> & { soClient: SavedObjectsClientContract }
+    options: Options & { soClient: SavedObjectsClientContract }
   ) {
     const definitionIds = await findAllDefinitionsByType(type, options.soClient);
 
