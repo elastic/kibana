@@ -28,5 +28,6 @@
     "@kbn/security-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/logging-mocks",
+    "@kbn/entities-data-access-plugin",
   ]
 }
