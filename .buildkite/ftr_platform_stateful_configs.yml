@@ -1,5 +1,6 @@
 disabled:
-  # Deployment-agnostic config example
+  # Deployment-agnostic default config + example
+  - x-pack/test/api_integration/deployment_agnostic/serverless.config.base.ts
   - x-pack/test/api_integration/apis/painless_lab/stateful.config.ts
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
