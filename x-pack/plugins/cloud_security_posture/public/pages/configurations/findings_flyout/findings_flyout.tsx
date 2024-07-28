@@ -146,14 +146,15 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
     finding.data_stream.dataset === CSP_DATASET &&
     finding.rule?.benchmark?.version &&
     finding.rule?.benchmark?.id &&
-    finding.rule?.id &&
-    application.getUrlForApp('security', {
-      path: generatePath(benchmarksNavigation.rules.path, {
-        benchmarkVersion: finding.rule.benchmark.version.split('v')[1], // removing the v from the version
-        benchmarkId: finding.rule.benchmark.id,
-        ruleId: finding.rule.id,
-      }),
-    });
+    finding.rule?.id
+      ? application.getUrlForApp('security', {
+          path: generatePath(benchmarksNavigation.rules.path, {
+            benchmarkVersion: finding.rule.benchmark.version.split('v')[1], // removing the v from the version
+            benchmarkId: finding.rule.benchmark.id,
+            ruleId: finding.rule.id,
+          }),
+        })
+      : undefined;
 
   switch (tab.id) {
     case 'overview':
