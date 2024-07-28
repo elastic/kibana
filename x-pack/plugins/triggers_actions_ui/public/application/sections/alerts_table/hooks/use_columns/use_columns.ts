@@ -9,14 +9,13 @@ import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 
 export interface UseColumnsArgs {
-  featureIds: AlertConsumers[];
+  ruleTypeIds: string[];
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
@@ -149,7 +148,7 @@ const persist = ({
 };
 
 export const useColumns = ({
-  featureIds,
+  ruleTypeIds,
   storageAlertsTable,
   storage,
   id,
@@ -157,7 +156,7 @@ export const useColumns = ({
   initialBrowserFields,
 }: UseColumnsArgs): UseColumnsResp => {
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
-    featureIds,
+    ruleTypeIds,
     initialBrowserFields,
   });
 

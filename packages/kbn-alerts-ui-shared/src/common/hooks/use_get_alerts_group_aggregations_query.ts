@@ -11,7 +11,6 @@ import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
@@ -24,7 +23,7 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
   toasts: ToastsStart;
   enabled?: boolean;
   params: {
-    featureIds: AlertConsumers[];
+    ruleTypeIds: string[];
     groupByField: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
     filters?: QueryDslQueryContainer[];

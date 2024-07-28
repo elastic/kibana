@@ -14,7 +14,6 @@ import type {
 } from '@kbn/alerting-types';
 import { set } from '@kbn/safer-lodash-set';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   MappingRuntimeFields,
   QueryDslFieldAndFormat,
@@ -36,9 +35,9 @@ export interface SearchAlertsParams {
 
   // Parameters
   /**
-   * Array of feature ids used for authorization and area-based filtering
+   * Array of rule type ids used for authorization and area-based filtering
    */
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
   /**
    * ES query to perform on the affected alert indices
    */
@@ -79,7 +78,7 @@ export interface SearchAlertsResult {
 export const searchAlerts = ({
   data,
   signal,
-  featureIds,
+  ruleTypeIds,
   fields,
   query,
   sort,
@@ -91,7 +90,7 @@ export const searchAlerts = ({
     data.search
       .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
         {
-          featureIds,
+          ruleTypeIds,
           fields,
           query,
           pagination: { pageIndex, pageSize },

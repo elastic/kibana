@@ -9,7 +9,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { useQuery } from '@tanstack/react-query';
@@ -22,31 +21,30 @@ export interface UseAlertDataViewResult {
 }
 
 export interface UseAlertDataViewProps {
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
   http: HttpStart;
   dataViewsService: DataViewsContract;
   toasts: ToastsStart;
 }
 
 export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataViewResult {
-  const { http, dataViewsService, toasts, featureIds } = props;
+  const { http, dataViewsService, toasts, ruleTypeIds } = props;
 
   const [dataViews, setDataViews] = useState<DataView[]>([]);
-  const features = featureIds.sort().join(',');
-  const isOnlySecurity = featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM);
-
-  const hasSecurityAndO11yFeatureIds =
-    featureIds.length > 1 && featureIds.includes(AlertConsumers.SIEM);
+  const ruleTypes = ruleTypeIds.sort().join(',');
+  const hasSecurity = ruleTypeIds.some((ruleTypeId) => ruleTypeId.startsWith('siem.'));
+  const isOnlySecurity = ruleTypeIds.length === 1 && hasSecurity;
+  const hasSecurityAndO11yFeatureIds = ruleTypeIds.length > 1 && hasSecurity;
 
   const hasNoSecuritySolution =
-    featureIds.length > 0 && !isOnlySecurity && !hasSecurityAndO11yFeatureIds;
+    ruleTypeIds.length > 0 && !isOnlySecurity && !hasSecurityAndO11yFeatureIds;
 
   const queryIndexNameFn = () => {
-    return fetchAlertIndexNames({ http, features });
+    return fetchAlertIndexNames({ http, ruleTypeIds: ruleTypes });
   };
 
   const queryAlertFieldsFn = () => {
-    return fetchAlertFields({ http, featureIds });
+    return fetchAlertFields({ http, ruleTypeIds });
   };
 
   const onErrorFn = () => {
@@ -63,12 +61,12 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
     isInitialLoading: isIndexNameInitialLoading,
     isLoading: isIndexNameLoading,
   } = useQuery({
-    queryKey: ['loadAlertIndexNames', features],
+    queryKey: ['loadAlertIndexNames', ruleTypeIds],
     queryFn: queryIndexNameFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
     staleTime: 60 * 1000, // To prevent duplicated requests
-    enabled: featureIds.length > 0 && !hasSecurityAndO11yFeatureIds,
+    enabled: ruleTypeIds.length > 0 && !hasSecurityAndO11yFeatureIds,
   });
 
   const {
@@ -77,7 +75,7 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
     isInitialLoading: isAlertFieldsInitialLoading,
     isLoading: isAlertFieldsLoading,
   } = useQuery({
-    queryKey: ['loadAlertFields', features],
+    queryKey: ['loadAlertFields', ruleTypeIds],
     queryFn: queryAlertFieldsFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
@@ -146,7 +144,7 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
     () => ({
       dataViews,
       loading:
-        featureIds.length === 0 || hasSecurityAndO11yFeatureIds
+        ruleTypeIds.length === 0 || hasSecurityAndO11yFeatureIds
           ? false
           : isOnlySecurity
           ? isIndexNameInitialLoading || isIndexNameLoading || dataViews.length === 0
@@ -157,7 +155,7 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
     }),
     [
       dataViews,
-      featureIds.length,
+      ruleTypeIds.length,
       hasSecurityAndO11yFeatureIds,
       isOnlySecurity,
       isIndexNameInitialLoading,

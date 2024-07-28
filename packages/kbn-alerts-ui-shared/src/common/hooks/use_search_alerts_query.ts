@@ -28,7 +28,7 @@ export const queryKeyPrefix = ['alerts', searchAlerts.name];
  */
 export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
   const {
-    featureIds,
+    ruleTypeIds,
     fields,
     query = {
       bool: {},
@@ -48,7 +48,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
       searchAlerts({
         data,
         signal,
-        featureIds,
+        ruleTypeIds,
         fields,
         query,
         sort,
@@ -58,7 +58,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
       }),
     refetchOnWindowFocus: false,
     context: AlertsQueryContext,
-    enabled: featureIds.length > 0,
+    enabled: ruleTypeIds.length > 0,
     // To avoid flash of empty state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
     keepPreviousData: true,
     placeholderData: {

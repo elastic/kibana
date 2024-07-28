@@ -21,7 +21,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         query: buildRouteValidation(
           t.exact(
             t.type({
-              featureIds: t.union([t.string, t.array(t.string)]),
+              ruleTypeIds: t.array(t.string),
             })
           )
         ),
@@ -34,18 +34,21 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { featureIds = [] } = request.query;
-        const onlyO11yFeatureIds = (Array.isArray(featureIds) ? featureIds : [featureIds]).filter(
-          (fId) => fId !== 'siem'
+        const { ruleTypeIds = [] } = request.query;
+
+        const onlyO11yRuleTypeIds = ruleTypeIds.filter(
+          (ruleTypeId) => !ruleTypeId.startsWith('siem.')
         );
+
         const o11yIndices =
-          (onlyO11yFeatureIds
-            ? await alertsClient.getAuthorizedAlertsIndices(onlyO11yFeatureIds)
+          (onlyO11yRuleTypeIds
+            ? await alertsClient.getAuthorizedAlertsIndices(onlyO11yRuleTypeIds)
             : []) ?? [];
+
         if (o11yIndices.length === 0) {
           return response.notFound({
             body: {
-              message: `No alerts-observability indices found for featureIds [${featureIds}]`,
+              message: `No alerts-observability indices found for rule type ids [${onlyO11yRuleTypeIds}]`,
               attributes: { success: false },
             },
           });
@@ -53,10 +56,11 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
 
         const fields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
-          featureIds: onlyO11yFeatureIds,
+          ruleTypeIds: onlyO11yRuleTypeIds,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
+
         return response.ok({
           body: fields,
         });

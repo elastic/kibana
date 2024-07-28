@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
   RuleRegistrySearchRequestPagination,
@@ -70,7 +69,7 @@ export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   configurationId: string;
   id: string;
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   initialPageSize?: number;
   browserFields?: BrowserFields;
@@ -194,7 +193,7 @@ const AlertsTableStateWithQueryProvider = memo(
     alertsTableConfigurationRegistry,
     configurationId,
     id,
-    featureIds,
+    ruleTypeIds,
     query,
     initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
     leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
@@ -293,7 +292,7 @@ const AlertsTableStateWithQueryProvider = memo(
       onColumnResize,
       fields,
     } = useColumns({
-      featureIds,
+      ruleTypeIds,
       storageAlertsTable,
       storage,
       id,
@@ -302,7 +301,7 @@ const AlertsTableStateWithQueryProvider = memo(
     });
 
     const [queryParams, setQueryParams] = useState({
-      featureIds,
+      ruleTypeIds,
       fields,
       query,
       sort,
@@ -313,14 +312,14 @@ const AlertsTableStateWithQueryProvider = memo(
 
     useEffect(() => {
       setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
-        featureIds,
+        ruleTypeIds,
         fields,
         query,
         sort,
         runtimeMappings,
         // Go back to the first page if the query changes
         pageIndex: !deepEqual(prevQueryParams, {
-          featureIds,
+          ruleTypeIds,
           fields,
           query,
           sort,
@@ -330,7 +329,7 @@ const AlertsTableStateWithQueryProvider = memo(
           : oldPageIndex,
         pageSize: oldPageSize,
       }));
-    }, [featureIds, fields, query, runtimeMappings, sort]);
+    }, [ruleTypeIds, fields, query, runtimeMappings, sort]);
 
     const {
       data: alertsData,
@@ -501,7 +500,7 @@ const AlertsTableStateWithQueryProvider = memo(
         toolbarVisibility,
         shouldHighlightRow,
         dynamicRowHeight,
-        featureIds,
+        ruleTypeIds,
         querySnapshot,
         pageIndex: queryParams.pageIndex,
         pageSize: queryParams.pageSize,
@@ -540,7 +539,7 @@ const AlertsTableStateWithQueryProvider = memo(
         toolbarVisibility,
         shouldHighlightRow,
         dynamicRowHeight,
-        featureIds,
+        ruleTypeIds,
         querySnapshot,
         queryParams.pageIndex,
         queryParams.pageSize,

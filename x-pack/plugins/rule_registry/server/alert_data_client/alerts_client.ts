@@ -1141,7 +1141,7 @@ export class AlertsClient {
     });
   }
 
-  public async getAuthorizedAlertsIndices(ruleTypeIds: string[]): Promise<string[] | undefined> {
+  public async getAuthorizedAlertsIndices(ruleTypeIds?: string[]): Promise<string[] | undefined> {
     try {
       const authorizedRuleTypes = await this.authorization.getAllAuthorizedRuleTypesFindOperation({
         authorizationEntity: AlertingAuthorizationEntity.Alert,

@@ -104,7 +104,7 @@ describe('useSearchAlertsQuery', () => {
 
   const params: UseSearchAlertsQueryParams = {
     data: mockDataPlugin as unknown as DataPublicPluginStart,
-    featureIds: ['siem'],
+    ruleTypeIds: ['siem.esqlRule'],
     fields: [
       { field: 'kibana.rule.type.id', include_unmapped: true },
       { field: '*', include_unmapped: true },
@@ -267,8 +267,8 @@ describe('useSearchAlertsQuery', () => {
     });
   });
 
-  it('does not fetch with no feature ids', () => {
-    const { result } = renderHook(() => useSearchAlertsQuery({ ...params, featureIds: [] }), {
+  it('does not fetch with no rule type ids', () => {
+    const { result } = renderHook(() => useSearchAlertsQuery({ ...params, ruleTypeIds: [] }), {
       wrapper,
     });
 

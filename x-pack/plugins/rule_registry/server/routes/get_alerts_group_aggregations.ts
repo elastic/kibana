@@ -24,7 +24,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
         body: buildRouteValidation(
           t.exact(
             t.type({
-              featureIds: t.array(t.string),
+              ruleTypeIds: t.array(t.string),
               groupByField: t.string,
               aggregations: t.union([alertsAggregationsSchema, t.undefined]),
               filters: t.union([t.array(alertsGroupFilterSchema), t.undefined]),
@@ -41,7 +41,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
     },
     async (context, request, response) => {
       const {
-        featureIds,
+        ruleTypeIds,
         groupByField,
         aggregations,
         filters,
@@ -53,7 +53,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const alerts = await alertsClient.getGroupAggregations({
-          featureIds,
+          ruleTypeIds,
           groupByField,
           aggregations,
           filters,

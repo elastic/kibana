@@ -203,7 +203,7 @@ describe('searchAlerts', () => {
 
   const params: SearchAlertsParams = {
     data: mockDataPlugin as unknown as DataPublicPluginStart,
-    featureIds: ['siem'],
+    ruleTypeIds: ['siem.esqlRule'],
     fields: [
       { field: 'kibana.rule.type.id', include_unmapped: true },
       { field: '*', include_unmapped: true },
@@ -236,7 +236,7 @@ describe('searchAlerts', () => {
     expect(mockDataPlugin.search.search).toHaveBeenCalledTimes(1);
     expect(mockDataPlugin.search.search).toHaveBeenCalledWith(
       {
-        featureIds: params.featureIds,
+        ruleTypeIds: params.ruleTypeIds,
         fields: [...params.fields!],
         pagination: {
           pageIndex: params.pageIndex,

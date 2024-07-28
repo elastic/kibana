@@ -42,7 +42,7 @@ describe('getBrowserFieldsByFeatureId', () => {
           requestMock.create({
             method: 'get',
             path,
-            query: { featureIds: undefined },
+            query: { ruleTypeIds: undefined },
           }),
           context
         )
