@@ -333,7 +333,9 @@ detect_known_integrations() {
     fi
   done
 
-  if compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
+  if [ -S /var/run/docker.sock ]; then
+    known_integrations_list_string+="docker"$'\n'
+  elif compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
     known_integrations_list_string+="docker"$'\n'
   fi
 
