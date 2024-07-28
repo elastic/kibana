@@ -315,7 +315,7 @@ export interface DataViewsServicePublicMethods {
   getAllDataViewLazy: () => Promise<DataViewLazy[]>;
 
   getDataViewLazy: (id: string) => Promise<DataViewLazy>;
-  getDataViewLazyFromCache: (id: string) => DataViewLazy;
+  getDataViewLazyFromCache: (id: string) => Promise<DataViewLazy | undefined>;
 
   createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
 
@@ -1014,7 +1014,7 @@ export class DataViewsService {
     }
   };
 
-  getDataViewLazyFromCache = (id: string) => {
+  getDataViewLazyFromCache = async (id: string) => {
     return this.dataViewLazyCache.get(id);
   };
 
