@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { processMapping } from './validate';
+import { findInvalidEcsFields, processMapping } from './validate';
 
 describe('Testing ecs handler', () => {
   it('processMapping()', async () => {
@@ -48,5 +48,45 @@ describe('Testing ecs handler', () => {
       'source.address': [['checkpoint', 'firewall', 'origin']],
       'user.name': [['checkpoint', 'firewall', 'administrator']],
     });
+  });
+});
+
+describe('findInvalidEcsFields', () => {
+  it('invalid: invalid ecs mapping', async () => {
+    const ecsMappingInvalid = {
+      mysql_enterprise: {
+        audit: {
+          test_array: null,
+          bytes: {
+            target: 'myField.bytes',
+            confidence: 0.99,
+            type: 'number',
+            date_formats: [],
+          },
+        },
+      },
+    };
+
+    const invalid = findInvalidEcsFields(ecsMappingInvalid);
+    expect(invalid.length).toBe(1);
+  });
+
+  it('invalid: reserved ecs field', async () => {
+    const ecsMappingReserved = {
+      mysql_enterprise: {
+        audit: {
+          test_array: null,
+          type: {
+            target: 'event.type',
+            confidence: 'error',
+            type: 'string',
+            date_formats: [],
+          },
+        },
+      },
+    };
+
+    const invalid = findInvalidEcsFields(ecsMappingReserved);
+    expect(invalid.length).toBe(1);
   });
 });
