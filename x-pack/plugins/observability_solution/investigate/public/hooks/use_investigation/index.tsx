@@ -99,10 +99,6 @@ function useInvestigationWithoutContext({
         id: v4(),
         globalWidgetParameters: {
           filters: [],
-          query: {
-            language: 'kuery',
-            query: '',
-          },
           timeRange: {
             from,
             to,

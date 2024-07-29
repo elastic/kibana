@@ -1,0 +1,865 @@
+openapi: 3.0.3
+info:
+  description: Interact with and manage endpoints running the Elastic Defend integration.
+  title: Security Solution Endpoint Management API (Elastic Cloud Serverless)
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/endpoint/action:
+    get:
+      operationId: EndpointGetActionsList
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/EndpointActionListRequestQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Actions List schema
+  '/api/endpoint/action_log/{agent_id}':
+    get:
+      operationId: EndpointGetActionAuditLog
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/AuditLogRequestQuery'
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/AuditLogRequestParams'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get action audit log schema
+  /api/endpoint/action_status:
+    get:
+      operationId: EndpointGetActionsStatus
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              agent_ids:
+                $ref: '#/components/schemas/AgentIds'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Actions status schema
+  '/api/endpoint/action/{action_id}':
+    get:
+      operationId: EndpointGetActionsDetails
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/DetailsRequestParams'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Action details schema
+  '/api/endpoint/action/{action_id}/file/{file_id}/download`':
+    get:
+      operationId: EndpointFileDownload
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/FileDownloadRequestParams'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: File Download schema
+  '/api/endpoint/action/{action_id}/file/{file_id}`':
+    get:
+      operationId: EndpointFileInfo
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/FileInfoRequestParams'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: File Info schema
+  /api/endpoint/action/execute:
+    post:
+      operationId: EndpointExecuteAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteActionRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Execute Action
+  /api/endpoint/action/get_file:
+    post:
+      operationId: EndpointGetFileAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetFileActionRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get File Action
+  /api/endpoint/action/isolate:
+    post:
+      operationId: EndpointIsolateHostAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alert_ids:
+                  $ref: '#/components/schemas/AlertIds'
+                case_ids:
+                  $ref: '#/components/schemas/CaseIds'
+                comment:
+                  $ref: '#/components/schemas/Comment'
+                endpoint_ids:
+                  $ref: '#/components/schemas/EndpointIds'
+                parameters:
+                  $ref: '#/components/schemas/Parameters'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Isolate host Action
+  /api/endpoint/action/kill_process:
+    post:
+      operationId: EndpointKillProcessAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessActionSchemas'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Kill process Action
+  /api/endpoint/action/running_procs:
+    post:
+      operationId: EndpointGetRunningProcessesAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alert_ids:
+                  $ref: '#/components/schemas/AlertIds'
+                case_ids:
+                  $ref: '#/components/schemas/CaseIds'
+                comment:
+                  $ref: '#/components/schemas/Comment'
+                endpoint_ids:
+                  $ref: '#/components/schemas/EndpointIds'
+                parameters:
+                  $ref: '#/components/schemas/Parameters'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Running Processes Action
+  /api/endpoint/action/scan:
+    post:
+      operationId: EndpointScanAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanActionRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Scan Action
+  /api/endpoint/action/state:
+    get:
+      operationId: EndpointGetActionsState
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Action State schema
+  /api/endpoint/action/suspend_process:
+    post:
+      operationId: EndpointSuspendProcessAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessActionSchemas'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Suspend process Action
+  /api/endpoint/action/unisolate:
+    post:
+      operationId: EndpointUnisolateHostAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alert_ids:
+                  $ref: '#/components/schemas/AlertIds'
+                case_ids:
+                  $ref: '#/components/schemas/CaseIds'
+                comment:
+                  $ref: '#/components/schemas/Comment'
+                endpoint_ids:
+                  $ref: '#/components/schemas/EndpointIds'
+                parameters:
+                  $ref: '#/components/schemas/Parameters'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Unisolate host Action
+  /api/endpoint/action/upload:
+    post:
+      operationId: EndpointUploadAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileUploadActionRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Upload Action
+  /api/endpoint/metadata:
+    get:
+      operationId: GetEndpointMetadataList
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/ListRequestQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Metadata List schema
+  '/api/endpoint/metadata/{id}':
+    get:
+      operationId: GetEndpointMetadata
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Metadata schema
+  /api/endpoint/metadata/transforms:
+    get:
+      operationId: GetEndpointMetadataTransform
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Metadata Transform schema
+  /api/endpoint/policy_response:
+    get:
+      operationId: GetPolicyResponse
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              agentId:
+                $ref: '#/components/schemas/AgentId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Policy Response schema
+  /api/endpoint/policy/summaries:
+    get:
+      operationId: GetAgentPolicySummary
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              package_name:
+                type: string
+              policy_id:
+                nullable: true
+                type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get Agent Policy Summary schema
+  '/api/endpoint/protection_updates_note/{package_policy_id}':
+    get:
+      operationId: GetProtectionUpdatesNote
+      parameters:
+        - in: path
+          name: package_policy_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
+          description: OK
+      summary: Get Protection Updates Note schema
+    post:
+      operationId: CreateUpdateProtectionUpdatesNote
+      parameters:
+        - in: path
+          name: package_policy_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
+          description: OK
+      summary: Create Update Protection Updates Note schema
+  '/api/endpoint/suggestions/{suggestion_type}':
+    post:
+      operationId: GetEndpointSuggestions
+      parameters:
+        - in: path
+          name: suggestion_type
+          required: true
+          schema:
+            enum:
+              - eventFilters
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                field:
+                  type: string
+                fieldMeta: {}
+                filters: {}
+                query:
+                  type: string
+              required:
+                - parameters
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: OK
+      summary: Get suggestions
+components:
+  schemas:
+    AgentId:
+      description: Agent ID
+      type: string
+    AgentIds:
+      minLength: 1
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          maxItems: 50
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+    AlertIds:
+      description: A list of alerts ids.
+      items:
+        $ref: '#/components/schemas/NonEmptyString'
+      minItems: 1
+      type: array
+    AuditLogRequestParams:
+      type: object
+      properties:
+        agent_id:
+          $ref: '#/components/schemas/AgentId'
+    AuditLogRequestQuery:
+      type: object
+      properties:
+        end_date:
+          $ref: '#/components/schemas/EndDate'
+        page:
+          $ref: '#/components/schemas/Page'
+        page_size:
+          $ref: '#/components/schemas/PageSize'
+        start_date:
+          $ref: '#/components/schemas/StartDate'
+    CaseIds:
+      description: Case IDs to be updated (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    Command:
+      description: The command to be executed (cannot be an empty string)
+      enum:
+        - isolate
+        - unisolate
+        - kill-process
+        - suspend-process
+        - running-processes
+        - get-file
+        - execute
+        - upload
+      minLength: 1
+      type: string
+    Commands:
+      items:
+        $ref: '#/components/schemas/Command'
+      type: array
+    Comment:
+      description: Optional comment
+      type: string
+    DetailsRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+    EndDate:
+      description: End date
+      type: string
+    EndpointActionListRequestQuery:
+      type: object
+      properties:
+        agentIds:
+          $ref: '#/components/schemas/AgentIds'
+        commands:
+          $ref: '#/components/schemas/Commands'
+        endDate:
+          $ref: '#/components/schemas/EndDate'
+        page:
+          $ref: '#/components/schemas/Page'
+        pageSize:
+          default: 10
+          description: Number of items per page
+          maximum: 10000
+          minimum: 1
+          type: integer
+        startDate:
+          $ref: '#/components/schemas/StartDate'
+        types:
+          $ref: '#/components/schemas/Types'
+        userIds:
+          $ref: '#/components/schemas/UserIds'
+        withOutputs:
+          $ref: '#/components/schemas/WithOutputs'
+    EndpointIds:
+      description: List of endpoint IDs (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    ExecuteActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                command:
+                  $ref: '#/components/schemas/Command'
+                timeout:
+                  $ref: '#/components/schemas/Timeout'
+              required:
+                - command
+          required:
+            - parameters
+    FileDownloadRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+        file_id:
+          type: string
+      required:
+        - action_id
+        - file_id
+    FileInfoRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+        file_id:
+          type: string
+      required:
+        - action_id
+        - file_id
+    FileUploadActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+        - type: object
+          properties:
+            file:
+              format: binary
+              type: string
+            parameters:
+              type: object
+              properties:
+                overwrite:
+                  default: false
+                  type: boolean
+          required:
+            - parameters
+            - file
+    GetFileActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+              required:
+                - path
+          required:
+            - parameters
+    ListRequestQuery:
+      type: object
+      properties:
+        hostStatuses:
+          items:
+            enum:
+              - healthy
+              - offline
+              - updating
+              - inactive
+              - unenrolled
+            type: string
+          type: array
+        kuery:
+          nullable: true
+          type: string
+        page:
+          default: 0
+          description: Page number
+          minimum: 0
+          type: integer
+        pageSize:
+          default: 10
+          description: Number of items per page
+          maximum: 10000
+          minimum: 1
+          type: integer
+        sortDirection:
+          enum:
+            - asc
+            - desc
+          nullable: true
+          type: string
+        sortField:
+          enum:
+            - enrolled_at
+            - metadata.host.hostname
+            - host_status
+            - metadata.Endpoint.policy.applied.name
+            - metadata.Endpoint.policy.applied.status
+            - metadata.host.os.name
+            - metadata.host.ip
+            - metadata.agent.version
+            - last_checkin
+          type: string
+      required:
+        - hostStatuses
+    NonEmptyString:
+      description: A string that is not empty and does not contain only whitespace
+      minLength: 1
+      pattern: ^(?! *$).+$
+      type: string
+    Page:
+      default: 1
+      description: Page number
+      minimum: 1
+      type: integer
+    PageSize:
+      default: 10
+      description: Number of items per page
+      maximum: 100
+      minimum: 1
+      type: integer
+    Parameters:
+      description: Optional parameters object
+      type: object
+    ProcessActionSchemas:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      minimum: 1
+                      type: integer
+                - type: object
+                  properties:
+                    entity_id:
+                      minLength: 1
+                      type: string
+          required:
+            - parameters
+    ProtectionUpdatesNoteResponse:
+      type: object
+      properties:
+        note:
+          type: string
+    ScanActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: '#/components/schemas/AlertIds'
+            case_ids:
+              $ref: '#/components/schemas/CaseIds'
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+              required:
+                - path
+          required:
+            - parameters
+    StartDate:
+      description: Start date
+      type: string
+    SuccessResponse:
+      type: object
+      properties: {}
+    Timeout:
+      description: The maximum timeout value in milliseconds (optional)
+      minimum: 1
+      type: integer
+    Type:
+      enum:
+        - automated
+        - manual
+      type: string
+    Types:
+      items:
+        $ref: '#/components/schemas/Type'
+      maxLength: 2
+      minLength: 1
+      type: array
+    UserIds:
+      description: User IDs
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+    WithOutputs:
+      description: With Outputs
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
