@@ -15010,10 +15010,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_app/top_nav/editor_menu.tsx"
-            },
-            {
               "plugin": "canvas",
               "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
             },
