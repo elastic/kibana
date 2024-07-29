@@ -1230,6 +1230,7 @@ describe('Agent policy', () => {
       mockedGetFullAgentPolicy.mockResolvedValue({
         id: 'policy123',
         revision: 1,
+        namespaces: ['mySpace'],
         inputs: [
           {
             id: 'input-123',
@@ -1282,10 +1283,16 @@ describe('Agent policy', () => {
             }),
             expect.objectContaining({
               '@timestamp': expect.anything(),
-              data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+              data: {
+                id: 'policy123',
+                inputs: [{ id: 'input-123' }],
+                revision: 1,
+                namespaces: ['mySpace'],
+              },
               default_fleet_server: false,
               policy_id: 'policy123',
               revision_idx: 1,
+              namespaces: ['mySpace'],
             }),
           ],
           refresh: 'wait_for',
