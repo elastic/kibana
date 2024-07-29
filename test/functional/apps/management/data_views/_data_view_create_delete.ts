@@ -147,6 +147,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return Promise.all(comparedHeaders);
         });
       });
+
+      it('should support unmatched index pattern segments', async function () {
+        await PageObjects.settings.createIndexPattern('l*,z*', '@timestamp');
+        const patternName = await PageObjects.settings.getIndexPageHeading();
+        expect(patternName).to.be('l*,z*');
+      });
     });
 
     describe('edit index pattern', () => {
