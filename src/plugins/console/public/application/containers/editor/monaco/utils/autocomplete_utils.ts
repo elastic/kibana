@@ -338,7 +338,16 @@ const getInsertText = (
   }
   let insertText = '';
   if (typeof name === 'string') {
-    insertText = bodyContent.endsWith('"') ? '' : '"';
+    const bodyContentLines = bodyContent.split('\n');
+    const currentContentLine = bodyContentLines[bodyContentLines.length - 1];
+    const incompleteFieldRegex = /.*"[^"]*$/;
+    if (incompleteFieldRegex.test(currentContentLine)) {
+      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+      insertText = '';
+    } else {
+      // The cursor is at the beginning of a field so the insert text should start with a quote
+      insertText = '"';
+    }
     if (insertValue && insertValue !== '{' && insertValue !== '[') {
       insertText += `${insertValue}"`;
     } else {
