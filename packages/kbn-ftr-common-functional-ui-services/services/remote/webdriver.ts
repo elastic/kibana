@@ -116,7 +116,9 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Use fake device for Media Stream to replace actual camera and microphone.
     'use-fake-device-for-media-stream',
     // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
-    'use-fake-ui-for-media-stream'
+    'use-fake-ui-for-media-stream',
+    // Do not show "Choose your search engine" dialog (> Chrome v127)
+    'disable-search-engine-choice-screen'
   );
 
   if (process.platform === 'linux') {
