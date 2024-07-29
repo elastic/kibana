@@ -9,7 +9,10 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestTransform } from './transform/generate_latest_transform';
-import { generateHistoryTransform } from './transform/generate_history_transform';
+import {
+  generateBackfillHistoryTransform,
+  generateHistoryTransform,
+} from './transform/generate_history_transform';
 
 export async function createAndInstallHistoryTransform(
   esClient: ElasticsearchClient,
@@ -33,7 +36,7 @@ export async function createAndInstallHistoryBackfillTransform(
   logger: Logger
 ) {
   try {
-    const historyTransform = generateHistoryTransform(definition, true);
+    const historyTransform = generateBackfillHistoryTransform(definition);
     await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
       logger,
     });
