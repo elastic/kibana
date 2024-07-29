@@ -107,6 +107,7 @@
     "@kbn/event-annotation-components",
     "@kbn/slo-schema",
     "@kbn/license-management-plugin",
+    "@kbn/observability-alerting-rule-utils",
   ],
   "exclude": [
     "target/**/*"

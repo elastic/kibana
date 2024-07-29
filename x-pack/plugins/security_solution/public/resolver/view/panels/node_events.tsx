@@ -16,7 +16,6 @@ import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import type { EventStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
-import { StyledPanel } from '../styles';
 import { PanelLoading } from './panel_loading';
 import { useLinkProps } from '../use_link_props';
 import * as nodeDataModel from '../../models/node_data';
@@ -29,14 +28,10 @@ export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
   const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
 
   if (processEvent === undefined || nodeStats === undefined) {
-    return (
-      <StyledPanel hasBorder>
-        <PanelLoading id={id} />
-      </StyledPanel>
-    );
+    return <PanelLoading id={id} />;
   } else {
     return (
-      <StyledPanel hasBorder>
+      <>
         <NodeEventsBreadcrumbs
           id={id}
           nodeName={event.processNameSafeVersion(processEvent)}
@@ -45,7 +40,7 @@ export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
         />
         <EuiSpacer size="l" />
         <EventCategoryLinks id={id} nodeID={nodeID} relatedStats={nodeStats} />
-      </StyledPanel>
+      </>
     );
   }
 }

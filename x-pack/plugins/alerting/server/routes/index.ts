@@ -19,7 +19,7 @@ import { updateRuleRoute } from './rule/apis/update/update_rule_route';
 import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
-import { enableRuleRoute } from './rule/apis/enable/enable_rule';
+import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
 import { findRulesRoute, findInternalRulesRoute } from './rule/apis/find/find_rules_route';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
