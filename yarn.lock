@@ -1700,10 +1700,10 @@
   dependencies:
     tslib "^1.9.3"
 
-"@elastic/ebt@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/ebt/-/ebt-0.0.3.tgz#3cf3a74d2e22c2149c53ae8e291ff11ab004089e"
-  integrity sha512-Wr38cKGQ7cw5Zl9c9Z2Ms8bypzX1im+lNhGbHPz3lLRcmJsXe19Ei6iYDZ0ALWdeZ78haGhwu50927ONuZilmQ==
+"@elastic/ebt@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/ebt/-/ebt-0.0.4.tgz#59b7182e8b171c7dcdde3833f67f726a9f497025"
+  integrity sha512-QjnJWyDP6yBHp6Zq1vStyG6phFse3IZZAlWKg9QHZiNzjfBIbED37SbE8bM7gYuRhpv/qwrBv920nXBlrmnqqw==
   dependencies:
     "@babel/runtime" "^7.24.7"
     fp-ts "^2.3.1"
