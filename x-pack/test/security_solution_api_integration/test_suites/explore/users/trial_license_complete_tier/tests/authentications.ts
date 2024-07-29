@@ -13,8 +13,10 @@ import {
   UsersQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
+import TestAgent from 'supertest/lib/agent';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import { BsearchService } from '../../../../../../../../test/common/services/bsearch';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';

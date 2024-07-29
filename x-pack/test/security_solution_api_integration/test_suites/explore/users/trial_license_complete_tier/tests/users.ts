@@ -13,6 +13,8 @@ import {
   FlowTarget,
   NetworkUsersStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import TestAgent from 'supertest/lib/agent';
+import { BsearchService } from '../../../../../../../../test/common/services/bsearch';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
