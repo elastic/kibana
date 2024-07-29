@@ -174,7 +174,9 @@
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
     "@kbn/securitysolution-exceptions-common",
+    "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/entityManager-plugin",
-    "@kbn/osquery-plugin"
+    "@kbn/osquery-plugin",
+    "@kbn/entities-schema"
   ]
 }

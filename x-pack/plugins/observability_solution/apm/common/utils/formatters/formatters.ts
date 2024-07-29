@@ -56,7 +56,11 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
-export function asDecimalOrInteger(value: number, threshold = 10) {
+export function asDecimalOrInteger(value: Maybe<number>, threshold = 10) {
+  if (!isFiniteNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
   // exact 0 or above threshold should not have decimal
   if (value === 0 || value >= threshold) {
     return asInteger(value);
