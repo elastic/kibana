@@ -50,6 +50,7 @@ describe('generateOpenApiDocument', () => {
             routes: [
               { method: 'get' },
               { method: 'post' },
+              { method: 'post', path: '/no-xsrf/{id}/{path*}', options: { xsrfRequired: false } },
               {
                 method: 'delete',
                 validationSchemas: {
@@ -60,7 +61,18 @@ describe('generateOpenApiDocument', () => {
             ],
           },
         },
-        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              { method: 'get' },
+              {
+                method: 'post',
+                path: '/no-xsrf/{id}/{path*}',
+                options: { access: 'public', options: { xsrfRequired: false } },
+              },
+            ],
+          },
+        },
       });
       expect(
         generateOpenApiDocument(

@@ -31,7 +31,7 @@ export enum OpenAiProviderType {
 
 export const DEFAULT_TIMEOUT_MS = 120000;
 
-export const DEFAULT_OPENAI_MODEL = 'gpt-4';
+export const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
 export const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const OPENAI_LEGACY_COMPLETION_URL = 'https://api.openai.com/v1/completions' as const;

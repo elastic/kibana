@@ -1,0 +1,99 @@
+{
+  "id": "investigateApp",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "investigateApp",
+      "id": "def-public.InvestigateAppPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigateAppPublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "investigateApp",
+      "id": "def-public.InvestigateAppPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigateAppPublicStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "investigateApp",
+        "id": "def-server.InvestigateAppServerRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "InvestigateAppServerRouteRepository",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/plugins/observability_solution/investigate_app/server/routes/get_global_investigate_app_server_route_repository.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "investigateApp",
+      "id": "def-server.InvestigateAppServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigateAppServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "investigateApp",
+      "id": "def-server.InvestigateAppServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InvestigateAppServerStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/investigate_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

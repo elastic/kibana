@@ -346,6 +346,8 @@ export const langChainExecute = async ({
   // Create an ElasticsearchStore for KB interactions
   const kbDataClient =
     (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+  const bedrockChatEnabled =
+    assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
   const esStore = new ElasticsearchStore(
     esClient,
     kbDataClient?.indexTemplateAndPattern?.alias ?? '',
@@ -368,6 +370,7 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
+    bedrockChatEnabled,
     assistantTools,
     conversationId,
     connectorId,

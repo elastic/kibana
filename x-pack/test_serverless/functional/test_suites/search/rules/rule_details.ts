@@ -75,7 +75,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await svlCommonPage.loginWithRole('viewer');
+      await svlCommonPage.loginAsViewer();
     });
 
     after(async () => {

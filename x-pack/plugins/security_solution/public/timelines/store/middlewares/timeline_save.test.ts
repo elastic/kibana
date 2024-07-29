@@ -262,7 +262,6 @@ describe('Timeline save middleware', () => {
         },
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],

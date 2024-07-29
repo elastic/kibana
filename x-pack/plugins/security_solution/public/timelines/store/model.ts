@@ -7,7 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
+import type { SessionViewConfig } from '../../../common/types';
 import type {
   EqlOptionsSelected,
   TimelineNonEcsData,
@@ -105,7 +105,6 @@ export interface TimelineModel {
   loadingText?: string | React.ReactNode;
   queryFields: string[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
-  expandedDetail: ExpandedDetailTimeline;
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
   indexNames: string[];
@@ -162,7 +161,6 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
-    | 'expandedDetail'
     | 'footerText'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
