@@ -40,7 +40,7 @@ export function AiAssistantSelectionPage() {
 
   return (
     <>
-      <EuiTitle size="l">
+      <EuiTitle size="l" data-test-subj="pluginsAiAssistantSelectionPageTitle">
         <h2>
           {i18n.translate(
             'aiAssistantManagementSelection.aiAssistantSettingsPage.h2.aIAssistantLabel',
@@ -53,7 +53,7 @@ export function AiAssistantSelectionPage() {
 
       <EuiSpacer size="m" />
 
-      <EuiText>
+      <EuiText data-test-subj="pluginsAiAssistantSelectionPageDescription">
         {i18n.translate(
           'aiAssistantManagementSelection.aiAssistantSettingsPage.descriptionTextLabel',
           {
@@ -75,6 +75,7 @@ export function AiAssistantSelectionPage() {
                     <EuiSpacer size="s" />
                     <EuiCallOut
                       iconType="warning"
+                      data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
                         {
@@ -145,6 +146,7 @@ export function AiAssistantSelectionPage() {
                     <EuiSpacer size="s" />
                     <EuiCallOut
                       iconType="warning"
+                      data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
                         {

@@ -18,10 +18,10 @@ describe('AiAssistantSelectionPage', () => {
   const setBreadcrumbs = jest.fn();
   const navigateToApp = jest.fn();
 
-  const generateMockCapabilities = (hasPersission: boolean) =>
+  const generateMockCapabilities = (hasPermission: boolean) =>
     ({
-      observabilityAIAssistant: { show: hasPersission },
-      securitySolutionAssistant: { 'ai-assistant': hasPersission },
+      observabilityAIAssistant: { show: hasPermission },
+      securitySolutionAssistant: { 'ai-assistant': hasPermission },
     } as unknown as CoreStart['application']['capabilities']);
 
   const testCapabilities = generateMockCapabilities(true);
@@ -32,7 +32,7 @@ describe('AiAssistantSelectionPage', () => {
       setBreadcrumbs,
       navigateToApp,
     });
-    return render(<AiAssistantSelectionPage />, {
+    render(<AiAssistantSelectionPage />, {
       wrapper: I18nProvider,
     });
   };
@@ -52,26 +52,26 @@ describe('AiAssistantSelectionPage', () => {
 
   it('renders the title and description', () => {
     renderComponent(generateMockCapabilities(true));
-    expect(screen.getByText('AI Assistant')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'AI Assistants use generative AI to help your team by explaining errors, suggesting remediation, and helping you request, analyze, and visualize your data.'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('pluginsAiAssistantSelectionPageTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('pluginsAiAssistantSelectionPageDescription')).toBeInTheDocument();
   });
 
   describe('Observability AI Assistant Card', () => {
     describe('when the feature is disabled', () => {
       it('displays the disabled callout', () => {
         renderComponent(generateMockCapabilities(false));
-        expect(screen.getByText('This feature is disabled.')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('pluginsAiAssistantSelectionPageObservabilityDocumentationCallout')
+        ).toBeInTheDocument();
       });
     });
 
     describe('when the feature is enabled', () => {
       it('does not display the disabled callout', () => {
         renderComponent(testCapabilities);
-        expect(screen.queryByText('This feature is disabled.')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('pluginsAiAssistantSelectionPageObservabilityDocumentationCallout')
+        ).not.toBeInTheDocument();
       });
 
       it('renders the manage settings button', () => {
@@ -105,7 +105,7 @@ describe('AiAssistantSelectionPage', () => {
       it('displays the disabled callout', () => {
         renderComponent(generateMockCapabilities(false));
         expect(
-          screen.getByText('This feature is disabled. It can be enabled from Spaces > Features.')
+          screen.getByTestId('pluginsAiAssistantSelectionPageSecurityDocumentationCallout')
         ).toBeInTheDocument();
       });
     });
@@ -114,7 +114,7 @@ describe('AiAssistantSelectionPage', () => {
       it('does not display the disabled callout', () => {
         renderComponent(testCapabilities);
         expect(
-          screen.queryByText('This feature is disabled. It can be enabled from Spaces > Features.')
+          screen.queryByTestId('pluginsAiAssistantSelectionPageSecurityDocumentationCallout')
         ).not.toBeInTheDocument();
       });
 
