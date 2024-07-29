@@ -10,6 +10,7 @@ import { SingleCommandQueryContext } from "./esql_parser";
 import { SourceCommandContext } from "./esql_parser";
 import { ProcessingCommandContext } from "./esql_parser";
 import { WhereCommandContext } from "./esql_parser";
+import { MatchExpressionContext } from "./esql_parser";
 import { LogicalNotContext } from "./esql_parser";
 import { BooleanDefaultContext } from "./esql_parser";
 import { IsNullContext } from "./esql_parser";
@@ -17,6 +18,7 @@ import { RegexExpressionContext } from "./esql_parser";
 import { LogicalInContext } from "./esql_parser";
 import { LogicalBinaryContext } from "./esql_parser";
 import { RegexBooleanExpressionContext } from "./esql_parser";
+import { MatchBooleanExpressionContext } from "./esql_parser";
 import { ValueExpressionDefaultContext } from "./esql_parser";
 import { ComparisonContext } from "./esql_parser";
 import { OperatorExpressionDefaultContext } from "./esql_parser";
@@ -157,6 +159,18 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitWhereCommand?: (ctx: WhereCommandContext) => void;
 	/**
+	 * Enter a parse tree produced by the `matchExpression`
+	 * labeled alternative in `esql_parser.booleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterMatchExpression?: (ctx: MatchExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `matchExpression`
+	 * labeled alternative in `esql_parser.booleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitMatchExpression?: (ctx: MatchExpressionContext) => void;
+	/**
 	 * Enter a parse tree produced by the `logicalNot`
 	 * labeled alternative in `esql_parser.booleanExpression`.
 	 * @param ctx the parse tree
@@ -238,6 +252,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRegexBooleanExpression?: (ctx: RegexBooleanExpressionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.matchBooleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterMatchBooleanExpression?: (ctx: MatchBooleanExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.matchBooleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitMatchBooleanExpression?: (ctx: MatchBooleanExpressionContext) => void;
 	/**
 	 * Enter a parse tree produced by the `valueExpressionDefault`
 	 * labeled alternative in `esql_parser.valueExpression`.

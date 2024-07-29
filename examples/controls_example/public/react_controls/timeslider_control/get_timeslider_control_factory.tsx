@@ -49,7 +49,7 @@ export const getTimesliderControlFactory = (
       i18n.translate('controlsExamples.timesliderControl.displayName', {
         defaultMessage: 'Time slider',
       }),
-    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi, services);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
@@ -185,7 +185,8 @@ export const getTimesliderControlFactory = (
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControl = initializeDefaultControlApi(initialState);
+      // overwrite the `width` attribute because time slider should always have a width of large
+      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)

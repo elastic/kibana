@@ -8,9 +8,9 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
-  RiskEngineInitResponse,
-  RiskEngineInitResult,
-} from '../../../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+  InitRiskEngineResponse,
+  InitRiskEngineResult,
+} from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -64,7 +64,7 @@ export const riskEngineInitRoute = (
             riskScoreDataClient,
           });
 
-          const result: RiskEngineInitResult = {
+          const result: InitRiskEngineResult = {
             risk_engine_enabled: initResult.riskEngineEnabled,
             risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
             risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
@@ -72,7 +72,7 @@ export const riskEngineInitRoute = (
             errors: initResult.errors,
           };
 
-          const initResponse: RiskEngineInitResponse = {
+          const initResponse: InitRiskEngineResponse = {
             result,
           };
 

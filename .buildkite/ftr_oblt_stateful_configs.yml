@@ -10,6 +10,9 @@ disabled:
   - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_runner.ts
   - x-pack/plugins/observability_solution/profiling/e2e/ftr_config.ts
 
+  #FTR configs
+  - x-pack/plugins/observability_solution/uptime/e2e/config.ts
+
   # Elastic Synthetics configs
   - x-pack/plugins/observability_solution/uptime/e2e/uptime/synthetics_run.ts
   - x-pack/plugins/observability_solution/synthetics/e2e/config.ts
@@ -27,6 +30,7 @@ enabled:
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/slos/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
+  - x-pack/test/api_integration/apis/entity_manager/config.ts
   - x-pack/test/apm_api_integration/basic/config.ts
   - x-pack/test/apm_api_integration/cloud/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
@@ -45,4 +49,3 @@ enabled:
   - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
-  
