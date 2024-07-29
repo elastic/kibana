@@ -6,6 +6,7 @@
  */
 
 import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { createGrokProcessor } from '../../../../common/pipeline_utils';
 import { EsqlTransport } from '../../../lib/esql_transport';
 import { NewestIndex } from '../../../../common/types';
 import { LOG_LEVEL_FIELD, MESSAGE_FIELD } from '../../../../common/constants';
@@ -63,16 +64,6 @@ export class LogLevelExtractionDetectionRule {
   }
 
   private buildPipelineProcessors(pattern: string): IngestProcessorContainer[] {
-    return [
-      {
-        grok: {
-          description: `Extract ${LOG_LEVEL_FIELD} field from ${MESSAGE_FIELD}`,
-          field: MESSAGE_FIELD,
-          patterns: [pattern],
-          ignore_failure: true,
-          ignore_missing: true,
-        },
-      },
-    ];
+    return [createGrokProcessor({ field: MESSAGE_FIELD, patterns: [pattern] })];
   }
 }

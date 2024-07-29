@@ -6,6 +6,7 @@
  */
 
 import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { createGrokProcessor } from '../../../../common/pipeline_utils';
 import { EsqlTransport } from '../../../lib/esql_transport';
 import { NewestIndex } from '../../../../common/types';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../../../common/constants';
@@ -84,15 +85,7 @@ export class TimestampExtractionDetectionRule {
 
   private buildPipelineProcessors(pattern: string): IngestProcessorContainer[] {
     return [
-      {
-        grok: {
-          description: `Extract @timestamp field from ${MESSAGE_FIELD}`,
-          field: MESSAGE_FIELD,
-          patterns: [pattern],
-          ignore_failure: true,
-          ignore_missing: true,
-        },
-      },
+      createGrokProcessor({ field: MESSAGE_FIELD, patterns: [pattern] }),
       {
         date: {
           field: TEMPORARY_TIMESTAMP_FIELD,

@@ -12,6 +12,7 @@ import {
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
+import { createRenameProcessor } from '../../../../common/pipeline_utils';
 import { createMappingGapsDetection } from '../../../../common/detections/utils';
 import { NewestIndex } from '../../../../common/types';
 import { MappingGap, MappingGapsDetection } from '../../../../common/detections/types';
@@ -80,16 +81,7 @@ export class MappingGapsDetectionRule {
   }
 
   private buildPipelineProcessors(gaps: MappingGap[]): IngestProcessorContainer[] {
-    return gaps
-      .filter((gap) => Boolean(gap.target_field))
-      .map(({ field, target_field: target }) => ({
-        rename: {
-          field,
-          target_field: target as string,
-          ignore_failure: true,
-          ignore_missing: true,
-        },
-      }));
+    return gaps.filter((gap) => Boolean(gap.target_field)).map(createRenameProcessor);
   }
 }
 

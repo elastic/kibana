@@ -19,10 +19,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Fragment, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { FieldName } from '@kbn/fields-metadata-plugin/common';
+import { createRenameProcessor } from '../../common/pipeline_utils';
 import { Recommendation } from '../../common/recommendations';
 import { LogsOptimizationPageTemplate } from '../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../utils/breadcrumbs';
@@ -388,16 +389,44 @@ const MappingGapRecommendation = ({ recommendation }: { recommendation: Recommen
     [fieldsMetadata]
   );
 
-  const [selectedOptions, setSelected] = useState();
+  const [selectedECSFieldsMap, setSelectedECSFieldsMap] = useState(() =>
+    recommendation.detection.gaps.reduce((gapsMap, gap) => {
+      gapsMap[gap.field] = [];
 
-  const onChange = (selectedOptions) => {
-    // We should only get back either 0 or 1 options.
-    setSelected(selectedOptions);
-  };
-
-  const [pipeline, setPipeline] = useState(() =>
-    JSON.stringify(recommendation.detection.tasks.processors, null, 2)
+      return gapsMap;
+    }, {})
   );
+
+  useEffect(() => {
+    if (options.length > 0) {
+      setSelectedECSFieldsMap((prev) => {
+        return recommendation.detection.gaps.reduce(
+          (gapsMap, gap) => {
+            gapsMap[gap.field] = gap.target_field
+              ? [options.find((option) => option.value === gap.target_field)]
+              : [];
+
+            return gapsMap;
+          },
+          { ...prev }
+        );
+      });
+    }
+  }, [options, recommendation.detection.gaps]);
+
+  const [pipeline, setPipeline] = useState(recommendation.detection.tasks.processors);
+
+  const handleSelectionChange = (selectedOptions, gap) => {
+    const updatedECSFieldsMap = { ...selectedECSFieldsMap, [gap.field]: selectedOptions };
+    const updatedPipeline = Object.entries(updatedECSFieldsMap)
+      .filter(([_field, selectedOptions]) => selectedOptions?.length > 0)
+      .map(([field, selectedOptions]) =>
+        createRenameProcessor({ field, target_field: selectedOptions.at(0).value })
+      );
+
+    setSelectedECSFieldsMap(updatedECSFieldsMap);
+    setPipeline(updatedPipeline);
+  };
 
   const accordionTriggerButton = (
     <EuiTitle size="xs">
@@ -468,8 +497,8 @@ const MappingGapRecommendation = ({ recommendation }: { recommendation: Recommen
                       placeholder="Select a field..."
                       singleSelection={{ asPlainText: true }}
                       options={options}
-                      selectedOptions={selectedOptions}
-                      onChange={onChange}
+                      selectedOptions={selectedECSFieldsMap[gap.field]}
+                      onChange={(selectedOpts) => handleSelectionChange(selectedOpts, gap)}
                     />
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -479,7 +508,7 @@ const MappingGapRecommendation = ({ recommendation }: { recommendation: Recommen
           <EuiFlexItem grow={3}>
             <CodeEditor
               languageId="json"
-              value={pipeline}
+              value={JSON.stringify(pipeline, null, 2)}
               onChange={setPipeline}
               fitToContent={{
                 minLines: 10,
