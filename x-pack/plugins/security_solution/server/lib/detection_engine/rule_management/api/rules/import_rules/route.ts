@@ -118,7 +118,8 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
             parsedObjectsWithoutDuplicateErrors,
-            actionSOClient
+            actionSOClient,
+            actionsClient
           );
 
           // import actions-connectors
@@ -158,6 +159,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });
+
           const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
           const successes = importRuleResponse.filter((resp) => {
             if (isImportRegular(resp)) {
