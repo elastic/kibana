@@ -148,6 +148,6 @@ export const historySettingsSchema = z
   .transform((settings) => {
     return {
       ...settings,
-      lookbackPeriod: settings?.lookbackPeriod || '1h',
+      lookbackPeriod: settings?.lookbackPeriod || durationSchema.parse('1h'),
     };
   });

@@ -112,9 +112,13 @@ describe('schemas', () => {
 
   describe('historySettingsSchema', () => {
     it('should return default values when not defined', () => {
-      const result = historySettingsSchema.safeParse(undefined);
+      let result = historySettingsSchema.safeParse(undefined);
       expect(result.success).toBeTruthy();
       expect(result.data).toEqual({ lookbackPeriod: '1h' });
+
+      result = historySettingsSchema.safeParse({ syncDelay: '1m' });
+      expect(result.success).toBeTruthy();
+      expect(result.data).toEqual({ syncDelay: '1m', lookbackPeriod: '1h' });
     });
 
     it('should return user defined values when defined', () => {
