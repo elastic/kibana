@@ -40,7 +40,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt9bc52ff78
 [discrete]
 ==== Statistics in legends
 
-Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for **Lens** and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. For example, the following chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
+Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for **Lens** and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. In the following example, the chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
 
 image::images/statistics-in-legends.png[Statistics in legends]
 
