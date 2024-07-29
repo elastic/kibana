@@ -1034,24 +1034,26 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   </EuiFlexItem>
                 )}
 
-                {arePartitioningFieldsProvided && selectedJob && shouldShowForecastButton === true && (
-                  <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
-                    <ForecastingModal
-                      buttonMode={'empty'}
-                      job={selectedJob}
-                      jobState={selectedJobStats.state}
-                      earliestRecordTimestamp={
-                        selectedJobStats.data_counts.earliest_record_timestamp
-                      }
-                      latestRecordTimestamp={selectedJobStats.data_counts.latest_record_timestamp}
-                      detectorIndex={selectedDetectorIndex}
-                      entities={entityControls}
-                      setForecastId={this.setForecastId}
-                      className="forecast-controls"
-                      onForecastComplete={onForecastComplete}
-                    />
-                  </EuiFlexItem>
-                )}
+                {arePartitioningFieldsProvided &&
+                  selectedJob &&
+                  shouldShowForecastButton === true && (
+                    <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
+                      <ForecastingModal
+                        buttonMode={'empty'}
+                        job={selectedJob}
+                        jobState={selectedJobStats.state}
+                        earliestRecordTimestamp={
+                          selectedJobStats.data_counts.earliest_record_timestamp
+                        }
+                        latestRecordTimestamp={selectedJobStats.data_counts.latest_record_timestamp}
+                        detectorIndex={selectedDetectorIndex}
+                        entities={entityControls}
+                        setForecastId={this.setForecastId}
+                        className="forecast-controls"
+                        onForecastComplete={onForecastComplete}
+                      />
+                    </EuiFlexItem>
+                  )}
               </EuiFlexGroup>
 
               <TimeSeriesChartWithTooltips
