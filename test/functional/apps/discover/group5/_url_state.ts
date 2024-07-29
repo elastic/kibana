@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     hideAnnouncements: true,
   };
 
-  describe.only('discover URL state', () => {
+  describe('discover URL state', () => {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
