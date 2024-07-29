@@ -8,13 +8,14 @@
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import React from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
+import { TaskTypes } from '../../../../common/types';
 import * as i18n from '../../../../common/translations';
 import { useActions } from './render_actions/use_actions';
 import { EndpointInfo } from './render_endpoint/endpoint_info';
 import { ServiceProvider } from './render_service_provider/service_provider';
 import { TaskType } from './render_task_type/task_type';
 import { DeploymentStatus } from './render_deployment_status/deployment_status';
-import { DeploymentStatusEnum, ServiceProviderKeys, TaskTypes } from '../types';
+import { DeploymentStatusEnum, ServiceProviderKeys } from '../types';
 
 export const useTableColumns = () => {
   const { actions } = useActions();

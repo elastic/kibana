@@ -29,7 +29,8 @@
     "@kbn/doc-links",
     "@kbn/console-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/ml-error-utils"
+    "@kbn/ml-error-utils",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": [
     "target/**/*",
