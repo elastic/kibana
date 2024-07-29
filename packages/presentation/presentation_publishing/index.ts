@@ -109,9 +109,8 @@ export {
 } from './interfaces/publishes_saved_object_id';
 export {
   apiPublishesUnsavedChanges,
-  initializeUnsavedChanges,
   type PublishesUnsavedChanges,
-} from './interfaces/unsaved_changes';
+} from './interfaces/publishes_unsaved_changes';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,

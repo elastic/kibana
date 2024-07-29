@@ -11,13 +11,13 @@ import {
   apiIsPresentationContainer,
   HasSerializedChildState,
   HasSnapshottableState,
+  initializeUnsavedChanges,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
   apiPublishesDataLoading,
   ComparatorDefinition,
-  initializeUnsavedChanges,
   PhaseEvent,
   StateComparators,
 } from '@kbn/presentation-publishing';
@@ -177,7 +177,6 @@ export const ReactEmbeddableRenderer = <
             const fullApi = setApi({
               ...apiRegistration,
               ...unsavedChanges.api,
-              snapshotRuntimeState: unsavedChanges.snapshotState,
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
             cleanupFunction.current = () => unsavedChanges.cleanup();

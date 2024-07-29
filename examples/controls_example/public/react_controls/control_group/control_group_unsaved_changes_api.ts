@@ -7,10 +7,13 @@
  */
 
 import { omit } from 'lodash';
-import { childrenUnsavedChanges$, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  childrenUnsavedChanges$,
+  initializeUnsavedChanges,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
 import {
   apiPublishesUnsavedChanges,
-  initializeUnsavedChanges,
   PublishesUnsavedChanges,
   StateComparators,
 } from '@kbn/presentation-publishing';

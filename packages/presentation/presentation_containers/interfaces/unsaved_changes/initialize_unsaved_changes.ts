@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { apiHasSaveNotification } from '@kbn/presentation-containers';
+import { HasSnapshottableState } from '../serialized_state';
+import { apiHasSaveNotification } from '../has_save_notification';
 import {
   BehaviorSubject,
   combineLatest,
@@ -21,7 +22,7 @@ import {
   PublishingSubject,
   runComparators,
   StateComparators,
-} from '../..';
+} from '../../../presentation_publishing';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
@@ -33,7 +34,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
   const subscriptions: Subscription[] = [];
   const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(lastSavedState);
 
-  const snapshotState = () => {
+  const snapshotRuntimeState = () => {
     const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
     const snapshot = {} as RuntimeState;
     comparatorKeys.forEach((key) => {
@@ -47,7 +48,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     subscriptions.push(
       // any time the parent saves, the current state becomes the last saved state...
       parentApi.saveNotification$.subscribe(() => {
-        lastSavedState$.next(snapshotState());
+        lastSavedState$.next(snapshotRuntimeState());
       })
     );
   }
@@ -98,10 +99,10 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
           setter(lastSaved?.[key] as RuntimeState[typeof key]);
         }
       },
-    } as PublishesUnsavedChanges<RuntimeState>,
+      snapshotRuntimeState,
+    } as PublishesUnsavedChanges<RuntimeState> & HasSnapshottableState<RuntimeState>,
     cleanup: () => {
       subscriptions.forEach((subscription) => subscription.unsubscribe());
     },
-    snapshotState,
   };
 };

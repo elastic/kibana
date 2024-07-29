@@ -9,7 +9,7 @@
 import { combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
-import { PresentationContainer } from './presentation_container';
+import { PresentationContainer } from '../presentation_container';
 
 export const DEBOUNCE_TIME = 100;
 
