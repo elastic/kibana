@@ -14,7 +14,11 @@ import type { Maybe } from '../../../search_strategy';
 import { Direction } from '../../../search_strategy';
 import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
-// TODO https://github.com/elastic/security-team/issues/7491
+import { ErrorSchema } from './error_schema';
+import type { DataProviderType } from './components.gen';
+import { DataProviderTypeEnum, TemplateTimelineTypeEnum } from './components.gen';
+
+export { DataProviderType, DataProviderTypeEnum, TemplateTimelineTypeEnum };
 
 /**
  * Outcome is a property of the saved object resolve api
@@ -39,11 +43,6 @@ export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
   runtimeTypes.literal('savedObjectConversion'),
   runtimeTypes.literal('savedObjectImport'),
 ]);
-
-import { ErrorSchema } from './error_schema';
-import type { DataProviderType } from './components.gen';
-import { DataProviderTypeEnum, TemplateTimelineTypeEnum } from './components.gen';
-export { DataProviderType, DataProviderTypeEnum, TemplateTimelineTypeEnum };
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
