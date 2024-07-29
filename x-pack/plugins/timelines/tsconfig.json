@@ -37,7 +37,8 @@
     "@kbn/search-errors",
     "@kbn/search-types",
     "@kbn/react-kibana-mount",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/config-schema"
   ],
   "exclude": [
     "target/**/*"
