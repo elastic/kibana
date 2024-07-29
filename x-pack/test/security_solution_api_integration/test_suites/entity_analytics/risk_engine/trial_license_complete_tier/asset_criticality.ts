@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
         enableAssetCriticalityAdvancedSetting(kibanaServer, log);
       });
 
-      it('should return the first 10 asset criticality records if no args provided', async () => {
+      it('@skipInServerless should return the first 10 asset criticality records if no args provided', async () => {
         await createRecords();
 
         const { body } = await assetCriticalityRoutes.list();
@@ -237,7 +237,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should only return 1 asset criticality record if per_page=1', async () => {
+      it('@skipInServerless should only return 1 asset criticality record if per_page=1', async () => {
         await createRecords();
 
         const { body } = await assetCriticalityRoutes.list({ per_page: 1 });
@@ -251,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.records[0].id_value).to.eql(records[0].id_value);
       });
 
-      it('should return the next 10 asset criticality records if page=2', async () => {
+      it('@skipInServerless should return the next 10 asset criticality records if page=2', async () => {
         await createRecords();
 
         const { body } = await assetCriticalityRoutes.list({ page: 2 });
