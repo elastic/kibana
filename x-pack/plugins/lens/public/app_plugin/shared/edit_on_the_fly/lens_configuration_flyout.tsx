@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
-  EuiNotificationBadge,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -27,7 +26,6 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -51,6 +49,7 @@ import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers'
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -509,76 +508,21 @@ export function LensEditConfigurationFlyout({
             </EuiFlexItem>
           )}
           {isOfAggregateQueryType(query) && canEditTextBasedQuery && dataGridAttrs && (
-            <EuiFlexItem
-              grow={isESQLResultsAccordionOpen ? 1 : false}
-              data-test-subj="ESQLQueryResults"
-              css={css`
-                .euiAccordion__childWrapper {
-                  flex: ${isESQLResultsAccordionOpen ? 1 : 'none'};
+            <ESQLDataGridAccordion
+              dataGridAttrs={dataGridAttrs}
+              isAccordionOpen={isESQLResultsAccordionOpen}
+              setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+              query={query}
+              isTableView={attributes.visualizationType !== 'lnsDatatable'}
+              onAccordionToggleCb={(status) => {
+                if (status && isSuggestionsAccordionOpen) {
+                  setIsSuggestionsAccordionOpen(!status);
                 }
-                padding: 0 ${euiThemeVars.euiSize};
-                border-bottom: ${euiThemeVars.euiBorderThin};
-              `}
-            >
-              <EuiAccordion
-                id="esql-results"
-                css={css`
-                  .euiAccordion__children {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                  }
-                `}
-                buttonContent={
-                  <EuiTitle
-                    size="xxs"
-                    css={css`
-                padding: 2px;
-              }
-            `}
-                  >
-                    <h5>
-                      {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
-                        defaultMessage: 'ES|QL Query Results',
-                      })}
-                    </h5>
-                  </EuiTitle>
+                if (status && isLayerAccordionOpen) {
+                  setIsLayerAccordionOpen(!status);
                 }
-                buttonProps={{
-                  paddingSize: 'm',
-                }}
-                initialIsOpen={isESQLResultsAccordionOpen}
-                forceState={isESQLResultsAccordionOpen ? 'open' : 'closed'}
-                onToggle={(status) => {
-                  setIsESQLResultsAccordionOpen(!isESQLResultsAccordionOpen);
-                  if (status && isSuggestionsAccordionOpen) {
-                    setIsSuggestionsAccordionOpen(!status);
-                  }
-                  if (status && isLayerAccordionOpen) {
-                    setIsLayerAccordionOpen(!status);
-                  }
-                }}
-                extraAction={
-                  <EuiNotificationBadge size="m" color="subdued">
-                    {dataGridAttrs.rows.length}
-                  </EuiNotificationBadge>
-                }
-              >
-                <>
-                  <ESQLDataGrid
-                    rows={dataGridAttrs?.rows}
-                    columns={dataGridAttrs?.columns}
-                    dataView={dataGridAttrs?.dataView}
-                    query={query}
-                    flyoutType="overlay"
-                    isTableView={attributes.visualizationType !== 'lnsDatatable'}
-                    initialRowHeight={0}
-                    controlColumnIds={['openDetails']}
-                  />
-                  <EuiSpacer />
-                </>
-              </EuiAccordion>
-            </EuiFlexItem>
+              }}
+            />
           )}
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
