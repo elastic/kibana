@@ -16,7 +16,7 @@ import type {
   OnOpenDeleteTimelineModal,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
 
 type Action = EuiTableActionsColumnType<object>['actions'][number];
 /**
@@ -121,7 +121,7 @@ export const getActionsColumns = ({
       if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);
     },
     enabled: (timeline: OpenTimelineResult) => {
-      return timeline.savedObjectId != null && timeline.status !== TimelineStatus.immutable;
+      return timeline.savedObjectId != null && timeline.status !== TimelineStatusEnum.immutable;
     },
     description: i18n.EXPORT_SELECTED,
     'data-test-subj': 'export-timeline',
@@ -136,7 +136,7 @@ export const getActionsColumns = ({
       if (onOpenDeleteTimelineModal != null) onOpenDeleteTimelineModal(selectedTimeline);
     },
     enabled: ({ savedObjectId, status }: OpenTimelineResult) =>
-      savedObjectId != null && status !== TimelineStatus.immutable,
+      savedObjectId != null && status !== TimelineStatusEnum.immutable,
     description: i18n.DELETE_SELECTED,
     'data-test-subj': 'delete-timeline',
     available: () => actionTimelineToShow.includes('delete') && deleteTimelines != null,
@@ -153,7 +153,7 @@ export const getActionsColumns = ({
     enabled: (timeline: OpenTimelineResult) =>
       onCreateRule != null &&
       timeline.savedObjectId != null &&
-      timeline.status !== TimelineStatus.immutable,
+      timeline.status !== TimelineStatusEnum.immutable,
     description: i18n.CREATE_RULE_FROM_TIMELINE,
     'data-test-subj': 'create-rule-from-timeline',
     available: ({ queryType }: OpenTimelineResult) =>
@@ -174,7 +174,7 @@ export const getActionsColumns = ({
     enabled: (timeline: OpenTimelineResult) =>
       onCreateRuleFromEql != null &&
       timeline.savedObjectId != null &&
-      timeline.status !== TimelineStatus.immutable,
+      timeline.status !== TimelineStatusEnum.immutable,
     description: i18n.CREATE_RULE_FROM_TIMELINE,
     'data-test-subj': 'create-rule-from-eql',
     available: ({ queryType }: OpenTimelineResult) =>

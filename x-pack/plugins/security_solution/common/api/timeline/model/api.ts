@@ -21,6 +21,8 @@ import {
   RowRendererId,
   RowRendererIdEnum,
   TemplateTimelineTypeEnum,
+  TimelineStatus,
+  TimelineStatusEnum,
 } from './components.gen';
 
 export {
@@ -29,6 +31,8 @@ export {
   RowRendererId,
   RowRendererIdEnum,
   TemplateTimelineTypeEnum,
+  TimelineStatus,
+  TimelineStatusEnum,
 };
 
 /**
@@ -259,16 +263,10 @@ export type Sort = runtimeTypes.TypeOf<typeof SavedSortRuntimeType>;
  *  Timeline Statuses
  */
 
-export enum TimelineStatus {
-  active = 'active',
-  draft = 'draft',
-  immutable = 'immutable',
-}
-
 export const TimelineStatusLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineStatus.active),
-  runtimeTypes.literal(TimelineStatus.draft),
-  runtimeTypes.literal(TimelineStatus.immutable),
+  runtimeTypes.literal(TimelineStatusEnum.active),
+  runtimeTypes.literal(TimelineStatusEnum.draft),
+  runtimeTypes.literal(TimelineStatusEnum.immutable),
 ]);
 
 const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);

@@ -24,7 +24,7 @@ import {
 } from './helpers';
 import type { OpenTimelineResult } from './types';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -325,7 +325,7 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         timelineType: TimelineType.default,
       };
 
@@ -342,7 +342,7 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Template',
         version: '1',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         timelineType: TimelineType.template,
       };
 
@@ -484,7 +484,7 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.immutable,
+        status: TimelineStatusEnum.immutable,
         timelineType: TimelineType.template,
       };
 
@@ -497,7 +497,7 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-10-28T11:37:31.655Z', start: '2020-10-27T11:37:31.655Z' },
-        status: TimelineStatus.immutable,
+        status: TimelineStatusEnum.immutable,
         timelineType: TimelineType.template,
         title: 'Awesome Timeline',
         columns: defaultUdtHeaders,
@@ -510,7 +510,7 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         timelineType: TimelineType.default,
       };
 
@@ -523,7 +523,7 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
         columns: defaultUdtHeaders,
       });
@@ -534,7 +534,7 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         timelineType: TimelineType.default,
       };
 
@@ -547,7 +547,7 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
         timelineType: TimelineType.default,
         defaultColumns: defaultUdtHeaders,
@@ -561,7 +561,7 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
         version: '1',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         timelineType: TimelineType.default,
         columns: customColumns,
       };
@@ -575,7 +575,7 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
         timelineType: TimelineType.default,
         defaultColumns: defaultUdtHeaders,

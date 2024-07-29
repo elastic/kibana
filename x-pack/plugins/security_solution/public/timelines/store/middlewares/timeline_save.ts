@@ -33,7 +33,7 @@ import { inputsSelectors } from '../../../common/store/inputs';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
 import type { inputsModel } from '../../../common/store/inputs';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../common/api/timeline';
 import type { TimelineErrorResponse, TimelineResponse } from '../../../../common/api/timeline';
 import type { TimelineInput } from '../../../../common/search_strategy';
 import type { TimelineModel } from '../model';
@@ -124,7 +124,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               updated: response.timeline.updated ?? undefined,
               savedObjectId: response.timeline.savedObjectId,
               version: response.timeline.version,
-              status: response.timeline.status ?? TimelineStatus.active,
+              status: response.timeline.status ?? TimelineStatusEnum.active,
               timelineType: response.timeline.timelineType ?? TimelineType.default,
               templateTimelineId: response.timeline.templateTimelineId ?? null,
               templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,

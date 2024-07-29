@@ -28,7 +28,7 @@ import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
 import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
@@ -171,7 +171,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       return {
         selectable: (timelineResult: OpenTimelineResult) =>
           timelineResult.savedObjectId != null &&
-          timelineResult.status !== TimelineStatus.immutable,
+          timelineResult.status !== TimelineStatusEnum.immutable,
         selectableMessage: (selectable: boolean) =>
           !selectable ? i18n.MISSING_SAVED_OBJECT_ID : '',
         onSelectionChange,

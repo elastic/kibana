@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import type { Note } from '../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -65,7 +65,7 @@ export const useUpdateTimeline = () => {
         );
       }
       if (
-        _timeline.status === TimelineStatus.immutable &&
+        _timeline.status === TimelineStatusEnum.immutable &&
         _timeline.timelineType === TimelineType.template
       ) {
         dispatch(

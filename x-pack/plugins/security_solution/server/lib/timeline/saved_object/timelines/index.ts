@@ -34,7 +34,7 @@ import type {
   SavedTimeline,
   TimelineWithoutExternalRefs,
 } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
@@ -147,16 +147,16 @@ const getTimelineTypeFilter = (
    * which includes status === 'active' and
    * those status doesn't exists */
   const draftFilter =
-    status === TimelineStatus.draft
-      ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
-      : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
+    status === TimelineStatusEnum.draft
+      ? `siem-ui-timeline.attributes.status: ${TimelineStatusEnum.draft}`
+      : `not siem-ui-timeline.attributes.status: ${TimelineStatusEnum.draft}`;
 
   const immutableFilter =
     status == null
       ? null
-      : status === TimelineStatus.immutable
-      ? `siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`
-      : `not siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`;
+      : status === TimelineStatusEnum.immutable
+      ? `siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`
+      : `not siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`;
 
   const filters = [typeFilter, draftFilter, immutableFilter];
   return combineFilters(filters);
@@ -204,7 +204,7 @@ export const getExistingPrepackagedTimelines = async (
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     ...queryPageInfo,
-    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.immutable),
+    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatusEnum.immutable),
   };
 
   return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
@@ -240,7 +240,7 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.default, TimelineStatus.active),
+    filter: getTimelineTypeFilter(TimelineType.default, TimelineStatusEnum.active),
   };
 
   const templateTimelineOptions = {
@@ -254,7 +254,7 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.active),
+    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatusEnum.active),
   };
 
   const favoriteTimelineOptions = {
@@ -264,7 +264,7 @@ export const getAllTimeline = async (
     perPage: 1,
     page: 1,
     filter: combineFilters([
-      getTimelineTypeFilter(timelineType ?? null, TimelineStatus.active),
+      getTimelineTypeFilter(timelineType ?? null, TimelineStatusEnum.active),
       getTimelineFavoriteFilter({ onlyUserFavorite: true, request }),
     ]),
   };
@@ -293,7 +293,7 @@ export const getDraftTimeline = async (
   timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
   const filter = combineFilters([
-    getTimelineTypeFilter(timelineType ?? null, TimelineStatus.draft),
+    getTimelineTypeFilter(timelineType ?? null, TimelineStatusEnum.draft),
     getTimelinesCreatedAndUpdatedByCurrentUser({ request }),
   ]);
   const options: SavedObjectsFindOptions = {
@@ -597,7 +597,7 @@ export const copyTimeline = async (
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
   ]);
 
-  const isImmutable = timeline.status === TimelineStatus.immutable;
+  const isImmutable = timeline.status === TimelineStatusEnum.immutable;
   const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
 
   const timelineResponse = await createTimeline({
@@ -773,7 +773,7 @@ export const getSelectedTimelines = async (
       },
       null,
       null,
-      TimelineStatus.active,
+      TimelineStatusEnum.active,
       null
     );
     exportedIds = savedAllTimelines.map((t) => t.savedObjectId);

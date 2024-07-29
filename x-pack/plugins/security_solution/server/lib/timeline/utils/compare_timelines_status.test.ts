@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 
 import {
@@ -537,7 +537,7 @@ describe('CompareTimelinesStatus', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue({
               ...mockGetTimelineValue,
-              status: TimelineStatus.immutable,
+              status: TimelineStatusEnum.immutable,
             }),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
           };
@@ -555,7 +555,7 @@ describe('CompareTimelinesStatus', () => {
           },
           timelineType: TimelineType.default,
           title: 'mock title',
-          status: TimelineStatus.immutable,
+          status: TimelineStatusEnum.immutable,
           templateTimelineInput: {
             id: mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId,
             type: TimelineType.template,
@@ -610,11 +610,11 @@ describe('CompareTimelinesStatus', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue({
               ...mockGetTemplateTimelineValue,
-              status: TimelineStatus.immutable,
+              status: TimelineStatusEnum.immutable,
             }),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue({
               ...mockGetTemplateTimelineValue,
-              status: TimelineStatus.immutable,
+              status: TimelineStatusEnum.immutable,
             }),
           };
         });
@@ -629,7 +629,7 @@ describe('CompareTimelinesStatus', () => {
             type: TimelineType.default,
             version: mockUniqueParsedObjects[0].version,
           },
-          status: TimelineStatus.immutable,
+          status: TimelineStatusEnum.immutable,
           timelineType: TimelineType.template,
           title: 'mock title',
           templateTimelineInput: {

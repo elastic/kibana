@@ -21,7 +21,7 @@ import type {
   createTimelineSchema,
   GetTimelineQuery,
 } from '../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 
@@ -102,7 +102,7 @@ export const createTemplateTimelineWithoutTimelineId = {
   timelineId: null,
   version: null,
   timelineType: TimelineType.template,
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
 };
 
 export const createTimelineWithTimelineId = {

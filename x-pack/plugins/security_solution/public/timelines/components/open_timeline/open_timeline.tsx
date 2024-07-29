@@ -10,7 +10,7 @@ import type { EuiBasicTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,
@@ -168,7 +168,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           ...(onCreateRuleFromEql != null ? createRuleFromEql : []),
         ];
 
-        if (timelineStatus !== TimelineStatus.immutable) {
+        if (timelineStatus !== TimelineStatusEnum.immutable) {
           timelineActions.push('export');
           timelineActions.push('selectable');
         }
@@ -176,7 +176,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         if (
           onDeleteSelected != null &&
           deleteTimelines != null &&
-          timelineStatus !== TimelineStatus.immutable
+          timelineStatus !== TimelineStatusEnum.immutable
         ) {
           timelineActions.push('delete');
         }
@@ -184,7 +184,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         return timelineActions;
       }
       // user with read access should only see export
-      if (timelineStatus !== TimelineStatus.immutable) {
+      if (timelineStatus !== TimelineStatusEnum.immutable) {
         return ['export', 'selectable'];
       }
       return [];
@@ -253,7 +253,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                     </UtilityBarText>
                   </UtilityBarGroup>
                   <UtilityBarGroup>
-                    {timelineStatus !== TimelineStatus.immutable && (
+                    {timelineStatus !== TimelineStatusEnum.immutable && (
                       <>
                         <UtilityBarText data-test-subj="selected-count">
                           {timelineType === TimelineType.template

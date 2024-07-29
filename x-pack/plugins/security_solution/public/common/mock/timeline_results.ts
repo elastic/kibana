@@ -11,7 +11,7 @@ import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
 import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { RowRendererIdEnum, TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { RowRendererIdEnum, TimelineType, TimelineStatusEnum } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
@@ -1920,7 +1920,7 @@ export const mockTimelineModel: TimelineModel = {
       sortDirection: Direction.desc,
     },
   ],
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
   title: 'Test rule',
   timelineType: TimelineType.default,
   templateTimelineId: null,
@@ -2104,7 +2104,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
         sortDirection: Direction.desc,
       },
     ],
-    status: TimelineStatus.draft,
+    status: TimelineStatusEnum.draft,
     title: '',
     timelineType: TimelineType.default,
     templateTimelineVersion: null,

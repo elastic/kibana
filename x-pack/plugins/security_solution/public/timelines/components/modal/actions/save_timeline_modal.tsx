@@ -26,7 +26,7 @@ import type { State } from '../../../../common/store';
 import { selectTimelineById } from '../../../store/selectors';
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
 import { timelineActions } from '../../../store';
 import * as commonI18n from '../../timeline/properties/translations';
 import * as i18n from './translations';
@@ -78,7 +78,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
       []
     );
 
-    const isUnsaved = status === TimelineStatus.draft;
+    const isUnsaved = status === TimelineStatusEnum.draft;
     const prevIsSaving = usePrevious(isSaving);
 
     // Resetting the timeline by replacing the active one with a new empty one
@@ -139,7 +139,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
     }, [closeSaveTimeline, resetTimeline, showWarning]);
 
     const closeModalText = useMemo(() => {
-      if (status === TimelineStatus.draft && showWarning) {
+      if (status === TimelineStatusEnum.draft && showWarning) {
         return timelineType === TimelineType.template
           ? i18n.DISCARD_TIMELINE_TEMPLATE
           : i18n.DISCARD_TIMELINE;
@@ -149,7 +149,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
 
     const modalHeader = useMemo(
       () =>
-        status === TimelineStatus.draft
+        status === TimelineStatusEnum.draft
           ? timelineType === TimelineType.template
             ? i18n.SAVE_TIMELINE_TEMPLATE
             : i18n.SAVE_TIMELINE
@@ -161,7 +161,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
 
     const saveButtonTitle = useMemo(
       () =>
-        status === TimelineStatus.draft && showWarning
+        status === TimelineStatusEnum.draft && showWarning
           ? timelineType === TimelineType.template
             ? i18n.SAVE_TIMELINE_TEMPLATE
             : i18n.SAVE_TIMELINE

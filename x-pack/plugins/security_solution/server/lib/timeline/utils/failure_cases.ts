@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { TimelineTypeLiteral, TimelineSavedObject } from '../../../../common/api/timeline';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { type TimelineStatus, TimelineStatusEnum } from '../../../../common/api/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new timelines with PATCH. Use POST instead.';
@@ -46,11 +46,12 @@ const isUpdatingStatus = (
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
   const obj = isHandlingTemplateTimeline ? existTemplateTimeline : existTimeline;
-  return obj?.status === TimelineStatus.immutable ? UPDATE_STATUS_ERROR_MESSAGE : null;
+  return obj?.status === TimelineStatusEnum.immutable ? UPDATE_STATUS_ERROR_MESSAGE : null;
 };
 
 const isGivenTitleValid = (status: TimelineStatus, title: string | null | undefined) => {
-  return (status !== TimelineStatus.draft && !isEmpty(title)) || status === TimelineStatus.draft
+  return (status !== TimelineStatusEnum.draft && !isEmpty(title)) ||
+    status === TimelineStatusEnum.draft
     ? null
     : EMPTY_TITLE_ERROR_MESSAGE;
 };
@@ -233,8 +234,8 @@ export const checkIsUpdateViaImportFailureCases = (
   } else {
     const isStatusValid =
       ((existTemplateTimeline?.status == null ||
-        existTemplateTimeline?.status === TimelineStatus.active) &&
-        (status == null || status === TimelineStatus.active)) ||
+        existTemplateTimeline?.status === TimelineStatusEnum.active) &&
+        (status == null || status === TimelineStatusEnum.active)) ||
       (existTemplateTimeline?.status != null && status === existTemplateTimeline?.status);
 
     if (!isStatusValid) {
@@ -348,7 +349,7 @@ export const checkIsCreateViaImportFailureCases = (
   existTimeline: TimelineSavedObject | null,
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
-  if (status === TimelineStatus.draft) {
+  if (status === TimelineStatusEnum.draft) {
     return {
       body: CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
       statusCode: 405,

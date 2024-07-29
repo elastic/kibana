@@ -25,7 +25,7 @@ import type {
 import {
   DataProviderTypeEnum,
   RowRendererValues,
-  TimelineStatus,
+  TimelineStatusEnum,
   TimelineType,
 } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
@@ -229,9 +229,9 @@ export const getTimelineStatus = (
   timelineType?: TimelineType
 ) => {
   const isCreateTimelineFromAction = timelineType && timeline.timelineType !== timelineType;
-  if (isCreateTimelineFromAction) return TimelineStatus.draft;
+  if (isCreateTimelineFromAction) return TimelineStatusEnum.draft;
 
-  return duplicate ? TimelineStatus.active : timeline.status;
+  return duplicate ? TimelineStatusEnum.active : timeline.status;
 };
 
 export const defaultTimelineToTimelineModel = (
@@ -253,7 +253,7 @@ export const defaultTimelineToTimelineModel = (
         : defaultHeadersValue,
     defaultColumns: defaultHeadersValue,
     dateRange:
-      timeline.status === TimelineStatus.immutable &&
+      timeline.status === TimelineStatusEnum.immutable &&
       timeline.timelineType === TimelineType.template
         ? {
             start: DEFAULT_FROM_MOMENT.toISOString(),

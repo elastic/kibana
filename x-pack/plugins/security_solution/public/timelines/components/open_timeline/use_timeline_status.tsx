@@ -15,7 +15,7 @@ import type {
 } from '../../../../common/api/timeline';
 import {
   TemplateTimelineTypeEnum,
-  TimelineStatus,
+  TimelineStatusEnum,
   TimelineType,
 } from '../../../../common/api/timeline';
 
@@ -53,8 +53,8 @@ export const useTimelineStatus = ({
       templateTimelineType == null
         ? null
         : templateTimelineType === TemplateTimelineTypeEnum.elastic
-        ? TimelineStatus.immutable
-        : TimelineStatus.active,
+        ? TimelineStatusEnum.immutable
+        : TimelineStatusEnum.active,
     [templateTimelineType]
   );
 

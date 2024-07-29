@@ -20,7 +20,7 @@ import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_provid
 import {
   type DataProviderType,
   DataProviderTypeEnum,
-  TimelineStatus,
+  TimelineStatusEnum,
   TimelineType,
 } from '../../../common/api/timeline';
 import type {
@@ -134,7 +134,7 @@ export const addTimelineToStore = ({
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
-        timeline.status === TimelineStatus.immutable &&
+        timeline.status === TimelineStatusEnum.immutable &&
         timeline.timelineType === TimelineType.template
           ? {
               start: DEFAULT_FROM_MOMENT.toISOString(),

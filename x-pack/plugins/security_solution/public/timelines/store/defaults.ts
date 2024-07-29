@@ -6,7 +6,7 @@
  */
 
 import { TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus, RowRendererIdEnum } from '../../../common/api/timeline';
+import { TimelineType, TimelineStatusEnum, RowRendererIdEnum } from '../../../common/api/timeline';
 
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
@@ -91,7 +91,7 @@ export const timelineDefaults: SubsetTimelineModel &
       sortDirection: 'desc',
     },
   ],
-  status: TimelineStatus.draft,
+  status: TimelineStatusEnum.draft,
   version: null,
   deletedEventIds: [],
   selectedEventIds: {},

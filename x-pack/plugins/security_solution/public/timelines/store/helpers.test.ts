@@ -8,7 +8,11 @@
 import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../common/types/timeline';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { DataProviderTypeEnum, TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import {
+  DataProviderTypeEnum,
+  TimelineType,
+  TimelineStatusEnum,
+} from '../../../common/api/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,
@@ -123,7 +127,7 @@ const basicTimeline: TimelineModel = {
       sortDirection: Direction.desc,
     },
   ],
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
   templateTimelineId: null,
   templateTimelineVersion: null,
   timelineType: TimelineType.default,
@@ -175,7 +179,7 @@ describe('Timeline', () => {
         id: 'foo',
         timeline: {
           ...basicTimeline,
-          status: TimelineStatus.immutable,
+          status: TimelineStatusEnum.immutable,
           timelineType: TimelineType.template,
         },
         timelineById: timelineByIdMock,
@@ -184,7 +188,7 @@ describe('Timeline', () => {
       expect(update).toEqual({
         foo: {
           ...basicTimeline,
-          status: TimelineStatus.immutable,
+          status: TimelineStatusEnum.immutable,
           timelineType: TimelineType.template,
           dateRange: {
             start: '2020-10-27T11:37:31.655Z',

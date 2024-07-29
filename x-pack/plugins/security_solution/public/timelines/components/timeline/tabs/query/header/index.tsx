@@ -17,7 +17,7 @@ import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use
 import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
 import type { TimelineStatusLiteralWithNull } from '../../../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../../store';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
@@ -126,7 +126,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
               )}
-              {status === TimelineStatus.immutable && (
+              {status === TimelineStatusEnum.immutable && (
                 <EuiFlexItem>
                   <EuiCallOut
                     data-test-subj="timelineImmutableCallOut"

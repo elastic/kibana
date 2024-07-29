@@ -6,7 +6,7 @@
  */
 
 import type { TimelineSavedObject, TimelineTypeLiteral } from '../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 
@@ -54,7 +54,7 @@ export class TimelineObject {
   }
 
   private get isImmutable() {
-    return this.data?.status === TimelineStatus.immutable;
+    return this.data?.status === TimelineStatusEnum.immutable;
   }
 
   public get isExists() {

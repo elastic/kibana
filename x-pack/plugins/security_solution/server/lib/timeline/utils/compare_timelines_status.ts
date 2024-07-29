@@ -10,7 +10,11 @@ import type {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
 } from '../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import {
+  TimelineType,
+  type TimelineStatus,
+  TimelineStatusEnum,
+} from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 
 import type { TimelineStatusAction } from './common';
@@ -46,7 +50,7 @@ export class CompareTimelinesStatus {
   private readonly title: string | null;
   private readonly status: TimelineStatus;
   constructor({
-    status = TimelineStatus.active,
+    status = TimelineStatusEnum.active,
     title,
     timelineType = TimelineType.default,
     timelineInput,
@@ -68,7 +72,7 @@ export class CompareTimelinesStatus {
     });
     this.timelineType = timelineType ?? TimelineType.default;
     this.title = title ?? null;
-    this.status = status ?? TimelineStatus.active;
+    this.status = status ?? TimelineStatusEnum.active;
   }
 
   public get isCreatable() {
@@ -109,8 +113,8 @@ export class CompareTimelinesStatus {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
 
     return obj.isExists
-      ? this.status === obj.getData?.status && this.status !== TimelineStatus.draft
-      : this.status !== TimelineStatus.draft;
+      ? this.status === obj.getData?.status && this.status !== TimelineStatusEnum.draft
+      : this.status !== TimelineStatusEnum.draft;
   }
 
   public get isUpdatable() {
@@ -142,8 +146,8 @@ export class CompareTimelinesStatus {
 
   public get isTitleValid() {
     return (
-      (this.status !== TimelineStatus.draft && !isEmpty(this.title)) ||
-      this.status === TimelineStatus.draft
+      (this.status !== TimelineStatusEnum.draft && !isEmpty(this.title)) ||
+      this.status === TimelineStatusEnum.draft
     );
   }
 
@@ -240,8 +244,8 @@ export class CompareTimelinesStatus {
       ? this.templateTimelineInput.data?.status
       : this.timelineInput.data?.status;
     return (
-      ((existingStatus == null || existingStatus === TimelineStatus.active) &&
-        (status == null || status === TimelineStatus.active)) ||
+      ((existingStatus == null || existingStatus === TimelineStatusEnum.active) &&
+        (status == null || status === TimelineStatusEnum.active)) ||
       (existingStatus != null && status === existingStatus)
     );
   }

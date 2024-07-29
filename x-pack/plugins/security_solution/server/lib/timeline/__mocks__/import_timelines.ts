@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
 
 export const mockDuplicateIdErrors = [];
 
@@ -188,7 +188,7 @@ export const mockGetDraftTimelineValue = {
   noteIds: [],
   pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
   timelineType: TimelineType.default,
-  status: TimelineStatus.draft,
+  status: TimelineStatusEnum.draft,
 };
 
 export const mockParsedTimelineObject = omit(

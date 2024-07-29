@@ -25,7 +25,7 @@ import type {
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
-  TimelineStatus,
+  TimelineStatusEnum,
   TimelineErrorResponseType,
   importTimelineResultSchema,
   allTimelinesResponse,
@@ -229,7 +229,7 @@ export const persistTimeline = async ({
   savedSearch,
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   try {
-    if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
+    if (isEmpty(timelineId) && timeline.status === TimelineStatusEnum.draft && timeline) {
       const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,

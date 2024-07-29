@@ -52,7 +52,7 @@ import {
 } from '../../../../common/detection_engine/utils';
 import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineType } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
@@ -1058,7 +1058,7 @@ export const sendAlertToTimelineAction = async ({
               title: '',
               timelineType: TimelineType.default,
               templateTimelineId: null,
-              status: TimelineStatus.draft,
+              status: TimelineStatusEnum.draft,
               dataProviders,
               eventType: 'all',
               filters,

@@ -17,7 +17,11 @@ import {
   SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
 import type { TimelineSavedObject } from '../../../../../common/api/timeline';
-import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
+import {
+  TimelineType,
+  type TimelineStatus,
+  TimelineStatusEnum,
+} from '../../../../../common/api/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([
@@ -113,15 +117,15 @@ function savedObjectTimelineStatusToAPITimelineStatus(
 ): TimelineStatus {
   // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
   if (timelineType === 'draft') {
-    return TimelineStatus.draft;
+    return TimelineStatusEnum.draft;
   }
   switch (status) {
     case SavedObjectTimelineStatus.draft:
-      return TimelineStatus.draft;
+      return TimelineStatusEnum.draft;
     case SavedObjectTimelineStatus.immutable:
-      return TimelineStatus.immutable;
+      return TimelineStatusEnum.immutable;
     case SavedObjectTimelineStatus.active:
     default:
-      return TimelineStatus.active;
+      return TimelineStatusEnum.active;
   }
 }
