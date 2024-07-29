@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     }
 
-    it('should modify the time range when the histogram is brushed--woof', async function () {
+    it('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // this is the number of renderings of the histogram needed when new data is fetched

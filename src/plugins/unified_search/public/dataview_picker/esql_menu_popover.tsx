@@ -19,7 +19,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IUnifiedSearchPluginServices } from '../types';
 
-interface ESQLMenuPopoverProps {
+export interface ESQLMenuPopoverProps {
   onDataViewSwitch: () => void;
   openESQLInlineDocs?: () => void;
 }
@@ -31,26 +31,30 @@ export const ESQLMenuPopover = ({ onDataViewSwitch, openESQLInlineDocs }: ESQLMe
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
+    if (openESQLInlineDocs) {
+      panelItems.push(
+        <EuiContextMenuItem
+          key="open-docs"
+          icon="documentation"
+          data-test-subj="esql-open-docs"
+          onClick={() => {
+            openESQLInlineDocs?.();
+            setIsESQLMenuPopoverOpen(false);
+          }}
+        >
+          {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.openDocs', {
+            defaultMessage: 'Open docs',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
     panelItems.push(
-      <EuiContextMenuItem
-        key="open-docs"
-        icon="documentation"
-        data-test-subj="esql-open-docs"
-        onClick={() => {
-          openESQLInlineDocs?.();
-          setIsESQLMenuPopoverOpen(false);
-        }}
-      >
-        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.openDocs', {
-          defaultMessage: 'Open docs',
-        })}
-      </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="about"
         icon="iInCircle"
         data-test-subj="esql-about"
         target="_blank"
-        href={docLinks?.links?.query?.queryESQL ?? ''}
+        href={docLinks.links.query.queryESQL}
       >
         {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.aboutESQL', {
           defaultMessage: 'About ES|QL',
@@ -82,11 +86,11 @@ export const ESQLMenuPopover = ({ onDataViewSwitch, openESQLInlineDocs }: ESQLMe
           color="text"
           display="base"
           onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
-          data-test-subj="esql_menu_button"
+          data-test-subj="esql-menu-button"
         />
       }
       panelProps={{
-        ['data-test-subj']: 'esql_menu_popover',
+        ['data-test-subj']: 'esql-menu-popover',
       }}
       isOpen={isESQLMenuPopoverOpen}
       closePopover={() => setIsESQLMenuPopoverOpen(false)}
