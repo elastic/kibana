@@ -11,6 +11,7 @@ import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
+import type { EditorFrameService } from '../../editor_frame_service';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
@@ -25,7 +26,8 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
 
   constructor(
     protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly core: CoreStart
+    protected readonly core: CoreStart,
+    protected readonly getEditorFrameService: () => Promise<EditorFrameService>
   ) {}
 
   public getDisplayName(): string {
@@ -41,18 +43,21 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(embeddable)) return false;
-    // compatible only when ES|QL advanced setting is enabled
     const { isCreateActionCompatible } = await getAsyncHelpers();
+
     return isCreateActionCompatible(this.core);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
     const { executeCreateAction } = await getAsyncHelpers();
+    const editorFrameService = await this.getEditorFrameService();
+
     executeCreateAction({
       deps: this.startDependencies,
       core: this.core,
       api: embeddable,
+      editorFrameService,
     });
   }
 }
