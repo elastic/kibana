@@ -10640,6 +10640,1397 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval exp(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval exp(nullVar)', []);
       });
+
+      describe('add', () => {
+        testErrorsAndWarnings('row var = add(1 year, 1 year)', []);
+        testErrorsAndWarnings('row add(1 year, 1 year)', []);
+        testErrorsAndWarnings('row var = add(1 year, now())', []);
+        testErrorsAndWarnings('row add(1 year, now())', []);
+        testErrorsAndWarnings('row var = add(1 year, to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = add(now(), 1 year)', []);
+        testErrorsAndWarnings('row add(now(), 1 year)', []);
+        testErrorsAndWarnings('row var = add(to_datetime(now()), 1 year)', []);
+        testErrorsAndWarnings('row var = add(now(), now())', []);
+        testErrorsAndWarnings('row add(now(), now())', []);
+        testErrorsAndWarnings('row var = add(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = add(5, 5)', []);
+        testErrorsAndWarnings('row add(5, 5)', []);
+        testErrorsAndWarnings('row var = add(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = add(true, true)', [
+          'Argument of [add] must be [time_literal], found value [true] type [boolean]',
+          'Argument of [add] must be [time_literal], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where add(numberField, numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where add(booleanField, booleanField) > 0', [
+          'Argument of [add] must be [time_literal], found value [booleanField] type [boolean]',
+          'Argument of [add] must be [time_literal], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = add(1 year, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval add(1 year, 1 year)', []);
+
+        testErrorsAndWarnings('from a_index | eval add(booleanField, booleanField)', [
+          'Argument of [add] must be [time_literal], found value [booleanField] type [boolean]',
+          'Argument of [add] must be [time_literal], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = add(1 year, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval add(1 year, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = add(1 year, to_datetime(dateField))', []);
+        testErrorsAndWarnings('from a_index | eval var = add(dateField, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval add(dateField, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval var = add(to_datetime(dateField), 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval var = add(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval add(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = add(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = add(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval add(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = add(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval add(1 year, 1 year, extraArg)', [
+          'Error: [add] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort add(1 year, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval add(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval add(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval add(1 year, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval add(1 year, concat("20", "22"))', []);
+        testErrorsAndWarnings('from a_index | eval add("2022", 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval add(concat("20", "22"), 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval add("2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval add(concat("20", "22"), concat("20", "22"))',
+          []
+        );
+      });
+
+      describe('div', () => {
+        testErrorsAndWarnings('row var = div(5, 5)', []);
+        testErrorsAndWarnings('row div(5, 5)', []);
+        testErrorsAndWarnings('row var = div(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = div(true, true)', [
+          'Argument of [div] must be [number], found value [true] type [boolean]',
+          'Argument of [div] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where div(numberField, numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where div(booleanField, booleanField) > 0', [
+          'Argument of [div] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [div] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = div(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval div(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = div(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval div(booleanField, booleanField)', [
+          'Argument of [div] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [div] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval div(numberField, numberField, extraArg)', [
+          'Error: [div] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort div(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval div(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval div(nullVar, nullVar)', []);
+      });
+
+      describe('equals', () => {
+        testErrorsAndWarnings('row var = equals(true, true)', []);
+        testErrorsAndWarnings('row equals(true, true)', []);
+        testErrorsAndWarnings('row var = equals(to_boolean(true), to_boolean(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = equals(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row equals(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = equals(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = equals(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row equals(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = equals(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = equals(now(), now())', []);
+        testErrorsAndWarnings('row equals(now(), now())', []);
+        testErrorsAndWarnings('row var = equals(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = equals(5, 5)', []);
+        testErrorsAndWarnings('row equals(5, 5)', []);
+        testErrorsAndWarnings('row var = equals(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = equals(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row equals(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = equals(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = equals(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row equals(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = equals(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = equals(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row equals(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
+        testErrorsAndWarnings(
+          'row var = equals(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = equals("a", "a")', []);
+        testErrorsAndWarnings('row equals("a", "a")', []);
+        testErrorsAndWarnings('row var = equals(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings('row var = equals(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row equals(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = equals(to_version("a"), to_version("a"))', []);
+        testErrorsAndWarnings('from a_index | eval var = equals(booleanField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(booleanField, booleanField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_boolean(booleanField), to_boolean(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval equals(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval equals(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = equals(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = equals(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = equals(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = equals(geoShapeField, geoShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(geoShapeField, geoShapeField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_geoshape(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = equals(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(ipField, ipField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_ip(ipField), to_ip(ipField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = equals(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = equals(versionField, versionField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(versionField, versionField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = equals(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval equals(booleanField, booleanField, extraArg)', [
+          'Error: [equals] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort equals(booleanField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval equals(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval equals(nullVar, nullVar)', []);
+      });
+
+      describe('greater_than', () => {
+        testErrorsAndWarnings('row var = greater_than(now(), now())', []);
+        testErrorsAndWarnings('row greater_than(now(), now())', []);
+        testErrorsAndWarnings('row var = greater_than(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = greater_than(5, 5)', []);
+        testErrorsAndWarnings('row greater_than(5, 5)', []);
+        testErrorsAndWarnings('row var = greater_than(to_integer(true), to_integer(true))', []);
+        testErrorsAndWarnings('row var = greater_than(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row greater_than(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
+        testErrorsAndWarnings(
+          'row var = greater_than(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = greater_than("a", "a")', []);
+        testErrorsAndWarnings('row greater_than("a", "a")', []);
+        testErrorsAndWarnings('row var = greater_than(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings(
+          'row var = greater_than(to_version("1.0.0"), to_version("1.0.0"))',
+          []
+        );
+        testErrorsAndWarnings('row greater_than(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = greater_than(to_version("a"), to_version("a"))', []);
+
+        testErrorsAndWarnings('row var = greater_than(true, true)', [
+          'Argument of [greater_than] must be [date], found value [true] type [boolean]',
+          'Argument of [greater_than] must be [date], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = greater_than(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval greater_than(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval greater_than(booleanField, booleanField)', [
+          'Argument of [greater_than] must be [date], found value [booleanField] type [boolean]',
+          'Argument of [greater_than] must be [date], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(numberField, numberField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval greater_than(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = greater_than(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval greater_than(ipField, ipField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(to_ip(ipField), to_ip(ipField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(stringField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval greater_than(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(versionField, versionField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval greater_than(versionField, versionField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval greater_than(dateField, dateField, extraArg)', [
+          'Error: [greater_than] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort greater_than(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval greater_than(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval greater_than(nullVar, nullVar)', []);
+      });
+
+      describe('greater_than_or_equal', () => {
+        testErrorsAndWarnings('row var = greater_than_or_equal(now(), now())', []);
+        testErrorsAndWarnings('row greater_than_or_equal(now(), now())', []);
+
+        testErrorsAndWarnings(
+          'row var = greater_than_or_equal(to_datetime(now()), to_datetime(now()))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = greater_than_or_equal(5, 5)', []);
+        testErrorsAndWarnings('row greater_than_or_equal(5, 5)', []);
+        testErrorsAndWarnings(
+          'row var = greater_than_or_equal(to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = greater_than_or_equal(to_ip("127.0.0.1"), to_ip("127.0.0.1"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row greater_than_or_equal(to_ip("127.0.0.1"), to_ip("127.0.0.1"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = greater_than_or_equal(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = greater_than_or_equal("a", "a")', []);
+        testErrorsAndWarnings('row greater_than_or_equal("a", "a")', []);
+        testErrorsAndWarnings(
+          'row var = greater_than_or_equal(to_string(true), to_string(true))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = greater_than_or_equal(to_version("1.0.0"), to_version("1.0.0"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row greater_than_or_equal(to_version("1.0.0"), to_version("1.0.0"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = greater_than_or_equal(to_version("a"), to_version("a"))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = greater_than_or_equal(true, true)', [
+          'Argument of [greater_than_or_equal] must be [date], found value [true] type [boolean]',
+          'Argument of [greater_than_or_equal] must be [date], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(dateField, dateField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval greater_than_or_equal(dateField, dateField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval greater_than_or_equal(booleanField, booleanField)',
+          [
+            'Argument of [greater_than_or_equal] must be [date], found value [booleanField] type [boolean]',
+            'Argument of [greater_than_or_equal] must be [date], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval greater_than_or_equal(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(ipField, ipField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval greater_than_or_equal(ipField, ipField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(to_ip(ipField), to_ip(ipField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval greater_than_or_equal(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(versionField, versionField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval greater_than_or_equal(versionField, versionField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = greater_than_or_equal(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval greater_than_or_equal(dateField, dateField, extraArg)',
+          ['Error: [greater_than_or_equal] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort greater_than_or_equal(dateField, dateField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval greater_than_or_equal(null, null)', []);
+        testErrorsAndWarnings(
+          'row nullVar = null | eval greater_than_or_equal(nullVar, nullVar)',
+          []
+        );
+      });
+
+      describe('in', () => {
+        testErrorsAndWarnings('row var = in(true, true)', []);
+        testErrorsAndWarnings('row in(true, true)', []);
+        testErrorsAndWarnings('row var = in(to_boolean(true), to_boolean(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = in(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row in(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = in(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = in(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row in(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = in(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = in(5, 5)', []);
+        testErrorsAndWarnings('row in(5, 5)', []);
+        testErrorsAndWarnings('row var = in(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = in(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row in(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = in(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = in(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row in(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = in(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = in(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row in(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
+        testErrorsAndWarnings(
+          'row var = in(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = in("a", "a")', []);
+        testErrorsAndWarnings('row in("a", "a")', []);
+        testErrorsAndWarnings('row var = in(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings('row var = in(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row in(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = in(to_version("a"), to_version("a"))', []);
+
+        testErrorsAndWarnings('row var = in(now(), now())', [
+          'Argument of [in] must be [boolean], found value [now()] type [date]',
+          'Argument of [in] must be [boolean], found value [now()] type [date]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = in(booleanField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval in(booleanField, booleanField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_boolean(booleanField), to_boolean(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval in(dateField, dateField)', [
+          'Argument of [in] must be [boolean], found value [dateField] type [date]',
+          'Argument of [in] must be [boolean], found value [dateField] type [date]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval in(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval in(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = in(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval in(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = in(geoPointField, geoPointField)', []);
+        testErrorsAndWarnings('from a_index | eval in(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = in(geoShapeField, geoShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval in(geoShapeField, geoShapeField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_geoshape(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = in(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval in(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval var = in(to_ip(ipField), to_ip(ipField))', []);
+        testErrorsAndWarnings('from a_index | eval var = in(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval in(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = in(versionField, versionField)', []);
+        testErrorsAndWarnings('from a_index | eval in(versionField, versionField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = in(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | sort in(booleanField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval in(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval in(nullVar, nullVar)', []);
+      });
+
+      describe('less_than', () => {
+        testErrorsAndWarnings('row var = less_than(now(), now())', []);
+        testErrorsAndWarnings('row less_than(now(), now())', []);
+        testErrorsAndWarnings('row var = less_than(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = less_than(5, 5)', []);
+        testErrorsAndWarnings('row less_than(5, 5)', []);
+        testErrorsAndWarnings('row var = less_than(to_integer(true), to_integer(true))', []);
+        testErrorsAndWarnings('row var = less_than(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row less_than(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
+        testErrorsAndWarnings(
+          'row var = less_than(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = less_than("a", "a")', []);
+        testErrorsAndWarnings('row less_than("a", "a")', []);
+        testErrorsAndWarnings('row var = less_than(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings('row var = less_than(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row less_than(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = less_than(to_version("a"), to_version("a"))', []);
+
+        testErrorsAndWarnings('row var = less_than(true, true)', [
+          'Argument of [less_than] must be [date], found value [true] type [boolean]',
+          'Argument of [less_than] must be [date], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = less_than(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval less_than(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval less_than(booleanField, booleanField)', [
+          'Argument of [less_than] must be [date], found value [booleanField] type [boolean]',
+          'Argument of [less_than] must be [date], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = less_than(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval less_than(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = less_than(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval less_than(ipField, ipField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than(to_ip(ipField), to_ip(ipField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = less_than(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval less_than(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than(versionField, versionField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval less_than(versionField, versionField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval less_than(dateField, dateField, extraArg)', [
+          'Error: [less_than] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort less_than(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval less_than(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval less_than(nullVar, nullVar)', []);
+      });
+
+      describe('less_than_or_equal', () => {
+        testErrorsAndWarnings('row var = less_than_or_equal(now(), now())', []);
+        testErrorsAndWarnings('row less_than_or_equal(now(), now())', []);
+        testErrorsAndWarnings(
+          'row var = less_than_or_equal(to_datetime(now()), to_datetime(now()))',
+          []
+        );
+        testErrorsAndWarnings('row var = less_than_or_equal(5, 5)', []);
+        testErrorsAndWarnings('row less_than_or_equal(5, 5)', []);
+        testErrorsAndWarnings(
+          'row var = less_than_or_equal(to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = less_than_or_equal(to_ip("127.0.0.1"), to_ip("127.0.0.1"))',
+          []
+        );
+
+        testErrorsAndWarnings('row less_than_or_equal(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
+        testErrorsAndWarnings(
+          'row var = less_than_or_equal(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = less_than_or_equal("a", "a")', []);
+        testErrorsAndWarnings('row less_than_or_equal("a", "a")', []);
+        testErrorsAndWarnings('row var = less_than_or_equal(to_string(true), to_string(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = less_than_or_equal(to_version("1.0.0"), to_version("1.0.0"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row less_than_or_equal(to_version("1.0.0"), to_version("1.0.0"))',
+          []
+        );
+        testErrorsAndWarnings('row var = less_than_or_equal(to_version("a"), to_version("a"))', []);
+
+        testErrorsAndWarnings('row var = less_than_or_equal(true, true)', [
+          'Argument of [less_than_or_equal] must be [date], found value [true] type [boolean]',
+          'Argument of [less_than_or_equal] must be [date], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(dateField, dateField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval less_than_or_equal(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval less_than_or_equal(booleanField, booleanField)',
+          [
+            'Argument of [less_than_or_equal] must be [date], found value [booleanField] type [boolean]',
+            'Argument of [less_than_or_equal] must be [date], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval less_than_or_equal(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = less_than_or_equal(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval less_than_or_equal(ipField, ipField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(to_ip(ipField), to_ip(ipField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval less_than_or_equal(stringField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(versionField, versionField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval less_than_or_equal(versionField, versionField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = less_than_or_equal(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval less_than_or_equal(dateField, dateField, extraArg)',
+          ['Error: [less_than_or_equal] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort less_than_or_equal(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval less_than_or_equal(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval less_than_or_equal(nullVar, nullVar)', []);
+      });
+
+      describe('like', () => {
+        testErrorsAndWarnings('row var = like("a", "a")', []);
+        testErrorsAndWarnings('row like("a", "a")', []);
+        testErrorsAndWarnings('row var = like(to_string(true), to_string(true))', []);
+
+        testErrorsAndWarnings('row var = like(true, true)', [
+          'Argument of [like] must be [string], found value [true] type [boolean]',
+          'Argument of [like] must be [string], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = like(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval like(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = like(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval like(booleanField, booleanField)', [
+          'Argument of [like] must be [string], found value [booleanField] type [boolean]',
+          'Argument of [like] must be [string], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort like(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval like(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval like(nullVar, nullVar)', []);
+      });
+
+      describe('mod', () => {
+        testErrorsAndWarnings('row var = mod(5, 5)', []);
+        testErrorsAndWarnings('row mod(5, 5)', []);
+        testErrorsAndWarnings('row var = mod(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = mod(true, true)', [
+          'Argument of [mod] must be [number], found value [true] type [boolean]',
+          'Argument of [mod] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where mod(numberField, numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where mod(booleanField, booleanField) > 0', [
+          'Argument of [mod] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mod] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = mod(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval mod(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mod(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mod(booleanField, booleanField)', [
+          'Argument of [mod] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mod] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval mod(numberField, numberField, extraArg)', [
+          'Error: [mod] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mod(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval mod(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval mod(nullVar, nullVar)', []);
+      });
+
+      describe('mul', () => {
+        testErrorsAndWarnings('row var = mul(5, 5)', []);
+        testErrorsAndWarnings('row mul(5, 5)', []);
+        testErrorsAndWarnings('row var = mul(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = mul(true, true)', [
+          'Argument of [mul] must be [number], found value [true] type [boolean]',
+          'Argument of [mul] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where mul(numberField, numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where mul(booleanField, booleanField) > 0', [
+          'Argument of [mul] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mul] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = mul(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval mul(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mul(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mul(booleanField, booleanField)', [
+          'Argument of [mul] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [mul] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval mul(numberField, numberField, extraArg)', [
+          'Error: [mul] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mul(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval mul(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval mul(nullVar, nullVar)', []);
+      });
+
+      describe('neg', () => {
+        testErrorsAndWarnings('row var = neg(1 year)', []);
+        testErrorsAndWarnings('row neg(1 year)', []);
+        testErrorsAndWarnings('row var = neg(5)', []);
+        testErrorsAndWarnings('row neg(5)', []);
+        testErrorsAndWarnings('row var = neg(to_integer(true))', []);
+        testErrorsAndWarnings('row var = neg(now())', []);
+        testErrorsAndWarnings('row neg(now())', []);
+        testErrorsAndWarnings('row var = neg(to_datetime(now()))', []);
+
+        testErrorsAndWarnings('row var = neg(true)', [
+          'Argument of [neg] must be [time_literal], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where neg(numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where neg(booleanField) > 0', [
+          'Argument of [neg] must be [time_literal], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = neg(1 year)', []);
+        testErrorsAndWarnings('from a_index | eval neg(1 year)', []);
+
+        testErrorsAndWarnings('from a_index | eval neg(booleanField)', [
+          'Argument of [neg] must be [time_literal], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = neg(*)', [
+          'Using wildcards (*) in neg is not allowed',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = neg(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval neg(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = neg(to_integer(booleanField))', []);
+        testErrorsAndWarnings('from a_index | eval var = neg(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval neg(dateField)', []);
+        testErrorsAndWarnings('from a_index | eval var = neg(to_datetime(dateField))', []);
+
+        testErrorsAndWarnings('from a_index | eval neg(1 year, extraArg)', [
+          'Error: [neg] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort neg(1 year)', []);
+        testErrorsAndWarnings('from a_index | eval neg(null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval neg(nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval neg("2022")', []);
+        testErrorsAndWarnings('from a_index | eval neg(concat("20", "22"))', []);
+      });
+
+      describe('not_equals', () => {
+        testErrorsAndWarnings('row var = not_equals(true, true)', []);
+        testErrorsAndWarnings('row not_equals(true, true)', []);
+        testErrorsAndWarnings('row var = not_equals(to_boolean(true), to_boolean(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row not_equals(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row not_equals(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = not_equals(now(), now())', []);
+        testErrorsAndWarnings('row not_equals(now(), now())', []);
+        testErrorsAndWarnings('row var = not_equals(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = not_equals(5, 5)', []);
+        testErrorsAndWarnings('row not_equals(5, 5)', []);
+        testErrorsAndWarnings('row var = not_equals(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row not_equals(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row not_equals(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = not_equals(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row not_equals(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
+        testErrorsAndWarnings(
+          'row var = not_equals(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = not_equals("a", "a")', []);
+        testErrorsAndWarnings('row not_equals("a", "a")', []);
+        testErrorsAndWarnings('row var = not_equals(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings('row var = not_equals(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row not_equals(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = not_equals(to_version("a"), to_version("a"))', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(booleanField, booleanField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval not_equals(booleanField, booleanField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_boolean(booleanField), to_boolean(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval not_equals(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval not_equals(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = not_equals(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval not_equals(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = not_equals(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval not_equals(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(geoPointField, geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval not_equals(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(geoShapeField, geoShapeField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval not_equals(geoShapeField, geoShapeField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_geoshape(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = not_equals(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval not_equals(ipField, ipField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_ip(ipField), to_ip(ipField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = not_equals(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval not_equals(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(versionField, versionField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval not_equals(versionField, versionField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = not_equals(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval not_equals(booleanField, booleanField, extraArg)',
+          ['Error: [not_equals] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort not_equals(booleanField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval not_equals(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval not_equals(nullVar, nullVar)', []);
+      });
+
+      describe('rlike', () => {
+        testErrorsAndWarnings('row var = rlike("a", "a")', []);
+        testErrorsAndWarnings('row rlike("a", "a")', []);
+        testErrorsAndWarnings('row var = rlike(to_string(true), to_string(true))', []);
+
+        testErrorsAndWarnings('row var = rlike(true, true)', [
+          'Argument of [rlike] must be [string], found value [true] type [boolean]',
+          'Argument of [rlike] must be [string], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = rlike(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval rlike(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = rlike(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval rlike(booleanField, booleanField)', [
+          'Argument of [rlike] must be [string], found value [booleanField] type [boolean]',
+          'Argument of [rlike] must be [string], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort rlike(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval rlike(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval rlike(nullVar, nullVar)', []);
+      });
+
+      describe('sub', () => {
+        testErrorsAndWarnings('row var = sub(1 year, 1 year)', []);
+        testErrorsAndWarnings('row sub(1 year, 1 year)', []);
+        testErrorsAndWarnings('row var = sub(now(), 1 year)', []);
+        testErrorsAndWarnings('row sub(now(), 1 year)', []);
+        testErrorsAndWarnings('row var = sub(to_datetime(now()), 1 year)', []);
+        testErrorsAndWarnings('row var = sub(now(), now())', []);
+        testErrorsAndWarnings('row sub(now(), now())', []);
+        testErrorsAndWarnings('row var = sub(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = sub(5, 5)', []);
+        testErrorsAndWarnings('row sub(5, 5)', []);
+        testErrorsAndWarnings('row var = sub(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = sub(true, true)', [
+          'Argument of [sub] must be [time_literal], found value [true] type [boolean]',
+          'Argument of [sub] must be [time_literal], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where sub(numberField, numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where sub(booleanField, booleanField) > 0', [
+          'Argument of [sub] must be [time_literal], found value [booleanField] type [boolean]',
+          'Argument of [sub] must be [time_literal], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = sub(1 year, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval sub(1 year, 1 year)', []);
+
+        testErrorsAndWarnings('from a_index | eval sub(booleanField, booleanField)', [
+          'Argument of [sub] must be [time_literal], found value [booleanField] type [boolean]',
+          'Argument of [sub] must be [time_literal], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = sub(dateField, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval sub(dateField, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval var = sub(to_datetime(dateField), 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval var = sub(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval sub(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = sub(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = sub(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval sub(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = sub(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval sub(1 year, 1 year, extraArg)', [
+          'Error: [sub] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort sub(1 year, 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval sub(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval sub(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval sub("2022", 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval sub(concat("20", "22"), 1 year)', []);
+        testErrorsAndWarnings('from a_index | eval sub("2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval sub(concat("20", "22"), concat("20", "22"))',
+          []
+        );
+      });
     });
   });
 
