@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import type { Client } from '@elastic/elasticsearch';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { getCommonRequestHeader } from '../../../../../functional/services/ml/common_api';
@@ -92,3 +93,42 @@ export const forceStartDatafeeds = async ({
 
   return body;
 };
+
+export const waitForAnomalies = async ({
+  es,
+  jobId,
+  retry,
+}: {
+  es: Client;
+  jobId: string;
+  retry: RetryService;
+}) =>
+  retry.try(async () => {
+    const anomaliesResponse = await es.search({
+      index: '.ml-anomalies-*',
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { job_id: jobId } },
+              {
+                query_string: {
+                  query: 'result_type:record',
+                  analyze_wildcard: false,
+                },
+              },
+              { term: { is_interim: false } },
+            ],
+          },
+        },
+      },
+    });
+
+    const anomalies = anomaliesResponse.hits?.hits ?? [];
+
+    if (!anomalies.length) {
+      throw new Error('No anomalies found');
+    }
+
+    return anomalies;
+  });
