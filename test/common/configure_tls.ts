@@ -8,17 +8,11 @@
 
 import { readFileSync } from 'fs';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { addOrReplaceKbnServerArg } from './configure_http2';
 
 type ConfigType = Record<string, any>;
 
-/**
- * Enables HTTP2 by adding/changing the appropriate config settings
- *
- * Important: this must be used on "final" (non-reused) configs, otherwise
- * the overrides from the children configs could remove the overrides
- * done in that helper.
- */
-export const configureHTTP2 = (config: ConfigType): ConfigType => {
+export const configureTLS = (config: ConfigType): ConfigType => {
   // Add env flag to avoid terminating on NODE_TLS_REJECT_UNAUTHORIZED warning
   process.env.IS_FTR_RUNNER = 'true';
 
@@ -39,8 +33,6 @@ export const configureHTTP2 = (config: ConfigType): ConfigType => {
 
   const serverArgs = config.kbnTestServer.serverArgs;
 
-  // enable http2 on the kibana server
-  addOrReplaceKbnServerArg(serverArgs, 'server.protocol', () => 'http2');
   // enable and configure TLS on the kibana server
   addOrReplaceKbnServerArg(serverArgs, 'server.ssl.enabled', () => 'true');
   addOrReplaceKbnServerArg(serverArgs, 'server.ssl.key', () => KBN_KEY_PATH);
@@ -55,31 +47,4 @@ export const configureHTTP2 = (config: ConfigType): ConfigType => {
   });
 
   return config;
-};
-
-/**
- * Set or replace given `arg` in the provided serverArgs list, using the provided replacer function
- */
-export const addOrReplaceKbnServerArg = (
-  serverArgs: string[],
-  argName: string,
-  replacer: (value: string | undefined) => string | undefined
-) => {
-  const argPrefix = `--${argName}=`;
-  const argIndex = serverArgs.findIndex((value) => value.startsWith(argPrefix));
-
-  if (argIndex === -1) {
-    const newArgValue = replacer(undefined);
-    if (newArgValue !== undefined) {
-      serverArgs.push(`${argPrefix}${newArgValue}`);
-    }
-  } else {
-    const currentArgValue = serverArgs[argIndex].substring(argPrefix.length);
-    const newArgValue = replacer(currentArgValue);
-    if (newArgValue !== undefined) {
-      serverArgs[argIndex] = `${argPrefix}${newArgValue}`;
-    } else {
-      serverArgs.splice(argIndex, 1);
-    }
-  }
 };
