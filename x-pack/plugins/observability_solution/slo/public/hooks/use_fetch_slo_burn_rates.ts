@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from '@tanstack/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -13,6 +18,9 @@ import { sloKeys } from './query_key_factory';
 export interface UseFetchSloBurnRatesResponse {
   isLoading: boolean;
   data: GetSLOBurnRatesResponse | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<GetSLOBurnRatesResponse | undefined, unknown>>;
 }
 
 interface UseFetchSloBurnRatesParams {
@@ -27,7 +35,7 @@ export function useFetchSloBurnRates({
   shouldRefetch,
 }: UseFetchSloBurnRatesParams): UseFetchSloBurnRatesResponse {
   const { http } = useKibana().services;
-  const { isLoading, data } = useQuery({
+  const { isLoading, data, refetch } = useQuery({
     queryKey: sloKeys.burnRates(slo.id, slo.instanceId, windows),
     queryFn: async ({ signal }) => {
       try {
@@ -56,5 +64,6 @@ export function useFetchSloBurnRates({
   return {
     data,
     isLoading,
+    refetch,
   };
 }
