@@ -7,7 +7,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
