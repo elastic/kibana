@@ -11,6 +11,7 @@ import { ComparisonSide } from './comparison_side';
 import type {
   ThreeWayDiff,
   DiffableAllFields,
+  RuleKqlQuery,
 } from '../../../../../../../common/api/detection_engine';
 import {
   ThreeWayDiffOutcome,
@@ -93,6 +94,7 @@ WithResolvedValue.argTypes = {
   },
 };
 
+/* Optional field becomes defined - was undefined in base version, but was then defined by user in current version */
 export const OptionalFieldBecomesDefined = Template.bind({});
 OptionalFieldBecomesDefined.args = {
   fieldName: 'timestamp_override',
@@ -115,36 +117,40 @@ OptionalFieldBecomesDefined.args = {
   },
 };
 
+/* Field type changes - in this example "kql_query" field was "inline" in base version, but became "saved" in the current version */
 export const FieldTypeChanges = Template.bind({});
+
+const fieldTypeChangesThreeWayDiff: ThreeWayDiff<RuleKqlQuery> = {
+  has_base_version: true,
+  base_version: {
+    type: KqlQueryType.inline_query,
+    query: 'event.agent_id_status: *',
+    language: 'kuery',
+    filters: [],
+  },
+  current_version: {
+    type: KqlQueryType.saved_query,
+    saved_query_id: 'e355ef26-45f5-40f1-bbb7-5176ecf07d5c',
+  },
+  target_version: {
+    type: KqlQueryType.inline_query,
+    query: 'event.agent_id_status: *',
+    language: 'kuery',
+    filters: [],
+  },
+  merged_version: {
+    type: KqlQueryType.saved_query,
+    saved_query_id: 'e355ef26-45f5-40f1-bbb7-5176ecf07d5c',
+  },
+  diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+  merge_outcome: ThreeWayMergeOutcome.Current,
+  has_update: false,
+  conflict: ThreeWayDiffConflict.NONE,
+};
+
 FieldTypeChanges.args = {
   fieldName: 'kql_query',
-  fieldThreeWayDiff: {
-    has_base_version: true,
-    base_version: {
-      type: KqlQueryType.inline_query,
-      query: 'event.agent_id_status: *',
-      language: 'kuery',
-      filters: [],
-    },
-    current_version: {
-      type: KqlQueryType.saved_query,
-      saved_query_id: 'e355ef26-45f5-40f1-bbb7-5176ecf07d5c',
-    },
-    target_version: {
-      type: KqlQueryType.inline_query,
-      query: 'event.agent_id_status: *',
-      language: 'kuery',
-      filters: [],
-    },
-    merged_version: {
-      type: KqlQueryType.saved_query,
-      saved_query_id: 'e355ef26-45f5-40f1-bbb7-5176ecf07d5c',
-    },
-    diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-    merge_outcome: ThreeWayMergeOutcome.Current,
-    has_update: false,
-    conflict: ThreeWayDiffConflict.NONE,
-  },
+  fieldThreeWayDiff: fieldTypeChangesThreeWayDiff,
 };
 
 export const SingleLineStringSubfieldChanges = Template.bind({});

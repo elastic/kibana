@@ -52,7 +52,6 @@ import {
   RuleKqlQuery,
   RuleNameOverrideObject,
   RuleSchedule,
-  SavedKqlQuery,
   TimelineTemplateReference,
   TimestampOverrideObject,
 } from './diffable_field_types';
@@ -100,14 +99,14 @@ export const DiffableCommonFields = z.object({
 export type DiffableCustomQueryFields = z.infer<typeof DiffableCustomQueryFields>;
 export const DiffableCustomQueryFields = z.object({
   type: z.literal('query'),
-  kql_query: InlineKqlQuery, // NOTE: new field
+  kql_query: RuleKqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
 });
 
 export type DiffableSavedQueryFields = z.infer<typeof DiffableSavedQueryFields>;
 export const DiffableSavedQueryFields = z.object({
   type: z.literal('saved_query'),
-  kql_query: SavedKqlQuery, // NOTE: new field
+  kql_query: RuleKqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
 });
 
@@ -213,15 +212,15 @@ const DiffableRule = z.intersection(
  * This is NOT a union discriminated by rule type, as DiffableRule is.
  */
 export type DiffableAllFields = DiffableCommonFields &
-  Omit<DiffableCustomQueryFields, 'type' | 'kql_query'> &
-  Omit<DiffableSavedQueryFields, 'type' | 'kql_query'> &
+  Omit<DiffableCustomQueryFields, 'type'> &
+  Omit<DiffableSavedQueryFields, 'type'> &
   Omit<DiffableEqlFields, 'type'> &
   Omit<DiffableEsqlFields, 'type'> &
-  Omit<DiffableThreatMatchFields, 'type' | 'kql_query'> &
-  Omit<DiffableThresholdFields, 'type' | 'kql_query'> &
+  Omit<DiffableThreatMatchFields, 'type'> &
+  Omit<DiffableThresholdFields, 'type'> &
   Omit<DiffableMachineLearningFields, 'type'> &
-  Omit<DiffableNewTermsFields, 'type' | 'kql_query'> &
-  DiffableRuleTypeField & { kql_query: RuleKqlQuery };
+  Omit<DiffableNewTermsFields, 'type'> &
+  DiffableRuleTypeField;
 
 interface DiffableRuleTypeField {
   type: DiffableRule['type'];
