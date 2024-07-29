@@ -64,7 +64,7 @@ export async function createPackagePolicy(
   const title = 'Security Posture Management';
   const streams = [
     {
-      enabled: false,
+      enabled: true,
       data_stream: {
         type: 'logs',
         dataset: 'cloud_security_posture.vulnerabilities',

@@ -9,7 +9,6 @@ import type { Filter } from '@kbn/es-query';
 import type { RowRendererId, TimelineTypeLiteral } from '../../api/timeline/model/api';
 
 import type { Direction } from '../../search_strategy';
-import type { ExpandedDetailTimeline } from '../detail_panel';
 import type { ColumnHeaderOptions, ColumnId } from '../header_actions';
 import type { DataProvider } from './data_provider';
 
@@ -43,7 +42,6 @@ export interface TimelinePersistInput {
   };
   defaultColumns?: ColumnHeaderOptions[];
   excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: ExpandedDetailTimeline;
   filters?: Filter[];
   id: string;
   indexNames: string[];

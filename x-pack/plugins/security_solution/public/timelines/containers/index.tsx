@@ -502,11 +502,17 @@ export const useTimelineEvents = ({
   });
   const { onLoad } = useFetchNotes();
 
+  const onTimelineSearchComplete: OnNextResponseHandler = useCallback(
+    (response) => {
+      onLoad(response.events);
+    },
+    [onLoad]
+  );
+
   useEffect(() => {
     if (!timelineSearchHandler) return;
-    timelineSearchHandler();
-    onLoad(timelineResponse.events);
-  }, [timelineSearchHandler, onLoad, timelineResponse.events]);
+    timelineSearchHandler(onTimelineSearchComplete);
+  }, [timelineSearchHandler, onTimelineSearchComplete]);
 
   return [dataLoadingState, timelineResponse];
 };

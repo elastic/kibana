@@ -22,6 +22,8 @@ info:
     ```
     GET kbn:/api/data_views
     ```
+
+    For more information about the console, refer to [Run API requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
   version: "1.0.2"
   license:
     name: Elastic License 2.0

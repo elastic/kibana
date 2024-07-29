@@ -11,7 +11,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
-  AssetCriticalityBulkUploadResponse,
+  BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -211,9 +211,9 @@ export class AssetCriticalityDataClient {
     recordsStream,
     flushBytes,
     retries,
-  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityBulkUploadResponse> => {
-    const errors: AssetCriticalityBulkUploadResponse['errors'] = [];
-    const stats: AssetCriticalityBulkUploadResponse['stats'] = {
+  }: BulkUpsertFromStreamOptions): Promise<BulkUpsertAssetCriticalityRecordsResponse> => {
+    const errors: BulkUpsertAssetCriticalityRecordsResponse['errors'] = [];
+    const stats: BulkUpsertAssetCriticalityRecordsResponse['stats'] = {
       successful: 0,
       failed: 0,
       total: 0,

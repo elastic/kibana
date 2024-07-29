@@ -29,3 +29,5 @@ export {
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
 } from './constants';
 export { getKibanaContextFn } from './expressions/kibana_context';
+
+export { toSavedSearchAttributes } from './service/saved_searches_utils';

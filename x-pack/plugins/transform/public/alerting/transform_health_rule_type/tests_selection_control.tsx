@@ -51,7 +51,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
         <EuiForm component="div" isInvalid={!!errors?.length} error={errors}>
           {(
             Object.entries(uiConfig) as Array<
-              [TransformHealthTests, typeof uiConfig[TransformHealthTests]]
+              [TransformHealthTests, (typeof uiConfig)[TransformHealthTests]]
             >
           )
             .filter(([name]) => !disabledChecks.has(name) || initConfig[name].enabled)
