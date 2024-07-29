@@ -176,18 +176,6 @@ const renderPanelOpener = (
   return items;
 };
 
-const getCurrentActiveNodeHref = (
-  activeNodes: ChromeProjectNavigationNode[][],
-  basePath: BasePathService
-) => {
-  const [nodes] = activeNodes;
-  if (!nodes) return;
-  const activeNode = nodes[nodes.length - 1];
-  if (activeNode && activeNode.href) {
-    return basePath.remove(activeNode.href);
-  }
-};
-
 const getEuiProps = (
   _navNode: ChromeProjectNavigationNode,
   deps: {
@@ -263,8 +251,11 @@ const getEuiProps = (
         external: isExternal,
         onClick: (e) => {
           if (href) {
-            const hrefPrev = getCurrentActiveNodeHref(activeNodes, basePath);
-            eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, hrefPrev });
+            eventTracker.clickNavLink({
+              href: basePath.remove(href),
+              id: navNode.id,
+              hrefPrev: basePath.remove(window.location.pathname),
+            });
           }
 
           if (customOnClick) {
@@ -282,8 +273,11 @@ const getEuiProps = (
 
   const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
     if (href) {
-      const hrefPrev = getCurrentActiveNodeHref(activeNodes, basePath);
-      eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, hrefPrev });
+      eventTracker.clickNavLink({
+        href: basePath.remove(href),
+        id: navNode.id,
+        hrefPrev: basePath.remove(window.location.pathname),
+      });
     }
 
     if (customOnClick) {
