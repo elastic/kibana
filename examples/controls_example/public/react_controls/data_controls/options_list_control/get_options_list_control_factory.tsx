@@ -190,7 +190,7 @@ export const getOptionsListControlFactory = (
         }
       });
 
-      /** Remove all other selections if this control is single select */
+      /** Remove all other selections if this control becomes a single select */
       const singleSelectSubscription = singleSelect$
         .pipe(filter((singleSelect) => Boolean(singleSelect)))
         .subscribe(() => {
@@ -257,6 +257,7 @@ export const getOptionsListControlFactory = (
           clearSelections: () => {
             if (selections$.getValue()?.length) selections$.next([]);
             if (existsSelected$.getValue()) existsSelected$.next(false);
+            if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
           },
         },
         {
