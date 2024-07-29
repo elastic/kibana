@@ -26,8 +26,8 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  [FieldType.SOLUTION_NEXT]: {
-    [FieldType.SOLUTION_NEXT]: {
+  [FieldType.SOLUTION]: {
+    [FieldType.SOLUTION]: {
       type: 'keyword',
       _meta: {
         description: 'The solution set for the space.',
@@ -59,7 +59,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     schema: {
       ...fields[FieldType.SPACE_ID],
       ...fields[FieldType.SOLUTION_PREV],
-      ...fields[FieldType.SOLUTION_NEXT],
+      ...fields[FieldType.SOLUTION],
       ...fields[FieldType.ACTION],
     },
   },
@@ -69,7 +69,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.SPACE_ID],
       ...fields[FieldType.SPACE_ID_PREV],
       ...fields[FieldType.SOLUTION_PREV],
-      ...fields[FieldType.SOLUTION_NEXT],
+      ...fields[FieldType.SOLUTION],
     },
   },
 ];

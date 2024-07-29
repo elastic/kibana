@@ -18,7 +18,7 @@ export enum FieldType {
   ACTION = 'action',
   SPACE_ID = 'space_id',
   SPACE_ID_PREV = 'space_id_prev',
-  SOLUTION_NEXT = 'solution_next',
+  SOLUTION = 'solution',
   SOLUTION_PREV = 'solution_prev',
 }
 
@@ -50,7 +50,7 @@ export class EventTracker {
   }) {
     this.track(EventType.SPACE_SOLUTION_CHANGED, {
       [FieldType.SPACE_ID]: spaceId,
-      [FieldType.SOLUTION_NEXT]: solution,
+      [FieldType.SOLUTION]: solution,
       [FieldType.SOLUTION_PREV]: solutionPrev,
       [FieldType.ACTION]: action,
     });
@@ -73,7 +73,7 @@ export class EventTracker {
     this.track(EventType.SPACE_CHANGED, {
       [FieldType.SPACE_ID]: nextSpaceId,
       [FieldType.SPACE_ID_PREV]: prevSpaceId,
-      [FieldType.SOLUTION_NEXT]: nextSolution,
+      [FieldType.SOLUTION]: nextSolution,
       [FieldType.SOLUTION_PREV]: prevSolution,
     });
   }

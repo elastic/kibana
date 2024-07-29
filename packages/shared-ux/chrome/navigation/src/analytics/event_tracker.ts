@@ -15,7 +15,7 @@ export enum EventType {
 export enum FieldType {
   ID = 'id',
   HREF = 'href',
-  PREV_HREF = 'prev_href',
+  HREF_PREV = 'href_prev',
 }
 
 export class EventTracker {
@@ -33,11 +33,11 @@ export class EventTracker {
   /*
    * Track whenever a user clicks on a navigation link in the side nav
    */
-  public clickNavLink({ id, href, prevHref }: { id: string; href?: string; prevHref?: string }) {
+  public clickNavLink({ id, href, hrefPrev }: { id: string; href?: string; hrefPrev?: string }) {
     this.track(EventType.CLICK_NAVLINK, {
       [FieldType.ID]: id,
       [FieldType.HREF]: href,
-      [FieldType.PREV_HREF]: prevHref,
+      [FieldType.HREF_PREV]: hrefPrev,
     });
   }
 }

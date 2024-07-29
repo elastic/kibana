@@ -263,8 +263,8 @@ const getEuiProps = (
         external: isExternal,
         onClick: (e) => {
           if (href) {
-            const prevHref = getCurrentActiveNodeHref(activeNodes, basePath);
-            eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, prevHref });
+            const hrefPrev = getCurrentActiveNodeHref(activeNodes, basePath);
+            eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, hrefPrev });
           }
 
           if (customOnClick) {
@@ -282,8 +282,8 @@ const getEuiProps = (
 
   const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
     if (href) {
-      const prevHref = getCurrentActiveNodeHref(activeNodes, basePath);
-      eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, prevHref });
+      const hrefPrev = getCurrentActiveNodeHref(activeNodes, basePath);
+      eventTracker.clickNavLink({ href: basePath.remove(href), id: navNode.id, hrefPrev });
     }
 
     if (customOnClick) {

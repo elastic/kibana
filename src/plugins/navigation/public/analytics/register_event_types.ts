@@ -30,8 +30,8 @@ const fields: Record<NavigationFieldType, RootSchema<Record<string, unknown>>> =
       },
     },
   },
-  [NavigationFieldType.PREV_HREF]: {
-    [NavigationFieldType.PREV_HREF]: {
+  [NavigationFieldType.HREF_PREV]: {
+    [NavigationFieldType.HREF_PREV]: {
       type: 'keyword',
       _meta: {
         description: 'The previous href before clicking on a navigation node.',
@@ -47,7 +47,7 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     schema: {
       ...fields[NavigationFieldType.ID],
       ...fields[NavigationFieldType.HREF],
-      ...fields[NavigationFieldType.PREV_HREF],
+      ...fields[NavigationFieldType.HREF_PREV],
     },
   },
 ];
