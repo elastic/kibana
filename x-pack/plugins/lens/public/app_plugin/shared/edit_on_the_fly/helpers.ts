@@ -27,7 +27,7 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
-export const getGridAtrrs = async (
+export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
   deps: LensPluginStartDependencies,
@@ -70,7 +70,7 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
 ) => {
   try {
-    const { dataView, columns, values } = await getGridAtrrs(
+    const { dataView, columns, values } = await getGridAttrs(
       query,
       adHocDataViews,
       deps,

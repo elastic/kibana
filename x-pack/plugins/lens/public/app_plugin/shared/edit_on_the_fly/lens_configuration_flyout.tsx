@@ -47,7 +47,7 @@ import {
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions, getGridAtrrs, type ESQLDataGridAttrs } from './helpers';
+import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -138,7 +138,7 @@ export function LensEditConfigurationFlyout({
   useEffect(() => {
     const getESQLGridAttrs = async () => {
       if (!dataGridAttrs && isOfAggregateQueryType(query)) {
-        const { dataView, columns, values } = await getGridAtrrs(
+        const { dataView, columns, values } = await getGridAttrs(
           query,
           adHocDataViews,
           startDependencies,
