@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 
 export const DEFAULT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.defaultTimelineTitle',
