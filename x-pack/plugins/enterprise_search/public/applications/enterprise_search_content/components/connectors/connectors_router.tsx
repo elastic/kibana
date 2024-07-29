@@ -20,7 +20,7 @@ import { ConnectorDetailRouter } from '../connector_detail/connector_detail_rout
 import { NewSearchIndexPage } from '../new_index/new_search_index_page';
 
 import { Connectors } from './connectors';
-import { CreateConnector } from './create_connector/create_connector';
+import { CreateConnector } from './create_connector';
 import { SelectConnector } from './select_connector/select_connector';
 
 export const ConnectorsRouter: React.FC = () => {
