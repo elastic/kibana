@@ -27,11 +27,7 @@ import { useAssistantContext } from '../assistant_context';
 import * as i18n from './translations';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
-import {
-  useSettingsUpdater,
-  DEFAULT_CONVERSATIONS,
-  DEFAULT_PROMPTS,
-} from '../assistant/settings/use_settings_updater/use_settings_updater';
+import { useSettingsUpdater } from '../assistant/settings/use_settings_updater/use_settings_updater';
 import { AssistantSettingsBottomBar } from '../assistant/settings/assistant_settings_bottom_bar';
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../assistant/settings/translations';
 import { SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP } from './translations';
@@ -47,12 +43,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
-    useSettingsUpdater(
-      DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
-      DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
-      false, // Knowledge Base settings do not require prompts
-      false // Knowledge Base settings do not require conversations
-    );
+    useSettingsUpdater();
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {

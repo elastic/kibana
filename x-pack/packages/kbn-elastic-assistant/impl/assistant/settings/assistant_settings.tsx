@@ -94,8 +94,11 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       }
     }, [selectedSettingsTab, setSelectedSettingsTab]);
 
-    const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
-      useFetchAnonymizationFields();
+    const {
+      data: anonymizationFields,
+      isFetched: anonymizationFieldsLoaded,
+      refetch: refetchAnonymizationFieldsResults,
+    } = useFetchAnonymizationFields();
     const { data: allPrompts, isFetched: promptsLoaded } = useFetchPrompts();
 
     const { data: connectors } = useLoadConnectors({
@@ -122,13 +125,14 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setUpdatedAnonymizationData,
       setPromptsBulkActions,
       setUpdatedSystemPromptSettings,
-    } = useSettingsUpdater(
+    } = useSettingsUpdater({
       conversations,
       allPrompts,
       conversationsLoaded,
       promptsLoaded,
-      anonymizationFields
-    );
+      anonymizationFields,
+      anonymizationFieldsLoaded,
+    });
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State

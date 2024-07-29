@@ -13,12 +13,7 @@ import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
 import { useAnonymizationListUpdate } from '../anonymization_settings/use_anonymization_list_update';
-import {
-  DEFAULT_ANONYMIZATION_FIELDS,
-  DEFAULT_CONVERSATIONS,
-  DEFAULT_PROMPTS,
-  useSettingsUpdater,
-} from '../../../assistant/settings/use_settings_updater/use_settings_updater';
+import { useSettingsUpdater } from '../../../assistant/settings/use_settings_updater/use_settings_updater';
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
 import { useAssistantContext } from '../../../assistant_context';
@@ -30,9 +25,12 @@ export interface Props {
 
 const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5 }) => {
   const { toasts } = useAssistantContext();
-  const { data: anonymizationFields } = useFetchAnonymizationFields();
+  const {
+    data: anonymizationFields,
+    isFetched: anonymizationFieldsLoaded,
+    refetch: refetchAnonymizationFields,
+  } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
-
   const {
     anonymizationFieldsBulkActions,
     setAnonymizationFieldsBulkActions,
@@ -40,13 +38,10 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
     resetSettings,
     saveSettings,
     updatedAnonymizationData,
-  } = useSettingsUpdater(
-    DEFAULT_CONVERSATIONS, // Anonymization settings do not require conversations
-    DEFAULT_PROMPTS, // Anonymization settings do not require prompts
-    false, // Anonymization settings do not require conversations
-    false, // Anonymization settings do not require prompts
-    anonymizationFields ?? DEFAULT_ANONYMIZATION_FIELDS
-  );
+  } = useSettingsUpdater({
+    anonymizationFieldsLoaded,
+    anonymizationFields,
+  });
 
   const onCancelClick = useCallback(() => {
     resetSettings();
@@ -67,8 +62,8 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
   );
 
   const onSaveButtonClicked = useCallback(() => {
-    handleSave();
-  }, [handleSave]);
+    handleSave({ callback: refetchAnonymizationFields });
+  }, [handleSave, refetchAnonymizationFields]);
 
   const handleAnonymizationFieldsBulkActions = useCallback(
     (value) => {
