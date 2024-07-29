@@ -20,7 +20,7 @@ const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating 
   }
   return (
     <>
-      <EuiLoadingSpinner size="s" />
+      <EuiLoadingSpinner size="s" data-test-subj="generatingLoader" />
       {i18n.LOADING}
     </>
   );
@@ -30,14 +30,13 @@ AnalyzeButtonText.displayName = 'AnalyzeButtonText';
 interface FooterProps {
   currentStep: State['step'];
   isGenerating: State['isGenerating'];
-  onGenerate: () => void;
   isNextStepEnabled?: boolean;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({ currentStep, onGenerate, isGenerating, isNextStepEnabled = false }) => {
+  ({ currentStep, isGenerating, isNextStepEnabled = false }) => {
     const telemetry = useTelemetry();
-    const { setStep } = useActions();
+    const { setStep, setIsGenerating } = useActions();
     const navigate = useNavigate();
 
     const onBack = useCallback(() => {
@@ -51,11 +50,11 @@ export const Footer = React.memo<FooterProps>(
     const onNext = useCallback(() => {
       telemetry.reportAssistantStepComplete({ step: currentStep });
       if (currentStep === 3) {
-        onGenerate();
+        setIsGenerating(true);
       } else {
         setStep(currentStep + 1);
       }
-    }, [currentStep, onGenerate, setStep, telemetry]);
+    }, [currentStep, setIsGenerating, setStep, telemetry]);
 
     const nextButtonText = useMemo(() => {
       if (currentStep === 3) {

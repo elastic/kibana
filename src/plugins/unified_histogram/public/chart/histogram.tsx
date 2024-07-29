@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
@@ -106,7 +106,6 @@ export function Histogram({
   abortController,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
-  const [chartSize, setChartSize] = useState('100%');
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
@@ -115,18 +114,7 @@ export function Histogram({
     isPlainRecord,
     timeField: dataView.timeFieldName,
   });
-  const chartRef = useRef<HTMLDivElement | null>(null);
-  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
   const { attributes } = visContext;
-
-  useEffect(() => {
-    if (attributes.visualizationType === 'lnsMetric') {
-      const size = containerHeight < containerWidth ? containerHeight : containerWidth;
-      setChartSize(`${size}px`);
-    } else {
-      setChartSize('100%');
-    }
-  }, [attributes, containerHeight, containerWidth]);
 
   const onLoad = useStableCallback(
     (
@@ -197,7 +185,7 @@ export function Histogram({
     }
 
     & .lnsExpressionRenderer {
-      width: ${chartSize};
+      width: ${attributes.visualizationType === 'lnsMetric' ? '90%' : '100%'};
       margin: auto;
       box-shadow: ${attributes.visualizationType === 'lnsMetric' ? boxShadow : 'none'};
     }
@@ -222,7 +210,6 @@ export function Histogram({
         data-request-data={requestData}
         data-suggestion-type={visContext.suggestionType}
         css={chartCss}
-        ref={chartRef}
       >
         <lens.EmbeddableComponent
           {...lensProps}

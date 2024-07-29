@@ -65,10 +65,11 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const { lists, ruleRegistry, security } = plugins;
 
-    const [, startPlugins] = await core.getStartServices();
-    const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    const [_, startPlugins] = await core.getStartServices();
+    const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -123,6 +124,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
 
         return createDetectionRulesClient({
+          actionsClient,
           rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
@@ -149,7 +151,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           return null;
         }
 
-        const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
+        const username = coreContext.security.authc.getCurrentUser()?.username || 'elastic';
         return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
 

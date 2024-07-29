@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
@@ -124,7 +124,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         params: schema.object({
           sourceId: schema.string(),
         }),
-        body: createValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
+        body: createRouteValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {

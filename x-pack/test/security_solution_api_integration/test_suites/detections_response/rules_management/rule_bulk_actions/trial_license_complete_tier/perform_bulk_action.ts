@@ -2403,7 +2403,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('manual rule run action', () => {
+    // skipped on MKI since feature flags are not supported there
+    describe('@skipInServerlessMKI manual rule run action', () => {
       it('should return all existing and enabled rules as succeeded', async () => {
         const intervalInMinutes = 25;
         const interval = `${intervalInMinutes}m`;

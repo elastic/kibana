@@ -69,7 +69,15 @@
               "\nRetrieves uiSettings values set by the user with fallbacks to default values if not specified."
             ],
             "signature": [
-              "<T = any>(key: string) => Promise<T>"
+              "<T = any>(key: string, context?: ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.GetUiSettingsContext",
+                "text": "GetUiSettingsContext"
+              },
+              " | undefined) => Promise<T>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
@@ -89,6 +97,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.IUiSettingsClient.get.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.GetUiSettingsContext",
+                    "text": "GetUiSettingsContext"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -103,12 +133,43 @@
               "\nRetrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified."
             ],
             "signature": [
-              "<T = any>() => Promise<Record<string, T>>"
+              "<T = any>(context?: ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.GetUiSettingsContext",
+                "text": "GetUiSettingsContext"
+              },
+              " | undefined) => Promise<Record<string, T>>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.IUiSettingsClient.getAll.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.GetUiSettingsContext",
+                    "text": "GetUiSettingsContext"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {

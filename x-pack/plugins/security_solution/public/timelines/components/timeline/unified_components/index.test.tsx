@@ -67,8 +67,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
-  if (feature === 'unifiedComponentsInTimelineEnabled') {
-    return true;
+  if (feature === 'unifiedComponentsInTimelineDisabled') {
+    return false;
   }
   return allowedExperimentalValues[feature];
 });
@@ -111,9 +111,6 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
     events: localMockedTimelineData,
     refetch: jest.fn(),
     totalCount: localMockedTimelineData.length,
-    onEventClosed: jest.fn(),
-    expandedDetail: {},
-    showExpandedDetails: false,
     onChangePage: jest.fn(),
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),

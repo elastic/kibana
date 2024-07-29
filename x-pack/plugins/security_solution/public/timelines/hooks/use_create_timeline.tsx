@@ -13,6 +13,7 @@ import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
 import type { TimelineTypeLiteral } from '../../../common/api/timeline';
+import { TimelineType } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
@@ -50,8 +51,8 @@ export const useCreateTimeline = ({
   onClick,
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
@@ -79,16 +80,17 @@ export const useCreateTimeline = ({
 
       dispatch(
         timelineActions.createTimeline({
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
           show,
           timelineType,
           updated: undefined,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
-            ? timelineDefaults.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineType.template
+              ? timelineDefaults.excludedRowRendererIds
+              : [],
         })
       );
 
@@ -123,7 +125,7 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
-      unifiedComponentsInTimelineEnabled,
+      unifiedComponentsInTimelineDisabled,
     ]
   );
 

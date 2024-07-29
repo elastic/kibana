@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
       before(async () => {
         findCasesResp = svlCases.api.getFindCasesResp();
         postCaseReq = svlCases.api.getPostCaseReq('securitySolution');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
 
       afterEach(async () => {

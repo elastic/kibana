@@ -7,11 +7,15 @@
 
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
+import { KeyValueDisplay } from '../../key_value_display';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
+  ActionDetails,
   GetProcessesActionOutputContent,
+  MaybeImmutable,
   ProcessesRequestBody,
 } from '../../../../../common/endpoint/types';
 import { useSendGetEndpointProcessesRequest } from '../../../hooks/response_actions/use_send_get_endpoint_processes_request';
@@ -45,17 +49,19 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
 
 export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
+    const comment = command.args.args?.comment?.[0];
     const actionCreator = useSendGetEndpointProcessesRequest();
 
     const actionRequestBody = useMemo(() => {
       return endpointId
         ? {
             endpoint_ids: [endpointId],
-            comment: command.args.args?.comment?.[0],
+            comment,
+            agent_type: agentType,
           }
         : undefined;
-    }, [endpointId, command.args.args?.comment]);
+    }, [endpointId, comment, agentType]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       ProcessesRequestBody,
@@ -71,6 +77,33 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       dataTestSubj: 'getProcesses',
     });
 
+    if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
+      return result;
+    }
+
+    // Show results
+    return (
+      <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
+        {agentType === 'sentinel_one' ? (
+          <SentinelOneRunningProcessesResults action={completedActionDetails} />
+        ) : (
+          <EndpointRunningProcessesResults action={completedActionDetails} agentId={endpointId} />
+        )}
+      </ResultComponent>
+    );
+  }
+);
+GetProcessesActionResult.displayName = 'GetProcessesActionResult';
+
+interface EndpointRunningProcessesResultsProps {
+  action: MaybeImmutable<ActionDetails<GetProcessesActionOutputContent>>;
+  /** If defined, only the results for the given agent id will be displayed. Else, all agents output will be displayed */
+  agentId?: string;
+}
+
+const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProps>(
+  ({ action, agentId }) => {
+    const agentIds: string[] = agentId ? [agentId] : [...action.agents];
     const columns = useMemo(
       () => [
         {
@@ -114,27 +147,78 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       []
     );
 
-    const tableEntries = useMemo(() => {
-      if (endpointId) {
-        return completedActionDetails?.outputs?.[endpointId]?.content.entries ?? [];
-      }
-      return [];
-    }, [completedActionDetails?.outputs, endpointId]);
-
-    if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
-      return result;
-    }
-
-    // Show results
     return (
-      <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
-        <StyledEuiBasicTable
-          data-test-subj={'getProcessListTable'}
-          items={[...tableEntries]}
-          columns={columns}
-        />
-      </ResultComponent>
+      <>
+        {agentIds.length > 1 ? (
+          agentIds.map((id) => {
+            const hostName = action.hosts[id].name;
+
+            return (
+              <div key={hostName}>
+                <KeyValueDisplay
+                  name={hostName}
+                  value={
+                    <StyledEuiBasicTable
+                      data-test-subj={'getProcessListTable'}
+                      items={action.outputs?.[id]?.content.entries ?? []}
+                      columns={columns}
+                    />
+                  }
+                />
+                <EuiSpacer />
+              </div>
+            );
+          })
+        ) : (
+          <StyledEuiBasicTable
+            data-test-subj={'getProcessListTable'}
+            items={action.outputs?.[agentIds[0]]?.content.entries ?? []}
+            columns={columns}
+          />
+        )}
+      </>
     );
   }
 );
-GetProcessesActionResult.displayName = 'GetProcessesActionResult';
+EndpointRunningProcessesResults.displayName = 'EndpointRunningProcessesResults';
+
+interface SentinelOneRunningProcessesResultsProps {
+  action: MaybeImmutable<ActionDetails<GetProcessesActionOutputContent>>;
+  /**
+   * If defined, the results will only be displayed for the given agent id.
+   * If undefined, then responses for all agents are displayed
+   */
+  agentId?: string;
+}
+
+const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResultsProps>(
+  ({ action, agentId }) => {
+    const agentIds = agentId ? [agentId] : action.agents;
+
+    return (
+      <>
+        {agentIds.length === 1 ? (
+          <ResponseActionFileDownloadLink action={action} canAccessFileDownloadLink={true} />
+        ) : (
+          agentIds.map((id) => {
+            return (
+              <div key={id}>
+                <KeyValueDisplay
+                  name={action.hosts[id].name}
+                  value={
+                    <ResponseActionFileDownloadLink
+                      action={action}
+                      agentId={id}
+                      canAccessFileDownloadLink={true}
+                    />
+                  }
+                />
+              </div>
+            );
+          })
+        )}
+      </>
+    );
+  }
+);
+SentinelOneRunningProcessesResults.displayName = 'SentinelOneRunningProcessesResults';

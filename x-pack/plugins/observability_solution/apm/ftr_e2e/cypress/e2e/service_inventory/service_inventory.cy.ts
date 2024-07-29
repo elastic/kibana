@@ -91,7 +91,7 @@ describe('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
+      cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click();
 
@@ -103,6 +103,7 @@ describe('Service inventory', () => {
 
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
+      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
@@ -123,7 +124,6 @@ describe('Service inventory', () => {
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
       cy.contains('Enable fast filter').click();
       cy.get('[data-test-subj="tableSearchInput"]').should('exist');
-      cy.contains('Try it').should('not.exist');
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
@@ -136,7 +136,6 @@ describe('Service inventory', () => {
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
       cy.contains('Disable fast filter').click();
-      cy.contains('Try it').should('exist');
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
     });
   });

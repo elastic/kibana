@@ -73,7 +73,9 @@ describe('SamlSessionManager', () => {
 
     test(`'getSessionCookieForRole' should return the actual cookie value`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      const cookie = await samlSessionManager.getSessionCookieForRole(roleViewer);
+      const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+        roleViewer
+      );
       expect(cookie).toBe(cookieInstance.value);
     });
 
@@ -85,9 +87,9 @@ describe('SamlSessionManager', () => {
 
     test(`'getSessionCookieForRole' should call 'createLocalSAMLSession' only once for the same role`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      await samlSessionManager.getSessionCookieForRole(roleViewer);
-      await samlSessionManager.getSessionCookieForRole(roleEditor);
-      await samlSessionManager.getSessionCookieForRole(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleEditor);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(2);
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
     });
@@ -120,9 +122,9 @@ describe('SamlSessionManager', () => {
         ', '
       )}. Update roles resource file in ${SERVERLESS_ROLES_ROOT_PATH} to enable it for testing`;
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      await expect(samlSessionManager.getSessionCookieForRole(nonExistingRole)).rejects.toThrow(
-        expectedErrorMessage
-      );
+      await expect(
+        samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(nonExistingRole)
+      ).rejects.toThrow(expectedErrorMessage);
       await expect(samlSessionManager.getApiCredentialsForRole(nonExistingRole)).rejects.toThrow(
         expectedErrorMessage
       );
@@ -148,7 +150,7 @@ describe('SamlSessionManager', () => {
         log,
         isCloud,
       });
-      await samlSessionManager.getSessionCookieForRole(nonExistingRole);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(nonExistingRole);
       await samlSessionManager.getApiCredentialsForRole(nonExistingRole);
       await samlSessionManager.getUserData(nonExistingRole);
       expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(1);
@@ -198,7 +200,9 @@ describe('SamlSessionManager', () => {
           log,
           isCloud,
         });
-        await expect(samlSessionManager.getSessionCookieForRole(roleViewer)).rejects.toThrow(
+        await expect(
+          samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer)
+        ).rejects.toThrow(
           'SAML Authentication requires TEST_CLOUD_HOST_NAME env variable to be set'
         );
       });
@@ -227,7 +231,9 @@ describe('SamlSessionManager', () => {
     test(`'getSessionCookieForRole' should return the actual cookie value`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
       createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
-      const cookie = await samlSessionManager.getSessionCookieForRole(roleViewer);
+      const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+        roleViewer
+      );
       expect(cookie).toBe(cloudCookieInstance.value);
     });
 
@@ -239,9 +245,9 @@ describe('SamlSessionManager', () => {
 
     test(`'getSessionCookieForRole' should call 'createCloudSAMLSession' only once for the same role`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      await samlSessionManager.getSessionCookieForRole(roleViewer);
-      await samlSessionManager.getSessionCookieForRole(roleEditor);
-      await samlSessionManager.getSessionCookieForRole(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleEditor);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(0);
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(2);
     });
@@ -274,9 +280,9 @@ describe('SamlSessionManager', () => {
         ', '
       )}. Update roles resource file in ${SERVERLESS_ROLES_ROOT_PATH} to enable it for testing`;
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      await expect(samlSessionManager.getSessionCookieForRole(nonExistingRole)).rejects.toThrow(
-        expectedErrorMessage
-      );
+      await expect(
+        samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(nonExistingRole)
+      ).rejects.toThrow(expectedErrorMessage);
       await expect(samlSessionManager.getApiCredentialsForRole(nonExistingRole)).rejects.toThrow(
         expectedErrorMessage
       );
@@ -293,9 +299,9 @@ describe('SamlSessionManager', () => {
         log,
         isCloud,
       });
-      await expect(samlSessionManager.getSessionCookieForRole(nonExistingRole)).rejects.toThrow(
-        `User with '${nonExistingRole}' role is not defined`
-      );
+      await expect(
+        samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(nonExistingRole)
+      ).rejects.toThrow(`User with '${nonExistingRole}' role is not defined`);
       await expect(samlSessionManager.getApiCredentialsForRole(nonExistingRole)).rejects.toThrow(
         `User with '${nonExistingRole}' role is not defined`
       );
@@ -308,9 +314,9 @@ describe('SamlSessionManager', () => {
     test(`throws error when credentials are not specified for the role`, async () => {
       const noCredentialsRole = 'admin';
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      await expect(samlSessionManager.getSessionCookieForRole(noCredentialsRole)).rejects.toThrow(
-        `User with '${noCredentialsRole}' role is not defined`
-      );
+      await expect(
+        samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(noCredentialsRole)
+      ).rejects.toThrow(`User with '${noCredentialsRole}' role is not defined`);
       await expect(samlSessionManager.getApiCredentialsForRole(noCredentialsRole)).rejects.toThrow(
         `User with '${noCredentialsRole}' role is not defined`
       );

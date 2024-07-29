@@ -157,6 +157,7 @@ describe('useDashboardListingTable', () => {
         showActivityView: true,
       },
       createdByEnabled: true,
+      recentlyAccessed: expect.objectContaining({ get: expect.any(Function) }),
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

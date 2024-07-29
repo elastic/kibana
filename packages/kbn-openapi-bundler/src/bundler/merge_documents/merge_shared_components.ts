@@ -6,49 +6,98 @@
  * Side Public License, v 1.
  */
 
-import { OpenAPIV3 } from 'openapi-types';
-import deepEqual from 'fast-deep-equal';
 import chalk from 'chalk';
-import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
-import { ResolvedRef } from '../ref_resolver/resolved_ref';
-import { BundledDocument } from '../bundle_document';
+import deepEqual from 'fast-deep-equal';
+import { OpenAPIV3 } from 'openapi-types';
+import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import { extractObjectByJsonPointer } from '../../utils/extract_by_json_pointer';
+import { logger } from '../../logger';
+
+const MERGEABLE_COMPONENT_TYPES = [
+  'schemas',
+  'responses',
+  'parameters',
+  'examples',
+  'requestBodies',
+  'headers',
+  'securitySchemes',
+  'links',
+  'callbacks',
+] as const;
 
 export function mergeSharedComponents(
-  bundledDocuments: BundledDocument[]
+  bundledDocuments: ResolvedDocument[]
 ): OpenAPIV3.ComponentsObject {
-  const componentsMap = new Map<string, ResolvedRef>();
   const mergedComponents: Record<string, unknown> = {};
 
-  for (const bundledDocument of bundledDocuments) {
-    mergeRefsToMap(bundledDocument.bundledRefs, componentsMap);
-  }
+  for (const componentsType of MERGEABLE_COMPONENT_TYPES) {
+    const mergedTypedComponents = mergeObjects(bundledDocuments, `/components/${componentsType}`);
 
-  for (const resolvedRef of componentsMap.values()) {
-    insertRefByPointer(resolvedRef.pointer, resolvedRef.refNode, mergedComponents);
+    if (Object.keys(mergedTypedComponents).length === 0) {
+      // Nothing was merged for that components type, go to the next component type
+      continue;
+    }
+
+    mergedComponents[componentsType] = mergedTypedComponents;
   }
 
   return mergedComponents;
 }
 
-function mergeRefsToMap(bundledRefs: ResolvedRef[], componentsMap: Map<string, ResolvedRef>): void {
-  for (const bundledRef of bundledRefs) {
-    const existingRef = componentsMap.get(bundledRef.pointer);
+function mergeObjects(
+  resolvedDocuments: ResolvedDocument[],
+  sourcePointer: string
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = {};
+  const componentNameSourceLocationMap = new Map<string, string>();
+  const mergedEntityName = sourcePointer.split('/').at(-1);
 
-    if (!existingRef) {
-      componentsMap.set(bundledRef.pointer, bundledRef);
+  for (const resolvedDocument of resolvedDocuments) {
+    const object = extractObjectToMerge(resolvedDocument, sourcePointer);
+
+    if (!object) {
       continue;
     }
 
-    if (deepEqual(existingRef.refNode, bundledRef.refNode)) {
-      continue;
-    }
+    for (const name of Object.keys(object)) {
+      const componentToAdd = object[name];
+      const existingComponent = merged[name];
 
-    throw new Error(
-      `❌  Unable to bundle documents due to conflicts in references. Schema ${chalk.yellow(
-        bundledRef.pointer
-      )} is defined in ${chalk.blue(existingRef.absolutePath)} and in ${chalk.magenta(
-        bundledRef.absolutePath
-      )} but has not matching definitions.`
+      // Bundled documents may contain explicit references duplicates. For example
+      // shared schemas from `@kbn/openapi-common` has `NonEmptyString` which is
+      // widely used. After bundling references into a document (i.e. making them
+      // local references) we will have duplicates. This is why we need to check
+      // for exact match via `deepEqual()` to check whether components match.
+      if (existingComponent && !deepEqual(componentToAdd, existingComponent)) {
+        const existingSchemaLocation = componentNameSourceLocationMap.get(name);
+
+        throw new Error(
+          `❌  Unable to merge documents due to conflicts in referenced ${mergedEntityName}. Component ${chalk.yellow(
+            `${sourcePointer}/${name}`
+          )} is defined in ${chalk.blue(resolvedDocument.absolutePath)} and in ${chalk.magenta(
+            existingSchemaLocation
+          )} but definitions DO NOT match.`
+        );
+      }
+
+      merged[name] = componentToAdd;
+      componentNameSourceLocationMap.set(name, resolvedDocument.absolutePath);
+    }
+  }
+
+  return merged;
+}
+
+function extractObjectToMerge(
+  resolvedDocument: ResolvedDocument,
+  sourcePointer: string
+): Record<string, unknown> | undefined {
+  try {
+    return extractObjectByJsonPointer(resolvedDocument.document, sourcePointer);
+  } catch (e) {
+    logger.verbose(
+      `JSON pointer "${sourcePointer}" is not resolvable in ${resolvedDocument.absolutePath}`
     );
+    return;
   }
 }

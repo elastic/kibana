@@ -153,6 +153,14 @@ export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {
   defaultMessage: 'Actions',
 });
 
+export const ACTIONS_BUTTON_ARIA_LABEL = (title: string) =>
+  i18n.translate('xpack.cases.allCases.actions.button.ariaLabel', {
+    defaultMessage: 'Actions for "{title}" column',
+    values: {
+      title,
+    },
+  });
+
 export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.allCases.noTagsAvailable', {
   defaultMessage: 'No tags available',
 });

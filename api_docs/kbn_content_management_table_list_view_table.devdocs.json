@@ -109,7 +109,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, createdByEnabled, }: ",
+          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, createdByEnabled, recentlyAccessed, }: ",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
             "scope": "public",
@@ -828,6 +828,28 @@
             "description": [],
             "signature": [
               "ContentEditorConfig | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewTableProps.recentlyAccessed",
+            "type": "Object",
+            "tags": [],
+            "label": "recentlyAccessed",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/recently-accessed",
+                "scope": "common",
+                "docId": "kibKbnRecentlyAccessedPluginApi",
+                "section": "def-common.RecentlyAccessed",
+                "text": "RecentlyAccessed"
+              },
+              ", \"get\"> | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,

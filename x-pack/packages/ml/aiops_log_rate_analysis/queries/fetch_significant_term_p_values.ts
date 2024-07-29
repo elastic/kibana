@@ -28,7 +28,7 @@ import { getRequestBase } from './get_request_base';
 
 export const getSignificantTermRequest = (
   params: AiopsLogRateAnalysisSchema,
-  fieldName: string,
+  fieldNames: string[],
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({
@@ -56,18 +56,18 @@ export const getSignificantTermRequest = (
     ];
   }
 
-  const pValueAgg: Record<
-    'sig_term_p_value' | 'distinct_count',
-    estypes.AggregationsAggregationContainer
-  > = {
+  const fieldCandidateAggs = fieldNames.reduce<
+    Record<string, estypes.AggregationsAggregationContainer>
+  >((aggs, fieldName, index) => {
     // Used to identify fields with only one distinct value which we'll ignore in the analysis.
-    distinct_count: {
+    aggs[`distinct_count_${index}`] = {
       cardinality: {
         field: fieldName,
       },
-    },
-    // Used to calculate the p-value for terms of the field.
-    sig_term_p_value: {
+    };
+
+    // Used to calculate the p-value for the field.
+    aggs[`sig_term_p_value_${index}`] = {
       significant_terms: {
         field: fieldName,
         background_filter: {
@@ -90,13 +90,15 @@ export const getSignificantTermRequest = (
         p_value: { background_is_superset: false },
         size: 1000,
       },
-    },
-  };
+    };
+
+    return aggs;
+  }, {});
 
   const body = {
     query,
     size: 0,
-    aggs: wrap(pValueAgg),
+    aggs: wrap(fieldCandidateAggs),
   };
 
   return {
@@ -137,21 +139,20 @@ export const fetchSignificantTermPValues = async ({
 
   const result: SignificantItem[] = [];
 
-  const settledPromises = await Promise.allSettled(
-    fieldNames.map((fieldName) =>
-      esClient.search(getSignificantTermRequest(params, fieldName, randomSamplerWrapper), {
-        signal: abortSignal,
-        maxRetries: 0,
-      })
-    )
+  const resp = await esClient.search(
+    getSignificantTermRequest(params, fieldNames, randomSamplerWrapper),
+    {
+      signal: abortSignal,
+      maxRetries: 0,
+    }
   );
 
-  function reportError(fieldName: string, error: unknown) {
-    if (!isRequestAbortedError(error)) {
+  if (resp.aggregations === undefined) {
+    if (!isRequestAbortedError(resp)) {
       if (logger) {
         logger.error(
-          `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-            error,
+          `Failed to fetch p-value aggregation for field names ${fieldNames.join()}, got: \n${JSON.stringify(
+            resp,
             null,
             2
           )}`
@@ -159,40 +160,23 @@ export const fetchSignificantTermPValues = async ({
       }
 
       if (emitError) {
-        emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+        emitError(`Failed to fetch p-value aggregation for field names "${fieldNames.join()}".`);
       }
     }
+    return result;
   }
 
-  for (const [index, settledPromise] of settledPromises.entries()) {
-    const fieldName = fieldNames[index];
+  const unwrappedResp = randomSamplerWrapper.unwrap(resp.aggregations) as Record<string, Aggs>;
 
-    if (settledPromise.status === 'rejected') {
-      reportError(fieldName, settledPromise.reason);
-      // Still continue the analysis even if individual p-value queries fail.
-      continue;
-    }
-
-    const resp = settledPromise.value;
-
-    if (resp.aggregations === undefined) {
-      reportError(fieldName, resp);
-      // Still continue the analysis even if individual p-value queries fail.
-      continue;
-    }
-
-    const overallResult = (
-      randomSamplerWrapper.unwrap(resp.aggregations) as Record<'sig_term_p_value', Aggs>
-    ).sig_term_p_value;
-
+  for (const [index, fieldName] of fieldNames.entries()) {
+    const pValueBuckets = unwrappedResp[`sig_term_p_value_${index}`];
     const distinctCount = (
-      randomSamplerWrapper.unwrap(resp.aggregations) as Record<
-        'distinct_count',
-        estypes.AggregationsCardinalityAggregate
-      >
-    ).distinct_count.value;
+      unwrappedResp[
+        `distinct_count_${index}`
+      ] as unknown as estypes.AggregationsCardinalityAggregate
+    ).value;
 
-    for (const bucket of overallResult.buckets) {
+    for (const bucket of pValueBuckets.buckets) {
       const pValue = Math.exp(-bucket.score);
 
       if (
@@ -209,8 +193,8 @@ export const fetchSignificantTermPValues = async ({
           fieldValue: String(bucket.key),
           doc_count: bucket.doc_count,
           bg_count: bucket.bg_count,
-          total_doc_count: overallResult.doc_count,
-          total_bg_count: overallResult.bg_count,
+          total_doc_count: pValueBuckets.doc_count,
+          total_bg_count: pValueBuckets.bg_count,
           score: bucket.score,
           pValue,
           normalizedScore: getNormalizedScore(bucket.score),

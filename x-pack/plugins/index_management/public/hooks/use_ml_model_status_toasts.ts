@@ -27,6 +27,22 @@ export function useMLModelNotificationToasts() {
       }),
     });
   };
+  const showSuccessfullyDeployedToast = (modelName: string) => {
+    return toasts.addSuccess({
+      title: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
+        {
+          defaultMessage: 'Model deployment started',
+        }
+      ),
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeployedNotification', {
+        defaultMessage: 'Model {modelName} has been deployed on your machine learning node.',
+        values: {
+          modelName,
+        },
+      }),
+    });
+  };
   const showErrorToasts = (error: ErrorType) => {
     const errorObj = extractErrorProperties(error);
     return toasts.addError(new MLRequestFailure(errorObj, error), {
@@ -35,5 +51,5 @@ export function useMLModelNotificationToasts() {
       }),
     });
   };
-  return { showSuccessToasts, showErrorToasts };
+  return { showSuccessToasts, showErrorToasts, showSuccessfullyDeployedToast };
 }

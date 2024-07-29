@@ -846,4 +846,27 @@ describe('UnifiedDataTable', () => {
       expect(getFieldColumns()).toEqual(['@timestamp', '_index', 'bytes', 'extension', 'message']);
     });
   });
+
+  describe('getRowIndicator', () => {
+    it('should render the color indicator control', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        getRowIndicator: jest.fn(() => ({ color: 'blue', label: 'test' })),
+      });
+
+      expect(findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()).toBeTruthy();
+      expect(
+        findTestSubject(component, 'unifiedDataTableRowColorIndicatorCell').first().prop('title')
+      ).toEqual('test');
+    });
+
+    it('should not render the color indicator control by default', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        getRowIndicator: undefined,
+      });
+
+      expect(findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()).toBeFalsy();
+    });
+  });
 });

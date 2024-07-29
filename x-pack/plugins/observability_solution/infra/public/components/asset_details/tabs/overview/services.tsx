@@ -10,14 +10,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut, EuiLink } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { ServicesAPIResponseRT } from '../../../../../common/http_api';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { Section } from '../../components/section';
 import { ServicesSectionTitle } from './section_titles';
-import { useServices } from '../../hooks/use_services';
-import { HOST_FIELD } from '../../../../../common/constants';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
 import { APM_HOST_FILTER_FIELD } from '../../constants';
 import { LinkToApmService } from '../../links/link_to_apm_service';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
+import { useRequestObservable } from '../../hooks/use_request_observable';
+import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 
 export const ServicesContent = ({
   hostName,
@@ -27,6 +31,9 @@ export const ServicesContent = ({
   dateRange: TimeRange;
 }) => {
   const { isServerlessEnv } = useKibanaEnvironmentContext();
+  const { request$ } = useRequestObservable();
+  const { isActiveTab } = useTabSwitcherContext();
+
   const linkProps = useLinkProps({
     app: 'home',
     hash: '/tutorial/apm',
@@ -37,14 +44,32 @@ export const ServicesContent = ({
   });
   const params = useMemo(
     () => ({
-      filters: { [HOST_FIELD]: hostName },
+      filters: { [HOST_NAME_FIELD]: hostName },
       from: dateRange.from,
       to: dateRange.to,
     }),
     [hostName, dateRange.from, dateRange.to]
   );
-  const { error, loading, response } = useServices(params);
-  const services = response?.services;
+
+  const query = useMemo(() => ({ ...params, filters: JSON.stringify(params.filters) }), [params]);
+
+  const { data, status, error } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/infra/services', {
+        method: 'GET',
+        query,
+      });
+
+      return decodeOrThrow(ServicesAPIResponseRT)(response);
+    },
+    [query],
+    {
+      requestObservable$: request$,
+      autoFetch: isActiveTab('overview'),
+    }
+  );
+
+  const services = data?.services;
   const hasServices = services?.length;
 
   return (
@@ -67,7 +92,7 @@ export const ServicesContent = ({
             defaultMessage: 'An error occurred while fetching services.',
           })}
         </EuiCallOut>
-      ) : loading ? (
+      ) : isPending(status) ? (
         <EuiLoadingSpinner size="m" />
       ) : hasServices ? (
         <EuiFlexGroup

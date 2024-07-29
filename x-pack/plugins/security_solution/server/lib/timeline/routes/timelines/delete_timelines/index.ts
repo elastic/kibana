@@ -10,18 +10,13 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 import type { ConfigType } from '../../../../..';
 import { deleteTimelinesSchema } from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { deleteTimeline } from '../../../saved_object/timelines';
 
-export const deleteTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.versioned
     .delete({
       path: TIMELINE_URL,
@@ -41,7 +36,7 @@ export const deleteTimelinesRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { savedObjectIds, searchIds } = request.body;
 
           await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);

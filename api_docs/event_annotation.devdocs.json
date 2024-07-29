@@ -1810,7 +1810,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"solid\" | \"dashed\" | \"dotted\")[]"
+                      "(\"dashed\" | \"solid\" | \"dotted\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
@@ -2932,7 +2932,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"solid\" | \"dashed\" | \"dotted\")[]"
+                      "(\"dashed\" | \"solid\" | \"dotted\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,

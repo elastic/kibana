@@ -51,6 +51,12 @@
                     "ignore_above": 256
                   }
                 }
+              },
+              "original": {
+                "type": "text"
+              },
+              "module": {
+                "type": "text"
               }
             }
           },

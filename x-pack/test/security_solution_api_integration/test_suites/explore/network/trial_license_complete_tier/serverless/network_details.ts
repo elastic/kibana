@@ -23,11 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('With filebeat', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       it('Make sure that we get Network details data', async () => {
@@ -53,11 +53,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('With packetbeat', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       it('Make sure that we get Network details data', async () => {

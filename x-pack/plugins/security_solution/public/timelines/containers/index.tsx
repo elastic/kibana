@@ -46,6 +46,7 @@ import type {
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
+import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -499,11 +500,19 @@ export const useTimelineEvents = ({
     skip,
     timerangeKind,
   });
+  const { onLoad } = useFetchNotes();
+
+  const onTimelineSearchComplete: OnNextResponseHandler = useCallback(
+    (response) => {
+      onLoad(response.events);
+    },
+    [onLoad]
+  );
 
   useEffect(() => {
     if (!timelineSearchHandler) return;
-    timelineSearchHandler();
-  }, [timelineSearchHandler]);
+    timelineSearchHandler(onTimelineSearchComplete);
+  }, [timelineSearchHandler, onTimelineSearchComplete]);
 
   return [dataLoadingState, timelineResponse];
 };

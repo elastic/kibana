@@ -44,11 +44,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('works', () => {
       describe('with host asset', () => {
         before(async () => {
-          roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+          roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
           return esArchiver.load(ARCHIVE_NAME);
         });
         after(async () => {
-          await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+          await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
           return esArchiver.unload(ARCHIVE_NAME);
         });
 

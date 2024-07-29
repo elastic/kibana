@@ -16,6 +16,12 @@ export enum TaskPriority {
   Normal = 50,
 }
 
+export enum TaskCost {
+  Tiny = 1,
+  Normal = 2,
+  ExtraLarge = 10,
+}
+
 /*
  * Type definitions and validations for tasks.
  */
@@ -128,6 +134,10 @@ export const taskDefinitionSchema = schema.object(
      */
     priority: schema.maybe(schema.number()),
     /**
+     * Cost to run this task type. Defaults to "Normal".
+     */
+    cost: schema.number({ defaultValue: TaskCost.Normal }),
+    /**
      * An optional more detailed description of what this task does.
      */
     description: schema.maybe(schema.string()),
@@ -172,7 +182,7 @@ export const taskDefinitionSchema = schema.object(
     paramsSchema: schema.maybe(schema.any()),
   },
   {
-    validate({ timeout, priority }) {
+    validate({ timeout, priority, cost }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
         return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
       }
@@ -181,6 +191,12 @@ export const taskDefinitionSchema = schema.object(
         return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
           .filter((key) => isNaN(Number(key)))
           .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
+      }
+
+      if (cost && (!isNumber(cost) || !(cost in TaskCost))) {
+        return `Invalid cost "${cost}". Cost must be one of ${Object.keys(TaskCost)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskCost[key as keyof typeof TaskCost]}`)}`;
       }
     },
   }
@@ -328,6 +344,11 @@ export interface TaskInstance {
    * Optionally override the timeout defined in the task type for this specific task instance
    */
   timeoutOverride?: string;
+
+  /*
+   * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
+   */
+  partition?: number;
 }
 
 /**
@@ -426,6 +447,11 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId: string | null;
+
+  /*
+   * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
+   */
+  partition?: number;
 }
 
 export interface ConcreteTaskInstanceVersion {
@@ -460,4 +486,5 @@ export type SerializedConcreteTaskInstance = Omit<
   startedAt: string | null;
   retryAt: string | null;
   runAt: string;
+  partition?: number;
 };

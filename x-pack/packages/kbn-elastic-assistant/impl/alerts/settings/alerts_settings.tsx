@@ -11,13 +11,11 @@ import {
   EuiFormRow,
   EuiRange,
   EuiSpacer,
-  EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { KnowledgeBaseConfig } from '../../assistant/types';
 import * as i18n from '../../knowledge_base/translations';
@@ -36,16 +34,6 @@ interface Props {
 const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }: Props) => {
   const inputRangeSliderId = useGeneratedHtmlId({ prefix: 'inputRangeSlider' });
 
-  const onEnableAlertsChange = useCallback(
-    (event: EuiSwitchEvent) => {
-      setUpdatedKnowledgeBaseSettings({
-        ...knowledgeBase,
-        isEnabledRAGAlerts: event.target.checked,
-      });
-    },
-    [knowledgeBase, setUpdatedKnowledgeBaseSettings]
-  );
-
   return (
     <>
       <EuiFormRow
@@ -57,14 +45,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
           }
         `}
       >
-        <EuiSwitch
-          checked={knowledgeBase.isEnabledRAGAlerts}
-          compressed
-          data-test-subj="alertsSwitch"
-          label={i18n.ALERTS_LABEL}
-          onChange={onEnableAlertsChange}
-          showLabel={false}
-        />
+        <></>
       </EuiFormRow>
 
       <EuiSpacer size="xs" />

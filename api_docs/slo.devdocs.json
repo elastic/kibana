@@ -338,8 +338,7 @@
                 "docId": "kibPresentationUtilPluginApi",
                 "section": "def-public.PresentationUtilPluginStart",
                 "text": "PresentationUtilPluginStart"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -400,44 +399,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "slo",
-            "id": "def-public.SloPublicPluginsStart.actionTypeRegistry",
-            "type": "Object",
-            "tags": [],
-            "label": "actionTypeRegistry",
-            "description": [],
-            "signature": [
-              "{ get: (id: string) => ",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>; list: () => ",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>[]; register: (objectType: ",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
-                "text": "ActionTypeModel"
-              },
-              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "slo",
             "id": "def-public.SloPublicPluginsStart.aiops",
@@ -675,46 +636,6 @@
                 "docId": "kibTriggersActionsUiPluginApi",
                 "section": "def-public.TriggersAndActionsUIPublicPluginStart",
                 "text": "TriggersAndActionsUIPublicPluginStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "slo",
-            "id": "def-public.SloPublicPluginsStart.navigation",
-            "type": "Object",
-            "tags": [],
-            "label": "navigation",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "navigation",
-                "scope": "public",
-                "docId": "kibNavigationPluginApi",
-                "section": "def-public.NavigationPublicStart",
-                "text": "NavigationPublicStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "slo",
-            "id": "def-public.SloPublicPluginsStart.security",
-            "type": "Object",
-            "tags": [],
-            "label": "security",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "public",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-public.SecurityPluginStart",
-                "text": "SecurityPluginStart"
               }
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
@@ -993,68 +914,6 @@
           },
           {
             "parentPluginId": "slo",
-            "id": "def-public.SloPublicPluginsStart.ruleTypeRegistry",
-            "type": "Object",
-            "tags": [],
-            "label": "ruleTypeRegistry",
-            "description": [],
-            "signature": [
-              "{ get: (id: string) => ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.RuleTypeModel",
-                "text": "RuleTypeModel"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/alerting-types",
-                "scope": "common",
-                "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.RuleTypeParams",
-                "text": "RuleTypeParams"
-              },
-              ">; list: () => ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.RuleTypeModel",
-                "text": "RuleTypeModel"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/alerting-types",
-                "scope": "common",
-                "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.RuleTypeParams",
-                "text": "RuleTypeParams"
-              },
-              ">[]; register: (objectType: ",
-              {
-                "pluginId": "triggersActionsUi",
-                "scope": "public",
-                "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.RuleTypeModel",
-                "text": "RuleTypeModel"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/alerting-types",
-                "scope": "common",
-                "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.RuleTypeParams",
-                "text": "RuleTypeParams"
-              },
-              ">) => void; has: (id: string) => boolean; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "slo",
             "id": "def-public.SloPublicPluginsStart.observabilityAIAssistant",
             "type": "Object",
             "tags": [],
@@ -1139,26 +998,6 @@
           },
           {
             "parentPluginId": "slo",
-            "id": "def-public.SloPublicPluginsStart.uiSettings",
-            "type": "Object",
-            "tags": [],
-            "label": "uiSettings",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "slo",
             "id": "def-public.SloPublicPluginsStart.usageCollection",
             "type": "Object",
             "tags": [],
@@ -1191,7 +1030,8 @@
                 "docId": "kibDiscoverPluginApi",
                 "section": "def-public.DiscoverStart",
                 "text": "DiscoverStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -1211,26 +1051,6 @@
                 "docId": "kibDataViewFieldEditorPluginApi",
                 "section": "def-public.PluginStart",
                 "text": "PluginStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "slo",
-            "id": "def-public.SloPublicPluginsStart.toastNotifications",
-            "type": "Object",
-            "tags": [],
-            "label": "toastNotifications",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
-                "text": "IToasts"
               }
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
@@ -1358,8 +1178,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               }
             ],
             "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",
@@ -1442,8 +1262,7 @@
                 "docId": "kibUsageCollectionPluginApi",
                 "section": "def-server.UsageCollectionSetup",
                 "text": "UsageCollectionSetup"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",
             "deprecated": false,

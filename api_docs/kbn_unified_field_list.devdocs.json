@@ -391,7 +391,7 @@
         "label": "FieldPopoverHeader",
         "description": [],
         "signature": [
-          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, }: React.PropsWithChildren<",
+          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, services, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "common",
@@ -410,7 +410,7 @@
             "id": "def-common.FieldPopoverHeader.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n}",
+            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n  services,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1590,6 +1590,14 @@
             "docId": "kibUiActionsPluginApi",
             "section": "def-public.UiActionsPublicStart",
             "text": "UiActionsPublicStart"
+          },
+          " | undefined; fieldsMetadata?: ",
+          {
+            "pluginId": "fieldsMetadata",
+            "scope": "public",
+            "docId": "kibFieldsMetadataPluginApi",
+            "section": "def-public.FieldsMetadataPublicStart",
+            "text": "FieldsMetadataPublicStart"
           },
           " | undefined; } & { dataViewFieldEditor?: ",
           {
@@ -3835,6 +3843,28 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.FieldPopoverHeaderProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "{ fieldsMetadata?: ",
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              },
+              " | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6125,6 +6155,14 @@
             "docId": "kibUiActionsPluginApi",
             "section": "def-public.UiActionsPublicStart",
             "text": "UiActionsPublicStart"
+          },
+          " | undefined; fieldsMetadata?: ",
+          {
+            "pluginId": "fieldsMetadata",
+            "scope": "public",
+            "docId": "kibFieldsMetadataPluginApi",
+            "section": "def-public.FieldsMetadataPublicStart",
+            "text": "FieldsMetadataPublicStart"
           },
           " | undefined; } & { dataViewFieldEditor?: ",
           {

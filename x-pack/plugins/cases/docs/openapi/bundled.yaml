@@ -281,7 +281,6 @@ paths:
                             - elastic
                     customFields:
                       type: array
-                      x-technical-preview: true
                       description: Custom fields configuration details.
                       items:
                         type: object
@@ -478,7 +477,6 @@ paths:
                           - elastic
                   customFields:
                     type: array
-                    x-technical-preview: true
                     description: Custom fields configuration details.
                     items:
                       type: object
@@ -677,7 +675,6 @@ paths:
                           - elastic
                   customFields:
                     type: array
-                    x-technical-preview: true
                     description: Custom fields configuration details.
                     items:
                       type: object
@@ -1548,7 +1545,6 @@ paths:
                             - elastic
                     customFields:
                       type: array
-                      x-technical-preview: true
                       description: Custom fields configuration details.
                       items:
                         type: object
@@ -1746,7 +1742,6 @@ paths:
                           - elastic
                   customFields:
                     type: array
-                    x-technical-preview: true
                     description: Custom fields configuration details.
                     items:
                       type: object
@@ -1946,7 +1941,6 @@ paths:
                           - elastic
                   customFields:
                     type: array
-                    x-technical-preview: true
                     description: Custom fields configuration details.
                     items:
                       type: object
@@ -3305,7 +3299,6 @@ components:
           type: array
           description: |
             Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
-          x-technical-preview: true
           minItems: 0
           maxItems: 10
           items:
@@ -3804,7 +3797,6 @@ components:
         customFields:
           type: array
           description: Custom field values for the case.
-          x-technical-preview: true
           items:
             type: object
             properties:
@@ -3933,7 +3925,6 @@ components:
                 type: array
                 description: |
                   Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
-                x-technical-preview: true
                 minItems: 0
                 maxItems: 10
                 items:
@@ -4053,7 +4044,6 @@ components:
                     $ref: '#/components/schemas/connector_types'
               customFields:
                 type: array
-                x-technical-preview: true
                 description: Custom field values in the template.
                 items:
                   type: object
@@ -4135,7 +4125,6 @@ components:
         customFields:
           type: array
           description: Custom fields case configuration.
-          x-technical-preview: true
           minItems: 0
           maxItems: 10
           items:
@@ -4216,7 +4205,6 @@ components:
         customFields:
           type: array
           description: Custom fields case configuration.
-          x-technical-preview: true
           items:
             type: object
             required:

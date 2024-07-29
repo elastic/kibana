@@ -32,11 +32,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('With auditbeat', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/users');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       it('Ensure data is returned from auditbeat', async () => {

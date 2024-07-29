@@ -625,8 +625,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               }
             ],
             "path": "x-pack/plugins/index_management/server/types.ts",
@@ -1439,6 +1439,56 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateMeta",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.managed_by",
+            "type": "string",
+            "tags": [],
+            "label": "managed_by",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateMeta.package",
+            "type": "Object",
+            "tags": [],
+            "label": "package",
+            "description": [],
+            "signature": [
+              "{ name: string; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,

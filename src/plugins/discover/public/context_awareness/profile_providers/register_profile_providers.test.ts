@@ -68,7 +68,7 @@ describe('registerProfileProviders', () => {
     const documentContext = documentProfileServiceMock.resolve({
       record: {
         id: 'test',
-        flattened: { 'data_stream.type': 'logs' },
+        flattened: { 'data_stream.type': 'example' },
         raw: {},
       },
     });
@@ -100,7 +100,7 @@ describe('registerProfileProviders', () => {
     const documentContext = documentProfileServiceMock.resolve({
       record: {
         id: 'test',
-        flattened: { 'data_stream.type': 'logs' },
+        flattened: { 'data_stream.type': 'example' },
         raw: {},
       },
     });

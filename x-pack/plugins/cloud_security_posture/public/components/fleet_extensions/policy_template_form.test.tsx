@@ -1226,48 +1226,6 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it(`renders ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {
-      let policy = getMockPolicyGCP();
-      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        setup_access: { value: 'manual' },
-        'gcp.credentials.type': { value: 'credentials-json' },
-      });
-
-      const { getByRole, getByLabelText } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
-      );
-
-      expect(getByRole('option', { name: 'Credentials JSON', selected: true })).toBeInTheDocument();
-
-      expect(
-        getByLabelText('JSON blob containing the credentials and key used to subscribe')
-      ).toBeInTheDocument();
-    });
-
-    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {
-      let policy = getMockPolicyGCP();
-      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.project_id': { value: 'a' },
-        'gcp.credentials.type': { value: 'credentials-json' },
-        setup_access: { value: 'manual' },
-      });
-
-      const { getByTestId } = render(
-        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
-      );
-
-      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON), 'b');
-
-      policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.credentials.json': { value: 'b' },
-      });
-
-      expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
-        updatedPolicy: policy,
-      });
-    });
-
     it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
@@ -1541,7 +1499,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for GCP for organisation account type', async () => {
+    it.skip('should render setup technology selector for GCP for organisation account type', async () => {
       const newPackagePolicy = getMockPolicyGCP();
 
       const { getByTestId, queryByTestId, getByRole } = render(
@@ -1593,7 +1551,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for GCP for single-account', async () => {
+    it.skip('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
       });

@@ -5,18 +5,31 @@
  * 2.0.
  */
 
+import {
+  Form,
+  useForm,
+} from '../../../public/application/components/mappings_editor/shared_imports';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import {
+  SelectInferenceId,
+  SelectInferenceIdProps,
+} from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import React from 'react';
 
-const onChangeMock = jest.fn();
-const setValueMock = jest.fn();
-const setNewInferenceEndpointMock = jest.fn();
+const createInferenceEndpointMock = jest.fn();
+const mockDispatch = jest.fn();
 
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
     core: { application: {} },
-    docLinks: {},
+    docLinks: {
+      links: {
+        enterpriseSearch: {
+          inferenceApiCreate: 'https://abc.com/inference-api-create',
+        },
+      },
+    },
     plugins: {
       ml: {
         mlApi: {
@@ -41,23 +54,40 @@ jest.mock(
     }),
   })
 );
+
+jest.mock('../../../public/application/components/mappings_editor/mappings_state_context', () => ({
+  useMappingsState: () => ({ inferenceToModelIdMap: {} }),
+  useDispatch: () => mockDispatch,
+}));
+
+function getTestForm(Component: React.FC<SelectInferenceIdProps>) {
+  return (defaultProps: SelectInferenceIdProps) => {
+    const { form } = useForm();
+    form.setFieldValue('inference_id', 'elser_model_2');
+    return (
+      <Form form={form}>
+        <Component {...(defaultProps as any)} />
+      </Form>
+    );
+  };
+}
+
 describe('SelectInferenceId', () => {
   let exists: any;
   let find: any;
 
   beforeAll(async () => {
-    const setup = registerTestBed(SelectInferenceId, {
-      defaultProps: {
-        onChange: onChangeMock,
-        'data-test-subj': 'data-inference-endpoint-list',
-        setValue: setValueMock,
-        setNewInferenceEndpoint: setNewInferenceEndpointMock,
-      },
+    const defaultProps: SelectInferenceIdProps = {
+      'data-test-subj': 'data-inference-endpoint-list',
+      createInferenceEndpoint: createInferenceEndpointMock,
+    };
+    const setup = registerTestBed(getTestForm(SelectInferenceId), {
+      defaultProps,
       memoryRouter: { wrapComponent: false },
     });
 
     await act(async () => {
-      const testBed = setup();
+      const testBed = await setup();
       exists = testBed.exists;
       find = testBed.find;
     });
@@ -69,7 +99,7 @@ describe('SelectInferenceId', () => {
 
   it('should contain the buttons for InferenceEndpoint management', () => {
     find('inferenceIdButton').simulate('click');
-    expect(exists('addInferenceEndpointButton')).toBe(true);
+    expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
     expect(exists('manageInferenceEndpointButton')).toBe(true);
   });
 

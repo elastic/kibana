@@ -12,10 +12,10 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from './use_unified_search';
@@ -41,11 +41,9 @@ const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const {
-    services: { http, data, telemetry },
+    services: { telemetry },
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
-  const abortCtrlRef = useRef(new AbortController());
-  const [searchSessionId, setSearchSessionId] = useState(() => data.search.session.start());
 
   const baseRequest = useMemo(
     () =>
@@ -58,16 +56,13 @@ export const useHostsView = () => {
     [buildQuery, parsedDateRange, sourceId, searchCriteria.limit]
   );
 
-  const [state, refetch] = useAsyncFn(
-    async () => {
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-
+  const { data, error, status } = useFetcher(
+    async (callApi) => {
       const start = performance.now();
-      const metricsResponse = await http.post<GetInfraMetricsResponsePayload>(
-        `${BASE_INFRA_METRICS_PATH}`,
+      const metricsResponse = await callApi<GetInfraMetricsResponsePayload>(
+        BASE_INFRA_METRICS_PATH,
         {
-          signal: abortCtrlRef.current.signal,
+          method: 'POST',
           body: JSON.stringify(baseRequest),
         }
       );
@@ -80,22 +75,13 @@ export const useHostsView = () => {
       );
       return metricsResponse;
     },
-    [baseRequest, http],
-    { loading: true }
+    [baseRequest, searchCriteria.limit, telemetry]
   );
 
-  useEffect(() => {
-    refetch();
-    setSearchSessionId(data.search.session.start());
-  }, [data.search.session, refetch]);
-
-  const { value, error, loading } = state;
-
   return {
-    loading,
+    loading: isPending(status),
     error,
-    hostNodes: value?.nodes ?? [],
-    searchSessionId,
+    hostNodes: data?.nodes ?? [],
   };
 };
 

@@ -29469,13 +29469,13 @@
       },
       {
         "parentPluginId": "expressions",
-        "id": "def-common.getUiSettingFn",
+        "id": "def-common.getUiSettingFnBrowser",
         "type": "Function",
         "tags": [],
-        "label": "getUiSettingFn",
+        "label": "getUiSettingFnBrowser",
         "description": [],
         "signature": [
-          "({\n  getStartDependencies,\n}: UiSettingFnArguments) => ",
+          "({\n  getStartDependencies,\n}: UiSettingFnArgumentsBrowser) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -29490,13 +29490,53 @@
         "children": [
           {
             "parentPluginId": "expressions",
-            "id": "def-common.getUiSettingFn.$1",
+            "id": "def-common.getUiSettingFnBrowser.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  getStartDependencies,\n}",
             "description": [],
             "signature": [
-              "UiSettingFnArguments"
+              "UiSettingFnArgumentsBrowser"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.getUiSettingFnServer",
+        "type": "Function",
+        "tags": [],
+        "label": "getUiSettingFnServer",
+        "description": [],
+        "signature": [
+          "({\n  getStartDependencies,\n}: UiSettingFnArgumentsServer) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionUiSetting",
+            "text": "ExpressionFunctionUiSetting"
+          }
+        ],
+        "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.getUiSettingFnServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  getStartDependencies,\n}",
+            "description": [],
+            "signature": [
+              "UiSettingFnArgumentsServer"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
             "deprecated": false,

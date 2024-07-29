@@ -489,7 +489,7 @@ export const updateAlertTags = () => {
 };
 
 export const showHoverActionsEventRenderedView = (fieldSelector: string) => {
-  cy.get(fieldSelector).first().trigger('mouseover');
+  cy.get(fieldSelector).first().realHover();
   cy.get(HOVER_ACTIONS_CONTAINER).should('be.visible');
 };
 

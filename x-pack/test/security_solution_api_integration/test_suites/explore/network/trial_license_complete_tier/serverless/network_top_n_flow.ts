@@ -30,11 +30,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('With filebeat', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       const FROM = '2019-02-09T01:57:24.870Z';

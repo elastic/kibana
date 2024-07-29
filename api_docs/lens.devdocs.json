@@ -494,10 +494,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Embeddable.openConfingPanel",
+            "id": "def-public.Embeddable.openConfigPanel",
             "type": "Function",
             "tags": [],
-            "label": "openConfingPanel",
+            "label": "openConfigPanel",
             "description": [],
             "signature": [
               "(startDependencies: ",
@@ -510,7 +510,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Embeddable.openConfingPanel.$1",
+                "id": "def-public.Embeddable.openConfigPanel.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "startDependencies",
@@ -525,7 +525,7 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Embeddable.openConfingPanel.$2",
+                "id": "def-public.Embeddable.openConfigPanel.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "isNewPanel",
@@ -540,7 +540,7 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Embeddable.openConfingPanel.$3",
+                "id": "def-public.Embeddable.openConfigPanel.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "deletePanel",
@@ -1539,7 +1539,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"line\" | \"area\" | \"bar\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -3562,7 +3562,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -4457,10 +4457,81 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.titlesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titlesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.valuesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valuesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.iconAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.valueFontMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueFontMode",
+            "description": [],
+            "signature": [
+              "ValueFontMode",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.MetricVisualizationState.color",
             "type": "string",
             "tags": [],
             "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
             "description": [],
             "signature": [
               "string | undefined"
@@ -5146,7 +5217,7 @@
             "label": "categoryDisplay",
             "description": [],
             "signature": [
-              "\"default\" | \"hide\" | \"inside\""
+              "\"default\" | \"inside\" | \"hide\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -9722,7 +9793,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -10049,7 +10120,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -10544,7 +10615,7 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
+              "\"dashed\" | \"solid\" | \"dotted\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -11007,7 +11078,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
+          "\"right\" | \"left\" | \"auto\" | \"above\" | \"below\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -11195,7 +11266,7 @@
         "label": "LensSavedObjectAttributes",
         "description": [],
         "signature": [
-          "{ title: string; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          "{ title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -11227,7 +11298,7 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[] | undefined; }; description?: string | undefined; references: ",
+          "[] | undefined; }; references: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -11384,7 +11455,7 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\""
+          "\"dashed\" | \"solid\" | \"dotted\" | \"dot-dashed\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -11604,7 +11675,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -12001,7 +12072,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"bottom\" | \"auto\""
+          "\"right\" | \"bottom\" | \"left\" | \"auto\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useState, MouseEventHandler } from 'react';
-import { useEuiTheme, EuiThemeComputed } from '@elastic/eui';
+import React, { useState } from 'react';
+import { useEuiTheme, EuiThemeComputed, keys } from '@elastic/eui';
 
 import { EmptyThumbnail } from './empty_thumbnail';
 import { getConfinedScreenshotSize, ScreenshotImageSize } from './screenshot_size';
 
 const DEFAULT_SIZE: [number, number] = [512, 512];
+
+type ScreenshotImageCallback = (e: { stopPropagation(): void }) => void;
 
 export interface ScreenshotImageProps {
   label?: string;
@@ -22,9 +24,9 @@ export interface ScreenshotImageProps {
   borderColor?: EuiThemeComputed['border']['color'];
   borderRadius?: string | number;
   hasBorder?: boolean;
-  onMouseEnter?: MouseEventHandler<HTMLImageElement>;
-  onMouseLeave?: MouseEventHandler<HTMLImageElement>;
-  onClick?: MouseEventHandler<HTMLImageElement>;
+  onFocus?: ScreenshotImageCallback;
+  onBlur?: ScreenshotImageCallback;
+  onClick?: ScreenshotImageCallback;
 }
 
 export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string }> = ({
@@ -37,8 +39,8 @@ export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string 
   borderRadius,
   hasBorder = true,
   size = [100, 64],
-  onMouseEnter,
-  onMouseLeave,
+  onFocus,
+  onBlur,
   onClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -70,10 +72,17 @@ export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string 
         ];
         setNaturalSize(updatedSize);
       }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={onFocus}
+      onMouseLeave={onBlur}
+      onFocus={onFocus}
+      onBlur={onBlur}
       onClick={onClick}
-      onKeyDown={undefined}
+      onKeyDown={(evt) => {
+        if (onClick && evt.key === keys.ENTER) {
+          onClick(evt);
+        }
+      }}
+      tabIndex={onClick ? 0 : undefined}
     />
   ) : (
     <EmptyThumbnail

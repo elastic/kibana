@@ -36,6 +36,12 @@ const inferenceEndpoints = [
   },
 ] as InferenceAPIConfigResponse[];
 
+jest.mock('../../hooks/use_delete_endpoint', () => ({
+  useDeleteEndpoint: () => ({
+    mutate: jest.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
+  }),
+}));
+
 describe('When the tabular page is loaded', () => {
   beforeEach(() => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);

@@ -565,6 +565,7 @@ class RuleEditorFlyoutUI extends Component {
 
       flyout = (
         <EuiFlyout
+          data-test-subj="mlRuleEditorFlyout"
           className="ml-rule-editor-flyout"
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"

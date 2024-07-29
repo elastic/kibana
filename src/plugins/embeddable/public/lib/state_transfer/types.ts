@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
-
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 
 /**
@@ -39,23 +37,15 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState {
   type: string;
+  /**
+   * For react embeddables, this input must be runtime state.
+   */
   input: object;
   embeddableId?: string;
   size?: {
     width?: number;
     height?: number;
   };
-  /**
-   * Copy dashboard panel transfers serialized panel state for React embeddables.
-   * The rawState will be passed into the input and references are passed separately
-   * so the container can update its references array and the updated references
-   * are correctly passed to the factory's deserialize method.
-   *
-   * Legacy embeddables have already injected the references
-   * into the input state, so they will not pass references.
-   */
-  references?: Reference[];
-
   /**
    * Pass current search session id when navigating to an editor,
    * Editors could use it continue previous search session

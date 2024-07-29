@@ -12,8 +12,7 @@ import {
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
-import type { ElasticsearchClient, Logger, StartServicesAccessor } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -24,7 +23,6 @@ import {
 import { buildSiemResponse } from '../utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
-import type { StartPlugins } from '../../../../plugin';
 import {
   getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
@@ -33,8 +31,7 @@ import {
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  sender: ITelemetryEventsSender,
-  startServices: StartServicesAccessor<StartPlugins>
+  sender: ITelemetryEventsSender
 ) => {
   router.versioned
     .post({
@@ -65,14 +62,10 @@ export const setSignalsStatusRoute = (
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const [_, { security }] = await startServices();
-        const user = security.authc.getCurrentUser(request);
+        const user = core.security.authc.getCurrentUser();
 
         const clusterId = sender.getClusterID();
-        const [isTelemetryOptedIn, username] = await Promise.all([
-          sender.isTelemetryOptedIn(),
-          security?.authc.getCurrentUser(request)?.username,
-        ]);
+        const isTelemetryOptedIn = await sender.isTelemetryOptedIn();
 
         if (isTelemetryOptedIn && clusterId) {
           // Sometimes the ids are in the query not passed in the request?
@@ -82,12 +75,12 @@ export const setSignalsStatusRoute = (
               : (get(request.body.query, 'bool.filter.terms._id') as string[]);
           // Get Context for Insights Payloads
           const sessionId = getSessionIDfromKibanaRequest(clusterId, request);
-          if (username && toSendAlertIds && sessionId && status) {
+          if (user?.username && toSendAlertIds && sessionId && status) {
             const insightsPayloads = createAlertStatusPayloads(
               clusterId,
               toSendAlertIds,
               sessionId,
-              username,
+              user.username,
               DETECTION_ENGINE_SIGNALS_STATUS_URL,
               status
             );

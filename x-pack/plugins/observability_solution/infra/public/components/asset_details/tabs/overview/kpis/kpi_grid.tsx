@@ -15,8 +15,8 @@ import {
 } from '@kbn/metrics-data-access-plugin/common';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
-import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
+import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
 
 interface Props {
   dataView?: DataView;
@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
-  const { searchSessionId } = useLoadingStateContext();
+  const { searchSessionId } = useSearchSessionContext();
 
   const filters = useMemo(() => {
     return [

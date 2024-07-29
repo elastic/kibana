@@ -218,7 +218,7 @@ export class MonacoEditorActionsProvider {
       const requests = await this.getRequests();
       if (!requests.length) {
         toasts.add(
-          i18n.translate('console.notification.error.noRequestSelectedTitle', {
+          i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
           })
@@ -249,15 +249,21 @@ export class MonacoEditorActionsProvider {
         });
 
         if (saveToHistoryError) {
-          const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
-            defaultMessage: 'Could not save request to Console history.',
-          });
+          const errorTitle = i18n.translate(
+            'console.notification.monaco.error.couldNotSaveRequestTitle',
+            {
+              defaultMessage: 'Could not save request to Console history.',
+            }
+          );
           if (isQuotaExceededError(saveToHistoryError)) {
             const toast = notifications.toasts.addWarning({
-              title: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
-                defaultMessage:
-                  'Request history is full. Clear the console history or disable saving new requests.',
-              }),
+              title: i18n.translate(
+                'console.notification.monaco.error.historyQuotaReachedMessage',
+                {
+                  defaultMessage:
+                    'Request history is full. Clear the console history or disable saving new requests.',
+                }
+              ),
               text: toMountPoint(
                 StorageQuotaError({
                   onClearHistory: () => {
@@ -308,7 +314,7 @@ export class MonacoEditorActionsProvider {
           payload: undefined,
         });
         toasts.addError(e, {
-          title: i18n.translate('console.notification.error.unknownErrorTitle', {
+          title: i18n.translate('console.notification.monaco.error.unknownErrorTitle', {
             defaultMessage: 'Unknown Request Error',
           }),
         });

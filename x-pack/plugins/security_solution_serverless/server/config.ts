@@ -17,10 +17,16 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   productTypes,
   /**
-   * Usage Reporting: the interval between runs of the task
+   * Usage Reporting: the interval between runs of the endpoint task
    */
 
   usageReportingTaskInterval: schema.string({ defaultValue: '5m' }),
+
+  /**
+   * Usage Reporting: the interval between runs of the cloud security task
+   */
+
+  cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
 
   /**
    * Usage Reporting: timeout value for how long the task should run.

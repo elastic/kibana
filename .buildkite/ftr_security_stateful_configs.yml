@@ -1,0 +1,85 @@
+disabled:
+  # Base config files, only necessary to inform config finding script
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.trial.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.trial.ts
+  - x-pack/test/security_solution_endpoint/configs/config.base.ts
+  - x-pack/test/security_solution_endpoint/config.base.ts
+  - x-pack/test/security_solution_endpoint_api_int/config.base.ts
+
+  # QA suites that are run out-of-band
+  - x-pack/test/cloud_security_posture_functional/config.cloud.ts
+
+  # Cypress configs, for now these are still run manually
+  - x-pack/test/defend_workflows_cypress/cli_config.ts
+  - x-pack/test/defend_workflows_cypress/config.ts
+  - x-pack/test/osquery_cypress/cli_config.ts
+  - x-pack/test/osquery_cypress/config.ts
+  - x-pack/test/osquery_cypress/visual_config.ts
+  - x-pack/test/security_solution_cypress/cli_config.ts
+  - x-pack/test/security_solution_cypress/config.ts
+  - x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
+  - x-pack/test/threat_intelligence_cypress/config.ts
+
+defaultQueue: 'n2-4-spot'
+enabled:
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/date_numeric_types/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/ips/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/keyword/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/long/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/text/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/workflows/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_gaps/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_creation/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_creation/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_patch/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_patch/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/bundled_prebuilt_rules_package/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/large_prebuilt_rules_package/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/management/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/update_prebuilt_rules_package/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_read/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/explore/hosts/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/explore/network/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/explore/users/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/explore/overview/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/investigation/saved_objects/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/security_and_spaces/configs/ess.basic.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/security_and_spaces/configs/ess.trial.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/package/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/policy_response/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
+  - x-pack/test/security_solution_endpoint/configs/integrations.config.ts
+  - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+  - x-pack/test/cloud_security_posture_api/config.ts
+  - x-pack/test/cloud_security_posture_functional/config.ts

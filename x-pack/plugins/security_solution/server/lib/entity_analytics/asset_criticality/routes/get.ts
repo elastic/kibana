@@ -8,6 +8,7 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { GetAssetCriticalityRecordRequestQuery } from '../../../../../common/api/entity_analytics';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   ASSET_CRITICALITY_INTERNAL_URL,
@@ -17,7 +18,6 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
@@ -25,7 +25,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 type GetHandler = (
   context: SecuritySolutionRequestHandlerContext,
   request: {
-    query: AssetCriticalityRecordIdParts;
+    query: GetAssetCriticalityRecordRequestQuery;
   },
   response: KibanaResponseFactory
 ) => Promise<IKibanaResponse>;
@@ -86,7 +86,7 @@ export const assetCriticalityInternalGetRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(AssetCriticalityRecordIdParts),
+            query: buildRouteValidationWithZod(GetAssetCriticalityRecordRequestQuery),
           },
         },
       },
@@ -111,7 +111,7 @@ export const assetCriticalityPublicGetRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(AssetCriticalityRecordIdParts),
+            query: buildRouteValidationWithZod(GetAssetCriticalityRecordRequestQuery),
           },
         },
       },

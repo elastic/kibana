@@ -14,49 +14,59 @@ import {
 import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
-import { enterConsoleCommand } from '../../../console/mocks';
+import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
-import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  EndpointCapabilities,
+  ResponseActionAgentType,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
-
-jest.mock('../../../../../common/experimental_features_service');
+import type { CommandDefinition } from '../../../console';
 
 describe('When using processes action from response actions console', () => {
-  let render: (
-    capabilities?: EndpointCapabilities[]
-  ) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let mockedContext: AppContextTestRender;
+  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
   let consoleManagerMockAccess: ReturnType<
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
+  let consoleSelectors: ReturnType<typeof getConsoleSelectorsAndActionMock>;
+  let consoleCommands: CommandDefinition[];
+
+  const setConsoleCommands = (
+    capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES],
+    agentType: ResponseActionAgentType = 'endpoint'
+  ): void => {
+    consoleCommands = getEndpointConsoleCommands({
+      agentType,
+      endpointAgentId: 'a.b.c',
+      endpointCapabilities: capabilities,
+      endpointPrivileges: {
+        ...getEndpointAuthzInitialState(),
+        loading: false,
+        canKillProcess: true,
+        canSuspendProcess: true,
+        canGetRunningProcesses: true,
+      },
+    });
+  };
 
   beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
-
+    mockedContext = createAppRootMockRenderer();
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    setConsoleCommands();
 
-    render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
+    render = async () => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointConsoleCommands({
-                  agentType: 'endpoint',
-                  endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...capabilities],
-                  endpointPrivileges: {
-                    ...getEndpointAuthzInitialState(),
-                    loading: false,
-                    canKillProcess: true,
-                    canSuspendProcess: true,
-                    canGetRunningProcesses: true,
-                  },
-                }),
+                commands: consoleCommands,
               },
             };
           }}
@@ -67,13 +77,15 @@ describe('When using processes action from response actions console', () => {
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
+      consoleSelectors = getConsoleSelectorsAndActionMock(renderResult);
 
       return renderResult;
     };
   });
 
   it('should show an error if the `running_processes` capability is not present in the endpoint', async () => {
-    await render([]);
+    setConsoleCommands([]);
+    await render();
     enterConsoleCommand(renderResult, 'processes');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
@@ -226,6 +238,94 @@ describe('When using processes action from response actions console', () => {
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('and when agent type is SentinelOne', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: true });
+      setConsoleCommands([], 'sentinel_one');
+    });
+
+    it('should display processes command --help', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'processes --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput').textContent).toEqual(
+          'About' +
+            'Show all running processes' +
+            'Usage' +
+            'processes [--comment]' +
+            'Example' +
+            'processes --comment "get the processes"' +
+            'Optional parameters' +
+            '--comment - A comment to go along with the action'
+        );
+      });
+    });
+
+    it('should display correct entry in help panel', async () => {
+      await render();
+      consoleSelectors.openHelpPanel();
+
+      expect(
+        renderResult.getByTestId('test-commandList-Responseactions-processes')
+      ).toHaveTextContent('processesShow all running processes');
+    });
+
+    it('should call the api with agentType of SentinelOne', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'processes');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.processes).toHaveBeenCalledWith({
+          body: '{"endpoint_ids":["a.b.c"],"agent_type":"sentinel_one"}',
+          path: '/api/endpoint/action/running_procs',
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should display download link to access results', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'processes');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('getProcessesSuccessCallout').textContent).toEqual(
+          'Click here to download(ZIP file passcode: elastic).' +
+            'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+      });
+    });
+
+    describe('and `responseActionsSentinelOneProcessesEnabled` feature flag is disabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: false });
+        setConsoleCommands([], 'sentinel_one');
+      });
+
+      it('should not display `processes` command in console help', async () => {
+        await render();
+        consoleSelectors.openHelpPanel();
+
+        expect(renderResult.queryByTestId('test-commandList-Responseactions-processes')).toBeNull();
+      });
+
+      it('should error if user enters `process` command', async () => {
+        await render();
+        enterConsoleCommand(renderResult, 'processes');
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('test-validationError')).toHaveTextContent(
+            'Unsupported actionSupport for processes is not currently available for SentinelOne.'
+          );
+        });
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.processes).not.toHaveBeenCalled();
+        });
+      });
     });
   });
 });
