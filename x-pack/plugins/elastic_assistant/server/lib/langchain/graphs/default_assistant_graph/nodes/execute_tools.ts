@@ -8,7 +8,7 @@
 import { RunnableConfig } from '@langchain/core/runnables';
 import { StructuredTool } from '@langchain/core/tools';
 import { ToolExecutor } from '@langchain/langgraph/prebuilt';
-import { isArray } from 'lodash';
+import { castArray } from 'lodash';
 import { AgentState, NodeParamsBase } from '../types';
 
 export interface ExecuteToolsParams extends NodeParamsBase {
@@ -34,23 +34,30 @@ export const executeTools = async ({ config, logger, state, tools }: ExecuteTool
   logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const toolExecutor = new ToolExecutor({ tools });
-  const agentAction = isArray(state.agentOutcome) ? state.agentOutcome[0] : state.agentOutcome;
+  const agentAction = castArray(state.agentOutcome);
 
   if (!agentAction || 'returnValues' in agentAction) {
     throw new Error('Agent has not been run yet');
   }
 
-  let out;
-  try {
-    out = await toolExecutor.invoke(agentAction, config);
-  } catch (err) {
-    return {
-      steps: [{ action: agentAction, observation: JSON.stringify(`Error: ${err}`, null, 2) }],
-    };
-  }
+  const steps = await Promise.all(
+    castArray(state.agentOutcome)?.map(async (action) => {
+      let out;
+      try {
+        out = await toolExecutor.invoke(action, config);
+      } catch (err) {
+        return {
+          action,
+          observation: JSON.stringify(`Error: ${err}`, null, 2),
+        };
+      }
 
-  return {
-    ...state,
-    steps: [{ action: agentAction, observation: JSON.stringify(out, null, 2) }],
-  };
+      return {
+        action,
+        observation: JSON.stringify(out, null, 2),
+      };
+    })
+  );
+
+  return { steps };
 };
