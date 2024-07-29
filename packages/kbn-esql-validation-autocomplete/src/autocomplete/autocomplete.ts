@@ -1540,7 +1540,14 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    if (isNewExpression) {
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else if (existingFields.size > 0) {
+      if (filteredMetaFields.length > 0) {
+        suggestions.push(commaCompleteItem);
+      }
+      suggestions.push(pipeCompleteItem);
+    }
   }
 
   if (command.name === 'stats') {
