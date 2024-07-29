@@ -16,7 +16,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const testSubjects = getService('testSubjects');
   const owner = OBSERVABILITY_OWNER;
 
-  describe('Observability case settings', function () {
+  // FLAKY:https://github.com/elastic/kibana/issues/189058
+  describe.skip('Observability case settings', function () {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
     });
@@ -24,6 +25,15 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
     it('case settings screenshots', async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
       await testSubjects.click('configure-case-button');
+      await testSubjects.click('add-custom-field');
+      await svlCommonScreenshots.takeScreenshot(
+        'observability-cases-custom-fields',
+        screenshotDirectories,
+        1400,
+        700
+      );
+      await testSubjects.setValue('custom-field-label-input', 'my-field');
+      await testSubjects.click('common-flyout-save');
       await svlCommonScreenshots.takeScreenshot(
         'observability-cases-settings',
         screenshotDirectories

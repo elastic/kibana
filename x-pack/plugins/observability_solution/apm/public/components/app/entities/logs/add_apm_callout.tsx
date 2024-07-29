@@ -7,7 +7,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -20,11 +19,19 @@ import {
 } from '@elastic/eui';
 import { apmLight } from '@kbn/shared-svg';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../../../../context/kibana_context/use_kibana';
+import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import { AddApmData } from '../../../shared/add_data_buttons/buttons';
 
 export function AddAPMCallOut() {
-  const { core } = useApmPluginContext();
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+
+  function handleClick() {
+    services.telemetry.reportEntityInventoryAddData({
+      view: 'add_apm_cta',
+    });
+  }
 
   return (
     <EuiPanel color="subdued" hasShadow={false}>
@@ -68,14 +75,7 @@ export function AddAPMCallOut() {
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <div>
-            <EuiButton
-              data-test-subj="apmAddApmCallOutButton"
-              href={core.http.basePath.prepend('/app/apm/tutorial')}
-            >
-              {i18n.translate('xpack.apm.logsServiceOverview.callout.addApm', {
-                defaultMessage: 'Add APM',
-              })}
-            </EuiButton>
+            <AddApmData data-test-subj="apmAddDataLogOnlyCallout" onClick={handleClick} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

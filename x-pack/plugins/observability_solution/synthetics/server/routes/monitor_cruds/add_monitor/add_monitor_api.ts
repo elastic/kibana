@@ -232,7 +232,7 @@ export class AddEditMonitorAPI {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
-      [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure),
+      [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure, monitor[ConfigKey.MAX_ATTEMPTS]),
       [ConfigKey.LOCATIONS]: locationsVal,
     } as MonitorFields;
   }

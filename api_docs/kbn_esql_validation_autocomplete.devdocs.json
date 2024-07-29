@@ -505,7 +505,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          "; option: ",
+          "<",
+          "FunctionSubtype",
+          ", string>; option: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -545,7 +547,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          "; option: ",
+          "<",
+          "FunctionSubtype",
+          ", string>; option: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -585,7 +589,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " | ",
+          "<",
+          "FunctionSubtype",
+          ", string> | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -711,7 +717,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " | ",
+          "<",
+          "FunctionSubtype",
+          ", string> | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -813,7 +821,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " | ",
+          "<",
+          "FunctionSubtype",
+          ", string> | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -923,7 +933,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " | ",
+          "<",
+          "FunctionSubtype",
+          ", string> | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -1273,7 +1285,7 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          ", { withTypes }: { withTypes: boolean; }) => { declaration: string; }[]"
+          ", { withTypes, capitalize }: { withTypes: boolean; capitalize?: boolean | undefined; }) => { declaration: string; }[]"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
         "deprecated": false,
@@ -1305,7 +1317,7 @@
             "id": "def-common.getFunctionSignatures.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ withTypes }",
+            "label": "{ withTypes, capitalize }",
             "description": [],
             "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
             "deprecated": false,
@@ -1318,6 +1330,20 @@
                 "tags": [],
                 "label": "withTypes",
                 "description": [],
+                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-validation-autocomplete",
+                "id": "def-common.getFunctionSignatures.$2.capitalize",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "capitalize",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1487,7 +1513,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " | undefined) => boolean"
+          "<",
+          "FunctionSubtype",
+          ", string> | undefined) => boolean"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
@@ -1508,7 +1536,9 @@
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
-              " | undefined"
+              "<",
+              "FunctionSubtype",
+              ", string> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
@@ -2107,7 +2137,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          ", useCaps: boolean) => string"
+          "<",
+          "FunctionSubtype",
+          ", string>) => string"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
@@ -2127,22 +2159,10 @@
                 "docId": "kibKbnEsqlAstPluginApi",
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
-              }
-            ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.printFunctionSignature.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "useCaps",
-            "description": [],
-            "signature": [
-              "boolean"
+              },
+              "<",
+              "FunctionSubtype",
+              ", string>"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
@@ -3366,7 +3386,9 @@
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
-              ") => ",
+              "<",
+              "FunctionSubtype",
+              ", string>) => ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -3394,7 +3416,10 @@
                     "docId": "kibKbnEsqlAstPluginApi",
                     "section": "def-common.ESQLFunction",
                     "text": "ESQLFunction"
-                  }
+                  },
+                  "<",
+                  "FunctionSubtype",
+                  ", string>"
                 ],
                 "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,

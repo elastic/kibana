@@ -61,6 +61,7 @@ export interface NewAgentAction {
   ack_data?: any;
   sent_at?: string;
   agents: string[];
+  namespaces?: string[];
   created_at?: string;
   id?: string;
   expiration?: string;
@@ -407,6 +408,8 @@ export interface FleetServerAgentAction {
    * The Agent IDs the action is intended for. No support for json.RawMessage with the current generator. Could be useful to lazy parse the agent ids
    */
   agents?: string[];
+
+  namespaces?: string[];
 
   /**
    * Date when the agent should execute that agent. This field could be altered by Fleet server for progressive rollout of the action.

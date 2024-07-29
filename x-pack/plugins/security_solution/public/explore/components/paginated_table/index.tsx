@@ -40,7 +40,7 @@ import type {
   NetworkTopCountriesColumnsNetworkDetails,
 } from '../../network/components/network_top_countries_table/columns';
 import type { TlsColumns } from '../../network/components/tls_table/columns';
-import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table';
+import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table/columns';
 import type { HostRiskScoreColumns } from '../../../entity_analytics/components/host_risk_score_table';
 
 import type { UsersColumns } from '../../network/components/users_table/columns';

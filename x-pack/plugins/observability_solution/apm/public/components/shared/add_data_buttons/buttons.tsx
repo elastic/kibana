@@ -8,10 +8,12 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
+import { useKibana } from '../../../context/kibana_context/use_kibana';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-export const addApmAgent = {
+export const addApmData = {
   name: i18n.translate('xpack.apm.add.apm.agent.button.', {
-    defaultMessage: 'Add APM agent',
+    defaultMessage: 'Add APM',
   }),
   link: '/app/observabilityOnboarding/?category=apm',
 };
@@ -30,40 +32,55 @@ export const collectServiceLogs = {
   link: '/app/observabilityOnboarding/?category=logs',
 };
 
-export function AddApmAgent({ basePath }: { basePath: IBasePath }) {
+export function AddApmData({
+  onClick,
+  ...props
+}: {
+  onClick?: () => void;
+  'data-test-subj': string;
+}) {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+  const {
+    application: { navigateToUrl },
+  } = useKibana().services;
+
+  function handleClick() {
+    navigateToUrl(basePath.prepend(addApmData.link));
+    onClick?.();
+  }
   return (
-    <EuiButton
-      data-test-subj="addApmAgentButton"
-      size="s"
-      target="_blank"
-      href={basePath.prepend(addApmAgent.link)}
-    >
-      {addApmAgent.name}
+    <EuiButton data-test-subj={props['data-test-subj']} size="s" onClick={handleClick}>
+      {addApmData.name}
     </EuiButton>
   );
 }
 
-export function AssociateServiceLogs() {
+export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
+  function handleClick() {
+    window.open(associateServiceLogs.link, '_blank');
+    onClick?.();
+  }
   return (
-    <EuiButton
-      data-test-subj="associateServiceLogsButton"
-      size="s"
-      target="_blank"
-      href={associateServiceLogs.link}
-    >
+    <EuiButton data-test-subj="associateServiceLogsButton" size="s" onClick={handleClick}>
       {associateServiceLogs.name}
     </EuiButton>
   );
 }
 
-export function CollectServiceLogs({ basePath }: { basePath: IBasePath }) {
+export function CollectServiceLogs({
+  basePath,
+  onClick,
+}: {
+  basePath: IBasePath;
+  onClick?: () => void;
+}) {
+  function handleClick() {
+    window.open(basePath.prepend(collectServiceLogs.link), '_blank');
+    onClick?.();
+  }
   return (
-    <EuiButton
-      data-test-subj="collectServiceLogsButton"
-      size="s"
-      target="_blank"
-      href={basePath.prepend(collectServiceLogs.link)}
-    >
+    <EuiButton data-test-subj="collectServiceLogsButton" size="s" onClick={handleClick}>
       {collectServiceLogs.name}
     </EuiButton>
   );

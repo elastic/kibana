@@ -12,7 +12,6 @@ Array [
     "esTypes": Array [
       "ip",
     ],
-    "format": "",
     "id": "source.ip",
     "initialWidth": 150,
     "name": "source.ip",

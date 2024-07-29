@@ -1139,7 +1139,7 @@
             "section": "def-common.SessionStorageCookieOptions",
             "text": "SessionStorageCookieOptions"
           },
-          "<T>, basePath: string | undefined) => Promise<",
+          "<T>, disableEmbedding: boolean, basePath: string | undefined) => Promise<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -1218,6 +1218,21 @@
           {
             "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.createCookieSessionStorageFactory.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "disableEmbedding",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.createCookieSessionStorageFactory.$5",
             "type": "string",
             "tags": [],
             "label": "basePath",

@@ -27,5 +27,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/reporting-public",
+    "@kbn/presentation-publishing",
   ]
 }
