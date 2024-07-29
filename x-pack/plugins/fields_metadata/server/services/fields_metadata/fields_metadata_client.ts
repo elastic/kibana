@@ -37,14 +37,14 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     // 1. Try resolving from metadata-fields static metadata
     let field = this.metadataFieldsRepository.getByName(fieldName);
 
-    // 2. Try resolving from ecs static metadata
-    if (!field) {
-      field = this.ecsFieldsRepository.getByName(fieldName);
+    // 2. Try searching for specific fields in the Elastic Package Registry
+    if (integration) {
+      field = await this.integrationFieldsRepository.getByName(fieldName, { integration, dataset });
     }
 
-    // 2. Try searching for the fiels in the Elastic Package Registry
-    if (!field && integration) {
-      field = await this.integrationFieldsRepository.getByName(fieldName, { integration, dataset });
+    // 3. Try resolving from ecs static metadata
+    if (!field) {
+      field = this.ecsFieldsRepository.getByName(fieldName);
     }
 
     return field;
@@ -57,8 +57,8 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   }: FindFieldsMetadataOptions = {}): Promise<FieldsMetadataDictionary> {
     if (!fieldNames) {
       return FieldsMetadataDictionary.create({
-        ...this.metadataFieldsRepository.find().getFields(),
         ...this.ecsFieldsRepository.find().getFields(),
+        ...this.metadataFieldsRepository.find().getFields(),
       });
     }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GET_RECOMMENDATIONS_URL } from '@kbn/logs-optimization-plugin/common/recommendations';
+import { GET_RECOMMENDATIONS_URL } from '../../../common/recommendations';
 import { createValidationFunction } from '../../../common/runtime_types';
 import * as recommendationsV1 from '../../../common/recommendations/v1';
 import { LogsOptimizationBackendLibs } from '../../lib/shared_types';
@@ -29,7 +29,7 @@ export const initGetRecommendationsRoute = ({
         },
       },
       async (_requestContext, request, response) => {
-        const { dataset } = request.query;
+        const { dataStream } = request.query;
 
         const [_core, _startDeps, startContract] = await getStartServices();
         const recommendationsClient = await startContract.recommendationsService.getScopedClient(
@@ -37,7 +37,7 @@ export const initGetRecommendationsRoute = ({
         );
 
         try {
-          const recommendations = await recommendationsClient.getRecommendations({ dataset });
+          const recommendations = await recommendationsClient.getRecommendations({ dataStream });
 
           const responsePayload: recommendationsV1.GetRecommendationsResponsePayload = {
             recommendations,

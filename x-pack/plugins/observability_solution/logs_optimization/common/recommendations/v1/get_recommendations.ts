@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 import { recommendationRT } from '../types';
 
 export const getRecommendationsRequestQueryRT = rt.type({
-  dataset: rt.string,
+  dataStream: rt.string,
 });
 
 export const getRecommendationsResponsePayloadRT = rt.type({

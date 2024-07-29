@@ -6,57 +6,67 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { NewestIndex } from '../../../common/types';
 import { createRecommendation } from '../../../common/recommendations/utils';
 import { Recommendation } from '../../../common/recommendations';
 import { IDetectionsClient } from '../detections/types';
 import { IRecommendationsClient } from './types';
+import { IndexManagerCreator } from '../../lib/index_manager';
 
 interface RecommendationsClientDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
   detectionsClient: IDetectionsClient;
+  indexManagerCreator: IndexManagerCreator;
 }
 
 export class RecommendationsClient implements IRecommendationsClient {
   private constructor(
     private readonly logger: Logger,
     private readonly esClient: ElasticsearchClient,
-    private readonly detectionsClient: IDetectionsClient
+    private readonly detectionsClient: IDetectionsClient,
+    private readonly indexManagerCreator: IndexManagerCreator
   ) {}
 
-  async getRecommendations({ dataset }: { dataset: string }): Promise<Recommendation[]> {
-    const newestIndex = await this.getNewestIndex(dataset);
+  async getRecommendations({ dataStream }: { dataStream: string }): Promise<Recommendation[]> {
+    const indexManager = this.indexManagerCreator.fromIndexPattern(dataStream);
 
-    if (!newestIndex) {
+    const lastIndex = await indexManager.getLastDataStreamIndex();
+    console.log(lastIndex);
+
+    if (!lastIndex) {
       return [];
     }
 
-    const detections = await this.detectionsClient.detectFrom(newestIndex);
+    const detections = await this.detectionsClient.detectFrom(lastIndex);
 
     const recommendations = detections.map(createRecommendation);
 
     return recommendations;
   }
 
-  // applyRecommendation({ dataset, recommendationId }) {}
+  // applyRecommendation({ dataStream, recommendationId }) {}
 
-  private async getNewestIndex(dataset: string): Promise<NewestIndex | null> {
-    const datasetIndices = await this.esClient.indices.get({ index: dataset });
+  // private async getNewestIndex(dataStream: string): Promise<NewestIndex | null> {
+  //   const datasetIndices = await this.esClient.indices.get({ index: dataStream });
 
-    const newestIndexName = Object.keys(datasetIndices).sort().pop();
+  //   const newestIndexName = Object.keys(datasetIndices).sort().pop();
 
-    if (!newestIndexName) {
-      return null;
-    }
+  //   if (!newestIndexName) {
+  //     return null;
+  //   }
 
-    return {
-      name: newestIndexName,
-      ...datasetIndices[newestIndexName],
-    };
-  }
+  //   return {
+  //     name: newestIndexName,
+  //     ...datasetIndices[newestIndexName],
+  //   };
+  // }
 
-  public static create({ logger, esClient, detectionsClient }: RecommendationsClientDeps) {
-    return new RecommendationsClient(logger, esClient, detectionsClient);
+  public static create({
+    logger,
+    esClient,
+    detectionsClient,
+    indexManagerCreator,
+  }: RecommendationsClientDeps) {
+    return new RecommendationsClient(logger, esClient, detectionsClient, indexManagerCreator);
   }
 }

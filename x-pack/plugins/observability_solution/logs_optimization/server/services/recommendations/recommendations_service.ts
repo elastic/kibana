@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { IndexManager } from '../../lib/index_manager';
 import { RecommendationsClient } from './recommendations_client';
 import {
   RecommendationsServiceSetup,
@@ -31,8 +32,13 @@ export class RecommendationsService {
     const { getStartServices, logger } = this;
 
     return {
-      getClient(esClient, detectionsClient) {
-        return RecommendationsClient.create({ detectionsClient, esClient, logger });
+      getClient(esClient, detectionsClient, indexManagerCreator) {
+        return RecommendationsClient.create({
+          detectionsClient,
+          esClient,
+          indexManagerCreator,
+          logger,
+        });
       },
 
       async getScopedClient(request) {
@@ -40,8 +46,9 @@ export class RecommendationsService {
 
         const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
         const detectionsClient = await detectionsService.getClient(esClient);
+        const indexManagerCreator = IndexManager.create(esClient);
 
-        return this.getClient(esClient, detectionsClient);
+        return this.getClient(esClient, detectionsClient, indexManagerCreator);
       },
     };
   }

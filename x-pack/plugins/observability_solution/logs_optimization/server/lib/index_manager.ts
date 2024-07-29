@@ -6,15 +6,78 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { NewestIndex } from '../../common/types';
+
+export interface IndexManagerCreator {
+  fromIndexPattern: (indexPattern: string) => IndexManager;
+}
 
 export class IndexManager {
-  constructor(private esClient: ElasticsearchClient, indexPattern: string) {}
+  private constructor(private esClient: ElasticsearchClient, private indexPattern: string) {}
 
-  getIndexDatasetName() {}
+  async getDataStreamInfo() {
+    const dataStream = await this.getDataStream();
+
+    if (!dataStream) {
+      return {};
+    }
+
+    const { type, dataset, namespace } = IndexManager.extractDataStreamFields(dataStream.name);
+
+    return {
+      isManaged: dataStream._meta?.isManaged ?? false,
+      integration: dataStream._meta?.package?.name ?? null,
+      type,
+      dataset,
+      namespace,
+    };
+  }
 
   getIndexIntegration() {}
 
-  create = (esClient: ElasticsearchClient) => (indexPattern: string) => {
-    return new IndexManager(esClient, index);
-  };
+  async getDataStream() {
+    try {
+      const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
+        name: this.indexPattern,
+      });
+      return dataStreams.at(0);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getLastDataStreamIndex(): Promise<NewestIndex | null> {
+    const dataStream = await this.getDataStream();
+
+    if (!dataStream) {
+      return null;
+    }
+
+    const lastIndex = dataStream.indices.pop();
+
+    if (!lastIndex) {
+      return null;
+    }
+
+    const indices = await this.esClient.indices.get({ index: lastIndex.index_name });
+
+    return {
+      name: lastIndex.index_name,
+      ...indices[lastIndex.index_name],
+    };
+  }
+
+  static extractDataStreamFields(dataStreamName: string) {
+    const regex = /^(?<type>[^-]+)-(?<dataset>[\S]+)-(?<namespace>[^-]+)$/;
+    const match = dataStreamName.match(regex);
+    return match?.groups ?? {};
+  }
+
+  static create(esClient: ElasticsearchClient): IndexManagerCreator {
+    return {
+      fromIndexPattern(indexPattern: string) {
+        return new IndexManager(esClient, indexPattern);
+      },
+    };
+  }
 }

@@ -6,7 +6,8 @@
  */
 
 import { CoreSetup, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { Recommendation } from '@kbn/logs-optimization-plugin/common/recommendations';
+import { Recommendation } from '../../../common/recommendations';
+import { IndexManagerCreator } from '../../lib/index_manager';
 import { DetectionsServiceStart } from '../detections';
 import { IDetectionsClient } from '../detections/types';
 import type { RecommendationsClient } from './recommendations_client';
@@ -25,11 +26,12 @@ export interface RecommendationsServiceSetup {}
 export interface RecommendationsServiceStart {
   getClient(
     esClient: ElasticsearchClient,
-    detectionClient: IDetectionsClient
+    detectionClient: IDetectionsClient,
+    indexManagerCreator: IndexManagerCreator
   ): RecommendationsClient;
   getScopedClient(request: KibanaRequest): Promise<RecommendationsClient>;
 }
 
 export interface IRecommendationsClient {
-  getRecommendations({ dataset }: { dataset: string }): Promise<Recommendation[]>;
+  getRecommendations({ dataStream }: { dataStream: string }): Promise<Recommendation[]>;
 }

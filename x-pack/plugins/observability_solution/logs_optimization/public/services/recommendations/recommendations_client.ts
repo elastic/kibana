@@ -33,7 +33,7 @@ export class RecommendationsClient implements IRecommendationsClient {
       .get(GET_RECOMMENDATIONS_URL, { query, version: '1' })
       .catch((error) => {
         throw new FetchRecommendationsError(
-          `Failed to fetch recommendations for dataset "${query.dataset}": ${error.message}`
+          `Failed to fetch recommendations for data stream "${query.dataStream}": ${error.message}`
         );
       });
 
@@ -41,7 +41,7 @@ export class RecommendationsClient implements IRecommendationsClient {
       getRecommendationsResponsePayloadRT,
       (message: string) =>
         new DecodeRecommendationsError(
-          `Failed decoding recommendations for dataset "${query.dataset}": ${message}`
+          `Failed decoding recommendations for data stream "${query.dataStream}": ${message}`
         )
     )(response);
 

@@ -35,11 +35,11 @@ export const RecommendationsRoute = () => {
 
   useBreadcrumbs(noBreadcrumbs, chrome, serverless);
 
-  const datasetFieldRef = useRef<HTMLInputElement | null>(null);
+  const dataStreamFieldRef = useRef<HTMLInputElement | null>(null);
 
-  const [dataset, setDataset] = useState('logs-random-generic');
+  const [dataStream, setDataStream] = useState('logs-random-generic');
 
-  const { recommendations, loading, error } = useRecommendations({ dataset }, [dataset]);
+  const { recommendations, loading, error } = useRecommendations({ dataStream }, [dataStream]);
 
   return (
     <LogsOptimizationPageTemplate
@@ -50,17 +50,19 @@ export const RecommendationsRoute = () => {
     >
       <EuiSpacer />
       <EuiFieldText
-        inputRef={datasetFieldRef}
+        inputRef={dataStreamFieldRef}
         data-test-subj="logsOptimizationRecommendationsRouteFieldText"
-        name="dataset"
-        defaultValue={dataset}
+        name="dataStream"
+        defaultValue={dataStream}
         prepend="Dataset"
         append={
           <EuiButtonEmpty
             data-test-subj="logsOptimizationRecommendationsRouteButtonButton"
             size="xs"
             onClick={() => {
-              if (datasetFieldRef.current?.value) setDataset(datasetFieldRef.current?.value);
+              if (dataStreamFieldRef.current?.value) {
+                setDataStream(dataStreamFieldRef.current?.value);
+              }
             }}
           >
             {i18n.translate('app_not_found_in_i18nrc.recommendationsRoute.buttonButtonEmptyLabel', {
@@ -158,7 +160,7 @@ const FieldExtractionRecommendation = ({ recommendation }: { recommendation: Rec
                 'app_not_found_in_i18nrc.fieldExtractionRecommendation.weCanExtractLoglevelsAccordionLabel',
                 {
                   defaultMessage:
-                    'We can extract the {targetField} field from this dataset {sourceField} field.',
+                    'We can extract the {targetField} field from this dataStream {sourceField} field.',
                   values: {
                     targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
                     sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
@@ -297,7 +299,7 @@ const JSONParsingRecommendation = ({ recommendation }: { recommendation: Recomme
                 'app_not_found_in_i18nrc.fieldExtractionRecommendation.weCanExtractLoglevelsAccordionLabel',
                 {
                   defaultMessage:
-                    'We can parse the {sourceField} field content from this dataset, as it seems to be in JSON format.',
+                    'We can parse the {sourceField} field content from this dataStream, as it seems to be in JSON format.',
                   values: {
                     targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
                     sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
