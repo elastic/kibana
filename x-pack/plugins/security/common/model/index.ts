@@ -40,4 +40,5 @@ export type {
   InvalidRoleTemplate,
   RoleTemplate,
   RoleMapping,
+  RoleMappingRule,
 } from './role_mapping';

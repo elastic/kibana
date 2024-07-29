@@ -12,6 +12,7 @@ export type {
   BuiltinESPrivileges,
   RawKibanaPrivileges,
   RoleMapping,
+  RoleMappingRule,
   RoleTemplate,
   StoredRoleTemplate,
   InvalidRoleTemplate,

@@ -21,7 +21,7 @@ interface RoleMappingExceptRule {
   except: RoleMappingRule;
 }
 
-type RoleMappingRule =
+export type RoleMappingRule =
   | RoleMappingAnyRule
   | RoleMappingAllRule
   | RoleMappingFieldRule
