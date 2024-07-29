@@ -13,6 +13,7 @@ import {
   HasEditCapabilities,
   PublishesDataLoading,
   PublishesDataViews,
+  SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DeepPartial } from '@kbn/utility-types';
@@ -30,12 +31,13 @@ export type ExtraSavedObjectProperties = Pick<
   | 'sharingSavedObjectProps'
 >;
 
-export type VisualizeRuntimeState = SerializedTitles & {
-  serializedVis: SerializedVis<VisParams>;
-  savedObjectId?: string;
-  savedObjectProperties?: ExtraSavedObjectProperties;
-  linkedToLibrary?: boolean;
-};
+export type VisualizeRuntimeState = SerializedTitles &
+  SerializedTimeRange & {
+    serializedVis: SerializedVis<VisParams>;
+    savedObjectId?: string;
+    savedObjectProperties?: ExtraSavedObjectProperties;
+    linkedToLibrary?: boolean;
+  };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
   savedVis?: SerializedVis<VisParams>;
