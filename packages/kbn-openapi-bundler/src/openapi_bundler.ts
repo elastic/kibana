@@ -17,7 +17,7 @@ import { writeDocuments } from './utils/write_documents';
 import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { resolveGlobs } from './utils/resolve_globs';
 import { DEFAULT_BUNDLING_PROCESSORS, withIncludeLabelsProcessor } from './bundler/processor_sets';
-import { PrototypeDoc } from './prototype_doc';
+import { PrototypeDocument } from './prototype_document';
 import { readDocument } from './utils/read_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
 
@@ -31,7 +31,7 @@ interface BundleOptions {
   /**
    * OpenAPI document itself or path to the document
    */
-  prototypeDoc?: PrototypeDoc | string;
+  prototypeDocument?: PrototypeDocument | string;
   /**
    * When specified the produced bundle will contain only
    * operations objects with matching labels
@@ -44,12 +44,12 @@ export const bundle = async ({
   outputFilePath = 'bundled-{version}.schema.yaml',
   options,
 }: BundlerConfig) => {
-  const prototypeDocument: PrototypeDoc | undefined =
-    typeof options?.prototypeDoc === 'string'
-      ? await readDocument(options.prototypeDoc)
-      : options?.prototypeDoc;
+  const prototypeDoc: PrototypeDocument | undefined =
+    typeof options?.prototypeDocument === 'string'
+      ? await readDocument(options.prototypeDocument)
+      : options?.prototypeDocument;
 
-  validatePrototypeDocument(prototypeDocument);
+  validatePrototypeDocument(prototypeDoc);
 
   logger.debug(chalk.bold(`Bundling API route schemas`));
   logger.debug(`👀  Searching for source files in ${chalk.underline(sourceGlob)}`);
@@ -73,19 +73,19 @@ export const bundle = async ({
 
   const blankOasDocumentFactory = (oasVersion: string, apiVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
-      info: prototypeDocument?.info
-        ? { ...DEFAULT_INFO, ...prototypeDocument.info, version: apiVersion }
+      info: prototypeDoc?.info
+        ? { ...DEFAULT_INFO, ...prototypeDoc.info, version: apiVersion }
         : { ...DEFAULT_INFO, version: apiVersion },
-      servers: prototypeDocument?.servers,
-      security: prototypeDocument?.security,
+      servers: prototypeDoc?.servers,
+      security: prototypeDoc?.security,
       components: {
-        securitySchemes: prototypeDocument?.components?.securitySchemes,
+        securitySchemes: prototypeDoc?.components?.securitySchemes,
       },
     });
   const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasDocumentFactory, {
     splitDocumentsByVersion: true,
-    skipServers: Boolean(prototypeDocument?.servers),
-    skipSecurity: Boolean(prototypeDocument?.security),
+    skipServers: Boolean(prototypeDoc?.servers),
+    skipSecurity: Boolean(prototypeDoc?.security),
   });
 
   await writeDocuments(resultDocumentsMap, outputFilePath);

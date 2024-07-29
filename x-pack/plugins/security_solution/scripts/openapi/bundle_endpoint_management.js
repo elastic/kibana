@@ -20,7 +20,7 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['serverless'],
-      prototypeDoc: {
+      prototypeDocument: {
         info: {
           title: 'Security Solution Endpoint Management API (Elastic Cloud Serverless)',
           description: 'Interact with and manage endpoints running the Elastic Defend integration.',
@@ -37,7 +37,7 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['ess'],
-      prototypeDoc: {
+      prototypeDocument: {
         info: {
           title: 'Security Solution Endpoint Management API (Elastic Cloud and self-hosted)',
           description: 'Interact with and manage endpoints running the Elastic Defend integration.',

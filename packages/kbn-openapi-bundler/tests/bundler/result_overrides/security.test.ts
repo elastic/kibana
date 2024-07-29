@@ -30,7 +30,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
             1: spec1,
           },
           {
-            prototypeDoc: {
+            prototypeDocument: {
               security: [{ ShouldBeUsedSecurityRequirement: [] }],
             },
           }
@@ -59,7 +59,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
             1: spec1,
           },
           {
-            prototypeDoc: {
+            prototypeDocument: {
               components: {
                 securitySchemes: {
                   ShouldBeUsedSecurityRequirement: {
@@ -129,7 +129,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
             2: spec2,
           },
           {
-            prototypeDoc: {
+            prototypeDocument: {
               security: [{ ShouldBeUsedSecurityRequirement: [] }],
               components: {
                 securitySchemes: {
@@ -204,7 +204,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
             2: spec2,
           },
           {
-            prototypeDoc: {
+            prototypeDocument: {
               security: [{ ShouldBeUsedSecurityRequirement: [] }],
               components: {
                 securitySchemes: {

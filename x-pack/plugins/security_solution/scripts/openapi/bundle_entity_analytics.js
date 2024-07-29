@@ -19,7 +19,7 @@ bundle({
   ),
   options: {
     includeLabels: ['serverless'],
-    prototypeDoc: {
+    prototypeDocument: {
       info: {
         title: 'Security Solution Entity Analytics API (Elastic Cloud Serverless)',
         description: '',
@@ -36,7 +36,7 @@ bundle({
   ),
   options: {
     includeLabels: ['ess'],
-    prototypeDoc: {
+    prototypeDocument: {
       info: {
         title: 'Security Solution Entity Analytics API (Elastic Cloud and self-hosted)',
         description: '',

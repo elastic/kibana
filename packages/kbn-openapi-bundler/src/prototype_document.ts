@@ -9,7 +9,7 @@
 import { OpenAPIV3 } from 'openapi-types';
 
 /**
- * `PrototypeDoc` is used as a prototype for the result file. In the other words
+ * `PrototypeDocument` is used as a prototype for the result file. In the other words
  * it provides a way to specify the following properties
  *
  * - `info` info object
@@ -19,7 +19,7 @@ import { OpenAPIV3 } from 'openapi-types';
  *
  * All the other properties will be ignored.
  */
-export interface PrototypeDoc {
+export interface PrototypeDocument {
   info?: Partial<OpenAPIV3.InfoObject>;
   servers?: OpenAPIV3.ServerObject[];
   security?: OpenAPIV3.SecurityRequirementObject[];

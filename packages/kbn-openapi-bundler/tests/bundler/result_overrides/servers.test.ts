@@ -65,7 +65,7 @@ describe('OpenAPI Bundler - with `servers` overrides', () => {
             2: spec2,
           },
           {
-            prototypeDoc: {
+            prototypeDocument: {
               servers: [
                 { url: 'https://should-be-used-url', description: 'Should be used description' },
               ],
@@ -133,7 +133,7 @@ describe('OpenAPI Bundler - with `servers` overrides', () => {
             2: spec2,
           },
           {
-            prototypeDoc: {
+            prototypeDocument: {
               servers: [
                 { url: 'https://should-be-used-url', description: 'Should be used description' },
               ],
@@ -200,7 +200,7 @@ describe('OpenAPI Bundler - with `servers` overrides', () => {
             2: spec2,
           },
           {
-            prototypeDoc: {
+            prototypeDocument: {
               servers: [
                 { url: 'https://should-be-used-url', description: 'Should be used description' },
               ],

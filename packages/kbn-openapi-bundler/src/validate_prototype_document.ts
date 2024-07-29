@@ -7,9 +7,16 @@
  */
 
 import chalk from 'chalk';
-import { PrototypeDoc } from './prototype_doc';
+import { PrototypeDocument } from './prototype_document';
 
-export function validatePrototypeDocument(prototypeDocument: PrototypeDoc | undefined): void {
+/**
+ * Validates that passed `prototypeDocument` fulfills the requirements.
+ *
+ * In particular security requirements must be specified via `security` and
+ * `components.securitySchemes` properties.
+ *
+ */
+export function validatePrototypeDocument(prototypeDocument: PrototypeDocument | undefined): void {
   if (prototypeDocument === undefined) {
     return;
   }

@@ -21,7 +21,7 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['serverless'],
-      prototypeDoc: {
+      prototypeDocument: {
         info: {
           title: 'Security Solution Exceptions API (Elastic Cloud Serverless)',
           description:
@@ -39,7 +39,7 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['ess'],
-      prototypeDoc: {
+      prototypeDocument: {
         info: {
           title: 'Security Solution Exceptions API (Elastic Cloud and self-hosted)',
           description:
