@@ -102,6 +102,9 @@ export default ({ getService }: FtrProviderContext) => {
       console.log('waiting for datafeed state');
       await ml.api.waitForDatafeedState(`datafeed-${mlJobId}`, DATAFEED_STATE.STARTED);
       console.log('done waiting for ML state');
+      console.log('waiting for anomalies');
+      await ml.api.waitForADJobRecordCountToBePositive(mlJobId);
+      console.log('done waiting for anomalies');
     });
 
     after(async () => {
