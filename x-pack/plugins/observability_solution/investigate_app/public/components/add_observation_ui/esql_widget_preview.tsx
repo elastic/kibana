@@ -5,30 +5,26 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import {
-  InvestigateWidgetColumnSpan,
-  InvestigateWidgetCreate,
-  WorkflowBlock,
-} from '@kbn/investigate-plugin/public';
+import { css } from '@emotion/css';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
 import {
   createEsqlWidget,
   ESQL_WIDGET_NAME,
   GlobalWidgetParameters,
+  InvestigateWidgetColumnSpan,
+  InvestigateWidgetCreate,
   OnWidgetAdd,
 } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { noop } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
-import { css } from '@emotion/css';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrides';
-import { EsqlWidget } from '../../widgets/esql_widget/register_esql_widget';
-import { SuggestVisualizationList } from '../suggest_visualization_list';
-import { ErrorMessage } from '../error_message';
 import { getDateHistogramResults } from '../../widgets/esql_widget/get_date_histogram_results';
+import { EsqlWidget } from '../../widgets/esql_widget/register_esql_widget';
+import { ErrorMessage } from '../error_message';
+import { SuggestVisualizationList } from '../suggest_visualization_list';
 
 function getWidgetFromSuggestion({
   query,
@@ -67,6 +63,7 @@ function PreviewContainer({ children }: { children: React.ReactNode }) {
       alignItems="center"
       justifyContent="center"
       className={css`
+        padding: 24px 0px 24px 0px;
         width: 100%;
         overflow: auto;
         > div {
@@ -84,7 +81,6 @@ export function EsqlWidgetPreview({
   onWidgetAdd,
   filters,
   timeRange,
-  query,
 }: {
   esqlQuery: string;
   onWidgetAdd: OnWidgetAdd;
@@ -97,9 +93,8 @@ export function EsqlWidgetPreview({
     return getEsFilterFromOverrides({
       filters,
       timeRange,
-      query,
     });
-  }, [filters, timeRange, query]);
+  }, [filters, timeRange]);
 
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | undefined>(undefined);
 
@@ -121,7 +116,7 @@ export function EsqlWidgetPreview({
 
   const dateHistoResponse = useAbortableAsync(
     ({ signal }) => {
-      if (!queryResult.value || queryResult.loading || !selectedSuggestion) {
+      if (!queryResult.value?.query?.values || queryResult.loading || !selectedSuggestion) {
         return undefined;
       }
       return getDateHistogramResults({
@@ -136,16 +131,6 @@ export function EsqlWidgetPreview({
     },
     [queryResult, esql, filter, esqlQuery, selectedSuggestion, timeRange]
   );
-
-  const fakeRenderApi = useMemo(() => {
-    return {
-      blocks: {
-        publish: (_blocks: WorkflowBlock[]) => {
-          return noop;
-        },
-      },
-    };
-  }, []);
 
   const [displayedProps, setDisplayedProps] = useState<
     {
@@ -216,7 +201,6 @@ export function EsqlWidgetPreview({
       <EuiFlexItem grow={false}>
         <PreviewContainer>
           <EsqlWidget
-            blocks={fakeRenderApi.blocks}
             suggestion={selectedSuggestion}
             columns={displayedProps.value.columns}
             allColumns={displayedProps.value.allColumns}
