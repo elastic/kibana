@@ -26,7 +26,14 @@ export const deleteRuleRoute = (
         summary: `Delete a rule`,
       },
       validate: {
-        params: deleteRuleRequestParamsSchemaV1,
+        request: {
+          params: deleteRuleRequestParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

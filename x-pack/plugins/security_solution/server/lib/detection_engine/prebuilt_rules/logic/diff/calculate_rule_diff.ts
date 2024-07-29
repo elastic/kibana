@@ -9,8 +9,12 @@ import type {
   DiffableRule,
   FullRuleDiff,
   ThreeWayDiff,
+  RuleFieldsDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { MissingVersion } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import {
+  MissingVersion,
+  ThreeWayDiffConflict,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -75,14 +79,18 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     target_version: diffableTargetVersion,
   });
 
-  const hasAnyFieldConflict = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).some(
-    (fieldDiff) => fieldDiff.has_conflict
-  );
+  const {
+    numberFieldsWithUpdates,
+    numberFieldsWithConflicts,
+    numberFieldsWithNonSolvableConflicts,
+  } = getNumberOfFieldsByChangeType(fieldsDiff);
 
   return {
     ruleDiff: {
       fields: fieldsDiff,
-      has_conflict: hasAnyFieldConflict,
+      num_fields_with_updates: numberFieldsWithUpdates,
+      num_fields_with_conflicts: numberFieldsWithConflicts,
+      num_fields_with_non_solvable_conflicts: numberFieldsWithNonSolvableConflicts,
     },
     ruleVersions: {
       input: {
@@ -98,3 +106,31 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     },
   };
 };
+
+const getNumberOfFieldsByChangeType = (fieldsDiff: RuleFieldsDiff) =>
+  Object.values<ThreeWayDiff<unknown>>(fieldsDiff).reduce<{
+    numberFieldsWithUpdates: number;
+    numberFieldsWithConflicts: number;
+    numberFieldsWithNonSolvableConflicts: number;
+  }>(
+    (counts, fieldDiff) => {
+      if (fieldDiff.has_update) {
+        counts.numberFieldsWithUpdates += 1;
+      }
+
+      if (fieldDiff.conflict !== ThreeWayDiffConflict.NONE) {
+        counts.numberFieldsWithConflicts += 1;
+
+        if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+          counts.numberFieldsWithNonSolvableConflicts += 1;
+        }
+      }
+
+      return counts;
+    },
+    {
+      numberFieldsWithUpdates: 0,
+      numberFieldsWithConflicts: 0,
+      numberFieldsWithNonSolvableConflicts: 0,
+    }
+  );

@@ -15,8 +15,9 @@ import {
   determineOrderAgnosticDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
   MissingVersion,
+  ThreeWayDiffConflict,
+  ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 /**
@@ -36,33 +37,37 @@ export const scalarArrayDiffAlgorithm = <TValue>(
   const diffOutcome = determineOrderAgnosticDiffOutcome(baseVersion, currentVersion, targetVersion);
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
-  const { mergeOutcome, mergedVersion } = mergeVersions({
-    baseVersion,
+  const hasBaseVersion = baseVersion !== MissingVersion;
+
+  const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
+    baseVersion: hasBaseVersion ? baseVersion : undefined,
     currentVersion,
     targetVersion,
     diffOutcome,
   });
 
   return {
-    base_version: baseVersion,
+    has_base_version: hasBaseVersion,
+    base_version: hasBaseVersion ? baseVersion : undefined,
     current_version: currentVersion,
     target_version: targetVersion,
     merged_version: mergedVersion,
+    merge_outcome: mergeOutcome,
 
     diff_outcome: diffOutcome,
-    merge_outcome: mergeOutcome,
+    conflict,
     has_update: valueCanUpdate,
-    has_conflict: mergeOutcome === ThreeWayMergeOutcome.Conflict,
   };
 };
 
 interface MergeResult<TValue> {
   mergeOutcome: ThreeWayMergeOutcome;
   mergedVersion: TValue[];
+  conflict: ThreeWayDiffConflict;
 }
 
 interface MergeArgs<TValue> {
-  baseVersion: TValue[] | MissingVersion;
+  baseVersion: TValue[] | undefined;
   currentVersion: TValue[];
   targetVersion: TValue[];
   diffOutcome: ThreeWayDiffOutcome;
@@ -74,33 +79,32 @@ const mergeVersions = <TValue>({
   targetVersion,
   diffOutcome,
 }: MergeArgs<TValue>): MergeResult<TValue> => {
-  const dedupedBaseVersion = baseVersion !== MissingVersion ? uniq(baseVersion) : MissingVersion;
+  const dedupedBaseVersion = uniq(baseVersion);
   const dedupedCurrentVersion = uniq(currentVersion);
   const dedupedTargetVersion = uniq(targetVersion);
 
   switch (diffOutcome) {
+    // Scenario -AA is treated as scenario AAA:
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
-    case ThreeWayDiffOutcome.CustomizedValueSameUpdate: {
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Current,
+        conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: dedupedCurrentVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Current,
       };
-    }
+
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Target,
+        conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: dedupedTargetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }
-    case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      if (dedupedBaseVersion === MissingVersion) {
-        return {
-          mergeOutcome: ThreeWayMergeOutcome.Merged,
-          mergedVersion: union(currentVersion, targetVersion),
-        };
-      }
 
+    case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion);
       const removedCurrent = difference(dedupedBaseVersion, dedupedCurrentVersion);
 
@@ -113,8 +117,19 @@ const mergeVersions = <TValue>({
       const merged = difference(union(dedupedBaseVersion, bothAdded), bothRemoved);
 
       return {
-        mergeOutcome: ThreeWayMergeOutcome.Merged,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
         mergedVersion: merged,
+        mergeOutcome: ThreeWayMergeOutcome.Merged,
+      };
+    }
+    // Scenario -AB is treated as scenario ABC, but marked as
+    // SOLVABLE, and returns the target version as the merged version
+    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
+      return {
+        mergedVersion: targetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
       };
     }
     default:

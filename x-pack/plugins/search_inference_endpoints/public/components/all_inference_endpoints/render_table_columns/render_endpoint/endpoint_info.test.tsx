@@ -9,6 +9,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EndpointInfo } from './endpoint_info';
 
+jest.mock('@kbn/ml-trained-models-utils', () => ({
+  ...jest.requireActual('@kbn/ml-trained-models-utils'),
+  ELASTIC_MODEL_DEFINITIONS: {
+    'model-with-mit-license': {
+      license: 'MIT',
+      licenseUrl: 'https://abc.com',
+    },
+  },
+}));
+
 describe('RenderEndpoint component tests', () => {
   describe('with cohere service', () => {
     const mockEndpoint = {
@@ -252,6 +262,62 @@ describe('RenderEndpoint component tests', () => {
 
       expect(screen.getByText('model-abc')).toBeInTheDocument();
       expect(screen.queryByText('Rate limit:')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('with amazonbedrock service', () => {
+    const mockEndpoint = {
+      model_id: 'amazon-bedrock-1',
+      service: 'amazonbedrock',
+      service_settings: {
+        region: 'us-west-1',
+        provider: 'AMAZONTITAN',
+        model: 'model-bedrock-xyz',
+      },
+    } as any;
+
+    it('renders the component with endpoint details', () => {
+      render(<EndpointInfo endpoint={mockEndpoint} />);
+
+      expect(screen.getByText('amazon-bedrock-1')).toBeInTheDocument();
+      expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
+      expect(screen.getByText('region: us-west-1, provider: amazontitan')).toBeInTheDocument();
+    });
+  });
+
+  describe('for MIT licensed models', () => {
+    const mockEndpointWithMitLicensedModel = {
+      model_id: 'model-123',
+      service: 'elasticsearch',
+      service_settings: {
+        num_allocations: 5,
+        num_threads: 10,
+        model_id: 'model-with-mit-license',
+      },
+    } as any;
+
+    it('renders the MIT license badge if the model is eligible', () => {
+      render(<EndpointInfo endpoint={mockEndpointWithMitLicensedModel} />);
+
+      const mitBadge = screen.getByTestId('mit-license-badge');
+      expect(mitBadge).toBeInTheDocument();
+      expect(mitBadge).toHaveAttribute('href', 'https://abc.com');
+    });
+
+    it('does not render the MIT license badge if the model is not eligible', () => {
+      const mockEndpointWithNonMitLicensedModel = {
+        model_id: 'model-123',
+        service: 'elasticsearch',
+        service_settings: {
+          num_allocations: 5,
+          num_threads: 10,
+          model_id: 'model-without-mit-license',
+        },
+      } as any;
+
+      render(<EndpointInfo endpoint={mockEndpointWithNonMitLicensedModel} />);
+
+      expect(screen.queryByTestId('mit-license-badge')).not.toBeInTheDocument();
     });
   });
 });

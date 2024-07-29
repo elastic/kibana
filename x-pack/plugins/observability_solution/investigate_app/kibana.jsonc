@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/investigate-app-plugin",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": "@elastic/obs-ux-management-team",
   "plugin": {
     "id": "investigateApp",
     "server": true,
