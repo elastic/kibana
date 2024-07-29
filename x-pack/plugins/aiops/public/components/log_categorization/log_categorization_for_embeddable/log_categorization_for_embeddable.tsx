@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
+import { useMemo } from 'react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -18,6 +19,7 @@ import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-anal
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import datemath from '@elastic/datemath';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
 import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
 import { useSearch } from '../../../hooks/use_search';
@@ -61,7 +63,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     randomSamplerProbability,
     onChange,
     onRenderComplete,
+    timeRange,
   } = input;
+  // console.log(timeRange);
+
   const { filters, query } = useFilterQueryUpdates();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -125,6 +130,16 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     [cancelRequest, mounted]
   );
 
+  const timeRangeParsed = useMemo(() => {
+    if (timeRange) {
+      const min = datemath.parse(timeRange.from);
+      const max = datemath.parse(timeRange.to);
+      if (min && max) {
+        return { min, max };
+      }
+    }
+  }, [timeRange]);
+
   const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
     dataView,
     'log_categorization',
@@ -133,7 +148,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     undefined,
     undefined,
     BAR_TARGET,
-    false
+    false,
+    timeRangeParsed
   );
 
   const onAddFilter = useCallback(
@@ -188,7 +204,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     const runtimeMappings = dataView.getRuntimeMappings();
 
     try {
-      const timeRange = await getMinimumTimeRange(
+      const minTimeRange = await getMinimumTimeRange(
         index,
         timeField,
         additionalFilter,
@@ -206,7 +222,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           index,
           fieldName,
           timeField,
-          timeRange,
+          minTimeRange,
           searchQuery,
           runtimeMappings,
           {
@@ -217,11 +233,11 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           index,
           fieldName,
           timeField,
-          { to: timeRange.to, from: timeRange.from },
+          { to: minTimeRange.to, from: minTimeRange.from },
           searchQuery,
           runtimeMappings,
           intervalMs,
-          timeRange.useSubAgg ? additionalFilter : undefined
+          minTimeRange.useSubAgg ? additionalFilter : undefined
         ),
       ]);
 
@@ -235,7 +251,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       // eslint-disable-next-line no-console
       console.log('categories', categories);
 
-      if (timeRange.useSubAgg) {
+      if (minTimeRange.useSubAgg) {
         const categoriesInBucket = categorizationResult.categories
           .map((category) => ({
             ...category,

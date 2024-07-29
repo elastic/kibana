@@ -147,7 +147,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
                 <FilterQueryContextProvider timeRange={timeRange}>
                   <PatternAnalysisEmbeddableWrapper
                     dataViewId={dataViewId}
-                    timeRange={timeRange} // !!!! is this needed?
+                    timeRange={timeRange}
                     fieldName={fieldName}
                     minimumTimeRangeOption={minimumTimeRangeOption}
                     randomSamplerMode={randomSamplerMode}
