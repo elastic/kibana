@@ -17,7 +17,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const testSubjects = getService('testSubjects');
   const owner = SECURITY_SOLUTION_OWNER;
 
-  describe('security case settings', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/188997
+  describe.skip('security case settings', function () {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
     });
@@ -30,6 +31,15 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await navigateToCasesApp(getPageObject, getService, owner);
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('add-custom-field');
+      await svlCommonScreenshots.takeScreenshot(
+        'security-cases-custom-fields',
+        screenshotDirectories,
+        1400,
+        700
+      );
+      await testSubjects.setValue('custom-field-label-input', 'my-field');
+      await testSubjects.click('common-flyout-save');
       await svlCommonScreenshots.takeScreenshot('security-cases-settings', screenshotDirectories);
       await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(

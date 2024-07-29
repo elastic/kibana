@@ -40,6 +40,9 @@ export const entityDefinitionSchema = z.object({
         syncField: z.optional(z.string()),
         syncDelay: z.optional(z.string()),
         frequency: z.optional(z.string()),
+        backfillSyncDelay: z.optional(z.string()),
+        backfillLookbackPeriod: z.optional(durationSchema),
+        backfillFrequency: z.optional(z.string()),
       })
     ),
   }),

@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Internal Asset Criticality Create Record Schema
+paths:
+  /internal/asset_criticality:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: InternalCreateAssetCriticalityRecord
+      summary: Deprecated Internal Create Criticality Record
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+                - type: object
+                  properties:
+                    refresh:
+                      type: string
+                      enum: [wait_for]
+                      description: If 'wait_for' the request will wait for the index refresh.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
+        '400':
+          description: Invalid request

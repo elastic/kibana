@@ -21,6 +21,31 @@ export default function (providerContext: FtrProviderContext) {
   describe('package install', async function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
+    const createFleetAgent = async (agentPolicyId: string, spaceId?: string) => {
+      const agentResponse = await esClient.index({
+        index: '.fleet-agents',
+        refresh: true,
+        body: {
+          access_api_key_id: 'api-key-3',
+          active: true,
+          policy_id: agentPolicyId,
+          policy_revision_idx: 1,
+          last_checkin_status: 'online',
+          type: 'PERMANENT',
+          local_metadata: {
+            host: { hostname: 'host123' },
+            elastic: { agent: { version: '8.15.0' } },
+          },
+          user_provided_metadata: {},
+          enrolled_at: new Date().toISOString(),
+          last_checkin: new Date().toISOString(),
+          tags: ['tag1'],
+          namespaces: spaceId ? [spaceId] : undefined,
+        },
+      });
+
+      return agentResponse._id;
+    };
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -227,6 +252,62 @@ export default function (providerContext: FtrProviderContext) {
             );
           expect(dashboard).not.eql(undefined);
         });
+      });
+    });
+
+    describe('uninstall', () => {
+      beforeEach(async () => {
+        await apiClient.installPackage({
+          pkgName: 'nginx',
+          pkgVersion: '1.20.0',
+          force: true, // To avoid package verification
+        });
+        const agentPolicyRes = await apiClient.createAgentPolicy();
+
+        await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [agentPolicyRes.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        await createFleetAgent(agentPolicyRes.item.id);
+      });
+
+      it('should not allow to delete a package with active agents in the same space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.uninstallPackage({
+            pkgName: 'nginx',
+            pkgVersion: '1.20.0',
+            force: true, // To avoid package verification
+          });
+        } catch (_err) {
+          err = _err;
+        }
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/400 "Bad Request"/);
+      });
+      it('should not allow to delete a package with active agents in a different space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.uninstallPackage(
+            {
+              pkgName: 'nginx',
+              pkgVersion: '1.20.0',
+              force: true, // To avoid package verification
+            },
+            TEST_SPACE_1
+          );
+        } catch (_err) {
+          err = _err;
+        }
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/400 "Bad Request"/);
       });
     });
   });

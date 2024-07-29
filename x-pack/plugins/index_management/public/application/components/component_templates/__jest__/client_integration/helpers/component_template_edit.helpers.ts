@@ -19,7 +19,7 @@ import {
 
 export type ComponentTemplateEditTestBed = TestBed<ComponentTemplateFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
-  coreStart: ReturnType<typeof coreMock['createStart']>;
+  coreStart: ReturnType<(typeof coreMock)['createStart']>;
 };
 
 export const setup = async (
