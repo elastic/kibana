@@ -31,8 +31,6 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space }) => {
     setIsDirty(true);
   };
 
-  // TODO handle create space
-
   const onUpdateSpace = async () => {
     const { id, name, disabledFeatures } = spaceSettings;
     if (!id) {

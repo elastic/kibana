@@ -73,8 +73,6 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({
     setSpaceFeatures({ ...updatedSpace, id: space.id });
   };
 
-  // TODO handle create space
-
   const onUpdateSpace = async () => {
     const { id, name, disabledFeatures } = spaceFeatures;
     if (!id) {
