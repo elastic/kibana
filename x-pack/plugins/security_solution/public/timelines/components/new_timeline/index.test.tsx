@@ -11,7 +11,7 @@ import { NewTimelineButton } from '.';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions } from '../../store';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { RowRendererId, TimelineType } from '../../../../common/api/timeline';
+import { RowRendererValues, TimelineType } from '../../../../common/api/timeline';
 import { TestProviders } from '../../../common/mock';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 
@@ -64,7 +64,7 @@ describe('NewTimelineButton', () => {
         show: true,
         timelineType: TimelineType.default,
         updated: undefined,
-        excludedRowRendererIds: [...Object.values(RowRendererId)],
+        excludedRowRendererIds: RowRendererValues,
       });
     });
   });

@@ -24,7 +24,7 @@ import type {
 } from '../../../../common/api/timeline';
 import {
   DataProviderTypeEnum,
-  RowRendererId,
+  RowRendererValues,
   TimelineStatus,
   TimelineType,
 } from '../../../../common/api/timeline';
@@ -261,7 +261,7 @@ export const defaultTimelineToTimelineModel = (
           }
         : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
-    excludedRowRendererIds: isTemplate ? [] : Object.keys(RowRendererId),
+    excludedRowRendererIds: isTemplate ? [] : RowRendererValues,
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
