@@ -222,14 +222,14 @@ export class EditRoleMappingPage extends Component<Props, State> {
       if (typeof currentObj === 'object' && currentObj !== null) {
         for (const key in currentObj) {
           if (currentObj.hasOwnProperty(key)) {
-            const value = currentObj[key];
+            const value: unknown = currentObj[key as keyof RoleMappingRule];
             if ((key === 'any' || key === 'all') && Array.isArray(value)) {
               if (value.length === 0) {
                 return true;
               }
               arrToCheck.push(...value);
             } else if (typeof value === 'object' && value !== null) {
-              arrToCheck.push(value);
+              arrToCheck.push(value as RoleMappingRule);
             }
           }
         }
