@@ -25,7 +25,7 @@ import type {
   SortTimeline,
   GetAllTimelineVariables,
 } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {
@@ -93,7 +93,7 @@ export const getAllTimeline = memoizeOne(
       title: timeline.title,
       updated: timeline.updated,
       updatedBy: timeline.updatedBy,
-      timelineType: timeline.timelineType ?? TimelineType.default,
+      timelineType: timeline.timelineType ?? TimelineTypeEnum.default,
       templateTimelineId: timeline.templateTimelineId,
       queryType: getTimelineQueryTypes(timeline),
     }))

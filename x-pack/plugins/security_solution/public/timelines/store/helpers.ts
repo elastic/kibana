@@ -21,7 +21,7 @@ import {
   type DataProviderType,
   DataProviderTypeEnum,
   TimelineStatusEnum,
-  TimelineType,
+  TimelineTypeEnum,
 } from '../../../common/api/timeline';
 import type {
   ColumnHeaderOptions,
@@ -135,7 +135,7 @@ export const addTimelineToStore = ({
       resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatusEnum.immutable &&
-        timeline.timelineType === TimelineType.template
+        timeline.timelineType === TimelineTypeEnum.template
           ? {
               start: DEFAULT_FROM_MOMENT.toISOString(),
               end: DEFAULT_TO_MOMENT.toISOString(),
@@ -162,7 +162,7 @@ export const addNewTimeline = ({
   const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
   const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
-    timelineType === TimelineType.template
+    timelineType === TimelineTypeEnum.template
       ? {
           templateTimelineId: uuidv4(),
           templateTimelineVersion: 1,
@@ -1022,7 +1022,10 @@ export const updateTimelineProviderType = ({
 }: UpdateTimelineProviderTypeParams): TimelineById => {
   const timeline = timelineById[id];
 
-  if (timeline.timelineType !== TimelineType.template && type === DataProviderTypeEnum.template) {
+  if (
+    timeline.timelineType !== TimelineTypeEnum.template &&
+    type === DataProviderTypeEnum.template
+  ) {
     // Not supported, timeline template cannot have template type providers
     return timelineById;
   }

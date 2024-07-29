@@ -17,7 +17,7 @@ import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
 import type { TimelineModel } from './model';
 import type { InsertTimeline, TimelineById } from './types';
-import { TimelineStatusEnum, TimelineType } from '../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 
 export const getTimelineShowStatusByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({
@@ -145,7 +145,7 @@ export const selectTitleByTimelineById = createSelector(
     if (!isEmpty(savedTitle)) {
       return savedTitle;
     }
-    if (timelineType === TimelineType.template) {
+    if (timelineType === TimelineTypeEnum.template) {
       return UNTITLED_TEMPLATE;
     }
     return UNTITLED_TIMELINE;

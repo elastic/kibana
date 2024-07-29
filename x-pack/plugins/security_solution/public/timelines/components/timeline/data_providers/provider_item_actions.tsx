@@ -14,7 +14,8 @@ import styled from 'styled-components';
 import {
   type DataProviderType,
   DataProviderTypeEnum,
-  TimelineType,
+  type TimelineType,
+  TimelineTypeEnum,
 } from '../../../../../common/api/timeline';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
@@ -141,7 +142,7 @@ export const getProviderActions = ({
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
       },
-      timelineType === TimelineType.template
+      timelineType === TimelineTypeEnum.template
         ? {
             className: CONVERT_TO_FIELD_CLASS_NAME,
             disabled: isLoading || operator === IS_ONE_OF_OPERATOR,

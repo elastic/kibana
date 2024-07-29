@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import {
   type DataProviderType,
   DataProviderTypeEnum,
-  TimelineType,
+  TimelineTypeEnum,
 } from '../../../../../common/api/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import {
@@ -80,10 +80,10 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineType = useShallowEqualSelector((state) => {
       if (!timelineId) {
-        return TimelineType.default;
+        return TimelineTypeEnum.default;
       }
 
-      return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
+      return getTimeline(state, timelineId)?.timelineType ?? TimelineTypeEnum.default;
     });
 
     const { isLoading } = useDeepEqualSelector(

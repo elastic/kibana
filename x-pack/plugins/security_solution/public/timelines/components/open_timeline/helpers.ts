@@ -26,7 +26,8 @@ import {
   DataProviderTypeEnum,
   RowRendererValues,
   TimelineStatusEnum,
-  TimelineType,
+  type TimelineType,
+  TimelineTypeEnum,
 } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
@@ -168,13 +169,13 @@ const getTemplateTimelineId = (
   targetTimelineType?: TimelineType
 ) => {
   if (
-    targetTimelineType === TimelineType.default &&
-    timeline.timelineType === TimelineType.template
+    targetTimelineType === TimelineTypeEnum.default &&
+    timeline.timelineType === TimelineTypeEnum.template
   ) {
     return timeline.templateTimelineId;
   }
 
-  return duplicate && timeline.timelineType === TimelineType.template
+  return duplicate && timeline.timelineType === TimelineTypeEnum.template
     ? // TODO: MOVE TO THE BACKEND
       uuidv4()
     : timeline.templateTimelineId;
@@ -202,7 +203,7 @@ const getDataProviders = (
   dataProviders: TimelineResult['dataProviders'],
   timelineType?: TimelineType
 ) => {
-  if (duplicate && dataProviders && timelineType === TimelineType.default) {
+  if (duplicate && dataProviders && timelineType === TimelineTypeEnum.default) {
     return dataProviders.map((dataProvider) => ({
       ...convertToDefaultField(dataProvider),
       and: dataProvider.and?.map(convertToDefaultField) ?? [],
@@ -240,7 +241,7 @@ export const defaultTimelineToTimelineModel = (
   timelineType?: TimelineType,
   unifiedComponentsInTimelineDisabled?: boolean
 ): TimelineModel => {
-  const isTemplate = timeline.timelineType === TimelineType.template;
+  const isTemplate = timeline.timelineType === TimelineTypeEnum.template;
   const defaultHeadersValue = !unifiedComponentsInTimelineDisabled
     ? defaultUdtHeaders
     : defaultHeaders;
@@ -254,7 +255,7 @@ export const defaultTimelineToTimelineModel = (
     defaultColumns: defaultHeadersValue,
     dateRange:
       timeline.status === TimelineStatusEnum.immutable &&
-      timeline.timelineType === TimelineType.template
+      timeline.timelineType === TimelineTypeEnum.template
         ? {
             start: DEFAULT_FROM_MOMENT.toISOString(),
             end: DEFAULT_TO_MOMENT.toISOString(),
@@ -365,7 +366,7 @@ export const useQueryTimelineById = () => {
           initialized: true,
           savedSearchId: savedSearchId ?? null,
           excludedRowRendererIds:
-            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineType.template
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
               ? timelineDefaults.excludedRowRendererIds
               : [],
         },

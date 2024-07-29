@@ -24,7 +24,7 @@ import {
 } from './helpers';
 import type { OpenTimelineResult } from './types';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -326,13 +326,17 @@ describe('helpers', () => {
         title: 'Awesome Timeline',
         version: '1',
         status: TimelineStatusEnum.active,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineTypeEnum.template
+      );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         columns: defaultUdtHeaders,
       });
     });
@@ -343,10 +347,10 @@ describe('helpers', () => {
         title: 'Awesome Template',
         version: '1',
         status: TimelineStatusEnum.active,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineTypeEnum.default);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         columns: defaultUdtHeaders,
@@ -485,20 +489,20 @@ describe('helpers', () => {
         title: 'Awesome Timeline',
         version: '1',
         status: TimelineStatusEnum.immutable,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         false
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-10-28T11:37:31.655Z', start: '2020-10-27T11:37:31.655Z' },
         status: TimelineStatusEnum.immutable,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         title: 'Awesome Timeline',
         columns: defaultUdtHeaders,
         excludedRowRendererIds: [],
@@ -511,13 +515,13 @@ describe('helpers', () => {
         title: 'Awesome Timeline',
         version: '1',
         status: TimelineStatusEnum.active,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         false
       );
       expect(newTimeline).toEqual({
@@ -535,13 +539,13 @@ describe('helpers', () => {
         title: 'Awesome Timeline',
         version: '1',
         status: TimelineStatusEnum.active,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         false
       );
       expect(newTimeline).toEqual({
@@ -549,7 +553,7 @@ describe('helpers', () => {
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
         status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         defaultColumns: defaultUdtHeaders,
         columns: defaultUdtHeaders,
       });
@@ -562,14 +566,14 @@ describe('helpers', () => {
         title: 'Awesome Timeline',
         version: '1',
         status: TimelineStatusEnum.active,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         columns: customColumns,
       };
 
       const newTimeline = defaultTimelineToTimelineModel(
         timeline,
         false,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         false
       );
       expect(newTimeline).toEqual({
@@ -577,7 +581,7 @@ describe('helpers', () => {
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
         status: TimelineStatusEnum.active,
         title: 'Awesome Timeline',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         defaultColumns: defaultUdtHeaders,
         columns: customColumns,
       });
@@ -623,7 +627,7 @@ describe('helpers', () => {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         onError,
         onOpenTimeline,
         openTimeline: true,
@@ -682,7 +686,7 @@ describe('helpers', () => {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         openTimeline: true,
       };
 
@@ -754,7 +758,7 @@ describe('helpers', () => {
         duplicate: false,
         graphEventId: '',
         timelineId: '',
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         onOpenTimeline,
         openTimeline: true,
       };
@@ -817,7 +821,7 @@ describe('helpers', () => {
           duplicate: false,
           graphEventId: '',
           timelineId: undefined,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
           unifiedComponentsInTimelineDisabled: false,
@@ -853,7 +857,7 @@ describe('helpers', () => {
           duplicate: false,
           graphEventId: '',
           timelineId: TimelineId.active,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onOpenTimeline: undefined,
           openTimeline: true,
           unifiedComponentsInTimelineDisabled: false,
@@ -892,7 +896,7 @@ describe('helpers', () => {
           duplicate: false,
           graphEventId: '',
           timelineId: TimelineId.active,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
           unifiedComponentsInTimelineDisabled: false,

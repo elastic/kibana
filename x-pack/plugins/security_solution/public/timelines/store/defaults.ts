@@ -6,7 +6,11 @@
  */
 
 import { TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatusEnum, RowRendererIdEnum } from '../../../common/api/timeline';
+import {
+  TimelineTypeEnum,
+  TimelineStatusEnum,
+  RowRendererIdEnum,
+} from '../../../common/api/timeline';
 
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
@@ -73,7 +77,7 @@ export const timelineDefaults: SubsetTimelineModel &
   resolveTimelineConfig: undefined,
   queryFields: [],
   title: '',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineId: null,
   templateTimelineVersion: null,
   noteIds: [],

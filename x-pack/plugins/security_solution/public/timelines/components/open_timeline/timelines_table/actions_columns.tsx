@@ -16,7 +16,7 @@ import type {
   OnOpenDeleteTimelineModal,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 type Action = EuiTableActionsColumnType<object>['actions'][number];
 /**
@@ -47,7 +47,7 @@ export const getActionsColumns = ({
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineId: savedObjectId!,
       });
@@ -57,7 +57,8 @@ export const getActionsColumns = ({
     description: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
     'data-test-subj': 'create-from-template',
     available: (item: OpenTimelineResult) =>
-      item.timelineType === TimelineType.template && actionTimelineToShow.includes('createFrom'),
+      item.timelineType === TimelineTypeEnum.template &&
+      actionTimelineToShow.includes('createFrom'),
   } as Action;
 
   const createTemplateFromTimeline = {
@@ -66,7 +67,7 @@ export const getActionsColumns = ({
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineId: savedObjectId!,
       });
@@ -76,7 +77,8 @@ export const getActionsColumns = ({
     description: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
     'data-test-subj': 'create-template-from-timeline',
     available: (item: OpenTimelineResult) =>
-      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('createFrom'),
+      item.timelineType !== TimelineTypeEnum.template &&
+      actionTimelineToShow.includes('createFrom'),
   } as Action;
 
   const openAsDuplicateColumn = {
@@ -93,7 +95,7 @@ export const getActionsColumns = ({
     description: i18n.OPEN_AS_DUPLICATE,
     'data-test-subj': 'open-duplicate',
     available: (item: OpenTimelineResult) =>
-      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('duplicate'),
+      item.timelineType !== TimelineTypeEnum.template && actionTimelineToShow.includes('duplicate'),
   } as Action;
 
   const openAsDuplicateTemplateColumn = {
@@ -110,7 +112,7 @@ export const getActionsColumns = ({
     description: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
     'data-test-subj': 'open-duplicate-template',
     available: (item: OpenTimelineResult) =>
-      item.timelineType === TimelineType.template && actionTimelineToShow.includes('duplicate'),
+      item.timelineType === TimelineTypeEnum.template && actionTimelineToShow.includes('duplicate'),
   } as Action;
 
   const exportTimelineAction = {

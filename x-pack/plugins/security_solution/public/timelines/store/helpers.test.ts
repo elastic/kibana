@@ -10,7 +10,7 @@ import type { ColumnHeaderOptions } from '../../../common/types/timeline';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
 import {
   DataProviderTypeEnum,
-  TimelineType,
+  TimelineTypeEnum,
   TimelineStatusEnum,
 } from '../../../common/api/timeline';
 import type {
@@ -130,7 +130,7 @@ const basicTimeline: TimelineModel = {
   status: TimelineStatusEnum.active,
   templateTimelineId: null,
   templateTimelineVersion: null,
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   title: '',
   version: null,
   savedSearchId: null,
@@ -145,7 +145,7 @@ const timelineByIdMock: TimelineById = {
 const timelineByIdTemplateMock: TimelineById = {
   foo: {
     ...basicTimeline,
-    timelineType: TimelineType.template,
+    timelineType: TimelineTypeEnum.template,
   },
 };
 
@@ -180,7 +180,7 @@ describe('Timeline', () => {
         timeline: {
           ...basicTimeline,
           status: TimelineStatusEnum.immutable,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         },
         timelineById: timelineByIdMock,
       });
@@ -189,7 +189,7 @@ describe('Timeline', () => {
         foo: {
           ...basicTimeline,
           status: TimelineStatusEnum.immutable,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
           dateRange: {
             start: '2020-10-27T11:37:31.655Z',
             end: '2020-10-28T11:37:31.655Z',
@@ -208,7 +208,7 @@ describe('Timeline', () => {
         dataViewId: null,
         indexNames: [],
         timelineById: timelineByIdMock,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         savedSearchId: null,
       });
       expect(update).not.toBe(timelineByIdMock);
@@ -221,7 +221,7 @@ describe('Timeline', () => {
         dataViewId: null,
         indexNames: [],
         timelineById: timelineByIdMock,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         savedSearchId: null,
       });
       expect(update).toEqual({
@@ -240,7 +240,7 @@ describe('Timeline', () => {
         dataViewId: null,
         indexNames: [],
         timelineById: timelineByIdMock,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         savedSearchId: null,
       });
       expect(update).toEqual({
@@ -1270,7 +1270,7 @@ describe('Timeline', () => {
               type: DataProviderTypeEnum.template,
             },
           ],
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         },
       };
 

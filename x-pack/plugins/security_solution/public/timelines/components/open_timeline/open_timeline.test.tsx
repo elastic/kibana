@@ -17,7 +17,7 @@ import type { TimelinesTableProps } from './timelines_table';
 import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
-import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
@@ -72,7 +72,7 @@ describe('OpenTimeline', () => {
     sortDirection: DEFAULT_SORT_DIRECTION,
     sortField: DEFAULT_SORT_FIELD,
     title,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     timelineStatus: TimelineStatusEnum.active,
     templateTimelineFilter: [<div key="mock-a" />, <div key="mock-b" />],
     totalSearchResultsCount: mockSearchResults.length,

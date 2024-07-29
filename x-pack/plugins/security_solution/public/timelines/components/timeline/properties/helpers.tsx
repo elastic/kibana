@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import * as i18n from './translations';
 
@@ -45,7 +45,7 @@ const NotesButtonContainer = styled(EuiFlexGroup)`
 
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
   ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId, notesCount }) => {
-    const isTemplate = timelineType === TimelineType.template;
+    const isTemplate = timelineType === TimelineTypeEnum.template;
     const onClick = useCallback(() => {
       if (eventId != null) {
         toggleShowNotes?.(eventId);

@@ -6,7 +6,7 @@
  */
 
 import type { ResolvedTimelineWithOutcomeSavedObject } from '../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 
 export const mockResolvedSavedObject = {
   saved_object: {
@@ -74,7 +74,7 @@ export const mockResolvedTimeline = {
   eventType: 'all',
   filters: [],
   kqlMode: 'filter',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   kqlQuery: { filterQuery: null },
   title: 'Test Timeline',
   sort: [

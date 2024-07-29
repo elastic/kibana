@@ -27,7 +27,7 @@ import {
   TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
 } from './failure_cases';
 import type { TimelineSavedObject } from '../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { mockGetTimelineValue, mockGetTemplateTimelineValue } from '../__mocks__/import_timelines';
 
 describe('failure cases', () => {
@@ -74,7 +74,7 @@ describe('failure cases', () => {
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -98,7 +98,7 @@ describe('failure cases', () => {
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -122,7 +122,7 @@ describe('failure cases', () => {
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -151,7 +151,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -178,7 +178,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -202,7 +202,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -226,7 +226,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -253,7 +253,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -277,7 +277,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -304,7 +304,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -330,7 +330,7 @@ describe('failure cases', () => {
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.draft,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -354,7 +354,7 @@ describe('failure cases', () => {
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -378,7 +378,7 @@ describe('failure cases', () => {
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -404,7 +404,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -428,7 +428,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -452,7 +452,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.immutable,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -476,7 +476,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.default,
+        TimelineTypeEnum.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -503,7 +503,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -527,7 +527,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -551,7 +551,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatusEnum.active,
-        TimelineType.template,
+        TimelineTypeEnum.template,
         version,
         templateTimelineVersion,
         templateTimelineId,

@@ -10,7 +10,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { SavedTimelineWithSavedObjectId } from '../../../../../common/api/timeline';
-import { TimelineType, TimelineStatusEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
@@ -35,8 +35,8 @@ export const pickSavedTimeline = (
       : TimelineStatusEnum.draft;
   }
 
-  if (savedTimeline.timelineType === TimelineType.default) {
-    savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
+  if (savedTimeline.timelineType === TimelineTypeEnum.default) {
+    savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineTypeEnum.default;
     savedTimeline.status = savedTimeline.status ?? TimelineStatusEnum.active;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;

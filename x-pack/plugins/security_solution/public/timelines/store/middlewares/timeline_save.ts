@@ -33,7 +33,7 @@ import { inputsSelectors } from '../../../common/store/inputs';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
 import type { inputsModel } from '../../../common/store/inputs';
-import { TimelineStatusEnum, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type { TimelineErrorResponse, TimelineResponse } from '../../../../common/api/timeline';
 import type { TimelineInput } from '../../../../common/search_strategy';
 import type { TimelineModel } from '../model';
@@ -125,7 +125,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               savedObjectId: response.timeline.savedObjectId,
               version: response.timeline.version,
               status: response.timeline.status ?? TimelineStatusEnum.active,
-              timelineType: response.timeline.timelineType ?? TimelineType.default,
+              timelineType: response.timeline.timelineType ?? TimelineTypeEnum.default,
               templateTimelineId: response.timeline.templateTimelineId ?? null,
               templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
               savedSearchId: response.timeline.savedSearchId ?? null,
@@ -168,7 +168,7 @@ const timelineInput: TimelineInput = {
   kqlQuery: null,
   indexNames: null,
   title: null,
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: null,

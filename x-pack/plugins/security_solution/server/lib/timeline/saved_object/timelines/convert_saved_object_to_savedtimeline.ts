@@ -18,7 +18,8 @@ import {
 } from '../../../../../common/types/timeline/saved_object';
 import type { TimelineSavedObject } from '../../../../../common/api/timeline';
 import {
-  TimelineType,
+  type TimelineType,
+  TimelineTypeEnum,
   type TimelineStatus,
   TimelineStatusEnum,
 } from '../../../../../common/api/timeline';
@@ -104,10 +105,10 @@ function savedObjectTimelineTypeToAPITimelineType(
 ): TimelineType {
   switch (timelineType) {
     case SavedObjectTimelineType.template:
-      return TimelineType.template;
+      return TimelineTypeEnum.template;
     case 'draft':
     default:
-      return TimelineType.default;
+      return TimelineTypeEnum.default;
   }
 }
 

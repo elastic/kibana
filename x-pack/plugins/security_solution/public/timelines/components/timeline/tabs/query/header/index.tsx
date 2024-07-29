@@ -17,7 +17,7 @@ import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use
 import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
 import type { TimelineStatusLiteralWithNull } from '../../../../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../../store';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
@@ -87,7 +87,8 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
     (state) => getIsDataProviderVisible(state, timelineId) ?? timelineDefaults.isDataProviderVisible
   );
 
-  const shouldShowQueryBuilder = isDataProviderVisible || timelineType === TimelineType.template;
+  const shouldShowQueryBuilder =
+    isDataProviderVisible || timelineType === TimelineTypeEnum.template;
 
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>

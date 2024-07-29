@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { TimelineTypeLiteral } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 
 export const DEFAULT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.defaultTimelineTitle',
@@ -38,7 +38,7 @@ export const EVENTS_TABLE_ARIA_LABEL = ({
 export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: TimelineTypeLiteral) =>
   i18n.translate('xpack.securitySolution.timeline.searchBoxPlaceholder', {
     values: {
-      timeline: timelineType === TimelineType.template ? 'Timeline template' : 'Timeline',
+      timeline: timelineType === TimelineTypeEnum.template ? 'Timeline template' : 'Timeline',
     },
     defaultMessage: 'e.g. {timeline} name or description',
   });

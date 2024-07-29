@@ -9,7 +9,7 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SortFieldTimelineEnum, TimelineType } from '../../../../common/api/timeline';
+import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
@@ -80,7 +80,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   );
 
   const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
-  const timelineType = TimelineType.default;
+  const timelineType = TimelineTypeEnum.default;
   const { timelineStatus } = useTimelineStatus({ timelineType });
 
   useEffect(() => {

@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import React from 'react';
 
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import * as i18n from '../body/translations';
 
@@ -48,7 +48,7 @@ export const getDefaultAriaLabel = ({
 
 export const Pin = React.memo<Props>(
   ({ ariaLabel, allowUnpinning, isAlert, isDisabled, onClick = noop, pinned, timelineType }) => {
-    const isTemplate = timelineType === TimelineType.template;
+    const isTemplate = timelineType === TimelineTypeEnum.template;
     const defaultAriaLabel = getDefaultAriaLabel({
       isAlert,
       isTemplate,

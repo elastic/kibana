@@ -16,7 +16,7 @@ import type {
 import {
   TemplateTimelineTypeEnum,
   TimelineStatusEnum,
-  TimelineType,
+  TimelineTypeEnum,
 } from '../../../../common/api/timeline';
 
 import * as i18n from './translations';
@@ -39,7 +39,7 @@ export const useTimelineStatus = ({
 } => {
   const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
   const isTemplateFilterEnabled = useMemo(
-    () => timelineType === TimelineType.template,
+    () => timelineType === TimelineTypeEnum.template,
     [timelineType]
   );
 

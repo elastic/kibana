@@ -15,7 +15,8 @@ import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery'
 import {
   type DataProviderType,
   DataProviderTypeEnum,
-  TimelineType,
+  type TimelineType,
+  TimelineTypeEnum,
 } from '../../../../../common/api/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
@@ -42,7 +43,7 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
   &.globalFilterItem {
     white-space: nowrap;
     min-width: ${({ $timelineType }) =>
-      $timelineType === TimelineType.template ? '140px' : 'none'};
+      $timelineType === TimelineTypeEnum.template ? '140px' : 'none'};
     display: flex;
 
     &.globalFilterItem-isDisabled {
@@ -208,7 +209,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           {/* Add a UI feature to let users know the is one of operator doesnt work with timeline templates:
           https://github.com/elastic/kibana/issues/142437 */}
 
-          {timelineType === TimelineType.template && operator !== IS_ONE_OF_OPERATOR && (
+          {timelineType === TimelineTypeEnum.template && operator !== IS_ONE_OF_OPERATOR && (
             <TemplateFieldBadge toggleType={toggleType} type={type} />
           )}
         </>

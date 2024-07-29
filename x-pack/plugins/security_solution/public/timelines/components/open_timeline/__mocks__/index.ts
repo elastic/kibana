@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 export const mockTimeline = {
   data: {
@@ -146,7 +146,7 @@ export const mockTimeline = {
       pinnedEventsSaveObject: [],
       status: TimelineStatusEnum.active,
       title: 'my timeline',
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       savedQueryId: null,

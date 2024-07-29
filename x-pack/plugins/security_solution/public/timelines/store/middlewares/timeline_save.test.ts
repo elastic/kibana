@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
 import { createMockStore, kibanaMock } from '../../../common/mock';
@@ -310,7 +310,7 @@ describe('Timeline save middleware', () => {
         loadingEventIds: [],
         queryFields: [],
         title: 'saved',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -483,7 +483,7 @@ describe('Timeline save middleware', () => {
         ],
         templateTimelineId: null,
         templateTimelineVersion: null,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         title: 'saved',
         status: TimelineStatusEnum.active,
       });

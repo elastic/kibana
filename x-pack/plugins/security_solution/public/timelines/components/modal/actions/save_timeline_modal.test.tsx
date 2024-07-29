@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 
@@ -74,7 +74,7 @@ describe('SaveTimelineModal', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
         status: TimelineStatusEnum.draft,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
       });
 
       const { getByTestId } = renderSaveTimelineModal();
@@ -132,7 +132,7 @@ describe('SaveTimelineModal', () => {
     it('should show correct header for save timeline template modal', () => {
       mockGetState.mockReturnValue({
         status: TimelineStatusEnum.active,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
       });
 
       const { getByTestId } = renderSaveTimelineModal();
@@ -149,7 +149,7 @@ describe('SaveTimelineModal', () => {
         description: 'my description',
         status: TimelineStatusEnum.active,
         title: 'my timeline',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
       });
 
       const { getByTestId } = renderSaveTimelineModal();
@@ -192,7 +192,7 @@ describe('SaveTimelineModal', () => {
     it('should show discard timeline template in the close button', () => {
       mockGetState.mockReturnValue({
         ...mockTimelineModel,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         status: TimelineStatusEnum.draft,
       });
 

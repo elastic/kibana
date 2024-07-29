@@ -15,7 +15,7 @@ import { mockDataProviders } from '../../../data_providers/mock/mock_data_provid
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 import { QueryTabHeader } from '.';
-import { TimelineStatusEnum, TimelineType } from '../../../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../../common/api/timeline';
 import { waitFor } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
 
@@ -48,7 +48,7 @@ describe('Header', () => {
     showCallOutUnauthorizedMsg: false,
     status: TimelineStatusEnum.active,
     timelineId: TimelineId.test,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   };
 
   describe('rendering', () => {

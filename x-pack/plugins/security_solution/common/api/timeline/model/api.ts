@@ -25,6 +25,8 @@ import {
   TemplateTimelineTypeEnum,
   TimelineStatus,
   TimelineStatusEnum,
+  TimelineType,
+  TimelineTypeEnum,
 } from './components.gen';
 
 export {
@@ -37,6 +39,8 @@ export {
   TemplateTimelineTypeEnum,
   TimelineStatus,
   TimelineStatusEnum,
+  TimelineType,
+  TimelineTypeEnum,
 };
 
 /**
@@ -306,14 +310,14 @@ export type TemplateTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
  *  Timeline Types
  */
 
-export enum TimelineType {
+export enum TimelineTypeOg {
   default = 'default',
   template = 'template',
 }
 
 export const TimelineTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineType.template),
-  runtimeTypes.literal(TimelineType.default),
+  runtimeTypes.literal(TimelineTypeEnum.template),
+  runtimeTypes.literal(TimelineTypeEnum.default),
 ]);
 
 export const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);

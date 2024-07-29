@@ -26,7 +26,7 @@ import type { State } from '../../../../common/store';
 import { selectTimelineById } from '../../../store/selectors';
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { timelineActions } from '../../../store';
 import * as commonI18n from '../../timeline/properties/translations';
 import * as i18n from './translations';
@@ -84,7 +84,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
     // Resetting the timeline by replacing the active one with a new empty one
     const resetTimeline = useCreateTimeline({
       timelineId: TimelineId.active,
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
     });
 
     const handleSubmit = useCallback(
@@ -140,7 +140,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
 
     const closeModalText = useMemo(() => {
       if (status === TimelineStatusEnum.draft && showWarning) {
-        return timelineType === TimelineType.template
+        return timelineType === TimelineTypeEnum.template
           ? i18n.DISCARD_TIMELINE_TEMPLATE
           : i18n.DISCARD_TIMELINE;
       }
@@ -150,10 +150,10 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
     const modalHeader = useMemo(
       () =>
         status === TimelineStatusEnum.draft
-          ? timelineType === TimelineType.template
+          ? timelineType === TimelineTypeEnum.template
             ? i18n.SAVE_TIMELINE_TEMPLATE
             : i18n.SAVE_TIMELINE
-          : timelineType === TimelineType.template
+          : timelineType === TimelineTypeEnum.template
           ? i18n.NAME_TIMELINE_TEMPLATE
           : i18n.SAVE_TIMELINE,
       [status, timelineType]
@@ -162,7 +162,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
     const saveButtonTitle = useMemo(
       () =>
         status === TimelineStatusEnum.draft && showWarning
-          ? timelineType === TimelineType.template
+          ? timelineType === TimelineTypeEnum.template
             ? i18n.SAVE_TIMELINE_TEMPLATE
             : i18n.SAVE_TIMELINE
           : i18n.SAVE,
@@ -182,7 +182,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
         disabled: isSaving,
         spellCheck: true,
         placeholder:
-          timelineType === TimelineType.template
+          timelineType === TimelineTypeEnum.template
             ? commonI18n.UNTITLED_TEMPLATE
             : commonI18n.UNTITLED_TIMELINE,
       }),

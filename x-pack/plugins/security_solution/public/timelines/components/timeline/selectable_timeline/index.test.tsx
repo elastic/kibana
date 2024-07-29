@@ -10,7 +10,7 @@ import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow, mount } from 'enzyme';
 
-import { SortFieldTimelineEnum, TimelineType } from '../../../../../common/api/timeline';
+import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
@@ -29,7 +29,7 @@ describe('SelectableTimeline', () => {
     getSelectableOptions: jest.fn().mockReturnValue([]),
     onClosePopover: jest.fn(),
     onTimelineChange: jest.fn(),
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   };
 
   describe('should render', () => {
@@ -53,7 +53,7 @@ describe('SelectableTimeline', () => {
     });
 
     describe('timeline template', () => {
-      const templateTimelineProps = { ...props, timelineType: TimelineType.template };
+      const templateTimelineProps = { ...props, timelineType: TimelineTypeEnum.template };
       beforeAll(() => {
         wrapper = shallow(<SelectableTimeline {...templateTimelineProps} />);
       });
@@ -84,7 +84,7 @@ describe('SelectableTimeline', () => {
       },
       status: null,
       onlyUserFavorite: false,
-      timelineType: TimelineType.default,
+      timelineType: TimelineTypeEnum.default,
     };
     beforeAll(() => {
       mount(<SelectableTimeline {...props} />);

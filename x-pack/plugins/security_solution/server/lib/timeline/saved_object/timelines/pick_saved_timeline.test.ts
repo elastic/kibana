@@ -8,7 +8,7 @@
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import type { SavedTimeline, Note } from '../../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 
@@ -55,7 +55,7 @@ describe('pickSavedTimeline', () => {
     sort: { sortDirection: 'desc', columnType: 'number', columnId: '@timestamp' },
     title: 'title',
     kqlMode: 'filter',
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     savedQueryId: null,
     kqlQuery: { filterQuery: null },
     dataProviders: [],
@@ -280,7 +280,7 @@ describe('pickSavedTimeline', () => {
     const userInfo = { username: 'elastic' } as AuthenticatedUser;
     const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-    expect(result.timelineType).toEqual(TimelineType.default);
+    expect(result.timelineType).toEqual(TimelineTypeEnum.default);
     expect(result.status).toEqual(TimelineStatusEnum.active);
     expect(result.templateTimelineId).toBeNull();
     expect(result.templateTimelineVersion).toBeNull();

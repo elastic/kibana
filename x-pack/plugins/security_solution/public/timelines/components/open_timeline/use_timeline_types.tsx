@@ -11,7 +11,7 @@ import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { noop } from 'lodash/fp';
 import type { TimelineTypeLiteralWithNull } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
@@ -38,18 +38,18 @@ export const useTimelineTypes = ({
   const { navigateToUrl } = useKibana().services.application;
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [timelineType, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
-    tabName === TimelineType.default || tabName === TimelineType.template
+    tabName === TimelineTypeEnum.default || tabName === TimelineTypeEnum.template
       ? tabName
-      : TimelineType.default
+      : TimelineTypeEnum.default
   );
 
   const notesEnabled = useIsExperimentalFeatureEnabled('securitySolutionNotesEnabled');
 
   const timelineUrl = useMemo(() => {
-    return formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch));
+    return formatUrl(getTimelineTabsUrl(TimelineTypeEnum.default, urlSearch));
   }, [formatUrl, urlSearch]);
   const templateUrl = useMemo(() => {
-    return formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch));
+    return formatUrl(getTimelineTabsUrl(TimelineTypeEnum.template, urlSearch));
   }, [formatUrl, urlSearch]);
 
   const notesUrl = useMemo(() => {
@@ -83,7 +83,7 @@ export const useTimelineTypes = ({
   const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
     (timelineTabsStyle: TimelineTabsStyle) => [
       {
-        id: TimelineType.default,
+        id: TimelineTypeEnum.default,
         name: i18n.TAB_TIMELINES,
         href: timelineUrl,
         disabled: false,
@@ -91,7 +91,7 @@ export const useTimelineTypes = ({
         onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTimeline : noop,
       },
       {
-        id: TimelineType.template,
+        id: TimelineTypeEnum.template,
         name: i18n.TAB_TEMPLATES,
         href: templateUrl,
         disabled: false,

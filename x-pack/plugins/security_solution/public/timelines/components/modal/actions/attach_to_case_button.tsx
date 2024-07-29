@@ -16,7 +16,7 @@ import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { setInsertTimeline, showTimeline } from '../../../store/actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
@@ -118,7 +118,7 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
         iconType="arrowDown"
         iconSide="right"
         disabled={
-          timelineStatus === TimelineStatusEnum.draft || timelineType !== TimelineType.default
+          timelineStatus === TimelineStatusEnum.draft || timelineType !== TimelineTypeEnum.default
         }
         data-test-subj="timeline-modal-attach-to-case-dropdown-button"
         onClick={togglePopover}

@@ -34,7 +34,11 @@ import type {
   SavedTimeline,
   TimelineWithoutExternalRefs,
 } from '../../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import {
+  TimelineStatusEnum,
+  type TimelineType,
+  TimelineTypeEnum,
+} from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
@@ -52,11 +56,11 @@ export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 export const getTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
-  timelineType: TimelineTypeLiteralWithNull = TimelineType.default
+  timelineType: TimelineTypeLiteralWithNull = TimelineTypeEnum.default
 ): Promise<TimelineSavedObject> => {
   let timelineIdToUse = timelineId;
   try {
-    if (timelineType === TimelineType.template) {
+    if (timelineType === TimelineTypeEnum.template) {
       const options = {
         type: timelineSavedObjectType,
         perPage: 1,
@@ -136,12 +140,12 @@ const getTimelineTypeFilter = (
   const typeFilter =
     timelineType == null
       ? null
-      : timelineType === TimelineType.template
-      ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
+      : timelineType === TimelineTypeEnum.template
+      ? `siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}` /** Show only whose timelineType exists and equals to "template" */
       : /** Show me every timeline whose timelineType is not "template".
          * which includes timelineType === 'default' and
          * those timelineType doesn't exists */
-        `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+        `not siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}`;
 
   /** Show me every timeline whose status is not "draft".
    * which includes status === 'active' and
@@ -204,7 +208,7 @@ export const getExistingPrepackagedTimelines = async (
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     ...queryPageInfo,
-    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatusEnum.immutable),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.template, TimelineStatusEnum.immutable),
   };
 
   return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
@@ -240,21 +244,21 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.default, TimelineStatusEnum.active),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.default, TimelineStatusEnum.active),
   };
 
   const templateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.template, null),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.template, null),
   };
 
   const customTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatusEnum.active),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.template, TimelineStatusEnum.active),
   };
 
   const favoriteTimelineOptions = {

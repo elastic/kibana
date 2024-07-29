@@ -28,7 +28,7 @@ import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
 import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
@@ -215,7 +215,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     const noItemsMessage =
       isLoading || searchResults == null
         ? i18n.LOADING
-        : timelineType === TimelineType.template
+        : timelineType === TimelineTypeEnum.template
         ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
         : i18n.ZERO_TIMELINES_MATCH;
 
