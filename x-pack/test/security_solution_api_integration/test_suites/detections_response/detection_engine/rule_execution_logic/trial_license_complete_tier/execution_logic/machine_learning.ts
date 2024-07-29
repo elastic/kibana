@@ -97,8 +97,11 @@ export default ({ getService }: FtrProviderContext) => {
       await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      console.log('waiting for job state');
       await ml.api.waitForJobState(mlJobId, JOB_STATE.OPENED);
+      console.log('waiting for datafeed state');
       await ml.api.waitForDatafeedState(`datafeed-${mlJobId}`, DATAFEED_STATE.STARTED);
+      console.log('done waiting for ML state');
     });
 
     after(async () => {
