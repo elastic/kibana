@@ -253,7 +253,7 @@ export function lookupColumn(
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
   const columnName = getQuotedColumnName(column);
-  return fields.get(columnName) || variables.get(columnName)?.[0];
+  return fields.get(columnName) || variables.get(columnName)?.[0] || fields.get(column.name);
 }
 
 const ARRAY_REGEXP = /\[\]$/;
