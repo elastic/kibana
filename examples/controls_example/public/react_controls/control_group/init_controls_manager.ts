@@ -22,22 +22,24 @@ import { DefaultControlApi, DefaultControlState } from '../types';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
+export function getControlsInOrder(initialControlPanelsState: ControlPanelsState) {
+  return Object.keys(initialControlPanelsState)
+    .map((key) => ({
+      id: key,
+      order: initialControlPanelsState[key].order,
+      type: initialControlPanelsState[key].type,
+    }))
+    .sort((a, b) => (a.order > b.order ? 1 : -1))
+    .map(({ id, type }) => ({ id, type })) // filter out `order`
+}
+
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
   const controlsPanelState: { [panelId: string]: DefaultControlState } = {
     ...initialControlPanelsState,
   };
-  const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
-    Object.keys(initialControlPanelsState)
-      .map((key) => ({
-        id: key,
-        order: initialControlPanelsState[key].order,
-        type: initialControlPanelsState[key].type,
-      }))
-      .sort((a, b) => (a.order > b.order ? 1 : -1))
-      .map(({ id, type }) => ({ id, type })) // filter out `order`
-  );
+  const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(getControlsInOrder(initialControlPanelsState));
 
   function untilControlLoaded(
     id: string

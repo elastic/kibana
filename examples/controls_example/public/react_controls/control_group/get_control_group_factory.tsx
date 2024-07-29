@@ -8,6 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -100,15 +101,18 @@ export const getControlGroupEmbeddableFactory = (services: {
           controlsInOrder: [
             controlsManager.controlsInOrder$,
             (next: ControlsInOrder) => controlsManager.controlsInOrder$.next(next),
+            fastIsEqual
           ],
           ignoreParentSettings: [
             ignoreParentSettings$,
             (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
+            fastIsEqual
           ],
           labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
         },
         controlsManager.snapshotControlsRuntimeState,
-        parentApi
+        parentApi,
+        uuid
       );
 
       const api = setApi({
