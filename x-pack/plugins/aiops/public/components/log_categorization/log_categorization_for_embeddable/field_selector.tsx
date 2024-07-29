@@ -17,6 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToken,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -75,15 +77,39 @@ export const FieldSelector: FC<Props> = ({ fields, selectedField, setSelectedFie
   );
 
   return (
-    <EuiFormRow fullWidth data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow" label={label}>
-      <EuiSuperSelect
-        fullWidth
-        compressed
-        aria-label={label}
-        options={fieldOptions}
-        valueOfSelected={selectedField ?? undefined}
-        onChange={setSelectedField}
-      />
-    </EuiFormRow>
+    <>
+      {fields.length === 0 ? (
+        <>
+          <EuiCallOut
+            size="s"
+            title={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationTitle', {
+              defaultMessage: 'The selected data view does not contain any text fields.',
+            })}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              {i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationDescription', {
+                defaultMessage:
+                  'Pattern analysis detection can only be run on data views with a text field.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      ) : null}
+
+      <EuiFormRow fullWidth data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow" label={label}>
+        <EuiSuperSelect
+          fullWidth
+          compressed
+          aria-label={label}
+          options={fieldOptions}
+          disabled={fields.length === 0}
+          valueOfSelected={selectedField ?? undefined}
+          onChange={setSelectedField}
+        />
+      </EuiFormRow>
+    </>
   );
 };
