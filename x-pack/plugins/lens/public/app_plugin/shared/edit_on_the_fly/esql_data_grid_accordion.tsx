@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiTitle, EuiAccordion, EuiSpacer, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
@@ -31,6 +31,13 @@ export const ESQLDataGridAccordion = ({
   setIsAccordionOpen,
   onAccordionToggleCb,
 }: ESQLDataGridAccordionProps) => {
+  const onAccordionToggle = useCallback(
+    (status: boolean) => {
+      setIsAccordionOpen(!isAccordionOpen);
+      onAccordionToggleCb(status);
+    },
+    [isAccordionOpen, onAccordionToggleCb, setIsAccordionOpen]
+  );
   return (
     <EuiFlexItem
       grow={isAccordionOpen ? 1 : false}
@@ -72,10 +79,7 @@ export const ESQLDataGridAccordion = ({
         }}
         initialIsOpen={isAccordionOpen}
         forceState={isAccordionOpen ? 'open' : 'closed'}
-        onToggle={(status) => {
-          setIsAccordionOpen(!isAccordionOpen);
-          onAccordionToggleCb(status);
-        }}
+        onToggle={onAccordionToggle}
         extraAction={
           <EuiNotificationBadge size="m" color="subdued">
             {dataGridAttrs.rows.length}
