@@ -298,6 +298,7 @@ describe('telemetry tasks', () => {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/189192
   describe('endpoint-meta-telemetry', () => {
     beforeEach(async () => {
       await initEndpointIndices(esClient);

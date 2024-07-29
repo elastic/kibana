@@ -11,22 +11,22 @@ import { buildShipperHeaders } from './build_headers';
 describe('buildShipperHeaders', () => {
   test('builds the headers as expected in the V3 endpoints', () => {
     expect(buildShipperHeaders('test-cluster', '1.2.3', 'test-license')).toMatchInlineSnapshot(`
-{
-  "content-type": "application/x-ndjson",
-  "x-elastic-cluster-id": "test-cluster",
-  "x-elastic-license-id": "test-license",
-  "x-elastic-stack-version": "1.2.3",
-}
-`);
+      Object {
+        "content-type": "application/x-ndjson",
+        "x-elastic-cluster-id": "test-cluster",
+        "x-elastic-license-id": "test-license",
+        "x-elastic-stack-version": "1.2.3",
+      }
+    `);
   });
 
   test('if license is not provided, it skips the license header', () => {
     expect(buildShipperHeaders('test-cluster', '1.2.3')).toMatchInlineSnapshot(`
-{
-  "content-type": "application/x-ndjson",
-  "x-elastic-cluster-id": "test-cluster",
-  "x-elastic-stack-version": "1.2.3",
-}
-`);
+      Object {
+        "content-type": "application/x-ndjson",
+        "x-elastic-cluster-id": "test-cluster",
+        "x-elastic-stack-version": "1.2.3",
+      }
+    `);
   });
 });
