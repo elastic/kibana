@@ -42,11 +42,9 @@ import {
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { ControlGroupApi } from '../react_controls/control_group/types';
-import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
-import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
-import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
-import { openDataControlEditor } from '../react_controls/data_controls/open_data_control_editor';
+import { getControlGroupSerializedState, setControlGroupSerializedState, WEB_LOGS_DATA_VIEW_ID } from './serialized_control_group_state';
+import { ControlGroupApi } from '../../react_controls/control_group/types';
+import { openDataControlEditor } from '../../react_controls/data_controls/open_data_control_editor';
 
 const toggleViewButtons = [
   {
@@ -60,53 +58,6 @@ const toggleViewButtons = [
     label: 'View mode',
   },
 ];
-
-const searchControlId = 'searchControl1';
-const rangeSliderControlId = 'rangeSliderControl1';
-const timesliderControlId = 'timesliderControl1';
-const controlGroupPanels = {
-  [searchControlId]: {
-    type: SEARCH_CONTROL_TYPE,
-    order: 2,
-    grow: true,
-    width: 'medium',
-    explicitInput: {
-      id: searchControlId,
-      fieldName: 'message',
-      title: 'Message',
-      grow: true,
-      width: 'medium',
-      enhancements: {},
-    },
-  },
-  [rangeSliderControlId]: {
-    type: RANGE_SLIDER_CONTROL_TYPE,
-    order: 1,
-    grow: true,
-    width: 'medium',
-    explicitInput: {
-      id: rangeSliderControlId,
-      fieldName: 'bytes',
-      title: 'Bytes',
-      grow: true,
-      width: 'medium',
-      enhancements: {},
-    },
-  },
-  [timesliderControlId]: {
-    type: TIMESLIDER_CONTROL_TYPE,
-    order: 0,
-    grow: true,
-    width: 'medium',
-    explicitInput: {
-      id: timesliderControlId,
-      title: 'Time slider',
-      enhancements: {},
-    },
-  },
-};
-
-const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
 export const ReactControlExample = ({
   core,
@@ -373,7 +324,7 @@ export const ReactControlExample = ({
             }}
           />
         </EuiFlexItem>
-        {unsavedChanges !== undefined && (
+        {unsavedChanges !== undefined && viewMode === 'edit' && (
           <>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={<pre>{unsavedChanges}</pre>}>
@@ -392,11 +343,14 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={() => {
-                  saveNotification$.next();
+                onClick={async () => {
+                  if (controlGroupApi) {
+                    saveNotification$.next();
+                    setControlGroupSerializedState(await controlGroupApi.serializeState());
+                  }
                 }}
               >
-                Submit
+                Save
               </EuiButton>
             </EuiFlexItem>
           </>
@@ -424,28 +378,7 @@ export const ReactControlExample = ({
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           ...dashboardApi,
-          getSerializedStateForChild: () => ({
-            rawState: {
-              controlStyle: 'oneLine',
-              chainingSystem: 'HIERARCHICAL',
-              showApplySelections: false,
-              panelsJSON: JSON.stringify(controlGroupPanels),
-              ignoreParentSettingsJSON:
-                '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-            } as object,
-            references: [
-              {
-                name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
-                type: 'index-pattern',
-                id: WEB_LOGS_DATA_VIEW_ID,
-              },
-              {
-                name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
-                type: 'index-pattern',
-                id: WEB_LOGS_DATA_VIEW_ID,
-              },
-            ],
-          }),
+          getSerializedStateForChild: getControlGroupSerializedState,
         })}
         key={`control_group`}
       />
