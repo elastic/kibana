@@ -8,13 +8,13 @@
 
 import React from 'react';
 
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
+import { ControlStateManager } from '../../../types';
+import { getOptionsListMocks } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import { OptionsListComponentApi, OptionsListComponentState } from '../types';
 import { OptionsListControl } from './options_list_control';
-import { ControlStateManager } from '../../../types';
-import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 describe('Options list control', () => {
   const mountComponent = ({
@@ -69,10 +69,10 @@ describe('Options list control', () => {
         { value: 'meow', docCount: 12 },
       ]);
       mocks.stateManager.selectedOptions.next(['woof', 'bark']);
-      mocks.api.fieldSpec.next({
+      mocks.api.field$.next({
         name: 'Test keyword field',
         type: 'keyword',
-      } as FieldSpec);
+      } as DataViewField);
       const control = mountComponent(mocks);
       const selections = control.getByTestId('optionsListSelections');
       expect(selections.textContent).toBe('woof,  bark ');
@@ -88,10 +88,10 @@ describe('Options list control', () => {
       { value: 3, docCount: 12 },
     ]);
     mocks.stateManager.selectedOptions.next([1, 2]);
-    mocks.api.fieldSpec.next({
+    mocks.api.field$.next({
       name: 'Test keyword field',
       type: 'number',
-    } as FieldSpec);
+    } as DataViewField);
     const control = mountComponent(mocks);
     const selections = control.getByTestId('optionsListSelections');
     expect(selections.textContent).toBe('1;   2 ');
@@ -107,10 +107,10 @@ describe('Options list control', () => {
     ]);
     mocks.stateManager.selectedOptions.next(['woof', 'bark']);
     mocks.api.invalidSelections$.next(new Set(['woof']));
-    mocks.api.fieldSpec.next({
+    mocks.api.field$.next({
       name: 'Test keyword field',
       type: 'number',
-    } as FieldSpec);
+    } as DataViewField);
 
     const control = mountComponent(mocks);
     expect(

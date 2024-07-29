@@ -8,10 +8,11 @@
 
 import React from 'react';
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { BehaviorSubject } from 'rxjs';
 import { ControlStateManager } from '../../../types';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
@@ -21,7 +22,6 @@ import {
   OptionsListDisplaySettings,
 } from '../types';
 import { OptionsListPopover } from './options_list_popover';
-import { BehaviorSubject } from 'rxjs';
 
 describe('Options list popover', () => {
   const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
@@ -267,10 +267,10 @@ describe('Options list popover', () => {
         { value: 1000, docCount: 1 },
         { value: 123456789, docCount: 4 },
       ]);
-      mocks.api.fieldSpec.next({
+      mocks.api.field$.next({
         name: 'Test number field',
         type: 'number',
-      } as FieldSpec);
+      } as DataViewField);
       const popover = mountComponent(mocks);
 
       expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1000);
@@ -290,10 +290,10 @@ describe('Options list popover', () => {
         { value: 1721283696000, docCount: 1 },
         { value: 1721295533000, docCount: 2 },
       ]);
-      mocks.api.fieldSpec.next({
+      mocks.api.field$.next({
         name: 'Test date field',
         type: 'date',
-      } as FieldSpec);
+      } as DataViewField);
 
       mountComponent(mocks);
       expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1721283696000);
@@ -304,10 +304,10 @@ describe('Options list popover', () => {
   describe('allow expensive queries warning', () => {
     test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
       const mocks = getOptionsListMocks();
-      mocks.api.fieldSpec.next({
+      mocks.api.field$.next({
         name: 'Test keyword field',
         type: 'keyword',
-      } as FieldSpec);
+      } as DataViewField);
       const popover = mountComponent(mocks);
       const warning = popover.queryByTestId('optionsList-allow-expensive-queries-warning');
       expect(warning).toBeNull();
@@ -315,10 +315,10 @@ describe('Options list popover', () => {
 
     test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
       const mocks = getOptionsListMocks();
-      mocks.api.fieldSpec.next({
+      mocks.api.field$.next({
         name: 'Test keyword field',
         type: 'keyword',
-      } as FieldSpec);
+      } as DataViewField);
       mocks.api.parentApi.allowExpensiveQueries$.next(false);
       const popover = mountComponent(mocks);
       const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
