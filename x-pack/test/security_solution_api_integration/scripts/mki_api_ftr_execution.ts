@@ -104,7 +104,7 @@ export const cli = () => {
         log.error(
           'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the API key.'
         );
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(1);
       }
 
@@ -134,7 +134,7 @@ export const cli = () => {
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(1);
       }
 
