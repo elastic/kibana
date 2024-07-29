@@ -67,11 +67,13 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
         index
       );
     }
-  }, [actionParams, editAction, index]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionParams]);
 
   useEffect(() => {
     editAction('subAction', eventAction, index);
-  }, [eventAction, editAction, index]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventAction]);
 
   const setEventActionType = (eventActionType: SUB_ACTION) => {
     const subActionParams =
