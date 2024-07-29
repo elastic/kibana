@@ -249,7 +249,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         >
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.emptyAnyAllMappingsWarning"
-            defaultMessage="Role mapping rules contains empty 'any' or 'all' rules. Please proceed with caution"
+            defaultMessage="Role mapping rules contains empty 'any' or 'all' rules. These empty rule groups will always evaluate to true. Please proceed with caution"
           />
         </EuiCallOut>
       );
