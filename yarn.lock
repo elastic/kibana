@@ -6269,6 +6269,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-endpoint-exceptions-common@link:packages/kbn-securitysolution-endpoint-exceptions-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-es-utils@link:packages/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
