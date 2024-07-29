@@ -7,13 +7,16 @@
 
 import { CustomRequestHandlerContext } from '@kbn/core/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
   fleet: FleetSetupContract;
+  telemetry: TelemetryPluginSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {
   fleet: FleetStartContract;
+  telemetry: TelemetryPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

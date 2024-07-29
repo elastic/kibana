@@ -25,7 +25,7 @@
       "lens",
       "fieldsMetadata"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["telemetry"],
     "requiredBundles": ["unifiedHistogram", "discover"],
     "extraPublicDirs": [
       "common"
