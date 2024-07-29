@@ -10,15 +10,15 @@ import { ControlGroupRuntimeState } from "../../react_controls/control_group/typ
 
 const RUNTIME_STATE_SESSION_STORAGE_KEY = 'kibana.examples.controls.reactControlExample.controlGroupRuntimeState';
 
+export function clearControlGroupRuntimeState() {
+  sessionStorage.removeItem(RUNTIME_STATE_SESSION_STORAGE_KEY);
+}
+
 export function getControlGroupRuntimeState(): Partial<ControlGroupRuntimeState> {
   const runtimeStateJSON = sessionStorage.getItem(RUNTIME_STATE_SESSION_STORAGE_KEY);
   return runtimeStateJSON
     ? JSON.parse(runtimeStateJSON)
     : {};
-}
-
-export function clearControlGroupRuntimeState() {
-  sessionStorage.removeItem(RUNTIME_STATE_SESSION_STORAGE_KEY);
 }
 
 export function setControlGroupRuntimeState(runtimeState: Partial<ControlGroupRuntimeState>) {

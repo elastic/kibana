@@ -15,6 +15,10 @@ import { TIMESLIDER_CONTROL_TYPE } from '../../react_controls/timeslider_control
 const SERIALIZED_STATE_SESSION_STORAGE_KEY = 'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
 export const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
+export function clearControlGroupSerializedState() {
+  sessionStorage.removeItem(SERIALIZED_STATE_SESSION_STORAGE_KEY);
+}
+
 export function getControlGroupSerializedState(): SerializedPanelState<ControlGroupSerializedState> {
   const serializedStateJSON = sessionStorage.getItem(SERIALIZED_STATE_SESSION_STORAGE_KEY);
   return serializedStateJSON
