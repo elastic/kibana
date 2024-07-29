@@ -46,10 +46,10 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
 
     [
-      { esVersion: '>=8.10', splitHighlightText: false }, // API change in 8.10
-      { esVersion: '<8.10', splitHighlightText: true },
-    ].forEach(({ esVersion, splitHighlightText }) => {
-      describe('/log_entries/highlights', function () {
+      { esVersion: '>=8.10', splitHighlightTerms: false }, // API change in 8.10
+      { esVersion: '<8.10', splitHighlightTerms: true },
+    ].forEach(({ esVersion, splitHighlightTerms }) => {
+      describe(`/log_entries/highlights (ES ${esVersion})`, function () {
         this.onlyEsVersion(esVersion);
 
         describe('with the default source', () => {
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
             entries.forEach((entry) => {
               entry.columns.forEach((column) => {
                 if ('message' in column && 'highlights' in column.message[0]) {
-                  const expectation = splitHighlightText
+                  const expectation = splitHighlightTerms
                     ? highlightTerms.split(' ')
                     : [highlightTerms];
                   expect(column.message[0].highlights).to.eql(expectation);
