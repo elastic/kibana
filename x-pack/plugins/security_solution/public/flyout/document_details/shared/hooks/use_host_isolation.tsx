@@ -6,14 +6,17 @@
  */
 
 import { useCallback, useMemo, useReducer } from 'react';
+import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint';
 
-import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/from_cases/endpoint_host_isolation_cases_context';
-
-interface HostIsolationStateReducer {
-  isolateAction: 'isolateHost' | 'unisolateHost';
+interface State {
   isHostIsolationPanelOpen: boolean;
   isIsolateActionSuccessBannerVisible: boolean;
 }
+
+const initialState: State = {
+  isHostIsolationPanelOpen: false,
+  isIsolateActionSuccessBannerVisible: false,
+};
 
 type HostIsolationActions =
   | {
@@ -21,24 +24,12 @@ type HostIsolationActions =
       isHostIsolationPanelOpen: boolean;
     }
   | {
-      type: 'setIsolateAction';
-      isolateAction: 'isolateHost' | 'unisolateHost';
-    }
-  | {
       type: 'setIsIsolateActionSuccessBannerVisible';
       isIsolateActionSuccessBannerVisible: boolean;
     };
 
-const initialHostIsolationState: HostIsolationStateReducer = {
-  isolateAction: 'isolateHost',
-  isHostIsolationPanelOpen: false,
-  isIsolateActionSuccessBannerVisible: false,
-};
-
-function hostIsolationReducer(state: HostIsolationStateReducer, action: HostIsolationActions) {
+function reducer(state: State, action: HostIsolationActions) {
   switch (action.type) {
-    case 'setIsolateAction':
-      return { ...state, isolateAction: action.isolateAction };
     case 'setIsHostIsolationPanel':
       return { ...state, isHostIsolationPanelOpen: action.isHostIsolationPanelOpen };
     case 'setIsIsolateActionSuccessBannerVisible':
@@ -51,27 +42,42 @@ function hostIsolationReducer(state: HostIsolationStateReducer, action: HostIsol
   }
 }
 
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
-const useHostIsolationTools = () => {
-  const [
-    { isolateAction, isHostIsolationPanelOpen, isIsolateActionSuccessBannerVisible },
-    dispatch,
-  ] = useReducer(hostIsolationReducer, initialHostIsolationState);
+export interface UseHostIsolationResult {
+  /**
+   * True if the host isolation panel is open in the flyout
+   */
+  isHostIsolationPanelOpen: boolean;
+  /**
+   * True if the isolate action was successful and the banner should be displayed
+   */
+  isIsolateActionSuccessBannerVisible: boolean;
+  /**
+   * Callback to handle the success of the isolation action
+   */
+  handleIsolationActionSuccess: () => void;
+  /**
+   * Callback to show the host isolation panel in the flyout
+   */
+  showHostIsolationPanel: (action: 'isolateHost' | 'unisolateHost' | undefined) => void;
+}
 
-  const showAlertDetails = useCallback(() => {
-    dispatch({ type: 'setIsHostIsolationPanel', isHostIsolationPanelOpen: false });
-    dispatch({
-      type: 'setIsIsolateActionSuccessBannerVisible',
-      isIsolateActionSuccessBannerVisible: false,
-    });
-  }, []);
+/**
+ * Hook that returns the information for a parent to render the host isolation panel in the flyout
+ */
+export const useHostIsolation = (): UseHostIsolationResult => {
+  const [{ isHostIsolationPanelOpen, isIsolateActionSuccessBannerVisible }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
-  const showHostIsolationPanel = useCallback((action) => {
-    if (action === 'isolateHost' || action === 'unisolateHost') {
-      dispatch({ type: 'setIsHostIsolationPanel', isHostIsolationPanelOpen: true });
-      dispatch({ type: 'setIsolateAction', isolateAction: action });
-    }
-  }, []);
+  const showHostIsolationPanel = useCallback(
+    (action: 'isolateHost' | 'unisolateHost' | undefined) => {
+      if (action === 'isolateHost' || action === 'unisolateHost') {
+        dispatch({ type: 'setIsHostIsolationPanel', isHostIsolationPanelOpen: true });
+      }
+    },
+    []
+  );
 
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
 
@@ -80,6 +86,7 @@ const useHostIsolationTools = () => {
       type: 'setIsIsolateActionSuccessBannerVisible',
       isIsolateActionSuccessBannerVisible: true,
     });
+
     // If a case details refresh ref is defined, then refresh actions and comments
     if (caseDetailsRefresh) {
       caseDetailsRefresh.refreshCase();
@@ -88,22 +95,16 @@ const useHostIsolationTools = () => {
 
   return useMemo(
     () => ({
-      isolateAction,
       isHostIsolationPanelOpen,
       isIsolateActionSuccessBannerVisible,
       handleIsolationActionSuccess,
-      showAlertDetails,
       showHostIsolationPanel,
     }),
     [
       isHostIsolationPanelOpen,
       isIsolateActionSuccessBannerVisible,
-      isolateAction,
       handleIsolationActionSuccess,
-      showAlertDetails,
       showHostIsolationPanel,
     ]
   );
 };
-
-export { useHostIsolationTools };

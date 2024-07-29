@@ -8,55 +8,57 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-
-import type { TakeActionDropdownProps } from '.';
-import { TakeActionDropdown } from '.';
-import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
-import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineId } from '../../../../common/types/timeline';
-import { TestProviders } from '../../../common/mock';
-import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { useHttp, useKibana } from '../../../common/lib/kibana';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TakeActionDropdownProps } from './take_action_dropdown';
+import { TakeActionDropdown } from './take_action_dropdown';
+import { generateAlertDetailsDataMock } from '../../../../common/components/event_details/__mocks__';
+import { getDetectionAlertMock } from '../../../../common/mock/mock_detection_alerts';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TestProviders } from '../../../../common/mock';
+import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { useHttp, useKibana } from '../../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
-import { allCasesPermissions } from '../../../cases_test_utils';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 import {
   ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
   ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-} from '../../../common/components/toolbar/bulk_actions/translations';
+} from '../../../../common/components/toolbar/bulk_actions/translations';
 
-jest.mock('../../../common/components/endpoint/host_isolation');
-jest.mock('../../../common/components/endpoint/responder');
-jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../../common/components/endpoint/host_isolation');
+jest.mock('../../../../common/components/endpoint/responder');
+jest.mock('../../../../common/components/user_privileges');
 
-jest.mock('../user_info', () => ({
+jest.mock('../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
+jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 
-jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
-}));
-jest.mock('../../../cases/components/use_insert_timeline');
+jest.mock(
+  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+  })
+);
+jest.mock('../../../../cases/components/use_insert_timeline');
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),
   }),
 }));
 
-jest.mock('../../../common/hooks/use_license', () => ({
+jest.mock('../../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
 
 jest.mock(
-  '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
+  '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
   () => {
     return {
       useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
@@ -74,11 +76,10 @@ describe('take action dropdown', () => {
 
   beforeEach(() => {
     defaultProps = {
-      detailsData: generateAlertDetailsDataMock() as TimelineEventsDetailsItem[],
-      ecsData: getDetectionAlertMock(),
+      dataFormattedForFieldBrowser: generateAlertDetailsDataMock() as TimelineEventsDetailsItem[],
+      dataAsNestedObject: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
       isHostIsolationPanelOpen: false,
-      loadingEventDetails: false,
       onAddEventFilterClick: jest.fn(),
       onAddExceptionTypeClick: jest.fn(),
       onAddIsolationStatusClick: jest.fn(),
@@ -243,8 +244,8 @@ describe('take action dropdown', () => {
   describe('for Endpoint related actions', () => {
     /** Removes the detail data that is used to determine if data is for an Alert */
     const setAlertDetailsDataMockToEvent = () => {
-      if (defaultProps.detailsData) {
-        defaultProps.detailsData = defaultProps.detailsData
+      if (defaultProps.dataFormattedForFieldBrowser) {
+        defaultProps.dataFormattedForFieldBrowser = defaultProps.dataFormattedForFieldBrowser
           .map((obj) => {
             if (obj.field === 'kibana.alert.rule.uuid') {
               return null;
@@ -261,34 +262,36 @@ describe('take action dropdown', () => {
           })
           .filter((obj) => obj) as TimelineEventsDetailsItem[];
       } else {
-        expect(defaultProps.detailsData).toBeInstanceOf(Object);
+        expect(defaultProps.dataFormattedForFieldBrowser).toBeInstanceOf(Object);
       }
     };
 
     const setAgentTypeOnAlertDetailsDataMock = (agentType: string = 'endpoint') => {
-      if (defaultProps.detailsData) {
-        defaultProps.detailsData = defaultProps.detailsData.map((obj) => {
-          if (obj.field === 'agent.type') {
-            return {
-              category: 'agent',
-              field: 'agent.type',
-              values: [agentType],
-              originalValue: [agentType],
-            };
-          }
-          if (obj.field === 'agent.id') {
-            return {
-              category: 'agent',
-              field: 'agent.id',
-              values: ['123'],
-              originalValue: ['123'],
-            };
-          }
+      if (defaultProps.dataFormattedForFieldBrowser) {
+        defaultProps.dataFormattedForFieldBrowser = defaultProps.dataFormattedForFieldBrowser.map(
+          (obj) => {
+            if (obj.field === 'agent.type') {
+              return {
+                category: 'agent',
+                field: 'agent.type',
+                values: [agentType],
+                originalValue: [agentType],
+              };
+            }
+            if (obj.field === 'agent.id') {
+              return {
+                category: 'agent',
+                field: 'agent.id',
+                values: ['123'],
+                originalValue: ['123'],
+              };
+            }
 
-          return obj;
-        }) as TimelineEventsDetailsItem[];
+            return obj;
+          }
+        ) as TimelineEventsDetailsItem[];
       } else {
-        expect(defaultProps.detailsData).toBeInstanceOf(Object);
+        expect(defaultProps.dataFormattedForFieldBrowser).toBeInstanceOf(Object);
       }
     };
 
@@ -297,14 +300,14 @@ describe('take action dropdown', () => {
       agentType: string = 'endpoint',
       agentId: string = '123'
     ) => {
-      if (defaultProps.ecsData) {
-        defaultProps.ecsData.agent = {
+      if (defaultProps.dataAsNestedObject) {
+        defaultProps.dataAsNestedObject.agent = {
           // @ts-expect-error Ecs definition for agent seems to be missing properties
           id: agentId,
           type: [agentType],
         };
       } else {
-        expect(defaultProps.ecsData).toBeInstanceOf(Object);
+        expect(defaultProps.dataAsNestedObject).toBeInstanceOf(Object);
       }
     };
 

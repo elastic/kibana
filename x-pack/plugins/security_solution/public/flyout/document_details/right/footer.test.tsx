@@ -7,12 +7,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FlyoutFooter } from './footer';
-import { TestProviders } from '../../../../../common/mock';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TestProviders } from '../../../common/mock';
+import { TimelineId } from '../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { mockAlertDetailsData } from '../../../../../common/components/event_details/__mocks__';
-import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import { KibanaServices, useKibana } from '../../../../../common/lib/kibana';
+import { mockAlertDetailsData } from '../../../common/components/event_details/__mocks__';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { KibanaServices, useKibana } from '../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
@@ -37,11 +37,11 @@ const mockAlertDetailsDataWithIsObject = mockAlertDetailsData.map((detail) => {
   };
 }) as TimelineEventsDetailsItem[];
 
-jest.mock('../../../../../common/components/endpoint/host_isolation');
-jest.mock('../../../../../common/components/endpoint/responder');
+jest.mock('../../../common/components/endpoint/host_isolation');
+jest.mock('../../../common/components/endpoint/responder');
 
 jest.mock(
-  '../../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
+  '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
   () => {
     return {
       useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
@@ -53,26 +53,23 @@ jest.mock(
   }
 );
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../../../../detections/components/user_info', () => ({
+jest.mock('../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
+
+jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+}));
+jest.mock('../../../cases/components/use_insert_timeline');
 
 jest.mock(
-  '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
-  })
-);
-jest.mock('../../../../../cases/components/use_insert_timeline');
-
-jest.mock(
-  '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
+  '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => {
     return {
       useInvestigateInTimeline: jest.fn().mockReturnValue({
@@ -82,8 +79,8 @@ jest.mock(
     };
   }
 );
-jest.mock('../../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../../common/components/guided_onboarding_tour/tour_step');
+jest.mock('../../../detections/components/alerts_table/actions');
+jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
 
 const defaultProps = {
   scopeId: TimelineId.test,
