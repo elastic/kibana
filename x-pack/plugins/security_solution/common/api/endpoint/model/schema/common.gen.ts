@@ -70,6 +70,7 @@ export const Command = z.enum([
   'get-file',
   'execute',
   'upload',
+  'scan',
 ]);
 export type CommandEnum = typeof Command.enum;
 export const CommandEnum = Command.enum;
@@ -135,6 +136,11 @@ export const Comment = z.string();
 export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});
 
+export type AgentType = z.infer<typeof AgentType>;
+export const AgentType = z.enum(['endpoint', 'sentinel_one', 'crowdstrike']);
+export type AgentTypeEnum = typeof AgentType.enum;
+export const AgentTypeEnum = AgentType.enum;
+
 export type BaseActionSchema = z.infer<typeof BaseActionSchema>;
 export const BaseActionSchema = z.object({
   endpoint_ids: EndpointIds,
@@ -142,15 +148,18 @@ export const BaseActionSchema = z.object({
   case_ids: CaseIds.optional(),
   comment: Comment.optional(),
   parameters: Parameters.optional(),
+  agent_type: AgentType.optional(),
 });
 
-export type NoParametersActionSchema = z.infer<typeof NoParametersActionSchema>;
-export const NoParametersActionSchema = z.object({
-  body: BaseActionSchema,
-});
+export type NoParametersRequestSchema = z.infer<typeof NoParametersRequestSchema>;
+export const NoParametersRequestSchema = BaseActionSchema.merge(
+  z.object({
+    parameters: z.object({}).optional(),
+  })
+);
 
-export type ProcessActionSchemas = z.infer<typeof ProcessActionSchemas>;
-export const ProcessActionSchemas = BaseActionSchema.merge(
+export type KillOrSuspendActionSchema = z.infer<typeof KillOrSuspendActionSchema>;
+export const KillOrSuspendActionSchema = BaseActionSchema.merge(
   z.object({
     parameters: z.union([
       z.object({

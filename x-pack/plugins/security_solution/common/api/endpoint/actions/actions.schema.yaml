@@ -98,7 +98,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../model/schema/common.schema.yaml#/components/schemas/ProcessActionSchemas'
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/KillOrSuspendActionSchema'
       responses:
         '200':
           description: OK
@@ -121,7 +121,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../model/schema/common.schema.yaml#/components/schemas/ProcessActionSchemas'
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/KillOrSuspendActionSchema'
       responses:
         '200':
           description: OK

@@ -27,4 +27,4 @@ components:
   schemas:
     ReleaseRouteRequestBody:
       allOf:
-        - $ref: '../model/schema/common.schema.yaml#/components/schemas/NoParametersActionSchema'
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'

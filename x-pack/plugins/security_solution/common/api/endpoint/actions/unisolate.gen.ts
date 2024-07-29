@@ -16,7 +16,7 @@
 
 import type { z } from 'zod';
 
-import { NoParametersActionSchema } from '../model/schema/common.gen';
+import { NoParametersRequestSchema } from '../model/schema/common.gen';
 
 export type ReleaseRouteRequestBody = z.infer<typeof ReleaseRouteRequestBody>;
-export const ReleaseRouteRequestBody = NoParametersActionSchema;
+export const ReleaseRouteRequestBody = NoParametersRequestSchema;
