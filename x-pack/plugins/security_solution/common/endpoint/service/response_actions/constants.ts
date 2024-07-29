@@ -191,7 +191,9 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
 });
 
 /**
- * Map of Agent Type to alert fields that holds the Agent ID for that agent type
+ * Map of Agent Type to alert fields that holds the Agent ID for that agent type.
+ * Multiple alert fields are supported since different data sources define the agent
+ * id in different paths
  */
 export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
   Record<ResponseActionAgentType, string[]>
@@ -202,7 +204,7 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
     'sentinel_one.threat.agent.id',
     'sentinel_one.alert.agent.id',
     'sentinel_one.agent.agent.id',
-    'observer.serial_number',
+    'observer.serial_number', // This is the UUID not ID. FIXME:PT should we remove this?
   ],
   crowdstrike: ['device.id'],
 });
