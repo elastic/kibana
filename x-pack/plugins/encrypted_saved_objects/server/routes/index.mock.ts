@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BuildFlavor } from '@kbn/config';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { ConfigType } from '../config';
@@ -17,5 +18,6 @@ export const routeDefinitionParamsMock = {
     logger: loggingSystemMock.create().get(),
     config: ConfigSchema.validate(config) as ConfigType,
     encryptionKeyRotationService: encryptionKeyRotationServiceMock.create(),
+    buildFlavor: 'traditional' as BuildFlavor,
   }),
 };
