@@ -99,7 +99,7 @@ const assertFilterControlsWithFilterObject = (
     cy.get(OPTION_LIST_VALUES(idx)).should((sub) => {
       const controlText = sub.text();
       filter.selectedOptions?.forEach((option) => {
-        expect(controlText).to.have.string(option);
+        expect(controlText).to.have.string(String(option));
       });
     });
   });
