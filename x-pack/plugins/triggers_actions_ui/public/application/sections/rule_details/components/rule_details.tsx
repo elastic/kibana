@@ -465,7 +465,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
+              <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="error">
                 <p>
                   <EuiIcon color="danger" type="warning" />
                   &nbsp;
