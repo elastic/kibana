@@ -101,12 +101,12 @@ export const getControlGroupEmbeddableFactory = (services: {
           controlsInOrder: [
             controlsManager.controlsInOrder$,
             (next: ControlsInOrder) => controlsManager.controlsInOrder$.next(next),
-            fastIsEqual
+            fastIsEqual,
           ],
           ignoreParentSettings: [
             ignoreParentSettings$,
             (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
-            fastIsEqual
+            fastIsEqual,
           ],
           labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
         },

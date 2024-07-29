@@ -30,7 +30,7 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
       type: initialControlPanelsState[key].type,
     }))
     .sort((a, b) => (a.order > b.order ? 1 : -1))
-    .map(({ id, type }) => ({ id, type })) // filter out `order`
+    .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
@@ -39,7 +39,9 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
   const controlsPanelState: { [panelId: string]: DefaultControlState } = {
     ...initialControlPanelsState,
   };
-  const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(getControlsInOrder(initialControlPanelsState));
+  const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
+    getControlsInOrder(initialControlPanelsState)
+  );
 
   function untilControlLoaded(
     id: string

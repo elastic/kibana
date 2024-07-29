@@ -36,7 +36,7 @@ export function initializeControlGroupUnsavedChanges(
   comparators: StateComparators<ControlGroupComparatorState>,
   snapshotControlsRuntimeState: () => ControlPanelsState,
   parentApi: unknown,
-  uuid: string,
+  uuid: string
 ) {
   const lastSavedState = getLastSavedState(comparators, parentApi, uuid);
   const controlGroupUnsavedChanges = initializeUnsavedChanges<ControlGroupComparatorState>(
@@ -74,7 +74,7 @@ export function initializeControlGroupUnsavedChanges(
 function getLastSavedState(
   comparators: StateComparators<ControlGroupComparatorState>,
   parentApi: unknown,
-  uuid: string,
+  uuid: string
 ): ControlGroupComparatorState {
   if (!apiHasSerializedChildState(parentApi)) {
     return {
@@ -86,7 +86,9 @@ function getLastSavedState(
     };
   }
 
-  const lastSerializedState = parentApi.getSerializedStateForChild(uuid) as SerializedPanelState<ControlGroupSerializedState>;
+  const lastSerializedState = parentApi.getSerializedStateForChild(
+    uuid
+  ) as SerializedPanelState<ControlGroupSerializedState>;
   const lastRuntimeState = deserializeControlGroup(lastSerializedState);
   return {
     autoApplySelections: lastRuntimeState.autoApplySelections,
