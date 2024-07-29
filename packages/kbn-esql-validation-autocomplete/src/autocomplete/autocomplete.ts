@@ -1565,7 +1565,7 @@ async function getOptionArgsSuggestions(
   if (command.name === 'stats') {
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
-        ['column'],
+        ['any'],
         command.name,
         option.name,
         getFieldsByType,
@@ -1575,7 +1575,6 @@ async function getOptionArgsSuggestions(
         }
       ))
     );
-
     const argDef = optionDef?.signature.params[argIndex];
 
     const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
@@ -1597,6 +1596,14 @@ async function getOptionArgsSuggestions(
           ))
         );
       }
+    }
+
+    if (option.name === 'by' && !option.incomplete) {
+      suggestions.push(
+        ...getFinalSuggestions({
+          comma: optionDef?.signature.multipleParams,
+        })
+      );
     }
   }
 
