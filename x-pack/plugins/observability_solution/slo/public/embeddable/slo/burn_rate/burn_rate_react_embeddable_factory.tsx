@@ -18,7 +18,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './constants';
-import { SloBurnRateEmbeddableState, SloEmbeddableDeps, ErrorBudgetApi } from './types';
+import { SloBurnRateEmbeddableState, SloEmbeddableDeps, BurnRateApi } from './types';
 import { BurnRate } from './burn_rate';
 
 export const getTitle = () =>
@@ -32,7 +32,7 @@ export const getBurnRateEmbeddableFactory = (deps: SloEmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
     SloBurnRateEmbeddableState,
     SloBurnRateEmbeddableState,
-    ErrorBudgetApi
+    BurnRateApi
   > = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
     deserializeState: (state) => {

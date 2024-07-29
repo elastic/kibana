@@ -33,7 +33,7 @@ interface BurnRateCustomInput {
 }
 
 export type SloBurnRateEmbeddableState = SerializedTitles & BurnRateCustomInput;
-export type ErrorBudgetApi = DefaultEmbeddableApi<SloBurnRateEmbeddableState> &
+export type BurnRateApi = DefaultEmbeddableApi<SloBurnRateEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle;
 
