@@ -8,61 +8,21 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-const significantItem = schema.object({
-  key: schema.string(),
-  type: schema.oneOf([schema.literal('keyword'), schema.literal('log_pattern')]),
-  fieldName: schema.string(),
-  fieldValue: schema.oneOf([schema.string(), schema.number()]),
-  doc_count: schema.number(),
-  bg_count: schema.number(),
-  total_doc_count: schema.number(),
-  total_bg_count: schema.number(),
-  score: schema.number(),
-  pValue: schema.nullable(schema.number()),
-  normalizedScore: schema.number(),
-  histogram: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        doc_count_overall: schema.number(),
-        doc_count_significant_item: schema.number(),
-        key: schema.number(),
-        key_as_string: schema.string(),
-      })
-    )
-  ),
-  unique: schema.maybe(schema.boolean()),
+import { aiopsLogRateAnalysisBase, significantItem } from './schema_v2';
+
+const overridesV3 = schema.object({
+  loaded: schema.maybe(schema.number()),
+  remainingKeywordFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
+  remainingTextFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
+  significantItems: schema.maybe(schema.arrayOf(significantItem)),
+  regroupOnly: schema.maybe(schema.boolean()),
 });
 
-export const aiopsLogRateAnalysisSchemaV3 = schema.object({
-  start: schema.number(),
-  end: schema.number(),
-  searchQuery: schema.string(),
-  timeFieldName: schema.string(),
-  includeFrozen: schema.maybe(schema.boolean()),
-  grouping: schema.maybe(schema.boolean()),
-  /** Analysis selection time ranges */
-  baselineMin: schema.number(),
-  baselineMax: schema.number(),
-  deviationMin: schema.number(),
-  deviationMax: schema.number(),
-  /** The index to query for log rate analysis */
-  index: schema.string(),
-  /** Settings to override headers derived compression and flush fix */
-  compressResponse: schema.maybe(schema.boolean()),
-  flushFix: schema.maybe(schema.boolean()),
+export const aiopsLogRateAnalysisSchemaV3 = schema.intersection([
+  aiopsLogRateAnalysisBase,
   /** Overrides to skip steps of the analysis with existing data */
-  overrides: schema.maybe(
-    schema.object({
-      loaded: schema.maybe(schema.number()),
-      remainingKeywordFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
-      remainingTextFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
-      significantItems: schema.maybe(schema.arrayOf(significantItem)),
-      regroupOnly: schema.maybe(schema.boolean()),
-    })
-  ),
-  /** Probability used for the random sampler aggregations */
-  sampleProbability: schema.maybe(schema.number()),
-});
+  schema.object({ overrides: schema.maybe(overridesV3) }),
+]);
 
 export type AiopsLogRateAnalysisSchemaV3 = TypeOf<typeof aiopsLogRateAnalysisSchemaV3>;
 export type AiopsLogRateAnalysisSchemaSignificantItem = TypeOf<typeof significantItem>;
