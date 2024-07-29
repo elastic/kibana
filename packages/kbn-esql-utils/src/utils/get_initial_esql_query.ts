@@ -12,9 +12,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
  * @param dataView
  */
 export function getInitialESQLQuery(dataView: DataView): string {
+  const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
-    timeFieldName !== '@timestamp'
+    !hasAtTimestampField && timeFieldName
       ? ` | WHERE ${timeFieldName} >= ?start AND ${timeFieldName} <= ?end`
       : '';
   return `FROM ${dataView.getIndexPattern()}${filterByTimeParams} | LIMIT 10`;
