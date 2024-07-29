@@ -11,6 +11,7 @@ import type { TimelineModel } from '../../store/model';
 import type {
   RowRendererId,
   SingleTimelineResolveResponse,
+  SortFieldTimeline,
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
   TimelineStatus,
@@ -123,7 +124,7 @@ export interface OnTableChangeParams {
     size: number;
   };
   sort?: {
-    field: string;
+    field: SortFieldTimeline;
     direction: 'asc' | 'desc';
   };
 }

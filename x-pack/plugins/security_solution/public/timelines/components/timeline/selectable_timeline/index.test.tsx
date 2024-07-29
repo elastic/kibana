@@ -10,7 +10,7 @@ import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow, mount } from 'enzyme';
 
-import { SortFieldTimeline, TimelineType } from '../../../../../common/api/timeline';
+import { SortFieldTimelineEnum, TimelineType } from '../../../../../common/api/timeline';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
@@ -79,7 +79,7 @@ describe('SelectableTimeline', () => {
       },
       search: '',
       sort: {
-        sortField: SortFieldTimeline.updated,
+        sortField: SortFieldTimelineEnum.updated,
         sortOrder: Direction.desc,
       },
       status: null,

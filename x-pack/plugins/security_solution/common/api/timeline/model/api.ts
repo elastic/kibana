@@ -20,6 +20,8 @@ import {
   DataProviderTypeEnum,
   RowRendererId,
   RowRendererIdEnum,
+  SortFieldTimeline,
+  SortFieldTimelineEnum,
   TemplateTimelineTypeEnum,
   TimelineStatus,
   TimelineStatusEnum,
@@ -30,6 +32,8 @@ export {
   DataProviderTypeEnum,
   RowRendererId,
   RowRendererIdEnum,
+  SortFieldTimeline,
+  SortFieldTimelineEnum,
   TemplateTimelineTypeEnum,
   TimelineStatus,
   TimelineStatusEnum,
@@ -462,7 +466,7 @@ export const TimelineErrorResponseType = runtimeTypes.union([
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
-export enum SortFieldTimeline {
+export enum SortFieldTimelineOg {
   title = 'title',
   description = 'description',
   updated = 'updated',
@@ -470,10 +474,10 @@ export enum SortFieldTimeline {
 }
 
 export const sortFieldTimeline = runtimeTypes.union([
-  runtimeTypes.literal(SortFieldTimeline.title),
-  runtimeTypes.literal(SortFieldTimeline.description),
-  runtimeTypes.literal(SortFieldTimeline.updated),
-  runtimeTypes.literal(SortFieldTimeline.created),
+  runtimeTypes.literal(SortFieldTimelineEnum.title),
+  runtimeTypes.literal(SortFieldTimelineEnum.description),
+  runtimeTypes.literal(SortFieldTimelineEnum.updated),
+  runtimeTypes.literal(SortFieldTimelineEnum.created),
 ]);
 
 export const direction = runtimeTypes.union([

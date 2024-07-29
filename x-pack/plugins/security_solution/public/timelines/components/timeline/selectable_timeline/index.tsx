@@ -24,7 +24,7 @@ import type {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
 } from '../../../../../common/api/timeline';
-import { SortFieldTimeline } from '../../../../../common/api/timeline';
+import { SortFieldTimelineEnum } from '../../../../../common/api/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';
@@ -254,7 +254,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       },
       search: searchTimelineValue,
       sort: {
-        sortField: SortFieldTimeline.updated,
+        sortField: SortFieldTimelineEnum.updated,
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: onlyFavorites,
