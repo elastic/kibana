@@ -577,7 +577,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
         myMetrics = containerSnapshotMetricTypes;
         break;
     }
-    return myMetrics.map(toMetricOpt);
+    return myMetrics.map((myMetric) => toMetricOpt(myMetric, props.nodeType));
   }, [props.nodeType]);
 
   return (
