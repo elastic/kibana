@@ -39,6 +39,10 @@ exports[`Authentication Host Table Component rendering it renders the host authe
 
 .c4 {
   margin-top: 4px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
 @media only screen and (min-width:575px) {
@@ -355,7 +359,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     class="euiFlexGroup c4 emotion-euiFlexGroup-l-flexStart-center-row"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class="euiPopover emotion-euiPopover-inline-block"
