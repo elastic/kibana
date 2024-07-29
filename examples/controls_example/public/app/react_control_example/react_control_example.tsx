@@ -42,8 +42,17 @@ import {
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { clearControlGroupSerializedState, getControlGroupSerializedState, setControlGroupSerializedState, WEB_LOGS_DATA_VIEW_ID } from './serialized_control_group_state';
-import { clearControlGroupRuntimeState, getControlGroupRuntimeState, setControlGroupRuntimeState } from './runtime_control_group_state';
+import {
+  clearControlGroupSerializedState,
+  getControlGroupSerializedState,
+  setControlGroupSerializedState,
+  WEB_LOGS_DATA_VIEW_ID,
+} from './serialized_control_group_state';
+import {
+  clearControlGroupRuntimeState,
+  getControlGroupRuntimeState,
+  setControlGroupRuntimeState,
+} from './runtime_control_group_state';
 import { ControlGroupApi } from '../../react_controls/control_group/types';
 import { openDataControlEditor } from '../../react_controls/data_controls/open_data_control_editor';
 
@@ -271,7 +280,7 @@ export const ReactControlExample = ({
       )}
 
       <EuiSpacer size="m" />
-      
+
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -412,7 +421,7 @@ export const ReactControlExample = ({
               getSerializedStateForChild: () => ({
                 rawState: {},
                 references: [],
-              })
+              }),
             })}
             hidePanelChrome={false}
             onApiAvailable={(api) => {

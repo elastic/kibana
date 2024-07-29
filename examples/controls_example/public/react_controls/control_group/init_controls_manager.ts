@@ -16,9 +16,9 @@ import { Reference } from '@kbn/content-management-utils';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../types';
-import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -143,7 +143,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
             order: index,
             type,
             ...controlApi.snapshotRuntimeState(),
-          }
+          };
         }
       });
       return controlsRuntimeState;

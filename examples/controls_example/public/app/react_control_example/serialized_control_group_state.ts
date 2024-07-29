@@ -12,7 +12,8 @@ import { RANGE_SLIDER_CONTROL_TYPE } from '../../react_controls/data_controls/ra
 import { SEARCH_CONTROL_TYPE } from '../../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../../react_controls/timeslider_control/types';
 
-const SERIALIZED_STATE_SESSION_STORAGE_KEY = 'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
+const SERIALIZED_STATE_SESSION_STORAGE_KEY =
+  'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
 export const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
 export function clearControlGroupSerializedState() {
@@ -21,12 +22,12 @@ export function clearControlGroupSerializedState() {
 
 export function getControlGroupSerializedState(): SerializedPanelState<ControlGroupSerializedState> {
   const serializedStateJSON = sessionStorage.getItem(SERIALIZED_STATE_SESSION_STORAGE_KEY);
-  return serializedStateJSON
-    ? JSON.parse(serializedStateJSON)
-    : initialSerializedControlGroupState;
+  return serializedStateJSON ? JSON.parse(serializedStateJSON) : initialSerializedControlGroupState;
 }
 
-export function setControlGroupSerializedState(serializedState: SerializedPanelState<ControlGroupSerializedState>) {
+export function setControlGroupSerializedState(
+  serializedState: SerializedPanelState<ControlGroupSerializedState>
+) {
   sessionStorage.setItem(SERIALIZED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState));
 }
 
@@ -96,4 +97,4 @@ const initialSerializedControlGroupState = {
       id: WEB_LOGS_DATA_VIEW_ID,
     },
   ],
-}
+};

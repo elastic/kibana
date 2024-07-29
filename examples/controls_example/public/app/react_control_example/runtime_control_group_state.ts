@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupRuntimeState } from "../../react_controls/control_group/types";
+import { ControlGroupRuntimeState } from '../../react_controls/control_group/types';
 
-const RUNTIME_STATE_SESSION_STORAGE_KEY = 'kibana.examples.controls.reactControlExample.controlGroupRuntimeState';
+const RUNTIME_STATE_SESSION_STORAGE_KEY =
+  'kibana.examples.controls.reactControlExample.controlGroupRuntimeState';
 
 export function clearControlGroupRuntimeState() {
   sessionStorage.removeItem(RUNTIME_STATE_SESSION_STORAGE_KEY);
@@ -16,9 +17,7 @@ export function clearControlGroupRuntimeState() {
 
 export function getControlGroupRuntimeState(): Partial<ControlGroupRuntimeState> {
   const runtimeStateJSON = sessionStorage.getItem(RUNTIME_STATE_SESSION_STORAGE_KEY);
-  return runtimeStateJSON
-    ? JSON.parse(runtimeStateJSON)
-    : {};
+  return runtimeStateJSON ? JSON.parse(runtimeStateJSON) : {};
 }
 
 export function setControlGroupRuntimeState(runtimeState: Partial<ControlGroupRuntimeState>) {

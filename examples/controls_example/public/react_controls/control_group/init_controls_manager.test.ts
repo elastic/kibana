@@ -127,13 +127,13 @@ describe('snapshotControlsRuntimeState', () => {
       alpha: {
         key1: 'alpha value',
         order: 1,
-        type: 'testControl'
+        type: 'testControl',
       },
       bravo: {
         key1: 'bravo value',
         order: 0,
-        type: 'testControl'
-      }
+        type: 'testControl',
+      },
     });
   });
 });
