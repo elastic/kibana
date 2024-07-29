@@ -104,7 +104,6 @@ export function NoEntitiesEmptyState() {
                   }}
                 />
                 <CollectServiceLogs
-                  basePath={basePath}
                   onClick={() => {
                     reportButtonClick('collect_new_service_logs');
                   }}

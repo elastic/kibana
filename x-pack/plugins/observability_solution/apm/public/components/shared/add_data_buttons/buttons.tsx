@@ -8,6 +8,8 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
+import { useKibana } from '../../../context/kibana_context/use_kibana';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export const addApmAgent = {
   name: i18n.translate('xpack.apm.add.apm.agent.button.', {
@@ -54,15 +56,15 @@ export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
   );
 }
 
-export function CollectServiceLogs({
-  basePath,
-  onClick,
-}: {
-  basePath: IBasePath;
-  onClick?: () => void;
-}) {
+export function CollectServiceLogs({ onClick }: { onClick?: () => void }) {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+  const {
+    application: { navigateToUrl },
+  } = useKibana().services;
+
   function handleClick() {
-    window.open(basePath.prepend(collectServiceLogs.link), '_blank');
+    navigateToUrl(basePath.prepend(collectServiceLogs.link));
     onClick?.();
   }
   return (
