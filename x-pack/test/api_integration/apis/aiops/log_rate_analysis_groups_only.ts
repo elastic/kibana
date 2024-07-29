@@ -37,14 +37,24 @@ export default ({ getService }: FtrProviderContext) => {
       getLogRateAnalysisTestData<typeof apiVersion>().forEach((testData) => {
         let overrides: AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'] = {};
 
-        overrides = {
-          loaded: 0,
-          remainingKeywordFieldCandidates: [],
-          remainingTextFieldCandidates: [],
-          significantItems: testData.expected
-            .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
-          regroupOnly: true,
-        } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
+        if (apiVersion === '2') {
+          overrides = {
+            loaded: 0,
+            remainingFieldCandidates: [],
+            significantItems: testData.expected
+              .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
+            regroupOnly: true,
+          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
+        } else if (apiVersion === '3') {
+          overrides = {
+            loaded: 0,
+            remainingKeywordFieldCandidates: [],
+            remainingTextFieldCandidates: [],
+            significantItems: testData.expected
+              .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
+            regroupOnly: true,
+          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
+        }
 
         describe(`with v${apiVersion} - ${testData.testName}`, () => {
           before(async () => {

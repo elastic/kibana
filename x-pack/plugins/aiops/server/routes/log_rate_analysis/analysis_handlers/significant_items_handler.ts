@@ -97,6 +97,8 @@ export const significantItemsHandlerFactory =
       } else {
         remainingKeywordFieldCandidates = keywordFieldCandidates;
       }
+
+      remainingTextFieldCandidates = textFieldCandidates;
     } else if (version === '3') {
       const overridesRemainingKeywordFieldCandidates = (
         requestBody as AiopsLogRateAnalysisSchema<'3'>

@@ -126,7 +126,11 @@ export const indexInfoHandlerFactory =
 
     responseStream.push(setZeroDocsFallback(zeroDocsFallback));
 
-    if (!skipFieldCandidates && keywordFieldCandidatesCount === 0) {
+    if (
+      !skipFieldCandidates &&
+      keywordFieldCandidatesCount === 0 &&
+      textFieldCandidatesCount === 0
+    ) {
       responseStream.endWithUpdatedLoadingState();
     } else if (stateHandler.shouldStop()) {
       logDebugMessage('shouldStop after fetching field candidates.');

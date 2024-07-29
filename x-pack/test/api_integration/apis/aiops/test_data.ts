@@ -25,7 +25,7 @@ import {
 
 import type { TestData } from './types';
 
-export const API_VERSIONS: ApiVersion[] = ['3'];
+export const API_VERSIONS: ApiVersion[] = ['2', '3'];
 
 export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {
