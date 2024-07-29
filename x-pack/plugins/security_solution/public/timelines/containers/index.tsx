@@ -61,7 +61,7 @@ export interface TimelineArgs {
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
 
-type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => void;
+type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => Promise<void>;
 
 type LoadPage = (newActivePage: number) => void;
 
@@ -516,13 +516,13 @@ export const useTimelineEvents = ({
     if (!timelineSearchHandler) return;
 
     const startTime = performance.now();
-    timelineSearchHandler(onTimelineSearchComplete);
-    const endTime = performance.now();
-
-    telemetry.reportTimelinesTrackQueryRun({
-      tab: timelineTab ?? undefined,
-      duration: endTime - startTime,
-      language,
+    timelineSearchHandler(onTimelineSearchComplete).then(() => {
+      const endTime = performance.now();
+      telemetry.reportTimelinesTrackQueryRun({
+        tab: timelineTab ?? undefined,
+        duration: endTime - startTime,
+        language,
+      });
     });
   }, [
     timelineSearchHandler,
