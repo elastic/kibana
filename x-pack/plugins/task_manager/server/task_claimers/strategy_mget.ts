@@ -19,7 +19,12 @@ import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
+import {
+  TaskClaimerOpts,
+  ClaimOwnershipResult,
+  getEmptyClaimOwnershipResult,
+  isTaskTypeExcluded,
+} from '.';
 import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import {
@@ -50,7 +55,7 @@ interface OwnershipClaimingOpts {
   size: number;
   taskTypes: Set<string>;
   removedTypes: Set<string>;
-  excludedTypes: Set<string>;
+  excludedTaskTypes: string[];
   taskStore: TaskStore;
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
@@ -103,13 +108,12 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const stopTaskTimer = startTaskTimer();
 
   const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
-  const excludedTypes = new Set(excludedTaskTypes); // excluded via config
 
   // get a list of candidate tasks to claim, with their version info
   const { docs, versionMap } = await searchAvailableTasks({
     definitions,
     taskTypes: new Set(definitions.getAllTypes()),
-    excludedTypes,
+    excludedTaskTypes,
     removedTypes,
     taskStore,
     events$,
@@ -317,14 +321,14 @@ async function searchAvailableTasks({
   definitions,
   taskTypes,
   removedTypes,
-  excludedTypes,
+  excludedTaskTypes,
   taskStore,
   size,
   taskPartitioner,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
   const searchedTypes = Array.from(taskTypes)
     .concat(Array.from(removedTypes))
-    .filter((type) => !excludedTypes.has(type));
+    .filter((type) => !isTaskTypeExcluded(excludedTaskTypes, type));
   const queryForScheduledTasks = mustBeAllOf(
     // Task must be enabled
     EnabledTask,

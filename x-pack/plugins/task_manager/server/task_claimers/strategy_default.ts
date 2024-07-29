@@ -9,14 +9,18 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import apm from 'elastic-apm-node';
-import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
 import { mergeScan } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
+import {
+  TaskClaimerOpts,
+  ClaimOwnershipResult,
+  getEmptyClaimOwnershipResult,
+  isTaskTypeExcluded,
+} from '.';
 import { ConcreteTaskInstance } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
@@ -130,16 +134,6 @@ async function executeClaimAvailableTasks(
 
 function emitEvents(events$: Subject<TaskClaim>, events: TaskClaim[]) {
   events.forEach((event) => events$.next(event));
-}
-
-function isTaskTypeExcluded(excludedTaskTypes: string[], taskType: string) {
-  for (const excludedType of excludedTaskTypes) {
-    if (minimatch(taskType, excludedType)) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 async function markAvailableTasksAsClaimed({
