@@ -34,7 +34,7 @@ const getStatusCodeClassName = (statusCode: number) => {
 
 export const getStatusCodeDecorations = (data: RequestResult[]) => {
   const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-  let lastRequestEndLine = 0;
+  let lastResponseEndLine = 0;
 
   data.forEach(({ response }) => {
     if (response?.value) {
@@ -45,9 +45,9 @@ export const getStatusCodeDecorations = (data: RequestResult[]) => {
       const startColumn = (response.value as string).indexOf(totalStatus) + 1;
       if (totalStatus && startColumn !== 0) {
         const range = {
-          startLineNumber: lastRequestEndLine + 1,
+          startLineNumber: lastResponseEndLine + 1,
           startColumn,
-          endLineNumber: lastRequestEndLine + 1,
+          endLineNumber: lastResponseEndLine + 1,
           endColumn: startColumn + totalStatus.length,
         };
         decorations.push({
@@ -57,7 +57,7 @@ export const getStatusCodeDecorations = (data: RequestResult[]) => {
           },
         });
       }
-      lastRequestEndLine += (response.value as string).split(/\\n|\n/).length;
+      lastResponseEndLine += (response.value as string).split(/\\n|\n/).length;
     }
   });
 

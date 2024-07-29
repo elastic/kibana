@@ -151,27 +151,27 @@
   max-width: 100%;
 }
 
-.monaco__status_badge__primary {
+.monaco__status_badge--primary {
   @extend %monaco__status_badge;
   background-color: $euiColorVis1;
 }
 
-.monaco__status_badge__success {
+.monaco__status_badge--success {
   @extend %monaco__status_badge;
   background-color: $euiColorSuccess;
 }
 
-.monaco__status_badge__default {
+.monaco__status_badge--default {
   @extend %monaco__status_badge;
   background-color: $euiColorLightShade;
 }
 
-.monaco__status_badge__warning {
+.monaco__status_badge--warning {
   @extend %monaco__status_badge;
   background-color: $euiColorWarning;
 }
 
-.monaco__status_badge__danger {
+.monaco__status_badge--danger {
   @extend %monaco__status_badge;
   background-color: $euiColorDanger;
 }
