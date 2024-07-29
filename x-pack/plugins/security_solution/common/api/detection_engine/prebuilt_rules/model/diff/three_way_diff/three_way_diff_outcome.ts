@@ -27,6 +27,12 @@ export enum ThreeWayDiffOutcome {
 
   /** Customized rule, the value has changed in the target version and is not equal to the current version. */
   CustomizedValueCanUpdate = 'BASE=A, CURRENT=B, TARGET=C',
+
+  /** Missing  base, the value hasn't changed in the target version. */
+  MissingBaseNoUpdate = 'BASE=-, CURRENT=A, TARGET=A',
+
+  /** Missing  base, the value changed in the target version. */
+  MissingBaseCanUpdate = 'BASE=-, CURRENT=A, TARGET=B',
 }
 
 export const determineDiffOutcome = <TValue>(
@@ -85,12 +91,12 @@ const getThreeWayDiffOutcome = ({
   if (!hasBaseVersion) {
     /**
      * We couldn't find the base version of the rule in the package so further
-     * version comparison is not possible. We assume that the rule is not
+     * version comparison is not possible. We assume that the rule is
      * customized and the value can be updated if there's an update.
      */
     return currentEqlTarget
-      ? ThreeWayDiffOutcome.StockValueNoUpdate
-      : ThreeWayDiffOutcome.StockValueCanUpdate;
+      ? ThreeWayDiffOutcome.MissingBaseNoUpdate
+      : ThreeWayDiffOutcome.MissingBaseCanUpdate;
   }
 
   if (baseEqlCurrent) {
@@ -111,6 +117,7 @@ const getThreeWayDiffOutcome = ({
 export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolean => {
   return (
     diffCase === ThreeWayDiffOutcome.StockValueCanUpdate ||
-    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate
+    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
+    diffCase === ThreeWayDiffOutcome.MissingBaseCanUpdate
   );
 };
