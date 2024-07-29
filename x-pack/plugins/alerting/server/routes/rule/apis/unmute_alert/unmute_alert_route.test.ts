@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { unmuteAlertRoute } from './unmute_alert';
+import { unmuteAlertRoute } from './unmute_alert_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
