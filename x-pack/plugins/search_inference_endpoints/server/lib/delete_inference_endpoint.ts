@@ -7,11 +7,10 @@
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { TaskTypes } from '../../common/types';
 
 function isTaskType(type?: string): type is InferenceTaskType {
-  return type
-    ? ['sparse_embedding', 'text_embedding', 'rerank', 'completion'].includes(type)
-    : true;
+  return type ? Object.values(TaskTypes).includes(type as TaskTypes) : true;
 }
 
 export const deleteInferenceEndpoint = async (
