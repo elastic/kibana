@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ControlGroupEditorStrings = {
+export const ControlGroupStrings = {
   getSaveChangesTitle: () =>
     i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
       defaultMessage: 'Save and close',
@@ -18,6 +18,14 @@ export const ControlGroupEditorStrings = {
       defaultMessage: 'Cancel',
     }),
   management: {
+    getApplyButtonTitle: (hasUnappliedSelections: boolean) =>
+      hasUnappliedSelections
+        ? i18n.translate('controls.controlGroup.management.applyButtonTooltip.enabled', {
+            defaultMessage: 'Apply selections',
+          })
+        : i18n.translate('controls.controlGroup.management.applyButtonTooltip.disabled', {
+            defaultMessage: 'No new selections to apply',
+          }),
     getFlyoutTitle: () =>
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
         defaultMessage: 'Control settings',
@@ -98,16 +106,3 @@ export const ControlGroupEditorStrings = {
     },
   },
 };
-
-export const CONTROL_LAYOUT_OPTIONS = [
-  {
-    id: `oneLine`,
-    'data-test-subj': 'control-editor-layout-oneLine',
-    label: ControlGroupEditorStrings.management.labelPosition.getInlineTitle(),
-  },
-  {
-    id: `twoLine`,
-    'data-test-subj': 'control-editor-layout-twoLine',
-    label: ControlGroupEditorStrings.management.labelPosition.getAboveTitle(),
-  },
-];
