@@ -1,0 +1,27 @@
+{
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "target/types",
+        "types": [
+            "node",
+            "@kbn/ambient-ftr-types"
+        ],
+        "allowJs": false
+    },
+    "include": [
+        "**/*",
+        "../../../typings/**/*",
+        "../../../packages/kbn-test/types/ftr_globals/**/*"
+    ],
+    "exclude": [
+        "target/**/*"
+    ],
+    "kbn_references": [
+        {
+            "path": "../tsconfig.json"
+        },
+        {
+            "path": "../../test_serverless/tsconfig.json"
+        },
+    ]
+}

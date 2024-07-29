@@ -24,7 +24,8 @@
     "*/plugins/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
-    "security_solution_api_integration/**/*"
+    "security_solution_api_integration/**/*",
+    "security_solution_endpoint/**/*"
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
