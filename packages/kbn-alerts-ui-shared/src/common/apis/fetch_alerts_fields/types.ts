@@ -6,23 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { HttpSetup } from '@kbn/core-http-browser';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { HttpSetup } from '@kbn/core/public';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
-export async function fetchAlertFields({
-  http,
-  featureIds,
-}: {
+export interface FetchAlertsFieldsParams {
+  // Dependencies
   http: HttpSetup;
+
+  // Params
+  /**
+   * Array of feature ids used for authorization and area-based filtering
+   */
   featureIds: ValidFeatureId[];
-}): Promise<FieldSpec[]> {
-  const { fields: alertFields = [] } = await http.get<{ fields: FieldSpec[] }>(
-    `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
-    {
-      query: { featureIds },
-    }
-  );
-  return alertFields;
 }

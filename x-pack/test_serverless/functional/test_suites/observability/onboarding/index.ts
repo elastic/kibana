@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import {
-  CreateEndpointListSchema,
-  createEndpointListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export const createEndpointListResponse = createEndpointListSchema;
-export type CreateEndpointListResponse = CreateEndpointListSchema;
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Onboarding', function () {
+    loadTestFile(require.resolve('./auto_detect'));
+  });
+}
