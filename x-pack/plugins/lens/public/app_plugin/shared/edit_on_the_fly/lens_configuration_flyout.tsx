@@ -136,13 +136,14 @@ export function LensEditConfigurationFlyout({
   }, [dispatch, output$, layers]);
 
   useEffect(() => {
+    const abortController = new AbortController();
     const getESQLGridAttrs = async () => {
       if (!dataGridAttrs && isOfAggregateQueryType(query)) {
         const { dataView, columns, values } = await getGridAttrs(
           query,
           adHocDataViews,
           startDependencies,
-          undefined
+          abortController
         );
 
         setDataGridAttrs({
@@ -153,6 +154,9 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
+    return () => {
+      abortController.abort();
+    };
   }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
