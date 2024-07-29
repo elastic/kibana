@@ -21,10 +21,11 @@ import { SLO_BURN_RATE_EMBEDDABLE_ID } from './constants';
 import { SloBurnRateEmbeddableState, SloEmbeddableDeps, ErrorBudgetApi } from './types';
 import { BurnRate } from './burn_rate';
 
-export const getErrorBudgetPanelTitle = () =>
-  i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
+export const getTitle = () =>
+  i18n.translate('xpack.slo.burnRateEmbeddable.title', {
     defaultMessage: 'SLO Burn Rate',
   });
+
 const queryClient = new QueryClient();
 
 export const getBurnRateEmbeddableFactory = (deps: SloEmbeddableDeps) => {
@@ -35,11 +36,11 @@ export const getBurnRateEmbeddableFactory = (deps: SloEmbeddableDeps) => {
   > = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
     deserializeState: (state) => {
-      return state.rawState;
+      return state.rawState as SloBurnRateEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
       const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
       const duration$ = new BehaviorSubject(state.duration);

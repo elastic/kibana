@@ -101,7 +101,7 @@ export function Configuration({ onCreate, onCancel }: Props) {
                       'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
                       {
                         defaultMessage:
-                          'Duration must be in the format of {value}{unit}, for example 5m, 3h, or 6d',
+                          'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
                       }
                     )}
                   >
