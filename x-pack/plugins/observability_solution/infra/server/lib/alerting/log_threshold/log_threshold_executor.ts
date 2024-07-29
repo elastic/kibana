@@ -31,7 +31,7 @@ import {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { type Group } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
@@ -191,6 +191,7 @@ export const createLogThresholdExecutor =
             [ALERT_CONTEXT]: alertContext,
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(rootLevelContext),
+            ...getEcsGroups(groups),
           };
 
           alertsClient.setAlertData({
