@@ -74,13 +74,17 @@ const entityDefinition = {
   metadata: [
     'user.risk.calculated_level',
     'user.risk.calculated_score_norm',
+    'user.email',
     'criticality_level',
     { source: '_index', destination: 'sourceIndex' },
-    { source: 'user.name', destination: 'test_user_name_embeddings' },
   ],
   history: {
     timestampField: '@timestamp',
     interval: '1m',
   },
   version: '1.0.0',
+  staticFields: {
+    test_user_name_embeddings: '{{user.name}} {{user.email}}',
+    debug_user_name_embeddings: '{{user.name}} {{user.email}}',
+  },
 };
