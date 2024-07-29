@@ -95,6 +95,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/observability-alerting-rule-utils"
   ]
 }

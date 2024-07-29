@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['entityManager']);
 
     loadTestFile(require.resolve('./enablement'));
+    loadTestFile(require.resolve('./definitions'));
   });
 }
