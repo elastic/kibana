@@ -169,7 +169,7 @@ export const ReactEmbeddableRenderer = <
             }
 
             const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
-              initialRuntimeState,
+              lastSavedRuntimeState,
               parentApi,
               comparators
             );

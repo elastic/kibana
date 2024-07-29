@@ -16,12 +16,12 @@ interface TestState {
 }
 
 describe('unsavedChanges api', () => {
-  const initialState = {
+  const lastSavedState = {
     key1: 'original key1 value',
     key2: 'original key2 value',
   } as TestState;
-  const key1$ = new BehaviorSubject(initialState.key1);
-  const key2$ = new BehaviorSubject(initialState.key2);
+  const key1$ = new BehaviorSubject(lastSavedState.key1);
+  const key2$ = new BehaviorSubject(lastSavedState.key2);
   const comparators = {
     key1: [key1$, (next: string) => key1$.next(next)],
     key2: [key2$, (next: string) => key2$.next(next)],
@@ -32,9 +32,9 @@ describe('unsavedChanges api', () => {
 
   let api: undefined | PublishesUnsavedChanges;
   beforeEach(() => {
-    key1$.next(initialState.key1);
-    key2$.next(initialState.key2);
-    ({ api } = initializeUnsavedChanges<TestState>(initialState, parentApi, comparators));
+    key1$.next(lastSavedState.key1);
+    key2$.next(lastSavedState.key2);
+    ({ api } = initializeUnsavedChanges<TestState>(lastSavedState, parentApi, comparators));
   });
 
   test('should have no unsaved changes after initialization', () => {
