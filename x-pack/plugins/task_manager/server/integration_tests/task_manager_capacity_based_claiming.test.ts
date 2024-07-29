@@ -13,6 +13,11 @@ import { TaskCost, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTask, setupTestServers, retry } from './lib';
+import { CreateMonitoringStatsOpts } from '../monitoring';
+import { filter, map } from 'rxjs';
+import { isTaskManagerWorkerUtilizationStatEvent } from '../task_events';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { Ok } from '../lib/result_type';
 
 const POLLING_INTERVAL = 5000;
 const { TaskPollingLifecycle: TaskPollingLifecycleMock } = jest.requireMock('../polling_lifecycle');
@@ -22,6 +27,17 @@ jest.mock('../polling_lifecycle', () => {
     ...actual,
     TaskPollingLifecycle: jest.fn().mockImplementation((opts) => {
       return new actual.TaskPollingLifecycle(opts);
+    }),
+  };
+});
+
+const { createMonitoringStats: createMonitoringStatsMock } = jest.requireMock('../monitoring');
+jest.mock('../monitoring', () => {
+  const actual = jest.requireActual('../monitoring');
+  return {
+    ...actual,
+    createMonitoringStats: jest.fn().mockImplementation((opts) => {
+      return new actual.createMonitoringStats(opts);
     }),
   };
 });
@@ -83,6 +99,7 @@ describe('capacity based claiming', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
+  let createMonitoringStatsOpts: CreateMonitoringStatsOpts;
 
   beforeAll(async () => {
     const setupResult = await setupTestServers({
@@ -120,6 +137,9 @@ describe('capacity based claiming', () => {
     taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
 
     expect(TaskPollingLifecycleMock).toHaveBeenCalledTimes(1);
+
+    expect(createMonitoringStatsMock).toHaveBeenCalledTimes(1);
+    createMonitoringStatsOpts = createMonitoringStatsMock.mock.calls[0][0];
   });
 
   afterAll(async () => {
@@ -143,6 +163,17 @@ describe('capacity based claiming', () => {
   });
 
   it('should claim tasks to full capacity', async () => {
+    const backgroundTaskLoads: number[] = [];
+    createMonitoringStatsOpts.taskPollingLifecycle?.events
+      .pipe(
+        filter(isTaskManagerWorkerUtilizationStatEvent),
+        map<TaskLifecycleEvent, number>((taskEvent: TaskLifecycleEvent) => {
+          return (taskEvent.event as unknown as Ok<number>).value;
+        })
+      )
+      .subscribe((load: number) => {
+        backgroundTaskLoads.push(load);
+      });
     const taskRunAtDates: Date[] = [];
     mockTaskTypeNormalCostRunFn.mockImplementation(() => {
       taskRunAtDates.push(new Date());
@@ -184,9 +215,25 @@ describe('capacity based claiming', () => {
     const lastRunAt = taskRunAtDates[taskRunAtDates.length - 1].getTime();
 
     expect(lastRunAt - firstRunAt).toBeLessThanOrEqual(1000);
+
+    // background task load should be 0 or 100 since we're only running these tasks
+    for (const load of backgroundTaskLoads) {
+      expect(load === 0 || load === 100).toBe(true);
+    }
   });
 
   it('should claim tasks until the next task will exceed capacity', async () => {
+    const backgroundTaskLoads: number[] = [];
+    createMonitoringStatsOpts.taskPollingLifecycle?.events
+      .pipe(
+        filter(isTaskManagerWorkerUtilizationStatEvent),
+        map<TaskLifecycleEvent, number>((taskEvent: TaskLifecycleEvent) => {
+          return (taskEvent.event as unknown as Ok<number>).value;
+        })
+      )
+      .subscribe((load: number) => {
+        backgroundTaskLoads.push(load);
+      });
     const now = new Date();
     const taskRunAtDates: Array<{ runAt: Date; type: string }> = [];
     mockTaskTypeNormalCostRunFn.mockImplementation(() => {
@@ -285,5 +332,12 @@ describe('capacity based claiming', () => {
     // last task should be normal cost and be run after one polling interval has passed
     expect(taskRunAtDates[7].type).toBe('normal');
     expect(taskRunAtDates[7].runAt.getTime() - firstRunAt).toBeGreaterThan(POLLING_INTERVAL - 500);
+
+    // background task load should be 0 or 60 or 100 since we're only running these tasks
+    // should be 100 during the claim cycle where we claimed 6 normal tasks but left the large capacity task in the queue
+    // should be 60 during the next claim cycle where we claimed the large capacity task and the normal capacity: 10 + 2 / 20 = 60%
+    for (const load of backgroundTaskLoads) {
+      expect(load === 0 || load === 60 || load === 100).toBe(true);
+    }
   });
 });
