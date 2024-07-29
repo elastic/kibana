@@ -9,7 +9,11 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../../common/api/timeline';
+import {
+  type DataProviderType,
+  DataProviderTypeEnum,
+  TimelineType,
+} from '../../../../../common/api/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import {
   useDeepEqualSelector,
@@ -22,10 +26,6 @@ import type { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 import type { DataProvidersAnd, QueryOperator } from './data_provider';
-import {
-  type DataProviderType,
-  DataProviderTypeEnum,
-} from '../../../../../common/api/timeline/model/components.gen';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
 import { timelineDefaults } from '../../../store/defaults';
 

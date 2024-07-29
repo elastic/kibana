@@ -20,7 +20,9 @@ import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_provid
 import {
   type DataProviderType,
   DataProviderTypeEnum,
-} from '../../../common/api/timeline/model/components.gen';
+  TimelineStatus,
+  TimelineType,
+} from '../../../common/api/timeline';
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
@@ -30,7 +32,6 @@ import type {
 } from '../../../common/types/timeline';
 import type { RowRendererId, TimelineTypeLiteral } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';

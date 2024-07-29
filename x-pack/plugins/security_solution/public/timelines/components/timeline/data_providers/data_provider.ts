@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { QueryType } from '@kbn/elastic-assistant';
-import type { DataProviderType } from '../../../../../common/api/timeline/model/components.gen';
+import type { DataProviderType } from '../../../../../common/api/timeline';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 /** Represents the Timeline data providers */
 

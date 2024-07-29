@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {

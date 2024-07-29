@@ -13,8 +13,11 @@ import type {
   TemplateTimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
 } from '../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import { TemplateTimelineTypeEnum } from '../../../../common/api/timeline/model/components.gen';
+import {
+  TemplateTimelineTypeEnum,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/api/timeline';
 
 import * as i18n from './translations';
 import type { TemplateTimelineFilter } from './types';

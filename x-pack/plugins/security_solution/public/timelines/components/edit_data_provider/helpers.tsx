@@ -9,10 +9,7 @@ import { findIndex } from 'lodash/fp';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { FieldCategory } from '@kbn/timelines-plugin/common/search_strategy';
-import {
-  type DataProviderType,
-  DataProviderTypeEnum,
-} from '../../../../common/api/timeline/model/components.gen';
+import { type DataProviderType, DataProviderTypeEnum } from '../../../../common/api/timeline';
 
 import type { BrowserFields } from '../../../common/containers/source';
 import { getAllFieldsByName } from '../../../common/containers/source';

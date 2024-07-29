@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 
 import { EXISTS_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
-import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 import {

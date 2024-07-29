@@ -11,17 +11,17 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/api/timeline';
+import {
+  type DataProviderType,
+  DataProviderTypeEnum,
+  TimelineType,
+} from '../../../../../common/api/timeline';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
 
 import type { OnDataProviderEdited } from '../events';
 import type { QueryOperator } from './data_provider';
 import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
-import {
-  type DataProviderType,
-  DataProviderTypeEnum,
-} from '../../../../../common/api/timeline/model/components.gen';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 
 import * as i18n from './translations';

@@ -16,7 +16,7 @@ import {
   EXISTS_OPERATOR,
   IS_ONE_OF_OPERATOR,
 } from '../timeline/data_providers/data_provider';
-import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 
 import { StatefulEditDataProvider } from '.';
 

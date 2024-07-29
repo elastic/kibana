@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum, TimelineType } from '../../../../common/api/timeline';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 import {
   getStringArray,

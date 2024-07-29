@@ -43,6 +43,7 @@ export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
 import { ErrorSchema } from './error_schema';
 import type { DataProviderType } from './components.gen';
 import { DataProviderTypeEnum, TemplateTimelineTypeEnum } from './components.gen';
+export { DataProviderType, DataProviderTypeEnum, TemplateTimelineTypeEnum };
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({

@@ -17,7 +17,7 @@ import memoizeOne from 'memoize-one';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =

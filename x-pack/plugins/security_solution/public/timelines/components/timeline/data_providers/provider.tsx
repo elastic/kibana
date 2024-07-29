@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import type { DataProvider } from './data_provider';
 import { IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
-import { DataProviderTypeEnum } from '../../../../../common/api/timeline/model/components.gen';
+import { DataProviderTypeEnum } from '../../../../../common/api/timeline';
 
 interface OwnProps {
   dataProvider: DataProvider;

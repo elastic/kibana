@@ -22,8 +22,12 @@ import type {
   PinnedEvent,
   Note,
 } from '../../../../common/api/timeline';
-import { RowRendererId, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
+import {
+  DataProviderTypeEnum,
+  RowRendererId,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 

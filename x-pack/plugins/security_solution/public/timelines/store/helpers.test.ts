@@ -8,13 +8,12 @@
 import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../common/types/timeline';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { DataProviderTypeEnum, TimelineType, TimelineStatus } from '../../../common/api/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,
 } from '../components/timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
-import { DataProviderTypeEnum } from '../../../common/api/timeline/model/components.gen';
 import { defaultColumnHeaderType } from '../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,

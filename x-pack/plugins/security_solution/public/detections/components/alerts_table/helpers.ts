@@ -11,12 +11,11 @@ import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum, TimelineType } from '../../../../common/api/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { DataProviderTypeEnum } from '../../../../common/api/timeline/model/components.gen';
 
 interface FindValueToChangeInQuery {
   field: string;

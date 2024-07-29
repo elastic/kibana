@@ -14,7 +14,6 @@ import type {
   DataProvider,
   QueryOperator,
 } from '../components/timeline/data_providers/data_provider';
-import { type DataProviderType } from '../../../common/api/timeline/model/components.gen';
 
 import type { KqlMode, TimelineModel } from './model';
 import type { InitialyzeTimelineSettings, InsertTimeline } from './types';
@@ -29,7 +28,7 @@ import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
 } from '../../../common/types/timeline';
-import type { RowRendererId } from '../../../common/api/timeline';
+import type { DataProviderType, RowRendererId } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');

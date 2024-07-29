@@ -12,16 +12,16 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
-import { TimelineType } from '../../../../../common/api/timeline';
+import {
+  type DataProviderType,
+  DataProviderTypeEnum,
+  TimelineType,
+} from '../../../../../common/api/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 
 import type { QueryOperator } from './data_provider';
 import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
-import {
-  type DataProviderType,
-  DataProviderTypeEnum,
-} from '../../../../../common/api/timeline/model/components.gen';
 
 import * as i18n from './translations';
 

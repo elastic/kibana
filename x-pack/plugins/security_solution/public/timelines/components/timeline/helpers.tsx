@@ -29,10 +29,7 @@ import {
 } from '../../../common/lib/kuery';
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
 import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
-import {
-  type DataProviderType,
-  DataProviderTypeEnum,
-} from '../../../../common/api/timeline/model/components.gen';
+import { type DataProviderType, DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
 const buildQueryMatch = (
