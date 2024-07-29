@@ -27,7 +27,7 @@ export const collectServiceLogs = {
   name: i18n.translate('xpack.apm.collect.service.logs.button', {
     defaultMessage: 'Collect new service logs',
   }),
-  link: '/app/observabilityOnboarding/?category=logs',
+  link: '/app/observabilityOnboarding/customLogs/?category=logs',
 };
 
 export function AddApmAgent({ basePath, onClick }: { basePath: IBasePath; onClick?: () => void }) {
