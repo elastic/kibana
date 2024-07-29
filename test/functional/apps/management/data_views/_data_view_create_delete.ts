@@ -152,6 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.createIndexPattern('l*,z*', '@timestamp');
         const patternName = await PageObjects.settings.getIndexPageHeading();
         expect(patternName).to.be('l*,z*');
+        await PageObjects.settings.removeIndexPattern();
       });
     });
 
