@@ -9,7 +9,6 @@
   },
   "kbn_references": [
     { "path": "../../../test/tsconfig.json" },
-    { "path": "../../../../test/tsconfig.json" },
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/cypress-config",

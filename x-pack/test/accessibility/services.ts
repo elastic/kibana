@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { services as kibanaA11yServices } from '../../../test/accessibility/services';
+import { services as kibanaA11yServices } from '@kbn/test-suites-src/accessibility/services';
 import { services as functionalServices } from '../functional/services';
 
 export const services = {

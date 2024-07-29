@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
+import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as commonServices } from '../../../common/services';
 import { services as apiIntegrationServices } from '../../../api_integration/services';
-import { services as kibanaApiIntegrationServices } from '../../../../../test/api_integration/services';
-import { services as kibanaFunctionalServices } from '../../../../../test/functional/services';
 
 export const services = {
   ...commonServices,
