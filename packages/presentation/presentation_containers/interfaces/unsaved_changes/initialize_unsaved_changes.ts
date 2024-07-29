@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { HasSnapshottableState } from '../serialized_state';
-import { apiHasSaveNotification } from '../has_save_notification';
 import {
   BehaviorSubject,
   combineLatest,
@@ -22,17 +20,19 @@ import {
   PublishingSubject,
   runComparators,
   StateComparators,
-} from '../../../presentation_publishing';
+} from '@kbn/presentation-publishing';
+import { HasSnapshottableState } from '../serialized_state';
+import { apiHasSaveNotification } from '../has_save_notification';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
 export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
-  lastSavedState: RuntimeState,
+  initialLastSavedState: RuntimeState,
   parentApi: unknown,
   comparators: StateComparators<RuntimeState>
 ) => {
   const subscriptions: Subscription[] = [];
-  const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(lastSavedState);
+  const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialLastSavedState);
 
   const snapshotRuntimeState = () => {
     const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;

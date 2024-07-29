@@ -7,8 +7,11 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import { COMPARATOR_SUBJECTS_DEBOUNCE, initializeUnsavedChanges } from './initialize_unsaved_changes';
-import { PublishesUnsavedChanges, StateComparators } from '../../../presentation_publishing';
+import {
+  COMPARATOR_SUBJECTS_DEBOUNCE,
+  initializeUnsavedChanges,
+} from './initialize_unsaved_changes';
+import { PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
 
 interface TestState {
   key1: string;

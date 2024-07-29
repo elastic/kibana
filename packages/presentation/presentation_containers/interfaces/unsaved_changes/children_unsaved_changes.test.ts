@@ -48,7 +48,7 @@ describe('childrenUnsavedChanges$', () => {
     expect(onFireMock).toHaveBeenCalledTimes(0);
 
     child1Api.unsavedChanges.next({
-      key1: 'modified value'
+      key1: 'modified value',
     });
     await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_TIME + 1));
 
@@ -56,8 +56,8 @@ describe('childrenUnsavedChanges$', () => {
     const childUnsavedChanges = onFireMock.mock.calls[0][0];
     expect(childUnsavedChanges).toEqual({
       child1: {
-        key1: 'modified value'
-      }
+        key1: 'modified value',
+      },
     });
 
     subscription.unsubscribe();
@@ -75,15 +75,15 @@ describe('childrenUnsavedChanges$', () => {
         unsavedChanges: new BehaviorSubject<object | undefined>({ key1: 'modified value' }),
         resetUnsavedChanges: () => undefined,
       },
-    })
+    });
     await new Promise((resolve) => setTimeout(resolve, DEBOUNCE_TIME + 1));
 
     expect(onFireMock).toHaveBeenCalledTimes(1);
     const childUnsavedChanges = onFireMock.mock.calls[0][0];
     expect(childUnsavedChanges).toEqual({
       child3: {
-        key1: 'modified value'
-      }
+        key1: 'modified value',
+      },
     });
 
     subscription.unsubscribe();
