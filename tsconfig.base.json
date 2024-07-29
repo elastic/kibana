@@ -1502,6 +1502,8 @@
       "@kbn/securitysolution-data-table/*": ["x-pack/packages/security-solution/data_table/*"],
       "@kbn/securitysolution-ecs": ["packages/kbn-securitysolution-ecs"],
       "@kbn/securitysolution-ecs/*": ["packages/kbn-securitysolution-ecs/*"],
+      "@kbn/securitysolution-endpoint-exceptions-common": ["packages/kbn-securitysolution-endpoint-exceptions-common"],
+      "@kbn/securitysolution-endpoint-exceptions-common/*": ["packages/kbn-securitysolution-endpoint-exceptions-common/*"],
       "@kbn/securitysolution-es-utils": ["packages/kbn-securitysolution-es-utils"],
       "@kbn/securitysolution-es-utils/*": ["packages/kbn-securitysolution-es-utils/*"],
       "@kbn/securitysolution-exception-list-components": ["packages/kbn-securitysolution-exception-list-components"],
@@ -1892,9 +1894,7 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ]
+      "@emotion/core": ["typings/@emotion"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

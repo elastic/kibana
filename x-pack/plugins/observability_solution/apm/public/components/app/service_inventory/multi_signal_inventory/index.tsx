@@ -27,6 +27,8 @@ import { ServiceListItem } from '../../../../../common/service_inventory';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { NoEntitiesEmptyState } from './table/no_entities_empty_state';
+import { Welcome } from '../../../shared/entity_enablement/welcome_modal';
+import { useServiceEcoTour } from '../../../../hooks/use_eco_tour';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 
@@ -147,6 +149,7 @@ export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
+  const { tourState, hideModal } = useServiceEcoTour();
   const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
@@ -172,45 +175,53 @@ export function MultiSignalInventory() {
     }
   }, [services.telemetry, data?.hasData]);
 
-  if (!data?.hasData && status === FETCH_STATUS.SUCCESS) {
-    return <NoEntitiesEmptyState />;
-  }
   return (
     <>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow>
-          <TableSearchBar
-            placeholder={i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
-              defaultMessage: 'Search services by name',
-            })}
-            searchQuery={searchQuery}
-            onChangeSearchQuery={setSearchQuery}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SearchBar showQueryInput={false} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <MultiSignalServicesTable
-            status={mainStatisticsStatus}
-            data={filteredData}
-            initialSortField={initialSortField}
-            initialPageSize={INITIAL_PAGE_SIZE}
-            initialSortDirection={INITIAL_SORT_DIRECTION}
-            timeseriesData={timeseriesDataFetch?.data}
-            timeseriesDataLoading={timeseriesDataFetch.status === FETCH_STATUS.LOADING}
-            noItemsMessage={
-              <EmptyMessage
-                heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
-                  defaultMessage: 'No services found',
+      {!data?.hasData && status === FETCH_STATUS.SUCCESS ? (
+        <NoEntitiesEmptyState />
+      ) : (
+        <>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow>
+              <TableSearchBar
+                placeholder={i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
+                  defaultMessage: 'Search services by name',
                 })}
+                searchQuery={searchQuery}
+                onChangeSearchQuery={setSearchQuery}
               />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SearchBar showQueryInput={false} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <MultiSignalServicesTable
+                status={mainStatisticsStatus}
+                data={filteredData}
+                initialSortField={initialSortField}
+                initialPageSize={INITIAL_PAGE_SIZE}
+                initialSortDirection={INITIAL_SORT_DIRECTION}
+                timeseriesData={timeseriesDataFetch?.data}
+                timeseriesDataLoading={timeseriesDataFetch.status === FETCH_STATUS.LOADING}
+                noItemsMessage={
+                  <EmptyMessage
+                    heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+                      defaultMessage: 'No services found',
+                    })}
+                  />
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+      <Welcome
+        isModalVisible={tourState.isModalVisible ?? false}
+        onClose={() => hideModal()}
+        onConfirm={() => hideModal()}
+      />
     </>
   );
 }

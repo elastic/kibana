@@ -6269,6 +6269,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-endpoint-exceptions-common@link:packages/kbn-securitysolution-endpoint-exceptions-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-es-utils@link:packages/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
@@ -25776,7 +25780,7 @@ prettier-linter-helpers@^1.0.0:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.0.tgz#b6a5bf1284026ae640f17f7ff5658a7567fc0d18"
   integrity sha512-kXtO4s0Lz/DW/IJ9QdWhAf7/NmPWQXkFr/r/WkR3vyI+0v8amTDxiaQSLzs8NBlytfLWX/7uQUMIW677yLKl4w==
 
-prettier@^2.0.0, prettier@^2.8.0:
+prettier@^2.0.0, prettier@^2.8.8:
   version "2.8.8"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
   integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==

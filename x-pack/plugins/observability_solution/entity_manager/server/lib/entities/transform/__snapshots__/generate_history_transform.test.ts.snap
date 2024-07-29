@@ -9,7 +9,7 @@ Object {
   "defer_validation": true,
   "dest": Object {
     "index": ".entities.v1.history.noop",
-    "pipeline": "entities-v1-history-admin-console-services",
+    "pipeline": "entities-v1-history-admin-console-services-backfill",
   },
   "frequency": "5m",
   "pivot": Object {
@@ -143,7 +143,7 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": "entities-v1-history-backfill-admin-console-services",
+  "transform_id": "entities-v1-history-backfill-admin-console-services-backfill",
 }
 `;
 
