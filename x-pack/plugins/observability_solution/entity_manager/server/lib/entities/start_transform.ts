@@ -8,10 +8,12 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
+  generateHistoryBackfillTransformId,
   generateHistoryTransformId,
   generateLatestTransformId,
 } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
+import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export async function startTransform(
   esClient: ElasticsearchClient,
@@ -26,6 +28,17 @@ export async function startTransform(
         esClient.transform.startTransform({ transform_id: historyTransformId }, { ignore: [409] }),
       { logger }
     );
+    if (isBackfillEnabled(definition)) {
+      const historyBackfillTransformId = generateHistoryBackfillTransformId(definition);
+      await retryTransientEsErrors(
+        () =>
+          esClient.transform.startTransform(
+            { transform_id: historyBackfillTransformId },
+            { ignore: [409] }
+          ),
+        { logger }
+      );
+    }
     await retryTransientEsErrors(
       () =>
         esClient.transform.startTransform({ transform_id: latestTransformId }, { ignore: [409] }),

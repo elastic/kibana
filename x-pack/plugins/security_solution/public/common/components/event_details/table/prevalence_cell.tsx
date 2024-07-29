@@ -14,6 +14,7 @@ import { getEmptyTagValue } from '../../empty_value';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
+import { getFieldFormat } from '../get_field_format';
 
 /**
  * Renders a Prevalence cell based on a regular alert prevalence query
@@ -37,7 +38,7 @@ const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
     contextId: scopeId,
     eventId,
     field: data.field,
-    fieldFormat: data.format,
+    fieldFormat: getFieldFormat(data),
     fieldFromBrowserField,
     fieldType: data.type,
     isObjectArray: data.isObjectArray,

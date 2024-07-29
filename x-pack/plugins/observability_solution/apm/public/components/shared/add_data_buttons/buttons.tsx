@@ -30,40 +30,43 @@ export const collectServiceLogs = {
   link: '/app/observabilityOnboarding/?category=logs',
 };
 
-export function AddApmAgent({ basePath }: { basePath: IBasePath }) {
+export function AddApmAgent({ basePath, onClick }: { basePath: IBasePath; onClick?: () => void }) {
+  function handleClick() {
+    window.open(basePath.prepend(addApmAgent.link), '_blank');
+    onClick?.();
+  }
   return (
-    <EuiButton
-      data-test-subj="addApmAgentButton"
-      size="s"
-      target="_blank"
-      href={basePath.prepend(addApmAgent.link)}
-    >
+    <EuiButton data-test-subj="addApmAgentButton" size="s" onClick={handleClick}>
       {addApmAgent.name}
     </EuiButton>
   );
 }
 
-export function AssociateServiceLogs() {
+export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
+  function handleClick() {
+    window.open(associateServiceLogs.link, '_blank');
+    onClick?.();
+  }
   return (
-    <EuiButton
-      data-test-subj="associateServiceLogsButton"
-      size="s"
-      target="_blank"
-      href={associateServiceLogs.link}
-    >
+    <EuiButton data-test-subj="associateServiceLogsButton" size="s" onClick={handleClick}>
       {associateServiceLogs.name}
     </EuiButton>
   );
 }
 
-export function CollectServiceLogs({ basePath }: { basePath: IBasePath }) {
+export function CollectServiceLogs({
+  basePath,
+  onClick,
+}: {
+  basePath: IBasePath;
+  onClick?: () => void;
+}) {
+  function handleClick() {
+    window.open(basePath.prepend(collectServiceLogs.link), '_blank');
+    onClick?.();
+  }
   return (
-    <EuiButton
-      data-test-subj="collectServiceLogsButton"
-      size="s"
-      target="_blank"
-      href={basePath.prepend(collectServiceLogs.link)}
-    >
+    <EuiButton data-test-subj="collectServiceLogsButton" size="s" onClick={handleClick}>
       {collectServiceLogs.name}
     </EuiButton>
   );

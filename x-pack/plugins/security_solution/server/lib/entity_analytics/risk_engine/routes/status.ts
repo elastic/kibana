@@ -7,7 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { RiskEngineStatusResponse } from '../../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import type { RiskEngineStatusResponse } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 

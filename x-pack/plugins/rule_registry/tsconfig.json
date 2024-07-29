@@ -34,8 +34,9 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server",
-    "@kbn/search-types",
-    "@kbn/alerting-state-types"
+    "@kbn/alerting-state-types",
+    "@kbn/alerting-types",
+    "@kbn/field-formats-plugin"
   ],
   "exclude": [
     "target/**/*",

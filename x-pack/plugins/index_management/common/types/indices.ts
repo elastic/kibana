@@ -11,6 +11,7 @@ interface IndexModule {
   number_of_shards: number | string;
   codec: string;
   routing_partition_size: number;
+  refresh_interval: string;
   load_fixed_bitset_filters_eagerly: boolean;
   shard: {
     check_on_startup: boolean | 'checksum';

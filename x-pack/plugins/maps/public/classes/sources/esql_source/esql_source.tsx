@@ -14,8 +14,8 @@ import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
-  getEarliestLatestParams,
-  hasEarliestLatestParams,
+  getStartEndParams,
+  hasStartEndParams,
 } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
@@ -117,11 +117,11 @@ export class ESQLSource
   }
 
   getApplyGlobalQuery() {
-    return this._descriptor.narrowByGlobalSearch || hasEarliestLatestParams(this._descriptor.esql);
+    return this._descriptor.narrowByGlobalSearch || hasStartEndParams(this._descriptor.esql);
   }
 
   async isTimeAware() {
-    return this._descriptor.narrowByGlobalTime || hasEarliestLatestParams(this._descriptor.esql);
+    return this._descriptor.narrowByGlobalTime || hasStartEndParams(this._descriptor.esql);
   }
 
   getApplyGlobalTime() {
@@ -214,7 +214,7 @@ export class ESQLSource
       }
     }
 
-    const namedParams = getEarliestLatestParams(this._descriptor.esql, timeRange);
+    const namedParams = getStartEndParams(this._descriptor.esql, timeRange);
     if (namedParams.length) {
       params.params = namedParams;
     }

@@ -45,7 +45,9 @@ export const publicConfigKeys = {
 } as const;
 
 export type InfraPublicConfigKey = keyof {
-  [K in keyof typeof publicConfigKeys as typeof publicConfigKeys[K] extends true ? K : never]: true;
+  [K in keyof typeof publicConfigKeys as (typeof publicConfigKeys)[K] extends true
+    ? K
+    : never]: true;
 };
 
 export type InfraPublicConfig = Pick<InfraConfig, InfraPublicConfigKey>;

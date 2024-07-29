@@ -19,10 +19,10 @@ export const UnprivilegedInfo: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.fleet.agentEnrollmentFlyout.unprivilegedMessage"
-            defaultMessage="To install Elastic Agent without root privileges, add the {flag} flag to the {command} install command below. For more information, see the {guideLink}"
+            defaultMessage="To install Elastic Agent without root privileges, add the {flag} flag to the {command} command below. For more information, see the {guideLink}"
             values={{
               flag: <EuiCode>--unprivileged</EuiCode>,
-              command: <EuiCode>sudo ./elastic-agent</EuiCode>,
+              command: <EuiCode>elastic-agent install</EuiCode>,
               guideLink: (
                 <EuiLink href={docLinks.links.fleet.unprivilegedMode} target="_blank" external>
                   <FormattedMessage
