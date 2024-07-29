@@ -288,12 +288,12 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'decimal',
+                    literalType: 'integer',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'decimal',
+                    literalType: 'integer',
                     name: '2',
                   },
                 ],
@@ -318,13 +318,12 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    // @TODO: investigate why these are interpreted as decimal, not integer
-                    literalType: 'decimal',
+                    literalType: 'integer',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'decimal',
+                    literalType: 'integer',
                     name: '2',
                   },
                 ],
@@ -343,12 +342,12 @@ describe('structurally can walk all nodes', () => {
             expect(literals).toMatchObject([
               {
                 type: 'literal',
-                literalType: 'decimal',
+                literalType: 'integer',
                 name: '1',
               },
               {
                 type: 'literal',
-                literalType: 'decimal',
+                literalType: 'integer',
                 name: '2',
               },
               {
@@ -512,7 +511,7 @@ describe('structurally can walk all nodes', () => {
 
       describe('cast expression', () => {
         test('can visit cast expression', () => {
-          const query = 'FROM index | STATS a = 123::number';
+          const query = 'FROM index | STATS a = 123::integer';
           const { ast } = getAstAndSyntaxErrors(query);
 
           const casts: ESQLInlineCast[] = [];
@@ -524,7 +523,7 @@ describe('structurally can walk all nodes', () => {
           expect(casts).toMatchObject([
             {
               type: 'inlineCast',
-              castType: 'number',
+              castType: 'integer',
               value: {
                 type: 'literal',
                 literalType: 'integer',

@@ -352,9 +352,9 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
   ) {
     const values: ESQLLiteral[] = [];
 
-    // @todo: double check here
     for (const numericValue of ctx.getTypedRuleContexts(NumericValueContext)) {
-      const isDecimal = numericValue.decimalValue() !== undefined;
+      const isDecimal =
+        numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
       values.push(createNumericLiteral(value!, isDecimal ? 'decimal' : 'integer'));
     }

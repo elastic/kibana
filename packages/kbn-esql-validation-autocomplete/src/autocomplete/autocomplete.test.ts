@@ -597,14 +597,10 @@ describe('autocomplete', () => {
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
       ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
     ]);
-    // @TODO: the quote escaping is causing autocomplete to suggest dates
-    // Find out why
-    // testSuggestions('from a | eval a=`any#Char$Field`+ ', [
-    //   ...TIME_SYSTEM_PARAMS,
-    //   ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-    //   'a', // @TODO remove this
-    //   ...getFunctionSignaturesByReturnType('eval', ESQL_NUMERIC_TYPES, { scalar: true }),
-    // ]);
+    testSuggestions('from a | eval a=`any#Char$Field`+ ', [
+      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
+    ]);
     testSuggestions(
       'from a | stats avg(doubleField) by stringField | eval ',
       [
