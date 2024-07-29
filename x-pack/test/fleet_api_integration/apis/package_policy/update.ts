@@ -579,6 +579,32 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should return 200 and disable an input that has all disabled streams', async function () {
+      const { body } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: {
+                    type: 'logs',
+                    dataset: 'test.some_logs',
+                  },
+                },
+              ],
+              type: 'single_input',
+            },
+          ],
+        })
+        .expect(200);
+      expect(body.item.inputs[0].enabled).to.eql(false);
+    });
+
     it('should allow to override inputs', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
@@ -886,6 +912,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const installation = await getInstallationSavedObject('integration_to_input', '2.0.0');
+
         expectIdArraysEqual(installation.installed_es, [
           // assets from version 1.0.0
           { id: 'logs-integration_to_input.log', type: 'index_template' },

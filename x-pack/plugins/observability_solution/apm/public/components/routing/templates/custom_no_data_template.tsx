@@ -93,7 +93,7 @@ export function CustomNoDataTemplate({
                     <p>
                       <EntityEnablement
                         label={i18n.translate('xpack.apm.customEmtpyState.card.link', {
-                          defaultMessage: 'Try creating services from logs',
+                          defaultMessage: 'Try collecting services from logs',
                         })}
                       />
                     </p>
