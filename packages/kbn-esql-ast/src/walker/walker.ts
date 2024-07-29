@@ -42,6 +42,8 @@ export interface WalkerOptions {
   visitUnknown?: (node: ESQLUnknownItem) => void;
 }
 
+export type WalkerAstNode = ESQLAstNode | ESQLAstNode[];
+
 /**
  * Iterates over all nodes in the AST and calls the appropriate visitor
  * functions.
@@ -64,7 +66,7 @@ export class Walker {
   /**
    * Walks the AST and calls the appropriate visitor functions.
    */
-  public static readonly walk = (node: Node, options: WalkerOptions): Walker => {
+  public static readonly walk = (node: WalkerAstNode, options: WalkerOptions): Walker => {
     const walker = new Walker(options);
     walker.walk(node);
     return walker;
@@ -88,7 +90,7 @@ export class Walker {
    *
    * @param node AST node to extract parameters from.
    */
-  public static readonly params = (node: Node): ESQLParamLiteral[] => {
+  public static readonly params = (node: WalkerAstNode): ESQLParamLiteral[] => {
     const params: ESQLParamLiteral[] = [];
     Walker.walk(node, {
       visitLiteral: (param) => {
@@ -101,21 +103,21 @@ export class Walker {
   };
 
   /**
-   * Returns the first function that matches the predicate.
+   * Finds the first function that matches the predicate.
    *
-   * @param node AST subtree to search in.
-   * @param predicate Function to test each function with.
-   * @returns The first function that matches the predicate.
+   * @param node AST node from which to search for a function
+   * @param predicate Callback function to determine if the function is found
+   * @returns The first function that matches the predicate
    */
   public static readonly findFunction = (
-    node: Node,
-    predicate: (fn: ESQLFunction) => boolean
+    node: WalkerAstNode,
+    predicate: (node: ESQLFunction) => boolean
   ): ESQLFunction | undefined => {
     let found: ESQLFunction | undefined;
     Walker.walk(node, {
-      visitFunction: (fn) => {
-        if (!found && predicate(fn)) {
-          found = fn;
+      visitFunction: (func) => {
+        if (!found && predicate(func)) {
+          found = func;
         }
       },
     });

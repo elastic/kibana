@@ -105,6 +105,7 @@
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
       "minimumReleaseAge": "7 days",
+      "allowedVersions": "<3.0",
       "enabled": true
     },
     {
