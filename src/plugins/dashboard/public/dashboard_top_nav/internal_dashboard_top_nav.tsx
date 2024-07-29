@@ -14,7 +14,6 @@ import {
   LazyLabsFlyout,
   getContextProvider as getPresentationUtilContextProvider,
 } from '@kbn/presentation-util-plugin/public';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
@@ -38,6 +37,7 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
+import { ManagedPopover } from '../dashboard_app/top_nav/managed_popover';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -62,6 +62,7 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
@@ -90,7 +91,6 @@ export function InternalDashboardTopNav({
 
   const dashboard = useDashboardAPI();
   const PresentationUtilContextProvider = getPresentationUtilContextProvider();
-
   const hasRunMigrations = dashboard.select(
     (state) => state.componentState.hasRunClientsideMigrations
   );
@@ -99,7 +99,7 @@ export function InternalDashboardTopNav({
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
-  const managed = dashboard.select((state) => state.componentState.managed);
+  const managed = true; // dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
@@ -313,10 +313,31 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
-      allBadges.push(getManagedContentBadge(dashboardManagedBadge.getTooltip()));
+      const text = dashboardManagedBadge.getText();
+      const renderCustomBadge = () => (
+        <ManagedPopover
+          key="managedDashboardDuplicatePopover"
+          text={text}
+          isPopoverOpen={isPopoverOpen}
+          setIsPopoverOpen={setIsPopoverOpen}
+          dashboard={dashboard}
+        />
+      );
+      allBadges.push({
+        renderCustomBadge,
+        badgeText: text,
+      });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);
+  }, [
+    hasUnsavedChanges,
+    viewMode,
+    hasRunMigrations,
+    showWriteControls,
+    managed,
+    isPopoverOpen,
+    dashboard,
+  ]);
 
   return (
     <div className="dashboardTopNav">

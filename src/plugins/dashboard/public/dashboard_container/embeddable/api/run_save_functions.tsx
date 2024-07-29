@@ -334,3 +334,91 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
     })();
   });
 }
+
+export async function duplicate(this: DashboardContainer) {
+  const {
+    dashboardContentManagement: { saveDashboardState, checkForDuplicateDashboardTitle },
+  } = pluginServices.getServices();
+
+  const { explicitInput: currentState } = this.getState();
+
+  return new Promise<SaveDashboardReturn | undefined>(async (resolve, reject) => {
+    try {
+      const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
+
+      let copyCount = baseCount;
+      let newTitle = `${baseTitle} (${copyCount})`;
+
+      while (
+        !(await checkForDuplicateDashboardTitle({
+          title: newTitle,
+          lastSavedTitle: currentState.title,
+          copyOnSave: true,
+          isTitleDuplicateConfirmed: false,
+        }))
+      ) {
+        copyCount++;
+        newTitle = `${baseTitle} (${copyCount})`;
+      }
+
+      let stateToSave: DashboardContainerInput & {
+        controlGroupInput?: PersistableControlGroupInput;
+      } = currentState;
+
+      if (this.controlGroup) {
+        stateToSave = {
+          ...stateToSave,
+          controlGroupInput: this.controlGroup.getPersistableInput(),
+        };
+      }
+
+      const isManaged = this.getState().componentState.managed;
+      const newPanels = await (async () => {
+        if (!isManaged) return currentState.panels;
+
+        const unlinkedPanels: DashboardPanelMap = {};
+
+        for (const [panelId, panel] of Object.entries(currentState.panels)) {
+          const child = this.getChild(panelId);
+          if (
+            child &&
+            isReferenceOrValueEmbeddable(child) &&
+            child.inputIsRefType(child.getInput() as EmbeddableInput)
+          ) {
+            const valueTypeInput = await child.getInputAsValueType();
+            unlinkedPanels[panelId] = {
+              ...panel,
+              explicitInput: valueTypeInput,
+            };
+            continue;
+          }
+          unlinkedPanels[panelId] = panel;
+        }
+        return unlinkedPanels;
+      })();
+
+      const saveResult = await saveDashboardState({
+        saveOptions: {
+          saveAsCopy: true,
+        },
+        currentState: {
+          ...stateToSave,
+          panels: newPanels,
+          title: newTitle,
+        },
+      });
+      this.savedObjectReferences = saveResult.references ?? [];
+      resolve(saveResult);
+      return saveResult.id
+        ? {
+            id: saveResult.id,
+          }
+        : {
+            error: saveResult.error,
+          };
+    } catch (error) {
+      reject(error);
+      return error;
+    }
+  });
+}

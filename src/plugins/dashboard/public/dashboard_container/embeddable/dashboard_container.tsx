@@ -82,6 +82,7 @@ import {
   runQuickSave,
   runInteractiveSave,
   showSettings,
+  duplicate,
 } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
@@ -440,7 +441,7 @@ export class DashboardContainer
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
-
+  public duplicate = duplicate;
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
