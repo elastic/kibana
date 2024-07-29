@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('flags fields with mismatched types as conflicting', async () => {
-      const response = await supertestWithoutAuth
+      const resp = await supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .set(internalReqHeader)
