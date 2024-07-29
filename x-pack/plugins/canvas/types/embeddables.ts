@@ -14,7 +14,11 @@ import {
   PublishesViewMode,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { CanAddNewPanel, HasSerializedChildState } from '@kbn/presentation-containers';
+import {
+  CanAddNewPanel,
+  HasRuntimeChildState,
+  HasSerializedChildState,
+} from '@kbn/presentation-containers';
 
 export type EmbeddableInput = Input & {
   timeRange?: TimeRange;
@@ -26,4 +30,5 @@ export type CanvasContainerApi = PublishesViewMode &
   CanAddNewPanel &
   HasDisableTriggers &
   HasSerializedChildState &
+  HasRuntimeChildState &
   Partial<HasAppContext & PublishesUnifiedSearch>;
