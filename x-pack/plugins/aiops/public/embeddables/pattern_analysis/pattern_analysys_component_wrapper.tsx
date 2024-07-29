@@ -28,6 +28,7 @@ import LogCategorizationEmbeddable from '../../components/log_categorization/log
  * @constructor
  */
 export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
+  dataViewId,
   fieldName,
   minimumTimeRangeOption,
   randomSamplerMode,
@@ -41,6 +42,10 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
   timeRange,
 }) => {
   const { dataView } = useDataSource();
+
+  if (dataView.id !== dataViewId) {
+    return null;
+  }
 
   return (
     <div
