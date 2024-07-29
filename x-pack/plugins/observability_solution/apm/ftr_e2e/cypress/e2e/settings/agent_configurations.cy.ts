@@ -121,8 +121,8 @@ describe('Agent configuration', () => {
 
     cy.get('mark').contains('All').click({ force: true });
     cy.contains('Next step').click();
-    cy.contains('Service name All');
-    cy.contains('Environment All');
+    cy.get('[data-test-subj="settingsPage_serviceName"]').contains('All');
+    cy.get('[data-test-subj="settingsPage_environmentName"]').contains('All');
     cy.contains('Edit').click();
     cy.wait('@serviceEnvironmentApi');
     cy.getByTestSubj('serviceEnviromentComboBox')
