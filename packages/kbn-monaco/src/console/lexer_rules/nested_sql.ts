@@ -29,11 +29,10 @@ export const buildSqlStartRule = (sqlRoot: string = 'sql_root') => {
 /*
  * This function creates a group of rules needed for sql highlighting in console.
  * It reuses the lexer ruls from the "sql" language, but since not all rules are referenced in the root
- * tokenizer and to avoid conflicts with existing console rules, only "root" and "comment" rules
- * are used.
+ * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
  */
 export const buildSqlRules = (sqlRoot: string = 'sql_root') => {
-  const { root, comment } = sqlLexerRules.tokenizer;
+  const { root, comment, numbers } = sqlLexerRules.tokenizer;
   return {
     [sqlRoot]: [
       // the rule to end sql highlighting and get back to the previous tokenizer state
@@ -45,6 +44,7 @@ export const buildSqlRules = (sqlRoot: string = 'sql_root') => {
         },
       ],
       ...root,
+      ...numbers,
     ],
     comment,
   };
