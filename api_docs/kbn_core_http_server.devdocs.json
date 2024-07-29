@@ -6221,6 +6221,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/external/update_objects_spaces.ts"
               },
               {
+                "plugin": "serverless",
+                "path": "x-pack/plugins/serverless/server/plugin.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
               },
@@ -6305,10 +6309,6 @@
                 "path": "x-pack/plugins/encrypted_saved_objects/server/routes/key_rotation.ts"
               },
               {
-                "plugin": "serverless",
-                "path": "x-pack/plugins/serverless/server/plugin.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/get_oauth_access_token.ts"
               },
@@ -6386,11 +6386,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -7538,14 +7538,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/disable_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/mute_all_rule.test.ts"
               },
               {
@@ -8042,11 +8034,19 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule.test.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule.test.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/disable/disable_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/enable/enable_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14521,6 +14521,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/management.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/inference_models.ts"
               },
               {
                 "plugin": "elasticAssistant",

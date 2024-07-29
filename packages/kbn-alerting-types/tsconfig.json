@@ -21,6 +21,7 @@
     "@kbn/rule-data-utils",
     "@kbn/rrule",
     "@kbn/core",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/search-types"
   ]
 }

@@ -28,8 +28,15 @@ export const disableRuleRoute = (
         summary: 'Disable a rule',
       },
       validate: {
-        params: disableRuleRequestParamsSchemaV1,
-        body: disableRuleRequestBodySchemaV1,
+        request: {
+          params: disableRuleRequestParamsSchemaV1,
+          body: disableRuleRequestBodySchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
