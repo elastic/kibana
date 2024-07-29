@@ -7,7 +7,10 @@
  */
 
 import React, {
+  useRef,
   useMemo,
+  useState,
+  useLayoutEffect,
   useCallback,
   Fragment,
   type ComponentProps,
@@ -72,8 +75,47 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
 }) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
-  const selectedTabId = state.meta.selectedTabId;
-  const shareModalHeadingId = useGeneratedHtmlId();
+  const { selectedTabId, defaultSelectedTabId } = state.meta;
+  const tabbedModalHTMLId = useGeneratedHtmlId();
+  const tabbedModalHeadingHTMLId = useGeneratedHtmlId();
+  const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'x' | 'y'>>());
+  const [modalPositionOverrideStyles, setPositionOverrideStyles] = useState<React.CSSProperties>(
+    {}
+  );
+
+  const onTabContentRender = useCallback(() => {
+    const tabbedModal = document.querySelector(`#${tabbedModalHTMLId}`) as HTMLDivElement;
+
+    if (!defaultTabCoordinates.current.get(defaultSelectedTabId)) {
+      // on initial render the modal animates into it's final position
+      // hence the need to wait till said animation has completed
+      tabbedModal.onanimationend = () => {
+        const { x, y } = tabbedModal.getBoundingClientRect();
+        defaultTabCoordinates.current.set(defaultSelectedTabId, { x, y });
+      };
+    } else {
+      let positionOverrideStyles: React.CSSProperties;
+
+      if (defaultSelectedTabId === selectedTabId) {
+        positionOverrideStyles = {};
+      } else {
+        const defaultTabData = defaultTabCoordinates.current.get(defaultSelectedTabId);
+
+        positionOverrideStyles = {
+          position: 'absolute',
+          top: `${defaultTabData?.y}px`,
+          left: `${defaultTabData?.x}px`,
+        };
+      }
+
+      if (
+        Object.keys(modalPositionOverrideStyles).length !==
+        Object.keys(positionOverrideStyles).length
+      ) {
+        setPositionOverrideStyles(positionOverrideStyles);
+      }
+    }
+  }, [tabbedModalHTMLId, defaultSelectedTabId, selectedTabId, modalPositionOverrideStyles]);
 
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
@@ -111,24 +153,35 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
 
   return (
     <EuiModal
+      id={tabbedModalHTMLId}
       onClose={() => {
         onClose();
         setTimeout(() => anchorElement?.focus(), 1);
       }}
-      style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
-      aria-labelledby={shareModalHeadingId}
       data-test-subj={props['data-test-subj']}
+      style={{
+        ...(modalWidth ? { width: modalWidth } : {}),
+        ...modalPositionOverrideStyles,
+      }}
+      aria-labelledby={tabbedModalHeadingHTMLId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={shareModalHeadingId}>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
           <EuiTabs>{renderTabs()}</EuiTabs>
-          {React.createElement(SelectedTabContent, {
-            state: selectedTabState,
-            dispatch,
+          {React.createElement(function RenderSelectedTabContent() {
+            useLayoutEffect(onTabContentRender, []);
+            return (
+              <SelectedTabContent
+                {...{
+                  state: selectedTabState,
+                  dispatch,
+                }}
+              />
+            );
           })}
         </Fragment>
       </EuiModalBody>
