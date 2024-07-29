@@ -64,10 +64,6 @@ actions:
   - target: "$.paths['/api/saved_objects/resolve/{type}/{id}']['get'].security"
     description: Remove system security definitions
     remove: true
-  # Remove elastic-api-version parameter
-  - target: "$.paths['/api/status']['get'].parameters[?(@.name=='elastic-api-version')]"
-    description: Remove elastic-api-version
-    remove: true
   # Add document-level security definitions
   - target: '$.components.securitySchemes'
     description: Add an API key security scheme
