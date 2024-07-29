@@ -8179,12 +8179,12 @@
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"@redocly/cli@^1.18.0":
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.18.0.tgz#9d6903dfa65bfc72d24be094eda040248637b0d2"
-  integrity sha512-JDxBetC1EYYZ2HNA4GzgkJK03Pbd/ABq7bT0WXGlgXsTQPkMEwv2S5QlwIprIBRHl7E+7zMaIO5tZGEPW/uCBQ==
+"@redocly/cli@^1.18.1":
+  version "1.18.1"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.18.1.tgz#a811d33be83885cdae973bcdf30455b8bb2bffc1"
+  integrity sha512-+bRKj46R9wvTzMdnoYfMueJ9/ek0NprEsQNowV7XcHgOXifeFFikRtBFcpkwqCNxaQ/nWAJn4LHZaFcssbcHow==
   dependencies:
-    "@redocly/openapi-core" "1.18.0"
+    "@redocly/openapi-core" "1.18.1"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -8195,6 +8195,7 @@
     handlebars "^4.7.6"
     mobx "^6.0.4"
     node-fetch "^2.6.1"
+    pluralize "^8.0.0"
     react "^17.0.0 || ^18.2.0"
     react-dom "^17.0.0 || ^18.2.0"
     redoc "~2.1.5"
@@ -8208,7 +8209,29 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.6.2.tgz#b5180ccb407673ee048b818c3be9a4f9d0636a64"
   integrity sha512-c3K5u64eMnr2ootPcpEI0ioIRLE8QP8ptvLxG9MwAmb2sU8HMRfVwXDU3AZiMVY2w4Ts0mDc+Xv4HTIk8DRqFw==
 
-"@redocly/openapi-core@1.18.0", "@redocly/openapi-core@^1.4.0":
+"@redocly/config@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.7.0.tgz#e8d06dc1f2d9cb9a4b5c5ce09afbf8536b32161c"
+  integrity sha512-6GKxTo/9df0654Mtivvr4lQnMOp+pRj9neVywmI5+BwfZLTtkJnj2qB3D6d8FHTr4apsNOf6zTa5FojX0Evh4g==
+
+"@redocly/openapi-core@1.18.1":
+  version "1.18.1"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.18.1.tgz#b23cdc647db3ecb787995e9f78b569c13c33fb0d"
+  integrity sha512-y2ZR3aaVF80XRVoFP0Dp2z5DeCOilPTuS7V4HnHIYZdBTfsqzjkO169h5JqAaifnaLsLBhe3YArdgLb7W7wW6Q==
+  dependencies:
+    "@redocly/ajv" "^8.11.0"
+    "@redocly/config" "^0.7.0"
+    colorette "^1.2.0"
+    https-proxy-agent "^7.0.4"
+    js-levenshtein "^1.1.6"
+    js-yaml "^4.1.0"
+    lodash.isequal "^4.5.0"
+    minimatch "^5.0.1"
+    node-fetch "^2.6.1"
+    pluralize "^8.0.0"
+    yaml-ast-parser "0.0.43"
+
+"@redocly/openapi-core@^1.4.0":
   version "1.18.0"
   resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.18.0.tgz#bc8ece197a856816b4fc076e6bead1e425e4f6a8"
   integrity sha512-kcbt7w23pcVYGLnJkh2LZpXF1OX5RDM4DLOtwPug2HvRE8ow/YfY8ZEM1YCFlA41D8rBPBVP918cYeIx4BVUbw==
