@@ -47,6 +47,7 @@ import {
   previewRule,
   previewRuleWithExceptionEntries,
   setupMlModulesWithRetry,
+  waitForAnomalies,
 } from '../../../../utils';
 import {
   createRule,
