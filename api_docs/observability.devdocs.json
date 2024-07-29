@@ -762,7 +762,13 @@
             "text": "TopAlert"
           },
           "<{}> | undefined; rawAlert?: ",
-          "EcsFieldsResponse",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
           " | undefined; alerts?: Record<string, unknown>[] | undefined; isInApp?: boolean | undefined; observabilityRuleTypeRegistry: { register: (type: ",
           {
             "pluginId": "observability",

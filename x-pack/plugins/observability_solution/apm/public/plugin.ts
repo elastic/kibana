@@ -82,6 +82,7 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
+import { registerServiceInventoryViewTypeContext } from './analytics/register_service_inventory_view_type_context';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
@@ -273,6 +274,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     };
 
     this.telemetry.setup({ analytics: core.analytics });
+    registerServiceInventoryViewTypeContext(core.analytics);
 
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(

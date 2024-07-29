@@ -21,4 +21,5 @@ export type AssistantFeatureKey = keyof AssistantFeatures;
 export const defaultAssistantFeatures = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
   assistantModelEvaluation: false,
+  assistantBedrockChat: false,
 });

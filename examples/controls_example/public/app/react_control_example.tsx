@@ -73,7 +73,6 @@ const controlGroupPanels = {
       title: 'Message',
       grow: true,
       width: 'medium',
-      searchString: 'this',
       enhancements: {},
     },
   },
@@ -144,6 +143,7 @@ export const ReactControlExample = ({
   );
 
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
+  const [isControlGroupInitialized, setIsControlGroupInitialized] = useState(false);
   const [dataViewNotFound, setDataViewNotFound] = useState(false);
 
   const dashboardApi = useMemo(() => {
@@ -221,6 +221,22 @@ export const ReactControlExample = ({
       subscription.unsubscribe();
     };
   }, [controlGroupFilters$, controlGroupApi]);
+
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    let ignore = false;
+    controlGroupApi.untilInitialized().then(() => {
+      if (!ignore) {
+        setIsControlGroupInitialized(true);
+      }
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [controlGroupApi]);
 
   useEffect(() => {
     if (!controlGroupApi) return;
@@ -376,22 +392,24 @@ export const ReactControlExample = ({
         key={`control_group`}
       />
       <EuiSpacer size="l" />
-      <div style={{ height: '400px' }}>
-        <ReactEmbeddableRenderer
-          type={'data_table'}
-          getParentApi={() => ({
-            ...dashboardApi,
-            getSerializedStateForChild: () => ({
-              rawState: {},
-              references: [],
-            }),
-          })}
-          hidePanelChrome={false}
-          onApiAvailable={(api) => {
-            dashboardApi?.setChild(api);
-          }}
-        />
-      </div>
+      {isControlGroupInitialized && (
+        <div style={{ height: '400px' }}>
+          <ReactEmbeddableRenderer
+            type={'data_table'}
+            getParentApi={() => ({
+              ...dashboardApi,
+              getSerializedStateForChild: () => ({
+                rawState: {},
+                references: [],
+              }),
+            })}
+            hidePanelChrome={false}
+            onApiAvailable={(api) => {
+              dashboardApi?.setChild(api);
+            }}
+          />
+        </div>
+      )}
     </>
   );
 };

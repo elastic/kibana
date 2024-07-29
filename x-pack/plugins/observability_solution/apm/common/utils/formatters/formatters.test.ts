@@ -71,6 +71,12 @@ describe('formatters', () => {
         expect(asDecimalOrInteger(0.25435632645, 1)).toEqual('0.3');
       });
     });
+
+    it('returns fallback when valueNaN', () => {
+      expect(asDecimalOrInteger(NaN)).toEqual('N/A');
+      expect(asDecimalOrInteger(null)).toEqual('N/A');
+      expect(asDecimalOrInteger(undefined)).toEqual('N/A');
+    });
   });
 });
 

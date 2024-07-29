@@ -15,7 +15,7 @@ const TARGET_TAGS = [
   '@brokenInServerless',
 ] as const;
 
-export type TargetTags = typeof TARGET_TAGS[number];
+export type TargetTags = (typeof TARGET_TAGS)[number];
 
 export function targetTags(thisSuite: Mocha.Suite, tags: TargetTags[]) {
   // @ts-ignore: _tags is not publicly visible
@@ -24,7 +24,7 @@ export function targetTags(thisSuite: Mocha.Suite, tags: TargetTags[]) {
 
   if (existingTargetTags.length > 0) {
     return expect().fail(`
-    
+
     ⚠️  ERROR in \`${targetTags.name}()\`: the passed suite already has target tags.
 
        Suite name:         ${thisSuite.title}
@@ -40,7 +40,7 @@ export function targetTags(thisSuite: Mocha.Suite, tags: TargetTags[]) {
           describe('must receive a regular function', function () {
             ${targetTags.name}(this, ['@serverless']);
           })
-    
+
     `);
   }
 

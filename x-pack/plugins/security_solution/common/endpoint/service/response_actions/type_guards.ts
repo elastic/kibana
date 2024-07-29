@@ -41,8 +41,8 @@ export const isGetFileAction = (
 };
 
 // type guards to ensure only the matching string values are attached to the types filter type
-export const isAgentType = (type: string): type is typeof RESPONSE_ACTION_AGENT_TYPE[number] =>
-  RESPONSE_ACTION_AGENT_TYPE.includes(type as typeof RESPONSE_ACTION_AGENT_TYPE[number]);
+export const isAgentType = (type: string): type is (typeof RESPONSE_ACTION_AGENT_TYPE)[number] =>
+  RESPONSE_ACTION_AGENT_TYPE.includes(type as (typeof RESPONSE_ACTION_AGENT_TYPE)[number]);
 
-export const isActionType = (type: string): type is typeof RESPONSE_ACTION_TYPE[number] =>
-  RESPONSE_ACTION_TYPE.includes(type as typeof RESPONSE_ACTION_TYPE[number]);
+export const isActionType = (type: string): type is (typeof RESPONSE_ACTION_TYPE)[number] =>
+  RESPONSE_ACTION_TYPE.includes(type as (typeof RESPONSE_ACTION_TYPE)[number]);

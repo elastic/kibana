@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
+import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -173,6 +174,39 @@ export class ChromeService {
     this.mutationObserver.observe(body, { attributes: true });
   };
 
+  // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
+    const isDev = this.params.coreContext.env.mode.name === 'development';
+    if (isDev) {
+      setEuiDevProviderWarning((providerError) => {
+        const errorObject = new Error(providerError.toString());
+        // show a stack trace in the console
+        // eslint-disable-next-line no-console
+        console.error(errorObject);
+
+        notifications.toasts.addDanger({
+          title: '`EuiProvider` is missing',
+          text: mountReactNode(
+            <p data-test-sub="core-chrome-euiDevProviderWarning-toast">
+              <FormattedMessage
+                id="core.chrome.euiDevProviderWarning"
+                defaultMessage="Kibana components must be wrapped in a React Context provider for full functionality and proper theming support. See {link}."
+                values={{
+                  link: (
+                    <a href="https://docs.elastic.dev/kibana-dev-docs/react-context">
+                      https://docs.elastic.dev/kibana-dev-docs/react-context
+                    </a>
+                  ),
+                }}
+              />
+            </p>
+          ),
+          toastLifeTimeMs: 60 * 60 * 1000, // keep message visible for up to an hour
+        });
+      });
+    }
+  };
+
   public setup({ analytics }: SetupDeps) {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
@@ -188,6 +222,7 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
+    this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
