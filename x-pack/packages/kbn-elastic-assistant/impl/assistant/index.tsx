@@ -256,13 +256,13 @@ const AssistantComponent: React.FC<Props> = ({
           conversations[WELCOME_CONVERSATION_TITLE] ??
           getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
 
-        // updated selected system prompt
-        setEditingSystemPromptId(
-          getDefaultSystemPrompt({
-            allSystemPrompts,
-            conversation: conversationToReturn,
-          })?.id
-        );
+        // // updated selected system prompt
+        // setEditingSystemPromptId(
+        //   getDefaultSystemPrompt({
+        //     allSystemPrompts,
+        //     conversation: conversationToReturn,
+        //   })?.id
+        // );
         if (
           prev &&
           prev.id === conversationToReturn.id &&
