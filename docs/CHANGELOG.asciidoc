@@ -97,7 +97,13 @@ The Uptime app is already hidden from Kibana when there is no recent Heartbeat d
 [[release-notes-8.14.3]]
 == {kib} 8.14.3
 
-The 8.14.3 release includes the following bug fixes.
+The 8.14.3 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
 [float]
 [[fixes-v8.14.3]]
@@ -110,7 +116,13 @@ For the Elastic Security 8.14.3 release information, refer to {security-guide}/r
 [[release-notes-8.14.2]]
 == {kib} 8.14.2
 
-The 8.14.2 release includes the following bug fixes.
+The 8.14.2 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
 [float]
 [[fixes-v8.14.2]]
@@ -128,7 +140,13 @@ Presentation::
 [[release-notes-8.14.1]]
 == {kib} 8.14.1
 
-The 8.14.1 release includes the following bug fixes.
+The 8.14.1 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
 [float]
 [[fixes-v8.14.1]]
@@ -148,6 +166,28 @@ Observability::
 == {kib} 8.14.0
 
 For information about the {kib} 8.14.0 release, review the following information.
+
+[float]
+[[known-issues-8.14.0]]
+=== Known issues
+
+// tag::known-issue-186969[]
+[discrete]
+.Creating or editing APM, {observability} and {stack-monitor-app} rules fails
+[%collapsible]
+====
+*Details* +
+When you attempt to create or edit some rule types in **{stack-manage-app}** > **{rules-ui}**, the request will fail with errors similar to `Cannot read properties of undefined (reading 'eui')` or `e.theme.eui is undefined`.
+Refer to https://github.com/elastic/kibana/issues/186969[#186969]
+
+*Impact* +
+This known issue impacts only {observability}, {stack-monitor-app}, and APM and {user-experience} rules.
+
+*Workaround* +
+To work around this issue for {observability} and APM and {user-experience} rules, create them from the {observability} *Alerts* page.
+Refer to <<apm-alerts>> and {observability-guide}/create-alerts-rules.html[Create and manage {observability} rules].
+====
+// end::known-issue-186969[]
 
 [float]
 [[breaking-changes-8.14.0]]
