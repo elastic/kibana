@@ -7,8 +7,6 @@
 
 import React, { useEffect } from 'react';
 
-import { useValues } from 'kea';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,10 +22,10 @@ import { i18n } from '@kbn/i18n';
 
 // import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
-
-import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+import { Connector } from '@kbn/search-connectors/types/connectors';
 
 interface ConfigurationStepProps {
+  connector: Connector;
   currentStep: number;
   isNextStepEnabled: boolean;
   setCurrentStep: Function;
@@ -39,6 +37,7 @@ interface ConfigurationStepProps {
 
 export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   title,
+  connector,
   currentStep,
   setCurrentStep,
   isNextStepEnabled,
@@ -46,7 +45,6 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
   setSyncing,
   syncing,
 }) => {
-  const { connector } = useValues(ConnectorViewLogic);
   if (connector) {
     connector.status = 'created' as ConnectorStatus;
   }

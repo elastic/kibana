@@ -24,11 +24,11 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { Connector } from '@kbn/search-connectors/types/connectors';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import { GenerateConfigButton } from '../../connector_detail/components/generate_config_button';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
-import { ConnectorViewValues } from '../../connector_detail/connector_view_logic';
 import { DeploymentLogic } from '../../connector_detail/deployment_logic';
 
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
@@ -37,7 +37,7 @@ import { ManualConfiguration } from './components/manual_configuration';
 
 interface StartStepProps {
   allConnectors: ConnectorDefinition[];
-  connector: ConnectorViewValues;
+  connector: Connector;
   connectorName: string;
   connectorSelected: ConnectorDefinition;
   currentStep: number;
