@@ -11,7 +11,10 @@ import {
   updateLoadingState,
   setZeroDocsFallback,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
 import { fetchIndexInfo } from '@kbn/aiops-log-rate-analysis/queries/fetch_index_info';
@@ -30,6 +33,7 @@ export const indexInfoHandlerFactory =
       requestBody,
       responseStream,
       stateHandler,
+      version,
     } = options;
 
     const keywordFieldCandidates: string[] = [];
@@ -54,9 +58,22 @@ export const indexInfoHandlerFactory =
       })
     );
 
-    const skipFieldCandidates =
-      Array.isArray(requestBody.overrides?.remainingKeywordFieldCandidates) ||
-      Array.isArray(requestBody.overrides?.remainingTextFieldCandidates);
+    let skipFieldCandidates = false;
+
+    if (version === '2') {
+      skipFieldCandidates = Array.isArray(
+        (requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.remainingFieldCandidates
+      );
+    } else if (version === '3') {
+      skipFieldCandidates =
+        Array.isArray(
+          (requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides
+            ?.remainingKeywordFieldCandidates
+        ) ||
+        Array.isArray(
+          (requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.remainingTextFieldCandidates
+        );
+    }
 
     try {
       const indexInfo = await fetchIndexInfo({

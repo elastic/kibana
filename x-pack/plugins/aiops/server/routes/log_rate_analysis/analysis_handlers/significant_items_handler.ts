@@ -44,6 +44,7 @@ export const significantItemsHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
+    version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
     keywordFieldCandidates,
@@ -85,19 +86,39 @@ export const significantItemsHandlerFactory =
       loadingStepSizePValues = LOADED_FIELD_CANDIDATES;
     }
 
-    if (requestBody.overrides?.remainingKeywordFieldCandidates) {
-      keywordFieldCandidates.push(...requestBody.overrides?.remainingKeywordFieldCandidates);
-      remainingKeywordFieldCandidates = requestBody.overrides?.remainingKeywordFieldCandidates;
-      keywordFieldCandidatesCount = keywordFieldCandidates.length;
-    } else {
-      remainingKeywordFieldCandidates = keywordFieldCandidates;
-    }
+    if (version === '2') {
+      const overridesRemainingFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'2'>)
+        .overrides?.remainingFieldCandidates;
 
-    if (requestBody.overrides?.remainingTextFieldCandidates) {
-      textFieldCandidates.push(...requestBody.overrides?.remainingTextFieldCandidates);
-      remainingTextFieldCandidates = requestBody.overrides?.remainingTextFieldCandidates;
-    } else {
-      remainingTextFieldCandidates = textFieldCandidates;
+      if (Array.isArray(overridesRemainingFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
+    } else if (version === '3') {
+      const overridesRemainingKeywordFieldCandidates = (
+        requestBody as AiopsLogRateAnalysisSchema<'3'>
+      ).overrides?.remainingKeywordFieldCandidates;
+
+      if (Array.isArray(overridesRemainingKeywordFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingKeywordFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingKeywordFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
+
+      const overridesRemainingTextFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'3'>)
+        .overrides?.remainingTextFieldCandidates;
+
+      if (Array.isArray(overridesRemainingTextFieldCandidates)) {
+        textFieldCandidates.push(...overridesRemainingTextFieldCandidates);
+        remainingTextFieldCandidates = overridesRemainingTextFieldCandidates;
+      } else {
+        remainingTextFieldCandidates = textFieldCandidates;
+      }
     }
 
     logDebugMessage('Fetch p-values.');

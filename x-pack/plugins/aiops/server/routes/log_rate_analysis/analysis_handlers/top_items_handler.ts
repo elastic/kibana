@@ -39,6 +39,7 @@ export const topItemsHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
+    version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
     keywordFieldCandidates,
@@ -52,13 +53,19 @@ export const topItemsHandlerFactory =
     // This will store the combined count of detected log patterns and keywords
     let fieldValuePairsCount = 0;
 
-    if (requestBody.overrides?.remainingTextFieldCandidates) {
-      textFieldCandidates.push(...requestBody.overrides?.remainingTextFieldCandidates);
+    if (version === '3') {
+      const overridesRemainingTextFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'3'>)
+        .overrides?.remainingTextFieldCandidates;
+
+      if (Array.isArray(overridesRemainingTextFieldCandidates)) {
+        textFieldCandidates.push(...overridesRemainingTextFieldCandidates);
+      }
     }
+
     const topCategories: SignificantItem[] = [];
 
     topCategories.push(
-      ...((requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.significantItems?.filter(
+      ...(requestBody.overrides?.significantItems?.filter(
         (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
       ) ?? [])
     );
@@ -93,16 +100,37 @@ export const topItemsHandlerFactory =
     let remainingKeywordFieldCandidates: string[];
     let loadingStepSizeTopTerms = PROGRESS_STEP_P_VALUES;
 
-    if (requestBody.overrides?.remainingKeywordFieldCandidates) {
-      keywordFieldCandidates.push(...requestBody.overrides?.remainingKeywordFieldCandidates);
-      remainingKeywordFieldCandidates = requestBody.overrides?.remainingKeywordFieldCandidates;
-      keywordFieldCandidatesCount = keywordFieldCandidates.length;
-      loadingStepSizeTopTerms =
-        LOADED_FIELD_CANDIDATES +
-        PROGRESS_STEP_P_VALUES -
-        (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
-    } else {
-      remainingKeywordFieldCandidates = keywordFieldCandidates;
+    if (version === '2') {
+      const overridesRemainingFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'2'>)
+        .overrides?.remainingFieldCandidates;
+
+      if (Array.isArray(overridesRemainingFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+        loadingStepSizeTopTerms =
+          LOADED_FIELD_CANDIDATES +
+          PROGRESS_STEP_P_VALUES -
+          (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
+    } else if (version === '3') {
+      const overridesRemainingKeywordFieldCandidates = (
+        requestBody as AiopsLogRateAnalysisSchema<'3'>
+      ).overrides?.remainingKeywordFieldCandidates;
+
+      if (Array.isArray(overridesRemainingKeywordFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingKeywordFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingKeywordFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+        loadingStepSizeTopTerms =
+          LOADED_FIELD_CANDIDATES +
+          PROGRESS_STEP_P_VALUES -
+          (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
     }
 
     logDebugMessage('Fetch top items.');
