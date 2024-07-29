@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useImperativeHandle, useMemo } from 'react';
+import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { StateComparators } from '@kbn/presentation-publishing';
@@ -27,23 +27,30 @@ export const ControlRenderer = <
   uuid,
   getParentApi,
   onApiAvailable,
+  isControlGroupInitialized,
 }: {
   type: string;
   uuid: string;
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
+  isControlGroupInitialized: boolean;
 }) => {
-  const component = useMemo(
-    () =>
-      (() => {
+  const [component, setComponent] = useState<undefined | React.FC<{ className: string }>>(
+    undefined
+  );
+
+  useEffect(
+    () => {
+      let ignore = false;
+
+      async function buildControl() {
         const parentApi = getParentApi();
         const factory = getControlFactory<StateType, ApiType>(type);
-
         const buildApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<StateType> // TODO: Use these to calculate unsaved changes
         ): ApiType => {
-          const fullApi = {
+          return {
             ...apiRegistration,
             uuid,
             parentApi,
@@ -51,34 +58,69 @@ export const ControlRenderer = <
             resetUnsavedChanges: () => {},
             type: factory.type,
           } as unknown as ApiType;
-
-          onApiAvailable?.(fullApi);
-          return fullApi;
         };
-
         const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {};
 
-        const { api, Component } = factory.buildControl(
+        return await factory.buildControl(
           initialState as unknown as StateType,
           buildApi,
           uuid,
           parentApi
         );
+      }
 
-        return React.forwardRef<typeof api, { className: string }>((props, ref) => {
-          // expose the api into the imperative handle
-          useImperativeHandle(ref, () => api, []);
+      buildControl()
+        .then(({ api, Component }) => {
+          if (ignore) {
+            return;
+          }
 
-          return <Component {...props} />;
+          onApiAvailable?.(api);
+
+          setComponent(
+            React.forwardRef<typeof api, { className: string }>((props, ref) => {
+              // expose the api into the imperative handle
+              useImperativeHandle(ref, () => api, []);
+              return <Component {...props} />;
+            })
+          );
+        })
+        .catch((error) => {
+          if (ignore) {
+            return;
+          }
+          /**
+           * critical error encountered when trying to build the control;
+           * since no API is available, create a dummy API that allows the control to be deleted
+           * */
+          const errorApi = {
+            uuid,
+            blockingError: new BehaviorSubject(error),
+          };
+          setComponent(
+            React.forwardRef<typeof errorApi, { className: string }>((_, ref) => {
+              // expose the dummy error api into the imperative handle
+              useImperativeHandle(ref, () => errorApi, []);
+              return null;
+            })
+          );
         });
-      })(),
+
+      return () => {
+        ignore = true;
+      };
+    },
     /**
      * Disabling exhaustive deps because we do not want to re-fetch the component
-     * from the embeddable registry unless the type changes.
+     * unless the type changes.
      */
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [type]
   );
 
-  return <ControlPanel<ApiType> Component={component} uuid={uuid} />;
+  return component && isControlGroupInitialized ? (
+    // @ts-expect-error
+    <ControlPanel<ApiType> Component={component} uuid={uuid} />
+  ) : // Control group will not display controls until all controls are initialized
+  null;
 };

@@ -17,7 +17,10 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction as AlertingRuleAction,
+  RuleSystemAction as AlertingRuleSystemAction,
+} from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
@@ -190,7 +193,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: AlertingRuleAction[];
+  actions: Array<AlertingRuleAction | AlertingRuleSystemAction>;
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
