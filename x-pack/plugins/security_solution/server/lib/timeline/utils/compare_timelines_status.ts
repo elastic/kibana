@@ -34,7 +34,7 @@ interface GivenTimelineInput {
 interface TimelinesStatusProps {
   status: TimelineStatus | null | undefined;
   title: string | null | undefined;
-  timelineType: TimelineType | undefined;
+  timelineType: TimelineType | null | undefined;
   timelineInput: GivenTimelineInput;
   templateTimelineInput: GivenTimelineInput;
   frameworkRequest: FrameworkRequest;
