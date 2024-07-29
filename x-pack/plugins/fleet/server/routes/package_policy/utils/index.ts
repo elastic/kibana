@@ -7,7 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { CreatePackagePolicyRequestSchema, PackagePolicyInput, NewPackagePolicyInput } from '../../../types';
+import type {
+  CreatePackagePolicyRequestSchema,
+  PackagePolicyInput,
+  NewPackagePolicyInput,
+} from '../../../types';
 import { licenseService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import type { NewPackagePolicyInputStream } from '../../../../common';
