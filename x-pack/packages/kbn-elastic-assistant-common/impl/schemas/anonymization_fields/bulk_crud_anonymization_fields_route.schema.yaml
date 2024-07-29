@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Bulk Anonymization Fields Actions API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
@@ -194,7 +194,6 @@ components:
             - summary
       required:
         - attributes
-
 
     BulkActionBase:
       x-inline: true

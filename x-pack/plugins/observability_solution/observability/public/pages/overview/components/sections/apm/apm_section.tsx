@@ -114,6 +114,7 @@ export function APMSection({ bucketSize }: Props) {
               defaultMessage: 'Services',
             })}
             isLoading={isLoading}
+            data-test-subj="apmServiceStat"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 export { UI_SETTINGS };
 
 type SettingKeys = keyof typeof UI_SETTINGS;
-type SettingValues = typeof UI_SETTINGS[SettingKeys];
+type SettingValues = (typeof UI_SETTINGS)[SettingKeys];
 
 export function useKibanaUISettings<T>(key: SettingValues): T {
   const {

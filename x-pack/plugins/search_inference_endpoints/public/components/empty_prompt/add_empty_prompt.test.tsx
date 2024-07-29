@@ -6,28 +6,42 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { AddEmptyPrompt } from './add_empty_prompt';
 
 import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 import '@testing-library/jest-dom';
-const setIsInferenceFlyoutVisibleMock = jest.fn();
 
 describe('When empty prompt is loaded', () => {
   beforeEach(() => {
-    render(<AddEmptyPrompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisibleMock} />);
+    render(<AddEmptyPrompt />);
   });
 
   it('should display the description for creation of the first inference endpoint', () => {
     expect(
       screen.getByText(
-        /Connect to your third-party model provider to create an inference endpoint for semantic search./
+        /Inference endpoints enable you to perform inference tasks using NLP models provided by third-party services/
       )
     ).toBeInTheDocument();
   });
 
-  it('calls setIsInferenceFlyoutVisible when the addInferenceEndpoint button is clicked', async () => {
-    fireEvent.click(screen.getByTestId('addEndpointButtonForEmptyPrompt'));
-    expect(setIsInferenceFlyoutVisibleMock).toHaveBeenCalled();
+  it('should have a learn-more link', () => {
+    const learnMoreLink = screen.getByTestId('learn-how-to-create-inference-endpoints');
+    expect(learnMoreLink).toBeInTheDocument();
+  });
+
+  it('should have a view-your-models link', () => {
+    const learnMoreLink = screen.getByTestId('view-your-models');
+    expect(learnMoreLink).toBeInTheDocument();
+  });
+
+  it('should have a semantic-search-with-elser link', () => {
+    const learnMoreLink = screen.getByTestId('semantic-search-with-elser');
+    expect(learnMoreLink).toBeInTheDocument();
+  });
+
+  it('should have a semantic-search-with-e5 link', () => {
+    const learnMoreLink = screen.getByTestId('semantic-search-with-e5');
+    expect(learnMoreLink).toBeInTheDocument();
   });
 });
