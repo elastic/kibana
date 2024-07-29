@@ -14,11 +14,12 @@ import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
+import { OptionsListStrings } from '../options_list_strings';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
-import { OptionsListStrings } from '../options_list_strings';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -27,7 +28,11 @@ interface OptionsListPopoverSuggestionsProps {
 export const OptionsListPopoverSuggestions = ({
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
-  const { api, stateManager } = useOptionsListContext();
+  const {
+    api,
+    stateManager,
+    displaySettings: { hideExists },
+  } = useOptionsListContext();
 
   const [
     sort,
@@ -68,13 +73,12 @@ export const OptionsListPopoverSuggestions = ({
     [availableOptions, totalCardinality, showOnlySelected, allowExpensiveQueries]
   );
 
-  const suggestions = useMemo<OptionsListSuggestions | string[]>(() => {
+  const suggestions = useMemo<OptionsListSuggestions | OptionsListSelection[]>(() => {
     return (showOnlySelected ? selectedOptions : availableOptions) ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
-    // if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
-    if (!existsSelected && (showOnlySelected || suggestions.length === 0)) return;
+    if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
 
     return {
       key: 'exists-option',
@@ -83,7 +87,7 @@ export const OptionsListPopoverSuggestions = ({
       className: 'optionsList__existsFilter',
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [suggestions, existsSelected, showOnlySelected]);
+  }, [suggestions, existsSelected, showOnlySelected, hideExists]);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
