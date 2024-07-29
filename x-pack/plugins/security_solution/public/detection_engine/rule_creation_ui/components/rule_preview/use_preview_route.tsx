@@ -16,6 +16,7 @@ import type {
   ScheduleStepRule,
   TimeframePreviewOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface PreviewRouteParams {
   defineRuleData?: DefineStepRule;
@@ -33,6 +34,10 @@ export const usePreviewRoute = ({
   timeframeOptions,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
+
+  const {
+    triggersActionsUi: { actionTypeRegistry },
+  } = useKibana().services;
 
   const { isLoading, response, rule, setRule } = usePreviewRule({
     timeframeOptions,
@@ -72,6 +77,7 @@ export const usePreviewRoute = ({
           defineRuleData,
           aboutRuleData,
           scheduleRuleData,
+          actionTypeRegistry,
           exceptionsList,
         })
       );
@@ -84,6 +90,7 @@ export const usePreviewRoute = ({
     aboutRuleData,
     scheduleRuleData,
     exceptionsList,
+    actionTypeRegistry,
   ]);
 
   return {

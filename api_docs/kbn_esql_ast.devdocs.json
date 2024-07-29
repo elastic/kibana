@@ -225,7 +225,9 @@
               "\nWalks the AST and calls the appropriate visitor functions."
             ],
             "signature": [
-              "(node: Node, options: ",
+              "(node: ",
+              "WalkerAstNode",
+              ", options: ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -254,7 +256,7 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "Node"
+                  "WalkerAstNode"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -339,7 +341,9 @@
               "\nWalks the AST and extracts all parameter literals.\n"
             ],
             "signature": [
-              "(node: Node) => ",
+              "(node: ",
+              "WalkerAstNode",
+              ") => ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -363,7 +367,7 @@
                   "AST node to extract parameters from."
                 ],
                 "signature": [
-                  "Node"
+                  "WalkerAstNode"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -380,10 +384,12 @@
             "tags": [],
             "label": "findFunction",
             "description": [
-              "\nReturns the first function that matches the predicate.\n"
+              "\nFinds the first function that matches the predicate.\n"
             ],
             "signature": [
-              "(node: Node, predicate: (fn: ",
+              "(node: ",
+              "WalkerAstNode",
+              ", predicate: (node: ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -391,7 +397,9 @@
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
-              ") => boolean) => ",
+              "<",
+              "FunctionSubtype",
+              ", string>) => boolean) => ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -399,7 +407,9 @@
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
-              " | undefined"
+              "<",
+              "FunctionSubtype",
+              ", string> | undefined"
             ],
             "path": "packages/kbn-esql-ast/src/walker/walker.ts",
             "deprecated": false,
@@ -412,10 +422,10 @@
                 "tags": [],
                 "label": "node",
                 "description": [
-                  "AST subtree to search in."
+                  "AST node from which to search for a function"
                 ],
                 "signature": [
-                  "Node"
+                  "WalkerAstNode"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -429,10 +439,10 @@
                 "tags": [],
                 "label": "predicate",
                 "description": [
-                  "Function to test each function with."
+                  "Callback function to determine if the function is found"
                 ],
                 "signature": [
-                  "(fn: ",
+                  "(node: ",
                   {
                     "pluginId": "@kbn/esql-ast",
                     "scope": "common",
@@ -440,7 +450,9 @@
                     "section": "def-common.ESQLFunction",
                     "text": "ESQLFunction"
                   },
-                  ") => boolean"
+                  "<",
+                  "FunctionSubtype",
+                  ", string>) => boolean"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -449,7 +461,7 @@
               }
             ],
             "returnComment": [
-              "The first function that matches the predicate."
+              "The first function that matches the predicate"
             ]
           },
           {
@@ -919,7 +931,9 @@
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
-              ") => void"
+              "<",
+              "FunctionSubtype",
+              ", string>) => void"
             ],
             "path": "packages/kbn-esql-ast/src/walker/walker.ts",
             "deprecated": false,
@@ -939,7 +953,10 @@
                     "docId": "kibKbnEsqlAstPluginApi",
                     "section": "def-common.ESQLFunction",
                     "text": "ESQLFunction"
-                  }
+                  },
+                  "<",
+                  "FunctionSubtype",
+                  ", string>"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -1137,7 +1154,9 @@
         "label": "walk",
         "description": [],
         "signature": [
-          "(node: Node, options: ",
+          "(node: ",
+          "WalkerAstNode",
+          ", options: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -1621,9 +1640,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " extends ",
+          "<Subtype, Name> extends ",
           "ESQLAstBaseItem",
-          "<string>"
+          "<Name>"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -1638,6 +1657,22 @@
             "description": [],
             "signature": [
               "\"function\""
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLFunction.subtype",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "subtype",
+            "description": [
+              "\nDefault is 'variadic-call'."
+            ],
+            "signature": [
+              "Subtype | undefined"
             ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -2229,7 +2264,9 @@
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
-              ") => void) | undefined"
+              "<",
+              "FunctionSubtype",
+              ", string>) => void) | undefined"
             ],
             "path": "packages/kbn-esql-ast/src/walker/walker.ts",
             "deprecated": false,
@@ -2249,7 +2286,10 @@
                     "docId": "kibKbnEsqlAstPluginApi",
                     "section": "def-common.ESQLFunction",
                     "text": "ESQLFunction"
-                  }
+                  },
+                  "<",
+                  "FunctionSubtype",
+                  ", string>"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -2745,7 +2785,9 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          " | ",
+          "<",
+          "FunctionSubtype",
+          ", string> | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
