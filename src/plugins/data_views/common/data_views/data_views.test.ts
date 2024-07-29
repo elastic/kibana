@@ -544,7 +544,24 @@ describe('IndexPatterns', () => {
   test('find', async () => {
     const search = 'kibana*';
     const size = 10;
-    await indexPatterns.find('kibana*', size);
+    const result = await indexPatterns.find('kibana*', size);
+
+    expect(result[0]).toBeInstanceOf(DataView);
+
+    expect(savedObjectsClient.find).lastCalledWith({
+      fields: ['title'],
+      search,
+      searchFields: ['title', 'name'],
+      perPage: size,
+    });
+  });
+
+  test('findLazy', async () => {
+    const search = 'kibana*';
+    const size = 10;
+    const result = await indexPatterns.findLazy('kibana*', size);
+
+    expect(result[0]).toBeInstanceOf(DataViewLazy);
 
     expect(savedObjectsClient.find).lastCalledWith({
       fields: ['title'],
