@@ -9,6 +9,7 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { StructuredTool } from '@langchain/core/tools';
 import { ToolExecutor } from '@langchain/langgraph/prebuilt';
 import { castArray } from 'lodash';
+import { AgentAction } from 'langchain/agents';
 import { AgentState, NodeParamsBase } from '../types';
 
 export interface ExecuteToolsParams extends NodeParamsBase {
@@ -34,14 +35,14 @@ export const executeTools = async ({ config, logger, state, tools }: ExecuteTool
   logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const toolExecutor = new ToolExecutor({ tools });
-  const agentAction = castArray(state.agentOutcome);
+  const agentAction = state.agentOutcome;
 
   if (!agentAction || 'returnValues' in agentAction) {
     throw new Error('Agent has not been run yet');
   }
 
   const steps = await Promise.all(
-    castArray(state.agentOutcome)?.map(async (action) => {
+    castArray(state.agentOutcome as AgentAction)?.map(async (action) => {
       let out;
       try {
         out = await toolExecutor.invoke(action, config);

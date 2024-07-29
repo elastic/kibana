@@ -4490,6 +4490,33 @@ Object {
       ],
       "type": "number",
     },
+    "tools": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-any-type": true,
+            },
+          ],
+          "type": "any",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "array",
+    },
   },
   "type": "object",
 }
