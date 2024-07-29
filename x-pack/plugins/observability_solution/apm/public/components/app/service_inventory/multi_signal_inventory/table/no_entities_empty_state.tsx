@@ -93,6 +93,7 @@ export function NoEntitiesEmptyState() {
             <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
               <EuiFlexGroup direction="row" gutterSize="xs">
                 <AddApmAgent
+                  data-test-subj="apmAddDataEmptyState"
                   onClick={() => {
                     reportButtonClick('add_apm_agent');
                   }}

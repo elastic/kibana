@@ -75,7 +75,7 @@ export function AddAPMCallOut() {
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <div>
-            <AddApmAgent onClick={handleClick} />
+            <AddApmAgent data-test-subj="apmAddDataLogOnlyCallout" onClick={handleClick} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

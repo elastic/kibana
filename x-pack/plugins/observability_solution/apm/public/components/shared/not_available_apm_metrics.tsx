@@ -29,7 +29,7 @@ export function NotAvailableApmMetrics() {
         defaultMessage:
           'Understand key metrics like transaction latency, throughput and error rate by instrumenting your service with APM.',
       })}
-      footer={<AddApmAgent onClick={handleClick} />}
+      footer={<AddApmAgent data-test-subj="apmAddDataNotAvailable" onClick={handleClick} />}
     />
   );
 }

@@ -32,7 +32,13 @@ export const collectServiceLogs = {
   link: '/app/observabilityOnboarding/?category=logs',
 };
 
-export function AddApmAgent({ onClick }: { onClick?: () => void }) {
+export function AddApmAgent({
+  onClick,
+  ...props
+}: {
+  onClick?: () => void;
+  'data-test-subj': string;
+}) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
   const {
@@ -44,7 +50,7 @@ export function AddApmAgent({ onClick }: { onClick?: () => void }) {
     onClick?.();
   }
   return (
-    <EuiButton data-test-subj="addApmAgentButton" size="s" onClick={handleClick}>
+    <EuiButton data-test-subj={props['data-test-subj']} size="s" onClick={handleClick}>
       {addApmAgent.name}
     </EuiButton>
   );
