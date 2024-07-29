@@ -10,7 +10,7 @@ import { getAlertDetailsFieldValue } from './get_event_details_field_values';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
 
-interface EventDetailsAgentIdField {
+export interface EventDetailsAgentIdField {
   found: boolean;
   category: string;
   field: string;
@@ -18,7 +18,7 @@ interface EventDetailsAgentIdField {
 }
 
 /**
- * Returns the Agent ID and associated information from an Event Details data that should be used
+ * Returns the Agent ID and associated field from an alert Event Details data that should be used
  * for executing response actions
  */
 export const getEventDetailsAgentIdField = (
