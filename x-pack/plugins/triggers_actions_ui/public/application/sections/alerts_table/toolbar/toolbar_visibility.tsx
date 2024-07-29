@@ -11,14 +11,10 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, memo, useMemo, useContext } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import { AlertsCount } from './components/alerts_count/alerts_count';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
-import type {
-  Alerts,
-  BulkActionsPanelConfig,
-  GetInspectQuery,
-  RowSelection,
-} from '../../../../types';
+import type { Alerts, BulkActionsPanelConfig, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 import { FieldBrowserOptions } from '../../field_browser/types';
@@ -30,11 +26,11 @@ const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar
 const RightControl = memo(
   ({
     controls,
-    getInspectQuery,
+    querySnapshot,
     showInspectButton,
   }: {
     controls?: EuiDataGridToolBarAdditionalControlsOptions;
-    getInspectQuery: GetInspectQuery;
+    querySnapshot: EsQuerySnapshot;
     showInspectButton: boolean;
   }) => {
     const {
@@ -43,7 +39,7 @@ const RightControl = memo(
     return (
       <>
         {showInspectButton && (
-          <InspectButton inspectTitle={ALERTS_TABLE_TITLE} getInspectQuery={getInspectQuery} />
+          <InspectButton inspectTitle={ALERTS_TABLE_TITLE} querySnapshot={querySnapshot} />
         )}
         <LastUpdatedAt updatedAt={bulkActionsState.updatedAt} />
         {controls?.right}
@@ -96,7 +92,7 @@ const useGetDefaultVisibility = ({
   browserFields,
   controls,
   fieldBrowserOptions,
-  getInspectQuery,
+  querySnapshot,
   showInspectButton,
   toolbarVisibilityProp,
 }: {
@@ -107,7 +103,7 @@ const useGetDefaultVisibility = ({
   browserFields: BrowserFields;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   fieldBrowserOptions?: FieldBrowserOptions;
-  getInspectQuery: GetInspectQuery;
+  querySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
@@ -115,10 +111,10 @@ const useGetDefaultVisibility = ({
     const hasBrowserFields = Object.keys(browserFields).length > 0;
     return {
       additionalControls: {
-        right: (
+        right: querySnapshot && (
           <RightControl
             controls={controls}
-            getInspectQuery={getInspectQuery}
+            querySnapshot={querySnapshot}
             showInspectButton={showInspectButton}
           />
         ),
@@ -146,7 +142,7 @@ const useGetDefaultVisibility = ({
     browserFields,
     columnIds,
     fieldBrowserOptions,
-    getInspectQuery,
+    querySnapshot,
     onResetColumns,
     onToggleColumn,
     showInspectButton,
@@ -170,7 +166,7 @@ export const useGetToolbarVisibility = ({
   controls,
   refresh,
   fieldBrowserOptions,
-  getInspectQuery,
+  querySnapshot,
   showInspectButton,
   toolbarVisibilityProp,
 }: {
@@ -188,7 +184,7 @@ export const useGetToolbarVisibility = ({
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   refresh: () => void;
   fieldBrowserOptions?: FieldBrowserOptions;
-  getInspectQuery: GetInspectQuery;
+  querySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
@@ -202,7 +198,7 @@ export const useGetToolbarVisibility = ({
       browserFields,
       controls,
       fieldBrowserOptions,
-      getInspectQuery,
+      querySnapshot,
       showInspectButton,
     };
   }, [
@@ -213,7 +209,7 @@ export const useGetToolbarVisibility = ({
     browserFields,
     controls,
     fieldBrowserOptions,
-    getInspectQuery,
+    querySnapshot,
     showInspectButton,
   ]);
   const defaultVisibility = useGetDefaultVisibility(defaultVisibilityProps);
@@ -231,10 +227,10 @@ export const useGetToolbarVisibility = ({
         showColumnSelector: false,
         showSortSelector: false,
         additionalControls: {
-          right: (
+          right: querySnapshot && (
             <RightControl
               controls={controls}
-              getInspectQuery={getInspectQuery}
+              querySnapshot={querySnapshot}
               showInspectButton={showInspectButton}
             />
           ),
@@ -270,7 +266,7 @@ export const useGetToolbarVisibility = ({
     refresh,
     setIsBulkActionsLoading,
     controls,
-    getInspectQuery,
+    querySnapshot,
     showInspectButton,
   ]);
 

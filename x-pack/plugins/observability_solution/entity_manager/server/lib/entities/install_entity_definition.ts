@@ -37,8 +37,8 @@ import {
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
-import { getEntitiesLatestIndexTemplateConfig } from '../../templates/entities_latest_template';
-import { getEntitiesHistoryIndexTemplateConfig } from '../../templates/entities_history_template';
+import { getEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
+import { getEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -112,7 +112,7 @@ export async function installEntityDefinition({
 
     return entityDefinition;
   } catch (e) {
-    logger.error(`Failed to install entity definition ${definition.id}`, e);
+    logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
     // Clean up anything that was successful.
     if (installState.ingestPipelines.history) {
       await deleteHistoryIngestPipeline(esClient, definition, logger);

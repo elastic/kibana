@@ -26,7 +26,14 @@ export const updateRuleApiKeyRoute = (
         summary: 'Update the API key for a rule',
       },
       validate: {
-        params: updateApiKeyParamsSchemaV1,
+        request: {
+          params: updateApiKeyParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

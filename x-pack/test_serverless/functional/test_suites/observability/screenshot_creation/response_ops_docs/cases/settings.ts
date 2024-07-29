@@ -16,7 +16,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const testSubjects = getService('testSubjects');
   const owner = OBSERVABILITY_OWNER;
 
-  describe('Observability case settings', function () {
+  // FLAKY:https://github.com/elastic/kibana/issues/189058
+  describe.skip('Observability case settings', function () {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
     });

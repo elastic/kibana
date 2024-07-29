@@ -100,6 +100,26 @@ export default function enterSpaceFunctionalTests({
       await PageObjects.spaceSelector.expectRoute(spaceId, '/app/management/kibana/objects');
     });
 
+    it('allows user to navigate to different space with provided next route preserving url hash and search', async () => {
+      const spaceId = 'another-space';
+
+      await PageObjects.security.login(undefined, undefined, {
+        expectSpaceSelector: true,
+      });
+
+      const anchorElement = await PageObjects.spaceSelector.getSpaceCardAnchor(spaceId);
+      const path = await anchorElement.getAttribute('href');
+
+      const pathWithNextRoute = `${path}?next=/app/management/kibana/objects?initialQuery=type:(visualization)#/view`;
+
+      await browser.navigateTo(pathWithNextRoute);
+
+      await PageObjects.spaceSelector.expectRoute(
+        spaceId,
+        '/app/management/kibana/objects?initialQuery=type%3A(visualization)#/view'
+      );
+    });
+
     it('allows user to navigate to different space with provided next route, route is normalized', async () => {
       const spaceId = 'another-space';
 
