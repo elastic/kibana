@@ -38,17 +38,18 @@ export const getGridAttrs = async (
     return adHoc.name === indexPattern;
   });
 
-  const results = await getESQLResults({
-    esqlQuery: query.esql,
-    search: deps.data.search.search,
-    signal: abortController?.signal,
-    dropNullColumns: true,
-    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
-  });
-
-  const dataView = dataViewSpec
-    ? await deps.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview(query.esql, deps.dataViews);
+  const [results, dataView] = await Promise.all([
+    getESQLResults({
+      esqlQuery: query.esql,
+      search: deps.data.search.search,
+      signal: abortController?.signal,
+      dropNullColumns: true,
+      timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+    }),
+    dataViewSpec
+      ? deps.dataViews.create(dataViewSpec)
+      : getESQLAdHocDataview(query.esql, deps.dataViews),
+  ]);
 
   const columns = formatESQLColumns(results.response.columns);
 
