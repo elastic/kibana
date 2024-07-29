@@ -466,13 +466,6 @@ export const TimelineErrorResponseType = runtimeTypes.union([
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
-export enum SortFieldTimelineOg {
-  title = 'title',
-  description = 'description',
-  updated = 'updated',
-  created = 'created',
-}
-
 export const sortFieldTimeline = runtimeTypes.union([
   runtimeTypes.literal(SortFieldTimelineEnum.title),
   runtimeTypes.literal(SortFieldTimelineEnum.description),
