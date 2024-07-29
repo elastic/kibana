@@ -187,6 +187,7 @@ export const OptionsListControl = ({
         closePopover={() => setPopoverOpen(false)}
         panelClassName="optionsList__popoverOverride"
         panelProps={{
+          title: panelTitle ?? defaultPanelTitle,
           'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
         }}
       >
