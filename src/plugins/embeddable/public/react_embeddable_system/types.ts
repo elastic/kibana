@@ -106,7 +106,10 @@ export interface ReactEmbeddableFactory<
    * function.
    */
   buildEmbeddable: (
-    initialState: RuntimeState,
+    /**
+     * Initial runtime state. Composed from last saved state and previous sessions's unsaved changes
+     */
+    initialRuntimeState: RuntimeState,
     /**
      * `buildApi` should be used by most embeddables that are used in dashboards, since it implements the unsaved
      * changes logic that the dashboard expects using the provided comparators

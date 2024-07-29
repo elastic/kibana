@@ -24,6 +24,7 @@ import {
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switchMap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
+import { getInitialRuntimeState } from './get_initial_runtime_state';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import {
   BuildReactEmbeddableApiRegistration,
@@ -118,19 +119,7 @@ export const ReactEmbeddableRenderer = <
         };
 
         const buildEmbeddable = async () => {
-          const serializedState = parentApi.getSerializedStateForChild(uuid);
-          const lastSavedRuntimeState = serializedState
-            ? await factory.deserializeState(serializedState)
-            : ({} as RuntimeState);
-
-          // If the parent provides runtime state for the child (usually as a state backup or cache),
-          // we merge it with the last saved runtime state.
-          const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
-            ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
-            : ({} as Partial<RuntimeState>);
-
-          const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
-
+          const initialRuntimeState = await getInitialRuntimeState<SerializedState, RuntimeState>(parentApi, factory.deserializeState, uuid);
           const buildApi = (
             apiRegistration: BuildReactEmbeddableApiRegistration<
               SerializedState,

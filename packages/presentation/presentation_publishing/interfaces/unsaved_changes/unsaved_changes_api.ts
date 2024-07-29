@@ -26,12 +26,12 @@ import {
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
 export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
-  initialState: RuntimeState,
+  lastSavedState: RuntimeState,
   parentApi: unknown,
   comparators: StateComparators<RuntimeState>
 ) => {
   const subscriptions: Subscription[] = [];
-  const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialState);
+  const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(lastSavedState);
 
   const snapshotState = () => {
     const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
