@@ -27,7 +27,7 @@ import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
 /**
- * The index info route handler return fields suitable for log rate analysis.
+ * The fetch field candidates route handler returns fields suitable for log rate analysis.
  */
 export function routeHandlerFactory<T extends ApiVersion>(
   version: '1',
