@@ -8,7 +8,7 @@
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -518,7 +518,7 @@ export const ActionTypeForm = ({
               <ActionAlertsFilterQuery
                 state={actionItem.alertsFilter?.query}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
-                featureIds={[producerId as ValidFeatureId]}
+                ruleTypeIds={[ruleTypeId]}
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
               />
