@@ -41,7 +41,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
     junit: {
-      reportName: 'Chrome X-Pack Security Functional Tests HTTP/2 (OpenID Connect)',
+      reportName: 'Chrome X-Pack Security Functional Tests TLS (OpenID Connect)',
     },
   });
 }
