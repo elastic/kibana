@@ -27,6 +27,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 
+import { useHistory } from 'react-router-dom';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
@@ -53,6 +54,8 @@ export function HeaderActions({
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
   } = useKibana().services;
+
+  const history = useHistory();
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
@@ -112,6 +115,22 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={() =>
+              history.push(`/alerts/${alert?.fields['kibana.alert.uuid']}/investigation`)
+            }
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+            data-test-subj="investigate-alert-button"
+          >
+            <EuiText size="s">
+              {i18n.translate('xpack.observability.alertDetails.investigateAlert', {
+                defaultMessage: 'Start investigation',
+              })}
+            </EuiText>
+          </EuiButton>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
