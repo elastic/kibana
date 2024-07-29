@@ -9,6 +9,15 @@ import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyK
 
 export interface NewestIndex extends IndicesIndexState {
   name: string;
+  info: DataStreamInfo;
+}
+
+export interface DataStreamInfo {
+  isManaged?: boolean;
+  integration?: string | null;
+  type?: string;
+  dataset?: string;
+  namespace?: string;
 }
 
 export type EsqlDocument = Record<string, string | null>;

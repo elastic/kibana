@@ -30,8 +30,7 @@ export class RecommendationsClient implements IRecommendationsClient {
   async getRecommendations({ dataStream }: { dataStream: string }): Promise<Recommendation[]> {
     const indexManager = this.indexManagerCreator.fromIndexPattern(dataStream);
 
-    const lastIndex = await indexManager.getLastDataStreamIndex();
-    console.log(lastIndex);
+    const lastIndex = await indexManager.getNewestDataStreamIndex();
 
     if (!lastIndex) {
       return [];

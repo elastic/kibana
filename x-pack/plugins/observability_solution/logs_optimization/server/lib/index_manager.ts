@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { NewestIndex } from '../../common/types';
+import { DataStreamInfo, NewestIndex } from '../../common/types';
 
 export interface IndexManagerCreator {
   fromIndexPattern: (indexPattern: string) => IndexManager;
@@ -15,9 +16,7 @@ export interface IndexManagerCreator {
 export class IndexManager {
   private constructor(private esClient: ElasticsearchClient, private indexPattern: string) {}
 
-  async getDataStreamInfo() {
-    const dataStream = await this.getDataStream();
-
+  getDataStreamInfo(dataStream: IndicesDataStream | null): DataStreamInfo {
     if (!dataStream) {
       return {};
     }
@@ -46,7 +45,7 @@ export class IndexManager {
     }
   }
 
-  async getLastDataStreamIndex(): Promise<NewestIndex | null> {
+  async getNewestDataStreamIndex(): Promise<NewestIndex | null> {
     const dataStream = await this.getDataStream();
 
     if (!dataStream) {
@@ -62,8 +61,9 @@ export class IndexManager {
     const indices = await this.esClient.indices.get({ index: lastIndex.index_name });
 
     return {
-      name: lastIndex.index_name,
       ...indices[lastIndex.index_name],
+      name: lastIndex.index_name,
+      info: this.getDataStreamInfo(dataStream),
     };
   }
 
