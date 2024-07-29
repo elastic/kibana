@@ -18,6 +18,7 @@ import {
   createAndInstallLatestIngestPipeline,
 } from './create_and_install_ingest_pipeline';
 import {
+  createAndInstallHistoryBackfillTransform,
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
 } from './create_and_install_transform';
@@ -28,13 +29,15 @@ import { findEntityDefinitions } from './find_entity_definition';
 import { saveEntityDefinition } from './save_entity_definition';
 import { startTransform } from './start_transform';
 import {
+  stopAndDeleteHistoryBackfillTransform,
   stopAndDeleteHistoryTransform,
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
+import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
-import { getEntitiesLatestIndexTemplateConfig } from '../../templates/entities_latest_template';
-import { getEntitiesHistoryIndexTemplateConfig } from '../../templates/entities_history_template';
+import { getEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
+import { getEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -56,6 +59,7 @@ export async function installEntityDefinition({
     },
     transforms: {
       history: false,
+      backfill: false,
       latest: false,
     },
     definition: false,
@@ -98,12 +102,16 @@ export async function installEntityDefinition({
     logger.debug(`Installing transforms for definition ${definition.id}`);
     await createAndInstallHistoryTransform(esClient, entityDefinition, logger);
     installState.transforms.history = true;
+    if (isBackfillEnabled(entityDefinition)) {
+      await createAndInstallHistoryBackfillTransform(esClient, entityDefinition, logger);
+      installState.transforms.backfill = true;
+    }
     await createAndInstallLatestTransform(esClient, entityDefinition, logger);
     installState.transforms.latest = true;
 
     return entityDefinition;
   } catch (e) {
-    logger.error(`Failed to install entity definition ${definition.id}`, e);
+    logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
     // Clean up anything that was successful.
     if (installState.definition) {
       await deleteEntityDefinition(soClient, definition, logger);
@@ -118,6 +126,10 @@ export async function installEntityDefinition({
 
     if (installState.transforms.history) {
       await stopAndDeleteHistoryTransform(esClient, definition, logger);
+    }
+
+    if (installState.transforms.backfill) {
+      await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
     }
 
     if (installState.transforms.latest) {

@@ -32,7 +32,16 @@ elif [[ "$UNAME" == "Darwin" ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
+NODE_VARIANT=""
+if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
+  NODE_VARIANT="node-pointer-compression/"
+  # Node.js 20.15.1 with pointer compression enabled
+  sed -i 's#kibana-ci-proxy-cache/dist#kibana-ci-proxy-cache/node-pointer-compression/dist#' WORKSPACE.bazel
+  sed -i 's#"node-v20.15.1-linux-arm64", "c049d670df0c27ae2fd53446df79b6227ab23aff930e38daf0ab3da41c396db5"#"node-v20.15.1-linux-arm64", "a86b4697e38cd500d434e6c94e4d5446e23a8e2826de7e7eafad160af2375aa9"#' WORKSPACE.bazel
+  sed -i 's#"node-v20.15.1-linux-x64", "a854c291c7b775bedab54251e1e273cfee1adf1dba25435bc52305ef41f143ab"#"node-v20.15.1-linux-x64", "d7990d99dcb165eca7305dd895ddd5b2a490b7c2b624136d2fc83004bc0f2d2d"#' WORKSPACE.bazel
+  echo ' -- Using Node.js variant with pointer compression enabled'
+fi
+nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${NODE_VARIANT}dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
 
 echo " -- node: version=v${NODE_VERSION} dir=$NODE_DIR"
 

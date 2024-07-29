@@ -35,7 +35,7 @@ export interface LogRateAnalysisState {
   initialAnalysisStart: InitialAnalysisStart;
   isBrushCleared: boolean;
   stickyHistogram: boolean;
-  windowParameters?: WindowParameters;
+  chartWindowParameters?: WindowParameters;
   earliest?: number;
   latest?: number;
   intervalMs?: number;
@@ -66,7 +66,7 @@ export const logRateAnalysisSlice = createSlice({
       action: PayloadAction<BrushSelectionUpdatePayload>
     ) => {
       if (!state.isBrushCleared || action.payload.force) {
-        state.windowParameters = action.payload.windowParameters;
+        state.chartWindowParameters = action.payload.windowParameters;
       }
       if (action.payload.force) {
         state.isBrushCleared = false;
@@ -74,7 +74,7 @@ export const logRateAnalysisSlice = createSlice({
       state.analysisType = action.payload.analysisType;
     },
     clearSelection: (state: LogRateAnalysisState) => {
-      state.windowParameters = undefined;
+      state.chartWindowParameters = undefined;
       state.isBrushCleared = true;
       state.initialAnalysisStart = undefined;
     },
@@ -110,11 +110,11 @@ export const logRateAnalysisSlice = createSlice({
     setStickyHistogram: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
       state.stickyHistogram = action.payload;
     },
-    setWindowParameters: (
+    setChartWindowParameters: (
       state: LogRateAnalysisState,
       action: PayloadAction<WindowParameters | undefined>
     ) => {
-      state.windowParameters = action.payload;
+      state.chartWindowParameters = action.payload;
       state.isBrushCleared = action.payload === undefined;
     },
   },
@@ -130,5 +130,5 @@ export const {
   setInitialAnalysisStart,
   setIsBrushCleared,
   setStickyHistogram,
-  setWindowParameters,
+  setChartWindowParameters,
 } = logRateAnalysisSlice.actions;

@@ -9,7 +9,6 @@ import { isValidFeatureId, ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
 
@@ -17,12 +16,6 @@ export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
   initialBrowserFields?: BrowserFields;
 }
-
-export interface FetchAlertResp {
-  alerts: Alerts;
-}
-
-export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, FetchAlertResp];
 
 const INVALID_FEATURE_ID = 'siem';
 

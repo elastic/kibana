@@ -56,7 +56,7 @@ check_for_changed_files() {
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -A -- . ':!.bazelrc' ':!config/node.options' ':!config/kibana.yml'
+      git add -A -- . ':!.bazelrc' ':!WORKSPACE.bazel' ':!config/node.options' ':!config/kibana.yml'
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push

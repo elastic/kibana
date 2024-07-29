@@ -1439,6 +1439,23 @@
           },
           {
             "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.cost",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cost",
+            "description": [
+              "\nAn optional definition of the cost associated with running the task."
+            ],
+            "signature": [
+              "TaskCost",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskRegisterDefinition.description",
             "type": "string",
             "tags": [],

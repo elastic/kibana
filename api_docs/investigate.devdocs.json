@@ -935,7 +935,7 @@
                     "section": "def-common.InvestigateWidget",
                     "text": "InvestigateWidget"
                   },
-                  "<{}, {}>, \"type\" | \"title\" | \"description\" | \"rows\" | \"columns\" | \"locked\"> & { parameters: ",
+                  "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
                   "_DeepPartialObject",
                   "<",
                   "GlobalWidgetParameters",
@@ -1139,7 +1139,7 @@
             "section": "def-common.InvestigateWidget",
             "text": "InvestigateWidget"
           },
-          "<{}, {}>, \"type\" | \"title\" | \"description\" | \"rows\" | \"columns\" | \"locked\"> & { parameters: ",
+          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
           "_DeepPartialObject",
           "<",
           "GlobalWidgetParameters",
@@ -1189,7 +1189,7 @@
                 "section": "def-common.InvestigateWidget",
                 "text": "InvestigateWidget"
               },
-              "<{}, {}>, \"type\" | \"title\" | \"description\" | \"rows\" | \"columns\" | \"locked\"> & { parameters: ",
+              "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
               "_DeepPartialObject",
               "<",
               "GlobalWidgetParameters",
@@ -2152,7 +2152,7 @@
             "section": "def-common.InvestigateWidget",
             "text": "InvestigateWidget"
           },
-          "<{}, {}>, \"type\" | \"title\" | \"description\" | \"rows\" | \"columns\" | \"locked\"> & { parameters: ",
+          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
           "_DeepPartialObject",
           "<",
           "GlobalWidgetParameters",

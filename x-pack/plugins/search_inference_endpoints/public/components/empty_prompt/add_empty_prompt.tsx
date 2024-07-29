@@ -8,27 +8,27 @@
 import React from 'react';
 
 import {
-  EuiButton,
   EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
+import { docLinks } from '../../../common/doc_links';
 
 import * as i18n from '../../../common/translations';
 
 import inferenceEndpoint from '../../assets/images/inference_endpoint.svg';
 
 import { EndpointPrompt } from './endpoint_prompt';
+import { useTrainedModelPageUrl } from '../../hooks/use_trained_model_page_url';
 
 import './add_empty_prompt.scss';
 
-interface AddEmptyPromptProps {
-  setIsInferenceFlyoutVisible: (value: boolean) => void;
-}
+export const AddEmptyPrompt: React.FC = () => {
+  const trainedModelPageUrl = useTrainedModelPageUrl();
 
-export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFlyoutVisible }) => {
   return (
     <EuiPageTemplate.EmptyPrompt
       layout="horizontal"
@@ -42,18 +42,19 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
           <EuiFlexItem data-test-subj="createFirstInferenceEndpointDescription">
             {i18n.CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButton
-                color="primary"
-                fill
-                iconType="plusInCircle"
-                data-test-subj="addEndpointButtonForEmptyPrompt"
-                onClick={() => setIsInferenceFlyoutVisible(true)}
-              >
-                {i18n.ADD_ENDPOINT_LABEL}
-              </EuiButton>
-            </div>
+          <EuiFlexItem>
+            <EuiLink
+              href={docLinks.createInferenceEndpoint}
+              target="_blank"
+              data-test-subj="learn-how-to-create-inference-endpoints"
+            >
+              {i18n.LEARN_HOW_TO_CREATE_INFERENCE_ENDPOINTS_LINK}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLink href={trainedModelPageUrl} target="_blank" data-test-subj="view-your-models">
+              {i18n.VIEW_YOUR_MODELS_LINK}
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -66,31 +67,31 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
           <EuiFlexGroup>
             <EuiFlexItem>
               <EndpointPrompt
-                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
                 title={i18n.ELSER_TITLE}
                 description={i18n.ELSER_DESCRIPTION}
                 footer={
-                  <EuiButton
-                    iconType="plusInCircle"
-                    onClick={() => setIsInferenceFlyoutVisible(true)}
+                  <EuiLink
+                    href={docLinks.semanticSearchElser}
+                    target="_blank"
+                    data-test-subj="semantic-search-with-elser"
                   >
-                    {i18n.ADD_ENDPOINT_LABEL}
-                  </EuiButton>
+                    {i18n.SEMANTIC_SEARCH_WITH_ELSER_LINK}
+                  </EuiLink>
                 }
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EndpointPrompt
-                setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
                 title={i18n.E5_TITLE}
                 description={i18n.E5_DESCRIPTION}
                 footer={
-                  <EuiButton
-                    iconType="plusInCircle"
-                    onClick={() => setIsInferenceFlyoutVisible(true)}
+                  <EuiLink
+                    href={docLinks.semanticSearchE5}
+                    target="_blank"
+                    data-test-subj="semantic-search-with-e5"
                   >
-                    {i18n.ADD_ENDPOINT_LABEL}
-                  </EuiButton>
+                    {i18n.SEMANTIC_SEARCH_WITH_E5_LINK}
+                  </EuiLink>
                 }
               />
             </EuiFlexItem>

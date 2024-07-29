@@ -19,12 +19,14 @@ import { omit } from 'lodash';
 import { ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../types';
 
+type ControlOrder = Array<{ id: string; type: string }>;
+
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
   const controlsPanelState: { [panelId: string]: DefaultControlState } = {
     ...initialControlPanelsState,
   };
-  const controlsInOrder$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
+  const controlsInOrder$ = new BehaviorSubject<ControlOrder>(
     Object.keys(initialControlPanelsState)
       .map((key) => ({
         id: key,
@@ -32,6 +34,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         type: initialControlPanelsState[key].type,
       }))
       .sort((a, b) => (a.order > b.order ? 1 : -1))
+      .map(({ id, type }) => ({ id, type })) // filter out `order`
   );
 
   function untilControlLoaded(
@@ -85,7 +88,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
   }
 
   return {
-    controlsInOrder$: controlsInOrder$ as PublishingSubject<Array<{ id: string; type: string }>>,
+    controlsInOrder$,
     getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({

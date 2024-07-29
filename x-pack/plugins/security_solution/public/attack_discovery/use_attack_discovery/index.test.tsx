@@ -37,8 +37,6 @@ jest.mock('@kbn/elastic-assistant', () => ({
     alertsIndexPattern: 'alerts-index-pattern',
     assistantAvailability: mockAssistantAvailability(),
     knowledgeBase: {
-      isEnabledRAGAlerts: true,
-      isEnabledKnowledgeBase: true,
       latestAlerts: 20,
     },
   }),
