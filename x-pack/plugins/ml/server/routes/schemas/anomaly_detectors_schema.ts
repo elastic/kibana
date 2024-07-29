@@ -12,10 +12,15 @@ const customRulesSchema = schema.maybe(
   schema.arrayOf(
     schema.object({
       actions: schema.arrayOf(
-        schema.oneOf([schema.literal('skip_result'), schema.literal('skip_model_update')])
+        schema.oneOf([
+          schema.literal('skip_result'),
+          schema.literal('skip_model_update'),
+          schema.literal('force_time_shift'),
+        ])
       ),
       conditions: schema.maybe(schema.arrayOf(schema.any())),
       scope: schema.maybe(schema.any()),
+      params: schema.maybe(schema.any()),
     })
   )
 );

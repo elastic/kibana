@@ -10,11 +10,10 @@ import classNames from 'classnames';
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiIcon } from '@elastic/eui';
-import {
-  useBatchedOptionalPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DEFAULT_CONTROL_GROW } from '@kbn/controls-plugin/common';
 
+import { BehaviorSubject } from 'rxjs';
 import { DefaultControlApi } from '../types';
 
 /**
@@ -23,16 +22,16 @@ import { DefaultControlApi } from '../types';
  * can be quite cumbersome.
  */
 export const ControlClone = ({
-  controlStyle,
+  labelPosition,
   controlApi,
 }: {
-  controlStyle: string;
-  controlApi: DefaultControlApi;
+  labelPosition: string;
+  controlApi: DefaultControlApi | undefined;
 }) => {
-  const width = useStateFromPublishingSubject(controlApi.width);
-  const [panelTitle, defaultPanelTitle] = useBatchedOptionalPublishingSubjects(
-    controlApi.panelTitle,
-    controlApi.defaultPanelTitle
+  const [width, panelTitle, defaultPanelTitle] = useBatchedPublishingSubjects(
+    controlApi ? controlApi.width : new BehaviorSubject(DEFAULT_CONTROL_GROW),
+    controlApi?.panelTitle ? controlApi.panelTitle : new BehaviorSubject(undefined),
+    controlApi?.defaultPanelTitle ? controlApi.defaultPanelTitle : new BehaviorSubject('')
   );
 
   return (
@@ -41,17 +40,17 @@ export const ControlClone = ({
         'controlFrameCloneWrapper--small': width === 'small',
         'controlFrameCloneWrapper--medium': width === 'medium',
         'controlFrameCloneWrapper--large': width === 'large',
-        'controlFrameCloneWrapper--twoLine': controlStyle === 'twoLine',
+        'controlFrameCloneWrapper--twoLine': labelPosition === 'twoLine',
       })}
     >
-      {controlStyle === 'twoLine' ? (
+      {labelPosition === 'twoLine' ? (
         <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>
       ) : undefined}
       <EuiFlexGroup responsive={false} gutterSize="none" className={'controlFrame__draggable'}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
         </EuiFlexItem>
-        {controlStyle === 'oneLine' ? (
+        {labelPosition === 'oneLine' ? (
           <EuiFlexItem>
             <label className="controlFrameCloneWrapper__label">
               {panelTitle ?? defaultPanelTitle}
