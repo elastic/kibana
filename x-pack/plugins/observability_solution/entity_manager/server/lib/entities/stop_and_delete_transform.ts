@@ -38,7 +38,7 @@ export async function stopAndDeleteHistoryTransform(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot stop or delete history transform [${definition.id}]`);
+    logger.error(`Cannot stop or delete history transform [${definition.id}]: ${e}`);
     throw e;
   }
 }
@@ -67,7 +67,7 @@ export async function stopAndDeleteHistoryBackfillTransform(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot stop or delete history backfill transform [${definition.id}]`);
+    logger.error(`Cannot stop or delete history backfill transform [${definition.id}]: ${e}`);
     throw e;
   }
 }
