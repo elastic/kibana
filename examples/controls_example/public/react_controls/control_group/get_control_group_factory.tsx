@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import {
   apiHasSaveNotification,
   combineCompatibleChildrenApis,
+  SerializedPanelState,
 } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
@@ -52,7 +53,7 @@ export const getControlGroupEmbeddableFactory = (services: {
   > = {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),
-    buildEmbeddable: async (initialState, buildApi, uuid, parentApi, setApi) => {
+    buildEmbeddable: async (initialRuntimeState, buildApi, uuid, parentApi, setApi, lastSavedRuntimeState) => {
       const {
         initialChildControlState,
         defaultControlGrow,
@@ -61,7 +62,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         chainingSystem,
         autoApplySelections,
         ignoreParentSettings,
-      } = initialState;
+      } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const controlsManager = initControlsManager(initialChildControlState);
@@ -112,11 +113,14 @@ export const getControlGroupEmbeddableFactory = (services: {
         },
         controlsManager.snapshotControlsRuntimeState,
         parentApi,
-        uuid
+        lastSavedRuntimeState
       );
 
       const api = setApi({
         ...controlsManager.api,
+        getLastSavedControlState: (controlUuid: string) => {
+          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {}
+        },
         ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>

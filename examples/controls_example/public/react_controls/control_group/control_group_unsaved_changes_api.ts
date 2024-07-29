@@ -8,11 +8,9 @@
 
 import { omit } from 'lodash';
 import {
-  apiHasSerializedChildState,
   childrenUnsavedChanges$,
   initializeUnsavedChanges,
   PresentationContainer,
-  SerializedPanelState,
 } from '@kbn/presentation-containers';
 import {
   apiPublishesUnsavedChanges,
@@ -21,8 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { combineLatest, map } from 'rxjs';
 import { ControlsInOrder, getControlsInOrder } from './init_controls_manager';
-import { ControlGroupRuntimeState, ControlGroupSerializedState, ControlPanelsState } from './types';
-import { deserializeControlGroup } from './serialization_utils';
+import { ControlGroupRuntimeState, ControlPanelsState } from './types';
 
 type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
@@ -36,11 +33,16 @@ export function initializeControlGroupUnsavedChanges(
   comparators: StateComparators<ControlGroupComparatorState>,
   snapshotControlsRuntimeState: () => ControlPanelsState,
   parentApi: unknown,
-  uuid: string
+  lastSavedRuntimeState: ControlGroupRuntimeState
 ) {
-  const lastSavedState = getLastSavedState(comparators, parentApi, uuid);
   const controlGroupUnsavedChanges = initializeUnsavedChanges<ControlGroupComparatorState>(
-    lastSavedState,
+    {
+      autoApplySelections: lastSavedRuntimeState.autoApplySelections,
+      chainingSystem: lastSavedRuntimeState.chainingSystem,
+      controlsInOrder: getControlsInOrder(lastSavedRuntimeState.initialChildControlState),
+      ignoreParentSettings: lastSavedRuntimeState.ignoreParentSettings,
+      labelPosition: lastSavedRuntimeState.labelPosition,
+    },
     parentApi,
     comparators
   );
@@ -68,33 +70,5 @@ export function initializeControlGroupUnsavedChanges(
         });
       },
     } as PublishesUnsavedChanges<ControlGroupRuntimeState>,
-  };
-}
-
-function getLastSavedState(
-  comparators: StateComparators<ControlGroupComparatorState>,
-  parentApi: unknown,
-  uuid: string
-): ControlGroupComparatorState {
-  if (!apiHasSerializedChildState(parentApi)) {
-    return {
-      autoApplySelections: comparators.autoApplySelections[0].value,
-      chainingSystem: comparators.chainingSystem[0].value,
-      controlsInOrder: comparators.controlsInOrder[0].value,
-      ignoreParentSettings: comparators.ignoreParentSettings[0].value,
-      labelPosition: comparators.labelPosition[0].value,
-    };
-  }
-
-  const lastSerializedState = parentApi.getSerializedStateForChild(
-    uuid
-  ) as SerializedPanelState<ControlGroupSerializedState>;
-  const lastRuntimeState = deserializeControlGroup(lastSerializedState);
-  return {
-    autoApplySelections: lastRuntimeState.autoApplySelections,
-    chainingSystem: lastRuntimeState.chainingSystem,
-    controlsInOrder: getControlsInOrder(lastRuntimeState.initialChildControlState),
-    ignoreParentSettings: lastRuntimeState.ignoreParentSettings,
-    labelPosition: lastRuntimeState.labelPosition,
   };
 }

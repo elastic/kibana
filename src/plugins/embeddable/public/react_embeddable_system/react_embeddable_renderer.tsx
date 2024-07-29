@@ -188,7 +188,8 @@ export const ReactEmbeddableRenderer = <
             buildApi,
             uuid,
             parentApi,
-            setApi
+            setApi,
+            lastSavedRuntimeState
           );
 
           if (apiPublishesDataLoading(api)) {

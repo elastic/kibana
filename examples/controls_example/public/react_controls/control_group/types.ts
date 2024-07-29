@@ -61,6 +61,7 @@ export type ControlGroupApi = PresentationContainer &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    getLastSavedControlState: (controlUuid: string) => object;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     untilInitialized: () => Promise<void>;
   };

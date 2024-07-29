@@ -49,15 +49,12 @@ export const ControlRenderer = <
       async function buildControl() {
         const parentApi = getParentApi();
         const factory = getControlFactory<StateType, ApiType>(type);
-        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {
-          rawState: {},
-        };
         const buildApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<StateType>
         ): ApiType => {
           const unsavedChanges = initializeUnsavedChanges<StateType>(
-            initialState as StateType,
+            parentApi.getLastSavedControlState(uuid) as StateType,
             parentApi,
             comparators
           );
@@ -73,6 +70,9 @@ export const ControlRenderer = <
           } as unknown as ApiType;
         };
 
+        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {
+          rawState: {},
+        };
         return await factory.buildControl(initialState as StateType, buildApi, uuid, parentApi);
       }
 
