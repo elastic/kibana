@@ -9,7 +9,7 @@
 import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 
 export enum EventType {
-  CLICK_NAVLINK = 'click_navlink',
+  CLICK_NAVLINK = 'solutionNav_click_navlink',
 }
 
 export enum FieldType {
