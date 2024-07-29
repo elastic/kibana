@@ -46,7 +46,7 @@ export async function mergeDocuments(
     // is the simplest way to take initial components into account.
     const documentsToMerge = [
       {
-        absolutePath: 'MERGED OpenAPI SPEC',
+        absolutePath: 'MERGED RESULT',
         document: mergedDocument as unknown as ResolvedDocument['document'],
       },
       ...documentsGroup,

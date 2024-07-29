@@ -503,10 +503,11 @@ x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/o
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
-x-pack/plugins/integration_assistant @elastic/security-solution
+x-pack/plugins/integration_assistant @elastic/security-scalability
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
+x-pack/plugins/observability_solution/investigate_app @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
@@ -544,7 +545,7 @@ examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
-x-pack/plugins/observability_solution/logs_data_access @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/logs_data_access @elastic/obs-knowledge-team @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
@@ -616,6 +617,7 @@ x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/ob
 x-pack/plugins/observability_solution/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
+x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
@@ -752,6 +754,7 @@ x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
+packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
 packages/kbn-securitysolution-es-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
 packages/kbn-securitysolution-exceptions-common @elastic/security-detection-engine

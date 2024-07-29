@@ -18,4 +18,4 @@ export const RecoveredActionGroup: Readonly<ActionGroup<'recovered'>> = Object.f
 
 export type DefaultActionGroupId = 'default';
 
-export type RecoveredActionGroupId = typeof RecoveredActionGroup['id'];
+export type RecoveredActionGroupId = (typeof RecoveredActionGroup)['id'];

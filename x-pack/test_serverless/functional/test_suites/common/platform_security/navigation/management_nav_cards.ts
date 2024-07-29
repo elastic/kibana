@@ -63,7 +63,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('as viewer', function () {
       before(async () => {
-        await pageObjects.svlCommonPage.loginWithRole('viewer');
+        await pageObjects.svlCommonPage.loginAsViewer();
       });
 
       beforeEach(async () => {
