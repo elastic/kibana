@@ -86,6 +86,10 @@ export function SecuritySolutionServerlessUtils({
           apiKeyHeader: apiKeyHeader ?? { Authorization: '' },
           internalOrigin: 'Kibana',
         };
+
+        log.debug(
+          `Sending request to SecureBsearch with options: ${JSON.stringify(serverlessSendOptions)}`
+        );
         return SecureBsearch.send(serverlessSendOptions);
       };
 

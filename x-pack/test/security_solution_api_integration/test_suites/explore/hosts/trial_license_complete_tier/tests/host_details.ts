@@ -10,19 +10,24 @@ import {
   HostDetailsStrategyResponse,
   HostsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import TestAgent from 'supertest/lib/agent';
+import { BsearchService } from '../../../../../../../../test/common/services/bsearch';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { hostDetailsFilebeatExpectedResult } from '../mocks/host_details';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
-  const bsearch = getService('bsearch');
-  const supertest = getService('supertest');
+  const utils = getService('securitySolutionUtils');
 
   describe('Host Details', () => {
+    let supertest: TestAgent;
+    let bsearch: BsearchService;
     describe('With filebeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
-      );
+      before(async () => {
+        supertest = await utils.createSuperTest('admin');
+        bsearch = await utils.createBsearch('admin');
+        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+      });
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
       );

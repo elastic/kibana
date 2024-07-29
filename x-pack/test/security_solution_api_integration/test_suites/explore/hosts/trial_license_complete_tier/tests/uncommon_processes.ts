@@ -11,6 +11,8 @@ import {
   HostsQueries,
   HostsUncommonProcessesStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import TestAgent from 'supertest/lib/agent';
+import { BsearchService } from '../../../../../../../../test/common/services/bsearch';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -21,11 +23,14 @@ const TOTAL_COUNT = 3;
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
-  const bsearch = getService('bsearch');
-  const supertest = getService('supertest');
+  const utils = getService('securitySolutionUtils');
 
   describe('hosts', () => {
+    let supertest: TestAgent;
+    let bsearch: BsearchService;
     before(async () => {
+      supertest = await utils.createSuperTest('admin');
+      bsearch = await utils.createBsearch('admin');
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
     });
     after(async () => {

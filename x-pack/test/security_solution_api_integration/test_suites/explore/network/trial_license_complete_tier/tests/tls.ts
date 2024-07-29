@@ -13,6 +13,8 @@ import {
   FlowTarget,
   NetworkTlsStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import TestAgent from 'supertest/lib/agent';
+import { BsearchService } from '../../../../../../../../test/common/services/bsearch';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
@@ -83,14 +85,17 @@ const expectedOverviewSourceResult = {
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const bsearch = getService('bsearch');
+  const utils = getService('securitySolutionUtils');
 
   describe('Tls Test with Packetbeat', () => {
+    let supertest: TestAgent;
+    let bsearch: BsearchService;
     describe('Tls Test', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls')
-      );
+      before(async () => {
+        supertest = await utils.createSuperTest();
+        bsearch = await utils.createBsearch();
+        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
+      });
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls')
       );
@@ -155,9 +160,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('Tls Overview Test', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls')
-      );
+      before(async () => {
+        supertest = await utils.createSuperTest();
+        bsearch = await utils.createBsearch();
+        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
+      });
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls')
       );

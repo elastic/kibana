@@ -10,18 +10,23 @@ import {
   NetworkOverviewStrategyResponse,
   NetworkQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import TestAgent from 'supertest/lib/agent';
+import { BsearchService } from '../../../../../../../../test/common/services/bsearch';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
-  const bsearch = getService('bsearch');
-  const supertest = getService('supertest');
+  const utils = getService('securitySolutionUtils');
 
   describe('Overview Network', () => {
+    let supertest: TestAgent;
+    let bsearch: BsearchService;
     describe('With filebeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
-      );
+      before(async () => {
+        supertest = await utils.createSuperTest();
+        bsearch = await utils.createBsearch();
+        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+      });
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
       );
@@ -61,9 +66,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('With packetbeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview')
-      );
+      before(async () => {
+        supertest = await utils.createSuperTest();
+        bsearch = await utils.createBsearch();
+        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview');
+      });
       after(
         async () =>
           await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview')
@@ -103,9 +110,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('With auditbeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview')
-      );
+      before(async () => {
+        supertest = await utils.createSuperTest();
+        bsearch = await utils.createBsearch();
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
+      });
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview')
       );
