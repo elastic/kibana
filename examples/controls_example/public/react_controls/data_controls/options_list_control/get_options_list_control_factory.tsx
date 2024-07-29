@@ -254,7 +254,10 @@ export const getOptionsListControlFactory = (
               references, // does not have any references other than those provided by the data control serializer
             };
           },
-          clearSelections: () => selections$.next([]),
+          clearSelections: () => {
+            if (selections$.getValue()?.length) selections$.next([]);
+            if (existsSelected$.getValue()) existsSelected$.next(false);
+          },
         },
         {
           ...dataControl.comparators,
@@ -266,12 +269,12 @@ export const getOptionsListControlFactory = (
           singleSelect: [singleSelect$, (selected) => singleSelect$.next(selected)],
           sort: [sort$, (sort) => sort$.next(sort)],
 
-          /** This state cannot be changed once the control is created */
-          placeholder: [placeholder$, () => {}, () => true],
-          hideActionBar: [hideActionBar$, () => {}, () => true],
-          hideExclude: [hideExclude$, () => {}, () => true],
-          hideExists: [hideExists$, () => {}, () => true],
-          hideSort: [hideSort$, () => {}, () => true],
+          /** This state cannot currently be changed after the control is created */
+          placeholder: [placeholder$, (placeholder) => placeholder$.next(placeholder)],
+          hideActionBar: [hideActionBar$, (hideActionBar) => hideActionBar$.next(hideActionBar)],
+          hideExclude: [hideExclude$, (hideExclude) => hideExclude$.next(hideExclude)],
+          hideExists: [hideExists$, (hideExists) => hideExists$.next(hideExists)],
+          hideSort: [hideSort$, (hideSort) => hideSort$.next(hideSort)],
         }
       );
 
@@ -309,9 +312,6 @@ export const getOptionsListControlFactory = (
           }
         },
         makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
-          const existsSelected = Boolean(existsSelected$.getValue());
-          const selectedOptions = selections$.getValue() ?? [];
-          const singleSelect = singleSelect$.getValue();
           const field = api.field$.getValue();
           if (!key || !field) {
             api.setBlockingError(
@@ -320,6 +320,12 @@ export const getOptionsListControlFactory = (
             return;
           }
 
+          const existsSelected = Boolean(existsSelected$.getValue());
+          const selectedOptions = selections$.getValue() ?? [];
+          const singleSelect = singleSelect$.getValue();
+
+          // the order of these checks matters, so be careful if rearranging them
+          const keyAsType = getSelectionAsFieldType(field, key);
           if (key === 'exists-option') {
             // if selecting exists, then deselect everything else
             existsSelected$.next(!existsSelected);
@@ -327,12 +333,7 @@ export const getOptionsListControlFactory = (
               selections$.next([]);
               invalidSelections$.next(new Set([]));
             }
-            return;
-          }
-
-          // the order of these checks matters, so be careful if rearranging them
-          const keyAsType = getSelectionAsFieldType(field, key);
-          if (showOnlySelected || selectedOptions.includes(keyAsType)) {
+          } else if (showOnlySelected || selectedOptions.includes(keyAsType)) {
             componentApi.deselectOption(key);
           } else if (singleSelect) {
             // replace selection

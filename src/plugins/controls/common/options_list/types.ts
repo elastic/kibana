@@ -54,12 +54,6 @@ export interface OptionsListFailureResponse {
   error: 'aborted' | Error;
 }
 
-export const optionsListResponseWasFailure = (
-  response: OptionsListResponse
-): response is OptionsListFailureResponse => {
-  return (response as OptionsListFailureResponse).error !== undefined;
-};
-
 export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailureResponse;
 
 /**
