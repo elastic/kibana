@@ -98,7 +98,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
       }, {});
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
-        const agentInfo = mostRecentAgentInfosByAgentId[agentId].sentinel_one.agent;
+        const agentInfo = mostRecentAgentInfosByAgentId[agentId]?.sentinel_one?.agent;
 
         const pendingActions = allPendingActions.find(
           (agentPendingActions) => agentPendingActions.agent_id === agentId
