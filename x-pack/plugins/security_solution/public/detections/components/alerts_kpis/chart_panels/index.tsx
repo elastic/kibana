@@ -23,10 +23,7 @@ import type { UpdateDateRange } from '../../../../common/components/charts/commo
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../alerts_histogram_panel';
 import { AlertsSummaryChartsPanel } from '../alerts_summary_charts_panel';
-import {
-  DEFAULT_STACK_BY_FIELD,
-  DEFAULT_STACK_BY_FIELD1,
-} from '../common/config';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { AlertsCountPanel } from '../alerts_count_panel';
 import { GROUP_BY_LABEL } from '../common/translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';

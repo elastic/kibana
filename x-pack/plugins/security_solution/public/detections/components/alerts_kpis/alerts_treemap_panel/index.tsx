@@ -15,10 +15,7 @@ import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import {
-  AlertsTreemap,
-  DEFAULT_MIN_CHART_HEIGHT,
-} from './alerts_treemap';
+import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from './alerts_treemap';
 import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
@@ -26,10 +23,7 @@ import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/
 import { FieldSelection } from '../../../../common/components/field_selection';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
-import {
-  DEFAULT_STACK_BY_FIELD0_SIZE,
-  getAlertsRiskQuery,
-} from './alerts_treemap/query';
+import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from './alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from './alerts_treemap/types';
 import { useKibana } from '../../../../common/lib/kibana';
 

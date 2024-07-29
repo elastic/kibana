@@ -19,10 +19,7 @@ import {
   getUpToMaxBuckets,
 } from '../alerts_treemap_panel/alerts_treemap/lib/helpers';
 import { getFlattenedBuckets } from '../alerts_treemap_panel/alerts_treemap/lib/flatten/get_flattened_buckets';
-import type {
-  FlattenedBucket,
-  RawBucket,
-} from '../alerts_treemap_panel/alerts_treemap/types';
+import type { FlattenedBucket, RawBucket } from '../alerts_treemap_panel/alerts_treemap/types';
 import {
   getMultiGroupAlertsCountTableColumns,
   getSingleGroupByAlertsCountTableColumns,
