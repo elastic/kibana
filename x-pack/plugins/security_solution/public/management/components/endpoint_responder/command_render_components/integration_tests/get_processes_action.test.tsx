@@ -287,6 +287,18 @@ describe('When using processes action from response actions console', () => {
       });
     });
 
+    it('should display download link to access results', async () => {
+      await render();
+      enterConsoleCommand(renderResult, 'processes');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('getProcessesSuccessCallout').textContent).toEqual(
+          'Click here to download(ZIP file passcode: elastic).' +
+            'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+      });
+    });
+
     describe('and `responseActionsSentinelOneProcessesEnabled` feature flag is disabled', () => {
       beforeEach(() => {
         mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: false });

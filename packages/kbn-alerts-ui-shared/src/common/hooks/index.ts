@@ -17,4 +17,5 @@ export * from './use_load_alerting_framework_health';
 export * from './use_create_rule';
 export * from './use_update_rule';
 export * from './use_resolve_rule';
+export * from './use_search_alerts_query';
 export * from './use_get_alerts_group_aggregations_query';

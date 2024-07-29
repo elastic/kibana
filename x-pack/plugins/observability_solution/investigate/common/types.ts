@@ -15,10 +15,6 @@ export interface GlobalWidgetParameters {
     from: string;
     to: string;
   };
-  query: {
-    query: string;
-    language: 'kuery';
-  };
   filters: Filter[];
 }
 
