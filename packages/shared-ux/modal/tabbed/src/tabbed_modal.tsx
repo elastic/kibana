@@ -60,6 +60,7 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;
+  'data-test-subj'?: string;
 }
 
 const TabbedModalInner: FC<ITabbedModalInner> = ({
@@ -67,6 +68,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   modalTitle,
   modalWidth,
   anchorElement,
+  ...props
 }) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
@@ -115,8 +117,8 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
-      data-test-subj="shareContextModal"
       aria-labelledby={shareModalHeadingId}
+      data-test-subj={props['data-test-subj']}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={shareModalHeadingId}>{modalTitle}</EuiModalHeaderTitle>
