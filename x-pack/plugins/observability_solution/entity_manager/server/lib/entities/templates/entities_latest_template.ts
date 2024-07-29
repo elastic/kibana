@@ -6,14 +6,14 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getEntityLatestIndexTemplateV1 } from '../../common/helpers';
+import { getEntityLatestIndexTemplateV1 } from '../../../../common/helpers';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_INDEX_PREFIX_V1,
-} from '../../common/constants_entities';
-import { getCustomLatestTemplateComponents } from './components/helpers';
+} from '../../../../common/constants_entities';
+import { getCustomLatestTemplateComponents } from '../../../templates/components/helpers';
 
 export const getEntitiesLatestIndexTemplateConfig = (
   definitionId: string
@@ -33,8 +33,8 @@ export const getEntitiesLatestIndexTemplateConfig = (
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
     ...getCustomLatestTemplateComponents(definitionId),
   ],
-  index_patterns: [`${ENTITY_LATEST_INDEX_PREFIX_V1}.*`],
-  priority: 1,
+  index_patterns: [`${ENTITY_LATEST_INDEX_PREFIX_V1}.${definitionId}`],
+  priority: 200,
   template: {
     mappings: {
       _meta: {
