@@ -8,6 +8,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
@@ -21,6 +22,7 @@ import {
   apiPublishesUnifiedSearch,
   apiPublishesViewMode,
   fetch$,
+  getUnchangingComparator,
   initializeTitles,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -31,6 +33,7 @@ import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getUiActions } from '../services';
+import { ACTION_CONVERT_TO_LENS } from '../triggers';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisInstance } from './create_vis_instance';
@@ -46,11 +49,13 @@ import {
   VisualizeSerializedState,
 } from './types';
 
-export const getVisualizeEmbeddableFactory: (
-  embeddableStart: EmbeddableStart
-) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeRuntimeState, VisualizeApi> = (
-  embeddableStart
-) => ({
+export const getVisualizeEmbeddableFactory: (deps: {
+  embeddableStart: EmbeddableStart;
+  embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
+}) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeRuntimeState, VisualizeApi> = ({
+  embeddableStart,
+  embeddableEnhancedStart,
+}) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState,
   buildEmbeddable: async (initialState: unknown, buildApi, uuid, parentApi) => {
@@ -62,6 +67,12 @@ export const getVisualizeEmbeddableFactory: (
           rawState: initialState,
         })
       : (initialState as VisualizeRuntimeState);
+
+    const dynamicActionsApi = embeddableEnhancedStart?.initializeReactEmbeddableDynamicActions(
+      uuid,
+      () => titlesApi.panelTitle.getValue(),
+      state
+    );
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
     const renderCount$ = new BehaviorSubject<number>(0);
@@ -123,9 +134,11 @@ export const getVisualizeEmbeddableFactory: (
     const api = buildApi(
       {
         ...titlesApi,
+        ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         defaultPanelTitle,
         dataLoading: dataLoading$,
         dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+        supportedTriggers: () => [ACTION_CONVERT_TO_LENS],
         serializeState: () => {
           const savedObjectProperties = savedObjectProperties$.getValue();
           return serializeState({
@@ -232,6 +245,9 @@ export const getVisualizeEmbeddableFactory: (
       },
       {
         ...titleComparators,
+        ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+          enhancements: getUnchangingComparator(),
+        }),
         serializedVis: [
           serializedVis$,
           async (value) => {

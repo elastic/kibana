@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   HasEditCapabilities,
+  HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
   SerializedTitles,
@@ -30,12 +32,13 @@ export type ExtraSavedObjectProperties = Pick<
   | 'sharingSavedObjectProps'
 >;
 
-export type VisualizeRuntimeState = SerializedTitles & {
-  serializedVis: SerializedVis<VisParams>;
-  savedObjectId?: string;
-  savedObjectProperties?: ExtraSavedObjectProperties;
-  linkedToLibrary?: boolean;
-};
+export type VisualizeRuntimeState = SerializedTitles &
+  Partial<DynamicActionsSerializedState> & {
+    serializedVis: SerializedVis<VisParams>;
+    savedObjectId?: string;
+    savedObjectProperties?: ExtraSavedObjectProperties;
+    linkedToLibrary?: boolean;
+  };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
   savedVis?: SerializedVis<VisParams>;
@@ -73,6 +76,7 @@ export type VisualizeApi = HasEditCapabilities &
   PublishesDataLoading &
   HasVisualizeConfig &
   HasInspectorAdapters &
+  HasSupportedTriggers &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;
