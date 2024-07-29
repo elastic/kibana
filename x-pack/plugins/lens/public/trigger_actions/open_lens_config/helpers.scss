@@ -4,6 +4,7 @@
   @include euiBreakpoint('xs', 's', 'm') {
     clip-path: none;
   }
+  max-inline-size: $euiSizeXXL * 20;
   background: $euiColorLightestShade;
   .kbnOverlayMountWrapper {
     padding-left: $euiFormMaxWidth;
