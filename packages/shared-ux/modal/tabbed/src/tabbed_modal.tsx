@@ -78,10 +78,8 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   const { selectedTabId, defaultSelectedTabId } = state.meta;
   const tabbedModalHTMLId = useGeneratedHtmlId();
   const tabbedModalHeadingHTMLId = useGeneratedHtmlId();
-  const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'x' | 'y'>>());
-  const [modalPositionOverrideStyles, setPositionOverrideStyles] = useState<React.CSSProperties>(
-    {}
-  );
+  const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'top'>>());
+  const [translateYValue, setTranslateYValue] = useState(0);
 
   const onTabContentRender = useCallback(() => {
     const tabbedModal = document.querySelector(`#${tabbedModalHTMLId}`) as HTMLDivElement;
@@ -90,32 +88,25 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       // on initial render the modal animates into it's final position
       // hence the need to wait till said animation has completed
       tabbedModal.onanimationend = () => {
-        const { x, y } = tabbedModal.getBoundingClientRect();
-        defaultTabCoordinates.current.set(defaultSelectedTabId, { x, y });
+        const { top } = tabbedModal.getBoundingClientRect();
+        defaultTabCoordinates.current.set(defaultSelectedTabId, { top });
       };
     } else {
-      let positionOverrideStyles: React.CSSProperties;
+      let translateYOverride = 0;
 
-      if (defaultSelectedTabId === selectedTabId) {
-        positionOverrideStyles = {};
-      } else {
+      if (defaultSelectedTabId !== selectedTabId) {
         const defaultTabData = defaultTabCoordinates.current.get(defaultSelectedTabId);
 
-        positionOverrideStyles = {
-          position: 'absolute',
-          top: `${defaultTabData?.y}px`,
-          left: `${defaultTabData?.x}px`,
-        };
+        const rect = tabbedModal.getBoundingClientRect();
+
+        translateYOverride = translateYValue + (defaultTabData?.top! - rect.top);
       }
 
-      if (
-        Object.keys(modalPositionOverrideStyles).length !==
-        Object.keys(positionOverrideStyles).length
-      ) {
-        setPositionOverrideStyles(positionOverrideStyles);
+      if (translateYOverride !== translateYValue) {
+        setTranslateYValue(translateYOverride);
       }
     }
-  }, [tabbedModalHTMLId, defaultSelectedTabId, selectedTabId, modalPositionOverrideStyles]);
+  }, [tabbedModalHTMLId, defaultSelectedTabId, selectedTabId, translateYValue]);
 
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
@@ -150,6 +141,12 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       );
     });
   }, [onSelectedTabChanged, selectedTabId, tabs]);
+
+  const modalPositionOverrideStyles: React.CSSProperties = {
+    transform: `translateY(${translateYValue}px)`,
+    transformOrigin: 'top',
+    willChange: 'transform',
+  };
 
   return (
     <EuiModal
