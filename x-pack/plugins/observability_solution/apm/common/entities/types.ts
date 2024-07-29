@@ -17,7 +17,7 @@ export interface EntityMetrics {
   latency: number | null;
   throughput: number | null;
   failedTransactionRate: number;
-  logRatePerMinute: number;
+  logRate: number;
   logErrorRate: number | null;
 }
 

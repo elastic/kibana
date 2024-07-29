@@ -17,13 +17,18 @@ export const LOGS_FEATURE_ID = 'logs';
 export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
 
 export const TIMESTAMP_FIELD = '@timestamp';
-export const MESSAGE_FIELD = 'message';
 export const TIEBREAKER_FIELD = '_doc';
-export const HOST_FIELD = 'host.name';
-export const CONTAINER_FIELD = 'container.id';
-export const POD_FIELD = 'kubernetes.pod.uid';
-export const CMDLINE_FIELD = 'system.process.cmdline';
+
+// system
 export const HOST_NAME_FIELD = 'host.name';
+export const CONTAINER_ID_FIELD = 'container.id';
+export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
+export const SYSTEM_PROCESS_CMDLINE_FIELD = 'system.process.cmdline';
+export const EVENT_MODULE = 'event.module';
+export const METRICSET_MODULE = 'metricset.module';
+
+// logs
+export const MESSAGE_FIELD = 'message';
 
 export const O11Y_AAD_FIELDS = [
   'cloud.*',

@@ -16,7 +16,7 @@ export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
     await axios.put(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
       auth: { username: 'elastic', password: 'changeme' },
-      headers: { 'kbn-xsrf': 'true' },
+      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -38,7 +38,7 @@ export const addTestMonitor = async (
   try {
     await axios.post(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, testData, {
       auth: { username: 'elastic', password: 'changeme' },
-      headers: { 'kbn-xsrf': 'true' },
+      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
     });
   } catch (e) {
     // eslint-disable-next-line no-console

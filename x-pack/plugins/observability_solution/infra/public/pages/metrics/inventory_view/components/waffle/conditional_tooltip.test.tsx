@@ -102,19 +102,16 @@ describe('ConditionalToolTip', () => {
     const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
     expect(tooltip.render()).toMatchSnapshot();
 
-    expect(mockedUseSnapshot).toBeCalledWith(
-      {
-        filterQuery: expectedQuery,
-        metrics: expectedMetrics,
-        groupBy: [],
-        nodeType: 'host',
-        sourceId: 'default',
-        currentTime,
-        accountId: '',
-        region: '',
-      } as UseSnapshotRequest,
-      { abortable: true }
-    );
+    expect(mockedUseSnapshot).toBeCalledWith({
+      filterQuery: expectedQuery,
+      metrics: expectedMetrics,
+      groupBy: [],
+      nodeType: 'host',
+      sourceId: 'default',
+      currentTime,
+      accountId: '',
+      region: '',
+    } as UseSnapshotRequest);
   });
 });
 

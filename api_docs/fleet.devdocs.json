@@ -4935,7 +4935,7 @@
             "label": "agent_list",
             "description": [],
             "signature": [
-              "({ kuery }: ",
+              "({ kuery, showInactive }: ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -4954,7 +4954,7 @@
                 "id": "def-public.pagePathGetters.agent_list.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ kuery }",
+                "label": "{ kuery, showInactive }",
                 "description": [],
                 "signature": [
                   {
@@ -7500,8 +7500,8 @@
                 "pluginId": "features",
                 "scope": "server",
                 "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
               },
               " | undefined"
             ],
@@ -19455,7 +19455,7 @@
         "label": "isValidNamespace",
         "description": [],
         "signature": [
-          "(namespace: string, allowBlankNamespace: boolean | undefined) => { valid: boolean; error?: string | undefined; }"
+          "(namespace: string, allowBlankNamespace: boolean | undefined, allowedNamespacePrefixes: string[] | undefined) => { valid: boolean; error?: string | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
         "deprecated": false,
@@ -19485,6 +19485,21 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidNamespace.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedNamespacePrefixes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
             "deprecated": false,
@@ -22146,6 +22161,21 @@
                 "text": "EpmPackageAdditions"
               },
               ">>"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetInfoResponse.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "PackageMetadata",
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false,
@@ -25754,7 +25784,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"password\" | \"select\" | \"textarea\" | \"bool\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"password\" | \"bool\" | \"select\" | \"textarea\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,

@@ -5,6 +5,7 @@ info:
 paths:
   /api/exception_lists/_duplicate:
     post:
+      x-labels: [serverless, ess]
       operationId: DuplicateExceptionList
       x-codegen-enabled: true
       summary: Duplicates an exception list

@@ -9,7 +9,6 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { FieldStatisticsInitializer } from './field_stats_initializer';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
@@ -53,10 +52,9 @@ export async function resolveEmbeddableFieldStatsUserInput(
       const update = async (nextUpdate: FieldStatsInitialState) => {
         const esqlQuery = nextUpdate?.query?.esql;
         if (isDefined(esqlQuery)) {
-          const indexPatternFromQuery = getIndexPatternFromESQLQuery(esqlQuery);
           const dv = await getOrCreateDataViewByIndexPattern(
             pluginStart.data.dataViews,
-            indexPatternFromQuery,
+            esqlQuery,
             undefined
           );
           if (dv?.id && nextUpdate.dataViewId !== dv.id) {

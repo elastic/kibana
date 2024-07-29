@@ -32,7 +32,6 @@ export const LensChart = React.memo(
     dateRange,
     filters,
     hidePanelTitles,
-    lastReloadRequestTime,
     query,
     onBrushEnd,
     onFilter,

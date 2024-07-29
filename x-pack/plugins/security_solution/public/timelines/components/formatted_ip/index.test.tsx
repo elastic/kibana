@@ -11,8 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { FormattedIp } from '.';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { timelineActions } from '../../store';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
+import { NetworkPanelKey } from '../../../flyout/network_details';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -43,16 +43,14 @@ jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
   };
 });
 
-jest.mock('../../store', () => {
-  const original = jest.requireActual('../../store');
-  return {
-    ...original,
-    timelineActions: {
-      ...original.timelineActions,
-      toggleDetailPanel: jest.fn(),
-    },
-  };
-});
+jest.mock('../../store');
+
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openFlyout: mockOpenFlyout,
+  }),
+}));
 
 describe('FormattedIp', () => {
   const props = {
@@ -89,18 +87,7 @@ describe('FormattedIp', () => {
     expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
-  test('if not enableIpDetailsFlyout, should go to network details page', () => {
-    render(
-      <TestProviders>
-        <FormattedIp {...props} />
-      </TestProviders>
-    );
-
-    userEvent.click(screen.getByTestId('network-details'));
-    expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-  });
-
-  test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', () => {
+  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -116,14 +103,14 @@ describe('FormattedIp', () => {
     );
 
     userEvent.click(screen.getByTestId('network-details'));
-    expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-      id: context.timelineID,
-      panelView: 'networkDetail',
-      params: {
-        flowTarget: 'source',
-        ip: props.value,
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: NetworkPanelKey,
+        params: {
+          ip: props.value,
+          flowTarget: 'source',
+        },
       },
-      tabType: context.tabType,
     });
   });
 });

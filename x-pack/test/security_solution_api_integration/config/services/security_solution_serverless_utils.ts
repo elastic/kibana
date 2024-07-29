@@ -29,7 +29,7 @@ export function SecuritySolutionServerlessUtils({
   const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
 
   async function invalidateApiKey(credentials: RoleCredentials) {
-    await svlUserManager.invalidateApiKeyForRole(credentials);
+    await svlUserManager.invalidateM2mApiKeyWithRoleScope(credentials);
   }
 
   async function cleanCredentials(role: string) {
@@ -59,7 +59,7 @@ export function SecuritySolutionServerlessUtils({
      */
     createSuperTest: async (role = 'admin') => {
       cleanCredentials(role);
-      const credentials = await svlUserManager.createApiKeyForRole(role);
+      const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
       rolesCredentials.set(role, credentials);
 
       return agentWithCommonHeaders.set(credentials.apiKeyHeader);

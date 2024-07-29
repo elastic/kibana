@@ -17,11 +17,11 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
-import { getEcsGroups } from './lib/get_ecs_groups';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
@@ -318,7 +318,6 @@ export const createCustomThresholdExecutor = ({
           startedAt: indexedStartedAt,
         }),
         ...additionalContext,
-        ...getEcsGroups(group),
       };
 
       alertsClient.setAlertData({

@@ -27,8 +27,6 @@ const createSetupContractMock = () => {
     getLegacyMetadata: jest.fn(),
     getTheme: jest.fn(),
     getPlugins: jest.fn(),
-    getInjectedVar: jest.fn(),
-    getInjectedVars: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
     getCustomBranding: jest.fn(),
   };

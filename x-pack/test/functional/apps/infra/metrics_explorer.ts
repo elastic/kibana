@@ -101,6 +101,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the metrics explorer survey link', async () => {
         await pageObjects.infraMetricsExplorer.ensureMetricsExplorerFeedbackLinkIsVisible();
       });
+
+      it('should not allow adding more than 20 metrics', async () => {
+        await pageObjects.infraMetricsExplorer.clearMetrics();
+
+        const fields = [
+          'process.cpu.pct',
+          'process.memory.pct',
+          'system.core.total.pct',
+          'system.core.user.pct',
+          'system.core.nice.pct',
+          'system.core.idle.pct',
+          'system.core.iowait.pct',
+          'system.core.irq.pct',
+          'system.core.softirq.pct',
+          'system.core.steal.pct',
+          'system.cpu.nice.pct',
+          'system.cpu.idle.pct',
+          'system.cpu.iowait.pct',
+          'system.cpu.irq.pct',
+          'system.cpu.softirq.pct',
+          'system.cpu.steal.pct',
+          'system.cpu.user.norm.pct',
+          'system.memory.free',
+          'kubernetes.pod.cpu.usage.node.pct',
+          'docker.cpu.total.pct',
+        ];
+
+        for (const field of fields) {
+          await pageObjects.infraMetricsExplorer.addMetric(field);
+        }
+
+        await pageObjects.infraMetricsExplorer.ensureMaxMetricsLimiteReachedIsVisible();
+      });
     });
 
     describe('Saved Views', function () {

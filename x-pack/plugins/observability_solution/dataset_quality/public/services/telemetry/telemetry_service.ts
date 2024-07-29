@@ -22,6 +22,9 @@ export class TelemetryService {
     analytics.registerEventType(datasetQualityEbtEvents.datasetNavigatedEventType);
     analytics.registerEventType(datasetQualityEbtEvents.datasetDetailsOpenedEventType);
     analytics.registerEventType(datasetQualityEbtEvents.datasetDetailsNavigatedEventType);
+    analytics.registerEventType(
+      datasetQualityEbtEvents.datasetDetailsBreakdownFieldChangedEventType
+    );
   }
 
   public start(): ITelemetryClient {

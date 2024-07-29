@@ -22,9 +22,10 @@ describe('getColumnsWithMetadata', () => {
     expect(result).toEqual(columns);
   });
 
-  it('should return columns with metadata if ECS version field is present', async () => {
+  it('should return columns with metadata if both name and type match with ECS fields', async () => {
     const columns = [
-      { name: 'ecs.version', type: 'string' as DatatableColumnType },
+      { name: 'ecs.field', type: 'string' as DatatableColumnType },
+      { name: 'ecs.fakeBooleanField', type: 'boolean' as DatatableColumnType },
       { name: 'field2', type: 'number' as DatatableColumnType },
     ];
     const fieldsMetadata = {
@@ -33,6 +34,10 @@ describe('getColumnsWithMetadata', () => {
           fields: {
             'ecs.version': { description: 'ECS version field', type: 'keyword' },
             'ecs.field': { description: 'ECS field description', type: 'keyword' },
+            'ecs.fakeBooleanField': {
+              description: 'ECS fake boolean field description',
+              type: 'keyword',
+            },
           },
         }),
       }),
@@ -42,10 +47,11 @@ describe('getColumnsWithMetadata', () => {
 
     expect(result).toEqual([
       {
-        name: 'ecs.version',
+        name: 'ecs.field',
         type: 'string',
-        metadata: { description: 'ECS version field' },
+        metadata: { description: 'ECS field description' },
       },
+      { name: 'ecs.fakeBooleanField', type: 'boolean' },
       { name: 'field2', type: 'number' },
     ]);
   });

@@ -27,6 +27,7 @@ export const getPersistedConversation = async ({
   if (!conversationId) {
     logger.debug('Cannot get conversation, because conversationId is undefined');
     return {
+      ...state,
       conversation: undefined,
       messages: [],
       chatTitle: '',
@@ -38,6 +39,7 @@ export const getPersistedConversation = async ({
   if (!conversation) {
     logger.debug('Requested conversation, because conversation is undefined');
     return {
+      ...state,
       conversation: undefined,
       messages: [],
       chatTitle: '',
@@ -49,6 +51,7 @@ export const getPersistedConversation = async ({
 
   const messages = getLangChainMessages(conversation.messages ?? []);
   return {
+    ...state,
     conversation,
     messages,
     chatTitle: conversation.title,

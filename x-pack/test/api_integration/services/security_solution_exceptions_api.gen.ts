@@ -122,7 +122,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     },
     findExceptionLists(props: FindExceptionListsProps) {
       return supertest
-        .get('/api/exception_lists/items/_find')
+        .get('/api/exception_lists/_find')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

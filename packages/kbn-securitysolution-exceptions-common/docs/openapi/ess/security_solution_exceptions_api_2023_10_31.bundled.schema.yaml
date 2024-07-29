@@ -1,0 +1,1854 @@
+openapi: 3.0.3
+info:
+  description: >-
+    Exceptions API allows you to manage detection rule exceptions to prevent a
+    rule from generating an alert from incoming events even when the rule's
+    other criteria are met.
+  title: Security Solution Exceptions API (Elastic Cloud and self-hosted)
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  '/api/detection_engine/rules/{id}/exceptions':
+    post:
+      operationId: CreateRuleExceptionListItems
+      parameters:
+        - description: Detection rule's identifier
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/RuleId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  items:
+                    $ref: '#/components/schemas/CreateRuleExceptionListItemProps'
+                  type: array
+              required:
+                - items
+        description: Rule exception list items
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ExceptionListItem'
+                type: array
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Creates rule exception list items
+      tags:
+        - Exceptions API
+  /api/exception_lists:
+    delete:
+      operationId: DeleteExceptionList
+      parameters:
+        - description: Either `id` or `list_id` must be specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListId'
+        - description: Either `id` or `list_id` must be specified
+          in: query
+          name: list_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListHumanId'
+        - in: query
+          name: namespace_type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+            default: single
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionList'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Deletes an exception list
+      tags:
+        - Exceptions API
+    get:
+      operationId: GetExceptionList
+      parameters:
+        - description: Either `id` or `list_id` must be specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListId'
+        - description: Either `id` or `list_id` must be specified
+          in: query
+          name: list_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListHumanId'
+        - in: query
+          name: namespace_type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+            default: single
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionList'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Retrieves an exception list using its `id` or `list_id` field
+      tags:
+        - Exceptions API
+    post:
+      operationId: CreateExceptionList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  $ref: '#/components/schemas/ExceptionListDescription'
+                list_id:
+                  $ref: '#/components/schemas/ExceptionListHumanId'
+                meta:
+                  $ref: '#/components/schemas/ExceptionListMeta'
+                name:
+                  $ref: '#/components/schemas/ExceptionListName'
+                namespace_type:
+                  $ref: '#/components/schemas/ExceptionNamespaceType'
+                  default: single
+                os_types:
+                  $ref: '#/components/schemas/ExceptionListOsTypeArray'
+                tags:
+                  $ref: '#/components/schemas/ExceptionListTags'
+                  default: []
+                type:
+                  $ref: '#/components/schemas/ExceptionListType'
+                version:
+                  $ref: '#/components/schemas/ExceptionListVersion'
+                  default: 1
+              required:
+                - name
+                - description
+                - type
+        description: Exception list's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionList'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list already exists response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Creates an exception list
+      tags:
+        - Exceptions API
+    put:
+      operationId: UpdateExceptionList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _version:
+                  type: string
+                description:
+                  $ref: '#/components/schemas/ExceptionListDescription'
+                id:
+                  $ref: '#/components/schemas/ExceptionListId'
+                list_id:
+                  $ref: '#/components/schemas/ExceptionListHumanId'
+                meta:
+                  $ref: '#/components/schemas/ExceptionListMeta'
+                name:
+                  $ref: '#/components/schemas/ExceptionListName'
+                namespace_type:
+                  $ref: '#/components/schemas/ExceptionNamespaceType'
+                  default: single
+                os_types:
+                  $ref: '#/components/schemas/ExceptionListOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '#/components/schemas/ExceptionListTags'
+                type:
+                  $ref: '#/components/schemas/ExceptionListType'
+                version:
+                  $ref: '#/components/schemas/ExceptionListVersion'
+              required:
+                - name
+                - description
+                - type
+        description: Exception list's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionList'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Updates an exception list
+      tags:
+        - Exceptions API
+  /api/exception_lists/_duplicate:
+    post:
+      operationId: DuplicateExceptionList
+      parameters:
+        - description: Exception list's human identifier
+          in: query
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ExceptionListHumanId'
+        - in: query
+          name: namespace_type
+          required: true
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+        - description: >-
+            Determines whether to include expired exceptions in the exported
+            list
+          in: query
+          name: include_expired_exceptions
+          required: true
+          schema:
+            default: 'true'
+            enum:
+              - 'true'
+              - 'false'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionList'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '405':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list to duplicate not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Duplicates an exception list
+      tags:
+        - Exceptions API
+  /api/exception_lists/_export:
+    post:
+      description: Exports an exception list and its associated items to an .ndjson file
+      operationId: ExportExceptionList
+      parameters:
+        - description: Exception list's identifier
+          in: query
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ExceptionListId'
+        - description: Exception list's human identifier
+          in: query
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/ExceptionListHumanId'
+        - in: query
+          name: namespace_type
+          required: true
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+        - description: >-
+            Determines whether to include expired exceptions in the exported
+            list
+          in: query
+          name: include_expired_exceptions
+          required: true
+          schema:
+            default: 'true'
+            enum:
+              - 'true'
+              - 'false'
+            type: string
+      responses:
+        '200':
+          content:
+            application/ndjson:
+              schema:
+                description: >-
+                  A `.ndjson` file containing specified exception list and its
+                  items
+                format: binary
+                type: string
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Exports an exception list
+      tags:
+        - Exceptions API
+  /api/exception_lists/_find:
+    get:
+      operationId: FindExceptionLists
+      parameters:
+        - description: >
+            Filters the returned results according to the value of the specified
+            field.
+
+
+            Uses the `so type.field name:field` value syntax, where `so type`
+            can be:
+
+
+            - `exception-list`: Specify a space-aware exception list.
+
+            - `exception-list-agnostic`: Specify an exception list that is
+            shared across spaces.
+          in: query
+          name: filter
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindExceptionListsFilter'
+        - description: >
+            Determines whether the returned containers are Kibana associated
+            with a Kibana space
+
+            or available in all spaces (`agnostic` or `single`)
+          in: query
+          name: namespace_type
+          required: false
+          schema:
+            default:
+              - single
+            items:
+              $ref: '#/components/schemas/ExceptionNamespaceType'
+            type: array
+        - description: The page number to return
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - description: The number of exception lists to return per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - description: Determines which field is used to sort the results
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            type: string
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/ExceptionList'
+                    type: array
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    minimum: 1
+                    type: integer
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Finds exception lists
+      tags:
+        - Exceptions API
+  /api/exception_lists/_import:
+    post:
+      description: Imports an exception list and associated items
+      operationId: ImportExceptionList
+      parameters:
+        - description: >
+            Determines whether existing exception lists with the same `list_id`
+            are overwritten.
+
+            If any exception items have the same `item_id`, those are also
+            overwritten.
+          in: query
+          name: overwrite
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - in: query
+          name: overwrite_exceptions
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - in: query
+          name: overwrite_action_connectors
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: >
+            Determines whether the list being imported will have a new `list_id`
+            generated.
+
+            Additional `item_id`'s are generated for each exception item. Both
+            the exception
+
+            list and its items are overwritten.
+          in: query
+          name: as_new_list
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: A `.ndjson` file containing the exception list
+                  format: binary
+                  type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    $ref: '#/components/schemas/ExceptionListsImportBulkErrorArray'
+                  success:
+                    type: boolean
+                  success_count:
+                    minimum: 0
+                    type: integer
+                  success_count_exception_list_items:
+                    minimum: 0
+                    type: integer
+                  success_count_exception_lists:
+                    minimum: 0
+                    type: integer
+                  success_exception_list_items:
+                    type: boolean
+                  success_exception_lists:
+                    type: boolean
+                required:
+                  - errors
+                  - success
+                  - success_count
+                  - success_exception_lists
+                  - success_count_exception_lists
+                  - success_exception_list_items
+                  - success_count_exception_list_items
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Imports an exception list
+      tags:
+        - Exceptions API
+  /api/exception_lists/items:
+    delete:
+      operationId: DeleteExceptionListItem
+      parameters:
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemId'
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: item_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemHumanId'
+        - in: query
+          name: namespace_type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+            default: single
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Deletes an exception list item
+      tags:
+        - Exceptions API
+    get:
+      operationId: GetExceptionListItem
+      parameters:
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemId'
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: item_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemHumanId'
+        - in: query
+          name: namespace_type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+            default: single
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Gets an exception list item
+      tags:
+        - Exceptions API
+    post:
+      operationId: CreateExceptionListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comments:
+                  $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
+                  default: []
+                description:
+                  $ref: '#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
+                expire_time:
+                  format: date-time
+                  type: string
+                item_id:
+                  $ref: '#/components/schemas/ExceptionListItemHumanId'
+                list_id:
+                  $ref: '#/components/schemas/ExceptionListHumanId'
+                meta:
+                  $ref: '#/components/schemas/ExceptionListItemMeta'
+                name:
+                  $ref: '#/components/schemas/ExceptionListItemName'
+                namespace_type:
+                  $ref: '#/components/schemas/ExceptionNamespaceType'
+                  default: single
+                os_types:
+                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '#/components/schemas/ExceptionListItemTags'
+                  default: []
+                type:
+                  $ref: '#/components/schemas/ExceptionListItemType'
+              required:
+                - list_id
+                - type
+                - name
+                - description
+                - entries
+        description: Exception list item's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list item already exists response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Creates an exception list item
+      tags:
+        - Exceptions API
+    put:
+      operationId: UpdateExceptionListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _version:
+                  type: string
+                comments:
+                  $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
+                  default: []
+                description:
+                  $ref: '#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
+                expire_time:
+                  format: date-time
+                  type: string
+                id:
+                  $ref: '#/components/schemas/ExceptionListItemId'
+                  description: Either `id` or `item_id` must be specified
+                item_id:
+                  $ref: '#/components/schemas/ExceptionListItemHumanId'
+                  description: Either `id` or `item_id` must be specified
+                list_id:
+                  $ref: '#/components/schemas/ExceptionListHumanId'
+                meta:
+                  $ref: '#/components/schemas/ExceptionListItemMeta'
+                name:
+                  $ref: '#/components/schemas/ExceptionListItemName'
+                namespace_type:
+                  $ref: '#/components/schemas/ExceptionNamespaceType'
+                  default: single
+                os_types:
+                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '#/components/schemas/ExceptionListItemTags'
+                type:
+                  $ref: '#/components/schemas/ExceptionListItemType'
+              required:
+                - type
+                - name
+                - description
+                - entries
+        description: Exception list item's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list item not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Updates an exception list item
+      tags:
+        - Exceptions API
+  /api/exception_lists/items/_find:
+    get:
+      operationId: FindExceptionListItems
+      parameters:
+        - description: List's id
+          in: query
+          name: list_id
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/ExceptionListHumanId'
+            type: array
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
+            using the `<field name>:<field value>` syntax.
+          in: query
+          name: filter
+          required: false
+          schema:
+            default: []
+            items:
+              $ref: '#/components/schemas/FindExceptionListItemsFilter'
+            type: array
+        - description: >
+            Determines whether the returned containers are Kibana associated
+            with a Kibana space
+
+            or available in all spaces (`agnostic` or `single`)
+          in: query
+          name: namespace_type
+          required: false
+          schema:
+            default:
+              - single
+            items:
+              $ref: '#/components/schemas/ExceptionNamespaceType'
+            type: array
+        - in: query
+          name: search
+          required: false
+          schema:
+            type: string
+        - description: The page number to return
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+        - description: The number of exception list items to return per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+        - description: Determines which field is used to sort the results
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/ExceptionListItem'
+                    type: array
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    minimum: 1
+                    type: integer
+                  pit:
+                    type: string
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Finds exception list items
+      tags:
+        - Exceptions API
+  /api/exception_lists/summary:
+    get:
+      operationId: GetExceptionListSummary
+      parameters:
+        - description: Exception list's identifier generated upon creation
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListId'
+        - description: Exception list's human readable identifier
+          in: query
+          name: list_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListHumanId'
+        - in: query
+          name: namespace_type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionNamespaceType'
+            default: single
+        - description: Search filter clause
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  linux:
+                    minimum: 0
+                    type: integer
+                  macos:
+                    minimum: 0
+                    type: integer
+                  total:
+                    minimum: 0
+                    type: integer
+                  windows:
+                    minimum: 0
+                    type: integer
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list not found response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Retrieves an exception list summary
+      tags:
+        - Exceptions API
+  /api/exceptions/shared:
+    post:
+      operationId: CreateSharedExceptionList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  $ref: '#/components/schemas/ExceptionListDescription'
+                name:
+                  $ref: '#/components/schemas/ExceptionListName'
+              required:
+                - name
+                - description
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExceptionList'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Not enough privileges response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Exception list already exists response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error response
+      summary: Creates a shared exception list
+      tags:
+        - Exceptions API
+components:
+  schemas:
+    CreateExceptionListItemComment:
+      type: object
+      properties:
+        comment:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - comment
+    CreateExceptionListItemCommentArray:
+      items:
+        $ref: '#/components/schemas/CreateExceptionListItemComment'
+      type: array
+    CreateRuleExceptionListItemComment:
+      type: object
+      properties:
+        comment:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - comment
+    CreateRuleExceptionListItemCommentArray:
+      items:
+        $ref: '#/components/schemas/CreateRuleExceptionListItemComment'
+      type: array
+    CreateRuleExceptionListItemProps:
+      type: object
+      properties:
+        comments:
+          $ref: '#/components/schemas/CreateRuleExceptionListItemCommentArray'
+          default: []
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
+        expire_time:
+          format: date-time
+          type: string
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+          default: single
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '#/components/schemas/ExceptionListItemTags'
+          default: []
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+      required:
+        - type
+        - name
+        - description
+        - entries
+    ExceptionList:
+      type: object
+      properties:
+        _version:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          type: string
+        description:
+          $ref: '#/components/schemas/ExceptionListDescription'
+        id:
+          $ref: '#/components/schemas/ExceptionListId'
+        immutable:
+          type: boolean
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+        os_types:
+          $ref: '#/components/schemas/ExceptionListOsTypeArray'
+        tags:
+          $ref: '#/components/schemas/ExceptionListTags'
+        tie_breaker_id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ExceptionListType'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          type: string
+        version:
+          $ref: '#/components/schemas/ExceptionListVersion'
+      required:
+        - id
+        - list_id
+        - type
+        - name
+        - description
+        - immutable
+        - namespace_type
+        - version
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+    ExceptionListDescription:
+      type: string
+    ExceptionListHumanId:
+      $ref: '#/components/schemas/NonEmptyString'
+      description: 'Human readable string identifier, e.g. `trusted-linux-processes`'
+    ExceptionListId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItem:
+      type: object
+      properties:
+        _version:
+          type: string
+        comments:
+          $ref: '#/components/schemas/ExceptionListItemCommentArray'
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          type: string
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
+        expire_time:
+          format: date-time
+          type: string
+        id:
+          $ref: '#/components/schemas/ExceptionListItemId'
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+        tags:
+          $ref: '#/components/schemas/ExceptionListItemTags'
+        tie_breaker_id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          type: string
+      required:
+        - id
+        - item_id
+        - list_id
+        - type
+        - name
+        - description
+        - entries
+        - namespace_type
+        - comments
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+    ExceptionListItemComment:
+      type: object
+      properties:
+        comment:
+          $ref: '#/components/schemas/NonEmptyString'
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/NonEmptyString'
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - id
+        - comment
+        - created_at
+        - created_by
+    ExceptionListItemCommentArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListItemComment'
+      type: array
+    ExceptionListItemDescription:
+      type: string
+    ExceptionListItemEntry:
+      anyOf:
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryList'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
+        - $ref: '#/components/schemas/ExceptionListItemEntryNested'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchWildcard'
+      discriminator:
+        propertyName: type
+    ExceptionListItemEntryArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListItemEntry'
+      type: array
+    ExceptionListItemEntryExists:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - exists
+          type: string
+      required:
+        - type
+        - field
+        - operator
+    ExceptionListItemEntryList:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        list:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ListId'
+            type:
+              $ref: '#/components/schemas/ListType'
+          required:
+            - id
+            - type
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - list
+          type: string
+      required:
+        - type
+        - field
+        - list
+        - operator
+    ExceptionListItemEntryMatch:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - match
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - type
+        - field
+        - value
+        - operator
+    ExceptionListItemEntryMatchAny:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - match_any
+          type: string
+        value:
+          items:
+            $ref: '#/components/schemas/NonEmptyString'
+          minItems: 1
+          type: array
+      required:
+        - type
+        - field
+        - value
+        - operator
+    ExceptionListItemEntryMatchWildcard:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - wildcard
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - type
+        - field
+        - value
+        - operator
+    ExceptionListItemEntryNested:
+      type: object
+      properties:
+        entries:
+          items:
+            $ref: '#/components/schemas/ExceptionListItemEntryNestedEntryItem'
+          minItems: 1
+          type: array
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        type:
+          enum:
+            - nested
+          type: string
+      required:
+        - type
+        - field
+        - entries
+    ExceptionListItemEntryNestedEntryItem:
+      oneOf:
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
+    ExceptionListItemEntryOperator:
+      enum:
+        - excluded
+        - included
+      type: string
+    ExceptionListItemHumanId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItemId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItemMeta:
+      additionalProperties: true
+      type: object
+    ExceptionListItemName:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItemOsTypeArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListOsType'
+      type: array
+    ExceptionListItemTags:
+      items:
+        $ref: '#/components/schemas/NonEmptyString'
+      type: array
+    ExceptionListItemType:
+      enum:
+        - simple
+      type: string
+    ExceptionListMeta:
+      additionalProperties: true
+      type: object
+    ExceptionListName:
+      type: string
+    ExceptionListOsType:
+      enum:
+        - linux
+        - macos
+        - windows
+      type: string
+    ExceptionListOsTypeArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListOsType'
+      type: array
+    ExceptionListsImportBulkError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status_code:
+              type: integer
+          required:
+            - status_code
+            - message
+        id:
+          $ref: '#/components/schemas/ExceptionListId'
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+      required:
+        - error
+    ExceptionListsImportBulkErrorArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListsImportBulkError'
+      type: array
+    ExceptionListTags:
+      items:
+        type: string
+      type: array
+    ExceptionListType:
+      enum:
+        - detection
+        - rule_default
+        - endpoint
+        - endpoint_trusted_apps
+        - endpoint_events
+        - endpoint_host_isolation_exceptions
+        - endpoint_blocklists
+      type: string
+    ExceptionListVersion:
+      minimum: 1
+      type: integer
+    ExceptionNamespaceType:
+      description: >
+        Determines whether the exception container is available in all Kibana
+        spaces or just the space
+
+        in which it is created, where:
+
+
+        - `single`: Only available in the Kibana space in which it is created.
+
+        - `agnostic`: Available in all Kibana spaces.
+      enum:
+        - agnostic
+        - single
+      type: string
+    FindExceptionListItemsFilter:
+      $ref: '#/components/schemas/NonEmptyString'
+    FindExceptionListsFilter:
+      type: string
+    ListId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListType:
+      enum:
+        - binary
+        - boolean
+        - byte
+        - date
+        - date_nanos
+        - date_range
+        - double
+        - double_range
+        - float
+        - float_range
+        - geo_point
+        - geo_shape
+        - half_float
+        - integer
+        - integer_range
+        - ip
+        - ip_range
+        - keyword
+        - long
+        - long_range
+        - shape
+        - short
+        - text
+      type: string
+    NonEmptyString:
+      description: A string that is not empty and does not contain only whitespace
+      minLength: 1
+      pattern: ^(?! *$).+$
+      type: string
+    PlatformErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+      required:
+        - statusCode
+        - error
+        - message
+    RuleId:
+      $ref: '#/components/schemas/UUID'
+    SiemErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          type: integer
+      required:
+        - status_code
+        - message
+    UpdateExceptionListItemComment:
+      type: object
+      properties:
+        comment:
+          $ref: '#/components/schemas/NonEmptyString'
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - comment
+    UpdateExceptionListItemCommentArray:
+      items:
+        $ref: '#/components/schemas/UpdateExceptionListItemComment'
+      type: array
+    UUID:
+      description: A universally unique identifier
+      format: uuid
+      type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []

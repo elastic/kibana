@@ -91,11 +91,21 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "prettier", "@types/jsdom"],
+      "matchDepNames": ["typescript", "@types/jsdom"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "prettier",
+      "matchDepNames": ["prettier", "eslint-plugin-prettier", "eslint-config-prettier"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "allowedVersions": "<3.0",
       "enabled": true
     },
     {
@@ -312,7 +322,7 @@
     {
       "groupName": "Profiling",
       "matchDepNames": ["peggy", "@types/dagre"],
-      "reviewers": ["team:profiling-ui"],
+      "reviewers": ["team:obs-ux-infra_services-team"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip"],
       "minimumReleaseAge": "7 days",
@@ -349,7 +359,7 @@
       "groupName": "XState",
       "matchDepNames": ["xstate"],
       "matchDepPrefixes": ["@xstate/"],
-      "reviewers": ["team:obs-ux-logs"],
+      "reviewers": ["team:obs-ux-logs-team"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Obs UX Logs", "release_note:skip"],
       "minimumReleaseAge": "7 days",
@@ -358,7 +368,7 @@
     {
       "groupName": "OpenTelemetry modules",
       "matchDepPrefixes": ["@opentelemetry/"],
-      "reviewers": ["team:monitoring"],
+      "reviewers": ["team:stack-monitoring"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Monitoring"],
       "minimumReleaseAge": "7 days",

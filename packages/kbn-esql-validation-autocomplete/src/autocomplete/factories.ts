@@ -28,12 +28,14 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
+export const TIME_SYSTEM_PARAMS = ['?start', '?end'];
+
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
+export function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
   return shouldBeQuotedText(text, options)
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
@@ -47,7 +49,7 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
-  const fullSignatures = getFunctionSignatures(fn);
+  const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
     label: fullSignatures[0].declaration,
     text: `${fn.name.toUpperCase()}($0)`,
@@ -67,7 +69,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
 export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
-    label: fn.name,
+    label: fn.name.toUpperCase(),
     text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
     kind: 'Operator',
@@ -198,7 +200,8 @@ export const buildSourcesDefinitions = (
 
 export const buildConstantsDefinitions = (
   userConstants: string[],
-  detail?: string
+  detail?: string,
+  sortText?: string
 ): SuggestionRawDefinition[] =>
   userConstants.map((label) => ({
     label,
@@ -209,7 +212,7 @@ export const buildConstantsDefinitions = (
       i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.constantDefinition', {
         defaultMessage: `Constant`,
       }),
-    sortText: 'A',
+    sortText: sortText ?? 'A',
   }));
 
 export const buildValueDefinitions = (
@@ -262,7 +265,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: label,
+    text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -388,4 +391,42 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
     }
   }
   return suggestions;
+}
+
+export function getDateLiterals() {
+  return [
+    ...buildConstantsDefinitions(
+      TIME_SYSTEM_PARAMS,
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
+        defaultMessage: 'Named parameter',
+      }),
+      '1A'
+    ),
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePickerLabel',
+        {
+          defaultMessage: 'Choose from the time picker',
+        }
+      ),
+      text: '',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+        {
+          defaultMessage: 'Click to choose',
+        }
+      ),
+      sortText: '1A',
+      command: {
+        id: 'esql.timepicker.choose',
+        title: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+          {
+            defaultMessage: 'Click to choose',
+          }
+        ),
+      },
+    } as SuggestionRawDefinition,
+  ];
 }

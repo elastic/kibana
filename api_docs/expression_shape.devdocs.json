@@ -1583,7 +1583,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
+          "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
@@ -2601,7 +2601,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
+          "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,

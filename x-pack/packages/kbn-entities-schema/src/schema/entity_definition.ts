@@ -35,12 +35,14 @@ export const entityDefinitionSchema = z.object({
     interval: durationSchema.refine((val) => val.asMinutes() >= 1, {
       message: 'The history.interval can not be less than 1m',
     }),
-    lookbackPeriod: z.optional(durationSchema),
     settings: z.optional(
       z.object({
         syncField: z.optional(z.string()),
         syncDelay: z.optional(z.string()),
         frequency: z.optional(z.string()),
+        backfillSyncDelay: z.optional(z.string()),
+        backfillLookbackPeriod: z.optional(durationSchema),
+        backfillFrequency: z.optional(z.string()),
       })
     ),
   }),

@@ -9187,8 +9187,8 @@
     {
       "query": "from a_index | eval date_diff(\"year\", concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [string]",
-        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [date_diff] must be [date], found value [concat(\"20\",\"22\")] type [string]",
+        "Argument of [date_diff] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -11086,7 +11086,7 @@
     {
       "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_extract] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [date_extract] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -11173,7 +11173,7 @@
     {
       "query": "from a_index | eval date_format(stringField, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_format] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [date_format] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -11390,7 +11390,7 @@
     {
       "query": "from a_index | eval date_trunc(1 year, concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -11402,8 +11402,8 @@
     {
       "query": "from a_index | eval date_trunc(concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [date_trunc] must be [time_literal], found value [concat(\"20\", \"22\")] type [string]",
-        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [date_trunc] must be [time_literal], found value [concat(\"20\",\"22\")] type [string]",
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -24143,7 +24143,7 @@
     {
       "query": "from a_index | stats max(concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [max] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [max] must be [number], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -24196,6 +24196,58 @@
     },
     {
       "query": "from a_index | eval max(booleanField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(ipField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(ipField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(ipField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(ipField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(ipField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(ipField) > 0",
       "error": [
         "EVAL does not support function max"
       ],
@@ -24468,7 +24520,7 @@
     {
       "query": "from a_index | stats min(concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [min] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [min] must be [number], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -24521,6 +24573,58 @@
     },
     {
       "query": "from a_index | eval min(booleanField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(ipField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(ipField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(ipField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(ipField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(ipField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(ipField) > 0",
       "error": [
         "EVAL does not support function min"
       ],
@@ -25080,14 +25184,14 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 1 year)",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats by bucket(concat(\"20\", \"22\"), 1 year)",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -25099,7 +25203,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, \"a\", \"a\")",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -25111,7 +25215,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -25123,7 +25227,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, \"a\", concat(\"20\", \"22\"))",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -25135,7 +25239,7 @@
     {
       "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, concat(\"20\", \"22\"), \"a\")",
       "error": [
-        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+        "Argument of [bucket] must be [date], found value [concat(\"20\",\"22\")] type [string]"
       ],
       "warning": []
     },
@@ -26475,6 +26579,91 @@
     },
     {
       "query": "row nullVar = null | stats weighted_avg(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = exp(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row exp(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = exp(to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = exp(true)",
+      "error": [
+        "Argument of [exp] must be [number], found value [true] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where exp(numberField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where exp(booleanField) > 0",
+      "error": [
+        "Argument of [exp] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = exp(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval exp(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = exp(to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval exp(booleanField)",
+      "error": [
+        "Argument of [exp] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = exp(*)",
+      "error": [
+        "Using wildcards (*) in exp is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval exp(numberField, extraArg)",
+      "error": [
+        "Error: [exp] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort exp(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval exp(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval exp(nullVar)",
       "error": [],
       "warning": []
     },

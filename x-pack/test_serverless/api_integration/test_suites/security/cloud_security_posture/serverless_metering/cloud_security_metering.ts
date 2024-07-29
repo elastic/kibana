@@ -40,7 +40,8 @@ export default function (providerContext: FtrProviderContext) {
   The task manager is running by default in security serverless project in the background and sending usage API requests to the usage API.
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
-  describe('Intercept the usage API request sent by the metering background task manager', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/188660
+  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
 
     let mockUsageApiServer: http.Server;
@@ -52,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
 
       await kibanaServer.savedObjects.cleanStandardList();
@@ -90,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
       ]);
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       mockUsageApiServer.close();
     });
 

@@ -24,6 +24,10 @@
     "@kbn/config",
     "@kbn/cloud-experiments-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-ui-settings-common",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

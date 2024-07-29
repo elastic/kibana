@@ -5,45 +5,45 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiConfirmModal, EuiInMemoryTable } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiConfirmModal,
+  EuiInMemoryTable,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
-import { ConversationsBulkActions } from '../../api';
+import {
+  FetchConversationsResponse,
+  useFetchCurrentUserConversations,
+  useFetchPrompts,
+} from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useConversationDeleted } from '../conversation_settings/use_conversation_deleted';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
-import { CANCEL, DELETE } from '../../settings/translations';
+import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
 import { useConversationChanged } from '../conversation_settings/use_conversation_changed';
 import { CONVERSATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useSessionPagination } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { DEFAULT_PAGE_SIZE } from '../../settings/const';
+import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
+import { mergeBaseWithPersistedConversations } from '../../helpers';
+import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 interface Props {
-  allSystemPrompts: PromptResponse[];
-  assistantStreamingEnabled: boolean;
   connectors: AIConnector[] | undefined;
-  conversationSettings: Record<string, Conversation>;
-  conversationsSettingsBulkActions: ConversationsBulkActions;
-  conversationsLoaded: boolean;
   defaultConnector?: AIConnector;
-  handleSave: (shouldRefetchConversation?: boolean) => void;
+  defaultSelectedConversation: Conversation;
   isDisabled?: boolean;
-  onCancelClick: () => void;
-  setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-  setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  setConversationsSettingsBulkActions: React.Dispatch<
-    React.SetStateAction<ConversationsBulkActions>
-  >;
-  selectedConversation: Conversation | undefined;
-  onSelectedConversationChange: (conversation?: Conversation) => void;
 }
 
 export const DEFAULT_TABLE_OPTIONS = {
@@ -52,23 +52,112 @@ export const DEFAULT_TABLE_OPTIONS = {
 };
 
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
-  allSystemPrompts,
-  assistantStreamingEnabled,
   connectors,
   defaultConnector,
-  conversationSettings,
-  conversationsSettingsBulkActions,
-  conversationsLoaded,
-  handleSave,
+  defaultSelectedConversation,
   isDisabled,
-  onSelectedConversationChange,
-  onCancelClick,
-  selectedConversation,
-  setAssistantStreamingEnabled,
-  setConversationSettings,
-  setConversationsSettingsBulkActions,
 }) => {
-  const { http, nameSpace, actionTypeRegistry } = useAssistantContext();
+  const {
+    actionTypeRegistry,
+    assistantAvailability: { isAssistantEnabled },
+    baseConversations,
+    http,
+    nameSpace,
+    toasts,
+  } = useAssistantContext();
+
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
+    [baseConversations]
+  );
+
+  const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
+
+  const {
+    data: conversations,
+    isFetched: conversationsLoaded,
+    refetch: refetchConversations,
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled,
+  });
+
+  const refetchAll = useCallback(() => {
+    refetchPrompts();
+    refetchConversations();
+  }, [refetchPrompts, refetchConversations]);
+
+  const {
+    systemPromptSettings: allSystemPrompts,
+    assistantStreamingEnabled,
+    conversationSettings,
+    conversationsSettingsBulkActions,
+    resetSettings,
+    saveSettings,
+    setConversationSettings,
+    setConversationsSettingsBulkActions,
+    setUpdatedAssistantStreamingEnabled,
+  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, promptsLoaded);
+
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+
+  const handleSave = useCallback(
+    async (param?: { callback?: () => void }) => {
+      const isSuccess = await saveSettings();
+      if (isSuccess) {
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        setHasPendingChanges(false);
+        param?.callback?.();
+      } else {
+        resetSettings();
+      }
+    },
+    [resetSettings, saveSettings, toasts]
+  );
+
+  const setAssistantStreamingEnabled = useCallback(
+    (value) => {
+      setHasPendingChanges(true);
+      setUpdatedAssistantStreamingEnabled(value);
+    },
+    [setUpdatedAssistantStreamingEnabled]
+  );
+
+  const onSaveButtonClicked = useCallback(() => {
+    handleSave({ callback: refetchAll });
+  }, [handleSave, refetchAll]);
+
+  const onCancelClick = useCallback(() => {
+    resetSettings();
+    setHasPendingChanges(false);
+  }, [resetSettings]);
+
+  // Local state for saving previously selected items so tab switching is friendlier
+  // Conversation Selection State
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(() => {
+    return conversationSettings[defaultSelectedConversation.title];
+  });
+
+  const onSelectedConversationChange = useCallback((conversation?: Conversation) => {
+    setSelectedConversation(conversation);
+  }, []);
+
+  useEffect(() => {
+    if (selectedConversation != null) {
+      const newConversation =
+        conversationSettings[selectedConversation.id] ||
+        conversationSettings[selectedConversation.title];
+      setSelectedConversation(
+        // conversationSettings has title as key, sometime has id as key
+        newConversation
+      );
+    }
+  }, [conversationSettings, selectedConversation]);
 
   const {
     isFlyoutOpen: editFlyoutVisible,
@@ -124,12 +213,13 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       return;
     }
     closeConfirmModal();
-    handleSave(true);
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
   }, [
     closeConfirmModal,
     conversationsSettingsBulkActions,
     handleSave,
+    refetchAll,
     setConversationsSettingsBulkActions,
   ]);
 
@@ -162,9 +252,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onSaveConfirmed = useCallback(() => {
     closeEditFlyout();
-    handleSave(true);
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
-  }, [closeEditFlyout, handleSave, setConversationsSettingsBulkActions]);
+  }, [closeEditFlyout, handleSave, refetchAll, setConversationsSettingsBulkActions]);
 
   const columns = useMemo(
     () =>
@@ -191,12 +281,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+        <EuiTitle size="xs">
+          <h2>{i18n.CONVERSATIONS_SETTINGS_TITLE}</h2>
+        </EuiTitle>
         <ConversationStreamingSwitch
           assistantStreamingEnabled={assistantStreamingEnabled}
           setAssistantStreamingEnabled={setAssistantStreamingEnabled}
           compressed={false}
         />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
+        <EuiTitle size="xs">
+          <h2>{i18n.CONVERSATIONS_LIST_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="m">{i18n.CONVERSATIONS_LIST_DESCRIPTION}</EuiText>
+        <EuiSpacer size="s" />
         <EuiInMemoryTable
           items={conversationOptions}
           columns={columns}
@@ -212,6 +311,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           onSaveConfirmed={onSaveConfirmed}
           onSaveCancelled={onSaveCancelled}
           title={selectedConversation?.title ?? i18n.CONVERSATIONS_FLYOUT_DEFAULT_TITLE}
+          saveButtonDisabled={
+            selectedConversation?.title == null || selectedConversation?.title === ''
+          }
         >
           <ConversationSettingsEditor
             allSystemPrompts={allSystemPrompts}
@@ -222,6 +324,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             selectedConversation={selectedConversation}
             setConversationSettings={setConversationSettings}
             setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+            onSelectedConversationChange={onSelectedConversationChange}
           />
         </Flyout>
       )}
@@ -240,6 +343,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           <p />
         </EuiConfirmModal>
       )}
+      <AssistantSettingsBottomBar
+        hasPendingChanges={hasPendingChanges}
+        onCancelClick={onCancelClick}
+        onSaveButtonClicked={onSaveButtonClicked}
+      />
     </>
   );
 };

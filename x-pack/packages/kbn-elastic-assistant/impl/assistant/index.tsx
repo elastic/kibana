@@ -80,7 +80,7 @@ import { Conversation } from '../assistant_context/types';
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
+import { SetupKnowledgeBaseButton } from '../knowledge_base/setup_knowledge_base_button';
 import { useFetchPrompts } from './api/prompts/use_fetch_prompts';
 
 export interface Props {
@@ -118,7 +118,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantAvailability: { isAssistantEnabled },
     getComments,
     http,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationId,
     getLastConversationId,
@@ -585,7 +584,6 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
-            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
@@ -612,8 +610,6 @@ const AssistantComponent: React.FC<Props> = ({
       showAnonymizedValues,
       refetchCurrentConversation,
       handleRegenerateResponse,
-      isEnabledKnowledgeBase,
-      isEnabledRAGAlerts,
       isLoadingChatSend,
       currentUserAvatar,
       selectedPromptContextsCount,
@@ -798,7 +794,7 @@ const AssistantComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <InstallKnowledgeBaseButton />
+                  <SetupKnowledgeBaseButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

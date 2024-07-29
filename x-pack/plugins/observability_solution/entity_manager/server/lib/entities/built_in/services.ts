@@ -8,63 +8,124 @@
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from './constants';
 
-export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitionSchema.parse({
-  id: `${BUILT_IN_ID_PREFIX}services`,
-  version: '0.1.0',
-  name: 'Services from logs',
-  type: 'service',
-  managed: true,
-  indexPatterns: ['logs-*', 'filebeat*'],
-  history: {
-    timestampField: '@timestamp',
-    interval: '1m',
-  },
-  latest: {
-    lookback: '5m',
-  },
-  identityFields: ['service.name', { field: 'service.environment', optional: true }],
-  displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
-  metadata: [
-    { source: '_index', destination: 'sourceIndex' },
-    'data_stream.type',
-    'service.instance.id',
-    'service.namespace',
-    'service.version',
-    'service.runtime.name',
-    'service.runtime.version',
-    'service.node.name',
-    'service.language.name',
-    'agent.name',
-    'cloud.provider',
-    'cloud.instance.id',
-    'cloud.availability_zone',
-    'cloud.instance.name',
-    'cloud.machine.type',
-    'host.name',
-    'container.id',
-  ],
-  metrics: [
-    {
-      name: 'logRate',
-      equation: 'A / 5',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'log.level: *',
-        },
-      ],
+const serviceTransactionFilter = (additionalFilters: string[] = []) => {
+  const baseFilters = [
+    'processor.event: "metric"',
+    'metricset.name: "service_transaction"',
+    'metricset.interval: "1m"',
+  ];
+
+  return [...baseFilters, ...additionalFilters].join(' AND ');
+};
+
+export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
+  entityDefinitionSchema.parse({
+    version: '0.1.0',
+    id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
+    name: 'Services from ECS data',
+    description:
+      'This definition extracts service entities from common data streams by looking for the ECS field service.name',
+    type: 'service',
+    managed: true,
+    filter: '@timestamp >= now-10m',
+    indexPatterns: ['logs-*', 'filebeat*', 'metrics-apm.service_transaction.1m*'],
+    history: {
+      timestampField: '@timestamp',
+      interval: '1m',
+      settings: {
+        frequency: '2m',
+        syncDelay: '2m',
+      },
     },
-    {
-      name: 'errorRate',
-      equation: 'A / 5',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'log.level: "ERROR"',
-        },
-      ],
+    latest: {
+      lookback: '5m',
     },
-  ],
-});
+    identityFields: ['service.name', { field: 'service.environment', optional: true }],
+    displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
+    metadata: [
+      { source: '_index', destination: 'sourceIndex' },
+      { source: 'agent.name', limit: 100 },
+      'data_stream.type',
+      'service.environment',
+      'service.name',
+      'service.namespace',
+      'service.version',
+      'service.runtime.name',
+      'service.runtime.version',
+      'service.language.name',
+      'cloud.provider',
+      'cloud.availability_zone',
+      'cloud.machine.type',
+    ],
+    metrics: [
+      {
+        name: 'latency',
+        equation: 'A',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'avg',
+            filter: serviceTransactionFilter(),
+            field: 'transaction.duration.histogram',
+          },
+        ],
+      },
+      {
+        name: 'throughput',
+        equation: 'A',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'value_count',
+            filter: serviceTransactionFilter(),
+            field: 'transaction.duration.summary',
+          },
+        ],
+      },
+      {
+        name: 'failedTransactionRate',
+        equation: '1 - (A / B)',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'sum',
+            filter: serviceTransactionFilter(),
+            field: 'event.success_count',
+          },
+          {
+            name: 'B',
+            aggregation: 'value_count',
+            filter: serviceTransactionFilter(),
+            field: 'event.success_count',
+          },
+        ],
+      },
+      {
+        name: 'logErrorRate',
+        equation: 'A / B',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'doc_count',
+            filter: 'log.level: "error" OR error.log.level: "error"',
+          },
+          {
+            name: 'B',
+            aggregation: 'doc_count',
+            filter: 'log.level: * OR error.log.level: *',
+          },
+        ],
+      },
+      {
+        name: 'logRate',
+        equation: 'A',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'doc_count',
+            filter: 'log.level: * OR error.log.level: *',
+          },
+        ],
+      },
+    ],
+  });

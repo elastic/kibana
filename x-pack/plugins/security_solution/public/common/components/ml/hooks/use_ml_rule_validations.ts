@@ -15,7 +15,7 @@ export interface UseMlRuleValidationsParams {
 export interface UseMlRuleValidationsReturn {
   loading: boolean;
   noJobsStarted: boolean;
-  someJobsStarted: boolean;
+  allJobsStarted: boolean;
 }
 
 /**
@@ -35,7 +35,7 @@ export const useMlRuleValidations = ({
     isJobStarted(job.jobState, job.datafeedState)
   ).length;
   const noMlJobsStarted = numberOfRuleMlJobsStarted === 0;
-  const someMlJobsStarted = !noMlJobsStarted && numberOfRuleMlJobsStarted !== ruleMlJobs.length;
+  const allMlJobsStarted = !noMlJobsStarted && numberOfRuleMlJobsStarted === ruleMlJobs.length;
 
-  return { loading, noJobsStarted: noMlJobsStarted, someJobsStarted: someMlJobsStarted };
+  return { loading, noJobsStarted: noMlJobsStarted, allJobsStarted: allMlJobsStarted };
 };

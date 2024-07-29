@@ -14,12 +14,37 @@
 # permission is obtained from Elasticsearch B.V.
 
 .PHONY: api-docs
-api-docs: ## Generate kibana.serverless.yaml
-	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "kibana.serverless.yaml" --prefix-components-with-info-prop title
+api-docs: ## Generate kibana.serverless.yaml and kibana.yaml
+	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "output/kibana.serverless.yaml" "bundle.serverless.json" --prefix-components-with-info-prop title
+	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" "bundle.json" -o "output/kibana.yaml" --prefix-components-with-info-prop title
 
+.PHONY: api-docs-stateful
+api-docs-stateful: ## Generate only kibana.yaml
+	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" "bundle.json" -o "output/kibana.yaml" --prefix-components-with-info-prop title
+# Temporarily omit "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" and "../x-pack/plugins/cases/docs/openapi/bundled.yaml" due to OAS version
+# Temporarily omit "../x-pack/plugins/fleet/common/openapi/bundled.yaml" due to internals tag and tag sorting
+
+.PHONY: api-docs-serverless
+api-docs-serverless: ## Generate only kibana.serverless.yaml
+	@npx @redocly/cli join "kibana.info.serverless.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled_serverless.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml" "../packages/core/saved-objects/docs/openapi/bundled_serverless.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "output/kibana.serverless.yaml" "bundle.serverless.json" --prefix-components-with-info-prop title
+	
 .PHONY: api-docs-lint
-api-docs-lint: ## Run spectral API docs linter
-	@npx @stoplight/spectral-cli lint "kibana.serverless.yaml" --ruleset ".spectral.yaml"
+api-docs-lint: ## Run spectral API docs linter 
+	@npx @stoplight/spectral-cli lint "output/kibana.serverless.yaml" --ruleset ".spectral.yaml"
+	@npx @stoplight/spectral-cli lint "output/kibana.yaml" --ruleset ".spectral.yaml"
+
+.PHONY: api-docs-lint-stateful
+api-docs-lint-stateful: ## Run spectral API docs linter on kibana.yaml
+	@npx @stoplight/spectral-cli lint "output/kibana.yaml" --ruleset ".spectral.yaml"
+
+.PHONY: api-docs-lint-serverless
+api-docs-lint-serverless: ## Run spectral API docs linter on kibana.serverless.yaml
+	@npx @stoplight/spectral-cli lint "output/kibana.serverless.yaml" --ruleset ".spectral.yaml"
+
+.PHONY: api-docs-overlay
+api-docs-overlay: ## Run spectral API docs linter on kibana.serverless.yaml
+	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.new.yaml"
+	@npx bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.new.yaml"
 
 help:  ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)

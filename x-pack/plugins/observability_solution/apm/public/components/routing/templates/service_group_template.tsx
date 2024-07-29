@@ -12,7 +12,6 @@ import {
   EuiSkeletonTitle,
   EuiIcon,
 } from '@elastic/eui';
-import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -21,8 +20,8 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
+import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -153,11 +152,7 @@ type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/service-map');
-  const { core } = useApmPluginContext();
-  const isEntityCentricExperienceEnabled = core.uiSettings.get<boolean>(
-    entityCentricExperience,
-    false
-  );
+  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
 
   const tabs: ServiceGroupContextTab[] = [
     {
@@ -170,7 +165,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
             })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isEntityCentricExperienceEnabled && (
+            {isEntityCentricExperienceViewEnabled && (
               <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
             )}
           </EuiFlexItem>

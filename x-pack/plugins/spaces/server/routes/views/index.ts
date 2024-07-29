@@ -36,7 +36,7 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
     async (context, request, response) => {
       try {
         const { uiSettings } = await context.core;
-        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request });
         const basePath = deps.basePath.get(request);
         const nextCandidateRoute = parseNextURL(request.url.href);
 
@@ -46,7 +46,7 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
 
         return response.redirected({
           headers: {
-            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}`,
+            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}${normalizedRoute.hash}`,
           },
         });
       } catch (e) {

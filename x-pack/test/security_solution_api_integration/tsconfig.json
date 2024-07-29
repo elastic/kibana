@@ -46,5 +46,6 @@
     "@kbn/utility-types",
     "@kbn/timelines-plugin",
     "@kbn/dev-cli-runner",
+    "@kbn/security-plugin",
   ]
 }

@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.0>>
 * <<release-notes-8.14.3>>
 * <<release-notes-8.14.2>>
 * <<release-notes-8.14.1>>
@@ -70,6 +71,29 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+[[release-notes-8.15.0]]
+== {kib} 8.15.0
+
+coming::[8.15.0]
+
+[float]
+[[deprecations-8.15.0]]
+=== Deprecations
+
+The following functionality is deprecated in 8.15.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.15.0.
+
+[discrete]
+[[deprecation-uptime]]
+.Uptime is deprecated in 8.15.0 and will be removed in 9.0.0.
+[%collapsible]
+====
+*Details* +
+The Uptime app is already hidden from Kibana when there is no recent Heartbeat data, but will be completely removed in 9.0.0. You should migrate to Synthetics as an alternative. For more details, refer to the {observability-guide}/uptime-intro.html[Uptime documentation].
+====
+
+
 [[release-notes-8.14.3]]
 == {kib} 8.14.3
 
@@ -82,8 +106,6 @@ Dashboard::
 * Fixes controls getting overwritten on navigation ({kibana-pull}187509[#187509]).
 Elastic Security::
 For the Elastic Security 8.14.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Logs::
-* Fixes log entry fly-out when response is slow ({kibana-pull}187303[#187303]).
 
 [[release-notes-8.14.2]]
 == {kib} 8.14.2

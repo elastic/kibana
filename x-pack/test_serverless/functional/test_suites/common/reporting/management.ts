@@ -58,7 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // Kibana CI and MKI use different users
     before('initialize saved object archive', async () => {
       roleName = 'admin';
-      roleAuthc = await svlUserManager.createApiKeyForRole(roleName);
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope(roleName);
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
@@ -66,8 +66,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it(`user sees a job they've created`, async () => {

@@ -78,32 +78,32 @@ describe('logsDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  describe('getRowIndicator', () => {
-    const dataViewWithLogLevel = createStubIndexPattern({
-      spec: {
-        title: VALID_INDEX_PATTERN,
-        fields: {
-          'log.level': {
-            name: 'log.level',
-            type: 'string',
-            esTypes: ['keyword'],
-            aggregatable: true,
-            searchable: true,
-            count: 0,
-            readFromDocValues: false,
-            scripted: false,
-            isMapped: true,
-          },
+  const dataViewWithLogLevel = createStubIndexPattern({
+    spec: {
+      title: VALID_INDEX_PATTERN,
+      fields: {
+        'log.level': {
+          name: 'log.level',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+          count: 0,
+          readFromDocValues: false,
+          scripted: false,
+          isMapped: true,
         },
       },
-    });
+    },
+  });
 
-    const dataViewWithoutLogLevel = createStubIndexPattern({
-      spec: {
-        title: VALID_INDEX_PATTERN,
-      },
-    });
+  const dataViewWithoutLogLevel = createStubIndexPattern({
+    spec: {
+      title: VALID_INDEX_PATTERN,
+    },
+  });
 
+  describe('getRowIndicator', () => {
     it('should return the correct color for a given log level', () => {
       const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
@@ -138,6 +138,19 @@ describe('logsDataSourceProfileProvider', () => {
       });
 
       expect(getRowIndicator).toBeUndefined();
+    });
+  });
+
+  describe('getCellRenderers', () => {
+    it('should return cell renderers for log level fields', () => {
+      const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(() => ({}));
+      const cellRenderers = getCellRenderers?.();
+
+      expect(cellRenderers).toBeDefined();
+      expect(cellRenderers?.['log.level']).toBeDefined();
+      expect(cellRenderers?.['log.level.keyword']).toBeDefined();
+      expect(cellRenderers?.log_level).toBeDefined();
+      expect(cellRenderers?.['log_level.keyword']).toBeDefined();
     });
   });
 });

@@ -93,11 +93,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Tls Test', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
@@ -166,11 +166,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Tls Overview Test', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       it('Ensure data is returned for FlowTarget.Source', async () => {

@@ -107,6 +107,10 @@
     "timestamp"
   ],
   "application_usage_totals": [],
+  "background-task-node": [
+    "id",
+    "last_seen"
+  ],
   "canvas-element": [
     "@created",
     "@timestamp",
@@ -1001,6 +1005,7 @@
     "attempts",
     "enabled",
     "ownerId",
+    "partition",
     "retryAt",
     "runAt",
     "schedule",

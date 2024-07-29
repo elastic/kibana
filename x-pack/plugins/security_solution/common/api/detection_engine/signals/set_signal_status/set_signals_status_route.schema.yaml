@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: SetAlertsStatus
       x-codegen-enabled: true
-      summary: Sets the status of one or more alerts
+      summary: Set a detection alert status
+      description: Set the status of one or more detection alerts.
       tags:
         - Alerts API
       requestBody:

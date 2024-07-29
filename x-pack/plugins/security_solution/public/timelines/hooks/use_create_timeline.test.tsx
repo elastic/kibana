@@ -8,7 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useCreateTimeline } from './use_create_timeline';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { TimelineType } from '../../../common/api/timeline';
+import { RowRendererCount, TimelineType } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { timelineActions } from '../store';
@@ -79,6 +79,7 @@ describe('useCreateTimeline', () => {
     );
     expect(createTimeline.mock.calls[0][0].show).toEqual(true);
     expect(createTimeline.mock.calls[0][0].updated).toEqual(undefined);
+    expect(createTimeline.mock.calls[0][0].excludedRowRendererIds).toHaveLength(RowRendererCount);
     expect(setSelectedDataView.mock.calls[0][0].id).toEqual(SourcererScopeName.timeline);
     expect(setSelectedDataView.mock.calls[0][0].selectedDataViewId).toEqual(
       mockGlobalState.sourcerer.defaultDataView.id

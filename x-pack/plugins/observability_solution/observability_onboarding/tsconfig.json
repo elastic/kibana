@@ -42,8 +42,8 @@
     "@kbn/utility-types",
     "@kbn/spaces-plugin",
     "@kbn/ebt",
-    "@kbn/dashboard-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/custom-integrations-plugin"
   ],
   "exclude": [
     "target/**/*"

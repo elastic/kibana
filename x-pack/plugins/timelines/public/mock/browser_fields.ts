@@ -310,28 +310,24 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'agent.ephemeral_id': {
         aggregatable: true,
-        format: '',
         name: 'agent.ephemeral_id',
         searchable: true,
         type: 'string',
       },
       'agent.hostname': {
         aggregatable: true,
-        format: '',
         name: 'agent.hostname',
         searchable: true,
         type: 'string',
       },
       'agent.id': {
         aggregatable: true,
-        format: '',
         name: 'agent.id',
         searchable: true,
         type: 'string',
       },
       'agent.name': {
         aggregatable: true,
-        format: '',
         name: 'agent.name',
         searchable: true,
         type: 'string',
@@ -342,21 +338,18 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'auditd.data.a0': {
         aggregatable: true,
-        format: '',
         name: 'auditd.data.a0',
         searchable: true,
         type: 'string',
       },
       'auditd.data.a1': {
         aggregatable: true,
-        format: '',
         name: 'auditd.data.a1',
         searchable: true,
         type: 'string',
       },
       'auditd.data.a2': {
         aggregatable: true,
-        format: '',
         name: 'auditd.data.a2',
         searchable: true,
         type: 'string',
@@ -367,7 +360,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       '@timestamp': {
         aggregatable: true,
-        format: '',
         name: '@timestamp',
         searchable: true,
         type: 'date',
@@ -383,7 +375,6 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
         searchable: true,
         aggregatable: false,
-        format: 'string',
       },
     },
   },
@@ -391,28 +382,24 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'client.address': {
         aggregatable: true,
-        format: '',
         name: 'client.address',
         searchable: true,
         type: 'string',
       },
       'client.bytes': {
         aggregatable: true,
-        format: '',
         name: 'client.bytes',
         searchable: true,
         type: 'number',
       },
       'client.domain': {
         aggregatable: true,
-        format: '',
         name: 'client.domain',
         searchable: true,
         type: 'string',
       },
       'client.geo.country_iso_code': {
         aggregatable: true,
-        format: '',
         name: 'client.geo.country_iso_code',
         searchable: true,
         type: 'string',
@@ -423,14 +410,12 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'cloud.account.id': {
         aggregatable: true,
-        format: '',
         name: 'cloud.account.id',
         searchable: true,
         type: 'string',
       },
       'cloud.availability_zone': {
         aggregatable: true,
-        format: '',
         name: 'cloud.availability_zone',
         searchable: true,
         type: 'string',
@@ -441,21 +426,18 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'container.id': {
         aggregatable: true,
-        format: '',
         name: 'container.id',
         searchable: true,
         type: 'string',
       },
       'container.image.name': {
         aggregatable: true,
-        format: '',
         name: 'container.image.name',
         searchable: true,
         type: 'string',
       },
       'container.image.tag': {
         aggregatable: true,
-        format: '',
         name: 'container.image.tag',
         searchable: true,
         type: 'string',
@@ -466,35 +448,30 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'destination.address': {
         aggregatable: true,
-        format: '',
         name: 'destination.address',
         searchable: true,
         type: 'string',
       },
       'destination.bytes': {
         aggregatable: true,
-        format: '',
         name: 'destination.bytes',
         searchable: true,
         type: 'number',
       },
       'destination.domain': {
         aggregatable: true,
-        format: '',
         name: 'destination.domain',
         searchable: true,
         type: 'string',
       },
       'destination.ip': {
         aggregatable: true,
-        format: '',
         name: 'destination.ip',
         searchable: true,
         type: 'ip',
       },
       'destination.port': {
         aggregatable: true,
-        format: '',
         name: 'destination.port',
         searchable: true,
         type: 'long',
@@ -504,7 +481,6 @@ export const mockBrowserFields: BrowserFields = {
   event: {
     fields: {
       'event.end': {
-        format: '',
         name: 'event.end',
         searchable: true,
         type: 'date',
@@ -515,19 +491,16 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
         searchable: true,
         aggregatable: true,
-        format: 'string',
       },
       'event.category': {
         name: 'event.category',
         type: 'string',
         searchable: true,
         aggregatable: true,
-        format: 'string',
       },
       'event.severity': {
         name: 'event.severity',
         type: 'number',
-        format: 'number',
         searchable: true,
         aggregatable: true,
       },
@@ -540,7 +513,6 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
         searchable: true,
         aggregatable: true,
-        format: 'string',
       },
     },
   },
@@ -548,14 +520,12 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'source.ip': {
         aggregatable: true,
-        format: '',
         name: 'source.ip',
         searchable: true,
         type: 'ip',
       },
       'source.port': {
         aggregatable: true,
-        format: '',
         name: 'source.port',
         searchable: true,
         type: 'long',
@@ -569,7 +539,6 @@ export const mockBrowserFields: BrowserFields = {
         type: 'string',
         searchable: true,
         aggregatable: true,
-        format: 'string',
       },
     },
   },
@@ -577,7 +546,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'nestedField.firstAttributes': {
         aggregatable: false,
-        format: '',
         name: 'nestedField.firstAttributes',
         searchable: true,
         type: 'string',
@@ -589,7 +557,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'nestedField.secondAttributes': {
         aggregatable: false,
-        format: '',
         name: 'nestedField.secondAttributes',
         searchable: true,
         type: 'string',
@@ -601,7 +568,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'nestedField.thirdAttributes': {
         aggregatable: false,
-        format: '',
         name: 'nestedField.thirdAttributes',
         searchable: true,
         type: 'date',

@@ -605,7 +605,15 @@
             "section": "def-common.UiSettingsScope",
             "text": "UiSettingsScope"
           },
-          " | undefined; order?: number | undefined; name?: string | undefined; category?: string[] | undefined; description?: string | undefined; metric?: { type: string; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; readonlyMode?: ",
+          " | undefined; order?: number | undefined; name?: string | undefined; description?: string | undefined; getValue?: ((context?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.GetUiSettingsContext",
+            "text": "GetUiSettingsContext"
+          },
+          " | undefined) => Promise<unknown>) | undefined; category?: string[] | undefined; metric?: { type: string; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; readonlyMode?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",

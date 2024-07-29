@@ -2562,7 +2562,7 @@
             "section": "def-common.DataGridCellValueElementProps",
             "text": "DataGridCellValueElementProps"
           },
-          ") => React.ReactNode; }"
+          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
         ],
         "path": "packages/kbn-unified-data-table/src/types.ts",
         "deprecated": false,
