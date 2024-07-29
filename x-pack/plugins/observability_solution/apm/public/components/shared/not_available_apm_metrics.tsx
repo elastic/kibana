@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { PopoverBadge } from './popover_badge';
 import { useKibana } from '../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../plugin';
-import { AddApmAgent } from './add_data_buttons/buttons';
+import { AddApmData } from './add_data_buttons/buttons';
 
 export function NotAvailableApmMetrics() {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -29,7 +29,7 @@ export function NotAvailableApmMetrics() {
         defaultMessage:
           'Understand key metrics like transaction latency, throughput and error rate by instrumenting your service with APM.',
       })}
-      footer={<AddApmAgent data-test-subj="apmAddDataNotAvailable" onClick={handleClick} />}
+      footer={<AddApmData data-test-subj="apmAddDataNotAvailable" onClick={handleClick} />}
     />
   );
 }

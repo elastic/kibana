@@ -11,7 +11,7 @@ import { IBasePath } from '@kbn/core/public';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-export const addApmAgent = {
+export const addApmData = {
   name: i18n.translate('xpack.apm.add.apm.agent.button.', {
     defaultMessage: 'Add APM',
   }),
@@ -32,7 +32,7 @@ export const collectServiceLogs = {
   link: '/app/observabilityOnboarding/?category=logs',
 };
 
-export function AddApmAgent({
+export function AddApmData({
   onClick,
   ...props
 }: {
@@ -46,12 +46,12 @@ export function AddApmAgent({
   } = useKibana().services;
 
   function handleClick() {
-    navigateToUrl(basePath.prepend(addApmAgent.link));
+    navigateToUrl(basePath.prepend(addApmData.link));
     onClick?.();
   }
   return (
     <EuiButton data-test-subj={props['data-test-subj']} size="s" onClick={handleClick}>
-      {addApmAgent.name}
+      {addApmData.name}
     </EuiButton>
   );
 }
