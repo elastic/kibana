@@ -52,7 +52,10 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
     // Show results
     return (
       <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
-        <RunningProcessesActionResults action={completedActionDetails} />
+        <RunningProcessesActionResults
+          action={completedActionDetails}
+          data-test-subj="processesOutput"
+        />
       </ResultComponent>
     );
   }

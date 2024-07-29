@@ -33,7 +33,7 @@ export interface RunningProcessesActionResultsProps {
 }
 
 export const RunningProcessesActionResults = memo<RunningProcessesActionResultsProps>(
-  ({ action, agentId, textSize = 'm', 'data-test-subj': dataTestSubj }) => {
+  ({ action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     return (
       <EuiText size={textSize}>
         {action.agentType === 'endpoint' ? (
