@@ -280,6 +280,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
+          // @ts-expect-error upgrade typescript v5.1.6
           cost: 23,
           createTaskRunner: jest.fn(),
         },
