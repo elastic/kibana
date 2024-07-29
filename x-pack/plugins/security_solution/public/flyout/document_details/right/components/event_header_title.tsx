@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { startCase } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutTitle } from '@kbn/securitysolution-common';
 import { DocumentSeverity } from './severity';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useDocumentDetailsContext } from '../../shared/context';

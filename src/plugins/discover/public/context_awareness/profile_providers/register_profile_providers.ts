@@ -19,6 +19,7 @@ import { exampleRootProfileProvider } from './example_root_pofile';
 import { createLogsDataSourceProfileProvider } from './logs_data_source_profile';
 import { createLogDocumentProfileProvider } from './log_document_profile';
 import { createProfileProviderServices } from './profile_provider_services';
+import { createSecurityRootProfileProvider } from './security/security_root_profile';
 
 export const registerProfileProviders = ({
   rootProfileService,
@@ -32,9 +33,10 @@ export const registerProfileProviders = ({
   experimentalProfileIds: string[];
 }) => {
   const providerServices = createProfileProviderServices();
+  const securityRootProfileProvider = createSecurityRootProfileProvider(providerServices);
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
   const logsDocumentProfileProvider = createLogDocumentProfileProvider(providerServices);
-  const rootProfileProviders = [exampleRootProfileProvider];
+  const rootProfileProviders = [exampleRootProfileProvider, securityRootProfileProvider];
   const dataSourceProfileProviders = [
     exampleDataSourceProfileProvider,
     logsDataSourceProfileProvider,

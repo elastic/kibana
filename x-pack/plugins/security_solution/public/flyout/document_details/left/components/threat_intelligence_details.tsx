@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import isEmpty from 'lodash/isEmpty';
+import { FlyoutLoading } from '@kbn/securitysolution-common';
 import { EnrichmentRangePicker } from '../../../../common/components/event_details/cti_details/enrichment_range_picker';
 import { ThreatDetailsView } from '../../../../common/components/event_details/cti_details/threat_details_view';
 import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
 import { THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID } from './test_ids';
-import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
 

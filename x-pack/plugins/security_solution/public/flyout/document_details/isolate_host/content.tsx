@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FlyoutBody } from '@kbn/securitysolution-common';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
@@ -16,7 +17,6 @@ import {
 } from '../../../common/components/endpoint/host_isolation';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
 import { useIsolateHostPanelContext } from './context';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 
 /**
  * Document details expandable flyout section content for the isolate host component, displaying the form or the success banner

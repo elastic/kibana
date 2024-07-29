@@ -23,7 +23,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/securitysolution-common';
 
 jest.mock('../hooks/use_fetch_threat_intelligence');
 

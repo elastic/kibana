@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { FlyoutTour } from '@kbn/securitysolution-common';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { FlyoutTour } from '../../shared/components/flyout_tour';
 import { getLeftSectionTourSteps } from '../../shared/utils/tour_step_config';
 import { Flyouts } from '../../shared/constants/flyouts';
 

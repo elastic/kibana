@@ -78,6 +78,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   const showRight = rightSection != null && right != null;
   const showLeft = leftSection != null && left != null;
   const showPreview = previewSection != null && preview != null;
+  console.log({ showRight, showLeft, showPreview, left, right });
 
   const { rightSectionWidth, leftSectionWidth, flyoutWidth, previewSectionLeft } = useSectionSizes({
     windowWidth,
@@ -87,6 +88,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   });
 
   const hideFlyout = !left && !right && !preview?.length;
+
   if (hideFlyout) {
     return null;
   }

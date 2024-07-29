@@ -7,10 +7,10 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FlyoutTour } from '@kbn/securitysolution-common';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { Flyouts } from '../../shared/constants/flyouts';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { FlyoutTour } from '../../shared/components/flyout_tour';
 import {
   getRightSectionTourSteps,
   getLeftSectionTourSteps,
