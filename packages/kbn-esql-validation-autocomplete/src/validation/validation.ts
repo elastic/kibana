@@ -21,7 +21,6 @@ import {
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstField } from '@kbn/esql-ast/src/types';
-import { isStringType } from '@kbn/esql-ast/src/ast_helpers';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -77,6 +76,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
+import { isStringType } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,

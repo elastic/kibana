@@ -7,7 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
@@ -24,6 +23,7 @@ import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
+import { isNumericType } from '../shared/esql_types';
 
 const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)

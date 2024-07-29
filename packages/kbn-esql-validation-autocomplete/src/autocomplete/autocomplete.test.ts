@@ -31,7 +31,7 @@ import { METADATA_FIELDS } from '../shared/constants';
 import {
   ESQL_COMMON_NUMERIC_TYPES as UNCASTED_ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NUMBER_TYPES,
-} from '@kbn/esql-ast/src/constants';
+} from '../shared/esql_types';
 
 const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
 const ESQL_COMMON_NUMERIC_TYPES =

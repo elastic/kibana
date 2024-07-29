@@ -17,7 +17,6 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { isNumericDecimalType } from '@kbn/esql-ast/src/ast_helpers';
 import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
@@ -44,6 +43,7 @@ import {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
+import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {

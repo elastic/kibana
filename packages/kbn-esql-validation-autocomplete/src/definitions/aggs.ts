@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { i18n } from '@kbn/i18n';
+import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../shared/esql_types';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
 function createNumericAggDefinition({

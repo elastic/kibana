@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
-import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
 import { i18n } from '@kbn/i18n';
+import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];

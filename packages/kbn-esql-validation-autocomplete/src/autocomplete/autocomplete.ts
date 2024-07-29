@@ -16,8 +16,7 @@ import type {
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
-import { isNumericType } from '@kbn/esql-ast/src/ast_helpers';
-import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
+import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   lookupColumn,

@@ -19,13 +19,7 @@ import type {
   QualifiedIntegerLiteralContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
-import {
-  DOUBLE_TICKS_REGEX,
-  ESQL_NUMBER_TYPES,
-  ESQL_NUMERIC_DECIMAL_TYPES,
-  SINGLE_BACKTICK,
-  TICKS_REGEX,
-} from './constants';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
   ESQLAstBaseItem,
   ESQLCommand,
@@ -43,28 +37,12 @@ import type {
   ESQLUnknownItem,
   ESQLNumericLiteralType,
   FunctionSubtype,
+  ESQLNumericLiteral,
+  ESQLParamLiteral,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
-}
-
-export function isStringType(type: unknown) {
-  return typeof type === 'string' && ['keyword', 'text'].includes(type);
-}
-
-export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
-  return (
-    typeof type === 'string' &&
-    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
-  );
-}
-
-export function isNumericDecimalType(type: unknown): type is ESQLNumericLiteralType {
-  return (
-    typeof type === 'string' &&
-    ESQL_NUMERIC_DECIMAL_TYPES.includes(type as (typeof ESQL_NUMERIC_DECIMAL_TYPES)[number])
-  );
 }
 
 export function createAstBaseItem<Name = string>(
@@ -189,21 +167,26 @@ export function createLiteral(
     location: getPosition(node.symbol),
     incomplete: isMissingText(text),
   };
-  if (isNumericType(type)) {
+  if (['decimal', 'integer', 'number'].includes(type)) {
+    return {
+      ...partialLiteral,
+      literalType: type as ESQLNumericLiteralType,
+      value: Number(text),
+      paramType: 'number',
+    } as ESQLNumericLiteral<'decimal'> | ESQLNumericLiteral<'integer'>;
+  } else if (type === 'param') {
     return {
       ...partialLiteral,
       literalType: type,
-      value: Number(text),
-      paramType: 'number',
-    };
-  } else if (type === 'param') {
-    throw new Error('Should never happen');
+      value: text,
+      paramType: 'string',
+    } as ESQLParamLiteral<string>;
   }
   return {
     ...partialLiteral,
     literalType: type,
     value: text,
-  };
+  } as ESQLLiteral;
 }
 
 export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInterval {

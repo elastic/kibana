@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '@kbn/esql-ast/src/constants';
+import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
 import { setup, getFunctionSignaturesByReturnType, getFieldNamesByType } from './helpers';
 
 const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];

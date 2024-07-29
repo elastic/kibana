@@ -8,7 +8,7 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
-// @TODO: verify against full list
+// Currently, partial of the full list
 // https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
 export const supportedFieldTypes = [
   'double',
