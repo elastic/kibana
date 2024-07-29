@@ -19,6 +19,7 @@ export async function getDatasetsForStreamOfLogs({
   streamOfLogs: string[];
   excludeStreamsStartingWith: string[];
 }) {
+  const uniqueDataStreamsSet = new Set<string>();
   const dataStreamsInfo: DataStreamBasicInfo[] = [];
 
   for (const streamOfLog of streamOfLogs) {
@@ -35,7 +36,7 @@ export async function getDatasetsForStreamOfLogs({
         )
     );
 
-    const uniqueDataStreamsSet = new Set<string>();
+    // Filter out duplicate dataStreams or dataStreams which are already dealt with
     const dataStreamsInfoRecords: DataStreamBasicInfo[] = logDataStreams.filter((dataStream) => {
       if (uniqueDataStreamsSet.has(dataStream.name)) {
         return false;

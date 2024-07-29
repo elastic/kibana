@@ -11,7 +11,7 @@ import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-
 
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { CLUSTER_SETTLEMENT_DELAY, EXCLUDE_ELASTIC_LOGS, TELEMETRY_INTERVAL } from './constants';
+import { EXCLUDE_ELASTIC_LOGS, STARTUP_DELAY, TELEMETRY_INTERVAL } from './constants';
 import { getDatasetsForStreamOfLogs } from './helpers';
 
 import { DataTelemetryEvent, StreamOfLog } from './types';
@@ -46,7 +46,7 @@ export class DataTelemetryService {
     this.clusterInfo = await this.fetchClusterInfo();
 
     this.logger.debug(`[Logs Data Telemetry] Starting the service`);
-    timer(CLUSTER_SETTLEMENT_DELAY, TELEMETRY_INTERVAL)
+    timer(STARTUP_DELAY, TELEMETRY_INTERVAL)
       .pipe(
         takeUntil(this.stop$),
         exhaustMap(() => this.collectAndSend())
