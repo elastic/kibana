@@ -8,14 +8,3 @@
 
 export { formatRequest } from './src/format_request';
 export { parseEndpoint } from './src/parse_endpoint';
-export type {
-  RouteRepositoryClient,
-  ReturnOf,
-  EndpointOf,
-  ClientRequestParamsOf,
-  DecodedRequestParamsOf,
-  ServerRouteRepository,
-  ServerRoute,
-  RouteParamsRT,
-  RouteState,
-} from './src/typings';

@@ -3436,6 +3436,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-ftr-e2e@link:x-pack/plugins/observability_solution/apm/ftr_e2e":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
   version "0.0.0"
   uid ""
@@ -5756,6 +5760,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-onboarding-e2e@link:x-pack/plugins/observability_solution/observability_onboarding/e2e":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
   version "0.0.0"
   uid ""
@@ -6356,6 +6364,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/server-route-repository-utils@link:packages/kbn-server-route-repository-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
@@ -6692,6 +6704,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/synthetics-e2e@link:x-pack/plugins/observability_solution/synthetics/e2e":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
   version "0.0.0"
   uid ""
@@ -6745,6 +6761,22 @@
   uid ""
 
 "@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-serverless@link:x-pack/test_serverless":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-src@link:test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-performance@link:x-pack/performance":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack@link:x-pack/test":
   version "0.0.0"
   uid ""
 
