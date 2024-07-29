@@ -446,40 +446,8 @@ describe('validation logic', () => {
       });
     });
 
-    describe('meta', () => {
-      testErrorsAndWarnings('meta', ["SyntaxError: missing 'functions' at '<EOF>'"]);
-      testErrorsAndWarnings('meta functions', []);
-      testErrorsAndWarnings('meta functions()', [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'",
-      ]);
-      testErrorsAndWarnings('meta functions blah', [
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'a'",
-        "SyntaxError: token recognition error at: 'h'",
-      ]);
-      testErrorsAndWarnings('meta info', [
-        "SyntaxError: token recognition error at: 'i'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'fo'",
-        "SyntaxError: missing 'functions' at '<EOF>'",
-      ]);
-    });
-
     describe('show', () => {
       testErrorsAndWarnings('show', ["SyntaxError: missing 'info' at '<EOF>'"]);
-      testErrorsAndWarnings('show functions', [
-        "SyntaxError: token recognition error at: 'f'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'c'",
-        "SyntaxError: token recognition error at: 't'",
-        "SyntaxError: token recognition error at: 'io'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 's'",
-        "SyntaxError: missing 'info' at '<EOF>'",
-      ]);
       testErrorsAndWarnings('show info', []);
       testErrorsAndWarnings('show numberField', [
         "SyntaxError: token recognition error at: 'n'",
@@ -1548,22 +1516,6 @@ describe('validation logic', () => {
         expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
         expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
           query: `from enrich_index | keep otherField, yetAnotherField`,
-        });
-      });
-
-      it('should call fields callbacks also for meta command', async () => {
-        const callbackMocks = getCallbackMocks();
-        await validateQuery(
-          `meta functions | keep name`,
-          getAstAndSyntaxErrors,
-          undefined,
-          callbackMocks
-        );
-        expect(callbackMocks.getSources).not.toHaveBeenCalled();
-        expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-        expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
-          query: 'meta functions',
         });
       });
 
