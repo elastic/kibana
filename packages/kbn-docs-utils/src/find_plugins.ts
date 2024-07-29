@@ -19,6 +19,7 @@ function toApiScope(pkg: Package): ApiScope {
       return ApiScope.CLIENT;
     case 'shared-server':
       return ApiScope.SERVER;
+    case 'core':
     case 'test-helper':
     case 'functional-tests':
     case 'shared-common':

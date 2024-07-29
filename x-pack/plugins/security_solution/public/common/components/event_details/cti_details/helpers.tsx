@@ -44,7 +44,9 @@ export const parseExistingEnrichments = (
   }
 
   const { originalValue } = threatIndicatorField;
-  const enrichmentStrings = Array.isArray(originalValue) ? originalValue : [originalValue];
+  const enrichmentStrings: string[] = Array.isArray(originalValue)
+    ? originalValue
+    : [originalValue];
 
   return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
     (enrichments, enrichmentString) => {
