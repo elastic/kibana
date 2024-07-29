@@ -9,9 +9,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 
 import type {
-  TimelineTypeLiteralWithNull,
-  TemplateTimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
+  TemplateTimelineType,
+  TimelineStatus,
+  TimelineType,
 } from '../../../../common/api/timeline';
 import {
   TemplateTimelineTypeEnum,
@@ -28,16 +28,16 @@ export const useTimelineStatus = ({
   elasticTemplateTimelineCount,
   customTemplateTimelineCount,
 }: {
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   elasticTemplateTimelineCount?: number | null;
   customTemplateTimelineCount?: number | null;
 }): {
-  timelineStatus: TimelineStatusLiteralWithNull;
-  templateTimelineType: TemplateTimelineTypeLiteralWithNull;
+  timelineStatus: TimelineStatus | null;
+  templateTimelineType: TemplateTimelineType | null;
   templateTimelineFilter: JSX.Element[] | null;
   installPrepackagedTimelines: () => void;
 } => {
-  const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
+  const [selectedTab, setSelectedTab] = useState<TemplateTimelineType | null>(null);
   const isTemplateFilterEnabled = useMemo(
     () => timelineType === TimelineTypeEnum.template,
     [timelineType]

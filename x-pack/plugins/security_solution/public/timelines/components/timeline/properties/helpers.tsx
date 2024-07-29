@@ -9,8 +9,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import * as i18n from './translations';
 
@@ -29,7 +28,7 @@ interface SmallNotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
   toggleShowNotes?: (eventId?: string) => void;
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   eventId?: string;
   /**
    * Number of notes. If > 0, then a red dot is shown in the top right corner of the icon.
@@ -85,7 +84,7 @@ interface NotesButtonProps {
   isDisabled?: boolean;
   toggleShowNotes?: () => void | ((eventId: string) => void);
   toolTip: string;
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   eventId?: string;
   /**
    * Number of notes. If > 0, then a red dot is shown in the top right corner of the icon.

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { TimelineTypeLiteral, TimelineSavedObject } from '../../../../common/api/timeline';
+import type { TimelineType, TimelineSavedObject } from '../../../../common/api/timeline';
 import { type TimelineStatus, TimelineStatusEnum } from '../../../../common/api/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
@@ -72,7 +72,7 @@ export const commonFailureChecker = (status: TimelineStatus, title: string | nul
 const commonUpdateTemplateTimelineCheck = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -125,7 +125,7 @@ const commonUpdateTemplateTimelineCheck = (
 const commonUpdateTimelineCheck = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -154,7 +154,7 @@ const commonUpdateTimelineCheck = (
 const commonUpdateCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -189,7 +189,7 @@ const commonUpdateCases = (
 const createTemplateTimelineCheck = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -215,7 +215,7 @@ const createTemplateTimelineCheck = (
 export const checkIsUpdateViaImportFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -277,7 +277,7 @@ export const checkIsUpdateViaImportFailureCases = (
 export const checkIsUpdateFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -311,7 +311,7 @@ export const checkIsUpdateFailureCases = (
 export const checkIsCreateFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
@@ -342,7 +342,7 @@ export const checkIsCreateFailureCases = (
 export const checkIsCreateViaImportFailureCases = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  timelineType: TimelineTypeLiteral,
+  timelineType: TimelineType,
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,

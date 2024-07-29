@@ -30,7 +30,7 @@ import type {
   TimelinePersistInput,
   SortColumnTimeline,
 } from '../../../common/types/timeline';
-import type { RowRendererId, TimelineTypeLiteral } from '../../../common/api/timeline';
+import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
@@ -147,7 +147,7 @@ export const addTimelineToStore = ({
 
 interface AddNewTimelineParams extends TimelinePersistInput {
   timelineById: TimelineById;
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */

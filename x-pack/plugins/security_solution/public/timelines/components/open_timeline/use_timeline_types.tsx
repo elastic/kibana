@@ -10,8 +10,7 @@ import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { noop } from 'lodash/fp';
-import type { TimelineTypeLiteralWithNull } from '../../../../common/api/timeline';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
@@ -25,7 +24,7 @@ export interface UseTimelineTypesArgs {
 }
 
 export interface UseTimelineTypesResult {
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   timelineTabs: JSX.Element;
   timelineFilters: JSX.Element;
 }
@@ -37,7 +36,7 @@ export const useTimelineTypes = ({
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.timelines);
   const { navigateToUrl } = useKibana().services.application;
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
-  const [timelineType, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
+  const [timelineType, setTimelineTypes] = useState<TimelineType | null>(
     tabName === TimelineTypeEnum.default || tabName === TimelineTypeEnum.template
       ? tabName
       : TimelineTypeEnum.default

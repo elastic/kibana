@@ -27,18 +27,14 @@ import type {
   ResponseTimeline,
   SortTimeline,
   TimelineResult,
-  TimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
+  TimelineType,
+  TimelineStatus,
   ResolvedTimelineWithOutcomeSavedObject,
   TimelineSavedObject,
   SavedTimeline,
   TimelineWithoutExternalRefs,
 } from '../../../../../common/api/timeline';
-import {
-  TimelineStatusEnum,
-  type TimelineType,
-  TimelineTypeEnum,
-} from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
@@ -56,7 +52,7 @@ export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 export const getTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
-  timelineType: TimelineTypeLiteralWithNull = TimelineTypeEnum.default
+  timelineType: TimelineType | null = TimelineTypeEnum.default
 ): Promise<TimelineSavedObject> => {
   let timelineIdToUse = timelineId;
   try {
@@ -134,8 +130,8 @@ export const getTimelineTemplateOrNull = async (
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
 const getTimelineTypeFilter = (
-  timelineType: TimelineTypeLiteralWithNull,
-  status: TimelineStatusLiteralWithNull
+  timelineType: TimelineType | null,
+  status: TimelineStatus | null
 ) => {
   const typeFilter =
     timelineType == null
@@ -220,8 +216,8 @@ export const getAllTimeline = async (
   pageInfo: PageInfoTimeline,
   search: string | null,
   sort: SortTimeline | null,
-  status: TimelineStatusLiteralWithNull,
-  timelineType: TimelineTypeLiteralWithNull
+  status: TimelineStatus | null,
+  timelineType: TimelineType | null
 ): Promise<AllTimelinesResponse> => {
   const searchTerm = search != null ? search : undefined;
   const searchFields = ['title', 'description'];
@@ -294,7 +290,7 @@ export const getAllTimeline = async (
 
 export const getDraftTimeline = async (
   request: FrameworkRequest,
-  timelineType: TimelineTypeLiteralWithNull
+  timelineType: TimelineType | null
 ): Promise<ResponseTimelines> => {
   const filter = combineFilters([
     getTimelineTypeFilter(timelineType ?? null, TimelineStatusEnum.draft),

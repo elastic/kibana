@@ -22,6 +22,7 @@ import {
   RowRendererIdEnum,
   SortFieldTimeline,
   SortFieldTimelineEnum,
+  TemplateTimelineType,
   TemplateTimelineTypeEnum,
   TimelineStatus,
   TimelineStatusEnum,
@@ -36,6 +37,7 @@ export {
   RowRendererIdEnum,
   SortFieldTimeline,
   SortFieldTimelineEnum,
+  TemplateTimelineType,
   TemplateTimelineTypeEnum,
   TimelineStatus,
   TimelineStatusEnum,
@@ -277,53 +279,19 @@ export const TimelineStatusLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineStatusEnum.immutable),
 ]);
 
-const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);
-
-export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
-  typeof TimelineStatusLiteralWithNullRt
->;
-
 export const RowRendererCount = Object.keys(RowRendererIdEnum).length;
 export const RowRendererValues = Object.values(RowRendererId.Values);
 
 const RowRendererIdRuntimeType = stringEnum(RowRendererIdEnum, 'RowRendererId');
 
 /**
- * Timeline template type
+ * Timeline types
  */
-
-export const TemplateTimelineTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TemplateTimelineTypeEnum.elastic),
-  runtimeTypes.literal(TemplateTimelineTypeEnum.custom),
-]);
-
-export const TemplateTimelineTypeLiteralWithNullRt = unionWithNullType(
-  TemplateTimelineTypeLiteralRt
-);
-
-export type TemplateTimelineTypeLiteral = runtimeTypes.TypeOf<typeof TemplateTimelineTypeLiteralRt>;
-export type TemplateTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
-  typeof TemplateTimelineTypeLiteralWithNullRt
->;
-
-/*
- *  Timeline Types
- */
-
-export enum TimelineTypeOg {
-  default = 'default',
-  template = 'template',
-}
 
 export const TimelineTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineTypeEnum.template),
   runtimeTypes.literal(TimelineTypeEnum.default),
 ]);
-
-export const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);
-
-export type TimelineTypeLiteral = runtimeTypes.TypeOf<typeof TimelineTypeLiteralRt>;
-export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTypeLiteralWithNullRt>;
 
 /**
  * This is the response type

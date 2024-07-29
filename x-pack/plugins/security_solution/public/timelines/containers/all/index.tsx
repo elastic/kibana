@@ -18,8 +18,8 @@ import { inputsActions } from '../../../common/store/inputs';
 
 import * as i18n from '../../pages/translations';
 import type {
-  TimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
+  TimelineType,
+  TimelineStatus,
   PageInfoTimeline,
   TimelineResult,
   SortTimeline,
@@ -52,8 +52,8 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
-  status: TimelineStatusLiteralWithNull;
-  timelineType: TimelineTypeLiteralWithNull;
+  status: TimelineStatus | null;
+  timelineType: TimelineType;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';

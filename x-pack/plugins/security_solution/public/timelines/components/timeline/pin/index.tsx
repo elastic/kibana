@@ -9,8 +9,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import * as i18n from '../body/translations';
 
@@ -23,7 +22,7 @@ interface Props {
   allowUnpinning: boolean;
   isAlert: boolean;
   isDisabled?: boolean;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
   onClick?: () => void;
   pinned: boolean;
 }

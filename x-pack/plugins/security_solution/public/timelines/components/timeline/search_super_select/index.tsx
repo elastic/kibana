@@ -12,15 +12,14 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 interface SearchTimelineSuperSelectProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
   timelineId: string | null;
   timelineTitle: string | null;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
   placeholder?: string;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
   'aria-label'?: string;
