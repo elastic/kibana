@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -19,29 +20,43 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import type { EntityResolutionSuggestion } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/css';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { USER_PREVIEW_BANNER } from '../../../../../flyout/document_details/right/components/user_entity_overview';
+import { UserPreviewPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { useEntityResolutions } from '../../../../api/hooks/use_entity_resolutions';
 
 interface Props {
   username: string;
+  scopeId: string;
 }
 
-export const EntityResolutionTab = ({ username }: Props) => {
+export const EntityResolutionTab = ({ username, scopeId }: Props) => {
   const { resolutions, markResolved } = useEntityResolutions({ name: username, type: 'user' });
 
-  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
   const [updating, setUpdating] = React.useState<Record<string, boolean>>({});
-
-  const toggleExpanded = (id: string) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   const toggleUpdating = (id: string) => setUpdating((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const resolve = (id: string, name: string, relation: 'is_same' | 'is_different') => {
     toggleUpdating(id);
     markResolved({ id, type: 'user', name }, relation);
   };
+
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const openPreview = (userName: string) =>
+    openPreviewPanel({
+      id: UserPreviewPanelKey,
+      params: {
+        userName,
+        scopeId,
+        banner: USER_PREVIEW_BANNER,
+      },
+    });
 
   if (resolutions.isLoading) {
     return (
@@ -64,8 +79,7 @@ export const EntityResolutionTab = ({ username }: Props) => {
             {...candidate}
             resolve={resolve}
             updating={updating}
-            expanded={expanded}
-            toggleExpanded={toggleExpanded}
+            openPreviewPanel={() => openPreview(candidate.entity?.name)}
             isCandidate
           />
         ))}
@@ -79,8 +93,7 @@ export const EntityResolutionTab = ({ username }: Props) => {
             {...candidate}
             resolve={resolve}
             updating={updating}
-            expanded={expanded}
-            toggleExpanded={toggleExpanded}
+            openPreviewPanel={() => openPreview(candidate.entity?.name)}
           />
         ))}
       </EuiPageSection>
@@ -91,8 +104,7 @@ export const EntityResolutionTab = ({ username }: Props) => {
 type ItemProps = EntityResolutionSuggestion & {
   resolve: (id: string, name: string, relation: 'is_same' | 'is_different') => void;
   updating: Record<string, boolean>;
-  expanded: Record<string, boolean>;
-  toggleExpanded: (id: string) => void;
+  openPreviewPanel: (id: string) => void;
   isCandidate?: boolean;
 };
 
@@ -104,61 +116,61 @@ const EntityItem: React.FC<ItemProps> = ({
   reason,
   resolve,
   updating,
-  expanded,
-  toggleExpanded,
+  openPreviewPanel,
   isCandidate,
 }) => {
   if (!entity || !document || !id) return null;
+
+  const entityDataContent = (
+    <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+      <EuiFlexItem
+        css={css`
+          max-width: 150px;
+        `}
+      >
+        <EuiText size="m">{entity.name}</EuiText>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+          <EuiText>{'Confidence:'}</EuiText>
+          <EuiToolTip position="bottom" title="Reason" content={reason}>
+            <EuiBadge color="default">{confidence}</EuiBadge>
+          </EuiToolTip>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const entityActions = (
+    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+      {isCandidate &&
+        (updating[id] ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <>
+            <EuiButtonEmpty size="m" onClick={() => resolve(id, entity.name, 'is_different')}>
+              {'Mark as different'}
+            </EuiButtonEmpty>
+            <EuiButton
+              size="m"
+              iconType="check"
+              onClick={() => resolve(id, entity.name, 'is_same')}
+            >
+              {'Confirm as Same'}
+            </EuiButton>
+          </>
+        ))}
+      <EuiButtonIcon onClick={() => openPreviewPanel(id)} iconType="expand" aria-label="Expand" />
+    </EuiFlexGroup>
+  );
   return (
     <>
       <EuiPanel hasBorder>
-        <EuiFlexGroup justifyContent="spaceEvenly" direction="column">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-              <EuiFlexItem
-                css={css`
-                  max-width: 150px;
-                `}
-              >
-                <EuiText size="m">{entity.name}</EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="flexStart">
-                  <EuiText>{'Confidence:'}</EuiText>
-                  <EuiBadge color="default">{confidence}</EuiBadge>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              {isCandidate && (
-                <>
-                  <EuiButtonEmpty
-                    size="m"
-                    isLoading={updating[id]}
-                    onClick={() => resolve(id, entity.name, 'is_different')}
-                  >
-                    {'Mark as different'}
-                  </EuiButtonEmpty>
-                  <EuiButton
-                    size="m"
-                    iconType="check"
-                    isLoading={updating[id]}
-                    onClick={() => resolve(id, entity.name, 'is_same')}
-                  >
-                    {'Confirm as Same'}
-                  </EuiButton>
-                </>
-              )}
-              <EuiButtonIcon
-                onClick={() => toggleExpanded(id)}
-                iconType="expand"
-                aria-label="Expand"
-              />
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-          {expanded[id] && <EuiCodeBlock language="json">{JSON.stringify(document)}</EuiCodeBlock>}
-        </EuiFlexGroup>
+        <EuiAccordion id={id} buttonContent={entityDataContent} extraAction={entityActions}>
+          <EuiSpacer size="m" />
+          <EuiCodeBlock language="json">{JSON.stringify(document)}</EuiCodeBlock>
+        </EuiAccordion>
       </EuiPanel>
       <EuiSpacer size="xs" />
     </>

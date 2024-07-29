@@ -46,6 +46,7 @@ import type { RiskEngineSettingsResponse } from '../../../common/api/entity_anal
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { ENTITY_STORE_GET_RELATIONS_URL } from '../../../common/entity_analytics/entity_store/constants';
+import { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -236,7 +237,7 @@ export const useEntityAnalyticsRoutes = () => {
     /**
      * Fetches entity candidates
      */
-    const fetchEntityCandidates = async (entity: SearchEntity) =>
+    const fetchEntityCandidates = async (entity: SearchEntity, connector?: string) =>
       http.fetch<EntityResolutionPostResponse>(ENTITY_RESOLUTION, {
         version: '1',
         method: 'POST',
@@ -278,6 +279,12 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(relation),
       });
 
+    const getConnectors = async () => {
+      return http.fetch<AllConnectorsResponseV1[]>('/api/actions/connectors', {
+        method: 'GET',
+      });
+    };
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -296,6 +303,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityCandidates,
       fetchEntityRelations,
       createEntityRelation,
+      getConnectors,
     };
   }, [http]);
 };

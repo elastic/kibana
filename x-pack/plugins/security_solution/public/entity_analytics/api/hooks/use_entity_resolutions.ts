@@ -13,30 +13,35 @@ import type { RelatedEntityRelation } from '../../../../common/api/entity_analyt
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const useEntityResolutions = (entity: SearchEntity) => {
-  const { fetchEntityCandidates, fetchEntityRelations, createEntityRelation } =
+  const { fetchEntityCandidates, fetchEntityRelations, createEntityRelation, getConnectors } =
     useEntityAnalyticsRoutes();
 
-  const resolutions = useQuery(['EA_LLM_ENTITY_RESOLUTION', entity], () =>
-    Promise.all([
-      fetchEntityCandidates({ name: entity.name, type: entity.type }),
-      fetchEntityRelations({ name: entity.name, type: entity.type }),
-    ]).then(([{ suggestions = [] }, relations]) => {
-      const marked = (relation: RelatedEntityRelation) => (candidate: EntityResolutionCandidate) =>
-        relations.some(
-          (r) =>
-            r.relation === relation &&
-            r.entity.name === entity.name &&
-            r.related_entity.id === candidate.id
+  const resolutions = useQuery(['EA_LLM_ENTITY_RESOLUTION', entity], () => {
+    return getConnectors()
+      .then((connectors) =>
+        Promise.all([
+          fetchEntityCandidates({ name: entity.name, type: entity.type }),
+          fetchEntityRelations({ name: entity.name, type: entity.type }),
+        ])
+      )
+      .then(([{ suggestions = [] }, relations]) => {
+        const marked =
+          (relation: RelatedEntityRelation) => (candidate: EntityResolutionCandidate) =>
+            relations.some(
+              (r) =>
+                r.relation === relation &&
+                r.entity.name === entity.name &&
+                r.related_entity.id === candidate.id
+            );
+        const same = suggestions.filter(marked('is_same'));
+        const different = suggestions.filter(marked('is_different'));
+        const candidates = suggestions.filter(
+          (candidate) => !same.includes(candidate) && !different.includes(candidate)
         );
-      const same = suggestions.filter(marked('is_same'));
-      const different = suggestions.filter(marked('is_different'));
-      const candidates = suggestions.filter(
-        (candidate) => !same.includes(candidate) && !different.includes(candidate)
-      );
 
-      return { candidates, marked: { same, different }, relations };
-    })
-  );
+        return { candidates, marked: { same, different }, relations };
+      });
+  });
 
   const markResolved = useCallback(
     (target: SearchEntity & { id: string }, relation: RelatedEntityRelation) => {

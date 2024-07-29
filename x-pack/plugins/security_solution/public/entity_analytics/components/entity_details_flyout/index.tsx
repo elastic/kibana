@@ -27,7 +27,7 @@ export const getRiskInputTab = ({ entityType, entityName, scopeId }: RiskInputsT
   content: <RiskInputsTab entityType={entityType} entityName={entityName} scopeId={scopeId} />,
 });
 
-export const getEntityResolutionTab = (username: string) => ({
+export const getEntityResolutionTab = (username: string, scopeId: string) => ({
   id: EntityDetailsLeftPanelTab.OBSERVED_DATA,
   'data-test-subj': 'observed_data_tab',
   name: (
@@ -36,5 +36,5 @@ export const getEntityResolutionTab = (username: string) => ({
       defaultMessage="Observed Data"
     />
   ),
-  content: <EntityResolutionTab username={username} />,
+  content: <EntityResolutionTab username={username} scopeId={scopeId} />,
 });

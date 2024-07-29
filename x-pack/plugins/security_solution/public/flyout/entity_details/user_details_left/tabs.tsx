@@ -54,7 +54,7 @@ export const useTabs = (
       tabs.push(getEntraTab(entraManagedUser));
     }
 
-    tabs.push(getEntityResolutionTab(name));
+    tabs.push(getEntityResolutionTab(name, scopeId));
     return tabs;
   }, [isRiskScoreExist, managedUser, name, scopeId]);
 
