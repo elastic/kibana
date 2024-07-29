@@ -19,24 +19,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 interface ChooseConnectorSelectableProps {
-  allConnectors: Array<{
-    description: string;
-    iconPath: string;
-    isBeta: boolean;
-    isNative: boolean;
-    isTechPreview: boolean;
-    name: string;
-  }>;
-  connectorSelected: {
-    description: string;
-    iconPath: string;
-    isBeta: boolean;
-    isNative: boolean;
-    isTechPreview: boolean;
-    name: string;
-  };
+  allConnectors: ConnectorDefinition[];
+  connectorSelected: ConnectorDefinition;
   selfManaged: boolean;
   setConnectorSelected: Function;
   setSelfManaged: Function;
@@ -58,18 +45,8 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   const [selectableOptions, selectableSetOptions] = useState<
     Array<EuiSelectableOption<OptionData>>
   >([]);
-  const initialOptions = allConnectors.map(
-    (
-      connector: {
-        description: string;
-        iconPath: string;
-        isBeta: boolean;
-        isNative: boolean;
-        isTechPreview: boolean;
-        name: string;
-      },
-      key
-    ): EuiSelectableOption => {
+  const getInitialOptions = () => {
+    return allConnectors.map((connector, key) => {
       const append: JSX.Element[] = [];
       if (connector.isTechPreview) {
         append.push(
@@ -109,12 +86,10 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         label: connector.name,
         prepend: <EuiIcon size="l" type={connector.iconPath} />,
       };
-    }
-  );
+    });
+  };
 
-  useEffect(() => {
-    selectableSetOptions(initialOptions);
-  }, []);
+  const initialOptions = getInitialOptions();
 
   useEffect(() => {
     // Setting options when changing the radiobutton to self managed but it doesn't update the values for disable nor badges

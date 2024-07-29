@@ -24,10 +24,11 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n-react';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import { GenerateConfigButton } from '../../connector_detail/components/generate_config_button';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
+import { ConnectorViewValues } from '../../connector_detail/connector_view_logic';
 import { DeploymentLogic } from '../../connector_detail/deployment_logic';
 
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
@@ -35,23 +36,10 @@ import { ConnectorDescriptionPopover } from './components/connector_description_
 import { ManualConfiguration } from './components/manual_configuration';
 
 interface StartStepProps {
-  allConnectors: Array<{
-    description: string;
-    iconPath: string;
-    isBeta: boolean;
-    isNative: boolean;
-    isTechPreview: boolean;
-    name: string;
-  }>;
+  allConnectors: ConnectorDefinition[];
+  connector: ConnectorViewValues;
   connectorName: string;
-  connectorSelected: {
-    description: string;
-    iconPath: string;
-    isBeta: boolean;
-    isNative: boolean;
-    isTechPreview: boolean;
-    name: string;
-  };
+  connectorSelected: ConnectorDefinition;
   currentStep: number;
   isNextStepEnabled: boolean;
   selfManaged: boolean;
@@ -61,7 +49,6 @@ interface StartStepProps {
   setNextStepEnabled: Function;
   setSelfManaged: Function;
   title: string;
-  connector:any;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -84,6 +71,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   const [radioIdSelected, setRadioIdSelected] = useState(
     selfManaged ? selfManagedRadioButtonId : elasticManagedRadioButtonId
   );
+
   // const { generateConfiguration } = useActions(DeploymentLogic);
   const { isGenerateLoading } = useValues(DeploymentLogic);
 
@@ -322,10 +310,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                       id: 'string',
                       name: 'my-api-key',
                     }}
-                    connector={{
-                      api_key_id: 'asldkj234lkj23dasldkajasd234',
-                      api_key_secret_id: 'asdasd234fasdf',
-                    }}
+                    connector={connector}
                     generateApiKey={() => {}}
                     isGenerateLoading={false}
                   />

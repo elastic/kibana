@@ -7,8 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 
-// import { useLocation } from 'react-router-dom';
-
 import { css } from '@emotion/react';
 
 import { useValues, useActions } from 'kea';
@@ -27,11 +25,12 @@ import {
   EuiSuperSelect,
   EuiText,
   useEuiTheme,
+  EuiStepStatus,
 } from '@elastic/eui';
 
 import { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n-react';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
@@ -56,53 +55,23 @@ export const CreateConnector: React.FC = () => {
   useEffect(() => {
     fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
   }, []);
-  const [startStepStatus, setStartStepStatus] = useState<
-    | 'current'
-    | 'incomplete'
-    | 'disabled'
-    | 'loading'
-    | 'warning'
-    | 'danger'
-    | 'complete'
-    | undefined
-  >('current');
-
-  const [deploymentStepStatus, setDeploymentStepStatus] = useState<
-    | 'current'
-    | 'incomplete'
-    | 'disabled'
-    | 'loading'
-    | 'warning'
-    | 'danger'
-    | 'complete'
-    | undefined
-  >('incomplete');
-
-  const [configurationStepStatus, setConfigurationStepStatus] = useState<
-    | 'current'
-    | 'incomplete'
-    | 'disabled'
-    | 'loading'
-    | 'warning'
-    | 'danger'
-    | 'complete'
-    | undefined
-  >('incomplete');
-
-  const [finishUpStepStatus, setFinishUpStepStatus] = useState<
-    | 'current'
-    | 'incomplete'
-    | 'disabled'
-    | 'loading'
-    | 'warning'
-    | 'danger'
-    | 'complete'
-    | undefined
-  >('incomplete');
-
+  const [startStepStatus, setStartStepStatus] = useState<EuiStepStatus>('current');
+  const [deploymentStepStatus, setDeploymentStepStatus] = useState<EuiStepStatus>('incomplete');
+  const [configurationStepStatus, setConfigurationStepStatus] =
+    useState<EuiStepStatus>('incomplete');
+  const [finishUpStepStatus, setFinishUpStepStatus] = useState<EuiStepStatus>('incomplete');
   const [currentStep, setCurrentStep] = useState(0);
-
-  const [connectorSelected, setConnectorSelected] = useState<any>('');
+  const [connectorSelected, setConnectorSelected] = useState<ConnectorDefinition>({
+    docsUrl: '',
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    iconPath: '',
+    isBeta: true,
+    isNative: true,
+    keywords: [],
+    name: '',
+    serviceType: '',
+  });
   const [connectorName, setConnectorName] = useState('');
   const [deploymentStepComplete, setDeploymentStepComplete] = useState(false);
   const [configurationStepComplete, setConfigurationStepComplete] = useState(false);

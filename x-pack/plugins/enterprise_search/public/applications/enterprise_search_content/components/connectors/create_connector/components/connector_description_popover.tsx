@@ -100,7 +100,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
         <EuiButtonIcon
           data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
           iconType="iInCircle"
-          onClick={() => setIsPopoverOpen(() => !isPopoverOpen)}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }
       isOpen={isPopoverOpen}

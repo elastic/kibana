@@ -39,9 +39,10 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 import { KibanaDeps } from '../../../../../../../common/types';
 
 import { AttachIndexBox } from '../../../connector_detail/attach_index_box';
+import { ConnectorViewValues } from '../../../connector_detail/connector_view_logic';
 
 export interface ManualConfigurationProps {
-  connector: any;
+  connector: ConnectorViewValues;
   connectorName: string;
   isDisabled: boolean;
   setConnectorName: Function;
@@ -77,7 +78,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
 --index-language en \  
 --from-file config.yml
 `;
-  let flyout;
+
   const flyoutCliContent: React.FC = () => (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -281,7 +282,6 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
     </>
   );
   const [flyoutConten, setFlyoutConten] = useState<React.FC>(flyoutManualConfigContent);
-
   const items = [
     <EuiContextMenuItem
       key="copy"
@@ -371,19 +371,6 @@ POST /_security/api_key
     </EuiContextMenuItem>,
   ];
 
-  if (isFlyoutVisible) {
-    flyout = (
-      <EuiFlyout
-        ownFocus
-        onClose={() => setIsFlyoutVisible(false)}
-        aria-labelledby={simpleFlyoutTitleId}
-        size="s"
-      >
-        {flyoutConten}
-      </EuiFlyout>
-    );
-  }
-
   return (
     <>
       <EuiPopover
@@ -409,7 +396,16 @@ POST /_security/api_key
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      {flyout}
+      {isFlyoutVisible && (
+        <EuiFlyout
+          ownFocus
+          onClose={() => setIsFlyoutVisible(false)}
+          aria-labelledby={simpleFlyoutTitleId}
+          size="s"
+        >
+          {flyoutConten}
+        </EuiFlyout>
+      )}
     </>
   );
 };
