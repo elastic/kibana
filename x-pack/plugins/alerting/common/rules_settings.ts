@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 export interface RulesSettingsModificationMetadata {
   createdBy: string | null;
   updatedBy: string | null;
@@ -13,6 +14,11 @@ export interface RulesSettingsModificationMetadata {
 
 export interface RulesSettingsFlappingProperties {
   enabled: boolean;
+  lookBackWindow: number;
+  statusChangeThreshold: number;
+}
+
+export interface RuleSpecificFlappingProperties {
   lookBackWindow: number;
   statusChangeThreshold: number;
 }
@@ -37,10 +43,13 @@ export interface RulesSettings {
   queryDelay?: RulesSettingsQueryDelay;
 }
 
-export const MIN_LOOK_BACK_WINDOW = 2;
-export const MAX_LOOK_BACK_WINDOW = 20;
-export const MIN_STATUS_CHANGE_THRESHOLD = 2;
-export const MAX_STATUS_CHANGE_THRESHOLD = 20;
+export {
+  MIN_LOOK_BACK_WINDOW,
+  MAX_LOOK_BACK_WINDOW,
+  MIN_STATUS_CHANGE_THRESHOLD,
+  MAX_STATUS_CHANGE_THRESHOLD,
+} from '@kbn/alerting-types';
+
 export const MIN_QUERY_DELAY = 0;
 export const MAX_QUERY_DELAY = 60;
 

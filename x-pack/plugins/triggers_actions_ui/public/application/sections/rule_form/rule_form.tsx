@@ -62,6 +62,7 @@ import {
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
   RuleActionKey,
+  RuleSpecificFlappingProperties,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -97,6 +98,7 @@ import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
 import { getInitialInterval } from './get_initial_interval';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
+import { RuleFormAdvancedOptions } from './rule_form_advanced_options';
 
 const ENTER_KEY = 13;
 
@@ -408,6 +410,16 @@ export const RuleForm = ({
 
   const setAlertDelayProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertDelayProperty' }, payload: { key, value } });
+  };
+
+  const setFlapping = (flapping: RuleSpecificFlappingProperties | null) => {
+    dispatch({ command: { type: 'setProperty' }, payload: { key: 'flapping', value: flapping } });
+  };
+
+  const onAlertDelayChange = (value: string) => {
+    const parsedValue = value === '' ? '' : parseInt(value, 10);
+    setAlertDelayProperty('active', parsedValue || 1);
+    setAlertDelay(parsedValue || undefined);
   };
 
   useEffect(() => {
@@ -797,6 +809,9 @@ export const RuleForm = ({
           <EuiFlexItem>
             <EuiFormRow
               fullWidth
+              label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.ruleScheduleLabel', {
+                defaultMessage: 'Rule schedule',
+              })}
               data-test-subj="intervalFormRow"
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
@@ -855,45 +870,13 @@ export const RuleForm = ({
             </EuiText>
           }
         >
-          <EuiSpacer size="s" />
-          <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
-            <EuiFieldNumber
-              fullWidth
-              min={1}
-              value={alertDelay || ''}
-              name="alertDelay"
-              data-test-subj="alertDelayInput"
-              prepend={[
-                i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
-                  defaultMessage: 'Alert after',
-                }),
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
-                      defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
-                    />
-                  }
-                />,
-              ]}
-              append={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
-                {
-                  defaultMessage: 'consecutive matches',
-                }
-              )}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '' || INTEGER_REGEX.test(value)) {
-                  const parsedValue = value === '' ? '' : parseInt(value, 10);
-                  setAlertDelayProperty('active', parsedValue || 1);
-                  setAlertDelay(parsedValue || undefined);
-                }
-              }}
-            />
-          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <RuleFormAdvancedOptions
+            alertDelay={alertDelay}
+            flappingSettings={rule.flapping}
+            onAlertDelayChange={onAlertDelayChange}
+            onFlappingChange={setFlapping}
+          />
         </EuiAccordion>
       </EuiFlexItem>
       {shouldShowConsumerSelect && (
