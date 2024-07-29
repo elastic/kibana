@@ -6,4 +6,8 @@
  */
 
 export const GET_RECOMMENDATIONS_URL = '/internal/recommendations';
+export const APPLY_RECOMMENDATIONS_URL = '/internal/recommendations/{recommendationId}';
 export const SIMULATE_PIPELINE_URL = '/internal/recommendations/simulate_pipeline';
+
+export const getApplyRecommendationUrl = (recommendationId: string) =>
+  APPLY_RECOMMENDATIONS_URL.replace('{recommendationId}', recommendationId);

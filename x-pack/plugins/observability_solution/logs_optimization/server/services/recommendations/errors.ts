@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRecommendationsClient } from './types';
-
-export const createRecommendationsClientMock = (): jest.Mocked<IRecommendationsClient> => ({
-  find: jest.fn(),
-  applyOne: jest.fn(),
-  simulatePipeline: jest.fn(),
-});
+export class RecommendationNotFoundError extends Error {
+  constructor(message: string, public cause?: Error) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'RecommendationNotFoundError';
+  }
+}

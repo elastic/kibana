@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './apply_recommendation';
 export * from './get_recommendations';

@@ -14,12 +14,14 @@ export const mappingGapRT = rt.type({
 
 const processorsRT = rt.record(rt.string, rt.any);
 
+export const tasksRT = rt.partial({
+  processors: processorsRT,
+});
+
 export const mappingGapDetectionRT = rt.type({
   type: rt.literal('mapping_gap'),
   gaps: rt.array(mappingGapRT),
-  tasks: rt.partial({
-    processors: processorsRT,
-  }),
+  tasks: tasksRT,
 });
 
 export const fieldExtractionDetectionRT = rt.type({
@@ -48,6 +50,7 @@ export const detectionRT = rt.union([
   jsonParsingDetectionRT,
 ]);
 
+export type Tasks = rt.TypeOf<typeof tasksRT>;
 export type MappingGap = rt.TypeOf<typeof mappingGapRT>;
 export type MappingGapsDetection = rt.TypeOf<typeof mappingGapDetectionRT>;
 export type FieldExtractionDetection = rt.TypeOf<typeof fieldExtractionDetectionRT>;

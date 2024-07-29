@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { RecommendationsClient } from './recommendations_client';
 import type {
   RecommendationsServiceStartDeps,
   RecommendationsServiceSetup,
   RecommendationsServiceStart,
-  IRecommendationsClient,
 } from './types';
 
 export class RecommendationsService {
-  private client?: IRecommendationsClient;
+  private client?: RecommendationsClient;
 
   public setup(): RecommendationsServiceSetup {
     return {};
@@ -27,8 +27,8 @@ export class RecommendationsService {
 
   private async getClient({ http }: RecommendationsServiceStartDeps) {
     if (!this.client) {
-      const { RecommendationsClient } = await import('./recommendations_client');
-      const client = new RecommendationsClient(http);
+      const module = await import('./recommendations_client');
+      const client = new module.RecommendationsClient(http);
       this.client = client;
     }
 

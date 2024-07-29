@@ -8,9 +8,13 @@
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
-import { Detection } from '@kbn/logs-optimization-plugin/common/detections/types';
-import { NewestIndex } from '@kbn/logs-optimization-plugin/common/types';
+import { Detection } from '../../../common/detections/types';
+import { NewestIndex } from '../../../common/types';
 import { DetectionsClient } from './detections_client';
+import type { JSONParsingDetectionRule } from './detection_rules/json_parsing';
+import type { LogLevelExtractionDetectionRule } from './detection_rules/log_level_extraction';
+import type { MappingGapsDetectionRule } from './detection_rules/mapping_ecs_gaps';
+import type { TimestampExtractionDetectionRule } from './detection_rules/timestamp_extraction';
 
 export interface DetectionsServiceSetupDeps {
   getStartServices: CoreSetup['getStartServices'];
@@ -37,3 +41,9 @@ export interface LogSource {
 }
 
 export type LogDocument = SearchHit<LogSource>;
+
+export type DetectionRule =
+  | JSONParsingDetectionRule
+  | LogLevelExtractionDetectionRule
+  | MappingGapsDetectionRule
+  | TimestampExtractionDetectionRule;

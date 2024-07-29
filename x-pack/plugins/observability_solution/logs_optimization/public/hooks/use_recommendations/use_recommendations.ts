@@ -7,7 +7,9 @@
 
 import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { Recommendation } from '../../../common/recommendations';
 import {
+  ApplyRecommendationRequestPayload,
   GetRecommendationsRequestQuery,
   GetRecommendationsResponsePayload,
 } from '../../../common/latest';
@@ -19,11 +21,17 @@ interface UseRecommendationsFactoryDeps {
 
 export type UseRecommendationsParams = GetRecommendationsRequestQuery;
 
+export type ApplyRecommendationHandler = (
+  recommendationId: string,
+  payload: ApplyRecommendationRequestPayload
+) => Promise<Recommendation>;
+
 export interface UseRecommendationsReturnType {
   recommendations: GetRecommendationsResponsePayload['recommendations'] | undefined;
   loading: boolean;
   error: Error | undefined;
-  reload: ReturnType<typeof useAsyncFn>[1];
+  applyRecommendation: ApplyRecommendationHandler;
+  isApplyingRecommendation: boolean;
 }
 
 export type UseRecommendationsHook = (
@@ -40,10 +48,31 @@ export const createUseRecommendationsHook = ({
       return client.find(params);
     }, deps);
 
+    const [{ loading: isApplyingRecommendation }, applyRecommendation] = useAsyncFn(
+      async (recommendationId: string, payload: ApplyRecommendationRequestPayload) => {
+        const client = await recommendationsService.getClient();
+        const { recommendation: updatedRecommendation } = await client.applyOne(
+          recommendationId,
+          payload
+        );
+
+        await load();
+
+        return updatedRecommendation;
+      },
+      [load]
+    );
+
     useEffect(() => {
       load();
     }, [load]);
 
-    return { recommendations: value?.recommendations, loading, error, reload: load };
+    return {
+      recommendations: value?.recommendations,
+      loading,
+      error,
+      applyRecommendation,
+      isApplyingRecommendation,
+    };
   };
 };

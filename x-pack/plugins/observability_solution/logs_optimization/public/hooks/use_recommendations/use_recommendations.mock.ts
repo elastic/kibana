@@ -12,5 +12,6 @@ export const createUseRecommendationsHookMock = (): jest.Mocked<UseRecommendatio
     recommendations: undefined,
     loading: false,
     error: undefined,
-    reload: jest.fn(),
+    applyRecommendation: jest.fn(),
+    isApplyingRecommendation: false,
   }));

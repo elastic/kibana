@@ -28,6 +28,7 @@ import { Recommendation } from '../../common/recommendations';
 import { LogsOptimizationPageTemplate } from '../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../utils/breadcrumbs';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
+import { ApplyRecommendationHandler } from '../hooks/use_recommendations';
 
 export const RecommendationsRoute = () => {
   const { services } = useKibanaContextForPlugin();
@@ -39,7 +40,10 @@ export const RecommendationsRoute = () => {
 
   const [dataStream, setDataStream] = useState('logs-random-generic');
 
-  const { recommendations, loading, error } = useRecommendations({ dataStream }, [dataStream]);
+  const { recommendations, loading, error, applyRecommendation } = useRecommendations(
+    { dataStream },
+    [dataStream]
+  );
 
   return (
     <LogsOptimizationPageTemplate
@@ -72,12 +76,15 @@ export const RecommendationsRoute = () => {
         }
       />
       <EuiSpacer size="xxl" />
-      {loading && 'Loading...'}
+      {Boolean(loading && !recommendations) && 'Loading...'}
       {error && error.message}
       {recommendations?.map((recommendation) => {
         const recommendationToComponentMap: Record<
           Recommendation['type'],
-          React.FunctionComponent<{ recommendation: Recommendation }>
+          React.FunctionComponent<{
+            recommendation: Recommendation;
+            onApplyRecommendation: ApplyRecommendationHandler;
+          }>
         > = {
           mapping_gap: MappingGapRecommendation,
           field_extraction: FieldExtractionRecommendation,
@@ -88,7 +95,10 @@ export const RecommendationsRoute = () => {
 
         return (
           <Fragment key={recommendation.id}>
-            <RecommendationComponent recommendation={recommendation} />
+            <RecommendationComponent
+              recommendation={recommendation}
+              onApplyRecommendation={applyRecommendation}
+            />
             <EuiSpacer size="m" />
           </Fragment>
         );
@@ -97,7 +107,13 @@ export const RecommendationsRoute = () => {
   );
 };
 
-const FieldExtractionRecommendation = ({ recommendation }: { recommendation: Recommendation }) => {
+const FieldExtractionRecommendation = ({
+  recommendation,
+  onApplyRecommendation,
+}: {
+  recommendation: Recommendation;
+  onApplyRecommendation: ApplyRecommendationHandler;
+}) => {
   const { services } = useKibanaContextForPlugin();
   const { usePipelineSimulator } = services;
 
@@ -137,20 +153,41 @@ const FieldExtractionRecommendation = ({ recommendation }: { recommendation: Rec
     </EuiTitle>
   );
 
+  const isResolved = recommendation.status === 'resolved';
+
+  const extraAction = (
+    <EuiButton
+      onClick={() =>
+        onApplyRecommendation(recommendation.id, {
+          dataStream: recommendation.dataStream,
+          tasks: {
+            processors: JSON.parse(pipeline),
+          },
+        })
+      }
+      disabled={isResolved}
+      color={isResolved ? 'success' : 'primary'}
+      data-test-subj="logsOptimizationFieldExtractionRecommendationApplyRecommendationButton"
+    >
+      {isResolved
+        ? i18n.translate(
+            'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabelResolved',
+            { defaultMessage: 'Applied!' }
+          )
+        : i18n.translate(
+            'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabel',
+            { defaultMessage: 'Apply recommendation' }
+          )}
+    </EuiButton>
+  );
+
   return (
     <EuiPanel>
       <EuiAccordion
         id={recommendation.type + recommendation.created_at}
         buttonContent={accordionTriggerButton}
-        extraAction={
-          <EuiButton data-test-subj="logsOptimizationFieldExtractionRecommendationApplyRecommendationButton">
-            {i18n.translate(
-              'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabel',
-              { defaultMessage: 'Apply recommendation' }
-            )}
-          </EuiButton>
-        }
-        initialIsOpen
+        extraAction={extraAction}
+        initialIsOpen={!isResolved}
       >
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="l">
@@ -234,7 +271,13 @@ const FieldExtractionRecommendation = ({ recommendation }: { recommendation: Rec
   );
 };
 
-const JSONParsingRecommendation = ({ recommendation }: { recommendation: Recommendation }) => {
+const JSONParsingRecommendation = ({
+  recommendation,
+  onApplyRecommendation,
+}: {
+  recommendation: Recommendation;
+  onApplyRecommendation: ApplyRecommendationHandler;
+}) => {
   const { services } = useKibanaContextForPlugin();
   const { usePipelineSimulator } = services;
 
@@ -276,20 +319,41 @@ const JSONParsingRecommendation = ({ recommendation }: { recommendation: Recomme
     </EuiTitle>
   );
 
+  const isResolved = recommendation.status === 'resolved';
+
+  const extraAction = (
+    <EuiButton
+      onClick={() =>
+        onApplyRecommendation(recommendation.id, {
+          dataStream: recommendation.dataStream,
+          tasks: {
+            processors: JSON.parse(pipeline),
+          },
+        })
+      }
+      disabled={isResolved}
+      color={isResolved ? 'success' : 'primary'}
+      data-test-subj="logsOptimizationJsonParsingRecommendationApplyRecommendationButton"
+    >
+      {isResolved
+        ? i18n.translate(
+            'app_not_found_in_i18nrc.jsonParsingRecommendation.applyRecommendationButtonLabelResolved',
+            { defaultMessage: 'Applied!' }
+          )
+        : i18n.translate(
+            'app_not_found_in_i18nrc.jsonParsingRecommendation.applyRecommendationButtonLabel',
+            { defaultMessage: 'Apply recommendation' }
+          )}
+    </EuiButton>
+  );
+
   return (
     <EuiPanel>
       <EuiAccordion
         id={recommendation.type + recommendation.created_at}
         buttonContent={accordionTriggerButton}
-        extraAction={
-          <EuiButton data-test-subj="logsOptimizationFieldExtractionRecommendationApplyRecommendationButton">
-            {i18n.translate(
-              'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabel',
-              { defaultMessage: 'Apply recommendation' }
-            )}
-          </EuiButton>
-        }
-        initialIsOpen
+        extraAction={extraAction}
+        initialIsOpen={!isResolved}
       >
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="l">
@@ -373,7 +437,13 @@ const JSONParsingRecommendation = ({ recommendation }: { recommendation: Recomme
   );
 };
 
-const MappingGapRecommendation = ({ recommendation }: { recommendation: Recommendation }) => {
+const MappingGapRecommendation = ({
+  recommendation,
+  onApplyRecommendation,
+}: {
+  recommendation: Recommendation;
+  onApplyRecommendation: ApplyRecommendationHandler;
+}) => {
   const { services } = useKibanaContextForPlugin();
   const {
     fieldsMetadata: { useFieldsMetadata },
@@ -441,20 +511,41 @@ const MappingGapRecommendation = ({ recommendation }: { recommendation: Recommen
     </EuiTitle>
   );
 
+  const isResolved = recommendation.status === 'resolved';
+
+  const extraAction = (
+    <EuiButton
+      onClick={() =>
+        onApplyRecommendation(recommendation.id, {
+          dataStream: recommendation.dataStream,
+          tasks: {
+            processors: pipeline,
+          },
+        })
+      }
+      disabled={isResolved}
+      color={isResolved ? 'success' : 'primary'}
+      data-test-subj="logsOptimizationMappingGapRecommendationApplyRecommendationButton"
+    >
+      {isResolved
+        ? i18n.translate(
+            'app_not_found_in_i18nrc.mappingGapRecommendation.applyRecommendationButtonLabelResolved',
+            { defaultMessage: 'Applied!' }
+          )
+        : i18n.translate(
+            'app_not_found_in_i18nrc.mappingGapRecommendation.applyRecommendationButtonLabel',
+            { defaultMessage: 'Apply recommendation' }
+          )}
+    </EuiButton>
+  );
+
   return (
     <EuiPanel>
       <EuiAccordion
         id={recommendation.type + recommendation.created_at}
         buttonContent={accordionTriggerButton}
-        extraAction={
-          <EuiButton data-test-subj="logsOptimizationFieldExtractionRecommendationApplyRecommendationButton">
-            {i18n.translate(
-              'app_not_found_in_i18nrc.fieldExtractionRecommendation.applyRecommendationButtonLabel',
-              { defaultMessage: 'Apply recommendation' }
-            )}
-          </EuiButton>
-        }
-        initialIsOpen
+        extraAction={extraAction}
+        initialIsOpen={!isResolved}
       >
         <EuiSpacer size="m" />
         <EuiText>

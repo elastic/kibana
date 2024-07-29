@@ -15,6 +15,7 @@ import { LogLevelExtractionDetectionRule } from './detection_rules/log_level_ext
 import { MappingGapsDetectionRule } from './detection_rules/mapping_ecs_gaps';
 import { TimestampExtractionDetectionRule } from './detection_rules/timestamp_extraction';
 import { IDetectionsClient } from './types';
+import { DetectionRulesExecutor } from './detection_rules_executor';
 
 interface DetectionsClientDeps {
   logger: Logger;
@@ -32,16 +33,20 @@ export class DetectionsClient implements IDetectionsClient {
   ) {}
 
   async detectFrom(index: NewestIndex): Promise<Detection[]> {
-    const detectionRules = [
-      new MappingGapsDetectionRule(this.fieldsMetadataClient),
-      new JSONParsingDetectionRule(this.esqlTransport),
-      new TimestampExtractionDetectionRule(this.esqlTransport),
-      new LogLevelExtractionDetectionRule(this.esqlTransport),
-    ];
-
-    const detections = (
-      await Promise.all(detectionRules.map((detection) => detection.process(index)))
-    ).filter(Boolean) as Detection[];
+    const detections = await DetectionRulesExecutor.create(index)
+      .add([
+        new MappingGapsDetectionRule(this.fieldsMetadataClient),
+        new JSONParsingDetectionRule(this.esqlTransport),
+      ])
+      .add((prevDetections) =>
+        prevDetections.some((detection) => detection.type === 'json_parsing')
+          ? []
+          : [
+              new TimestampExtractionDetectionRule(this.esqlTransport),
+              new LogLevelExtractionDetectionRule(this.esqlTransport),
+            ]
+      )
+      .runDetections();
 
     this.logger.debug(`Detected ${detections.length} possible changes`);
 

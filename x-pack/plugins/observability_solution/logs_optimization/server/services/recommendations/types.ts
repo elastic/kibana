@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { Tasks } from '../../../common/detections/types';
 import { Recommendation } from '../../../common/recommendations';
 import { IndexManagerCreator } from '../../lib/index_manager';
 import { DetectionsServiceStart } from '../detections';
@@ -34,4 +35,13 @@ export interface RecommendationsServiceStart {
 
 export interface IRecommendationsClient {
   getRecommendations({ dataStream }: { dataStream: string }): Promise<Recommendation[]>;
+  applyRecommendation({
+    id,
+    dataStream,
+    tasks,
+  }: {
+    id: string;
+    dataStream: string;
+    tasks: Tasks;
+  }): Promise<Recommendation>;
 }

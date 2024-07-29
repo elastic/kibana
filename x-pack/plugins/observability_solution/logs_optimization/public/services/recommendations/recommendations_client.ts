@@ -7,6 +7,10 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
+  ApplyRecommendationRequestPayload,
+  applyRecommendationRequestPayloadRT,
+  ApplyRecommendationResponsePayload,
+  applyRecommendationResponsePayloadRT,
   GetRecommendationsRequestQuery,
   getRecommendationsRequestQueryRT,
   GetRecommendationsResponsePayload,
@@ -15,6 +19,7 @@ import {
 import {
   DecodeRecommendationsError,
   FetchRecommendationsError,
+  getApplyRecommendationUrl,
   GET_RECOMMENDATIONS_URL,
   SIMULATE_PIPELINE_URL,
 } from '../../../common/recommendations';
@@ -42,6 +47,34 @@ export class RecommendationsClient implements IRecommendationsClient {
       (message: string) =>
         new DecodeRecommendationsError(
           `Failed decoding recommendations for data stream "${query.dataStream}": ${message}`
+        )
+    )(response);
+
+    return data;
+  }
+
+  public async applyOne(
+    recommendationId: string,
+    payload: ApplyRecommendationRequestPayload
+  ): Promise<ApplyRecommendationResponsePayload> {
+    const body = applyRecommendationRequestPayloadRT.encode(payload);
+
+    const response = await this.http
+      .put(getApplyRecommendationUrl(recommendationId), {
+        body: JSON.stringify(body),
+        version: '1',
+      })
+      .catch((error) => {
+        throw new FetchRecommendationsError(
+          `Failed to fetch recommendations for data stream "${body.dataStream}": ${error.message}`
+        );
+      });
+
+    const data = decodeOrThrow(
+      applyRecommendationResponsePayloadRT,
+      (message: string) =>
+        new DecodeRecommendationsError(
+          `Failed decoding recommendations for data stream "${body.dataStream}": ${message}`
         )
     )(response);
 

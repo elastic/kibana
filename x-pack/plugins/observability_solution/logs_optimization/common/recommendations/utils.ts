@@ -8,9 +8,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { Detection } from '../detections/types';
 import { Recommendation } from './types';
 
-export const createRecommendation = (detection: Detection): Recommendation => ({
+export const createRecommendation = ({
+  dataStream,
+  detection,
+}: {
+  dataStream: string;
+  detection: Detection;
+}): Recommendation => ({
   id: uuidv4(),
   type: detection.type,
+  dataStream,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   status: 'pending',

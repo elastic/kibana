@@ -23,6 +23,7 @@ export const recommendationTypeRT = rt.keyof({
 export const recommendationRT = rt.type({
   id: rt.string,
   type: recommendationTypeRT,
+  dataStream: rt.string,
   status: recommendationStatusRT,
   created_at: rt.string,
   updated_at: rt.string,
