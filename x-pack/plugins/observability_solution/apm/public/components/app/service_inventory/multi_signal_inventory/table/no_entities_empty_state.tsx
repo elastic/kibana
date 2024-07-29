@@ -93,7 +93,6 @@ export function NoEntitiesEmptyState() {
             <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
               <EuiFlexGroup direction="row" gutterSize="xs">
                 <AddApmAgent
-                  basePath={basePath}
                   onClick={() => {
                     reportButtonClick('add_apm_agent');
                   }}
