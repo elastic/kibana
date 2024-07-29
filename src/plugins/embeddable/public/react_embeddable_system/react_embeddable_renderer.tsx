@@ -10,7 +10,6 @@ import {
   apiIsPresentationContainer,
   HasSerializedChildState,
   HasSnapshottableState,
-  SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
@@ -20,7 +19,7 @@ import {
   StateComparators,
 } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { initializeReactEmbeddableState } from './react_embeddable_state';
@@ -50,7 +49,7 @@ export const ReactEmbeddableRenderer = <
   maybeId,
   getParentApi,
   panelProps,
-  onAnyStateChange,
+  onRuntimeStateChange,
   onApiAvailable,
   hidePanelChrome,
 }: {
@@ -69,10 +68,11 @@ export const ReactEmbeddableRenderer = <
   >;
   hidePanelChrome?: boolean;
   /**
-   * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
-   * as it changes. This is **not** expected to change over the lifetime of the component.
+   * This `onRuntimeStateChange` callback allows the parent to keep track of the state of the embeddable
+   * as it changes. This callback is **not** expected to change over the lifetime of the component.
+   * Note that the state recieved here is runtime state, and will
    */
-  onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
+  onRuntimeStateChange?: (state: RuntimeState) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
   const firstLoadCompleteTime = useRef<number | null>(null);
@@ -131,35 +131,6 @@ export const ReactEmbeddableRenderer = <
             >,
             comparators: StateComparators<RuntimeState>
           ) => {
-            if (onAnyStateChange) {
-              /**
-               * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
-               * an `onAnyStateChange` callback is provided
-               */
-              const comparatorDefinitions: Array<
-                ComparatorDefinition<RuntimeState, keyof RuntimeState>
-              > = Object.values(comparators);
-              subscriptions.add(
-                combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
-                  .pipe(
-                    skip(1),
-                    debounceTime(ON_STATE_CHANGE_DEBOUNCE),
-                    switchMap(() => {
-                      const isAsync =
-                        apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
-                      return isAsync
-                        ? (apiRegistration.serializeState() as Promise<
-                            SerializedPanelState<SerializedState>
-                          >)
-                        : Promise.resolve(apiRegistration.serializeState());
-                    })
-                  )
-                  .subscribe((serializedState) => {
-                    onAnyStateChange(serializedState);
-                  })
-              );
-            }
-
             const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
               startStateDiffing(comparators);
 
@@ -171,6 +142,27 @@ export const ReactEmbeddableRenderer = <
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
             cleanupFunction.current = () => cleanup();
+
+            if (onRuntimeStateChange) {
+              /**
+               * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
+               * an `onRuntimeStateChange` callback is provided
+               */
+              const comparatorDefinitions: Array<
+                ComparatorDefinition<RuntimeState, keyof RuntimeState>
+              > = Object.values(comparators);
+              subscriptions.add(
+                combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
+                  .pipe(
+                    skip(1),
+                    debounceTime(ON_STATE_CHANGE_DEBOUNCE),
+                    map(() => snapshotRuntimeState())
+                  )
+                  .subscribe((runtimeState) => {
+                    onRuntimeStateChange(runtimeState);
+                  })
+              );
+            }
             return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 
