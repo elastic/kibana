@@ -53,14 +53,19 @@ type DataTableColumnsMeta = Record<
 >;
 
 const sortOrder: SortOrder[] = [];
+const DEFAULT_INITIAL_ROW_HEIGHT = 5;
+const DEFAULT_ROWS_PER_PAGE = 10;
+const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
   );
-  const [rowHeight, setRowHeight] = useState<number>(props.initialRowHeight ?? 5);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowHeight, setRowHeight] = useState<number>(
+    props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
+  );
+  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
   const onSetColumns = useCallback((columns) => {
     setActiveColumns(columns);
@@ -209,7 +214,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       dataView={props.dataView}
       sampleSizeState={rows.length}
       rowsPerPageState={rowsPerPage}
-      rowsPerPageOptions={[10, 25]}
+      rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
       onSetColumns={onSetColumns}
       onUpdateRowsPerPage={setRowsPerPage}
       expandedDoc={expandedDoc}
@@ -222,7 +227,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       maxDocFieldsDisplayed={100}
       renderDocumentView={renderDocumentView}
       showFullScreenButton={false}
-      configRowHeight={5}
+      configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
       rowHeightState={rowHeight}
       onUpdateRowHeight={setRowHeight}
       controlColumnIds={props.controlColumnIds}
