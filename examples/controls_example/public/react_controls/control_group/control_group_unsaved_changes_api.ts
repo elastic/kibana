@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { childrenUnsavedChanges$, PresentationContainer } from '@kbn/presentation-containers';
 import {
   apiPublishesUnsavedChanges,
@@ -49,10 +50,10 @@ export function initializeControlGroupUnsavedChanges(
         childrenUnsavedChanges$(children$),
       ]).pipe(
         map(([unsavedControlGroupState, unsavedControlsState]) => {
-          const unsavedChanges: { [key: string]: unknown } = unsavedControlGroupState
-            ? { ...unsavedControlGroupState }
+          const unsavedChanges: Partial<ControlGroupRuntimeState> = unsavedControlGroupState
+            ? omit(unsavedControlGroupState, 'controlsInOrder')
             : {};
-          if (unsavedControlsState) {
+          if (unsavedControlsState || unsavedControlGroupState?.controlsInOrder) {
             unsavedChanges.initialChildControlState = snapshotControlsRuntimeState();
           }
           return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
@@ -64,6 +65,6 @@ export function initializeControlGroupUnsavedChanges(
           if (apiPublishesUnsavedChanges(controlApi)) controlApi.resetUnsavedChanges();
         });
       },
-    } as PublishesUnsavedChanges,
+    } as PublishesUnsavedChanges<ControlGroupRuntimeState>,
   };
 }

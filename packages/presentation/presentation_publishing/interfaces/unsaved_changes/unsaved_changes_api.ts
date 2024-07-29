@@ -25,20 +25,20 @@ import {
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
-export const initializeUnsavedChanges = <State extends {} = {}>(
-  initialState: State,
+export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
+  initialState: RuntimeState,
   parentApi: unknown,
-  comparators: StateComparators<State>
+  comparators: StateComparators<RuntimeState>
 ) => {
   const subscriptions: Subscription[] = [];
-  const lastSavedState$ = new BehaviorSubject<State | undefined>(initialState);
+  const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialState);
 
   const snapshotState = () => {
-    const comparatorKeys = Object.keys(comparators) as Array<keyof State>;
-    const snapshot = {} as State;
+    const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
+    const snapshot = {} as RuntimeState;
     comparatorKeys.forEach((key) => {
       const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
-      snapshot[key] = comparatorSubject.value as State[typeof key];
+      snapshot[key] = comparatorSubject.value as RuntimeState[typeof key];
     });
     return snapshot;
   };
@@ -53,18 +53,18 @@ export const initializeUnsavedChanges = <State extends {} = {}>(
   }
 
   const comparatorSubjects: Array<PublishingSubject<unknown>> = [];
-  const comparatorKeys: Array<keyof State> = []; // index maps comparator subject to comparator key
-  for (const key of Object.keys(comparators) as Array<keyof State>) {
+  const comparatorKeys: Array<keyof RuntimeState> = []; // index maps comparator subject to comparator key
+  for (const key of Object.keys(comparators) as Array<keyof RuntimeState>) {
     const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
     comparatorSubjects.push(comparatorSubject as PublishingSubject<unknown>);
     comparatorKeys.push(key);
   }
 
-  const unsavedChanges = new BehaviorSubject<Partial<State> | undefined>(
+  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(
     runComparators(
       comparators,
       comparatorKeys,
-      lastSavedState$.getValue() as State,
+      lastSavedState$.getValue() as RuntimeState,
       getInitialValuesFromComparators(comparators, comparatorKeys)
     )
   );
@@ -75,9 +75,9 @@ export const initializeUnsavedChanges = <State extends {} = {}>(
         debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE),
         map((latestStates) =>
           comparatorKeys.reduce((acc, key, index) => {
-            acc[key] = latestStates[index] as State[typeof key];
+            acc[key] = latestStates[index] as RuntimeState[typeof key];
             return acc;
-          }, {} as Partial<State>)
+          }, {} as Partial<RuntimeState>)
         ),
         combineLatestWith(lastSavedState$)
       )
@@ -95,10 +95,10 @@ export const initializeUnsavedChanges = <State extends {} = {}>(
         const lastSaved = lastSavedState$.getValue();
         for (const key of comparatorKeys) {
           const setter = comparators[key][1]; // setter function is the 1st element of the tuple
-          setter(lastSaved?.[key] as State[typeof key]);
+          setter(lastSaved?.[key] as RuntimeState[typeof key]);
         }
       },
-    } as PublishesUnsavedChanges,
+    } as PublishesUnsavedChanges<RuntimeState>,
     cleanup: () => {
       subscriptions.forEach((subscription) => subscription.unsubscribe());
     },
