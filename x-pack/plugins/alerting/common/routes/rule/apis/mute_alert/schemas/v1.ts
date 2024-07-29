@@ -8,6 +8,14 @@
 import { schema } from '@kbn/config-schema';
 
 export const muteAlertParamsSchema = schema.object({
-  rule_id: schema.string(),
-  alert_id: schema.string(),
+  rule_id: schema.string({
+    meta: {
+      description: 'The identifier for the rule.',
+    },
+  }),
+  alert_id: schema.string({
+    meta: {
+      description: 'The identifier for the alert.',
+    },
+  }),
 });

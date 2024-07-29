@@ -34,7 +34,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
   return definition.metadata.reduce(
     (aggs, metadata) => ({
       ...aggs,
-      [`entity.metadata.${metadata.destination ?? metadata.source}`]: {
+      [`entity.metadata.${metadata.destination}`]: {
         filter: {
           range: {
             'event.ingested': {

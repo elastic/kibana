@@ -27,6 +27,7 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const useOsqueryTab = ({
   rawEventData,
   ecsData,

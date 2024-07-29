@@ -33,5 +33,5 @@ export const optionsSlice = createSlice({
 
 export const { setSimulateErrors, setCompressResponse, setFlushFix } = optionsSlice.actions;
 export type ReduxOptionsApiAction = ReturnType<
-  typeof optionsSlice.actions[keyof typeof optionsSlice.actions]
+  (typeof optionsSlice.actions)[keyof typeof optionsSlice.actions]
 >;

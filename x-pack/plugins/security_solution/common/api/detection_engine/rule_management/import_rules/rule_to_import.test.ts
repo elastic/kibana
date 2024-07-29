@@ -776,20 +776,6 @@ describe('RuleToImport', () => {
     expectParseSuccess(result);
   });
 
-  test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload = getImportRulesSchemaMock({
-      actions: [
-        // @ts-expect-error assign unsupported value
-        { id: 'id', action_type_id: 'action_type_id', params: {} },
-      ],
-    });
-
-    const result = RuleToImport.safeParse(payload);
-    expectParseError(result);
-
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.group: Required"`);
-  });
-
   test('You cannot send in an array of actions that are missing "id"', () => {
     const payload = getImportRulesSchemaMock({
       actions: [

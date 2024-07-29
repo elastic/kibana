@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { type DataView, ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { ESQL_SEARCH_STRATEGY, type DataView } from '@kbn/data-plugin/common';
 import type { ESFilter, ESQLSearchResponse } from '@kbn/es-types';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import { lastValueFrom } from 'rxjs';
 import { v4 } from 'uuid';
 import type { InvestigateAppStartDependencies } from '../types';
 import { getKibanaColumns } from '../utils/get_kibana_columns';
@@ -92,19 +92,17 @@ export function createEsqlService({
       };
     },
     meta: async ({ query, signal, filter }) => {
-      const indexPattern = getIndexPatternFromESQLQuery(query);
-
       const [response, lensHelper, dataView] = await Promise.all([
         runQuery({ query: `${query} | LIMIT 0`, signal, dropNullColumns: false, filter }),
         lens.stateHelperApi(),
-        getESQLAdHocDataview(indexPattern, dataViews),
+        getESQLAdHocDataview(query, dataViews),
       ]);
 
       const columns = getKibanaColumns(response.columns ?? []);
 
       const suggestionsFromLensHelper = await lensHelper.suggestions(
         {
-          dataViewSpec: dataView.toSpec(),
+          dataViewSpec: dataView.toSpec(false),
           fieldName: '',
           textBasedColumns: columns,
           query: {

@@ -66,7 +66,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/controls-plugin",
-    "@kbn/search-types",
     "@kbn/alerting-comparators",
     "@kbn/alerting-types",
     "@kbn/visualization-utils",

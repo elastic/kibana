@@ -352,7 +352,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { isAgentlessEnabled } = useAgentless();
   const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
-    updateNewAgentPolicy,
+    setNewAgentPolicy,
     updateAgentPolicies,
     setSelectedPolicyTab,
     packageInfo,

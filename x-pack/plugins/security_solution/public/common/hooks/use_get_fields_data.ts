@@ -96,6 +96,7 @@ const getFieldsValue = (
 export type GetFieldsDataValue = string | string[] | null | undefined;
 export type GetFieldsData = (field: string) => GetFieldsDataValue;
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const useGetFieldsData = (fieldsData: SearchHit['fields'] | undefined): GetFieldsData => {
   // TODO: Move cache to top level container such as redux or context. Make it store type agnostic if possible
   // TODO: Handle updates where data is re-requested and the cache is reset.

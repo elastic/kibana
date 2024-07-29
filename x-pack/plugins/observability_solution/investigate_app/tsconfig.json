@@ -51,6 +51,5 @@
     "@kbn/security-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/esql-datagrid",
-    "@kbn/std"
   ],
 }
