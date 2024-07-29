@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ERROR_USER_NOT_AUTHORIZED } from '@kbn/entityManager-plugin/public';
 import useToggle from 'react-use/lib/useToggle';
 import {
   EuiButtonIcon,
@@ -77,17 +76,17 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
         }
         refetch();
       } else {
-        if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
-          setIsLoading(false);
-          setsIsUnauthorizedModalVisible(true);
-          return;
-        }
-
         throw new Error(response.message);
       }
     } catch (error) {
       setIsLoading(false);
       const err = error as Error | IHttpFetchError<ResponseErrorBody>;
+      if ('response' in err) {
+        if (err.response?.status === 403) {
+          setsIsUnauthorizedModalVisible(true);
+          return;
+        }
+      }
       notifications.toasts.danger({
         title: i18n.translate('xpack.apm.eemEnablement.errorTitle', {
           defaultMessage: 'Error while enabling the new experience',
