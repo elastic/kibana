@@ -18,12 +18,17 @@ export const useEntityResolutions = (entity: SearchEntity) => {
 
   const resolutions = useQuery(['EA_LLM_ENTITY_RESOLUTION', entity], () => {
     return getConnectors()
-      .then((connectors) =>
-        Promise.all([
-          fetchEntityCandidates({ name: entity.name, type: entity.type }),
+      .then((connectors) => {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { connector_type_id, id, config } = connectors[0];
+        return Promise.all([
+          fetchEntityCandidates(
+            { name: entity.name, type: entity.type },
+            { connectorId: id, actionTypeId: connector_type_id, model: config?.defaultModel }
+          ),
           fetchEntityRelations({ name: entity.name, type: entity.type }),
-        ])
-      )
+        ]);
+      })
       .then(([{ suggestions = [] }, relations]) => {
         const marked =
           (relation: RelatedEntityRelation) => (candidate: EntityResolutionCandidate) =>

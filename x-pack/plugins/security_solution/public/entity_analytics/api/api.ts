@@ -237,7 +237,10 @@ export const useEntityAnalyticsRoutes = () => {
     /**
      * Fetches entity candidates
      */
-    const fetchEntityCandidates = async (entity: SearchEntity, connector?: string) =>
+    const fetchEntityCandidates = async (
+      entity: SearchEntity,
+      connector: Record<'connectorId' | 'model' | 'actionTypeId', string>
+    ) =>
       http.fetch<EntityResolutionPostResponse>(ENTITY_RESOLUTION, {
         version: '1',
         method: 'POST',
@@ -247,11 +250,7 @@ export const useEntityAnalyticsRoutes = () => {
           size: 10,
           replacements: {},
           subAction: 'invokeAI',
-          apiConfig: {
-            connectorId: '57fe89ef-e8e6-4672-96b1-3811e0ebc138',
-            actionTypeId: '.bedrock',
-            model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
-          },
+          apiConfig: connector,
         }),
       });
 
