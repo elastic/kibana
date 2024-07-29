@@ -668,7 +668,7 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('string').map((v) => `${v},`),
       ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
         'concat',
-      ]).map((v) => `${v},`),
+      ]).map((v) => ({ ...v, text: `${v.text},` })),
     ]);
     testSuggestions(
       'from a | eval a=concat(stringField, ',
@@ -696,7 +696,7 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('ip').map((v) => `${v},`),
       ...getFunctionSignaturesByReturnType('eval', 'ip', { scalar: true }, undefined, [
         'cidr_match',
-      ]).map((v) => `${v},`),
+      ]).map((v) => ({ ...v, text: `${v.text},` })),
     ]);
     testSuggestions(
       'from a | eval a=cidr_match(ipField, ',
@@ -884,7 +884,7 @@ describe('autocomplete', () => {
           ...getLiteralsByType('time_literal').map((t) => `${t},`),
           ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }, undefined, [
             'date_trunc',
-          ]).map((t) => `${t},`),
+          ]).map((t) => ({ ...t, text: `${t.text},` })),
           ...getFieldNamesByType('date').map((t) => `${t},`),
           TIME_PICKER_SUGGESTION,
         ],
@@ -896,6 +896,29 @@ describe('autocomplete', () => {
         ' '
       );
     });
+  });
+
+  describe('values suggestions', () => {
+    testSuggestions('FROM "a"', ['a', 'b'], undefined, 7, [
+      ,
+      [
+        { name: 'a', hidden: false },
+        { name: 'b', hidden: false },
+      ],
+    ]);
+    testSuggestions('FROM " "', [], ' ');
+    // TODO — re-enable these tests when we can support this case
+    testSuggestions.skip('FROM "  a"', [], undefined, 9);
+    testSuggestions.skip('FROM "foo b"', [], undefined, 11);
+    testSuggestions('FROM a | WHERE tags == " "', [], ' ');
+    testSuggestions('FROM a | WHERE tags == """ """', [], ' ');
+    testSuggestions('FROM a | WHERE tags == "a"', [], undefined, 25);
+    testSuggestions('FROM a | EVAL tags == " "', [], ' ');
+    testSuggestions('FROM a | EVAL tags == "a"', [], undefined, 24);
+    testSuggestions('FROM a | STATS tags == " "', [], ' ');
+    testSuggestions('FROM a | STATS tags == "a"', [], undefined, 25);
+    testSuggestions('FROM a | GROK "a" "%{WORD:firstWord}"', [], undefined, 16);
+    testSuggestions('FROM a | DISSECT "a" "%{WORD:firstWord}"', [], undefined, 19);
   });
 
   describe('callbacks', () => {

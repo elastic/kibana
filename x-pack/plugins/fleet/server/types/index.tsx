@@ -100,6 +100,7 @@ export type {
   InstallResultStatus,
   InstallLatestExecutedState,
   TemplateAgentPolicyInput,
+  NewPackagePolicyInput,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';
