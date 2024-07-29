@@ -13529,6 +13529,69 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.findLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "findLazy",
+            "description": [
+              "\nFind and load lazy data views by title."
+            ],
+            "signature": [
+              "(search: string, size?: number) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.findLazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "search",
+                "description": [
+                  "Search string"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.findLazy.$2",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [
+                  "Number of data views to return"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "DataViewLazy[]"
+            ]
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.getIdsWithTitle",
             "type": "Function",
             "tags": [],
@@ -20875,6 +20938,69 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.findLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "findLazy",
+            "description": [
+              "\nFind and load lazy data views by title."
+            ],
+            "signature": [
+              "(search: string, size?: number) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.findLazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "search",
+                "description": [
+                  "Search string"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.findLazy.$2",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [
+                  "Number of data views to return"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "DataViewLazy[]"
+            ]
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.getIdsWithTitle",
             "type": "Function",
             "tags": [],
@@ -25007,7 +25133,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+          "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; findLazy: (search: string, size?: number) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          "[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",

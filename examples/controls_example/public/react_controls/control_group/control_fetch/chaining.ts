@@ -13,7 +13,15 @@ import {
   apiPublishesTimeslice,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, debounceTime, map, Observable, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  map,
+  Observable,
+  skipWhile,
+  switchMap,
+} from 'rxjs';
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;
@@ -24,10 +32,29 @@ export function chaining$(
   uuid: string,
   chainingSystem$: PublishingSubject<ControlGroupChainingSystem>,
   controlsInOrder$: PublishingSubject<Array<{ id: string; type: string }>>,
-  getControlApi: (uuid: string) => undefined | unknown
+  children$: PublishingSubject<{ [key: string]: unknown }>
 ) {
-  return combineLatest([chainingSystem$, controlsInOrder$]).pipe(
-    switchMap(([chainingSystem, controlsInOrder]) => {
+  return combineLatest([chainingSystem$, controlsInOrder$, children$]).pipe(
+    skipWhile(([chainingSystem, controlsInOrder, children]) => {
+      if (chainingSystem === 'HIERARCHICAL') {
+        for (let i = 0; i < controlsInOrder.length; i++) {
+          if (controlsInOrder[i].id === uuid) {
+            // all controls to the left are initialized
+            return false;
+          }
+
+          if (!children[controlsInOrder[i].id]) {
+            // a control to the left is not initialized
+            // block rxjs pipe flow until its initialized
+            return true;
+          }
+        }
+      }
+
+      // no chaining
+      return false;
+    }),
+    switchMap(([chainingSystem, controlsInOrder, children]) => {
       const observables: Array<Observable<unknown>> = [];
       if (chainingSystem === 'HIERARCHICAL') {
         for (let i = 0; i < controlsInOrder.length; i++) {
@@ -35,7 +62,7 @@ export function chaining$(
             break;
           }
 
-          const chainedControlApi = getControlApi(controlsInOrder[i].id);
+          const chainedControlApi = children[controlsInOrder[i].id];
 
           const chainedControl$ = combineLatest([
             apiPublishesFilters(chainedControlApi)

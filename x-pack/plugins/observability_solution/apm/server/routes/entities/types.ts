@@ -7,6 +7,10 @@
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { SignalTypes, EntityMetrics } from '../../../common/entities/types';
 
+export enum EntityType {
+  SERVICE = 'service',
+}
+
 export interface Entity {
   id: string;
   latestTimestamp: string;
