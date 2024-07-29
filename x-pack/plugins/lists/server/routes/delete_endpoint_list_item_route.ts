@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  DeleteEndpointListItemRequestQuery,
+  DeleteEndpointListItemResponse,
+} from '@kbn/securitysolution-endpoint-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  DeleteEndpointListItemRequestQueryDecoded,
-  deleteEndpointListItemRequestQuery,
-  deleteEndpointListItemResponse,
-} from '../../common/api';
 
 import {
-  buildRouteValidation,
   buildSiemResponse,
   getErrorMessageExceptionListItem,
   getExceptionListClient,
@@ -36,10 +34,7 @@ export const deleteEndpointListItemRoute = (router: ListsPluginRouter): void => 
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof deleteEndpointListItemRequestQuery,
-              DeleteEndpointListItemRequestQueryDecoded
-            >(deleteEndpointListItemRequestQuery),
+            query: buildRouteValidationWithZod(DeleteEndpointListItemRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -65,12 +60,7 @@ export const deleteEndpointListItemRoute = (router: ListsPluginRouter): void => 
                 statusCode: 404,
               });
             } else {
-              const [validated, errors] = validate(deleted, deleteEndpointListItemResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
+              return response.ok({ body: DeleteEndpointListItemResponse.parse(deleted) });
             }
           }
         } catch (err) {
