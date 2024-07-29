@@ -40,10 +40,10 @@ export function createAddPatternAnalysisEmbeddableAction(
           i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
             defaultMessage: 'Machine Learning and Analytics',
           }),
-        getIconType: () => 'machineLearningApp',
+        getIconType: () => 'logPatternAnalysis',
       },
     ],
-    getIconType: () => 'machineLearningApp',
+    getIconType: () => 'logPatternAnalysis',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddablePatternAnalysisDisplayName', {
         defaultMessage: 'Pattern analysis',
