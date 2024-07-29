@@ -22,7 +22,6 @@ import { apiPublishesSavedSearch, PublishesSavedSearch } from '../types';
 
 type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
-/** Async type guards aren't supported, so need to make this an async getter instead */
 export const compatibilityCheck = (
   api: EmbeddableApiContext['embeddable']
 ): api is ViewSavedSearchActionApi => {
