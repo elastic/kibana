@@ -10,9 +10,7 @@ type Dataset = 'wiz.cloud_configuration_finding' | 'cloud_security_posture.findi
 export const WIZ_DATASET = 'wiz.cloud_configuration_finding';
 export const CSP_DATASET = 'cloud_security_posture.findings';
 
-const datasetDisplayNames: { [key: Dataset]: string } = {
-  [WIZ_DATASET]: 'Wiz',
-  [CSP_DATASET]: 'Elastic CSP',
+export const getDatasetDisplayName = (dataset?: Dataset | string) => {
+  if (dataset === WIZ_DATASET) return 'Wiz';
+  if (dataset === CSP_DATASET) return 'Elastic CSP';
 };
-
-export const getDatasetDisplayName = (dataset: Dataset | srting) => datasetDisplayNames[dataset];
