@@ -141,7 +141,7 @@ export const SimulateWatchResultsFlyout = ({
         }
       ),
       dataType: 'string' as const,
-      render: (actionState: string, _item: typeof actionsTableData[number]) => (
+      render: (actionState: string, _item: (typeof actionsTableData)[number]) => (
         <ActionStateBadge state={actionState} />
       ),
     },

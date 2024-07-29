@@ -21,19 +21,23 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { FeedbackModal } from './feedback_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 import { Unauthorized } from './unauthorized_modal';
+import { useServiceEcoTour } from '../../../hooks/use_eco_tour';
 
 export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: string }) {
   const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
+  const { tourState, showModal } = useServiceEcoTour();
 
   const {
     services: { entityManager },
+    notifications,
   } = useKibana<ApmPluginStartDeps>();
 
   const {
@@ -55,6 +59,9 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
   const handleEnablement = async () => {
     if (isEntityManagerEnabled) {
       setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
+      if (tourState.isModalVisible === undefined) {
+        showModal();
+      }
       return;
     }
 
@@ -64,16 +71,29 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
       if (response.success) {
         setIsLoading(false);
         setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
-        refetch();
-      }
 
-      if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
-        setIsLoading(false);
-        setsIsUnauthorizedModalVisible(true);
+        if (tourState.isModalVisible === undefined) {
+          showModal();
+        }
+        refetch();
+      } else {
+        if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
+          setIsLoading(false);
+          setsIsUnauthorizedModalVisible(true);
+          return;
+        }
+
+        throw new Error(response.message);
       }
     } catch (error) {
       setIsLoading(false);
-      console.error(error);
+      const err = error as Error | IHttpFetchError<ResponseErrorBody>;
+      notifications.toasts.danger({
+        title: i18n.translate('xpack.apm.eemEnablement.errorTitle', {
+          defaultMessage: 'Error while enabling the new experience',
+        }),
+        body: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
+      });
     }
   };
 

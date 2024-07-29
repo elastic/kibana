@@ -20,8 +20,6 @@ describe('AlertsSettings', () => {
   it('updates the knowledgeBase settings when the alerts range slider is changed', () => {
     const setUpdatedKnowledgeBaseSettings = jest.fn();
     const knowledgeBase: KnowledgeBaseConfig = {
-      isEnabledRAGAlerts: true,
-      isEnabledKnowledgeBase: false,
       latestAlerts: DEFAULT_LATEST_ALERTS,
     };
 
@@ -36,8 +34,6 @@ describe('AlertsSettings', () => {
     fireEvent.change(rangeSlider, { target: { value: '10' } });
 
     expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
-      isEnabledRAGAlerts: true,
-      isEnabledKnowledgeBase: false,
       latestAlerts: 10,
     });
   });

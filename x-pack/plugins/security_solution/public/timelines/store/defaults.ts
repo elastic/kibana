@@ -56,7 +56,6 @@ export const timelineDefaults: SubsetTimelineModel &
     RowRendererId.threat_match,
     RowRendererId.zeek,
   ],
-  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   indexNames: [],

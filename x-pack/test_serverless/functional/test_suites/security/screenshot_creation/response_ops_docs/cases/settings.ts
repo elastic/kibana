@@ -17,7 +17,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const testSubjects = getService('testSubjects');
   const owner = SECURITY_SOLUTION_OWNER;
 
-  describe('security case settings', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/188997
+  describe.skip('security case settings', function () {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
     });
