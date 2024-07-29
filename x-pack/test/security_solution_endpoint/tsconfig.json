@@ -1,27 +1,36 @@
 {
-    "extends": "../../../tsconfig.base.json",
-    "compilerOptions": {
-        "outDir": "target/types",
-        "types": [
-            "node",
-            "@kbn/ambient-ftr-types"
-        ],
-        "allowJs": false
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "@kbn/ambient-ftr-types"
+    ],
+    "allowJs": false
+  },
+  "include": [
+    "**/*",
+    "../../../typings/**/*",
+    "../../../packages/kbn-test/types/ftr_globals/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    {
+      "path": "../tsconfig.json"
     },
-    "include": [
-        "**/*",
-        "../../../typings/**/*",
-        "../../../packages/kbn-test/types/ftr_globals/**/*"
-    ],
-    "exclude": [
-        "target/**/*"
-    ],
-    "kbn_references": [
-        {
-            "path": "../tsconfig.json"
-        },
-        {
-            "path": "../../test_serverless/tsconfig.json"
-        },
-    ]
+    {
+      "path": "../../test_serverless/tsconfig.json"
+    },
+    "@kbn/expect",
+    "@kbn/security-solution-plugin",
+    "@kbn/repo-info",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/fleet-plugin",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/test",
+    "@kbn/test-subj-selector",
+  ]
 }
