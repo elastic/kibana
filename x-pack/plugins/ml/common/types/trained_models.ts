@@ -176,6 +176,7 @@ export interface TrainedModelDeploymentStatsResponse {
     threads_per_allocation: number;
     number_of_allocations: number;
   }>;
+  reason?: string;
 }
 
 export interface AllocatedModel {

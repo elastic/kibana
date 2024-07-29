@@ -30,7 +30,7 @@ import type {
 } from '../table_list_view_table';
 import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
-import { TagFilterPanel } from './tag_filter_panel';
+import { TagFilterPanel, TagFilterContextProvider } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
@@ -188,32 +188,9 @@ export function Table<T extends UserContentCommonSchema>({
 
     return {
       type: 'custom_component',
-      component: () => {
-        return (
-          <TagFilterPanel
-            isPopoverOpen={isPopoverOpen}
-            isInUse={isInUse}
-            closePopover={closePopover}
-            options={options}
-            totalActiveFilters={totalActiveFilters}
-            onFilterButtonClick={onFilterButtonClick}
-            onSelectChange={onSelectChange}
-            clearTagSelection={clearTagSelection}
-          />
-        );
-      },
+      component: TagFilterPanel,
     };
-  }, [
-    isPopoverOpen,
-    isInUse,
-    isTaggingEnabled,
-    closePopover,
-    options,
-    totalActiveFilters,
-    onFilterButtonClick,
-    onSelectChange,
-    clearTagSelection,
-  ]);
+  }, [isTaggingEnabled]);
 
   const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     return createdByEnabled
@@ -295,22 +272,33 @@ export function Table<T extends UserContentCommonSchema>({
       selectedUsers={tableFilter.createdBy}
       showNoUserOption={showNoUserOption}
     >
-      <EuiInMemoryTable<T>
-        itemId="id"
-        items={visibleItems}
-        columns={tableColumns}
-        pagination={pagination}
-        loading={isFetchingItems}
-        message={noItemsMessage}
-        selection={selection}
-        search={search}
-        executeQueryOptions={{ enabled: false }}
-        sorting={sorting}
-        onChange={onTableChange}
-        data-test-subj="itemsInMemTable"
-        rowHeader="attributes.title"
-        tableCaption={tableCaption}
-      />
+      <TagFilterContextProvider
+        isPopoverOpen={isPopoverOpen}
+        isInUse={isInUse}
+        closePopover={closePopover}
+        onFilterButtonClick={onFilterButtonClick}
+        onSelectChange={onSelectChange}
+        options={options}
+        totalActiveFilters={totalActiveFilters}
+        clearTagSelection={clearTagSelection}
+      >
+        <EuiInMemoryTable<T>
+          itemId="id"
+          items={visibleItems}
+          columns={tableColumns}
+          pagination={pagination}
+          loading={isFetchingItems}
+          message={noItemsMessage}
+          selection={selection}
+          search={search}
+          executeQueryOptions={{ enabled: false }}
+          sorting={sorting}
+          onChange={onTableChange}
+          data-test-subj="itemsInMemTable"
+          rowHeader="attributes.title"
+          tableCaption={tableCaption}
+        />
+      </TagFilterContextProvider>
     </UserFilterContextProvider>
   );
 }

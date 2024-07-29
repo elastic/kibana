@@ -85,4 +85,4 @@ export const ML_PAGES = {
   AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: 'aiops/change_point_detection_index_select',
 } as const;
 
-export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];
+export type MlPages = (typeof ML_PAGES)[keyof typeof ML_PAGES];

@@ -248,7 +248,7 @@ function InternalAlertsPage() {
                 featureIds={observabilityAlertFeatureIds}
                 query={esQuery}
                 showAlertStatusWithFlapping
-                pageSize={ALERTS_PER_PAGE}
+                initialPageSize={ALERTS_PER_PAGE}
                 cellContext={{ observabilityRuleTypeRegistry }}
               />
             )}
