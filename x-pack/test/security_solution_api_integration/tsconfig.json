@@ -13,7 +13,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    { "path": "../../test_serverless/tsconfig.json" },
+    "@kbn/test-suites-serverless",
     { "path": "../../test_serverless/api_integration/**/*" },
     { "path": "../../test_serverless/shared/**/*" },
     { "path": "../../api_integration/services/**/*" },
@@ -47,5 +47,6 @@
     "@kbn/timelines-plugin",
     "@kbn/dev-cli-runner",
     "@kbn/security-plugin",
+    "@kbn/test-suites-src",
   ]
 }

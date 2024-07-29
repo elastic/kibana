@@ -265,6 +265,26 @@ describe('RenderEndpoint component tests', () => {
     });
   });
 
+  describe('with amazonbedrock service', () => {
+    const mockEndpoint = {
+      model_id: 'amazon-bedrock-1',
+      service: 'amazonbedrock',
+      service_settings: {
+        region: 'us-west-1',
+        provider: 'AMAZONTITAN',
+        model: 'model-bedrock-xyz',
+      },
+    } as any;
+
+    it('renders the component with endpoint details', () => {
+      render(<EndpointInfo endpoint={mockEndpoint} />);
+
+      expect(screen.getByText('amazon-bedrock-1')).toBeInTheDocument();
+      expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
+      expect(screen.getByText('region: us-west-1, provider: amazontitan')).toBeInTheDocument();
+    });
+  });
+
   describe('for MIT licensed models', () => {
     const mockEndpointWithMitLicensedModel = {
       model_id: 'model-123',
