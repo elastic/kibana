@@ -82,17 +82,23 @@ export const FieldSelector: FC<Props> = ({ fields, selectedField, setSelectedFie
         <>
           <EuiCallOut
             size="s"
-            title={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationTitle', {
-              defaultMessage: 'The selected data view does not contain any text fields.',
-            })}
+            title={i18n.translate(
+              'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title',
+              {
+                defaultMessage: 'The selected data view does not contain any text fields.',
+              }
+            )}
             color="warning"
             iconType="warning"
           >
             <p>
-              {i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationDescription', {
-                defaultMessage:
-                  'Pattern analysis detection can only be run on data views with a text field.',
-              })}
+              {i18n.translate(
+                'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
+                {
+                  defaultMessage:
+                    'Pattern analysis detection can only be run on data views with a text field.',
+                }
+              )}
             </p>
           </EuiCallOut>
           <EuiSpacer />
