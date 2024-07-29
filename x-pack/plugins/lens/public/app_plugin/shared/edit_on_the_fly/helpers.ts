@@ -22,7 +22,7 @@ import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
 export interface ESQLDataGridAttrs {
-  values: ESQLRow[];
+  rows: ESQLRow[];
   dataView: DataView;
   columns: DatatableColumn[];
 }
@@ -53,7 +53,7 @@ export const getGridAttrs = async (
   const columns = formatESQLColumns(results.response.columns);
 
   return {
-    values: results.response.values,
+    rows: results.response.values,
     dataView,
     columns,
   };
@@ -70,7 +70,7 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
 ) => {
   try {
-    const { dataView, columns, values } = await getGridAttrs(
+    const { dataView, columns, rows } = await getGridAttrs(
       query,
       adHocDataViews,
       deps,
@@ -78,7 +78,7 @@ export const getSuggestions = async (
     );
 
     setDataGridAttrs?.({
-      values,
+      rows,
       dataView,
       columns,
     });

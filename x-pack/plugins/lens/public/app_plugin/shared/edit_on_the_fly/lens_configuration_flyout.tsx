@@ -139,7 +139,7 @@ export function LensEditConfigurationFlyout({
     const abortController = new AbortController();
     const getESQLGridAttrs = async () => {
       if (!dataGridAttrs && isOfAggregateQueryType(query)) {
-        const { dataView, columns, values } = await getGridAttrs(
+        const { dataView, columns, rows } = await getGridAttrs(
           query,
           adHocDataViews,
           startDependencies,
@@ -147,7 +147,7 @@ export function LensEditConfigurationFlyout({
         );
 
         setDataGridAttrs({
-          values,
+          rows,
           dataView,
           columns,
         });
@@ -537,7 +537,7 @@ export function LensEditConfigurationFlyout({
             `}
                   >
                     <h5>
-                      {i18n.translate('xpack.lens.config.ESQLQueryResults', {
+                      {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
                         defaultMessage: 'ES|QL Query Results',
                       })}
                     </h5>
@@ -559,13 +559,13 @@ export function LensEditConfigurationFlyout({
                 }}
                 extraAction={
                   <EuiNotificationBadge size="m" color="subdued">
-                    {dataGridAttrs.values.length}
+                    {dataGridAttrs.rows.length}
                   </EuiNotificationBadge>
                 }
               >
                 <>
                   <ESQLDataGrid
-                    rows={dataGridAttrs?.values}
+                    rows={dataGridAttrs?.rows}
                     columns={dataGridAttrs?.columns}
                     dataView={dataGridAttrs?.dataView}
                     query={query}
