@@ -78,6 +78,8 @@
       "@kbn/apm-data-access-plugin/*": ["x-pack/plugins/observability_solution/apm_data_access/*"],
       "@kbn/apm-data-view": ["packages/kbn-apm-data-view"],
       "@kbn/apm-data-view/*": ["packages/kbn-apm-data-view/*"],
+      "@kbn/apm-ftr-e2e": ["x-pack/plugins/observability_solution/apm/ftr_e2e"],
+      "@kbn/apm-ftr-e2e/*": ["x-pack/plugins/observability_solution/apm/ftr_e2e/*"],
       "@kbn/apm-plugin": ["x-pack/plugins/observability_solution/apm"],
       "@kbn/apm-plugin/*": ["x-pack/plugins/observability_solution/apm/*"],
       "@kbn/apm-synthtrace": ["packages/kbn-apm-synthtrace"],
@@ -1238,6 +1240,8 @@
       "@kbn/observability-get-padded-alert-time-range-util/*": ["x-pack/packages/observability/get_padded_alert_time_range_util/*"],
       "@kbn/observability-logs-explorer-plugin": ["x-pack/plugins/observability_solution/observability_logs_explorer"],
       "@kbn/observability-logs-explorer-plugin/*": ["x-pack/plugins/observability_solution/observability_logs_explorer/*"],
+      "@kbn/observability-onboarding-e2e": ["x-pack/plugins/observability_solution/observability_onboarding/e2e"],
+      "@kbn/observability-onboarding-e2e/*": ["x-pack/plugins/observability_solution/observability_onboarding/e2e/*"],
       "@kbn/observability-onboarding-plugin": ["x-pack/plugins/observability_solution/observability_onboarding"],
       "@kbn/observability-onboarding-plugin/*": ["x-pack/plugins/observability_solution/observability_onboarding/*"],
       "@kbn/observability-plugin": ["x-pack/plugins/observability_solution/observability"],
@@ -1502,6 +1506,8 @@
       "@kbn/securitysolution-data-table/*": ["x-pack/packages/security-solution/data_table/*"],
       "@kbn/securitysolution-ecs": ["packages/kbn-securitysolution-ecs"],
       "@kbn/securitysolution-ecs/*": ["packages/kbn-securitysolution-ecs/*"],
+      "@kbn/securitysolution-endpoint-exceptions-common": ["packages/kbn-securitysolution-endpoint-exceptions-common"],
+      "@kbn/securitysolution-endpoint-exceptions-common/*": ["packages/kbn-securitysolution-endpoint-exceptions-common/*"],
       "@kbn/securitysolution-es-utils": ["packages/kbn-securitysolution-es-utils"],
       "@kbn/securitysolution-es-utils/*": ["packages/kbn-securitysolution-es-utils/*"],
       "@kbn/securitysolution-exception-list-components": ["packages/kbn-securitysolution-exception-list-components"],
@@ -1538,6 +1544,8 @@
       "@kbn/server-http-tools/*": ["packages/kbn-server-http-tools/*"],
       "@kbn/server-route-repository": ["packages/kbn-server-route-repository"],
       "@kbn/server-route-repository/*": ["packages/kbn-server-route-repository/*"],
+      "@kbn/server-route-repository-utils": ["packages/kbn-server-route-repository-utils"],
+      "@kbn/server-route-repository-utils/*": ["packages/kbn-server-route-repository-utils/*"],
       "@kbn/serverless": ["x-pack/plugins/serverless"],
       "@kbn/serverless/*": ["x-pack/plugins/serverless/*"],
       "@kbn/serverless-common-settings": ["packages/serverless/settings/common"],
@@ -1704,6 +1712,8 @@
       "@kbn/stdio-dev-helpers/*": ["packages/kbn-stdio-dev-helpers/*"],
       "@kbn/storybook": ["packages/kbn-storybook"],
       "@kbn/storybook/*": ["packages/kbn-storybook/*"],
+      "@kbn/synthetics-e2e": ["x-pack/plugins/observability_solution/synthetics/e2e"],
+      "@kbn/synthetics-e2e/*": ["x-pack/plugins/observability_solution/synthetics/e2e/*"],
       "@kbn/synthetics-plugin": ["x-pack/plugins/observability_solution/synthetics"],
       "@kbn/synthetics-plugin/*": ["x-pack/plugins/observability_solution/synthetics/*"],
       "@kbn/task-manager-fixture-plugin": ["x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture"],
@@ -1734,6 +1744,14 @@
       "@kbn/test-jest-helpers/*": ["packages/kbn-test-jest-helpers/*"],
       "@kbn/test-subj-selector": ["packages/kbn-test-subj-selector"],
       "@kbn/test-subj-selector/*": ["packages/kbn-test-subj-selector/*"],
+      "@kbn/test-suites-serverless": ["x-pack/test_serverless"],
+      "@kbn/test-suites-serverless/*": ["x-pack/test_serverless/*"],
+      "@kbn/test-suites-src": ["test"],
+      "@kbn/test-suites-src/*": ["test/*"],
+      "@kbn/test-suites-xpack": ["x-pack/test"],
+      "@kbn/test-suites-xpack/*": ["x-pack/test/*"],
+      "@kbn/test-suites-xpack-performance": ["x-pack/performance"],
+      "@kbn/test-suites-xpack-performance/*": ["x-pack/performance/*"],
       "@kbn/testing-embedded-lens-plugin": ["x-pack/examples/testing_embedded_lens"],
       "@kbn/testing-embedded-lens-plugin/*": ["x-pack/examples/testing_embedded_lens/*"],
       "@kbn/text-based-editor": ["packages/kbn-text-based-editor"],
@@ -1892,9 +1910,7 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ]
+      "@emotion/core": ["typings/@emotion"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
