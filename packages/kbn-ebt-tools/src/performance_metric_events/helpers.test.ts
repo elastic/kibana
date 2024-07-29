@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  createAnalytics,
-  type AnalyticsClient,
-  type AnalyticsClientInitContext,
-} from '@elastic/ebt/client';
+import { createAnalytics, type AnalyticsClient } from '@elastic/ebt/client';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';
 import { METRIC_EVENT_SCHEMA } from './schema';
@@ -24,7 +20,7 @@ describe('performance metric event helpers', () => {
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
         sendTo: 'staging',
         logger: loggerMock.create(),
-      } as AnalyticsClientInitContext);
+      });
     });
 
     test('registers the `performance_metric` eventType to the analytics client', () => {
@@ -45,7 +41,7 @@ describe('performance metric event helpers', () => {
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
         sendTo: 'staging',
         logger: loggerMock.create(),
-      } as AnalyticsClientInitContext);
+      });
       registerPerformanceMetricEventType(analyticsClient);
     });
 
