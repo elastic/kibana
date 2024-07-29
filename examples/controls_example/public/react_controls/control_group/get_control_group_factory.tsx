@@ -6,26 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  KeyboardSensor,
-  MeasuringStrategy,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  rectSortingStrategy,
-  SortableContext,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -39,20 +21,13 @@ import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
-  apiPublishesFilters,
-  apiPublishesTimeslice,
   PublishesDataViews,
-  PublishesFilters,
-  PublishesTimeslice,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-
-import { ControlRenderer } from '../control_renderer';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
@@ -63,7 +38,8 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { ControlClone } from '../components/control_clone';
+import { ControlGroup } from './components/control_group';
+import { initSelectionsManager } from './selections_manager';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -81,16 +57,18 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialChildControlState,
         defaultControlGrow,
         defaultControlWidth,
-        labelPosition,
+        labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
         ignoreParentSettings,
       } = initialState;
 
-      const controlsManager = initControlsManager(initialChildControlState);
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+      const controlsManager = initControlsManager(initialChildControlState);
+      const selectionsManager = initSelectionsManager({
+        ...controlsManager.api,
+        autoApplySelections$,
+      });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
@@ -103,7 +81,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         defaultControlWidth ?? DEFAULT_CONTROL_WIDTH
       );
       const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
-        labelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
+        initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
 
       /** TODO: Handle loading; loading should be true if any child is loading */
@@ -123,13 +101,14 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
+        ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
           controlFetch$(
             chaining$(
               controlUuid,
               chainingSystem$,
               controlsManager.controlsInOrder$,
-              controlsManager.getControlApi
+              controlsManager.api.children$
             ),
             controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
           ),
@@ -176,50 +155,12 @@ export const getControlGroupEmbeddableFactory = (services: {
         },
         grow,
         width,
-        filters$,
         dataViews,
         labelPosition: labelPosition$,
-        timeslice$,
-      });
-
-      /**
-       * Subscribe to all children's output filters, combine them, and output them
-       * TODO: If `autoApplySelections` is false, publish to "unpublishedFilters" instead
-       * and only output to filters$ when the apply button is clicked.
-       *       OR
-       *       Always publish to "unpublishedFilters" and publish them manually on click
-       *       (when `autoApplySelections` is false) or after a small debounce (when false)
-       *       See: https://github.com/elastic/kibana/pull/182842#discussion_r1624929511
-       * - Note: Unsaved changes of control group **should** take into consideration the
-       *         output filters,  but not the "unpublishedFilters"
-       */
-      const outputFiltersSubscription = combineCompatibleChildrenApis<PublishesFilters, Filter[]>(
-        api,
-        'filters$',
-        apiPublishesFilters,
-        []
-      ).subscribe((newFilters) => filters$.next(newFilters));
-
-      const childrenTimesliceSubscription = combineCompatibleChildrenApis<
-        PublishesTimeslice,
-        [number, number] | undefined
-      >(
-        api,
-        'timeslice$',
-        apiPublishesTimeslice,
-        undefined,
-        // flatten method
-        (values) => {
-          // control group should never allow multiple timeslider controls
-          // returns first timeslider control value
-          return values.length === 0 ? undefined : values[0];
-        }
-      ).subscribe((timeslice) => {
-        timeslice$.next(timeslice);
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
-      const childDataViewsSubscription = combineCompatibleChildrenApis<
+      const childrenDataViewsSubscription = combineCompatibleChildrenApis<
         PublishesDataViews,
         DataView[]
       >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
@@ -229,82 +170,26 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const [controlsInOrder, controlStyle] = useBatchedPublishingSubjects(
-            controlsManager.controlsInOrder$,
+          const [hasUnappliedSelections, labelPosition] = useBatchedPublishingSubjects(
+            selectionsManager.hasUnappliedSelections$,
             labelPosition$
-          );
-
-          /** Handle drag and drop */
-          const sensors = useSensors(
-            useSensor(PointerSensor),
-            useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-          );
-          const [draggingId, setDraggingId] = useState<string | null>(null);
-          const onDragEnd = useCallback(
-            ({ over, active }: DragEndEvent) => {
-              const oldIndex = active?.data.current?.sortable.index;
-              const newIndex = over?.data.current?.sortable.index;
-              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
-                controlsManager.controlsInOrder$.next(
-                  arrayMove([...controlsInOrder], oldIndex, newIndex)
-                );
-              }
-              (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
-              setDraggingId(null);
-            },
-            [controlsInOrder]
           );
 
           useEffect(() => {
             return () => {
-              outputFiltersSubscription.unsubscribe();
-              childDataViewsSubscription.unsubscribe();
-              childrenTimesliceSubscription.unsubscribe();
+              selectionsManager.cleanup();
+              childrenDataViewsSubscription.unsubscribe();
             };
           }, []);
 
           return (
-            <EuiPanel
-              borderRadius="m"
-              paddingSize="none"
-              color={draggingId ? 'success' : 'transparent'}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
-                <DndContext
-                  onDragStart={({ active }) => setDraggingId(`${active.id}`)}
-                  onDragEnd={onDragEnd}
-                  onDragCancel={() => setDraggingId(null)}
-                  sensors={sensors}
-                  measuring={{
-                    droppable: {
-                      strategy: MeasuringStrategy.BeforeDragging,
-                    },
-                  }}
-                >
-                  <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-                    {controlsInOrder.map(({ id, type }) => (
-                      <ControlRenderer
-                        key={id}
-                        uuid={id}
-                        type={type}
-                        getParentApi={() => api}
-                        onApiAvailable={(controlApi) => {
-                          controlsManager.setControlApi(id, controlApi);
-                        }}
-                      />
-                    ))}
-                  </SortableContext>
-                  <DragOverlay>
-                    {draggingId ? (
-                      <ControlClone
-                        controlStyle={controlStyle}
-                        controlApi={controlsManager.getControlApi(draggingId)}
-                      />
-                    ) : null}
-                  </DragOverlay>
-                </DndContext>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <ControlGroup
+              applySelections={selectionsManager.applySelections}
+              controlGroupApi={api}
+              controlsManager={controlsManager}
+              hasUnappliedSelections={hasUnappliedSelections}
+              labelPosition={labelPosition}
+            />
           );
         },
       };
