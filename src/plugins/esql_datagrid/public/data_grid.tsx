@@ -159,11 +159,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             <EuiLink
               href={discoverLink}
               target="_blank"
-              color="text"
+              color="primary"
               css={css`
                 display: flex;
                 align-items: center;
               `}
+              external={false}
             >
               <EuiIcon
                 type="discoverApp"
@@ -174,7 +175,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
               />
               <EuiText size="xs">
                 {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
-                  defaultMessage: 'Open in Discover.',
+                  defaultMessage: 'Open in Discover',
                 })}
               </EuiText>
             </EuiLink>

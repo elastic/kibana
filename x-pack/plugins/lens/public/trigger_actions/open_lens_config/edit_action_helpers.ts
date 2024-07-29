@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import './helpers.scss';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -72,6 +74,10 @@ const openInlineLensConfigEditor = (
         overlayRef.close();
       },
       outsideClickCloses: true,
+      css: css`
+        max-width: calc(${euiThemeVars.euiSizeXXL} * 20);
+        min-width: calc(${euiThemeVars.euiSizeXXL} * 10);
+      `,
     }
   );
 

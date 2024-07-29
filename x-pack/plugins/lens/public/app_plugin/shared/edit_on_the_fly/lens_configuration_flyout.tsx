@@ -517,6 +517,7 @@ export function LensEditConfigurationFlyout({
                   flex: ${isESQLResultsAccordionOpen ? 1 : 'none'};
                 }
                 padding: 0 ${euiThemeVars.euiSize};
+                border-bottom: ${euiThemeVars.euiBorderThin};
               `}
             >
               <EuiAccordion
