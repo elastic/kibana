@@ -28,6 +28,8 @@ export interface TopNavMenuData {
   target?: string;
   href?: string;
   intl?: InjectedIntl;
+  appendElement?: React.ReactElement;
+  hideLabel?: boolean;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

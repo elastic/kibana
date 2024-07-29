@@ -8,7 +8,14 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiButton,
+  EuiHeaderLink,
+  EuiBetaBadge,
+  EuiButtonIcon,
+  EuiShowFor,
+} from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -57,6 +64,23 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
+  if (props.hideLabel && props.iconType) {
+    return (
+      <>
+        <EuiShowFor sizes={['m', 'l', 'xl']}>
+          <EuiToolTip content={getTooltip()}>
+            <EuiButtonIcon size="s" {...commonButtonProps} />
+          </EuiToolTip>
+        </EuiShowFor>
+        <EuiShowFor sizes={['s', 'xs']}>
+          <EuiHeaderLink size="s" color="primary" {...commonButtonProps} {...overrideProps}>
+            {getButtonContainer()}
+          </EuiHeaderLink>
+        </EuiShowFor>
+      </>
+    );
+  }
+
   const btn = props.emphasize ? (
     <EuiButton size="s" {...commonButtonProps} fill>
       {getButtonContainer()}
@@ -70,6 +94,14 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   const tooltip = getTooltip();
   if (tooltip) {
     return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
+  }
+  if (props.appendElement) {
+    return (
+      <>
+        {btn}
+        {props.appendElement}
+      </>
+    );
   }
   return btn;
 }

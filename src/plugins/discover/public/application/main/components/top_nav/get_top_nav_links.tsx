@@ -11,6 +11,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { omit } from 'lodash';
+import { copyToClipboard } from '@elastic/eui';
+import { useState } from 'react';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -23,7 +25,7 @@ import type { TopNavCustomization } from '../../../../customizations';
 /**
  * Helper function to build the top nav links
  */
-export const getTopNavLinks = ({
+export const useTopNavLinks = ({
   dataView,
   services,
   state,
@@ -40,6 +42,7 @@ export const getTopNavLinks = ({
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
+  const [linkCopied, setLinkCopied] = useState(false);
   const alerts = {
     id: 'alerts',
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
@@ -94,6 +97,62 @@ export const getTopNavLinks = ({
       });
     },
   };
+  const getShareLink = async () => {
+    const savedSearch = state.savedSearchState.getState();
+    const searchSourceSharingData = await getSharingData(
+      savedSearch.searchSource,
+      state.appState.getState(),
+      services,
+      isEsqlMode
+    );
+
+    const { locator } = services;
+    const appState = state.appState.getState();
+    const { timefilter } = services.data.query.timefilter;
+    const timeRange = timefilter.getTime();
+    const refreshInterval = timefilter.getRefreshInterval();
+    const filters = services.filterManager.getFilters();
+
+    // Share -> Get links -> Snapshot
+    const params: DiscoverAppLocatorParams = {
+      ...omit(appState, 'dataSource'),
+      ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
+      ...(dataView?.isPersisted()
+        ? { dataViewId: dataView?.id }
+        : { dataViewSpec: dataView?.toMinimalSpec() }),
+      filters,
+      timeRange,
+      refreshInterval,
+    };
+    const relativeUrl = locator.getRedirectUrl(params);
+
+    // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
+    // replaced when https://github.com/elastic/kibana/issues/153323 is implemented.
+    const link = document.createElement('a');
+    link.setAttribute('href', relativeUrl);
+    const shareableUrl = link.href;
+
+    // Share -> Get links -> Saved object
+    let shareableUrlForSavedObject = await locator.getUrl(
+      { savedSearchId: savedSearch.id },
+      { absolute: true }
+    );
+    // UrlPanelContent forces a '_g' parameter in the saved object URL:
+    // https://github.com/elastic/kibana/blob/a30508153c1467b1968fb94faf1debc5407f61ea/src/plugins/share/public/components/url_panel_content.tsx#L230
+    // Since our locator doesn't add the '_g' parameter if it's not needed, UrlPanelContent
+    // will interpret it as undefined and add '?_g=' to the URL, which is invalid in Discover,
+    // so instead we add an empty object for the '_g' parameter to the URL.
+    shareableUrlForSavedObject = setStateToKbnUrl('_g', {}, undefined, shareableUrlForSavedObject);
+
+    return {
+      shareableUrl,
+      shareableUrlForSavedObject,
+      locator,
+      savedSearch,
+      searchSourceSharingData,
+      params,
+    };
+  };
 
   const openSearch = {
     id: 'open',
@@ -122,57 +181,14 @@ export const getTopNavLinks = ({
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
-      const savedSearch = state.savedSearchState.getState();
-      const searchSourceSharingData = await getSharingData(
-        savedSearch.searchSource,
-        state.appState.getState(),
-        services,
-        isEsqlMode
-      );
-
-      const { locator, notifications } = services;
-      const appState = state.appState.getState();
-      const { timefilter } = services.data.query.timefilter;
-      const timeRange = timefilter.getTime();
-      const refreshInterval = timefilter.getRefreshInterval();
-      const filters = services.filterManager.getFilters();
-
-      // Share -> Get links -> Snapshot
-      const params: DiscoverAppLocatorParams = {
-        ...omit(appState, 'dataSource'),
-        ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
-        ...(dataView?.isPersisted()
-          ? { dataViewId: dataView?.id }
-          : { dataViewSpec: dataView?.toMinimalSpec() }),
-        filters,
-        timeRange,
-        refreshInterval,
-      };
-      const relativeUrl = locator.getRedirectUrl(params);
-
-      // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
-      // replaced when https://github.com/elastic/kibana/issues/153323 is implemented.
-      const link = document.createElement('a');
-      link.setAttribute('href', relativeUrl);
-      const shareableUrl = link.href;
-
-      // Share -> Get links -> Saved object
-      let shareableUrlForSavedObject = await locator.getUrl(
-        { savedSearchId: savedSearch.id },
-        { absolute: true }
-      );
-
-      // UrlPanelContent forces a '_g' parameter in the saved object URL:
-      // https://github.com/elastic/kibana/blob/a30508153c1467b1968fb94faf1debc5407f61ea/src/plugins/share/public/components/url_panel_content.tsx#L230
-      // Since our locator doesn't add the '_g' parameter if it's not needed, UrlPanelContent
-      // will interpret it as undefined and add '?_g=' to the URL, which is invalid in Discover,
-      // so instead we add an empty object for the '_g' parameter to the URL.
-      shareableUrlForSavedObject = setStateToKbnUrl(
-        '_g',
-        {},
-        undefined,
-        shareableUrlForSavedObject
-      );
+      const {
+        shareableUrl,
+        shareableUrlForSavedObject,
+        locator,
+        params,
+        savedSearch,
+        searchSourceSharingData,
+      } = await getShareLink();
 
       services.share.toggleShareContextMenu({
         anchorElement,
@@ -204,7 +220,87 @@ export const getTopNavLinks = ({
         onClose: () => {
           anchorElement?.focus();
         },
-        toasts: notifications.toasts,
+        toasts: services.notifications.toasts,
+      });
+    },
+  };
+
+  const shareSearchBtn = {
+    id: 'shareBtn',
+    label: i18n.translate('discover.localMenu.shareTitle', {
+      defaultMessage: 'Copy link',
+    }),
+    description: linkCopied
+      ? i18n.translate('discover.localMenu.shareSearchDescriptionCopied', {
+          defaultMessage: 'Permalink copied to clipboard',
+        })
+      : i18n.translate('discover.localMenu.shareSearchDescription', {
+          defaultMessage: 'Copy permalink to clipboard',
+        }),
+    tooltip: linkCopied
+      ? i18n.translate('discover.localMenu.shareSearchDescriptionCopied', {
+          defaultMessage: 'Permalink copied to clipboard',
+        })
+      : i18n.translate('discover.localMenu.shareSearchDescription', {
+          defaultMessage: 'Copy permalink to clipboard',
+        }),
+    iconType: linkCopied ? 'check' : 'link',
+    emphasize: true,
+    hideLabel: true,
+    testId: 'shareTopNavButtonSm',
+    run: async () => {
+      if (!services.share) return;
+      const audioContext = new AudioContext();
+      const gainNode = audioContext.createGain();
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 30;
+      oscillator.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.005);
+      const channels = 1;
+      const sampleRate = audioContext.sampleRate;
+      const frameCount = sampleRate * 3;
+      const arrayBuffer = audioContext.createBuffer(channels, frameCount, sampleRate);
+
+      // getChannelData allows us to access and edit the buffer data and change.
+      const bufferData = arrayBuffer.getChannelData(0);
+      for (let i = 0; i < frameCount; i++) {
+        // if the sample lies between 0 and 0.4 seconds, or 0.6 and 1 second, we want it to be on.
+        if (
+          (i / sampleRate > 0 && i / sampleRate < 0.4) ||
+          (i / sampleRate > 0.6 && i / sampleRate < 1.0)
+        ) {
+          bufferData[i] = 0.25;
+        }
+      }
+
+      const ringerLFOBuffer = arrayBuffer;
+      const ringerLFOSource = audioContext.createBufferSource();
+      ringerLFOSource.buffer = ringerLFOBuffer;
+      ringerLFOSource.loop = true;
+      // connect the ringerLFOSource to the gain Node audio param
+      ringerLFOSource.connect(gainNode.gain);
+      ringerLFOSource.start(0);
+
+      getShareLink().then(async (res) => {
+        let link = '';
+        if (!services.share) return;
+        if (services.capabilities.discover.createShortUrl) {
+          const shortUrls = services.share.url.shortUrls.get(null);
+          const shortUrl = await shortUrls.createWithLocator({
+            locator: res.locator,
+            params: { url: res.shareableUrl },
+          });
+          link = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+          copyToClipboard(link);
+        } else {
+          copyToClipboard(res.shareableUrl);
+        }
+        setLinkCopied(true);
+        // play a click sound generated with web audio api
+
+        setTimeout(() => setLinkCopied(false), 2000);
       });
     },
   };
@@ -248,6 +344,12 @@ export const getTopNavLinks = ({
 
   if (!defaultMenu?.inspectItem?.disabled) {
     entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 500 });
+  }
+  console.log('test1234');
+
+  if (!defaultMenu?.shareItem?.disabled) {
+    console.log('test1234');
+    entries.push({ data: shareSearchBtn, order: defaultMenu?.shareItem?.order ?? 550 });
   }
 
   if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
