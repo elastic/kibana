@@ -45,7 +45,7 @@ describe('performance metric event helpers', () => {
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
         sendTo: 'staging',
         logger: loggerMock.create(),
-      });
+      } as AnalyticsClientInitContext);
       registerPerformanceMetricEventType(analyticsClient);
     });
 
