@@ -66,6 +66,7 @@ export const ControlRenderer = <
           return {
             ...apiRegistration,
             ...unsavedChanges.api,
+            snapshotRuntimeState: unsavedChanges.snapshotState,
             uuid,
             parentApi,
             type: factory.type,

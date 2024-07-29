@@ -43,6 +43,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { getControlGroupSerializedState, setControlGroupSerializedState, WEB_LOGS_DATA_VIEW_ID } from './serialized_control_group_state';
+import { clearControlGroupRuntimeState, getControlGroupRuntimeState, setControlGroupRuntimeState } from './runtime_control_group_state';
 import { ControlGroupApi } from '../../react_controls/control_group/types';
 import { openDataControlEditor } from '../../react_controls/data_controls/open_data_control_editor';
 
@@ -227,9 +228,12 @@ export const ReactControlExample = ({
     }
     const subscription = controlGroupApi.unsavedChanges.subscribe((nextUnsavedChanges) => {
       if (!nextUnsavedChanges) {
+        clearControlGroupRuntimeState();
         setUnsavedChanges(undefined);
         return;
       }
+
+      setControlGroupRuntimeState(nextUnsavedChanges);
 
       // JSON.stringify removes keys where value is `undefined`
       // switch `undefined` to `null` to see when value has been cleared
@@ -379,6 +383,7 @@ export const ReactControlExample = ({
         getParentApi={() => ({
           ...dashboardApi,
           getSerializedStateForChild: getControlGroupSerializedState,
+          getRuntimeStateForChild: getControlGroupRuntimeState,
         })}
         key={`control_group`}
       />
@@ -392,7 +397,7 @@ export const ReactControlExample = ({
               getSerializedStateForChild: () => ({
                 rawState: {},
                 references: [],
-              }),
+              })
             })}
             hidePanelChrome={false}
             onApiAvailable={(api) => {

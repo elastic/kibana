@@ -107,6 +107,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           ],
           labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
         },
+        controlsManager.snapshotControlsRuntimeState,
         parentApi
       );
 

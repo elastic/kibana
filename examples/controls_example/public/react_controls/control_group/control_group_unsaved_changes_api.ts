@@ -15,7 +15,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { combineLatest, map } from 'rxjs';
 import { ControlsInOrder } from './init_controls_manager';
-import { ControlGroupRuntimeState } from './types';
+import { ControlGroupRuntimeState, ControlPanelsState } from './types';
 
 type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
@@ -27,6 +27,7 @@ type ControlGroupComparatorState = Pick<
 export function initializeControlGroupUnsavedChanges(
   children$: PresentationContainer['children$'],
   comparators: StateComparators<ControlGroupComparatorState>,
+  snapshotControlsRuntimeState: () => ControlPanelsState,
   parentApi: unknown
 ) {
   const controlGroupUnsavedChanges = initializeUnsavedChanges<ControlGroupComparatorState>(
@@ -52,7 +53,7 @@ export function initializeControlGroupUnsavedChanges(
             ? { ...unsavedControlGroupState }
             : {};
           if (unsavedControlsState) {
-            unsavedChanges.controls = unsavedControlsState;
+            unsavedChanges.initialChildControlState = snapshotControlsRuntimeState();
           }
           return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
         })

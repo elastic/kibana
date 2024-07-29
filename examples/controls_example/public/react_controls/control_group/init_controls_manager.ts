@@ -18,6 +18,7 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../types';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -132,6 +133,20 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         panelsJSON: JSON.stringify(explicitInputPanels),
         references,
       };
+    },
+    snapshotControlsRuntimeState: () => {
+      const controlsRuntimeState: ControlPanelsState = {};
+      controlsInOrder$.getValue().forEach(({ id, type }, index) => {
+        const controlApi = getControlApi(id);
+        if (controlApi && apiHasSnapshottableState(controlApi)) {
+          controlsRuntimeState[id] = {
+            order: index,
+            type,
+            ...controlApi.snapshotRuntimeState(),
+          }
+        }
+      });
+      return controlsRuntimeState;
     },
     api: {
       getSerializedStateForChild: (childId: string) => {
