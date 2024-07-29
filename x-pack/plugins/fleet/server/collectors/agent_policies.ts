@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import _ from 'lodash';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   OUTPUT_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../common';
@@ -37,7 +37,7 @@ export const getAgentPoliciesUsage = async (
 
   const { saved_objects: agentPolicies, total: totalAgentPolicies } =
     await soClient.find<AgentPolicy>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
     });

@@ -12,7 +12,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
@@ -61,7 +61,7 @@ async function _deleteGhostPackagePolicies(
     return;
   }
 
-  const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
+  const objects = policyIds.map((id) => ({ id, type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
     if (so.error && so.error.statusCode === 404) {
       acc.set(so.id, false);
@@ -146,7 +146,7 @@ async function _deleteExistingData(
     existingPolicies = (
       await agentPolicyService.list(soClient, {
         perPage: SO_SEARCH_LIMIT,
-        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
+        kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
       })
     ).items;
   }

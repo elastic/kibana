@@ -15,7 +15,7 @@ import type {
 } from '../../types/rest_spec/uninstall_token';
 import { defaultFleetErrorHandler } from '../../errors';
 import type { GetUninstallTokenResponse } from '../../../common/types/rest_spec/uninstall_token';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   unknown,
@@ -40,7 +40,7 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
     const { items: managedPolicies } = await agentPolicyService.list(soClient, {
       fields: ['id'],
       perPage: SO_SEARCH_LIMIT,
-      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+      kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
     });
 
     const managedPolicyIds = managedPolicies.map((policy) => policy.id);

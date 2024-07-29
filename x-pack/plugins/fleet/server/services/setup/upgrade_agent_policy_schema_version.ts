@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
 } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
@@ -18,7 +18,7 @@ const DEFAULT_BATCH_SIZE = 2;
 function getOutdatedAgentPoliciesBatch(soClient: SavedObjectsClientContract, batchSize: number) {
   return agentPolicyService.list(soClient, {
     perPage: batchSize,
-    kuery: `NOT ${AGENT_POLICY_SAVED_OBJECT_TYPE}.schema_version:${FLEET_AGENT_POLICIES_SCHEMA_VERSION}`,
+    kuery: `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.schema_version:${FLEET_AGENT_POLICIES_SCHEMA_VERSION}`,
     fields: ['id'], // we only need the ID of the agent policy
   });
 }

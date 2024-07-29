@@ -11,7 +11,7 @@ import { has, unset, some, mapKeys } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -112,7 +112,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const references = policiesList.map((id) => ({
           id,
           name: agentPoliciesIdMap[id]?.name,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         }));
 
         const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(

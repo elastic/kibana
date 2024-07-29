@@ -8,7 +8,7 @@
 import type { SavedObjectReference, SavedObjectsClient } from '@kbn/core/server';
 import { filter, map } from 'lodash';
 import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { packSavedObjectType } from '../../common/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
@@ -25,7 +25,7 @@ export const getPackagePolicyDeleteCallback =
           const foundPacks = await packsClient.find({
             type: packSavedObjectType,
             hasReference: {
-              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
               id: deletedOsqueryManagerPolicy.policy_id,
             },
             perPage: 1000,

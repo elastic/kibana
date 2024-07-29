@@ -11,6 +11,7 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -134,10 +135,7 @@ export const getSavedObjectTypes = (
       },
       mappings: {
         dynamic: false,
-        properties: {
-          // allowed_namespace_prefixes: { enabled: false },
-          // managed_by: { type: 'keyword', index: false },
-        },
+        properties: {},
       },
     },
     // Deprecated
@@ -156,6 +154,7 @@ export const getSavedObjectTypes = (
           prerelease_integrations_enabled: { type: 'boolean' },
           secret_storage_requirements_met: { type: 'boolean' },
           output_secret_storage_requirements_met: { type: 'boolean' },
+          use_space_awareness: { type: 'boolean', index: false },
         },
       },
       migrations: {
@@ -167,11 +166,11 @@ export const getSavedObjectTypes = (
         1: settingsV1,
       },
     },
-    [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
-      name: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]: {
+      name: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -247,6 +246,50 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+      },
+    },
+    [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
+      name: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+          schema_version: { type: 'version' },
+          description: { type: 'text' },
+          namespace: { type: 'keyword' },
+          is_managed: { type: 'boolean' },
+          is_default: { type: 'boolean' },
+          is_default_fleet_server: { type: 'boolean' },
+          status: { type: 'keyword' },
+          unenroll_timeout: { type: 'integer' },
+          inactivity_timeout: { type: 'integer' },
+          updated_at: { type: 'date' },
+          updated_by: { type: 'keyword' },
+          revision: { type: 'integer' },
+          monitoring_enabled: { type: 'keyword', index: false },
+          is_preconfigured: { type: 'keyword' },
+          data_output_id: { type: 'keyword' },
+          monitoring_output_id: { type: 'keyword' },
+          download_source_id: { type: 'keyword' },
+          fleet_server_host_id: { type: 'keyword' },
+          agent_features: {
+            properties: {
+              name: { type: 'keyword' },
+              enabled: { type: 'boolean' },
+            },
+          },
+          is_protected: { type: 'boolean' },
+          overrides: { type: 'flattened', index: false },
+          keep_monitoring_alive: { type: 'boolean' },
+          advanced_settings: { type: 'flattened', index: false },
+          supports_agentless: { type: 'boolean' },
+          global_data_tags: { type: 'flattened', index: false },
         },
       },
     },

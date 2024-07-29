@@ -11,13 +11,19 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
-import { API_VERSIONS } from '../../../common/constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  API_VERSIONS,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../common/constants';
 
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
+import { saveSettings } from '../../services/settings';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -98,6 +104,49 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
   }
 };
 
+export const postEnableSpaceAwarenessHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+    // TODO If settings SO already set => return
+
+    // Migration
+    // For every policy => create a new one (shortcut for POC do not write package policies)
+    const res = await soClient.find<any>({
+      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    // Should probably check results
+    await soClient.bulkCreate<any>(
+      res.saved_objects.map((so) => ({
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        id: so.id,
+        attributes: so.attributes,
+      })),
+      {
+        overwrite: true,
+      }
+    );
+
+    // Update Settings SO
+    await saveSettings(soClient, {
+      use_space_awareness: true,
+    });
+
+    return response.ok({
+      body: {},
+    });
+  } catch (e) {
+    const error = new GenerateServiceTokenError(e);
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
 export const generateServiceTokenHandler: RequestHandler<
   null,
   null,
@@ -143,6 +192,22 @@ const serviceTokenBodyValidation = (data: any, validationResult: RouteValidation
 };
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
+  router.versioned
+    .post({
+      path: '/internal/fleet/enable_space_awareness',
+      access: 'internal',
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+      },
+      postEnableSpaceAwarenessHandler
+    );
+
   router.versioned
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,

@@ -23,7 +23,7 @@ import type { AgentPolicySOAttributes } from '../types';
 import type { LicenseService } from '../../common/services/license';
 
 import type { AgentPolicy } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
@@ -72,7 +72,7 @@ export class PolicyWatcher {
   public async watch(license: ILicense) {
     const log = this.logger.get('endpoint', 'agentPolicyLicenseWatch');
 
-    const agentPolicyFetcher = agentPolicyService.fetchAllAgentPolicies(
+    const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(
       this.makeInternalSOClient(this.soStart),
       { fields: ['is_protected', 'id', 'revision'] } // Don't forget to extend this to include all fields that are used in the `isAgentPolicyValidForLicense` function
     );
@@ -99,7 +99,7 @@ export class PolicyWatcher {
         policiesToUpdate.map((policy) => {
           const { id, revision, ...policyContent } = policy;
           return {
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             id,
             attributes: {
               ...policyContent,

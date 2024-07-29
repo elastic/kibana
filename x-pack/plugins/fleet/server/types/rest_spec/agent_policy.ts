@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 
@@ -27,7 +27,7 @@ export const GetAgentPoliciesRequestSchema = {
         validate: (value: string) => {
           const validationObj = validateKuery(
             value,
-            [AGENT_POLICY_SAVED_OBJECT_TYPE],
+            [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
             AGENT_POLICY_MAPPINGS,
             true
           );

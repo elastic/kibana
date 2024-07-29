@@ -21,7 +21,7 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 
 import type { AgentPolicy } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 
 import { LicenseService } from '../../common/services';
 
@@ -52,7 +52,7 @@ describe('Agent Policy-Changing license watcher', () => {
 
   const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
     id,
-    type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
     attributes: {
       is_protected: isProtected,
     },

@@ -23,7 +23,7 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
 } from '../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
@@ -173,7 +173,7 @@ describe('Agent policy', () => {
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-agent-policy',
-        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         attributes: {},
         references: [],
       });
@@ -193,7 +193,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-agent-policy',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
 
@@ -386,7 +386,7 @@ describe('Agent policy', () => {
         id: 'test-agent-policy',
         attributes: {},
         references: [],
-        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       await agentPolicyService.get(soClient, 'test-agent-policy', false);
@@ -394,7 +394,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-agent-policy',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -409,13 +409,13 @@ describe('Agent policy', () => {
             id: 'test-agent-policy-1',
             attributes: {},
             references: [],
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-agent-policy-2',
             attributes: {},
             references: [],
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -425,13 +425,13 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
         id: 'test-agent-policy-1',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
         id: 'test-agent-policy-2',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -447,14 +447,14 @@ describe('Agent policy', () => {
             id: 'test-agent-policy-1',
             attributes: {},
             references: [],
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
           {
             id: 'test-agent-policy-2',
             attributes: {},
             references: [],
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
         ],
@@ -471,13 +471,13 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
         id: 'test-agent-policy-1',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
         id: 'test-agent-policy-2',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -551,7 +551,7 @@ describe('Agent policy', () => {
         expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
           action: 'delete',
           id: 'mocked',
-          savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         });
       });
 
@@ -651,7 +651,7 @@ describe('Agent policy', () => {
         expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
           action: 'delete',
           id: 'mocked',
-          savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         });
       });
 
@@ -789,7 +789,7 @@ describe('Agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<(typeof agentPolicyService)['update']>
+      ReturnType<typeof agentPolicyService['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -864,7 +864,7 @@ describe('Agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<(typeof agentPolicyService)['update']>
+      ReturnType<typeof agentPolicyService['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -998,7 +998,7 @@ describe('Agent policy', () => {
         attributes: {},
         references: [],
         id: 'test-agent-policy',
-        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       await agentPolicyService.update(soClient, esClient, 'test-agent-policy', {
@@ -1010,7 +1010,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
         id: 'test-agent-policy',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
 
@@ -1313,7 +1313,7 @@ describe('Agent policy', () => {
             attributes: {},
             references: [],
             id: 'test-agent-policy',
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -1350,7 +1350,7 @@ describe('Agent policy', () => {
 
       soClient.create.mockResolvedValueOnce({
         id: 'my-unique-id',
-        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         attributes: {},
         references: [],
       });
@@ -1362,7 +1362,7 @@ describe('Agent policy', () => {
       );
 
       expect(soClient.create).toHaveBeenCalledWith(
-        AGENT_POLICY_SAVED_OBJECT_TYPE,
+        LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         expect.anything(),
         expect.objectContaining({ id: 'my-unique-id' })
       );
@@ -1372,7 +1372,7 @@ describe('Agent policy', () => {
   describe('getInactivityTimeouts', () => {
     const createPolicySO = (id: string, inactivityTimeout: number) => ({
       id,
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       attributes: { inactivity_timeout: inactivityTimeout },
       references: [],
       score: 1,
@@ -1436,7 +1436,7 @@ describe('Agent policy', () => {
               return {
                 score: 1,
                 id: 'so-123',
-                type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+                type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
                 version: 'abc',
                 updated_at: soAttributes.updated_at,
                 attributes: soAttributes,
@@ -1485,7 +1485,7 @@ describe('Agent policy', () => {
 
         expect(soClientMock.find).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
             sortField: 'created_at',
             sortOrder: 'asc',
@@ -1505,7 +1505,7 @@ describe('Agent policy', () => {
 
         expect(soClientMock.find).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 13,
             sortField: 'created_at',
             sortOrder: 'asc',
@@ -1549,7 +1549,7 @@ describe('Agent policy', () => {
 
         expect(soClientMock.find).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
             sortField: 'created_at',
             sortOrder: 'asc',
@@ -1571,7 +1571,7 @@ describe('Agent policy', () => {
 
         expect(soClientMock.find).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 12,
             sortField: 'updated_by',
             sortOrder: 'desc',
@@ -1585,7 +1585,7 @@ describe('Agent policy', () => {
   describe('turnOffAgentTamperProtections', () => {
     const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
       id,
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       attributes: {
         is_protected: isProtected,
       },

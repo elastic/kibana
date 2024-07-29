@@ -25,7 +25,7 @@ import {
   sendGetActionStatus,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
 
@@ -166,7 +166,7 @@ export function useFetchAgentsData() {
               kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
             }),
             sendGetAgentPolicies({
-              kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+              kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
               perPage: SO_SEARCH_LIMIT,
               full: false,
             }),

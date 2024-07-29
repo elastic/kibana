@@ -45,7 +45,7 @@ import type {
 import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../constants';
 import { appContextService } from '../../app_context';
 import { agentPolicyService } from '../../agent_policy';
@@ -231,10 +231,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async searchPoliciesByName(policyNameSearchString: string): Promise<string[]> {
-    const policyNameFilter = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.name:${policyNameSearchString}`;
+    const policyNameFilter = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.name:${policyNameSearchString}`;
 
     const agentPoliciesSOs = await this.soClient.find<AgentPolicySOAttributes>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       filter: policyNameFilter,
     });
 
