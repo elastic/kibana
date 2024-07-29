@@ -318,21 +318,6 @@ export const metrics = {
       }
     ),
   }),
-  apm_responses_errors_concurrency: new ApmEventsRateClusterMetric({
-    field: 'beats_stats.metrics.apm-server.server.response.errors.concurrency',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.concurrencyTitle', {
-      defaultMessage: 'Concurrency',
-    }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.concurrencyLabel', {
-      defaultMessage: 'Concurrency',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.apm.responseErrors.concurrencyDescription',
-      {
-        defaultMessage: 'HTTP Requests rejected due to overall concurrency limit breach',
-      }
-    ),
-  }),
   apm_responses_errors_closed: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.closed',
     title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.closedTitle', {

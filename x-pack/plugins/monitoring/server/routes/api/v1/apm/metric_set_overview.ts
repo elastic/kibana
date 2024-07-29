@@ -47,7 +47,6 @@ export const metricSet: NamedMetricDescriptor[] = [
       'apm_responses_errors_queue',
       'apm_responses_errors_decode',
       'apm_responses_errors_forbidden',
-      'apm_responses_errors_concurrency',
       'apm_responses_errors_closed',
       'apm_responses_errors_internal',
     ],
