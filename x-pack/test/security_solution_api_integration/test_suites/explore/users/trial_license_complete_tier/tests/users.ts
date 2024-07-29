@@ -22,14 +22,17 @@ const IP = '0.0.0.0';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
-  const bsearch = getService('bsearch');
-  const supertest = getService('supertest');
+  const utils = getService('securitySolutionUtils');
 
   describe('Users', () => {
+    let supertest: TestAgent;
+    let bsearch: BsearchService;
     describe('With auditbeat', () => {
-      before(
-        async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users')
-      );
+      before(async () => {
+        supertest = await utils.createSuperTest();
+        bsearch = await utils.createBsearch();
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users');
+      });
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/users')
       );

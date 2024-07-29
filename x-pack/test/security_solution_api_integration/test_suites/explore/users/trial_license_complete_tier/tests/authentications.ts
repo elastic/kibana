@@ -27,11 +27,17 @@ const EDGE_LENGTH = 1;
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
-  const bsearch = getService('bsearch');
-  const supertest = getService('supertest');
+  const utils = getService('securitySolutionUtils');
 
   describe('authentications', () => {
-    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
+    let supertest: TestAgent;
+    let bsearch: BsearchService;
+
+    before(async () => {
+      supertest = await utils.createSuperTest();
+      bsearch = await utils.createBsearch();
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
 
     after(
       async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts')
