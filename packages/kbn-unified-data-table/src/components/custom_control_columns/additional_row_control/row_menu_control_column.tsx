@@ -81,20 +81,19 @@ export const RowMenuControlCell = ({
         <DataTableRowControl size={Size.normal}>
           <EuiToolTip content={buttonLabel} delay="long">
             <EuiButtonIcon
-              size="xs"
-              iconSize="s"
-              aria-label={buttonLabel}
               data-test-subj={`unifiedDataTable_${props.columnId}`}
-              onClick={() => {
-                setIsMoreActionsPopoverOpen(!isMoreActionsPopoverOpen);
-              }}
+              iconSize="s"
               iconType="boxesVertical"
               color="text"
+              aria-label={buttonLabel}
               css={css`
                 .euiDataGridRowCell__content--defaultHeight & {
                   margin-top: 2px; // to align with other controls
                 }
               `}
+              onClick={() => {
+                setIsMoreActionsPopoverOpen(!isMoreActionsPopoverOpen);
+              }}
             />
           </EuiToolTip>
         </DataTableRowControl>

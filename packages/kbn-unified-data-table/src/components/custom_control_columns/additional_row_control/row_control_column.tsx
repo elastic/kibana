@@ -36,7 +36,6 @@ export const RowControlCell = ({
               <EuiButtonIcon
                 data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
                 disabled={disabled}
-                size="xs"
                 iconSize="s"
                 iconType={iconType}
                 color={color ?? 'text'}
