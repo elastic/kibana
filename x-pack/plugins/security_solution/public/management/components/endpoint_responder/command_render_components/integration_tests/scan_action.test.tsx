@@ -225,7 +225,7 @@ describe('When using scan action from response actions console', () => {
 
   it.each([
     'ra_scan_error_not-found',
-    'ra_scan_error_scan_invalid-input',
+    'ra_scan_error_invalid-input',
     'ra_scan_error_scan-queue-quota',
   ])('should show detailed error if `scan` failure returned code: %s', async (outputCode) => {
     const mockData = apiMocks.responseProvider.actionDetails({
