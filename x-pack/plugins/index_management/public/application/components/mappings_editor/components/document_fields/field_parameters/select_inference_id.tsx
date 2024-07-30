@@ -133,11 +133,16 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
 
   const options: EuiSelectableOption[] = useMemo(() => {
+    const filteredEndpoints = endpoints?.filter(
+      (endpoint) =>
+        endpoint.task_type === 'text_embedding' || endpoint.task_type === 'sparse_embedding'
+    );
+
     const missingDefaultEndpoints = defaultEndpoints.filter(
-      (endpoint) => !(endpoints || []).find((e) => e.model_id === endpoint.model_id)
+      (endpoint) => !(filteredEndpoints || []).find((e) => e.model_id === endpoint.model_id)
     );
     const newOptions: EuiSelectableOption[] = [
-      ...(endpoints || []),
+      ...(filteredEndpoints || []),
       ...missingDefaultEndpoints,
     ].map((endpoint) => ({
       label: endpoint.model_id,
