@@ -120,7 +120,10 @@ const EntityDetailsSection: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const observedFields = useObservedUserItems(observedUser);
-  const { resolutions } = useEntityResolutions({ name: userName, type: 'user' });
+  const resolution = useEntityResolutions({
+    name: userName,
+    type: 'user',
+  });
 
   return (
     <>
@@ -142,7 +145,7 @@ const EntityDetailsSection: React.FC<Props> = ({
         data-test-subj="entity-details-accordion"
       >
         <EuiSpacer size="m" />
-        <RelatedEntitiesSummary resolutions={resolutions} onOpen={openDetailsPanel || noop} />
+        <RelatedEntitiesSummary resolution={resolution} onOpen={openDetailsPanel || noop} />
         <EuiSpacer size="m" />
         <ObservedEntity
           observedData={observedUser}

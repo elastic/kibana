@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiButton, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { EntityResolutionSuggestion } from '@kbn/elastic-assistant-common';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -15,11 +15,11 @@ import { ExpandablePanel } from '../../../flyout/shared/components/expandable_pa
 import type { UseEntityResolution } from '../../api/hooks/use_entity_resolutions';
 
 interface Props {
-  resolutions: UseEntityResolution['resolutions'];
+  resolution: UseEntityResolution;
   onOpen: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
-export const RelatedEntitiesSummary: React.FC<Props> = ({ resolutions, onOpen }) => {
+export const RelatedEntitiesSummary: React.FC<Props> = ({ resolution, onOpen }) => {
   const header = {
     title: <EuiText>{'Related Entities'}</EuiText>,
     link: {
@@ -30,48 +30,54 @@ export const RelatedEntitiesSummary: React.FC<Props> = ({ resolutions, onOpen })
 
   return (
     <ExpandablePanel header={header}>
-      <RelatedEntitiesSummaryContent resolutions={resolutions} onOpen={onOpen} />
+      <RelatedEntitiesSummaryContent resolution={resolution} onOpen={onOpen} />
     </ExpandablePanel>
   );
 };
 
-export const RelatedEntitiesSummaryContent: React.FC<Props> = ({ resolutions, onOpen }) => {
-  if (resolutions.isLoading) {
+export const RelatedEntitiesSummaryContent: React.FC<Props> = ({ resolution, onOpen }) => {
+  if (resolution.verifications.isLoading) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
-  if (!resolutions.data) {
-    return <EuiText>{'No data found'}</EuiText>;
+  if (resolution.verifications.data && resolution.verifications.data.length > 0) {
+    return (
+      <EuiBasicTable
+        tableCaption="Verified as the same entity"
+        items={resolution.verifications.data}
+        rowHeader="firstName"
+        columns={entityColumns}
+      />
+    );
+  }
+
+  if (resolution.scanning) {
+    return <EuiLoadingSpinner size="xl" />;
+  }
+
+  if (!resolution.candidateData) {
+    return (
+      <EuiButton
+        onClick={() => {
+          resolution.setScanning(true);
+          onOpen(EntityDetailsLeftPanelTab.OBSERVED_DATA);
+        }}
+      >
+        {'Scan related entities'}
+      </EuiButton>
+    );
   }
 
   return (
-    <>
-      {resolutions.data && resolutions.data.candidates.length > 0 && (
-        <EuiText>{`Found ${resolutions.data?.candidates.length} candidates`}</EuiText>
-      )}
-      {resolutions.data.marked.same.length > 0 && (
-        <EuiBasicTable
-          tableCaption="Verified as the same entity"
-          items={resolutions.data.marked.same}
-          rowHeader="firstName"
-          columns={entityColumns}
-        />
-      )}
-    </>
+    <EuiText>{`Found ${resolution.resolutions.candidates.length} potential related entities`}</EuiText>
   );
 };
 
 const entityColumns: Array<EuiBasicTableColumn<EntityResolutionSuggestion>> = [
   {
-    field: 'entity.name',
+    field: 'related_entity.name',
     name: 'Entity',
 
     render: (name: string) => <EuiText>{name}</EuiText>,
   },
-  //   {
-  //     field: 'document',
-  //     name: 'Document',
-
-  //     render: (document: {}) => <EuiCodeBlock>{JSON.stringify(document)}</EuiCodeBlock>,
-  //   },
 ];

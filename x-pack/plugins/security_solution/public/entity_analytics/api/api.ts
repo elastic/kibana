@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { ENTITY_RESOLUTION } from '@kbn/elastic-assistant-plugin/common/constants';
 import type { EntityResolutionPostResponse, SearchEntity } from '@kbn/elastic-assistant-common';
+import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
 import type { EntityRelationRecord } from '../../../common/api/entity_analytics/entity_store/relations/common.gen';
 import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
@@ -46,7 +47,6 @@ import type { RiskEngineSettingsResponse } from '../../../common/api/entity_anal
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { ENTITY_STORE_GET_RELATIONS_URL } from '../../../common/entity_analytics/entity_store/constants';
-import { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
