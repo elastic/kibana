@@ -189,11 +189,11 @@ export const getDiscoverAppStateContainer = ({
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
-  const initialUrlState = cleanupUrlState(
-    stateStorage?.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
-    services.uiSettings
+  let initialState = getInitialState(
+    getCurrentUrlState(stateStorage, services),
+    savedSearchContainer.getState(),
+    services
   );
-  let initialState = getInitialState(initialUrlState, savedSearchContainer.getState(), services);
   let previousState = initialState;
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
 
@@ -258,9 +258,11 @@ export const getDiscoverAppStateContainer = ({
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
 
     if (!currentSavedSearch.id) {
+      const { columns, rowHeight } = getCurrentUrlState(stateStorage, services);
+
       internalStateContainer.transitions.setResetDefaultProfileState({
-        columns: initialUrlState.columns === undefined,
-        rowHeight: initialUrlState.rowHeight === undefined,
+        columns: columns === undefined,
+        rowHeight: rowHeight === undefined,
       });
     }
 
@@ -340,6 +342,13 @@ export const getDiscoverAppStateContainer = ({
     getAppStateFromSavedSearch,
   };
 };
+
+function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
+  return cleanupUrlState(
+    stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
+    services.uiSettings
+  );
+}
 
 export function getInitialState(
   initialUrlState: DiscoverAppState | undefined,
