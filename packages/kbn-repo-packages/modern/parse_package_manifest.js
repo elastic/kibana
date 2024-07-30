@@ -279,7 +279,12 @@ function validatePackageManifest(parsed, repoRoot, path) {
   };
 
   // return if this is one of the more basic types of package types
-  if (type === 'shared-server' || type === 'functional-tests' || type === 'test-helper') {
+  if (
+    type === 'shared-server' ||
+    type === 'functional-tests' ||
+    type === 'test-helper' ||
+    type === 'core'
+  ) {
     return {
       type,
       ...base,
