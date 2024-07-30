@@ -41,7 +41,7 @@ import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
-import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
+import { useInsightDataProviders } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
 import {
@@ -55,6 +55,7 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { filtersToInsightProviders } from './provider';
+import type { Providers } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
@@ -293,7 +294,7 @@ const InsightEditorComponent = ({
     sourcererScope: SourcererScopeName.default,
   });
 
-  const [providers, setProviders] = useState<Provider[][]>([[]]);
+  const [providers, setProviders] = useState<Providers>([[]]);
   const dateRangeChoices = useMemo(() => {
     const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
       DEFAULT_TIMEPICKER_QUICK_RANGES
@@ -394,9 +395,9 @@ const InsightEditorComponent = ({
     return (
       labelOrEmpty.trim() === '' ||
       flattenedProviders.length === 0 ||
-      flattenedProviders.some(
-        (provider) => !isProviderValid(provider, dataView?.getFieldByName(provider.field))
-      )
+      flattenedProviders.some((provider) => {
+        return provider && !isProviderValid(provider, dataView?.getFieldByName(provider.field));
+      })
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {

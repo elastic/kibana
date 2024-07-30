@@ -26,7 +26,7 @@ export interface Provider {
   valueType?: string;
 }
 export interface UseInsightDataProvidersProps {
-  providers: Provider[][];
+  providers: Array<Provider | Provider[]>;
   alertData?: TimelineEventsDetailsItem[] | null;
 }
 
@@ -71,61 +71,86 @@ const dataProviderStub: DataProvider = {
     operator: EXISTS_OPERATOR,
   },
 };
-const buildDataProviders = (
-  providers: Provider[][],
-  alertData?: TimelineEventsDetailsItem[] | null
-): DataProvider[] => {
+const buildDataProviders = ({
+  providers,
+  alertData,
+}: {
+  providers: Array<Provider | Provider[]>;
+  alertData?: TimelineEventsDetailsItem[] | null;
+}): DataProvider[] => {
   return providers.map((innerProvider) => {
-    return innerProvider.reduce((prev, next, index): DataProvider => {
-      const { field, value, excluded, queryType } = next;
+    if (Array.isArray(innerProvider)) {
+      return innerProvider.reduce((prev, next, index): DataProvider => {
+        const { field, value, excluded, queryType } = next;
+        const { result, matchedBrackets } = replaceParamsQuery(value, alertData);
+        const isTemplate = !alertData && matchedBrackets;
+        if (index === 0) {
+          return {
+            and: [],
+            enabled: true,
+            id: JSON.stringify(field + value),
+            name: field,
+            excluded,
+            kqlQuery: '',
+            type: isTemplate ? DataProviderType.template : DataProviderType.default,
+            queryMatch: {
+              field,
+              value: result,
+              operator: dataProviderQueryType(queryType),
+            },
+          };
+        } else {
+          const newProvider = {
+            enabled: true,
+            id: JSON.stringify(field + value),
+            name: field,
+            excluded,
+            kqlQuery: '',
+            type: isTemplate ? DataProviderType.template : DataProviderType.default,
+            queryMatch: {
+              field,
+              value: result,
+              operator: dataProviderQueryType(queryType),
+            },
+          };
+          prev.and.push(newProvider);
+        }
+        return prev;
+      }, dataProviderStub);
+    } else {
+      const { field, value, excluded, queryType } = innerProvider;
       const { result, matchedBrackets } = replaceParamsQuery(value, alertData);
       const isTemplate = !alertData && matchedBrackets;
-      if (index === 0) {
-        return {
-          and: [],
-          enabled: true,
-          id: JSON.stringify(field + value),
-          name: field,
-          excluded,
-          kqlQuery: '',
-          type: isTemplate ? DataProviderType.template : DataProviderType.default,
-          queryMatch: {
-            field,
-            value: result,
-            operator: dataProviderQueryType(queryType),
-          },
-        };
-      } else {
-        const newProvider = {
-          enabled: true,
-          id: JSON.stringify(field + value),
-          name: field,
-          excluded,
-          kqlQuery: '',
-          type: isTemplate ? DataProviderType.template : DataProviderType.default,
-          queryMatch: {
-            field,
-            value: result,
-            operator: dataProviderQueryType(queryType),
-          },
-        };
-        prev.and.push(newProvider);
-      }
-      return prev;
-    }, dataProviderStub);
+      return {
+        and: [],
+        enabled: true,
+        id: JSON.stringify(field + value),
+        name: field,
+        excluded,
+        kqlQuery: '',
+        type: isTemplate ? DataProviderType.template : DataProviderType.default,
+        queryMatch: {
+          field,
+          value: result,
+          operator: dataProviderQueryType(queryType),
+        },
+      };
+    }
   });
 };
 
-const buildPrimitiveFilter = (provider: Provider): Filter => {
+const buildPrimitiveFilter = (provider: Provider | null): Filter => {
   const baseFilter = {
     ...filterStub,
     meta: {
       ...filterStub.meta,
-      negate: provider.excluded,
-      type: provider.queryType,
+      negate: provider?.excluded ?? false,
+      type: provider?.queryType ?? 'exists',
     },
   };
-  if (provider.queryType === FILTERS.EXISTS) {
+  if (provider === null) {
+    return baseFilter;
+  } else if (provider.queryType === FILTERS.EXISTS) {
     return {
       ...baseFilter,
       meta: {
@@ -198,37 +223,88 @@ const buildPrimitiveFilter = (provider: Provider): Filter => {
   }
 };
 
-const buildFiltersFromInsightProviders = (
-  providers: Provider[][],
-  alertData?: TimelineEventsDetailsItem[] | null
-): Filter[] => {
+const buildFiltersFromInsightProviders = ({
+  providers,
+  alertData,
+  providersContainTopLevelNestedOr,
+}: {
+  providers: Array<Provider | Provider[] | null>;
+  alertData?: TimelineEventsDetailsItem[] | null;
+  providersContainTopLevelNestedOr: boolean;
+}): Filter[] => {
   const filters: Filter[] = [];
-  for (let index = 0; index < providers.length; index++) {
-    const provider = providers[index];
-    if (provider.length > 1) {
-      // Only support 1 level of nesting currently
-      const innerProviders = provider.map((innerProvider) => {
-        return buildPrimitiveFilter(innerProvider);
-      });
-      const combinedFilter = {
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        meta: {
-          type: FILTERS.COMBINED,
-          relation: BooleanRelation.AND,
-          params: innerProviders,
-          index: undefined,
-          disabled: false,
-          negate: false,
-        },
-      };
-      filters.push(combinedFilter);
-    } else {
-      const baseProvider = provider[0];
+  if (providersContainTopLevelNestedOr) {
+    for (let index = 0; index < providers.length; index++) {
+      const provider = providers[index];
+      if (Array.isArray(provider)) {
+        const remainingProviders = providers.slice(index + 1);
+        const nullTerminationIndex = remainingProviders.findIndex(
+          (innerProvider) => innerProvider === null
+        );
+        const orEnd =
+          nullTerminationIndex !== -1
+            ? nullTerminationIndex + index + 1
+            : remainingProviders.length + index + 1;
+        const oredProviders = providers.slice(index, orEnd);
+        const innerProviders = oredProviders.map((innerProvider) => {
+          return Array.isArray(innerProvider)
+            ? buildPrimitiveFilter(innerProvider[0])
+            : buildPrimitiveFilter(innerProvider);
+        });
 
-      const baseFilter = buildPrimitiveFilter(baseProvider);
-      filters.push(baseFilter);
+        const combinedFilter = {
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+          meta: {
+            type: FILTERS.COMBINED,
+            relation: BooleanRelation.OR,
+            params: innerProviders,
+            index: undefined,
+            disabled: false,
+            negate: false,
+          },
+        };
+        filters.push(combinedFilter);
+        index = orEnd;
+      } else {
+        const baseFilter = buildPrimitiveFilter(provider);
+        filters.push(baseFilter);
+      }
+    }
+  } else {
+    for (let index = 0; index < providers.length; index++) {
+      const provider = providers[index];
+      if (provider !== null) {
+        if (Array.isArray(provider)) {
+          if (provider.length > 1) {
+            const innerProviders = provider.map((innerProvider) => {
+              return buildPrimitiveFilter(innerProvider);
+            });
+            const combinedFilter = {
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              meta: {
+                type: FILTERS.COMBINED,
+                relation: BooleanRelation.AND,
+                params: innerProviders,
+                index: undefined,
+                disabled: false,
+                negate: false,
+              },
+            };
+            filters.push(combinedFilter);
+          } else {
+            const baseProvider = provider[0];
+            const baseFilter = buildPrimitiveFilter(baseProvider);
+            filters.push(baseFilter);
+          }
+        } else {
+          const baseFilter = buildPrimitiveFilter(provider);
+          filters.push(baseFilter);
+        }
+      }
     }
   }
   return filters;
@@ -240,22 +316,36 @@ export const useInsightDataProviders = ({
 }: UseInsightDataProvidersProps): UseInsightDataProvidersResult => {
   const providersContainRangeQuery = useMemo(() => {
     return providers.some((innerProvider) => {
-      return innerProvider.some((provider) => provider.queryType === 'range');
+      if (Array.isArray(innerProvider)) {
+        return innerProvider.some((provider) => provider.queryType === 'range');
+      } else {
+        return innerProvider?.queryType === 'range';
+      }
     });
   }, [providers]);
+  const providersContainTopLevelNestedOr = useMemo(() => {
+    return providers.some((innerProvider) => {
+      return !Array.isArray(innerProvider);
+    });
+  }, [providers]);
+  const dataProvidersUnsupported = providersContainRangeQuery || providersContainTopLevelNestedOr;
   const dataProviders: DataProvider[] = useMemo(() => {
-    if (providersContainRangeQuery) {
+    if (dataProvidersUnsupported) {
       return [];
     } else {
-      return buildDataProviders(providers, alertData);
+      return buildDataProviders({ providers, alertData });
     }
-  }, [alertData, providers, providersContainRangeQuery]);
+  }, [alertData, providers, dataProvidersUnsupported]);
   const filters = useMemo(() => {
-    if (!providersContainRangeQuery) {
+    if (!dataProvidersUnsupported) {
       return [];
     } else {
-      return buildFiltersFromInsightProviders(providers, alertData);
+      return buildFiltersFromInsightProviders({
+        providers,
+        alertData,
+        providersContainTopLevelNestedOr,
+      });
     }
-  }, [providersContainRangeQuery, providers, alertData]);
+  }, [dataProvidersUnsupported, providers, alertData, providersContainTopLevelNestedOr]);
   return { dataProviders, filters };
 };
