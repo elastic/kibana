@@ -28,7 +28,6 @@ import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
 import { responseStreamFactory } from './response_stream_factory';
-import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream_utils/constants';
 
 /**
  * The log rate analysis route handler sets up `responseStreamFactory`
@@ -135,8 +134,6 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 analysis.groupingHandler(significantCategories, significantTerms, overallTimeSeries)
             );
           }
-
-          stateHandler.loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
 
           responseStream.endWithUpdatedLoadingState();
         } catch (e) {

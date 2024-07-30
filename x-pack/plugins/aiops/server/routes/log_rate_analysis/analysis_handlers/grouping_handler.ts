@@ -30,7 +30,14 @@ import { fetchTerms2CategoriesCounts } from '@kbn/aiops-log-rate-analysis/querie
 import { getSignificantItemGroups } from '@kbn/aiops-log-rate-analysis/queries/get_significant_item_groups';
 import { fetchMiniHistogramsForSignificantGroups } from '@kbn/aiops-log-rate-analysis/queries/fetch_mini_histograms_for_significant_groups';
 
-import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../response_stream_utils/constants';
+import {
+  MAX_CONCURRENT_QUERIES,
+  LOADED_FIELD_CANDIDATES,
+  PROGRESS_STEP_P_VALUES,
+  PROGRESS_STEP_GROUPING,
+  PROGRESS_STEP_HISTOGRAMS,
+  PROGRESS_STEP_HISTOGRAMS_GROUPS,
+} from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const groupingHandlerFactory =
@@ -134,7 +141,12 @@ export const groupingHandlerFactory =
           responseStream.push(addSignificantItemsGroup(significantItemGroups));
         }
 
-        stateHandler.loaded(PROGRESS_STEP_GROUPING, false);
+        stateHandler.loaded(
+          LOADED_FIELD_CANDIDATES +
+            PROGRESS_STEP_P_VALUES +
+            PROGRESS_STEP_HISTOGRAMS +
+            PROGRESS_STEP_GROUPING
+        );
         pushHistogramDataLoadingState();
 
         if (stateHandler.shouldStop()) {
@@ -144,6 +156,10 @@ export const groupingHandlerFactory =
         }
 
         logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
+
+        const groupHistogramQueueChunks = chunk(significantItemGroups, QUEUE_CHUNKING_SIZE);
+        const loadingStepSize =
+          (1 / groupHistogramQueueChunks.length) * PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
         const groupHistogramQueue = queue(async function (payload: SignificantItemGroup[]) {
           if (stateHandler.shouldStop()) {
@@ -175,11 +191,13 @@ export const groupingHandlerFactory =
               return;
             }
 
+            stateHandler.loaded(loadingStepSize, false);
+            pushHistogramDataLoadingState();
             responseStream.push(addSignificantItemsGroupHistogram(histograms));
           }
         }, MAX_CONCURRENT_QUERIES);
 
-        await groupHistogramQueue.push(chunk(significantItemGroups, QUEUE_CHUNKING_SIZE));
+        await groupHistogramQueue.push(groupHistogramQueueChunks);
         await groupHistogramQueue.drain();
       }
     } catch (e) {

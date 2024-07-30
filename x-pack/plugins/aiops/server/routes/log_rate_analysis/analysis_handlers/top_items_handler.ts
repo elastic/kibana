@@ -201,9 +201,9 @@ export const topItemsHandlerFactory =
           responseStream.push(addSignificantItems(topCategoriesForField));
           fieldValuePairsCount += topCategoriesForField.length;
         }
-      }
 
-      stateHandler.loaded(queueItemLoadingStep, false);
+        stateHandler.loaded(queueItemLoadingStep, false);
+      }
     }, MAX_CONCURRENT_QUERIES);
 
     topTermsQueue.push(

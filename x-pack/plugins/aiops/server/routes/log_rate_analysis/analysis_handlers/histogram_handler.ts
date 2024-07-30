@@ -67,6 +67,13 @@ export const histogramHandlerFactory =
       overallTimeSeries !== undefined &&
       !requestBody.overrides?.regroupOnly
     ) {
+      const fieldValueHistogramQueueChunks = [
+        ...chunk(significantTerms, QUEUE_CHUNKING_SIZE),
+        ...chunk(significantCategories, QUEUE_CHUNKING_SIZE),
+      ];
+      const loadingStepSize =
+        (1 / fieldValueHistogramQueueChunks.length) * PROGRESS_STEP_HISTOGRAMS;
+
       const fieldValueHistogramQueue = queue(async function (payload: SignificantItem[]) {
         if (stateHandler.shouldStop()) {
           logDebugMessage('shouldStop abort fetching field/value histograms.');
@@ -95,16 +102,13 @@ export const histogramHandlerFactory =
             return;
           }
 
-          stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
+          stateHandler.loaded(loadingStepSize, false);
           pushHistogramDataLoadingState();
           responseStream.push(addSignificantItemsHistogram(histograms));
         }
       }, MAX_CONCURRENT_QUERIES);
 
-      await fieldValueHistogramQueue.push([
-        ...chunk(significantTerms, QUEUE_CHUNKING_SIZE),
-        ...chunk(significantCategories, QUEUE_CHUNKING_SIZE),
-      ]);
+      await fieldValueHistogramQueue.push(fieldValueHistogramQueueChunks);
       await fieldValueHistogramQueue.drain();
     }
   };
