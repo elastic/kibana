@@ -353,16 +353,15 @@ describe('Response actions history', () => {
     });
 
     it('should show multiple hostnames correctly', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
+      const data = await getActionListMock({
+        actionCount: 1,
         hosts: {
-          ...data.data[0].hosts,
           'agent-b': { name: 'Host-agent-b' },
           'agent-c': { name: '' },
           'agent-d': { name: 'Host-agent-d' },
         },
-      };
+        agentIds: ['agent-a', 'agent-b', 'agent-c', 'agent-d'],
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -376,14 +375,11 @@ describe('Response actions history', () => {
     });
 
     it('should show display host is unenrolled for a single agent action when metadata host name is empty', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
-        hosts: {
-          ...data.data[0].hosts,
-          'agent-a': { name: '' },
-        },
-      };
+      const data = await getActionListMock({
+        actionCount: 1,
+        agentIds: ['agent-a'],
+        hosts: { 'agent-a': { name: '' } },
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -397,16 +393,15 @@ describe('Response actions history', () => {
     });
 
     it('should show display host is unenrolled for a single agent action when metadata host names are empty', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
+      const data = await getActionListMock({
+        actionCount: 1,
+        agentIds: ['agent-a', 'agent-b', 'agent-c'],
         hosts: {
-          ...data.data[0].hosts,
           'agent-a': { name: '' },
           'agent-b': { name: '' },
           'agent-c': { name: '' },
         },
-      };
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
