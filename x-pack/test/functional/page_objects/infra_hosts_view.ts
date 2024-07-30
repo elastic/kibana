@@ -33,13 +33,21 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists('infra-beta-badge');
     },
 
+    // Onboarding
+    async onboardingPageExists() {
+      return testSubjects.exists('kbnNoDataPage');
+    },
+    async onboardingAddDataClick() {
+      return testSubjects.click('noDataDefaultFooterAction');
+    },
+
     // Inventory UI
     async clickTryHostViewLink() {
-      return await testSubjects.click('inventory-hostsView-link');
+      return testSubjects.click('inventory-hostsView-link');
     },
 
     async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-link-badge');
+      return testSubjects.click('inventory-hostsView-link-badge');
     },
 
     // Table

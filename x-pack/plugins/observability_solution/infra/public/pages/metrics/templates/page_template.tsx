@@ -5,60 +5,26 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
-import type { EuiCardProps } from '@elastic/eui';
-import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
-import { NoDataConfig } from '@kbn/shared-ux-page-no-data-config-types';
 import { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
-import {
-  NoRemoteCluster,
-  noMetricIndicesPromptDescription,
-  noMetricIndicesPromptTitle,
-} from '../../../components/empty_states';
+import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { useMetricsDataViewContext, useSourceContext } from '../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ErrorCallout } from '../hosts/components/error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { getNoDataConfigDetails } from './no_data_config';
-
-export const getNoDataConfig = ({
-  hasData,
-  loading,
-  defaultCardConfig,
-  defaultPageConfig,
-  noDataConfigOverride,
-  onboardingHref,
-}: {
-  hasData: boolean;
-  loading: boolean;
-  defaultCardConfig?: Pick<EuiCardProps, 'title' | 'description'>;
-  defaultPageConfig?: Pick<NoDataPageProps, 'pageTitle' | 'pageDescription' | 'docsLink'>;
-  noDataConfigOverride?: NoDataConfig;
-  onboardingHref?: string;
-}): NoDataConfig | undefined => {
-  if (hasData || loading) {
-    return;
-  }
-
-  return (
-    noDataConfigOverride &&
-    getNoDataConfigDetails({ card: defaultCardConfig, page: defaultPageConfig, onboardingHref })
-  );
-};
+import { type OnboardingFlow, getNoDataConfig } from './no_data_config';
 
 export const MetricsPageTemplate = ({
   'data-test-subj': _dataTestSubj,
   dataAvailabilityModules,
   onboardingFlow = 'infra',
-  noDataConfig: noDataConfigOverride,
   ...pageTemplateProps
-}: LazyObservabilityPageTemplateProps & {
+}: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
   dataAvailabilityModules?: string[];
-  onboardingFlow?: 'infra' | 'logs';
+  onboardingFlow?: OnboardingFlow;
 }) => {
   const {
     services: {
@@ -71,10 +37,7 @@ export const MetricsPageTemplate = ({
     },
   } = useKibanaContextForPlugin();
 
-  const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
-  const href = onboardingLocator?.getRedirectUrl({ category: onboardingFlow });
-
-  const { source, error: sourceError, loadSource, isLoading } = useSourceContext();
+  const { source, error: sourceError, loadSource, isLoading: isSourceLoading } = useSourceContext();
   const { error: dataViewLoadError, refetch: loadDataView } = useMetricsDataViewContext();
   const { remoteClustersExist } = source?.status ?? {};
 
@@ -91,15 +54,9 @@ export const MetricsPageTemplate = ({
   const noDataConfig = getNoDataConfig({
     hasData,
     loading: isPending(status),
-    defaultCardConfig: {
-      title: noMetricIndicesPromptTitle,
-      description: noMetricIndicesPromptDescription,
-    },
-    defaultPageConfig: {
-      docsLink: docLinks.links.observability.guide,
-    },
-    noDataConfigOverride,
-    onboardingHref: href,
+    onboardingFlow,
+    docsLink: docLinks.links.observability.guide,
+    locators: share.url.locators,
   });
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
@@ -137,7 +94,7 @@ export const MetricsPageTemplate = ({
     });
   }, [hasData, setScreenContext, source]);
 
-  if (!isLoading && !remoteClustersExist) {
+  if (!isSourceLoading && !remoteClustersExist) {
     return <NoRemoteCluster />;
   }
 

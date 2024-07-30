@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -15,7 +15,6 @@ import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { MetricsPageTemplate } from '../templates/page_template';
-import { getNoDataConfigDetails } from '../templates/no_data_config';
 import { hostsTitle } from '../../../translations';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostContainer } from './components/hosts_container';
@@ -36,38 +35,12 @@ export const HostsPage = () => {
     },
   ]);
 
-  const noDataConfig = useMemo(
-    () =>
-      getNoDataConfigDetails({
-        card: {
-          title: i18n.translate('xpack.infra.hostsViewPage.noData.card.cta', {
-            defaultMessage: 'Add data',
-          }),
-          description: i18n.translate('xpack.infra.hostsViewPage.noData.card.description', {
-            defaultMessage:
-              'Start collecting data for your hosts to understand metric trends, explore logs and deep insight into their performance',
-          }),
-        },
-        page: {
-          pageTitle: i18n.translate('xpack.infra.hostsViewPage.noData.page.title', {
-            defaultMessage: 'Detect and resolve problems with your hosts',
-          }),
-          pageDescription: i18n.translate('xpack.infra.hostsViewPage.noData.page.description', {
-            defaultMessage:
-              'Understand how your hosts are performing so you can take action before it becomes a problem.',
-          }),
-        },
-      }),
-    []
-  );
-
   return (
     <EuiErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
         <MetricsPageTemplate
           dataAvailabilityModules={[SYSTEM_INTEGRATION]}
-          noDataConfig={noDataConfig}
-          onboardingFlow="logs"
+          onboardingFlow="hosts"
           pageHeader={{
             alignItems: 'center',
             pageTitle: (
