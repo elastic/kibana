@@ -153,7 +153,7 @@ export const fetchLogRateAnalysis = async ({
     arguments: {
       ...indexInfoParams,
       textFieldCandidatesOverrides: ['message', 'error.message'],
-      includeFieldCandidates,
+      skipFieldCandidates: !includeFieldCandidates,
     },
   });
 
@@ -182,7 +182,7 @@ export const fetchLogRateAnalysis = async ({
     ...analysisWindowParameters,
   };
 
-  keywordFieldCandidates.push(...indexInfo.fieldCandidates);
+  keywordFieldCandidates.push(...indexInfo.keywordFieldCandidates);
   textFieldCandidates.push(...indexInfo.textFieldCandidates);
   const sampleProbability = getSampleProbability(
     indexInfo.deviationTotalDocCount + indexInfo.baselineTotalDocCount
