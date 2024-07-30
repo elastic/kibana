@@ -530,12 +530,6 @@ export const ModelsList: FC<Props> = ({
       try {
         setIsLoading(true);
         await trainedModelsApiService.installElasticTrainedModelConfig(modelId);
-        displaySuccessToast(
-          i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
-            defaultMessage: '"{modelId}" model download has been started successfully.',
-            values: { modelId },
-          })
-        );
         // Need to fetch model state updates
         await fetchModelsData();
       } catch (e) {
@@ -549,7 +543,7 @@ export const ModelsList: FC<Props> = ({
         setIsLoading(true);
       }
     },
-    [displayErrorToast, displaySuccessToast, fetchModelsData, trainedModelsApiService]
+    [displayErrorToast, fetchModelsData, trainedModelsApiService]
   );
 
   /**
