@@ -33,6 +33,8 @@ import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './help
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { isAgentInNamespace } from '../spaces/agent_namespaces';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
@@ -404,6 +406,10 @@ export async function getAgentById(
 
   if ('notFound' in agentHit) {
     throw new AgentNotFoundError(`Agent ${agentId} not found`);
+  }
+
+  if (!isAgentInNamespace(agentHit, getCurrentNamespace(soClient))) {
+    throw new AgentNotFoundError(`${agentHit.id} not found in namespace`);
   }
 
   return agentHit;
