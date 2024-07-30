@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, noop, omit, pick } from 'lodash';
+import { keyBy, omit, pick } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
@@ -186,9 +186,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                   });
 
                   setRange(nextDateRange);
-                }}
-                onQueryChange={({ dateRange }) => {
-                  noop();
                 }}
                 onFocus={() => {
                   setSearchBarFocused(true);

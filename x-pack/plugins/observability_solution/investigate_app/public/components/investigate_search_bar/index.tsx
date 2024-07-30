@@ -17,7 +17,6 @@ const parentClassName = css`
 interface Props {
   rangeFrom?: string;
   rangeTo?: string;
-  onQueryChange: (payload: { dateRange: TimeRange }) => void;
   onQuerySubmit: (payload: { dateRange: TimeRange }, isUpdate?: boolean) => void;
   onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
   onFocus?: () => void;
@@ -28,7 +27,6 @@ interface Props {
 export function InvestigateSearchBar({
   rangeFrom,
   rangeTo,
-  onQueryChange,
   onQuerySubmit,
   onRefresh,
   onFocus,
@@ -112,9 +110,6 @@ export function InvestigateSearchBar({
     >
       <unifiedSearch.ui.SearchBar
         appName="investigate"
-        onQueryChange={({ dateRange }) => {
-          onQueryChange({ dateRange });
-        }}
         onQuerySubmit={({ dateRange }) => {
           onQuerySubmit({ dateRange });
         }}
