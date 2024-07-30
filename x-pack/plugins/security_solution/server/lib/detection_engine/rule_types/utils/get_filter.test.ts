@@ -6,11 +6,16 @@
  */
 
 import { getFilter } from './get_filter';
+import type { GetFilterArgs } from './get_filter';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
+import { getDataTierFilter } from './get_data_tier_filter';
+
+jest.mock('./get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+const getDataTierFilterMock = getDataTierFilter as jest.Mock;
 
 describe('get_filter', () => {
   let servicesMock: RuleExecutorServicesMock;
@@ -31,6 +36,7 @@ describe('get_filter', () => {
         filters: [],
       },
     }));
+    getDataTierFilterMock.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -317,6 +323,144 @@ describe('get_filter', () => {
           },
         }
       `);
+    });
+
+    describe('data tiers filters', () => {
+      let defaultFilterProps: Omit<GetFilterArgs, 'type'>;
+
+      beforeEach(() => {
+        getDataTierFilterMock.mockResolvedValue([
+          {
+            meta: { negate: true },
+            query: {
+              terms: {
+                _tier: ['data_cold', 'data_frozen'],
+              },
+            },
+          },
+        ]);
+
+        defaultFilterProps = {
+          filters: [
+            {
+              query: {
+                match_phrase: {
+                  'event.module': 'system',
+                },
+              },
+            },
+          ],
+          language: 'kuery',
+          query: 'host.name: siem',
+          savedId: undefined,
+          services: servicesMock,
+          index: ['auditbeat-*'],
+          exceptionFilter: undefined,
+        };
+      });
+
+      it('adds data tier clause for query rule type', async () => {
+        const esFilter = await getFilter({
+          ...defaultFilterProps,
+          type: 'query',
+        });
+
+        expect(esFilter.bool).toHaveProperty('must_not', [
+          {
+            terms: {
+              _tier: ['data_cold', 'data_frozen'],
+            },
+          },
+        ]);
+      });
+
+      it('adds data tier clause for new terms rule type', async () => {
+        const esFilter = await getFilter({
+          ...defaultFilterProps,
+          type: 'new_terms',
+        });
+
+        expect(esFilter.bool).toHaveProperty('must_not', [
+          {
+            terms: {
+              _tier: ['data_cold', 'data_frozen'],
+            },
+          },
+        ]);
+      });
+
+      it('adds data tier clause for indicator match rule type', async () => {
+        const esFilter = await getFilter({
+          ...defaultFilterProps,
+          type: 'threshold',
+        });
+
+        expect(esFilter.bool).toHaveProperty('must_not', [
+          {
+            terms: {
+              _tier: ['data_cold', 'data_frozen'],
+            },
+          },
+        ]);
+      });
+
+      it('adds data tier clause for saved_query rule type', async () => {
+        const esFilter = await getFilter({
+          ...defaultFilterProps,
+          type: 'saved_query',
+          savedId: 'mock-saved-id',
+        });
+
+        expect(esFilter.bool).toHaveProperty('must_not', [
+          {
+            terms: {
+              _tier: ['data_cold', 'data_frozen'],
+            },
+          },
+        ]);
+      });
+
+      it('does not adds data tier clause for threat_match rule type', async () => {
+        const esFilter = await getFilter({
+          ...defaultFilterProps,
+          type: 'threat_match',
+        });
+
+        expect(esFilter.bool).toHaveProperty('must_not', []);
+      });
+
+      it('should not call getDataTierFilterMock for eql rule type', async () => {
+        await expect(
+          getFilter({
+            ...defaultFilterProps,
+            type: 'eql',
+          })
+        ).rejects.toThrow();
+
+        expect(getDataTierFilterMock).not.toHaveBeenCalled();
+      });
+
+      it('should not call getDataTierFilterMock for esql rule type', async () => {
+        await expect(
+          getFilter({
+            ...defaultFilterProps,
+            type: 'esql',
+          })
+        ).rejects.toThrow();
+
+        expect(getDataTierFilterMock).not.toHaveBeenCalled();
+      });
+
+      it('should not call getDataTierFilterMock for machine_learning rule type', async () => {
+        await expect(
+          getFilter({
+            ...defaultFilterProps,
+            type: 'machine_learning',
+          })
+        ).rejects.toThrow();
+
+        expect(getDataTierFilterMock).not.toHaveBeenCalled();
+      });
     });
   });
 });

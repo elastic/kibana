@@ -14,7 +14,9 @@ import { ActionsRequestHandlerContext } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 export const getActionRoute = (
@@ -28,6 +30,8 @@ export const getActionRoute = (
       options: {
         access: 'public',
         summary: `Get connector information`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         params: paramSchema,

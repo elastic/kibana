@@ -21,14 +21,12 @@ import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
   RowRenderer,
-  ToggleDetailPanel,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../../common/store';
@@ -61,9 +59,6 @@ type CommonDataTableProps = {
   refetch: inputsModel.Refetch;
   onFieldEdited: () => void;
   totalCount: number;
-  onEventClosed: (args: ToggleDetailPanel) => void;
-  expandedDetail: ExpandedDetailTimeline;
-  showExpandedDetails: boolean;
   onChangePage: OnChangePage;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
@@ -102,9 +97,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     refetch,
     dataLoadingState,
     totalCount,
-    onEventClosed,
-    showExpandedDetails,
-    expandedDetail,
     onChangePage,
     updatedAt,
     isTextBasedQuery = false,

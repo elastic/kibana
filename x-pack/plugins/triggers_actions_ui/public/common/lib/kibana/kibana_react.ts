@@ -19,8 +19,9 @@ export type KibanaContext = KibanaReactContextValue<TriggersAndActionsUiServices
 export interface WithKibanaProps {
   kibana: KibanaContext;
 }
-
-const useTypedKibana = () => useKibana<TriggersAndActionsUiServices>();
+const useTypedKibana = () => {
+  return useKibana<TriggersAndActionsUiServices>();
+};
 
 export {
   KibanaContextProvider,

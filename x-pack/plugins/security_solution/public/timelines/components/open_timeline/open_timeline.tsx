@@ -257,8 +257,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                       <>
                         <UtilityBarText data-test-subj="selected-count">
                           {timelineType === TimelineType.template
-                            ? i18n.SELECTED_TEMPLATES(selectedItems.length)
-                            : i18n.SELECTED_TIMELINES(selectedItems.length)}
+                            ? i18n.SELECTED_TEMPLATES((selectedItems || []).length)
+                            : i18n.SELECTED_TIMELINES((selectedItems || []).length)}
                         </UtilityBarText>
                         <UtilityBarAction
                           dataTestSubj="batchActions"
