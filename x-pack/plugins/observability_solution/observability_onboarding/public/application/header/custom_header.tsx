@@ -39,14 +39,14 @@ export function CustomHeaderSection({
       paddingSize="l"
       restrictWidth
     >
-      <BackButton
-        customLabel={i18n.translate(
+      <BackButton>
+        {i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.button.returnButtonLabel',
           {
             defaultMessage: 'Return',
           }
         )}
-      />
+      </BackButton>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <div
