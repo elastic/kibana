@@ -138,7 +138,7 @@ WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not 
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.thehive`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
