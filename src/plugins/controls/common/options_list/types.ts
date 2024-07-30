@@ -10,6 +10,7 @@ import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/co
 import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 import type { DataControlInput } from '../types';
+import { OptionsListSelection } from './options_list_selections';
 import { OptionsListSearchTechnique } from './suggestions_searching';
 import type { OptionsListSortingType } from './suggestions_sorting';
 
@@ -18,7 +19,7 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
-  selectedOptions?: string[];
+  selectedOptions?: OptionsListSelection[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
@@ -30,7 +31,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   exclude?: boolean;
 }
 
-export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
+export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -38,7 +39,7 @@ export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>
 export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
   totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
-  invalidSelections?: string[];
+  invalidSelections?: OptionsListSelection[];
 }
 
 /**
@@ -61,12 +62,9 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
  */
 export type OptionsListRequest = Omit<
   OptionsListRequestBody,
-  'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
+  'filters' | 'fieldName' | 'fieldSpec'
 > & {
-  searchTechnique?: OptionsListSearchTechnique;
-  allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
-  runPastTimeout?: boolean;
   dataView: DataView;
   filters?: Filter[];
   field: FieldSpec;
@@ -76,16 +74,16 @@ export type OptionsListRequest = Omit<
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListRequestBody {
+export interface OptionsListRequestBody
+  extends Pick<
+    OptionsListEmbeddableInput,
+    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
+  > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
-  sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: Array<string | number>;
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;
-  fieldName: string;
   size: number;
 }
