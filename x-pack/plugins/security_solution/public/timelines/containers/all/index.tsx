@@ -53,7 +53,7 @@ export interface AllTimelinesVariables {
   search: string;
   sort: SortTimeline;
   status: TimelineStatus | null;
-  timelineType: TimelineType;
+  timelineType: TimelineType | null;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
