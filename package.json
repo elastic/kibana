@@ -753,7 +753,7 @@
     "json5": "^2.2.3",
     "jsondiffpatch": "0.4.1",
     "license-checker": "^25.0.1",
-    "listr2": "^8.2.1",
+    "listr2": "^8.2.3",
     "lmdb": "^2.9.2",
     "marge": "^1.0.1",
     "micromatch": "^4.0.7",
