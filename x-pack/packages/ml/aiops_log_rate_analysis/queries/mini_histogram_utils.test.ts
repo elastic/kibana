@@ -62,6 +62,7 @@ describe('getMiniHistogramDataFromAggResponse', () => {
       },
     };
 
+    // we'll only check the first element to the returned array to avoid a large snapshot
     expect(
       getMiniHistogramDataFromAggResponse(numericChartDataMock, aggResponseMock, 0)[0]
     ).toStrictEqual({
