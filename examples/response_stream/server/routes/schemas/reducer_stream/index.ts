@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { reducerStreamReducer } from './reducer';
+export { reducerStreamRequestBodySchema } from './request_body_schema';
+export type { ReducerStreamRequestBodySchema } from './request_body_schema';
