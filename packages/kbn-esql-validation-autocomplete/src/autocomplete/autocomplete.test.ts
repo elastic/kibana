@@ -1365,12 +1365,12 @@ describe('autocomplete', () => {
     );
 
     // SORT field order
-    testSuggestions('FROM index1 | SORT stringField a', ['asc', 'desc', ',', '|'], undefined, 32);
+    testSuggestions('FROM index1 | SORT stringField a', ['ASC', 'DESC', ',', '|'], undefined, 32);
 
     // SORT field order nulls
     testSuggestions(
       'FROM index1 | SORT stringField ASC n',
-      ['nulls first', 'nulls last', ',', '|'],
+      ['NULLS FIRST', 'NULLS LAST', ',', '|'],
       undefined,
       36
     );
