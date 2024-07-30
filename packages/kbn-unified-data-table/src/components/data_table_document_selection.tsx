@@ -169,6 +169,19 @@ export function DataTableDocumentToolbarBtn({
         )}
       </EuiCopy>,
       <EuiContextMenuItem
+        data-test-subj="dscCopySelectionToClipboard"
+        key="copySelectionToClipboard"
+        icon="copyClipboard"
+        onClick={() => {
+          //
+        }}
+      >
+        <FormattedMessage
+          id="unifiedDataTable.copySelectionToClipboard"
+          defaultMessage="Copy selection to clipboard"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
         data-test-subj="dscGridClearSelectedDocuments"
         key="clearSelection"
         icon="cross"
