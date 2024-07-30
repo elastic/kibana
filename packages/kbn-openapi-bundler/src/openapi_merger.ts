@@ -22,9 +22,6 @@ export interface MergerConfig {
   outputFilePath: string;
   options?: {
     mergedSpecInfo?: Partial<OpenAPIV3.InfoObject>;
-    conflictsResolution?: {
-      prependComponentsWith: 'title';
-    };
   };
 }
 
