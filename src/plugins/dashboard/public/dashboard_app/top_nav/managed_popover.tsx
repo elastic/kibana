@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiPopover, EuiPopoverFooter, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DashboardAPI } from '../..';
@@ -16,6 +25,8 @@ interface ManagedPopoverProps {
   isPopoverOpen: boolean;
   setIsPopoverOpen: (isPopoverOpen: boolean) => void;
   dashboard: DashboardAPI;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
 }
 
 export const ManagedPopover = ({
@@ -23,6 +34,8 @@ export const ManagedPopover = ({
   setIsPopoverOpen,
   isPopoverOpen,
   dashboard,
+  isLoading,
+  setIsLoading,
 }: ManagedPopoverProps) => {
   const button = (
     <EuiButton
@@ -43,21 +56,45 @@ export const ManagedPopover = ({
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={() => setIsPopoverOpen(false)}>
-      <EuiText size="s">{text}</EuiText>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      className="eui-hideFor--s eui-hideFor--xs"
+      data-test-subj="managedContentPopover"
+    >
+      <EuiFlexItem>
+        <EuiText size="s">{text}</EuiText>
+      </EuiFlexItem>
       <EuiPopoverFooter>
-        <EuiButtonEmpty
-          size="xs"
-          onClick={() => {
-            dashboard.duplicate();
-          }}
-        >
-          <EuiText size="s">
-            {i18n.translate('managedContentPopoverFooterText', {
-              defaultMessage: 'Duplicate this dashboard',
-            })}
-          </EuiText>
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButton
+            color="primary"
+            size="s"
+            disabled={isLoading}
+            fill
+            onClick={() => {
+              setIsLoading(true);
+              dashboard.duplicate();
+              setIsLoading(false);
+            }}
+            data-test-subj="managedContentPopoverDuplicateButton"
+          >
+            {isLoading && <EuiLoadingSpinner size="m" />}
+            <EuiText size="s">
+              {i18n.translate('managedContentPopoverFooterText', {
+                defaultMessage: 'Duplicate this dashboard',
+              })}
+            </EuiText>
+          </EuiButton>
+          <EuiButtonEmpty onClick={() => setIsPopoverOpen(false)}>
+            <EuiText size="s">
+              {i18n.translate('managedContentPopoverFooterCancelText', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiText>
+          </EuiButtonEmpty>
+        </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>
   );

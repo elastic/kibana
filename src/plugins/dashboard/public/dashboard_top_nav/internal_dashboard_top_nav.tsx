@@ -63,6 +63,7 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
@@ -321,6 +322,8 @@ export function InternalDashboardTopNav({
           isPopoverOpen={isPopoverOpen}
           setIsPopoverOpen={setIsPopoverOpen}
           dashboard={dashboard}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
         />
       );
       allBadges.push({
@@ -337,6 +340,8 @@ export function InternalDashboardTopNav({
     managed,
     isPopoverOpen,
     dashboard,
+    isLoading,
+    setIsLoading,
   ]);
 
   return (
