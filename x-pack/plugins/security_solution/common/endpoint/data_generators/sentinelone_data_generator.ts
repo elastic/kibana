@@ -51,12 +51,16 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
-    return super.generate({
-      EndpointActions: {
-        input_type: 'sentinel_one',
-      },
-      ...overrides,
-    }) as LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+    return super.generate(
+      merge(
+        {
+          EndpointActions: {
+            input_type: 'sentinel_one',
+          },
+        },
+        overrides
+      )
+    ) as LogsEndpointAction<TParameters, TOutputContent, TMeta>;
   }
 
   /** Generate a SentinelOne activity index ES doc */

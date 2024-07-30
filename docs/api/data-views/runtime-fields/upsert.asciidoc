@@ -4,7 +4,7 @@
 <titleabbrev>Upsert runtime field</titleabbrev>
 ++++
 
-experimental[] Create or update an existing runtime field
+Create or update an existing runtime field
 
 
 [[data-views-runtime-field-upsert-request]]

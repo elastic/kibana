@@ -5,12 +5,13 @@ info:
 paths:
   /internal/osquery/assets:
     get:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ReadAssetsStatus
       summary: Get assets
       parameters:
         - name: query
-          in: path
+          in: query
           required: true
           schema:
             $ref: './assets_status.schema.yaml#/components/schemas/AssetsRequestQuery'
@@ -25,12 +26,13 @@ paths:
                 # Define properties for the success response if needed
   /internal/osquery/assets/update:
     post:
+      x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: UpdateAssetsStatus
       summary: Update assets
       parameters:
         - name: query
-          in: path
+          in: query
           required: true
           schema:
             $ref: './assets_status.schema.yaml#/components/schemas/AssetsRequestQuery'

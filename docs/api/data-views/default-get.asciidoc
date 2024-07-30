@@ -4,7 +4,7 @@
 <titleabbrev>Get default data view</titleabbrev>
 ++++
 
-experimental[] Retrieve a default data view ID. Kibana UI uses the default data view unless user picks a different one.
+Retrieve a default data view ID. Kibana UI uses the default data view unless user picks a different one.
 
 [NOTE]
 ====

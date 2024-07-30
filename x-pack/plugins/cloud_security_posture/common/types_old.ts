@@ -146,8 +146,8 @@ export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types
-export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
-export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
+export type PostureInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
+export type CloudSecurityPolicyTemplate = (typeof SUPPORTED_POLICY_TEMPLATES)[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
 
 export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;

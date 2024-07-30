@@ -73,7 +73,7 @@ export const SUPPORTED_TRAINED_MODELS = {
   },
 } as const;
 export type SupportedTrainedModelNamesType =
-  typeof SUPPORTED_TRAINED_MODELS[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
+  (typeof SUPPORTED_TRAINED_MODELS)[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
 
 export interface TrainedModelVocabulary {
   vocabulary: string[];
@@ -1577,7 +1577,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       modelName: SupportedTrainedModelNamesType,
       config?: PutTrainedModelConfig
     ) {
-      const trainedModelConfig = config || this.getTrainedModelConfig(modelName);
+      const trainedModelConfig = config ?? this.getTrainedModelConfig(modelName);
       await this.createTrainedModel(modelId, trainedModelConfig);
       await this.createTrainedModelVocabularyES(modelId, this.getTrainedModelVocabulary(modelName));
       await this.uploadTrainedModelDefinitionES(

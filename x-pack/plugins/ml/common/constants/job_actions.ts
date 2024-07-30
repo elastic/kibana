@@ -11,7 +11,7 @@ export const JOB_ACTION = {
   REVERT: 'revert',
 } as const;
 
-export type JobAction = typeof JOB_ACTION[keyof typeof JOB_ACTION];
+export type JobAction = (typeof JOB_ACTION)[keyof typeof JOB_ACTION];
 
 export type JobActionState = 'deleting' | 'resetting' | 'reverting';
 

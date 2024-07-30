@@ -287,13 +287,12 @@ export function areFieldAndVariableTypesCompatible(
   return fieldType === variableType;
 }
 
-export function printFunctionSignature(arg: ESQLFunction, useCaps = true): string {
+export function printFunctionSignature(arg: ESQLFunction): string {
   const fnDef = getFunctionDefinition(arg.name);
   if (fnDef) {
     const signature = getFunctionSignatures(
       {
         ...fnDef,
-        name: useCaps ? fnDef.name.toUpperCase() : fnDef.name,
         signatures: [
           {
             ...fnDef?.signatures[0],
@@ -310,7 +309,7 @@ export function printFunctionSignature(arg: ESQLFunction, useCaps = true): strin
           },
         ],
       },
-      { withTypes: false }
+      { withTypes: false, capitalize: true }
     );
     return signature[0].declaration;
   }
@@ -555,12 +554,41 @@ export function sourceExists(index: string, sources: Set<string>) {
   return Boolean(fuzzySearch(index, sources.keys()));
 }
 
+/**
+ * Works backward from the cursor position to determine if
+ * the final character of the previous word matches the given character.
+ */
+function characterPrecedesCurrentWord(text: string, char: string) {
+  let inCurrentWord = true;
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (inCurrentWord && /\s/.test(text[i])) {
+      inCurrentWord = false;
+    }
+
+    if (!inCurrentWord && !/\s/.test(text[i])) {
+      return text[i] === char;
+    }
+  }
+}
+
+export function pipePrecedesCurrentWord(text: string) {
+  return characterPrecedesCurrentWord(text, '|');
+}
+
 export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
+/**
+ * Are we after a comma? i.e. STATS fieldA, <here>
+ */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',';
+  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
+}
+
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
 }
 
 export function shouldBeQuotedSource(text: string) {

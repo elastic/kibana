@@ -40,21 +40,24 @@ export const ControlsContent: React.FC<Props> = ({
   const [controlPanels, setControlPanels] = useControlPanels(dataView);
   const subscriptions = useRef<Subscription>(new Subscription());
 
-  const getInitialInput = useCallback(async () => {
-    const initialInput: Partial<ControlGroupInput> = {
-      id: dataView?.id ?? '',
-      viewMode: ViewMode.VIEW,
-      chainingSystem: 'HIERARCHICAL',
-      controlStyle: 'oneLine',
-      defaultControlWidth: 'small',
-      panels: controlPanels,
-      filters,
-      query,
-      timeRange,
-    };
+  const getInitialInput = useCallback(
+    (loadedDataView: DataView) => async () => {
+      const initialInput: Partial<ControlGroupInput> = {
+        id: loadedDataView.id,
+        viewMode: ViewMode.VIEW,
+        chainingSystem: 'HIERARCHICAL',
+        controlStyle: 'oneLine',
+        defaultControlWidth: 'small',
+        panels: controlPanels,
+        filters,
+        query,
+        timeRange,
+      };
 
-    return { initialInput };
-  }, [controlPanels, dataView?.id, filters, query, timeRange]);
+      return { initialInput };
+    },
+    [controlPanels, filters, query, timeRange]
+  );
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupAPI) => {
@@ -90,10 +93,14 @@ export const ControlsContent: React.FC<Props> = ({
     };
   }, []);
 
+  if (!dataView) {
+    return null;
+  }
+
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
-        getCreationOptions={getInitialInput}
+        getCreationOptions={getInitialInput(dataView)}
         ref={loadCompleteHandler}
         timeRange={timeRange}
         query={query}

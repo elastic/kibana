@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics';
 import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,
