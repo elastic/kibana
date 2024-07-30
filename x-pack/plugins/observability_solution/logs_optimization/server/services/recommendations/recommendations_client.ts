@@ -89,14 +89,23 @@ export class RecommendationsClient implements IRecommendationsClient {
     const newestIndex = await indexManager.getNewestDataStreamIndex();
 
     if (newestIndex && newestIndex.info.isManagedByFleet) {
-      // Do something for integration indices
+      // 1. Create/update the custom pipeline for the integration data stream
+      if (tasks.processors && newestIndex.info.template) {
+        const customPipelineDraft = {
+          processors: tasks.processors,
+        };
+        await indexManager.updateIndexPipeline(
+          `${newestIndex.info.template}@custom`,
+          customPipelineDraft
+        );
+      }
     } else if (newestIndex && newestIndex.info.isManaged) {
       // Do something for DSNS indices
       // 1. Get if an ad-hoc index template is in place or relies on default one
 
-      const customTemplateName = indexManager.getCustomIndexTemplateName(dataStream);
-      const defaultPipelineName = indexManager.getDefaultPipelineName(dataStream);
-      const dataStreamWildcard = indexManager.getDataStreamWildcard(dataStream);
+      const customTemplateName = indexManager.getCustomIndexTemplateName();
+      const defaultPipelineName = indexManager.getDefaultPipelineName();
+      const dataStreamWildcard = indexManager.getDataStreamWildcard();
 
       const customTemplate = await indexManager.getIndexTemplate(customTemplateName);
 

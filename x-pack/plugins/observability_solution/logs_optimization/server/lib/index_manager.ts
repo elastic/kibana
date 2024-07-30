@@ -71,11 +71,7 @@ export class IndexManager {
         name,
         ...templateChanges,
       });
-
-      // return indexTemplates.at(0)?.index_template ?? null;
     } catch (error) {
-      console.log(error);
-
       return null;
     }
   }
@@ -122,20 +118,20 @@ export class IndexManager {
     };
   }
 
-  getCustomIndexTemplateName(dataStreamName: string) {
-    const { type, dataset } = IndexManager.extractDataStreamFields(dataStreamName);
+  getCustomIndexTemplateName() {
+    const { type, dataset } = IndexManager.extractDataStreamFields(this.indexPattern);
 
     return `${type}-${dataset}@custom`;
   }
 
-  getDefaultPipelineName(dataStreamName: string) {
-    const { type, dataset } = IndexManager.extractDataStreamFields(dataStreamName);
+  getDefaultPipelineName() {
+    const { type, dataset } = IndexManager.extractDataStreamFields(this.indexPattern);
 
     return `${type}-${dataset}@default-pipeline`;
   }
 
-  getDataStreamWildcard(dataStreamName: string) {
-    const { type, dataset } = IndexManager.extractDataStreamFields(dataStreamName);
+  getDataStreamWildcard() {
+    const { type, dataset } = IndexManager.extractDataStreamFields(this.indexPattern);
 
     return `${type}-${dataset}-*`;
   }
