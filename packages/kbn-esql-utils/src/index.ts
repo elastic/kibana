@@ -22,6 +22,7 @@ export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
+  formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
 } from './utils/run_query';
