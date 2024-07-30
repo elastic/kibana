@@ -199,11 +199,13 @@ export class MonacoEditorActionsProvider {
     );
     // get variables values
     const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
-    return stringifiedRequests
-      .map((request) => replaceRequestVariables(request, variables))
-      // if any request doesnt have a method then we gonna treat it as a non-valid
-      // request
-      .filter((request) => request.method);
+    return (
+      stringifiedRequests
+        .map((request) => replaceRequestVariables(request, variables))
+        // if any request doesnt have a method then we gonna treat it as a non-valid
+        // request
+        .filter((request) => request.method)
+    );
   }
 
   public async getCurl(elasticsearchBaseUrl: string): Promise<string> {
