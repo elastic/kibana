@@ -56,144 +56,371 @@ components:
         fields:
           type: object
           description: |
-           Fields that can be customized during the upgrade workflow
-           as decided in: https://github.com/elastic/kibana/issues/186544
-           Fields listed here, which are not specified in the request body,
-           will default to a `pick_version` of `MERGED`.
+            Fields that can be customized during the upgrade workflow
+            as decided in: https://github.com/elastic/kibana/issues/186544
+            Fields listed here, which are not specified in the request body,
+            will default to a `pick_version` of `MERGED`.
           properties:
             name:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleName'
             tags:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
             description:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleDescription'
             severity:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
             severity_mapping:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SeverityMapping'
             risk_score:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RiskScore'
             risk_score_mapping:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RiskScoreMapping'
             references:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleReferenceArray'
             false_positives:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleFalsePositiveArray'
             threat:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/ThreatArray'
             note:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/InvestigationGuide'
             setup:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SetupGuide'
             related_integrations:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
             required_fields:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
             max_signals:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/MaxSignals'
             building_block_type:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/BuildingBlockType'
             from:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleIntervalFrom'
             interval:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleInterval'
             exceptions_list:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleExceptionList'
             rule_name_override:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleNameOverride'
             timestamp_override:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimestampOverride'
             timestamp_override_fallback_disabled:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimestampOverrideFallbackDisabled'
             timeline_id:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateId'
             timeline_title:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateTitle'
             index:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
             data_view_id:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/DataViewId'
             query:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleQuery'
             language:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/QueryLanguage'
             filters:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
             saved_id:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
             machine_learning_job_id:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/MachineLearningJobId'
             anomaly_threshold:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/AnomalyThreshold'
             threat_query:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatQuery'
             threat_mapping:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatMapping'
             threat_index:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndex'
             threat_filters:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatFilters'
             threat_indicator_path:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndicatorPath'
             threat_language:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage'
             new_terms_fields:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/NewTermsFields'
             history_window_start:
-              $ref: '#/components/schemas/FieldUpgradeRequest'
-
-    FieldUpgradeRequest:
-      type: object
-      required:
-        - pick_version
-      properties:
-        pick_version:
-          type: string
-          enum: [BASE, CURRENT, TARGET, MERGED, RESOLVED]
-        resolved_value:
-          oneOf:
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleName'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleDescription'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/Severity'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SeverityMapping'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RiskScore'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RiskScoreMapping'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleReferenceArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleFalsePositiveArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/ThreatArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/InvestigationGuide'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SetupGuide'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/MaxSignals'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/BuildingBlockType'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleIntervalFrom'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleInterval'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleExceptionList'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleNameOverride'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimestampOverride'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimestampOverrideFallbackDisabled'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateId'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateTitle'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/DataViewId'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleQuery'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/QueryLanguage'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
-            - $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/MachineLearningJobId'
-            - $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/AnomalyThreshold'
-            - $ref: '../../model/rule_schema/specific_attributes/ml_attributes.schema.yaml#/components/schemas/AnomalyThreshold'
-            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatQuery'
-            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatMapping'
-            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndex'
-            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatFilters'
-            - $ref: '../../model/rule_schema/specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndicatorPath'
-            - $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage' # threat_language
-            - $ref: '../../model/rule_schema/specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/NewTermsFields'
-            - $ref: '../../model/rule_schema/specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/HistoryWindowStart'
+              type: object
+              required:
+                - pick_version
+              properties:
+                pick_version:
+                  $ref: '#/components/schemas/FieldPickVersionValues'
+                resolved_value:
+                  $ref: '../../model/rule_schema/specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/HistoryWindowStart'
 
     UpgradeSpecificRulesRequest:
       type: object

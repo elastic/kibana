@@ -79,57 +79,6 @@ export const FieldPickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERG
 export type FieldPickVersionValuesEnum = typeof FieldPickVersionValues.enum;
 export const FieldPickVersionValuesEnum = FieldPickVersionValues.enum;
 
-export type FieldUpgradeRequest = z.infer<typeof FieldUpgradeRequest>;
-export const FieldUpgradeRequest = z.object({
-  pick_version: z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED', 'RESOLVED']),
-  resolved_value: z
-    .union([
-      RuleName,
-      RuleTagArray,
-      RuleDescription,
-      Severity,
-      SeverityMapping,
-      RiskScore,
-      RiskScoreMapping,
-      RuleReferenceArray,
-      RuleFalsePositiveArray,
-      ThreatArray,
-      InvestigationGuide,
-      SetupGuide,
-      RelatedIntegrationArray,
-      RequiredFieldArray,
-      RequiredFieldArray,
-      MaxSignals,
-      BuildingBlockType,
-      RuleIntervalFrom,
-      RuleInterval,
-      RuleExceptionList,
-      RuleNameOverride,
-      TimestampOverride,
-      TimestampOverrideFallbackDisabled,
-      TimelineTemplateId,
-      TimelineTemplateTitle,
-      IndexPatternArray,
-      DataViewId,
-      RuleQuery,
-      QueryLanguage,
-      RuleFilterArray,
-      SavedQueryId,
-      MachineLearningJobId,
-      AnomalyThreshold,
-      AnomalyThreshold,
-      ThreatQuery,
-      ThreatMapping,
-      ThreatIndex,
-      ThreatFilters,
-      ThreatIndicatorPath,
-      KqlQueryLanguage,
-      NewTermsFields,
-      HistoryWindowStart,
-    ])
-    .optional(),
-});
-
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
   rule_id: RuleSignatureId,
@@ -145,46 +94,246 @@ will default to a `pick_version` of `MERGED`.
       */
   fields: z
     .object({
-      name: FieldUpgradeRequest.optional(),
-      tags: FieldUpgradeRequest.optional(),
-      description: FieldUpgradeRequest.optional(),
-      severity: FieldUpgradeRequest.optional(),
-      severity_mapping: FieldUpgradeRequest.optional(),
-      risk_score: FieldUpgradeRequest.optional(),
-      risk_score_mapping: FieldUpgradeRequest.optional(),
-      references: FieldUpgradeRequest.optional(),
-      false_positives: FieldUpgradeRequest.optional(),
-      threat: FieldUpgradeRequest.optional(),
-      note: FieldUpgradeRequest.optional(),
-      setup: FieldUpgradeRequest.optional(),
-      related_integrations: FieldUpgradeRequest.optional(),
-      required_fields: FieldUpgradeRequest.optional(),
-      max_signals: FieldUpgradeRequest.optional(),
-      building_block_type: FieldUpgradeRequest.optional(),
-      from: FieldUpgradeRequest.optional(),
-      interval: FieldUpgradeRequest.optional(),
-      exceptions_list: FieldUpgradeRequest.optional(),
-      rule_name_override: FieldUpgradeRequest.optional(),
-      timestamp_override: FieldUpgradeRequest.optional(),
-      timestamp_override_fallback_disabled: FieldUpgradeRequest.optional(),
-      timeline_id: FieldUpgradeRequest.optional(),
-      timeline_title: FieldUpgradeRequest.optional(),
-      index: FieldUpgradeRequest.optional(),
-      data_view_id: FieldUpgradeRequest.optional(),
-      query: FieldUpgradeRequest.optional(),
-      language: FieldUpgradeRequest.optional(),
-      filters: FieldUpgradeRequest.optional(),
-      saved_id: FieldUpgradeRequest.optional(),
-      machine_learning_job_id: FieldUpgradeRequest.optional(),
-      anomaly_threshold: FieldUpgradeRequest.optional(),
-      threat_query: FieldUpgradeRequest.optional(),
-      threat_mapping: FieldUpgradeRequest.optional(),
-      threat_index: FieldUpgradeRequest.optional(),
-      threat_filters: FieldUpgradeRequest.optional(),
-      threat_indicator_path: FieldUpgradeRequest.optional(),
-      threat_language: FieldUpgradeRequest.optional(),
-      new_terms_fields: FieldUpgradeRequest.optional(),
-      history_window_start: FieldUpgradeRequest.optional(),
+      name: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleName.optional(),
+        })
+        .optional(),
+      tags: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleTagArray.optional(),
+        })
+        .optional(),
+      description: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleDescription.optional(),
+        })
+        .optional(),
+      severity: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: Severity.optional(),
+        })
+        .optional(),
+      severity_mapping: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: SeverityMapping.optional(),
+        })
+        .optional(),
+      risk_score: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RiskScore.optional(),
+        })
+        .optional(),
+      risk_score_mapping: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RiskScoreMapping.optional(),
+        })
+        .optional(),
+      references: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleReferenceArray.optional(),
+        })
+        .optional(),
+      false_positives: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleFalsePositiveArray.optional(),
+        })
+        .optional(),
+      threat: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: ThreatArray.optional(),
+        })
+        .optional(),
+      note: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: InvestigationGuide.optional(),
+        })
+        .optional(),
+      setup: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: SetupGuide.optional(),
+        })
+        .optional(),
+      related_integrations: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RelatedIntegrationArray.optional(),
+        })
+        .optional(),
+      required_fields: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RequiredFieldArray.optional(),
+        })
+        .optional(),
+      max_signals: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: MaxSignals.optional(),
+        })
+        .optional(),
+      building_block_type: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: BuildingBlockType.optional(),
+        })
+        .optional(),
+      from: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleIntervalFrom.optional(),
+        })
+        .optional(),
+      interval: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleInterval.optional(),
+        })
+        .optional(),
+      exceptions_list: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleExceptionList.optional(),
+        })
+        .optional(),
+      rule_name_override: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleNameOverride.optional(),
+        })
+        .optional(),
+      timestamp_override: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: TimestampOverride.optional(),
+        })
+        .optional(),
+      timestamp_override_fallback_disabled: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: TimestampOverrideFallbackDisabled.optional(),
+        })
+        .optional(),
+      timeline_id: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: TimelineTemplateId.optional(),
+        })
+        .optional(),
+      timeline_title: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: TimelineTemplateTitle.optional(),
+        })
+        .optional(),
+      index: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: IndexPatternArray.optional(),
+        })
+        .optional(),
+      data_view_id: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: DataViewId.optional(),
+        })
+        .optional(),
+      query: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleQuery.optional(),
+        })
+        .optional(),
+      language: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: QueryLanguage.optional(),
+        })
+        .optional(),
+      filters: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: RuleFilterArray.optional(),
+        })
+        .optional(),
+      saved_id: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: SavedQueryId.optional(),
+        })
+        .optional(),
+      machine_learning_job_id: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: MachineLearningJobId.optional(),
+        })
+        .optional(),
+      anomaly_threshold: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: AnomalyThreshold.optional(),
+        })
+        .optional(),
+      threat_query: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: ThreatQuery.optional(),
+        })
+        .optional(),
+      threat_mapping: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: ThreatMapping.optional(),
+        })
+        .optional(),
+      threat_index: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: ThreatIndex.optional(),
+        })
+        .optional(),
+      threat_filters: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: ThreatFilters.optional(),
+        })
+        .optional(),
+      threat_indicator_path: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: ThreatIndicatorPath.optional(),
+        })
+        .optional(),
+      threat_language: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: KqlQueryLanguage.optional(),
+        })
+        .optional(),
+      new_terms_fields: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: NewTermsFields.optional(),
+        })
+        .optional(),
+      history_window_start: z
+        .object({
+          pick_version: FieldPickVersionValues,
+          resolved_value: HistoryWindowStart.optional(),
+        })
+        .optional(),
     })
     .optional(),
 });
