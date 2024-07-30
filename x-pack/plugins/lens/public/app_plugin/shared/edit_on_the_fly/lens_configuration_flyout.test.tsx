@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { renderWithReduxStore } from '../../../mocks';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,6 +16,64 @@ import { createMockStartDependencies } from '../../../editor_frame_service/mocks
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
+
+jest.mock('@kbn/esql-utils', () => {
+  return {
+    getESQLResults: jest.fn().mockResolvedValue({
+      response: {
+        columns: [
+          {
+            name: '@timestamp',
+            id: '@timestamp',
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            name: 'bytes',
+            id: 'bytes',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'memory',
+            id: 'memory',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        values: [],
+      },
+    }),
+    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
+    getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
+    formatESQLColumns: jest.fn().mockReturnValue([
+      {
+        name: '@timestamp',
+        id: '@timestamp',
+        meta: {
+          type: 'date',
+        },
+      },
+      {
+        name: 'bytes',
+        id: 'bytes',
+        meta: {
+          type: 'number',
+        },
+      },
+      {
+        name: 'memory',
+        id: 'memory',
+        meta: {
+          type: 'number',
+        },
+      },
+    ]),
+  };
+});
 
 const lensAttributes = {
   title: 'test',
@@ -38,11 +96,27 @@ const lensAttributes = {
 } as unknown as TypedLensByValueInput['attributes'];
 const mockStartDependencies =
   createMockStartDependencies() as unknown as LensPluginStartDependencies;
-const data = mockDataPlugin();
-(data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
-  from: 'now-2m',
-  to: 'now',
-});
+
+const data = {
+  ...mockDataPlugin(),
+  query: {
+    ...mockDataPlugin().query,
+    timefilter: {
+      ...mockDataPlugin().query.timefilter,
+      timefilter: {
+        ...mockDataPlugin().query.timefilter.timefilter,
+        getTime: jest.fn(() => ({
+          from: 'now-2m',
+          to: 'now',
+        })),
+        getAbsoluteTime: jest.fn(() => ({
+          from: '2021-01-10T04:00:00.000Z',
+          to: '2021-01-10T04:00:00.000Z',
+        })),
+      },
+    },
+  },
+};
 const startDependencies = {
   ...mockStartDependencies,
   data,
@@ -196,6 +270,14 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
+
+  it('should display the ES|QL results table if canEditTextBasedQuery prop is true', async () => {
+    renderConfigFlyout({
+      canEditTextBasedQuery: true,
+    });
+    await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
+  });
+
   it('save button is disabled if no changes have been made', async () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();

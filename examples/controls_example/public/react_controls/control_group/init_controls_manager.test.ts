@@ -65,4 +65,44 @@ describe('PresentationContainer api', () => {
       'charlie',
     ]);
   });
+
+  describe('untilInitialized', () => {
+    test('should not resolve until all controls are initialized', async () => {
+      const controlsManager = initControlsManager({
+        alpha: { type: 'whatever', order: 0 },
+        bravo: { type: 'whatever', order: 1 },
+      });
+      let isDone = false;
+      controlsManager.api.untilInitialized().then(() => {
+        isDone = true;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(isDone).toBe(false);
+
+      controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(isDone).toBe(false);
+
+      controlsManager.setControlApi('bravo', {} as unknown as DefaultControlApi);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(isDone).toBe(true);
+    });
+
+    test('should resolve when all control already initialized ', async () => {
+      const controlsManager = initControlsManager({
+        alpha: { type: 'whatever', order: 0 },
+        bravo: { type: 'whatever', order: 1 },
+      });
+      controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
+      controlsManager.setControlApi('bravo', {} as unknown as DefaultControlApi);
+
+      let isDone = false;
+      controlsManager.api.untilInitialized().then(() => {
+        isDone = true;
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(isDone).toBe(true);
+    });
+  });
 });

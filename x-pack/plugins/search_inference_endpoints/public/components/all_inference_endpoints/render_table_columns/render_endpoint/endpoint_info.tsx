@@ -21,18 +21,18 @@ export interface EndpointInfoProps {
 
 export const EndpointInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup gutterSize="xs" direction="column">
+      <EuiFlexItem>
         <strong>{endpoint.model_id}</strong>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem css={{ textWrap: 'wrap' }}>
         <EndpointModelInfo endpoint={endpoint} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
+const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
   const serviceSettings = endpoint.service_settings;
   const modelId =
     'model_id' in serviceSettings
@@ -44,15 +44,10 @@ export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => 
   const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
 
   return (
-    <EuiFlexGroup gutterSize="s" wrap alignItems="center">
-      {modelId && (
-        <EuiFlexItem grow={false}>
-          <ModelBadge model={modelId} />
-        </EuiFlexItem>
-      )}
-
-      {isEligibleForMITBadge && (
-        <EuiFlexItem grow={false}>
+    <>
+      <EuiText color="subdued" size="xs">
+        {modelId && <ModelBadge model={modelId} />}
+        {isEligibleForMITBadge ? (
           <EuiBadge
             color="hollow"
             iconType="popout"
@@ -63,15 +58,10 @@ export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => 
           >
             {i18n.MIT_LICENSE}
           </EuiBadge>
-        </EuiFlexItem>
-      )}
-
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued" size="xs">
-          {endpointModelAtrributes(endpoint)}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        ) : null}{' '}
+        {endpointModelAtrributes(endpoint)}
+      </EuiText>
+    </>
   );
 };
 
@@ -94,6 +84,8 @@ function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
       return mistralAttributes(endpoint);
     case ServiceProviderKeys.googleaistudio:
       return googleAIStudioAttributes(endpoint);
+    case ServiceProviderKeys.amazonbedrock:
+      return amazonBedrockAttributes(endpoint);
     default:
       return null;
   }
@@ -139,7 +131,7 @@ function openAIAttributes(endpoint: InferenceAPIConfigResponse) {
 
 function azureOpenAIStudioAttributes(endpoint: InferenceAPIConfigResponse) {
   const serviceSettings = endpoint.service_settings;
-  const provider = 'provider' in serviceSettings ? serviceSettings.provider : undefined;
+  const provider = 'provider' in serviceSettings ? serviceSettings?.provider : undefined;
   const endpointType =
     'endpoint_type' in serviceSettings ? serviceSettings.endpoint_type : undefined;
   const target = 'target' in serviceSettings ? serviceSettings.target : undefined;
@@ -171,6 +163,18 @@ function mistralAttributes(endpoint: InferenceAPIConfigResponse) {
     maxInputTokens && `max_input_tokens: ${maxInputTokens}`,
     rateLimit && `rate_limit: ${rateLimit}`,
   ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+function amazonBedrockAttributes(endpoint: InferenceAPIConfigResponse) {
+  const serviceSettings = endpoint.service_settings;
+
+  const region = 'region' in serviceSettings ? serviceSettings.region : undefined;
+  const provider =
+    'provider' in serviceSettings ? serviceSettings.provider.toLocaleLowerCase() : undefined;
+
+  return [region && `region: ${region}`, provider && `provider: ${provider}`]
     .filter(Boolean)
     .join(', ');
 }

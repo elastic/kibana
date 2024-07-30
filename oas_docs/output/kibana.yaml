@@ -1401,43 +1401,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Machine_learning_APIs_mlSync4xxResponse'
-      security:
-        - Machine_learning_APIs_basicAuth: []
-        - Machine_learning_APIs_apiKeyAuth: []
-  /s/{spaceId}/api/ml/saved_objects/sync:
-    get:
-      summary: Sync saved objects
-      description: >
-        Synchronizes Kibana saved objects for machine learning jobs and trained
-        models. You must have `all` privileges for the **Machine Learning**
-        feature in the **Analytics** section of the Kibana feature privileges.
-        This API runs automatically when you start Kibana and periodically
-        thereafter.
-      operationId: mlSyncWithSpaceId
-      tags:
-        - ml
-      parameters:
-        - $ref: '#/components/parameters/Machine_learning_APIs_spaceParam'
-        - $ref: '#/components/parameters/Machine_learning_APIs_simulateParam'
-      responses:
-        '200':
-          description: Indicates a successful call
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Machine_learning_APIs_mlSync200Response'
-              examples:
-                syncExample:
-                  $ref: '#/components/examples/Machine_learning_APIs_mlSyncExample'
-        '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Machine_learning_APIs_mlSync4xxResponse'
-      security:
-        - Machine_learning_APIs_basicAuth: []
-        - Machine_learning_APIs_apiKeyAuth: []
   /api/encrypted_saved_objects/_rotate_key:
     post:
       summary: Rotate a key for encrypted saved objects
@@ -2486,9 +2449,6 @@ paths:
                 $ref: '#/components/schemas/SLOs_409_response'
       servers:
         - url: https://localhost:5601
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
     get:
       summary: Get a paginated list of SLOs
       operationId: findSlosOp
@@ -2581,9 +2541,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}:
     get:
       summary: Get an SLO
@@ -2634,9 +2591,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
     put:
       summary: Update an SLO
       operationId: updateSloOp
@@ -2686,9 +2640,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
     delete:
       summary: Delete an SLO
       operationId: deleteSloOp
@@ -2728,9 +2679,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
       summary: Enable an SLO
@@ -2771,9 +2719,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
       summary: Disable an SLO
@@ -2814,9 +2759,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/{sloId}/_reset:
     post:
       summary: Reset an SLO
@@ -2861,123 +2803,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
-  /s/{spaceId}/internal/observability/slos/_historical_summary:
-    post:
-      summary: Get a historical summary for SLOs
-      operationId: historicalSummaryOp
-      description: >
-        You must have the `read` privileges for the **SLOs** feature in the
-        **Observability** section of the Kibana feature privileges.
-      tags:
-        - slo
-      parameters:
-        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
-        - $ref: '#/components/parameters/SLOs_space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SLOs_historical_summary_request'
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_historical_summary_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_400_response'
-        '401':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_401_response'
-        '403':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_403_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
-  /s/{spaceId}/internal/observability/slos/_definitions:
-    get:
-      summary: Get the SLO definitions
-      operationId: getDefinitionsOp
-      description: >
-        You must have the `read` privileges for the **SLOs** feature in the
-        **Observability** section of the Kibana feature privileges.
-      tags:
-        - slo
-      parameters:
-        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
-        - $ref: '#/components/parameters/SLOs_space_id'
-        - name: includeOutdatedOnly
-          in: query
-          description: >-
-            Indicates if the API returns only outdated SLO or all SLO
-            definitions
-          schema:
-            type: boolean
-          example: true
-        - name: search
-          in: query
-          description: Filters the SLOs by name
-          schema:
-            type: string
-          example: my service availability
-        - name: page
-          in: query
-          description: The page to use for pagination, must be greater or equal than 1
-          schema:
-            type: number
-          example: 1
-        - name: perPage
-          in: query
-          description: Number of SLOs returned by page
-          schema:
-            type: integer
-            default: 100
-            maximum: 1000
-          example: 100
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_400_response'
-        '401':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_401_response'
-        '403':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_403_response'
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       summary: Batch delete rollup and summary data
@@ -3020,9 +2845,6 @@ paths:
                 $ref: '#/components/schemas/SLOs_403_response'
       servers:
         - url: https://localhost:5601
-      security:
-        - SLOs_basicAuth: []
-        - SLOs_apiKeyAuth: []
   /api/status:
     get:
       operationId: /api/status#0
@@ -3127,15 +2949,6 @@ components:
       schema:
         type: string
         example: hour_of_day
-    Machine_learning_APIs_spaceParam:
-      in: path
-      name: spaceId
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      required: true
-      schema:
-        type: string
     Machine_learning_APIs_simulateParam:
       in: query
       name: simulate
@@ -8844,55 +8657,6 @@ components:
           description: The internal SLO version
           type: number
           example: 2
-    SLOs_historical_summary_request:
-      title: Historical summary request
-      type: object
-      required:
-        - list
-      properties:
-        list:
-          description: The list of SLO identifiers to get the historical summary for
-          type: array
-          items:
-            type: string
-            example: 8853df00-ae2e-11ed-90af-09bb6422b258
-    SLOs_historical_summary_response:
-      title: Historical summary response
-      type: object
-      additionalProperties:
-        type: array
-        items:
-          type: object
-          properties:
-            date:
-              type: string
-              example: '2022-01-01T00:00:00.000Z'
-            status:
-              $ref: '#/components/schemas/SLOs_summary_status'
-            sliValue:
-              type: number
-              example: 0.9836
-            errorBudget:
-              $ref: '#/components/schemas/SLOs_error_budget'
-    SLOs_find_slo_definitions_response:
-      title: Find SLO definitions response
-      description: |
-        A paginated response of SLO definitions matching the query.
-      type: object
-      properties:
-        page:
-          type: number
-          example: 2
-        perPage:
-          type: number
-          example: 100
-        total:
-          type: number
-          example: 123
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/SLOs_slo_definition_response'
     SLOs_delete_slo_instances_request:
       title: Delete SLO instances request
       description: >
@@ -11340,25 +11104,10 @@ components:
           schema:
             $ref: '#/components/schemas/Connectors_action_response_properties'
   securitySchemes:
-    Machine_learning_APIs_basicAuth:
-      type: http
-      scheme: basic
-    Machine_learning_APIs_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: ApiKey
     Saved_objects_basicAuth:
       type: http
       scheme: basic
     Saved_objects_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-    SLOs_basicAuth:
-      type: http
-      scheme: basic
-    SLOs_apiKeyAuth:
       type: apiKey
       in: header
       name: Authorization
