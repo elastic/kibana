@@ -24,7 +24,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
         },
       });
 
-      expect(
+      await expect(
         bundleSpecs(
           {
             1: spec1,
@@ -53,7 +53,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
         },
       });
 
-      expect(
+      await expect(
         bundleSpecs(
           {
             1: spec1,

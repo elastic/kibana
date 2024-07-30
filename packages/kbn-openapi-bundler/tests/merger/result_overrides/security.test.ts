@@ -27,7 +27,7 @@ describe('OpenAPI Merger - with security requirements overrides', () => {
         },
       });
 
-      expect(
+      await expect(
         mergeSpecs(
           {
             1: spec1,
@@ -56,7 +56,7 @@ describe('OpenAPI Merger - with security requirements overrides', () => {
         },
       });
 
-      expect(
+      await expect(
         mergeSpecs(
           {
             1: spec1,
