@@ -6,7 +6,7 @@
  */
 
 import { repeat } from 'lodash';
-import { identity, Observable, OperatorFunction } from 'rxjs';
+import { Observable, OperatorFunction } from 'rxjs';
 import {
   BufferFlushEvent,
   StreamingChatResponseEventType,
@@ -22,10 +22,6 @@ import {
 export function flushBuffer<T extends StreamingChatResponseEventWithoutError | TokenCountEvent>(
   isCloud: boolean
 ): OperatorFunction<T, T | BufferFlushEvent> {
-  if (!isCloud) {
-    return identity;
-  }
-
   return (source: Observable<T>) =>
     new Observable<T | BufferFlushEvent>((subscriber) => {
       const cloudProxyBufferSize = 4096;
@@ -41,7 +37,15 @@ export function flushBuffer<T extends StreamingChatResponseEventWithoutError | T
         }
       };
 
-      const intervalId = setInterval(flushBufferIfNeeded, 250);
+      const keepAlive = () => {
+        subscriber.next({
+          data: '0',
+          type: StreamingChatResponseEventType.BufferFlush,
+        });
+      };
+
+      const flushIntervalId = isCloud ? setInterval(flushBufferIfNeeded, 250) : undefined;
+      const keepAliveIntervalId = setInterval(keepAlive, 30_000);
 
       source.subscribe({
         next: (value) => {
@@ -52,11 +56,13 @@ export function flushBuffer<T extends StreamingChatResponseEventWithoutError | T
           subscriber.next(value);
         },
         error: (error) => {
-          clearInterval(intervalId);
+          clearInterval(flushIntervalId);
+          clearInterval(keepAliveIntervalId);
           subscriber.error(error);
         },
         complete: () => {
-          clearInterval(intervalId);
+          clearInterval(flushIntervalId);
+          clearInterval(keepAliveIntervalId);
           subscriber.complete();
         },
       });

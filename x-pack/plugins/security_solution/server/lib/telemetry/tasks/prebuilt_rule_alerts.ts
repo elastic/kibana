@@ -67,6 +67,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         }
 
         for await (const alerts of receiver.fetchPrebuiltRuleAlertsBatch(
+          index,
           taskExecutionPeriod.last ?? 'now-1h',
           taskExecutionPeriod.current
         )) {

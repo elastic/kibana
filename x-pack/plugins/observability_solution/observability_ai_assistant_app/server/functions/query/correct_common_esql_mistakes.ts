@@ -191,7 +191,7 @@ function escapeExpressionsInSort(sortCommand: string) {
 
       if (sortOrder) sortOrder = ` ${sortOrder}`;
 
-      if (!column.match(/^`?[a-zA-Z0-9_\.@]+`?$/)) {
+      if (!column.match(/^`.*?`$/) && !column.match(/^[a-zA-Z0-9_\.@]+$/)) {
         column = `\`${column}\``;
       }
 
