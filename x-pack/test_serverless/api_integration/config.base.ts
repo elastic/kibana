@@ -33,6 +33,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs || []),
+          // configure security reponse header report-to settings to mimic MKI configuration
+          `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
+          `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
         ],
       },
       testFiles: options.testFiles,

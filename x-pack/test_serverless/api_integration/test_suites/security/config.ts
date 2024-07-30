@@ -25,8 +25,5 @@ export default createTestConfig({
     '--coreApp.allowDynamicConfigOverrides=true',
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
     `--xpack.securitySolutionServerless.usageReportingApiUrl=http://localhost:8081/api/v1/usage`,
-    // configure security reponse header report-to settings to mimic MKI configuration
-    `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
-    `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
   ],
 });
