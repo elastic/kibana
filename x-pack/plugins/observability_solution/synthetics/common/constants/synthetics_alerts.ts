@@ -34,14 +34,4 @@ export const ACTION_GROUP_DEFINITIONS: {
   TLS_CERTIFICATE,
 };
 
-export const SYNTHETICS_STATUS_RULE = 'xpack.synthetics.alerts.monitorStatus';
-export const SYNTHETICS_TLS_RULE = 'xpack.synthetics.alerts.tls';
-
-export const SYNTHETICS_ALERT_RULE_TYPES = {
-  MONITOR_STATUS: SYNTHETICS_STATUS_RULE,
-  TLS: SYNTHETICS_TLS_RULE,
-};
-
-export const SYNTHETICS_RULE_TYPES = [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE];
-
 export const SYNTHETICS_RULE_TYPES_ALERT_CONTEXT = 'observability.uptime';

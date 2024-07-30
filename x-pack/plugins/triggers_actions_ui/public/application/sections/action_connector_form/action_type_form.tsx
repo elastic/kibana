@@ -518,7 +518,7 @@ export const ActionTypeForm = ({
               <ActionAlertsFilterQuery
                 state={actionItem.alertsFilter?.query}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
-                ruleTypeIds={[ruleTypeId]}
+                ruleTypeIds={ruleTypeId ? [ruleTypeId] : []}
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
               />

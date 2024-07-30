@@ -13,13 +13,6 @@ import { SnapshotCustomMetricInput } from '../../http_api';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 
-export enum InfraRuleType {
-  MetricThreshold = 'metrics.alert.threshold',
-  InventoryThreshold = 'metrics.alert.inventory.threshold',
-}
-
-export const INFRA_RULE_TYPE_IDS = Object.values(InfraRuleType);
-
 export enum Aggregators {
   COUNT = 'count',
   AVERAGE = 'avg',
