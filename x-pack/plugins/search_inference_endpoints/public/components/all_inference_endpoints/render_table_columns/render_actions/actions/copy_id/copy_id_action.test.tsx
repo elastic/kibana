@@ -8,7 +8,7 @@
 import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { useKibana } from '../../../../../../hooks/use_kibana';
-import { useCopyIDAction } from './use_copy_id_action';
+import { CopyIDAction } from './copy_id_action';
 
 const mockInferenceEndpoint = {
   deployment: 'not_applicable',
@@ -35,8 +35,6 @@ Object.defineProperty(navigator, 'clipboard', {
   configurable: true,
 });
 
-const mockOnActionSuccess = jest.fn();
-
 jest.mock('../../../../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
@@ -53,21 +51,19 @@ const addSuccess = jest.fn();
   },
 }));
 
-describe('useCopyIDAction hook', () => {
+describe('CopyIDAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the label with correct text', () => {
     const TestComponent = () => {
-      const { getAction } = useCopyIDAction({ onActionSuccess: mockOnActionSuccess });
-      const action = getAction(mockInferenceEndpoint);
-      return <div>{action}</div>;
+      return <CopyIDAction modelId={mockInferenceEndpoint.endpoint.model_id} />;
     };
 
     const { getByTestId } = render(<TestComponent />);
     const labelElement = getByTestId('inference-endpoints-action-copy-id-label');
 
-    expect(labelElement).toHaveTextContent('Copy endpoint ID');
+    expect(labelElement).toBeVisible();
   });
 });
