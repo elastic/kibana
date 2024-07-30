@@ -39,9 +39,8 @@ const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
 interface ManagedConfigurationOpts {
   config: TaskManagerConfig;
-  defaultCapacity?: number;
-  errors$: Observable<Error>;
   logger: Logger;
+  errors$: Observable<Error>;
 }
 
 export interface ManagedConfiguration {
@@ -52,12 +51,11 @@ export interface ManagedConfiguration {
 
 export function createManagedConfiguration({
   config,
-  defaultCapacity = DEFAULT_CAPACITY,
   logger,
   errors$,
 }: ManagedConfigurationOpts): ManagedConfiguration {
   const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
-  const startingCapacity = calculateStartingCapacity(config, logger, defaultCapacity);
+  const startingCapacity = calculateStartingCapacity(config, logger);
   const startingPollInterval = config.poll_interval;
   return {
     startingCapacity,
@@ -212,11 +210,7 @@ function getMinCapacity(config: TaskManagerConfig) {
   }
 }
 
-export function calculateStartingCapacity(
-  config: TaskManagerConfig,
-  logger: Logger,
-  defaultCapacity: number
-): number {
+export function calculateStartingCapacity(config: TaskManagerConfig, logger: Logger): number {
   if (config.capacity !== undefined && config.max_workers !== undefined) {
     logger.warn(
       `Both "xpack.task_manager.capacity" and "xpack.task_manager.max_workers" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`
@@ -231,6 +225,6 @@ export function calculateStartingCapacity(
     return Math.min(config.max_workers, MAX_CAPACITY);
   }
 
-  // Neither are set, use the given default capacity
-  return defaultCapacity;
+  // Neither are set, use DEFAULT CAPACITY
+  return DEFAULT_CAPACITY;
 }

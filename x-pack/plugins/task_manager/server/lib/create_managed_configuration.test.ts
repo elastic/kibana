@@ -13,7 +13,12 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
-import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
+import {
+  CLAIM_STRATEGY_DEFAULT,
+  CLAIM_STRATEGY_MGET,
+  DEFAULT_CAPACITY,
+  TaskManagerConfig,
+} from '../config';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -83,11 +88,10 @@ describe('createManagedConfiguration()', () => {
     expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
   });
 
-  test('uses provided defaultCapacity if neither capacity nor max_workers is defined', async () => {
+  test('uses DEFAULT_CAPACITY if neither capacity nor max_workers is defined', async () => {
     const capacitySubscription = jest.fn();
     const pollIntervalSubscription = jest.fn();
     const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      defaultCapacity: 500,
       logger,
       errors$: new Subject<Error>(),
       config: {
@@ -97,7 +101,7 @@ describe('createManagedConfiguration()', () => {
     capacityConfiguration$.subscribe(capacitySubscription);
     pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
     expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 500);
+    expect(capacitySubscription).toHaveBeenNthCalledWith(1, DEFAULT_CAPACITY);
     expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
     expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
   });
