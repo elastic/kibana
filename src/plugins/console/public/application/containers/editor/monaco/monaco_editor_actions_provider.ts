@@ -356,7 +356,7 @@ export class MonacoEditorActionsProvider {
       });
       const lineTokens = getLineTokens(lineContent);
       // if there is 1 or fewer tokens, suggest method
-      if (lineTokens.length <= 1) {
+      if (lineTokens.length <= 1 && !shouldTriggerSuggestions(lineContent)) {
         return AutocompleteType.METHOD;
       }
       // if there are 2 tokens, look at the 2nd one and suggest path or url_params
