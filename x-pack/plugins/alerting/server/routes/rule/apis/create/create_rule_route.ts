@@ -35,6 +35,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
       options: {
         access: 'public',
         summary: `Create a rule`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {

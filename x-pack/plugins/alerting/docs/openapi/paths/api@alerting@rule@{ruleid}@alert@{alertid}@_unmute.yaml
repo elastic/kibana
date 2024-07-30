@@ -1,8 +1,7 @@
 post:
-  summary: Unmutes all alerts.
-  operationId: unmuteAllAlerts
+  summary: Unmute an alert
+  operationId: unmuteAlert
   description: >
-    If the rule has its notifications snoozed indefinitely, this API cancels the snooze.
     You must have `all` privileges for the appropriate Kibana features,
     depending on the `consumer` and `rule_type_id` of the rule. For example, the
     **Management > Stack Rules** feature, **Analytics > Discover** and
@@ -13,8 +12,8 @@ post:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/alert_id.yaml'
     - $ref: '../components/parameters/rule_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.
