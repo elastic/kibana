@@ -481,7 +481,41 @@
             "section": "def-common.ESQLAst",
             "text": "ESQLAst"
           },
-          ", offset: number) => { type: \"list\"; command: ",
+          ", offset: number) => { type: \"value\"; command: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommand",
+            "text": "ESQLCommand"
+          },
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
+          },
+          "; node: ",
+          "ESQLStringLiteral",
+          "; option: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandOption",
+            "text": "ESQLCommandOption"
+          },
+          " | undefined; setting: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandMode",
+            "text": "ESQLCommandMode"
+          },
+          " | undefined; } | { type: \"list\"; command: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -632,8 +666,6 @@
           " | ",
           "ESQLNullLiteral",
           " | ",
-          "ESQLStringLiteral",
-          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -752,8 +784,6 @@
           " | ",
           "ESQLNullLiteral",
           " | ",
-          "ESQLStringLiteral",
-          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -855,8 +885,6 @@
           "ESQLBooleanLiteral",
           " | ",
           "ESQLNullLiteral",
-          " | ",
-          "ESQLStringLiteral",
           " | ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -967,8 +995,6 @@
           "ESQLBooleanLiteral",
           " | ",
           "ESQLNullLiteral",
-          " | ",
-          "ESQLStringLiteral",
           " | ",
           {
             "pluginId": "@kbn/esql-ast",

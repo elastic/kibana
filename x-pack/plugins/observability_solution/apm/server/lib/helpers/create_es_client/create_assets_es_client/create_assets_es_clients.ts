@@ -14,7 +14,8 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 
-const ENTITIES_INDEX_NAME = '.entities.v1.latest.builtin_services*';
+const ENTITIES_LATEST_INDEX_NAME = '.entities.v1.latest.builtin_services*';
+const ENTITIES_HISTORY_INDEX_NAME = '.entities.v1.history.builtin_services*';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -29,7 +30,11 @@ export function cancelEsRequestOnAbort<T extends Promise<any>>(
 }
 
 export interface EntitiesESClient {
-  search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+  searchLatest<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    operationName: string,
+    searchRequest: TSearchRequest
+  ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
+  searchHistory<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
     operationName: string,
     searchRequest: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
@@ -45,30 +50,45 @@ export async function createEntitiesESClient({
   request: KibanaRequest;
   esClient: ElasticsearchClient;
 }) {
+  function search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    indexName: string,
+    operationName: string,
+    searchRequest: TSearchRequest
+  ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
+    const controller = new AbortController();
+
+    const promise = withApmSpan(operationName, () => {
+      return cancelEsRequestOnAbort(
+        esClient.search(
+          { ...searchRequest, index: [indexName] },
+          {
+            signal: controller.signal,
+            meta: true,
+          }
+        ) as unknown as Promise<{
+          body: InferSearchResponseOf<TDocument, TSearchRequest>;
+        }>,
+        request,
+        controller
+      );
+    });
+
+    return unwrapEsResponse(promise);
+  }
+
   return {
-    search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    searchLatest<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      const controller = new AbortController();
+      return search(ENTITIES_LATEST_INDEX_NAME, operationName, searchRequest);
+    },
 
-      const promise = withApmSpan(operationName, () => {
-        return cancelEsRequestOnAbort(
-          esClient.search(
-            { ...searchRequest, index: [ENTITIES_INDEX_NAME] },
-            {
-              signal: controller.signal,
-              meta: true,
-            }
-          ) as unknown as Promise<{
-            body: InferSearchResponseOf<TDocument, TSearchRequest>;
-          }>,
-          request,
-          controller
-        );
-      });
-
-      return unwrapEsResponse(promise);
+    searchHistory<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+      operationName: string,
+      searchRequest: TSearchRequest
+    ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
+      return search(ENTITIES_HISTORY_INDEX_NAME, operationName, searchRequest);
     },
 
     async msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
@@ -78,7 +98,7 @@ export async function createEntitiesESClient({
         .map((params) => {
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
-              index: [ENTITIES_INDEX_NAME],
+              index: [ENTITIES_LATEST_INDEX_NAME],
             },
             {
               ...params.body,
