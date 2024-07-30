@@ -397,7 +397,7 @@ To make your legend as informative as possible, you can show some additional **S
 - **First value**: First value considering all data points in the chart
 - **First non-null value**: First non-null value
 - **Difference**: Difference between first and last values
-- **Different %**: % difference between first and last values
+- **Difference %**: % difference between first and last values
 - **Sum**: Sum of al values plotted in the chart
 - **Count**: number of data points plotted in the chart
 - **Distinct Count**: number of data points with different values plotted in the chart
