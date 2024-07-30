@@ -1149,14 +1149,11 @@
           {
             "parentPluginId": "@kbn/aiops-log-rate-analysis",
             "id": "def-common.LogRateHistogramItem.time",
-            "type": "CompoundType",
+            "type": "number",
             "tags": [],
             "label": "time",
             "description": [
               "\nTime of bucket"
-            ],
-            "signature": [
-              "string | number"
             ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
             "deprecated": false,

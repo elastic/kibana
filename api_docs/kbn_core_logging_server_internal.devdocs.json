@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-common.getNextRollingTime",
+        "id": "def-server.getNextRollingTime",
         "type": "Function",
         "tags": [],
         "label": "getNextRollingTime",
@@ -37,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-common.getNextRollingTime.$1",
+            "id": "def-server.getNextRollingTime.$1",
             "type": "number",
             "tags": [],
             "label": "currentTime",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-common.getNextRollingTime.$2",
+            "id": "def-server.getNextRollingTime.$2",
             "type": "Object",
             "tags": [],
             "label": "interval",
@@ -67,7 +59,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-common.getNextRollingTime.$3",
+            "id": "def-server.getNextRollingTime.$3",
             "type": "boolean",
             "tags": [],
             "label": "modulate",
@@ -88,7 +80,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-common.PrebootDeps",
+        "id": "def-server.PrebootDeps",
         "type": "Interface",
         "tags": [],
         "label": "PrebootDeps",
@@ -99,7 +91,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-common.PrebootDeps.loggingSystem",
+            "id": "def-server.PrebootDeps.loggingSystem",
             "type": "Object",
             "tags": [],
             "label": "loggingSystem",
@@ -120,7 +112,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-common.appendersSchema",
+        "id": "def-server.appendersSchema",
         "type": "Object",
         "tags": [],
         "label": "appendersSchema",
@@ -154,9 +146,9 @@
           "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; strategy: ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-common.NumericRollingStrategyConfig",
+            "section": "def-server.NumericRollingStrategyConfig",
             "text": "NumericRollingStrategyConfig"
           },
           "; }>>"
@@ -168,7 +160,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-common.loggerContextConfigSchema",
+        "id": "def-server.loggerContextConfigSchema",
         "type": "Object",
         "tags": [],
         "label": "loggerContextConfigSchema",
@@ -194,9 +186,9 @@
           "<Map<string, ",
           {
             "pluginId": "@kbn/core-logging-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-common.AppenderConfigType",
+            "section": "def-server.AppenderConfigType",
             "text": "AppenderConfigType"
           },
           ">>; loggers: ",
@@ -216,7 +208,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-common.loggerSchema",
+        "id": "def-server.loggerSchema",
         "type": "Object",
         "tags": [],
         "label": "loggerSchema",
@@ -263,5 +255,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

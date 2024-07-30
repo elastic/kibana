@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-common.UiSettingsClient",
+        "id": "def-server.UiSettingsClient",
         "type": "Class",
         "tags": [],
         "label": "UiSettingsClient",
@@ -28,9 +20,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-ui-settings-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUiSettingsServerInternalPluginApi",
-            "section": "def-common.UiSettingsClient",
+            "section": "def-server.UiSettingsClient",
             "text": "UiSettingsClient"
           },
           " extends ",
@@ -42,7 +34,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.UiSettingsClient.Unnamed",
+            "id": "def-server.UiSettingsClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -56,7 +48,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-common.UiSettingsClient.Unnamed.$1",
+                "id": "def-server.UiSettingsClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -77,7 +69,7 @@
       },
       {
         "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-common.UiSettingsGlobalClient",
+        "id": "def-server.UiSettingsGlobalClient",
         "type": "Class",
         "tags": [],
         "label": "UiSettingsGlobalClient",
@@ -87,9 +79,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-ui-settings-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUiSettingsServerInternalPluginApi",
-            "section": "def-common.UiSettingsGlobalClient",
+            "section": "def-server.UiSettingsGlobalClient",
             "text": "UiSettingsGlobalClient"
           },
           " extends ",
@@ -101,7 +93,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.UiSettingsGlobalClient.Unnamed",
+            "id": "def-server.UiSettingsGlobalClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -115,7 +107,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-common.UiSettingsGlobalClient.Unnamed.$1",
+                "id": "def-server.UiSettingsGlobalClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -133,7 +125,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.UiSettingsGlobalClient.setMany",
+            "id": "def-server.UiSettingsGlobalClient.setMany",
             "type": "Function",
             "tags": [],
             "label": "setMany",
@@ -147,7 +139,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-common.UiSettingsGlobalClient.setMany.$1",
+                "id": "def-server.UiSettingsGlobalClient.setMany.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "changes",
@@ -162,7 +154,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-common.UiSettingsGlobalClient.setMany.$2",
+                "id": "def-server.UiSettingsGlobalClient.setMany.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -173,7 +165,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                    "id": "def-common.UiSettingsGlobalClient.setMany.$2.validateKeys",
+                    "id": "def-server.UiSettingsGlobalClient.setMany.$2.validateKeys",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "validateKeys",
@@ -192,7 +184,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.UiSettingsGlobalClient.set",
+            "id": "def-server.UiSettingsGlobalClient.set",
             "type": "Function",
             "tags": [],
             "label": "set",
@@ -206,7 +198,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-common.UiSettingsGlobalClient.set.$1",
+                "id": "def-server.UiSettingsGlobalClient.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -221,7 +213,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-common.UiSettingsGlobalClient.set.$2",
+                "id": "def-server.UiSettingsGlobalClient.set.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -244,7 +236,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-common.createOrUpgradeSavedConfig",
+        "id": "def-server.createOrUpgradeSavedConfig",
         "type": "Function",
         "tags": [],
         "label": "createOrUpgradeSavedConfig",
@@ -258,7 +250,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.createOrUpgradeSavedConfig.$1",
+            "id": "def-server.createOrUpgradeSavedConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -282,7 +274,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-common.uiSettingsConfig",
+        "id": "def-server.uiSettingsConfig",
         "type": "Object",
         "tags": [],
         "label": "uiSettingsConfig",
@@ -293,7 +285,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.uiSettingsConfig.path",
+            "id": "def-server.uiSettingsConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -304,7 +296,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.uiSettingsConfig.schema",
+            "id": "def-server.uiSettingsConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -341,7 +333,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-common.uiSettingsConfig.deprecations",
+            "id": "def-server.uiSettingsConfig.deprecations",
             "type": "Function",
             "tags": [],
             "label": "deprecations",
@@ -372,7 +364,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-common.uiSettingsConfig.deprecations.$1",
+                "id": "def-server.uiSettingsConfig.deprecations.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "factory",
@@ -396,5 +388,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

@@ -14,7 +14,6 @@ import { PrettyDuration } from '@elastic/eui';
 import type { InvestigateWidgetGridItemOverride } from '../components/investigate_widget_grid';
 
 enum OverrideType {
-  query = 'query',
   timeRange = 'timeRange',
   filters = 'filters',
 }
@@ -37,15 +36,6 @@ export function getOverridesFromGlobalParameters(
   uiSettingsDateFormat: string
 ) {
   const overrides: InvestigateWidgetGridItemOverride[] = [];
-
-  if (!isEqual(itemParameters.query, globalParameters.query)) {
-    overrides.push({
-      id: OverrideType.query,
-      label: itemParameters.query.query
-        ? itemParameters.query.query
-        : i18n.translate('xpack.investigateApp.overrides.noQuery', { defaultMessage: 'No query' }),
-    });
-  }
 
   if (!isEqual(itemParameters.timeRange, globalParameters.timeRange)) {
     overrides.push({
