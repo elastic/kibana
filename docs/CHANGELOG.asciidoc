@@ -105,10 +105,6 @@ The 8.14.3 release includes the following bug fixes and known issues.
 
 include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
-[float]
-[[known-issues-8.14.3]]
-=== Known issues
-
 [discrete]
 [[known-185691]]
 .When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error

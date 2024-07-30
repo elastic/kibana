@@ -34,17 +34,17 @@
         "{ getGlobalSections: () => ",
         {
           "pluginId": "@kbn/management-settings-section-registry",
-          "scope": "common",
+          "scope": "public",
           "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-          "section": "def-common.RegistryEntry",
+          "section": "def-public.RegistryEntry",
           "text": "RegistryEntry"
         },
         "[]; getSpacesSections: () => ",
         {
           "pluginId": "@kbn/management-settings-section-registry",
-          "scope": "common",
+          "scope": "public",
           "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-          "section": "def-common.RegistryEntry",
+          "section": "def-public.RegistryEntry",
           "text": "RegistryEntry"
         },
         "[]; }"
