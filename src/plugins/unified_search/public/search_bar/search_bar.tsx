@@ -16,7 +16,14 @@ import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es-query';
+import {
+  type Query,
+  type Filter,
+  type TimeRange,
+  type AggregateQuery,
+  isOfQueryType,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type {
   TimeHistoryContract,
@@ -480,9 +487,10 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   }
 
   public render() {
-    const { theme } = this.props;
+    const { theme, query } = this.props;
+    const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
-    const styles = searchBarStyles(theme);
+    const styles = searchBarStyles(theme, isESQLQuery);
     const cssStyles = [
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],

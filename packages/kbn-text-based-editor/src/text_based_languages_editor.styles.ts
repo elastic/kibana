@@ -63,8 +63,8 @@ export const textBasedLanguageEditorStyles = (
           : 'none'
         : `2px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
-      paddingLeft: euiTheme.size.base,
-      paddingRight: euiTheme.size.base,
+      paddingLeft: euiTheme.size.xs,
+      paddingRight: euiTheme.size.xs,
       paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       width: '100%',

@@ -362,7 +362,7 @@ export function ChangeDataView({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         {!isTextBasedLangSelected && (
           <>
             {textBasedLanguages?.length && (

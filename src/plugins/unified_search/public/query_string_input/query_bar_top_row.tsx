@@ -8,6 +8,7 @@
 
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
@@ -35,6 +36,7 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -757,7 +759,7 @@ export const QueryBarTopRow = React.memo(
         )
       );
     }
-
+    const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
 
     return (
@@ -774,6 +776,9 @@ export const QueryBarTopRow = React.memo(
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"
+              css={css`
+                padding: ${isQueryLangSelected ? euiTheme.size.s : 0};
+              `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
