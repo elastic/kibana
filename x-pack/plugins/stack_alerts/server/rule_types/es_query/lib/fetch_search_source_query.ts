@@ -66,6 +66,7 @@ export async function fetchSearchSourceQuery({
     latestTimestamp,
     dateStart,
     dateEnd,
+    logger,
     alertLimit
   );
 
@@ -108,6 +109,7 @@ export async function updateSearchSource(
   latestTimestamp: string | undefined,
   dateStart: string,
   dateEnd: string,
+  logger: Logger,
   alertLimit?: number
 ): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -171,6 +173,7 @@ export async function updateSearchSource(
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     })
   );
   return {
