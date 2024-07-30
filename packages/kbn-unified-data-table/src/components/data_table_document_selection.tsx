@@ -169,24 +169,15 @@ export function DataTableDocumentToolbarBtn({
   pageSize: number | undefined;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
-  const {
-    selectAllDocs,
-    clearAllSelectedDocs,
-    isDocSelected,
-    selectedDocIds,
-    getCountOfSelectedDocs,
-  } = selectedDocsState;
+  const { selectAllDocs, clearAllSelectedDocs, isDocSelected, selectedDocIds } = selectedDocsState;
 
   const shouldSuggestToSelectAll = useMemo(() => {
-    if (isFilterActive || !(selectedDocIds.length < rows.length && rows.length > 1)) {
+    const canSelectMore = selectedDocIds.length < rows.length && rows.length > 1;
+    if (typeof pageSize !== 'number' || isFilterActive || !canSelectMore) {
       return false;
     }
-    const docIdsFromCurrentPage = getDocIdsForCurrentPage(rows, pageIndex, pageSize);
-    if (!docIdsFromCurrentPage?.length) {
-      return false;
-    }
-    return getCountOfSelectedDocs(docIdsFromCurrentPage) === docIdsFromCurrentPage.length;
-  }, [getCountOfSelectedDocs, rows, pageIndex, pageSize, selectedDocIds.length, isFilterActive]);
+    return selectedDocIds.length >= pageSize;
+  }, [rows, pageSize, selectedDocIds.length, isFilterActive]);
 
   const getMenuItems = useCallback(() => {
     return [

@@ -271,7 +271,7 @@ describe('document selection', () => {
       expect(props.selectedDocsState.selectAllDocs).toHaveBeenCalled();
     });
 
-    test('it should not render "Select all X" button if on another page', () => {
+    test('it should render "Select all X" button even if on another page', () => {
       const props = {
         isPlainRecord: false,
         isFilterActive: false,
@@ -286,6 +286,27 @@ describe('document selection', () => {
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
       expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected2');
+
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(true);
+    });
+
+    test('it should not render "Select all X" button if all rows are selected', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(dataTableContextMock.rows.map((row) => row.id)),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 1,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe(
+        `Selected${dataTableContextMock.rows.length}`
+      );
 
       expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(false);
     });
