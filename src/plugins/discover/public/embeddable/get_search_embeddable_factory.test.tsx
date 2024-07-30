@@ -225,7 +225,7 @@ describe('saved search embeddable', () => {
         discoverServiceMock.profilesManager,
         'resolveRootProfile'
       );
-      const initialRuntimeState =  getInitialRuntimeState();
+      const initialRuntimeState = getInitialRuntimeState();
       await factory.buildEmbeddable(
         initialRuntimeState,
         buildApiMock,
