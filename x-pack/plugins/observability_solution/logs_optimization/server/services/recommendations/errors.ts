@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 export class RecommendationNotFoundError extends Error {
   constructor(message: string, public cause?: Error) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'RecommendationNotFoundError';
+  }
+}
+
+export class RecommendationResolvedError extends Error {
+  constructor(message: string, public cause?: Error) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'RecommendationResolvedError';
   }
 }

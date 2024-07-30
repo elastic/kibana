@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesDataStream,
+  IndicesPutIndexTemplateRequest,
+  IngestPipeline,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import deepmerge from 'deepmerge';
 import { DataStreamInfo, NewestIndex } from '../../common/types';
 
 export interface IndexManagerCreator {
@@ -24,15 +29,15 @@ export class IndexManager {
     const { type, dataset, namespace } = IndexManager.extractDataStreamFields(dataStream.name);
 
     return {
-      isManaged: dataStream._meta?.isManaged ?? false,
+      isManaged: dataStream._meta?.managed ?? false,
+      isManagedByFleet: dataStream._meta?.managed_by === 'fleet' ?? false,
       integration: dataStream._meta?.package?.name ?? null,
+      template: dataStream.template,
       type,
       dataset,
       namespace,
     };
   }
-
-  getIndexIntegration() {}
 
   async getDataStream() {
     try {
@@ -43,6 +48,52 @@ export class IndexManager {
     } catch (error) {
       return null;
     }
+  }
+
+  async getIndexTemplate(name: string) {
+    try {
+      const { index_templates: indexTemplates } = await this.esClient.indices.getIndexTemplate({
+        name,
+      });
+
+      return indexTemplates.at(0)?.index_template ?? null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async updateIndexTemplate(
+    name: string,
+    templateChanges: Omit<IndicesPutIndexTemplateRequest, 'name'>
+  ) {
+    try {
+      return await this.esClient.indices.putIndexTemplate({
+        name,
+        ...templateChanges,
+      });
+
+      // return indexTemplates.at(0)?.index_template ?? null;
+    } catch (error) {
+      console.log(error);
+
+      return null;
+    }
+  }
+
+  async updateIndexPipeline(id: string, pipelineUpdates: Omit<IngestPipeline, 'id'>) {
+    let pipeline: IngestPipeline = {
+      description: `Pipeline for parsing ${id} logs.`,
+      processors: [],
+    };
+
+    try {
+      const pipelines = await this.esClient.ingest.getPipeline({ id });
+      pipeline = pipelines[id];
+    } catch {}
+
+    const pipelineDraft = deepmerge(pipeline, pipelineUpdates);
+
+    return await this.esClient.ingest.putPipeline({ id, ...pipelineDraft });
   }
 
   async getNewestDataStreamIndex(): Promise<NewestIndex | null> {
@@ -65,6 +116,24 @@ export class IndexManager {
       name: lastIndex.index_name,
       info: this.getDataStreamInfo(dataStream),
     };
+  }
+
+  getCustomIndexTemplateName(dataStreamName: string) {
+    const { type, dataset } = IndexManager.extractDataStreamFields(dataStreamName);
+
+    return `${type}-${dataset}@custom`;
+  }
+
+  getDefaultPipelineName(dataStreamName: string) {
+    const { type, dataset } = IndexManager.extractDataStreamFields(dataStreamName);
+
+    return `${type}-${dataset}@default-pipeline`;
+  }
+
+  getDataStreamWildcard(dataStreamName: string) {
+    const { type, dataset } = IndexManager.extractDataStreamFields(dataStreamName);
+
+    return `${type}-${dataset}-*`;
   }
 
   static extractDataStreamFields(dataStreamName: string) {

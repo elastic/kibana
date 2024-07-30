@@ -14,7 +14,9 @@ export interface NewestIndex extends IndicesIndexState {
 
 export interface DataStreamInfo {
   isManaged?: boolean;
+  isManagedByFleet?: boolean;
   integration?: string | null;
+  template?: string;
   type?: string;
   dataset?: string;
   namespace?: string;

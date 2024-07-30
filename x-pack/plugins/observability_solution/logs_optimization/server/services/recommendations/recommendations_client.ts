@@ -6,13 +6,14 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import deepmerge from 'deepmerge';
 import { Tasks } from '../../../common/detections/types';
 import { createRecommendation } from '../../../common/recommendations/utils';
 import { Recommendation } from '../../../common/recommendations';
 import { IDetectionsClient } from '../detections/types';
 import { IRecommendationsClient } from './types';
 import { IndexManagerCreator } from '../../lib/index_manager';
-import { RecommendationNotFoundError } from './errors';
+import { RecommendationNotFoundError, RecommendationResolvedError } from './errors';
 
 interface RecommendationsClientDeps {
   logger: Logger;
@@ -34,10 +35,10 @@ export class RecommendationsClient implements IRecommendationsClient {
 
   async getRecommendations({ dataStream }: { dataStream: string }): Promise<Recommendation[]> {
     // This should be a SO lookup once recommendations are persisted.
-    const storedRecommendation = recommendationsByDataStreamMap.get(dataStream);
-    if (storedRecommendation) {
-      return storedRecommendation;
-    }
+    // const storedRecommendation = recommendationsByDataStreamMap.get(dataStream);
+    // if (storedRecommendation) {
+    //   return storedRecommendation;
+    // }
 
     const indexManager = this.indexManagerCreator.fromIndexPattern(dataStream);
 
@@ -79,10 +80,99 @@ export class RecommendationsClient implements IRecommendationsClient {
       );
     }
 
-    // TODO: apply recommendation tasks
+    if (recommendation.status === 'resolved') {
+      throw new RecommendationResolvedError('This recommendations has already been applied.');
+    }
+
+    const indexManager = this.indexManagerCreator.fromIndexPattern(dataStream);
+
+    const newestIndex = await indexManager.getNewestDataStreamIndex();
+
+    if (newestIndex && newestIndex.info.isManagedByFleet) {
+      // Do something for integration indices
+    } else if (newestIndex && newestIndex.info.isManaged) {
+      // Do something for DSNS indices
+      // 1. Get if an ad-hoc index template is in place or relies on default one
+
+      const customTemplateName = indexManager.getCustomIndexTemplateName(dataStream);
+      const defaultPipelineName = indexManager.getDefaultPipelineName(dataStream);
+      const dataStreamWildcard = indexManager.getDataStreamWildcard(dataStream);
+
+      const customTemplate = await indexManager.getIndexTemplate(customTemplateName);
+      console.log(customTemplate);
+
+      if (customTemplate) {
+        // A custom template has been already created, update only mappings and pipeline
+        if (tasks.processors) {
+          const previousDefaultPipelineProcessor =
+            newestIndex.settings?.index?.default_pipeline !== defaultPipelineName
+              ? {
+                  pipeline: {
+                    name: newestIndex.settings?.index?.default_pipeline,
+                  },
+                }
+              : null;
+
+          const customPipelineDraft = {
+            processors: [previousDefaultPipelineProcessor, ...tasks.processors].filter(Boolean),
+          };
+          await indexManager.updateIndexPipeline(defaultPipelineName, customPipelineDraft);
+        }
+      } else {
+        if (newestIndex.info.template) {
+          const defaultTemplate = await indexManager.getIndexTemplate(newestIndex.info.template);
+
+          const customTemplateDraft = deepmerge(
+            defaultTemplate ?? {},
+            {
+              index_patterns: [dataStreamWildcard],
+              priority: 200,
+              _meta: {
+                description: `Ad-hoc template installed for ${dataStreamWildcard} data streams.`,
+              },
+              template: {
+                settings: {
+                  index: {
+                    default_pipeline: defaultPipelineName,
+                  },
+                },
+              },
+            },
+            { arrayMerge: (_destination, source) => source }
+          );
+
+          await indexManager.updateIndexTemplate(customTemplateName, customTemplateDraft);
+        }
+
+        if (tasks.processors) {
+          const previousDefaultPipelineProcessor =
+            newestIndex.settings?.index?.default_pipeline !== defaultPipelineName
+              ? {
+                  pipeline: {
+                    name: newestIndex.settings?.index?.default_pipeline,
+                  },
+                }
+              : null;
+
+          const customPipelineDraft = {
+            processors: [previousDefaultPipelineProcessor, ...tasks.processors].filter(Boolean),
+          };
+          await indexManager.updateIndexPipeline(defaultPipelineName, customPipelineDraft);
+        }
+        // Need to duplicate the template, create component template for settings, create pipeline, set default pipeline
+      }
+      // 2. Duplicate index template, updating default pipeline with <template-name>
+      // 3. Create/update custom pipeline, duplicating from initial one
+    } else {
+      // Do something for non data stream indices
+    }
 
     const updatedRecommendation: Recommendation = {
       ...recommendation,
+      detection: {
+        ...recommendation.detection,
+        tasks,
+      },
       updated_at: new Date().toISOString(),
       status: 'resolved',
     };

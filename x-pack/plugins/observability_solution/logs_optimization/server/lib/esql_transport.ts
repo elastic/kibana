@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { EsqlDocument, EsqlHit } from '@kbn/logs-optimization-plugin/common/types';
+import { EsqlDocument, EsqlHit } from '../../common/types';
 
 interface EsqlResultColumn {
   name: string;
@@ -26,15 +26,9 @@ export class EsqlTransport {
   constructor(private esClient: ElasticsearchClient) {}
 
   query(query: string) {
-    return this.esClient.transport
-      .request<EsqlQueryResponse>({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query,
-        },
-      })
-      .then(EsqlTable.create);
+    return this.esClient.esql
+      .query({ query })
+      .then((table) => EsqlTable.create(table as unknown as EsqlQueryResponse));
   }
 }
 

@@ -14,15 +14,15 @@ import {
 export const createRenameProcessor = ({
   field,
   target_field: targetField,
-}: Pick<IngestRenameProcessor, 'field' | 'target_field'>): Pick<
-  IngestProcessorContainer,
-  'rename'
-> => ({
+}: Pick<IngestRenameProcessor, 'field' | 'target_field'>): {
+  rename: IngestRenameProcessor & { override: boolean };
+} => ({
   rename: {
     field,
     target_field: targetField,
     ignore_failure: true,
     ignore_missing: true,
+    override: true,
   },
 });
 

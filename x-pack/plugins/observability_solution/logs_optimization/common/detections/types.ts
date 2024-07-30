@@ -12,7 +12,7 @@ export const mappingGapRT = rt.type({
   target_field: rt.union([rt.string, rt.null]),
 });
 
-const processorsRT = rt.record(rt.string, rt.any);
+const processorsRT = rt.array(rt.any);
 
 export const tasksRT = rt.partial({
   processors: processorsRT,

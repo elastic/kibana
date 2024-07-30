@@ -9,7 +9,10 @@ import { APPLY_RECOMMENDATIONS_URL } from '../../../common/recommendations';
 import { createValidationFunction } from '../../../common/runtime_types';
 import * as recommendationsV1 from '../../../common/recommendations/v1';
 import { LogsOptimizationBackendLibs } from '../../lib/shared_types';
-import { RecommendationNotFoundError } from '../../services/recommendations/errors';
+import {
+  RecommendationNotFoundError,
+  RecommendationResolvedError,
+} from '../../services/recommendations/errors';
 
 export const initApplyRecommendationRoute = ({
   router,
@@ -54,7 +57,10 @@ export const initApplyRecommendationRoute = ({
             body: recommendationsV1.applyRecommendationResponsePayloadRT.encode(responsePayload),
           });
         } catch (error) {
-          if (error instanceof RecommendationNotFoundError) {
+          if (
+            error instanceof RecommendationNotFoundError ||
+            error instanceof RecommendationResolvedError
+          ) {
             return response.badRequest({
               body: {
                 message: error.message,
