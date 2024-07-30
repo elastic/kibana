@@ -28,6 +28,11 @@ import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
@@ -49,6 +54,8 @@ export interface ObservabilityOnboardingPluginSetupDeps {
   security: SecurityPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  charts: ChartsPluginStart;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
@@ -62,6 +69,7 @@ export interface ObservabilityOnboardingPluginStartDeps {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   cloudExperiments?: CloudExperimentsPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &
