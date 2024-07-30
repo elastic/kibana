@@ -158,7 +158,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       }}
       maxWidth={true}
       data-test-subj={props['data-test-subj']}
-      style={{
+      css={{
         ...(modalWidth ? { width: modalWidth } : {}),
         ...modalPositionOverrideStyles,
       }}
