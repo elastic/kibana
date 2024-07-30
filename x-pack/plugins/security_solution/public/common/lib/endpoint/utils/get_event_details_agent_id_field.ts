@@ -6,6 +6,7 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { parseEcsFieldPath } from './parse_ecs_field_path';
 import { getAlertDetailsFieldValue } from './get_event_details_field_values';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -35,7 +36,7 @@ export const getEventDetailsAgentIdField = (
   const fieldList: string[] = [...RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType]];
 
   fieldList.some((fieldPath) => {
-    const { field, category } = parseField(fieldPath);
+    const { field, category } = parseEcsFieldPath(fieldPath);
     const agentId = getAlertDetailsFieldValue({ category, field }, eventData);
 
     if (agentId) {
@@ -49,16 +50,6 @@ export const getEventDetailsAgentIdField = (
 
     return false;
   });
-
-  return result;
-};
-
-const parseField = (field: string): { category: string; field: string } => {
-  const result = { category: '', field };
-
-  if (field.includes('.')) {
-    result.category = field.substring(0, field.indexOf('.'));
-  }
 
   return result;
 };
