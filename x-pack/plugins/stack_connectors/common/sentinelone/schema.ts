@@ -169,7 +169,7 @@ export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
 });
 
 export const SentinelOneFetchAgentFilesParamsSchema = schema.object({
-  agentUUID: schema.string({ minLength: 1 }),
+  agentId: schema.string({ minLength: 1 }),
   zipPassCode: schema.string({ minLength: 10 }),
   files: schema.arrayOf(schema.string({ minLength: 1 })),
 });
@@ -187,7 +187,7 @@ export const SentinelOneFetchAgentFilesResponseSchema = schema.object({
 });
 
 export const SentinelOneDownloadAgentFileParamsSchema = schema.object({
-  agentUUID: schema.string({ minLength: 1 }),
+  agentId: schema.string({ minLength: 1 }),
   activityId: schema.string({ minLength: 1 }),
 });
 

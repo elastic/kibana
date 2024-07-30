@@ -204,7 +204,6 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
     'sentinel_one.threat.agent.id',
     'sentinel_one.alert.agent.id',
     'sentinel_one.agent.agent.id',
-    'observer.serial_number', // This is the UUID not ID. FIXME:PT should we remove this?
   ],
   crowdstrike: ['device.id'],
 });
