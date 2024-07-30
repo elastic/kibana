@@ -273,16 +273,22 @@ export function createWorkloadAggregator({
       let totalCost = 0;
       const taskTypeSummary = taskTypes.reduce((acc, bucket) => {
         const value = bucket as TaskTypeWithStatusBucket;
-        const cost =
-          value.doc_count * taskDefinitions.get(value.key as string)?.cost ?? TaskCost.Normal;
-        totalCost += cost;
-        return Object.assign(acc, {
-          [value.key as string]: {
-            count: value.doc_count,
-            cost,
-            status: mapValues(keyBy(value.status.buckets, 'key'), 'doc_count'),
-          },
-        });
+        try {
+          const taskDef = taskDefinitions.get(value.key as string);
+          const cost = value.doc_count * taskDef?.cost ?? TaskCost.Normal;
+
+          totalCost += cost;
+          return Object.assign(acc, {
+            [value.key as string]: {
+              count: value.doc_count,
+              cost,
+              status: mapValues(keyBy(value.status.buckets, 'key'), 'doc_count'),
+            },
+          });
+        } catch (err) {
+          // task type is not registered with dictionary, do not add to summary
+          return acc;
+        }
       }, {});
 
       const summary: WorkloadStat = {
@@ -550,7 +556,12 @@ interface DateRangeBucket {
 function getTotalCost(taskTypeBuckets: TaskTypeBucket[], definitions: TaskTypeDictionary): number {
   let cost = 0;
   for (const bucket of taskTypeBuckets) {
-    cost += bucket.doc_count * definitions.get(bucket.key as string)?.cost ?? TaskCost.Normal;
+    try {
+      const taskDef = definitions.get(bucket.key as string);
+      cost += bucket.doc_count * taskDef?.cost ?? TaskCost.Normal;
+    } catch (err) {
+      // task type is not registered with dictionary, do not add to cost
+    }
   }
   return cost;
 }
