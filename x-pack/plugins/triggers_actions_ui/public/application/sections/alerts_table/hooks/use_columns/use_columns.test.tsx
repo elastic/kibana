@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserFields } from '@kbn/alerting-types';
+import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
-import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../../common/lib/kibana', () => ({
@@ -23,7 +28,6 @@ jest.mock('../../../../../common/lib/kibana', () => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
-jest.mock('../use_fetch_browser_fields_capabilities');
 
 const setItemStorageMock = jest.fn();
 const mockStorage = {
@@ -33,7 +37,44 @@ const mockStorage = {
   clear: jest.fn(),
 };
 
-describe('useColumn', () => {
+const queryClient = new QueryClient(testQueryClientConfig);
+
+const wrapper: FunctionComponent = ({ children }) => (
+  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+    {children}
+  </QueryClientProvider>
+);
+
+const mockFetchAlertsFields = jest.mocked(fetchAlertsFields);
+const browserFields: BrowserFields = {
+  kibana: {
+    fields: {
+      ['event.action']: {
+        category: 'event',
+        name: 'event.action',
+        type: 'string',
+      },
+      ['@timestamp']: {
+        category: 'base',
+        name: '@timestamp',
+        type: 'date',
+      },
+      ['kibana.alert.duration.us']: {
+        category: 'kibana',
+        name: 'kibana.alert.duration.us',
+        type: 'number',
+      },
+      ['kibana.alert.reason']: {
+        category: 'kibana',
+        name: 'kibana.alert.reason',
+        type: 'string',
+      },
+    },
+  },
+};
+mockFetchAlertsFields.mockResolvedValue({ browserFields, fields: [] });
+
+describe('useColumns', () => {
   const id = 'useColumnTest';
   const featureIds: AlertConsumers[] = [AlertConsumers.LOGS, AlertConsumers.APM];
   let storage = { current: new Storage(mockStorage) };
@@ -73,38 +114,8 @@ describe('useColumn', () => {
       schema: 'string',
     },
   ];
-  const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
-  const browserFields: BrowserFields = {
-    kibana: {
-      fields: {
-        ['event.action']: {
-          category: 'event',
-          name: 'event.action',
-          type: 'string',
-        },
-        ['@timestamp']: {
-          category: 'base',
-          name: '@timestamp',
-          type: 'date',
-        },
-        ['kibana.alert.duration.us']: {
-          category: 'kibana',
-          name: 'kibana.alert.duration.us',
-          type: 'number',
-        },
-        ['kibana.alert.reason']: {
-          category: 'kibana',
-          name: 'kibana.alert.reason',
-          type: 'string',
-        },
-      },
-    },
-  };
 
   beforeEach(() => {
-    hookUseFetchBrowserFieldCapabilities.mockClear();
-    hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
-
     setItemStorageMock.mockClear();
     storage = { current: new Storage(mockStorage) };
   });
@@ -113,14 +124,16 @@ describe('useColumn', () => {
     // storageTable will always be in sync with defualtColumns.
     // it is an invariant. If that is the case, that can be considered an issue
     const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-      useColumns({
-        defaultColumns,
-        featureIds,
-        id,
-        storageAlertsTable: localStorageAlertsTable,
-        storage,
-      })
+    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      () =>
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        }),
+      { wrapper }
     );
 
     act(() => {
@@ -142,14 +155,16 @@ describe('useColumn', () => {
   describe('visibleColumns', () => {
     test('hide all columns with onChangeVisibleColumns', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       act(() => {
@@ -162,14 +177,16 @@ describe('useColumn', () => {
 
     test('show all columns with onChangeVisibleColumns', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       act(() => {
@@ -189,14 +206,16 @@ describe('useColumn', () => {
 
     test('should populate visiblecolumns correctly', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       expect(result.current.visibleColumns).toMatchObject(defaultColumns.map((col) => col.id));
@@ -205,14 +224,16 @@ describe('useColumn', () => {
     test('should change visiblecolumns if provided defaultColumns change', async () => {
       let localDefaultColumns = [...defaultColumns];
       let localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(localDefaultColumns);
-      const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns: localDefaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns: localDefaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       expect(result.current.visibleColumns).toMatchObject(defaultColumns.map((col) => col.id));
@@ -240,14 +261,16 @@ describe('useColumn', () => {
   describe('columns', () => {
     test('should changes the column list when defaultColumns has been updated', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result, waitFor } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result, waitFor } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       await waitFor(() => expect(result.current.columns).toMatchObject(defaultColumns));
@@ -257,14 +280,16 @@ describe('useColumn', () => {
   describe('onToggleColumns', () => {
     test('should update the list of columns when on Toggle Columns is called', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       act(() => {
@@ -276,14 +301,16 @@ describe('useColumn', () => {
 
     test('should update the list of visible columns when onToggleColumn is called', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       // remove particular column
@@ -303,14 +330,16 @@ describe('useColumn', () => {
 
     test('should update the column details in the storage when onToggleColumn is called', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       // remove particular column
@@ -334,14 +363,16 @@ describe('useColumn', () => {
   describe('onResetColumns', () => {
     test('should restore visible columns defaults', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
-        useColumns({
-          defaultColumns,
-          featureIds,
-          id,
-          storageAlertsTable: localStorageAlertsTable,
-          storage,
-        })
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+        () =>
+          useColumns({
+            defaultColumns,
+            featureIds,
+            id,
+            storageAlertsTable: localStorageAlertsTable,
+            storage,
+          }),
+        { wrapper }
       );
 
       expect(result.current.visibleColumns).toEqual([
