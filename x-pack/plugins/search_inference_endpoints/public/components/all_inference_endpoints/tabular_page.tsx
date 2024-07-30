@@ -15,10 +15,11 @@ import {
   HorizontalAlignment,
 } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { TaskTypes } from '../../../common/types';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
-import { FilterOptions, InferenceEndpointUI, ServiceProviderKeys, TaskTypes } from './types';
+import { FilterOptions, InferenceEndpointUI, ServiceProviderKeys } from './types';
 
 import { DeploymentStatusEnum } from './types';
 
