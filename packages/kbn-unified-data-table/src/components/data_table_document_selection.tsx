@@ -177,13 +177,16 @@ export function DataTableDocumentToolbarBtn({
     getCountOfSelectedDocs,
   } = selectedDocsState;
 
-  const areAllDocsOnCurrentPageSelected = () => {
+  const shouldSuggestToSelectAll = useMemo(() => {
+    if (isFilterActive || !(selectedDocIds.length < rows.length && rows.length > 1)) {
+      return false;
+    }
     const docIdsFromCurrentPage = getDocIdsForCurrentPage(rows, pageIndex, pageSize);
     if (!docIdsFromCurrentPage?.length) {
       return false;
     }
-    return getCountOfSelectedDocs(docIdsFromCurrentPage) === pageSize;
-  };
+    return getCountOfSelectedDocs(docIdsFromCurrentPage) === docIdsFromCurrentPage.length;
+  }, [getCountOfSelectedDocs, rows, pageIndex, pageSize, selectedDocIds.length, isFilterActive]);
 
   const getMenuItems = useCallback(() => {
     return [
@@ -358,10 +361,7 @@ export function DataTableDocumentToolbarBtn({
       <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
         {selectedRowsMenuButton}
       </EuiFlexItem>
-      {!isFilterActive &&
-      selectedDocIds.length < rows.length &&
-      rows.length > 1 &&
-      areAllDocsOnCurrentPageSelected() ? (
+      {shouldSuggestToSelectAll ? (
         <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
           <EuiDataGridToolbarControl
             data-test-subj="dscGridSelectAllDocs"
