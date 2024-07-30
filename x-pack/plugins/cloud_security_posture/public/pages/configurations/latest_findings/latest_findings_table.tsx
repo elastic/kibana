@@ -36,7 +36,7 @@ interface LatestFindingsTableProps {
  * Type Guard for checking if the given source is a CspFinding
  */
 const isCspFinding = (source: Record<string, any> | undefined): source is CspFinding => {
-  return source?.result?.evaluation !== undefined;
+  return source?.data_stream?.dataset !== undefined;
 };
 
 const getCspFinding = (source: Record<string, any> | undefined): CspFinding | undefined => {
@@ -108,7 +108,7 @@ export const LatestFindingsTable = ({
 
     return async (http: HttpSetup) => createDetectionRuleFromBenchmarkRule(http, finding.rule);
   };
-
+  console.log(rows);
   return (
     <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
       {error ? (

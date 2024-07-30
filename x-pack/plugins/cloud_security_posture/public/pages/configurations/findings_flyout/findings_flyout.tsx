@@ -26,6 +26,7 @@ import {
   EuiToolTip,
   EuiDescriptionListProps,
   EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
@@ -84,7 +85,7 @@ const PAGINATION_LABEL = i18n.translate('xpack.csp.findings.findingsFlyout.pagin
   defaultMessage: 'Finding navigation',
 });
 
-type FindingsTab = (typeof tabs)[number];
+type FindingsTab = typeof tabs[number];
 
 interface FindingFlyoutProps {
   onClose(): void;
@@ -120,6 +121,28 @@ export const CisKubernetesIcons = ({
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+export const RuleNameLink = ({
+  ruleFlyoutLink,
+  ruleName,
+}: {
+  ruleFlyoutLink?: string;
+  ruleName: string;
+}) => {
+  return ruleFlyoutLink && ruleName ? (
+    <EuiToolTip
+      position="top"
+      content={i18n.translate(
+        'xpack.csp.findings.findingsFlyout.ruleNameTabField.ruleNameTooltip',
+        { defaultMessage: 'Manage Rule' }
+      )}
+    >
+      <EuiLink href={ruleFlyoutLink}>{ruleName}</EuiLink>
+    </EuiToolTip>
+  ) : (
+    ruleName
+  );
+};
 
 const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps['listItems'] =>
   [
@@ -176,6 +199,10 @@ const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
 
   return (
     <EuiCallOut
+      style={{
+        borderRadius: 4,
+        overflow: 'hidden',
+      }}
       size="s"
       iconType="iInCircle"
       title={
@@ -247,7 +274,7 @@ export const FindingsRuleFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
         {['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: 16, borderRadius: 4, overflow: 'hidden' }}>
+          <div style={{ marginBottom: 16 }}>
             <MissingFieldsCallout finding={finding} />
           </div>
         )}

@@ -34,12 +34,16 @@ const getBenchmarkIdIconType = (type: BenchmarkId) => {
   }
 };
 
-export const CISBenchmarkIcon = (props: Props) => (
-  <EuiToolTip content={props.name}>
-    <EuiIcon
-      type={getBenchmarkIdIconType(props.type) || ''}
-      size={props.size || 'xl'}
-      css={props.style}
-    />
-  </EuiToolTip>
-);
+export const CISBenchmarkIcon = (props: Props) => {
+  if (!getBenchmarkIdIconType(props.type)) return <></>;
+
+  return (
+    <EuiToolTip content={props.name}>
+      <EuiIcon
+        type={getBenchmarkIdIconType(props.type)}
+        size={props.size || 'xl'}
+        css={props.style}
+      />
+    </EuiToolTip>
+  );
+};

@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
@@ -32,7 +31,7 @@ import {
 import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
+import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown, RuleNameLink } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
@@ -47,19 +46,11 @@ const getDetailsList = (
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description:
-      ruleFlyoutLink && data.rule?.name ? (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
-            defaultMessage: 'Manage Rule',
-          })}
-        >
-          <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
-        </EuiToolTip>
-      ) : (
-        data.rule?.name || '-'
-      ),
+    description: data.rule?.name ? (
+      <RuleNameLink ruleFlyoutLink={ruleFlyoutLink} ruleName={data.rule.name} />
+    ) : (
+      '-'
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
