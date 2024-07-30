@@ -32415,6 +32415,616 @@ Object {
 }
 `;
 
+exports[`Connector type config checks detect connector type changes for: .thehive 1`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "comments": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "default": Object {
+                    "special": "deep",
+                  },
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "keys": Object {
+                  "comment": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                  "commentId": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            ],
+            "type": "array",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "incident": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "description": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "externalId": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+        "severity": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "type": "number",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+        "tags": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "items": Array [
+                  Object {
+                    "flags": Object {
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                ],
+                "type": "array",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+        "title": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "tlp": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "type": "number",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .thehive 2`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "description": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "severity": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "default": 2,
+              "error": [Function],
+              "presence": "optional",
+            },
+            "type": "number",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "source": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "sourceRef": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "tags": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "type": "array",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "title": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "tlp": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "default": 2,
+              "error": [Function],
+              "presence": "optional",
+            },
+            "type": "number",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "type": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .thehive 3`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "organisation": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "url": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .thehive 4`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "apiKey": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .thehive 5`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "subAction": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "subActionParams": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
 exports[`Connector type config checks detect connector type changes for: .tines 1`] = `
 Object {
   "flags": Object {
