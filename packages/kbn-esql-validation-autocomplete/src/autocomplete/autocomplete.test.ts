@@ -145,13 +145,6 @@ describe('autocomplete', () => {
     }
   });
 
-  describe('meta', () => {
-    testSuggestions('meta ', ['FUNCTIONS']);
-    for (const fn of ['functions']) {
-      testSuggestions(`meta ${fn} `, ['|']);
-    }
-  });
-
   describe('where', () => {
     const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
       scalar: true,

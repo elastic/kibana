@@ -76,7 +76,6 @@ export function AddDataContextMenu() {
           name: collectServiceLogs.name,
           href: basePath.prepend(collectServiceLogs.link),
           'data-test-subj': 'apmAddDataCollectServiceLogs',
-          target: '_blank',
           onClick: () => {
             reportButtonClick('collect_new_service_logs');
           },
