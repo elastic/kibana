@@ -61,13 +61,16 @@ export const CrawlerDomainsLogic = kea<MakeLogicType<CrawlerDomainsValues, Crawl
     domains: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onReceiveData: (_, { domains }) => domains,
       },
     ],
     meta: [
       DEFAULT_META,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onReceiveData: (_, { meta }) => meta,
+        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],

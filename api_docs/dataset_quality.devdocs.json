@@ -266,9 +266,9 @@
           "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.RouteParamsRT",
+            "section": "def-server.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
@@ -276,9 +276,9 @@
           " ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.RouteParamsRT",
+            "section": "def-server.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never"
@@ -423,9 +423,9 @@
           " ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
+            "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
@@ -433,9 +433,9 @@
           " | { message: string | Error; attributes?: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ResponseErrorAttributes",
+            "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
@@ -456,9 +456,9 @@
           "Omit<",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpFetchOptions",
+            "section": "def-public.HttpFetchOptions",
             "text": "HttpFetchOptions"
           },
           ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"
