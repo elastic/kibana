@@ -13,7 +13,7 @@ import {
   TITLE_HEADER_ICON_TEST_ID,
   TITLE_HEADER_TEXT_TEST_ID,
   TITLE_LINK_ICON_TEST_ID,
-} from './test_ids';
+} from '../test_ids';
 
 const title = 'test title';
 const TEST_ID = 'test';

@@ -8,10 +8,10 @@
 
 export { FlyoutFooter } from './flyout_footer';
 export { FlyoutError } from './flyout_error';
-
 export { FlyoutLoading } from './flyout_loading';
 export { FlyoutNavigation } from './flyout_navigation';
 export { FlyoutTitle } from './flyout_title';
 export { FlyoutBody } from './flyout_body';
 export { FlyoutHeader } from './flyout_header';
 export { FlyoutHeaderTabs } from './flyout_header_tabs';
+export { ExpandablePanel } from './expandable_panel';

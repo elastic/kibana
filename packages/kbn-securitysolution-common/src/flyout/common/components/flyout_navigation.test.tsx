@@ -9,24 +9,28 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import { TestProviders } from '../../../common/mock';
 import { FlyoutNavigation } from './flyout_navigation';
 import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
-} from './test_ids';
-import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
+} from '../test_ids';
+import { ExpandableFlyoutProvider, ExpandableFlyoutState } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
   type ExpandableFlyoutApi,
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
+import { I18nProvider } from '@kbn/i18n-react';
 
 const expandDetails = jest.fn();
 
 const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) => {
-  return <TestProviders>{children}</TestProviders>;
+  return (
+    <I18nProvider>
+      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+    </I18nProvider>
+  );
 };
 
 jest.mock('@kbn/expandable-flyout', () => ({
