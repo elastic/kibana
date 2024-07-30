@@ -6,32 +6,14 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { MuteOptions } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-const paramSchema = schema.object({
-  rule_id: schema.string({
-    meta: {
-      description: 'The identifier for the rule.',
-    },
-  }),
-  alert_id: schema.string({
-    meta: {
-      description: 'The identifier for the alert.',
-    },
-  }),
-});
-
-const rewriteParamsReq: RewriteRequestCase<MuteOptions> = ({
-  rule_id: alertId,
-  alert_id: alertInstanceId,
-}) => ({
-  alertId,
-  alertInstanceId,
-});
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  unmuteAlertParamsSchemaV1,
+  UnmuteAlertRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/unmute_alert';
+import { transformRequestParamsToApplicationV1 } from './transforms';
 
 export const unmuteAlertRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -45,15 +27,22 @@ export const unmuteAlertRoute = (
         summary: `Unmute an alert`,
       },
       validate: {
-        params: paramSchema,
+        request: {
+          params: unmuteAlertParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const params = rewriteParamsReq(req.params);
+        const params: UnmuteAlertRequestParamsV1 = req.params;
         try {
-          await rulesClient.unmuteInstance(params);
+          await rulesClient.unmuteInstance(transformRequestParamsToApplicationV1(params));
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
