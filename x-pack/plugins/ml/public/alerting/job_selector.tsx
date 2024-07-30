@@ -16,6 +16,7 @@ import { useMlKibana } from '../application/contexts/kibana';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
+import { LoadingIndicator } from '../application/components/loading_indicator';
 
 interface JobSelection {
   jobIds?: JobId[];
@@ -68,6 +69,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   const isMounted = useMountedState();
 
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [jobsLoaded, setJobsLoaded] = useState<boolean>(false);
   const jobIds = useMemo(() => new Set(), []);
   const groupIds = useMemo(() => new Set(), []);
 
@@ -149,6 +151,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         }),
       });
     }
+    setJobsLoaded(true);
   }, [
     adJobsApiService,
     allowSelectAll,
@@ -201,6 +204,8 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     fetchOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createJobUrl]);
+
+  if (jobsLoaded === false) return <LoadingIndicator />;
 
   return jobIds.size || shouldUseDropdownJobCreate ? (
     <EuiFormRow
