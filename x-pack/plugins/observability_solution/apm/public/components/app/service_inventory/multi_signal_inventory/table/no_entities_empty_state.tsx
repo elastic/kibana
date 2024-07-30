@@ -27,7 +27,7 @@ import { useLocalStorage } from '../../../../../hooks/use_local_storage';
 import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
 import { EntityInventoryAddDataParams } from '../../../../../services/telemetry';
 import {
-  AddApmAgent,
+  AddApmData,
   AssociateServiceLogs,
   CollectServiceLogs,
 } from '../../../../shared/add_data_buttons/buttons';
@@ -92,8 +92,8 @@ export function NoEntitiesEmptyState() {
           actions={
             <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
               <EuiFlexGroup direction="row" gutterSize="xs">
-                <AddApmAgent
-                  basePath={basePath}
+                <AddApmData
+                  data-test-subj="apmAddDataEmptyState"
                   onClick={() => {
                     reportButtonClick('add_apm_agent');
                   }}
