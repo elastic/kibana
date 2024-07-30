@@ -363,8 +363,7 @@ const TextFieldWarning = () => {
           {i18n.translate(
             'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
             {
-              defaultMessage:
-                'Pattern analysis detection can only be run on data views with a text field.',
+              defaultMessage: 'Pattern analysis can only be run on data views with a text field.',
             }
           )}
         </p>
@@ -392,8 +391,7 @@ const TimeFieldWarning = () => {
           {i18n.translate(
             'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title.description',
             {
-              defaultMessage:
-                'Pattern analysis detection can only be run on data views with a time field.',
+              defaultMessage: 'Pattern analysis can only be run on data views with a time field.',
             }
           )}
         </p>
