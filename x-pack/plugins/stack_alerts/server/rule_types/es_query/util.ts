@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { OnlyEsQueryRuleParams } from './types';
 import { EsQueryRuleParams } from './rule_type_params';
 
@@ -45,4 +46,14 @@ function getInvalidQueryError(query: string) {
       query,
     },
   });
+}
+
+export function parseShardFailures(searchResult: SearchResponse<unknown>) {
+  const anyShardsFailed = searchResult?._shards?.failed ?? 0;
+  if (anyShardsFailed > 0) {
+    // grab the error from the failures array and throw
+    const errorMessage =
+      searchResult?._shards?.failures?.[0]?.reason?.reason || 'Search failed due shard exception.';
+    throw new Error(errorMessage);
+  }
 }

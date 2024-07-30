@@ -9,6 +9,7 @@ import { OnlyEsQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsQuery } from './fetch_es_query';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/common', () => {
@@ -477,6 +478,57 @@ describe('fetchEsQuery', () => {
         track_total_hits: true,
       },
       { meta: true }
+    );
+  });
+
+  it('should bubble up CCS errors stored in the _shards field of the search result', async () => {
+    scopedClusterClientMock.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 16,
+        timed_out: false,
+        _shards: {
+          total: 51,
+          successful: 48,
+          skipped: 48,
+          failed: 3,
+          failures: [
+            {
+              shard: 0,
+              index: 'ccs-index',
+              node: '8jMc8jz-Q6qFmKZXfijt-A',
+              reason: {
+                type: 'illegal_argument_exception',
+                reason:
+                  "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+              },
+            },
+          ],
+        },
+        hits: {
+          total: {
+            value: 0,
+            relation: 'eq',
+          },
+          max_score: 0,
+          hits: [],
+        },
+      })
+    );
+
+    await expect(() =>
+      fetchEsQuery({
+        ruleId: 'abc',
+        name: 'test-rule',
+        params: defaultParams,
+        timestamp: '2020-02-09T23:15:41.941Z',
+        services,
+        spacePrefix: '',
+        publicBaseUrl: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting."`
     );
   });
 });

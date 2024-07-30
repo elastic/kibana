@@ -7,7 +7,7 @@
 
 import { OnlyEsQueryRuleParams } from './types';
 import { Comparator } from '../../../common/comparator_types';
-import { getParsedQuery } from './util';
+import { getParsedQuery, parseShardFailures } from './util';
 
 describe('es_query utils', () => {
   const defaultProps = {
@@ -46,6 +46,103 @@ describe('es_query utils', () => {
           esQuery: '{ "someProperty": "test-query" }',
         } as OnlyEsQueryRuleParams)
       ).toThrow('invalid query specified: "{ "someProperty": "test-query" }" - query must be JSON');
+    });
+  });
+
+  describe('parseShardFailures', () => {
+    it('should throw error if any failures in the shard response', () => {
+      expect(() =>
+        parseShardFailures({
+          took: 16,
+          timed_out: false,
+          _shards: {
+            total: 51,
+            successful: 48,
+            skipped: 48,
+            failed: 3,
+            failures: [
+              {
+                shard: 0,
+                index: 'ccs-index',
+                node: '8jMc8jz-Q6qFmKZXfijt-A',
+                reason: {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                },
+              },
+            ],
+          },
+          hits: {
+            total: {
+              value: 0,
+              relation: 'eq',
+            },
+            max_score: 0,
+            hits: [],
+          },
+        })
+      ).toThrow(
+        `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+      );
+    });
+
+    it('should throw error with default error message if malformed error', () => {
+      expect(() =>
+        parseShardFailures({
+          took: 16,
+          timed_out: false,
+          _shards: {
+            total: 51,
+            successful: 48,
+            skipped: 48,
+            failed: 3,
+            failures: [
+              // @ts-expect-error
+              {
+                shard: 0,
+                index: 'ccs-index',
+                node: '8jMc8jz-Q6qFmKZXfijt-A',
+              },
+            ],
+          },
+          hits: {
+            total: {
+              value: 0,
+              relation: 'eq',
+            },
+            max_score: 0,
+            hits: [],
+          },
+        })
+      ).toThrow(`Search failed due shard exception.`);
+
+      expect(() =>
+        parseShardFailures({
+          took: 16,
+          timed_out: false,
+          _shards: { total: 51, successful: 48, skipped: 48, failed: 3, failures: [] },
+          hits: {
+            total: {
+              value: 0,
+              relation: 'eq',
+            },
+            max_score: 0,
+            hits: [],
+          },
+        })
+      ).toThrow(`Search failed due shard exception.`);
+    });
+
+    it('should not throw error if no failures', () => {
+      expect(
+        parseShardFailures({
+          took: 16,
+          timed_out: false,
+          _shards: { total: 51, successful: 51, skipped: 51, failed: 0, failures: [] },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+        })
+      ).toBeUndefined();
     });
   });
 });

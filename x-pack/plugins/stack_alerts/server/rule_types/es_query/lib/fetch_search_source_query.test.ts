@@ -6,13 +6,17 @@
  */
 
 import { OnlySearchSourceRuleParams } from '../types';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import {
+  createSearchSourceMock,
+  searchSourceInstanceMock,
+} from '@kbn/data-plugin/common/search/search_source/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   updateSearchSource,
   generateLink,
   updateFilterReferences,
   getSmallerDataViewSpec,
+  fetchSearchSourceQuery,
 } from './fetch_search_source_query';
 import {
   createStubDataView,
@@ -24,6 +28,7 @@ import { Comparator } from '../../../../common/comparator_types';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 
 const createDataView = () => {
   const id = 'test-id';
@@ -422,6 +427,72 @@ describe('fetchSearchSourceQuery', () => {
         }
       `);
       expect(logger.warn).toHaveBeenCalledWith('Top hits size is capped at 100');
+    });
+
+    it('should bubble up CCS errors stored in the _shards field of the search result', async () => {
+      const response = {
+        took: 16,
+        timed_out: false,
+        _shards: {
+          total: 51,
+          successful: 48,
+          skipped: 48,
+          failed: 3,
+          failures: [
+            {
+              shard: 0,
+              index: 'ccs-index',
+              node: '8jMc8jz-Q6qFmKZXfijt-A',
+              reason: {
+                type: 'illegal_argument_exception',
+                reason:
+                  "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+              },
+            },
+          ],
+        },
+        hits: {
+          total: {
+            value: 0,
+            relation: 'eq',
+          },
+          max_score: 0,
+          hits: [],
+        },
+      };
+
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(dataViewMock)
+      );
+      (searchSourceInstanceMock.setField as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(undefined)
+      );
+      (searchSourceInstanceMock.createChild as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(searchSourceInstanceMock)
+      );
+      (searchSourceInstanceMock.fetch as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(response)
+      );
+
+      // const searchSourceInstance = createSearchSourceMock({}, response);
+      searchSourceCommonMock.createLazy.mockResolvedValueOnce(searchSourceInstanceMock);
+
+      await expect(() =>
+        fetchSearchSourceQuery({
+          ruleId: 'abc',
+          params: defaultParams,
+          // @ts-expect-error
+          services: {
+            logger,
+            searchSourceClient: searchSourceCommonMock,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting."`
+      );
     });
   });
 

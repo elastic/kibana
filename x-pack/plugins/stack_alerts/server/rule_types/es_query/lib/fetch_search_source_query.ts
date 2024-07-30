@@ -26,6 +26,7 @@ import { Logger } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
+import { parseShardFailures } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -76,6 +77,10 @@ export async function fetchSearchSourceQuery({
   );
 
   const searchResult = await searchSource.fetch();
+
+  // result against CCS indices will return success response with errors nested within the _shards field
+  // look for these errors and bubble them up
+  parseShardFailures(searchResult);
 
   const link = await generateLink(
     initialSearchSource,

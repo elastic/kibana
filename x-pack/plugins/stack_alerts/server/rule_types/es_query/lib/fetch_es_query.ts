@@ -16,7 +16,7 @@ import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { getParsedQuery } from '../util';
+import { getParsedQuery, parseShardFailures } from '../util';
 
 export interface FetchEsQueryOpts {
   ruleId: string;
@@ -134,6 +134,10 @@ export async function fetchEsQuery({
     () =>
       ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
+
+  // result against CCS indices will return success response with errors nested within the _shards field
+  // look for these errors and bubble them up
+  parseShardFailures(searchResult);
 
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
 
