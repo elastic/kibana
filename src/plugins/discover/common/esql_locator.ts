@@ -29,7 +29,7 @@ export class DiscoverESQLLocatorDefinition implements LocatorDefinition<Discover
   public readonly getLocation = async () => {
     const { discoverAppLocator, dataViews } = this.deps;
     const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-    const dataView = await getESQLAdHocDataview(indexName, dataViews);
+    const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
     const esql = getInitialESQLQuery(dataView);
 
     const params = {
