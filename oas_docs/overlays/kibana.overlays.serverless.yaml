@@ -22,13 +22,6 @@ actions:
   - target: "$.paths['/s/{spaceId}/api/saved_objects/_export']"
     description: Remove duplicate path
     remove: true
-  # Remove internal paths
-  - target: "$.paths['/s/{spaceId}/internal/observability/slos/_historical_summary']"
-    description: Remove internal path
-    remove: true
-  - target: "$.paths['/s/{spaceId}/internal/observability/slos/_definitions']"
-    description: Remove internal path
-    remove: true
   # Remove operation-level security definitions
   - target: "$.paths['/api/status']['get'].security"
     description: Remove system security definitions
@@ -77,33 +70,6 @@ actions:
     remove: true
   - target: "$.paths['/api/saved_objects/resolve/{type}/{id}']['get'].security"
     description: Remove saved object security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos']['post'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos']['get'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}']['get'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}']['put'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}']['delete'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}/enable']['post'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}/disable']['post'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos/{sloId}/_reset']['post'].security"
-    description: Remove slo security definitions
-    remove: true
-  - target: "$.paths['/s/{spaceId}/api/observability/slos/_delete_instances']['post'].security"
-    description: Remove slo security definitions
     remove: true
   # Add a document-level security definition
   - target: '$.components.securitySchemes'
