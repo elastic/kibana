@@ -43,7 +43,7 @@ export const entityDefinitionSchema = z.object({
         z.object({
           syncField: z.optional(z.string()),
           syncDelay: z.optional(durationSchema),
-          frequency: z.optional(z.string()),
+          frequency: z.optional(durationSchema),
         })
       ),
     })
