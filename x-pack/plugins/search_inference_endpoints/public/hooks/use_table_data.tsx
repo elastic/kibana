@@ -9,6 +9,7 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
+import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   FilterOptions,
@@ -17,7 +18,6 @@ import {
   QueryParams,
   SortOrder,
   ServiceProviderKeys,
-  TaskTypes,
 } from '../components/all_inference_endpoints/types';
 import { DeploymentStatusEnum } from '../components/all_inference_endpoints/types';
 
