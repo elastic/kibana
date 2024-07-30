@@ -166,7 +166,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           theme: CONSOLE_THEME_ID,
           // Make the quick-fix window be fixed to the window rather than clipped by
           // the parent content set with overflow: hidden/auto
-          fixedOverflowWidgets: true
+          fixedOverflowWidgets: true,
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
