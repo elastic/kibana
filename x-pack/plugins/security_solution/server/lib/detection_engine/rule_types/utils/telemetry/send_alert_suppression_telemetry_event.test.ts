@@ -43,6 +43,7 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
     const ruleParams = {
       type: 'query',
       immutable: false,
+      ruleId: 'test-rule-id',
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
@@ -84,6 +85,7 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
           value: 20,
         },
       },
+      ruleId: 'test-rule-id',
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
@@ -98,10 +100,12 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
       suppressionAlertsCreated: 6,
       suppressionAlertsSuppressed: 1,
       suppressionDuration: 1200,
-      suppressionFieldsNumber: 0,
       suppressionMissingFields: false,
       suppressionRuleName: 'Custom rule',
       suppressionRuleType: 'threshold',
+      suppressionGroupByFields: [],
+      suppressionGroupByFieldsNumber: 0,
+      suppressionRuleId: 'test-rule-id',
     });
   });
   it('should report correct event data for query rule type with per time period suppression', () => {
@@ -115,6 +119,7 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
           value: 1,
         },
       },
+      ruleId: 'test-rule-id',
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
@@ -129,10 +134,12 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
       suppressionAlertsCreated: 10,
       suppressionAlertsSuppressed: 0,
       suppressionDuration: 3600,
-      suppressionFieldsNumber: 1,
       suppressionMissingFields: true,
       suppressionRuleType: 'query',
       suppressionRuleName: 'Custom rule',
+      suppressionGroupByFields: ['host.name'],
+      suppressionGroupByFieldsNumber: 1,
+      suppressionRuleId: 'test-rule-id',
     });
   });
 
@@ -144,6 +151,7 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
         groupBy: ['host.name', 'host.ip'],
         missingFieldsStrategy: 'doNotSuppress',
       },
+      ruleId: 'test-rule-id',
     } as RuleParams;
 
     sendAlertSuppressionTelemetryEvent({
@@ -158,10 +166,12 @@ describe('sendAlertSuppressionTelemetryEvent', () => {
       suppressionAlertsCreated: 11,
       suppressionAlertsSuppressed: 2,
       suppressionDuration: -1,
-      suppressionFieldsNumber: 2,
       suppressionMissingFields: false,
       suppressionRuleName: 'Custom rule',
       suppressionRuleType: 'esql',
+      suppressionGroupByFields: ['host.name', 'host.ip'],
+      suppressionGroupByFieldsNumber: 2,
+      suppressionRuleId: 'test-rule-id',
     });
   });
   it('should report prebuilt rule name', () => {

@@ -128,9 +128,11 @@ export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
   suppressionAlertsSuppressed: number;
   suppressionRuleName: string;
   suppressionDuration: number;
-  suppressionFieldsNumber: number;
+  suppressionGroupByFieldsNumber: number;
+  suppressionGroupByFields: string[];
   suppressionRuleType: string;
   suppressionMissingFields: boolean;
+  suppressionRuleId: string;
 }> = {
   eventType: 'Alert suppression event',
   schema: {
@@ -160,10 +162,24 @@ export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
         description: 'Duration in seconds of suppression period. -1 for per rule execution config',
       },
     },
-    suppressionFieldsNumber: {
+    suppressionGroupByFieldsNumber: {
       type: 'long',
       _meta: {
         description: 'Number of Suppress by fields',
+      },
+    },
+    suppressionGroupByFields: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Tag attached to the element...',
+          optional: false,
+        },
+      },
+      _meta: {
+        description: 'List of tags attached to the element...',
+        optional: false,
       },
     },
     suppressionRuleType: {
@@ -176,6 +192,12 @@ export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Suppression of missing fields enabled',
+      },
+    },
+    suppressionRuleId: {
+      type: 'keyword',
+      _meta: {
+        description: 'ruleId',
       },
     },
   },

@@ -55,9 +55,13 @@ export const sendAlertSuppressionTelemetryEvent = ({
     return;
   }
 
-  const suppressionFieldsNumber = isThresholdParams(ruleParams)
+  const suppressionGroupByFieldsNumber = isThresholdParams(ruleParams)
     ? ruleParams.threshold?.field?.length || 0
     : ruleParams.alertSuppression.groupBy.length;
+
+  const suppressionGroupByFields = isThresholdParams(ruleParams)
+    ? ruleParams.threshold?.field || []
+    : ruleParams.alertSuppression.groupBy;
 
   const suppressionMissingFields = isThresholdParams(ruleParams)
     ? false
@@ -68,9 +72,11 @@ export const sendAlertSuppressionTelemetryEvent = ({
     suppressionAlertsSuppressed: suppressedAlertsCount,
     suppressionRuleName: ruleParams.immutable ? ruleAttributes.name : 'Custom rule',
     suppressionDuration: suppressionDurationToSeconds(ruleParams.alertSuppression.duration),
-    suppressionFieldsNumber,
+    suppressionGroupByFieldsNumber,
+    suppressionGroupByFields,
     suppressionRuleType: ruleParams.type,
     suppressionMissingFields,
+    suppressionRuleId: ruleParams.ruleId,
   };
   analytics.reportEvent(ALERT_SUPPRESSION_EVENT.eventType, telemetryEvent);
 };
