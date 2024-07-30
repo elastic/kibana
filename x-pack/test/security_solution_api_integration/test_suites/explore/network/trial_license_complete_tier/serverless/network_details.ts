@@ -10,8 +10,8 @@ import {
   NetworkDetailsStrategyResponse,
   NetworkQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
