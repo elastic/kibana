@@ -86,7 +86,7 @@ export const getRunningProcesses = (command: string): Cypress.Chainable<number> 
   // traverse back from last column to the second column that has pid
   return cy
     .getByTestSubj('processesOutput-processListTable', { timeout: 120000 })
-    .findByTestSubj('process_list_command')
+    .findByTestSubj('processesOutput-command')
     .contains(command)
     .parents('td')
     .siblings('td')
