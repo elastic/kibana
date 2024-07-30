@@ -194,7 +194,12 @@ export const INFERENCE_ENDPOINTS_PLUGIN = {
 };
 
 export const CREATE_CONNECTOR_PLUGIN = {
-  CLI_SNIPPET: `#Create an index
+  CLI_SNIPPET: `./bin/connectors connector create \  
+  --index-name my-index \    
+  --index-language en \  
+  --from-file config.yml
+  `,
+  CONSOLE_SNIPPET: `#Create an index
 PUT /my-index-000001
 {
   "settings": {
@@ -238,11 +243,6 @@ POST /_security/api_key
                           }  
       }
   }`,
-  CONSOLE_SNIPPET: `./bin/connectors connector create \  
-  --index-name my-index \    
-  --index-language en \  
-  --from-file config.yml
-  `,
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
