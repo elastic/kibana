@@ -130,6 +130,7 @@ export class EntityResolutionDataClient {
         _source: {
           excludes: [`test_${searchEntity.type}_name_embeddings`],
         },
+        min_score: 0.92,
         knn: [
           {
             field: `test_${searchEntity.type}_name_embeddings.inference.chunks.embeddings`,
