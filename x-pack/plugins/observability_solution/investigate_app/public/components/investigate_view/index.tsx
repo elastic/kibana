@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, omit, pick } from 'lodash';
+import { keyBy, noop, omit, pick } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
@@ -18,6 +19,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
 import { AddNoteUI } from '../add_note_ui';
 import { AddObservationUI } from '../add_observation_ui';
+import { InvestigateSearchBar } from '../investigate_search_bar';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
 
 const containerClassName = css`
@@ -40,6 +42,27 @@ const sideBarClassName = css`
   padding: 0px 12px 32px 12px;
 `;
 
+/**
+ * const theme = useTheme();
+ *  const backgroundColorOpaque = rgba(theme.colors.emptyShade, 1);
+  const backgroundColorTransparent = rgba(theme.colors.emptyShade, 0);
+ *   // background: linear-gradient(
+  //   to bottom,
+  //   ${backgroundColorTransparent} 0%,
+  //   ${backgroundColorOpaque} 8px,
+  //   ${backgroundColorOpaque} calc(100% - 8px),
+  //   ${backgroundColorTransparent} 100%
+  // );
+ */
+const searchBarContainerClassName = css`
+  position: sticky;
+  top: -8px;
+  padding: 8px 0px;
+  margin: -8px 0px;
+
+  z-index: 100;
+`;
+
 function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const {
     core: { uiSettings },
@@ -51,6 +74,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
 
   const [range, setRange] = useDateRange();
+  const [searchBarFocused, setSearchBarFocused] = useState(false);
 
   const {
     addItem,
@@ -61,6 +85,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     investigation,
     lockItem,
     setItemParameters,
+    setGlobalParameters,
     unlockItem,
     revision,
   } = investigate.useInvestigation({
@@ -76,7 +101,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   };
 
   const createWidgetRef = useRef(createWidget);
-
   createWidgetRef.current = createWidget;
 
   useEffect(() => {
@@ -138,8 +162,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     });
   }, [revision, widgetDefinitions, uiSettings]);
 
-  const [searchBarFocused] = useState(false);
-
   if (!investigation || !revision || !gridItems) {
     return <EuiLoadingSpinner />;
   }
@@ -149,6 +171,34 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       <EuiFlexItem grow className={scrollContainerClassName}>
         <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexEnd">
           <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem className={searchBarContainerClassName}>
+              <InvestigateSearchBar
+                rangeFrom={range.from}
+                rangeTo={range.to}
+                onQuerySubmit={async ({ dateRange }) => {
+                  const nextDateRange = {
+                    from: datemath.parse(dateRange.from)!.toISOString(),
+                    to: datemath.parse(dateRange.to)!.toISOString(),
+                  };
+                  await setGlobalParameters({
+                    ...revision.parameters,
+                    timeRange: nextDateRange,
+                  });
+
+                  setRange(nextDateRange);
+                }}
+                onQueryChange={({ dateRange }) => {
+                  noop();
+                }}
+                onFocus={() => {
+                  setSearchBarFocused(true);
+                }}
+                onBlur={() => {
+                  setSearchBarFocused(false);
+                }}
+              />
+            </EuiFlexItem>
+
             <EuiFlexItem className={gridContainerClassName} grow={false}>
               <InvestigateWidgetGrid
                 items={gridItems}
