@@ -88,6 +88,11 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
+    ...(definition.staticFields != null
+      ? Object.keys(definition.staticFields).map((field) => ({
+          set: { field, value: definition.staticFields![field] },
+        }))
+      : []),
     ...(definition.metadata != null
       ? [{ script: { source: cleanScript(createMetadataPainlessScript(definition)) } }]
       : []),
@@ -117,11 +122,6 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: `${generateLatestIndexName(definition)}`,
       },
     },
-    ...(definition.staticFields != null
-      ? Object.keys(definition.staticFields).map((field) => ({
-          set: { field, value: definition.staticFields![field] },
-        }))
-      : []),
     {
       pipeline: {
         ignore_missing_pipeline: true,

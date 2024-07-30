@@ -11,6 +11,7 @@ import { useCallback } from 'react';
 import { ENTITY_DEFINITION_ID } from './entity_model';
 
 const INDEX_COMPONENT_NAME = `${ENTITY_DEFINITION_ID}-latest@platform`;
+const PIPELINE_ID = `${ENTITY_DEFINITION_ID}-latest@platform`;
 const TARGET_INDEX_EMBEDDINGS_FIELD = `test_user_name_embeddings`;
 const MODEL_ID = '.multilingual-e5-small';
 const INFERENCE_ID = 'entity_store_e5_small';
@@ -27,6 +28,7 @@ export const useVectorSearch = () => {
 };
 
 const install = async (http: HttpSetup) => {
+  await createIngestPipelineAPI(http);
   await createComponentTemplateAPI(http);
   await installModelAPI(http);
 };
@@ -64,3 +66,52 @@ const installModelAPI = async (http: HttpSetup) => {
     version: '1',
   });
 };
+
+const createIngestPipelineAPI = async (http: HttpSetup) =>
+  http.fetch(`/api/ingest_pipelines`, {
+    method: 'POST',
+    body: JSON.stringify({
+      name: PIPELINE_ID,
+      processors: [
+        {
+          set: {
+            field: TARGET_INDEX_EMBEDDINGS_FIELD,
+            value: '{{{user.name}}}{{#user.email}} {{.}}{{/user.email}}',
+          },
+        },
+        {
+          set: {
+            if: 'ctx?.asset.type == "okta_user"',
+            field: 'data_source',
+            value: 'entity_analytics_okta',
+          },
+        },
+        {
+          set: {
+            if: 'ctx?.labels?.identity_source == "azure-1"',
+            field: 'data_source',
+            value: 'entity_analytics_okta',
+          },
+        },
+        {
+          set: {
+            if: 'ctx?.data_source === null',
+            field: 'data_source',
+            value: 'observed_data',
+          },
+        },
+        {
+          remove: {
+            field: 'labels.identity_source',
+            ignore_missing: true,
+          },
+        },
+        {
+          remove: {
+            field: 'asset.type',
+            ignore_missing: true,
+          },
+        },
+      ],
+    }),
+  });

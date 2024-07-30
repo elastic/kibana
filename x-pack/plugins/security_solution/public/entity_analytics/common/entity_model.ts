@@ -69,6 +69,8 @@ const entityDefinition = {
   identityFields: [
     { field: 'user.name', optional: true },
     { field: 'id_value', optional: true },
+    { field: 'asset.type', optional: true },
+    { field: 'labels.identity_source', optional: true },
   ],
   displayNameTemplate: '{{user.name}}{{id_value}}',
   metadata: [
@@ -76,6 +78,8 @@ const entityDefinition = {
     'user.risk.calculated_score_norm',
     'user.email',
     'criticality_level',
+    'asset.type',
+    'labels.identity_source',
     { source: '_index', destination: 'sourceIndex' },
   ],
   history: {
@@ -83,8 +87,4 @@ const entityDefinition = {
     interval: '1m',
   },
   version: '1.0.0',
-  staticFields: {
-    test_user_name_embeddings: '{{user.name}} {{user.email}}',
-    debug_user_name_embeddings: '{{user.name}} {{user.email}}',
-  },
 };
