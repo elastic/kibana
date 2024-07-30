@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-const CIS_GCP_OPTION_TEST_ID = 'cisGcpTestId';
-const GCP_SINGLE_ACCOUNT_TEST_ID = 'gcpSingleAccountTestId';
-
+const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
 const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
+
+const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -27,12 +24,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('Agentless CIS Integration Page Cloud Credentials ', function () {
+  describe('Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
-    let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     const previousPackageVersion = '1.9.0';
 
     before(async () => {
@@ -40,7 +36,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-      cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
     });
 
     after(async () => {
@@ -116,68 +111,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
-      });
-    });
-
-    describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
-      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_CREDENTIALS_PACKAGE_VERSION
-        );
-
-        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
-      });
-
-      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(false);
-      });
-    });
-
-    describe('Agentless CIS_GCP ORG Account Launch Cloud Shell', () => {
-      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_CREDENTIALS_PACKAGE_VERSION
-        );
-
-        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
-      });
-
-      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(false);
       });
     });
   });
