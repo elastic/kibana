@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import { useRef } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -627,7 +628,7 @@ export const ModelsList: FC<Props> = ({
       }),
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
-      render: ({ description, recommended }: ModelItem) => {
+      render: ({ description, recommended, tags }: ModelItem) => {
         if (!description) return null;
         const descriptionText = description.replace('(Tech Preview)', '');
         return recommended ? (
@@ -641,12 +642,15 @@ export const ModelsList: FC<Props> = ({
           >
             <>
               {descriptionText}&nbsp;
-              <b>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                  defaultMessage="(Recommended)"
-                />
-              </b>
+              {tags.includes(ELASTIC_MODEL_TAG) ? (
+                <b>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                    defaultMessage="(Recommended)"
+                  />
+                </b>
+              ) : null}
+              <EuiIcon type={'starEmpty'} />
             </>
           </EuiToolTip>
         ) : (
