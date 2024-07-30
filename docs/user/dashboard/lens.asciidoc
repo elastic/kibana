@@ -375,7 +375,7 @@ image::images/legend-popover.png[Menu with options to customize the legend of a 
 
 **Change the legend's display**
 
-With the **Display**, **Legend layout**, **Legend position**, and **Legend width** options, you can adjust the way the legend appears in or next to the visualization.
+With the **Visibility**, **Position**, and **Width** options, you can adjust the way the legend appears in or next to the visualization.
 
 **Truncate long labels**
 
@@ -383,32 +383,33 @@ With the **Label truncation** option, you can keep your legend minimal in case o
 
 **Show additional statistics**
 
-To make your legend as informative as possible, you can show some additional statistics for each element of the visualization.
+To make your legend as informative as possible, you can show some additional **Statistics** for each element of the visualization and add a **Series header**.
 
 **Bar**, **Line** and **Area** charts can show the following values:
 
-- **Value**: The exact value when mousing over a specific data point
 - **Average**: Average value considering all data points in the chart
 - **Median**: Median value considering all data points in the chart
-- **Max**: Maximum value considering all data points in the chart
-- **Min**: Minimum value considering all data points in the chart
-- **First**: First value considering all data points in the chart
-- **First non-null**: First non-null value
-- **Last**: Last value considering all data points in the chart
-- **Last non-null:** Last non-null value
-- **Total**: Sum of al values plotted in the chart
+- **Minimum**: Minimum value considering all data points in the chart
+- **Maximum**: Maximum value considering all data points in the chart
+- **Range**: Difference between min and max values
+- **Last value**: Last value considering all data points in the chart
+- **Last non-null value:** Last non-null value
+- **First value**: First value considering all data points in the chart
+- **First non-null value**: First non-null value
+- **Difference**: Difference between first and last values
+- **Different %**: % difference between first and last values
+- **Sum**: Sum of al values plotted in the chart
 - **Count**: number of data points plotted in the chart
 - **Distinct Count**: number of data points with different values plotted in the chart
 - **Variance**: Variance of all data points plotted in the chart
 - **Std Deviation**: Standard deviation of all data points plotted in the chart
-- **Range**: Difference between min and max values
-- **Difference**: Difference between first and last values
-- **Different percent**: % difference between first and last values
+- **Current or last value**: The exact value of the current or last data point moused over
 
-**Pie** charts can only show two static options:
 
-- **Value**
-- **Percentage**
+//Not part of release
+//**Pie** charts can only show two static options:
+//- **Value**
+//- **Percentage**
 
 All statistics are computed based on the selected time range and the aggregated data points shown in the chart, rather than the original data coming from {es}. 
 
