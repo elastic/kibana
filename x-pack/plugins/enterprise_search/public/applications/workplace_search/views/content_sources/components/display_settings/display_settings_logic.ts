@@ -161,65 +161,83 @@ export const DisplaySettingsLogic = kea<
     sourceName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeDisplaySettings: (_, { sourceName }) => sourceName,
       },
     ],
     sourceId: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeDisplaySettings: (_, { sourceId }) => sourceId,
       },
     ],
     schemaFields: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeDisplaySettings: (_, { schemaFields }) => schemaFields,
       },
     ],
     exampleDocuments: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeDisplaySettings: (_, { exampleDocuments }) => exampleDocuments,
       },
     ],
     serverSearchResultConfig: [
       defaultSearchResultConfig,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeDisplaySettings: (_, { searchResultConfig }) =>
           setDefaultColor(searchResultConfig),
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerResponseData: (_, { searchResultConfig }) => searchResultConfig,
       },
     ],
     searchResultConfig: [
       defaultSearchResultConfig,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeDisplaySettings: (_, { searchResultConfig }) =>
           setDefaultColor(searchResultConfig),
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerResponseData: (_, { searchResultConfig }) => searchResultConfig,
+        // @ts-expect-error upgrade typescript v5.1.6
         setTitleField: (searchResultConfig, titleField) => ({ ...searchResultConfig, titleField }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setSubtitleField: (searchResultConfig, subtitleField) => ({
           ...searchResultConfig,
           subtitleField,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setUrlField: (searchResultConfig, urlField) => ({ ...searchResultConfig, urlField }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setDescriptionField: (searchResultConfig, descriptionField) => ({
           ...searchResultConfig,
           descriptionField,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setTypeField: (searchResultConfig, typeField) => ({ ...searchResultConfig, typeField }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setMediaTypeField: (searchResultConfig, mediaTypeField) => ({
           ...searchResultConfig,
           mediaTypeField,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setCreatedByField: (searchResultConfig, createdByField) => ({
           ...searchResultConfig,
           createdByField,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setUpdatedByField: (searchResultConfig, updatedByField) => ({
           ...searchResultConfig,
           updatedByField,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setColorField: (searchResultConfig, color) => ({ ...searchResultConfig, color }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setDetailFields: (searchResultConfig, { result: { destination, source } }) => {
           const detailFields = cloneDeep(searchResultConfig.detailFields);
           const element = detailFields[source.index];
@@ -230,6 +248,7 @@ export const DisplaySettingsLogic = kea<
             detailFields,
           };
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         addDetailField: (searchResultConfig, newfield) => {
           const detailFields = cloneDeep(searchResultConfig.detailFields);
           detailFields.push(newfield);
@@ -238,6 +257,7 @@ export const DisplaySettingsLogic = kea<
             detailFields,
           };
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         removeDetailField: (searchResultConfig, index) => {
           const detailFields = cloneDeep(searchResultConfig.detailFields);
           detailFields.splice(index, 1);
@@ -246,6 +266,7 @@ export const DisplaySettingsLogic = kea<
             detailFields,
           };
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         updateDetailField: (searchResultConfig, { updatedField, index }) => {
           const detailFields = cloneDeep(searchResultConfig.detailFields);
           detailFields[index] = updatedField;
@@ -259,12 +280,14 @@ export const DisplaySettingsLogic = kea<
     serverRoute: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeDisplaySettings: (_, { serverRoute }) => serverRoute,
       },
     ],
     editFieldIndex: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         openEditDetailField: (_, openEditDetailField) => openEditDetailField,
         toggleFieldEditorModal: () => null,
       },
@@ -278,12 +301,14 @@ export const DisplaySettingsLogic = kea<
     navigatingBetweenTabs: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
       },
     ],
     addFieldModalVisible: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleFieldEditorModal: (addFieldModalVisible) => !addFieldModalVisible,
         openEditDetailField: () => true,
         updateDetailField: () => false,
@@ -293,48 +318,56 @@ export const DisplaySettingsLogic = kea<
     titleFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleTitleFieldHover: (titleFieldHover) => !titleFieldHover,
       },
     ],
     urlFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleUrlFieldHover: (urlFieldHover) => !urlFieldHover,
       },
     ],
     subtitleFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleSubtitleFieldHover: (subtitleFieldHover) => !subtitleFieldHover,
       },
     ],
     descriptionFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleDescriptionFieldHover: (descriptionFieldHover) => !descriptionFieldHover,
       },
     ],
     typeFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleTypeFieldHover: (typeFieldHover) => !typeFieldHover,
       },
     ],
     mediaTypeFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleMediaTypeFieldHover: (mediaTypeFieldHover) => !mediaTypeFieldHover,
       },
     ],
     createdByFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleCreatedByFieldHover: (createdByFieldHover) => !createdByFieldHover,
       },
     ],
     updatedByFieldHover: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleUpdatedByFieldHover: (updatedByFieldHover) => !updatedByFieldHover,
       },
     ],

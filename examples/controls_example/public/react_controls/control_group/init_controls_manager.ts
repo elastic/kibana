@@ -12,21 +12,22 @@ import {
   PanelPackage,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import { Reference } from '@kbn/content-management-utils';
-import { BehaviorSubject, merge } from 'rxjs';
+import type { Reference } from '@kbn/content-management-utils';
+import { BehaviorSubject, first, merge } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../types';
 
-type ControlOrder = Array<{ id: string; type: string }>;
+export type ControlsInOrder = Array<{ id: string; type: string }>;
 
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
+  const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
   const controlsPanelState: { [panelId: string]: DefaultControlState } = {
     ...initialControlPanelsState,
   };
-  const controlsInOrder$ = new BehaviorSubject<ControlOrder>(
+  const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
     Object.keys(initialControlPanelsState)
       .map((key) => ({
         id: key,
@@ -156,6 +157,23 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         );
         return controlApi ? controlApi.uuid : '';
       },
-    } as PresentationContainer & HasSerializedChildState<ControlPanelState>,
+      untilInitialized: () => {
+        return new Promise((resolve) => {
+          children$
+            .pipe(
+              first((children) => {
+                const atLeastOneControlNotInitialized = initialControlIds.some(
+                  (controlId) => !children[controlId]
+                );
+                return !atLeastOneControlNotInitialized;
+              })
+            )
+            .subscribe(() => {
+              resolve();
+            });
+        });
+      },
+    } as PresentationContainer &
+      HasSerializedChildState<ControlPanelState> & { untilInitialized: () => Promise<void> },
   };
 }

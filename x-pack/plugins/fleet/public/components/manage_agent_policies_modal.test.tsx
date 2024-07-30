@@ -39,7 +39,12 @@ jest.mock('../hooks', () => ({
       },
     },
   }),
-  useGetAgentPolicies: jest.fn(),
+  useGetAgentPolicies: jest.fn().mockReturnValue({
+    data: {
+      items: [] as AgentPolicy[],
+    },
+    isLoading: false,
+  }),
   useGetPackagePolicies: jest.fn().mockReturnValue({
     data: {
       items: [{ name: 'Integration 1', revision: 2, id: 'integration1', policy_ids: ['policy1'] }],
@@ -59,8 +64,7 @@ jest.mock('../hooks', () => ({
   }),
 }));
 
-// FLAKY: https://github.com/elastic/kibana/issues/189004
-describe.skip('ManageAgentPoliciesModal', () => {
+describe('ManageAgentPoliciesModal', () => {
   let testRenderer: TestRenderer;
   const mockOnClose = jest.fn();
   const mockPolicies = [{ name: 'Test policy', revision: 2, id: 'policy1' }] as AgentPolicy[];
