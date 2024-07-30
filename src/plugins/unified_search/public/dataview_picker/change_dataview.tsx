@@ -116,12 +116,11 @@ export function ChangeDataView({
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
         adHocDataViews?.map(mapAdHocDataView) ?? [];
 
+      setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
       if (currentDataViewId) {
         const currentDataview = await data.dataViews.get(currentDataViewId, false);
         setSelectedDataView(currentDataview);
       }
-
-      setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
