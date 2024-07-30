@@ -21,8 +21,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '../table_context';
+import { copyRowsToClipboard } from '../utils/copy_value_to_clipboard';
 
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const { euiTheme } = useEuiTheme();
@@ -84,6 +86,8 @@ export function DataTableDocumentToolbarBtn({
   selectedDocs,
   setIsFilterActive,
   setSelectedDocs,
+  toastNotifications,
+  columns,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
@@ -91,7 +95,10 @@ export function DataTableDocumentToolbarBtn({
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;
+  toastNotifications: ToastsStart;
+  columns: string[];
 }) {
+  const { valueToStringConverter } = useContext(UnifiedDataTableContext);
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const getMenuItems = useCallback(() => {
@@ -141,6 +148,24 @@ export function DataTableDocumentToolbarBtn({
           )}
         </EuiContextMenuItem>
       ),
+      <EuiContextMenuItem
+        data-test-subj="dscCopySelectionToClipboard"
+        key="copySelectionToClipboard"
+        icon="copyClipboard"
+        onClick={async () => {
+          await copyRowsToClipboard({
+            columns,
+            selectedRowIndices: selectedDocs.map((id) => rows.findIndex((row) => row.id === id)),
+            valueToStringConverter,
+            toastNotifications,
+          });
+        }}
+      >
+        <FormattedMessage
+          id="unifiedDataTable.copySelectionToClipboard"
+          defaultMessage="Copy selection to clipboard"
+        />
+      </EuiContextMenuItem>,
       <EuiCopy
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
@@ -169,19 +194,6 @@ export function DataTableDocumentToolbarBtn({
         )}
       </EuiCopy>,
       <EuiContextMenuItem
-        data-test-subj="dscCopySelectionToClipboard"
-        key="copySelectionToClipboard"
-        icon="copyClipboard"
-        onClick={() => {
-          //
-        }}
-      >
-        <FormattedMessage
-          id="unifiedDataTable.copySelectionToClipboard"
-          defaultMessage="Copy selection to clipboard"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
         data-test-subj="dscGridClearSelectedDocuments"
         key="clearSelection"
         icon="cross"
@@ -194,7 +206,17 @@ export function DataTableDocumentToolbarBtn({
         <FormattedMessage id="unifiedDataTable.clearSelection" defaultMessage="Clear selection" />
       </EuiContextMenuItem>,
     ];
-  }, [isFilterActive, isPlainRecord, rows, selectedDocs, setIsFilterActive, setSelectedDocs]);
+  }, [
+    isFilterActive,
+    isPlainRecord,
+    rows,
+    selectedDocs,
+    setIsFilterActive,
+    setSelectedDocs,
+    valueToStringConverter,
+    toastNotifications,
+    columns,
+  ]);
 
   const toggleSelectionToolbar = useCallback(
     () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),

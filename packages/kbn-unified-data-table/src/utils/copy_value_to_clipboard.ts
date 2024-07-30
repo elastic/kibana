@@ -151,3 +151,74 @@ export const copyColumnNameToClipboard = ({
 
   return columnDisplayName;
 };
+
+export const copyRowsToClipboard = async ({
+  columns,
+  selectedRowIndices,
+  toastNotifications,
+  valueToStringConverter,
+}: {
+  columns: string[];
+  selectedRowIndices: number[];
+  toastNotifications: ToastsStart;
+  valueToStringConverter: ValueToStringConverter;
+}): Promise<string | null> => {
+  const columnSeparator = '\t ';
+  const rowSeparator = '\n';
+  let withFormula = false;
+  let textToCopy = '';
+
+  textToCopy +=
+    columns
+      .map((columnId) => {
+        const nameFormattedResult = convertNameToString(columnId); // TODO: switch to displayName
+        withFormula = withFormula || nameFormattedResult.withFormula;
+        return nameFormattedResult.formattedString;
+      })
+      .join(columnSeparator) + rowSeparator;
+
+  selectedRowIndices.forEach((rowIndex) => {
+    textToCopy +=
+      columns
+        .map((columnId) => {
+          const result = valueToStringConverter(rowIndex, columnId, { compatibleWithCSV: true });
+          withFormula = withFormula || result.withFormula;
+          return result.formattedString;
+        })
+        .join(columnSeparator) + rowSeparator;
+  });
+
+  let copied;
+  try {
+    // try to copy without browser styles
+    await window.navigator?.clipboard?.writeText(textToCopy);
+    copied = true;
+  } catch (error) {
+    copied = copyToClipboard(textToCopy);
+  }
+
+  if (!copied) {
+    toastNotifications.addWarning({
+      title: COPY_FAILED_ERROR_MESSAGE,
+    });
+
+    return null;
+  }
+
+  const toastTitle = i18n.translate('unifiedDataTable.copyRowsToClipboard.toastTitle', {
+    defaultMessage: 'Copied to clipboard',
+  });
+
+  if (withFormula) {
+    toastNotifications.addWarning({
+      title: toastTitle,
+      text: WARNING_FOR_FORMULAS,
+    });
+  } else {
+    toastNotifications.addInfo({
+      title: toastTitle,
+    });
+  }
+
+  return textToCopy;
+};

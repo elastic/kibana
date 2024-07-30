@@ -909,6 +909,8 @@ export const UnifiedDataTable = ({
                 selectedDocs={usedSelectedDocs}
                 setSelectedDocs={setSelectedDocs}
                 setIsFilterActive={setIsFilterActive}
+                toastNotifications={toastNotifications}
+                columns={visibleColumns}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -923,6 +925,8 @@ export const UnifiedDataTable = ({
     isFilterActive,
     enableComparisonMode,
     rows,
+    toastNotifications,
+    visibleColumns,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
