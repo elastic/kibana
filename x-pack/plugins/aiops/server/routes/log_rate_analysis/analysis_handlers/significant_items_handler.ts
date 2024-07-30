@@ -44,15 +44,16 @@ export const significantItemsHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
+    version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
-    fieldCandidates,
+    keywordFieldCandidates,
     textFieldCandidates,
   }: {
-    fieldCandidates: string[];
+    keywordFieldCandidates: string[];
     textFieldCandidates: string[];
   }) => {
-    let fieldCandidatesCount = fieldCandidates.length;
+    let keywordFieldCandidatesCount = keywordFieldCandidates.length;
     const textFieldCandidatesCount = textFieldCandidates.length;
 
     // This will store the combined count of detected significant log patterns and keywords
@@ -61,7 +62,7 @@ export const significantItemsHandlerFactory =
     const significantCategories: SignificantItem[] = [];
 
     significantCategories.push(
-      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.significantItems?.filter(
         (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
       ) ?? [])
     );
@@ -69,30 +70,63 @@ export const significantItemsHandlerFactory =
     const significantTerms: SignificantItem[] = [];
 
     significantTerms.push(
-      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.significantItems?.filter(
         (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
       ) ?? [])
     );
 
-    let remainingFieldCandidates: string[];
-    let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
+    let remainingKeywordFieldCandidates: string[];
+    let remainingTextFieldCandidates: string[];
+    let loadingStepSizePValues: number;
 
-    if (requestBody.overrides?.remainingFieldCandidates) {
-      fieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
-      remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
-      fieldCandidatesCount = fieldCandidates.length;
+    if (requestBody.overrides?.loaded) {
       loadingStepSizePValues =
-        LOADED_FIELD_CANDIDATES +
-        PROGRESS_STEP_P_VALUES -
-        (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+        LOADED_FIELD_CANDIDATES + PROGRESS_STEP_P_VALUES - requestBody.overrides?.loaded;
     } else {
-      remainingFieldCandidates = fieldCandidates;
+      loadingStepSizePValues = LOADED_FIELD_CANDIDATES;
+    }
+
+    if (version === '2') {
+      const overridesRemainingFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'2'>)
+        .overrides?.remainingFieldCandidates;
+
+      if (Array.isArray(overridesRemainingFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
+
+      remainingTextFieldCandidates = textFieldCandidates;
+    } else if (version === '3') {
+      const overridesRemainingKeywordFieldCandidates = (
+        requestBody as AiopsLogRateAnalysisSchema<'3'>
+      ).overrides?.remainingKeywordFieldCandidates;
+
+      if (Array.isArray(overridesRemainingKeywordFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingKeywordFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingKeywordFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
+
+      const overridesRemainingTextFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'3'>)
+        .overrides?.remainingTextFieldCandidates;
+
+      if (Array.isArray(overridesRemainingTextFieldCandidates)) {
+        textFieldCandidates.push(...overridesRemainingTextFieldCandidates);
+        remainingTextFieldCandidates = overridesRemainingTextFieldCandidates;
+      } else {
+        remainingTextFieldCandidates = textFieldCandidates;
+      }
     }
 
     logDebugMessage('Fetch p-values.');
 
     const loadingStep =
-      (1 / (fieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
+      (1 / (keywordFieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
 
     const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
       let queueItemLoadingStep = 0;
@@ -124,7 +158,9 @@ export const significantItemsHandlerFactory =
           return;
         }
 
-        remainingFieldCandidates = remainingFieldCandidates.filter((d) => !fieldNames.includes(d));
+        remainingKeywordFieldCandidates = remainingKeywordFieldCandidates.filter(
+          (d) => !fieldNames.includes(d)
+        );
 
         if (pValues.length > 0) {
           significantTerms.push(...pValues);
@@ -135,17 +171,33 @@ export const significantItemsHandlerFactory =
         const { textFieldCandidates: fieldNames } = payload;
         queueItemLoadingStep = loadingStep * fieldNames.length;
 
-        const significantCategoriesForField = await fetchSignificantCategories({
-          esClient,
-          logger,
-          emitError: responseStream.pushError,
-          abortSignal,
-          arguments: {
-            ...requestBody,
-            fieldNames,
-            sampleProbability: stateHandler.sampleProbability(),
-          },
-        });
+        let significantCategoriesForField: Awaited<ReturnType<typeof fetchSignificantCategories>>;
+
+        try {
+          significantCategoriesForField = await fetchSignificantCategories({
+            esClient,
+            logger,
+            emitError: responseStream.pushError,
+            abortSignal,
+            arguments: {
+              ...requestBody,
+              fieldNames,
+              sampleProbability: stateHandler.sampleProbability(),
+            },
+          });
+        } catch (e) {
+          if (!isRequestAbortedError(e)) {
+            logger.error(
+              `Failed to fetch p-values for ${fieldNames.join()}, got: \n${e.toString()}`
+            );
+            responseStream.pushError(`Failed to fetch p-values for ${fieldNames.join()}.`);
+          }
+          return;
+        }
+
+        remainingTextFieldCandidates = remainingTextFieldCandidates.filter(
+          (d) => !fieldNames.includes(d)
+        );
 
         if (significantCategoriesForField.length > 0) {
           significantCategories.push(...significantCategoriesForField);
@@ -170,7 +222,8 @@ export const significantItemsHandlerFactory =
               },
             }
           ),
-          remainingFieldCandidates,
+          remainingKeywordFieldCandidates,
+          remainingTextFieldCandidates,
         })
       );
     }, MAX_CONCURRENT_QUERIES);
@@ -182,7 +235,9 @@ export const significantItemsHandlerFactory =
     pValuesQueue.push(
       [
         ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
-        ...chunk(fieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ keywordFieldCandidates: d })),
+        ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+          keywordFieldCandidates: d,
+        })),
       ],
       (err) => {
         if (err) {
