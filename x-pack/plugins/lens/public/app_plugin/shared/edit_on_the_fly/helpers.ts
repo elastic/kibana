@@ -7,15 +7,58 @@
 import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
-  getESQLQueryColumns,
+  getESQLResults,
+  formatESQLColumns,
 } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
+
+export interface ESQLDataGridAttrs {
+  rows: ESQLRow[];
+  dataView: DataView;
+  columns: DatatableColumn[];
+}
+
+export const getGridAttrs = async (
+  query: AggregateQuery,
+  adHocDataViews: DataViewSpec[],
+  deps: LensPluginStartDependencies,
+  abortController?: AbortController
+): Promise<ESQLDataGridAttrs> => {
+  const indexPattern = getIndexPatternFromESQLQuery(query.esql);
+  const dataViewSpec = adHocDataViews.find((adHoc) => {
+    return adHoc.name === indexPattern;
+  });
+
+  const [results, dataView] = await Promise.all([
+    getESQLResults({
+      esqlQuery: query.esql,
+      search: deps.data.search.search,
+      signal: abortController?.signal,
+      dropNullColumns: true,
+      timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+    }),
+    dataViewSpec
+      ? deps.dataViews.create(dataViewSpec)
+      : getESQLAdHocDataview(query.esql, deps.dataViews),
+  ]);
+
+  const columns = formatESQLColumns(results.response.columns);
+
+  return {
+    rows: results.response.values,
+    dataView,
+    columns,
+  };
+};
 
 export const getSuggestions = async (
   query: AggregateQuery,
@@ -24,24 +67,23 @@ export const getSuggestions = async (
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
   setErrors: (errors: Error[]) => void,
-  abortController?: AbortController
+  abortController?: AbortController,
+  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
 ) => {
   try {
-    const indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    const dataViewSpec = adHocDataViews.find((adHoc) => {
-      return adHoc.name === indexPattern;
+    const { dataView, columns, rows } = await getGridAttrs(
+      query,
+      adHocDataViews,
+      deps,
+      abortController
+    );
+
+    setDataGridAttrs?.({
+      rows,
+      dataView,
+      columns,
     });
 
-    const dataView = dataViewSpec
-      ? await deps.dataViews.create(dataViewSpec)
-      : await getESQLAdHocDataview(query.esql, deps.dataViews);
-
-    const columns = await getESQLQueryColumns({
-      esqlQuery: 'esql' in query ? query.esql : '',
-      search: deps.data.search.search,
-      signal: abortController?.signal,
-      timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
-    });
     const context = {
       dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
