@@ -13,20 +13,13 @@ import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { padStart } from 'lodash';
 import { Logger } from '@kbn/core/server';
-import { TaskRunner } from '../task_running';
-import { isTaskSavedObjectNotFoundError } from '../lib/is_task_not_found_error';
-import { TaskManagerStat } from '../task_events';
-import { ICapacity } from './types';
-import { CLAIM_STRATEGY_MGET } from '../config';
-import { WorkerCapacity } from './worker_capacity';
-import { CostCapacity } from './cost_capacity';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskRunner } from './task_running';
+import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
+import { TaskManagerStat } from './task_events';
 
-interface TaskPoolOpts {
-  capacity$: Observable<number>;
-  definitions: TaskTypeDictionary;
+interface Opts {
+  maxWorkers$: Observable<number>;
   logger: Logger;
-  strategy: string;
 }
 
 export enum TaskPoolRunResult {
@@ -41,43 +34,31 @@ export enum TaskPoolRunResult {
 }
 
 const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana service';
+const MAX_RUN_ATTEMPTS = 3;
 
 /**
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
+  private maxWorkers: number = 0;
   private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
-  private definitions: TaskTypeDictionary;
-  private capacityCalculator: ICapacity;
 
   /**
    * Creates an instance of TaskPool.
    *
    * @param {Opts} opts
-   * @prop {number} capacity - The total capacity available
-   *    (e.g. capacity is 4, then 2 tasks of cost 2 can run at a time, or 4 tasks of cost 1)
+   * @prop {number} maxWorkers - The total number of workers / work slots available
+   *    (e.g. maxWorkers is 4, then 2 tasks of cost 2 can run at a time, or 4 tasks of cost 1)
    * @prop {Logger} logger - The task manager logger.
    */
-  constructor(opts: TaskPoolOpts) {
+  constructor(opts: Opts) {
     this.logger = opts.logger;
-    this.definitions = opts.definitions;
-
-    switch (opts.strategy) {
-      case CLAIM_STRATEGY_MGET:
-        this.capacityCalculator = new CostCapacity({
-          capacity$: opts.capacity$,
-          logger: this.logger,
-        });
-        break;
-
-      default:
-        this.capacityCalculator = new WorkerCapacity({
-          capacity$: opts.capacity$,
-          logger: this.logger,
-        });
-    }
+    opts.maxWorkers$.subscribe((maxWorkers) => {
+      this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
+      this.maxWorkers = maxWorkers;
+    });
   }
 
   public get load(): Observable<TaskManagerStat> {
@@ -85,39 +66,38 @@ export class TaskPool {
   }
 
   /**
-   * Gets how much capacity is currently in use.
+   * Gets how many workers are currently in use.
    */
-  public get usedCapacity() {
-    return this.capacityCalculator.usedCapacity(this.tasksInPool);
+  public get occupiedWorkers() {
+    return this.tasksInPool.size;
   }
 
   /**
-   * Gets how much capacity is currently in use as a percentage
+   * Gets % of workers in use
    */
-  public get usedCapacityPercentage() {
-    return this.capacityCalculator.usedCapacityPercentage(this.tasksInPool);
+  public get workerLoad() {
+    return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
   }
 
   /**
-   * Gets how much capacity is currently available.
+   * Gets how many workers are currently available.
    */
-  public availableCapacity(taskType?: string) {
+  public get availableWorkers() {
     // cancel expired task whenever a call is made to check for capacity
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
     this.cancelExpiredTasks();
-
-    return this.capacityCalculator.availableCapacity(
-      this.tasksInPool,
-      taskType ? this.definitions.get(taskType) : null
-    );
+    return this.maxWorkers - this.occupiedWorkers;
   }
 
   /**
-   * Gets how much capacity is currently in use by each type.
+   * Gets how many workers are currently in use by type.
    */
-  public getUsedCapacityByType(type: string) {
-    return this.capacityCalculator.getUsedCapacityByType([...this.tasksInPool.values()], type);
+  public getOccupiedWorkersByType(type: string) {
+    return [...this.tasksInPool.values()].reduce(
+      (count, runningTask) => (runningTask.definition.type === type ? ++count : count),
+      0
+    );
   }
 
   /**
@@ -128,14 +108,26 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public async run(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
-    // Note `this.availableCapacity` has side effects, so we just want
+  public async run(tasks: TaskRunner[], attempt = 1): Promise<TaskPoolRunResult> {
+    // Note `this.availableWorkers` is a getter with side effects, so we just want
     // to call it once for this bit of the code.
-    const availableCapacity = this.availableCapacity();
-    const [tasksToRun, leftOverTasks] = this.capacityCalculator.determineTasksToRunBasedOnCapacity(
-      tasks,
-      availableCapacity
-    );
+    const availableWorkers = this.availableWorkers;
+    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, availableWorkers);
+
+    if (attempt > MAX_RUN_ATTEMPTS) {
+      const stats = [
+        `availableWorkers: ${availableWorkers}`,
+        `tasksToRun: ${tasksToRun.length}`,
+        `leftOverTasks: ${leftOverTasks.length}`,
+        `maxWorkers: ${this.maxWorkers}`,
+        `occupiedWorkers: ${this.occupiedWorkers}`,
+        `workerLoad: ${this.workerLoad}`,
+      ].join(', ');
+      this.logger.warn(
+        `task pool run attempts exceeded ${MAX_RUN_ATTEMPTS}; assuming ran out of capacity; ${stats}`
+      );
+      return TaskPoolRunResult.RanOutOfCapacity;
+    }
 
     if (tasksToRun.length) {
       await Promise.all(
@@ -171,10 +163,11 @@ export class TaskPool {
     }
 
     if (leftOverTasks.length) {
-      // leave any leftover tasks
-      // they will be available for claiming in 30 seconds
+      if (this.availableWorkers) {
+        return this.run(leftOverTasks, attempt + 1);
+      }
       return TaskPoolRunResult.RanOutOfCapacity;
-    } else if (!this.availableCapacity()) {
+    } else if (!this.availableWorkers) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
@@ -247,6 +240,11 @@ export class TaskPool {
       }
     })().catch(() => {});
   }
+}
+
+function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
+  const listInCount = list.splice(0, count);
+  return [listInCount, list];
 }
 
 function durationAsString(duration: Duration): string {
