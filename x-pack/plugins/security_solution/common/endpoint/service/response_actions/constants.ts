@@ -193,7 +193,14 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
 /**
  * Map of Agent Type to alert fields that holds the Agent ID for that agent type.
  * Multiple alert fields are supported since different data sources define the agent
- * id in different paths
+ * id in different paths.
+ *
+ * NOTE:  there are utilities in `x-pack/plugins/security_solution/public/common/lib/endpoint/utils`
+ *        that facilitate working with alert (ECS) fields to determine if the give event/alert supports
+ *        response actions, including:
+ *        - `getAgentTypeForAgentIdField()`
+ *        - `getEventDetailsAgentIdField()`
+ *        - `isResponseActionsAlertAgentIdField()`
  */
 export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
   Record<ResponseActionAgentType, string[]>
