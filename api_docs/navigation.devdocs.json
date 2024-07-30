@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -75,9 +75,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -101,9 +101,9 @@
               "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>) => ",
@@ -129,9 +129,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -155,9 +155,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", depsStart: ",
@@ -185,9 +185,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -926,9 +926,9 @@
           " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.MountPoint",
+            "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
           "<HTMLElement> | undefined) => void) | undefined; }"

@@ -10,7 +10,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
-import { DataSourceCategory } from '../../profiles';
+import { DataSourceCategory, RootContext, SolutionType } from '../../profiles';
 import { createContextAwarenessMocks } from '../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
 
@@ -21,7 +21,7 @@ describe('logsDataSourceProfileProvider', () => {
   const VALID_INDEX_PATTERN = 'logs-nginx.access-*';
   const MIXED_INDEX_PATTERN = 'logs-nginx.access-*,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';
-
+  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: { category: DataSourceCategory.Logs },
@@ -33,6 +33,7 @@ describe('logsDataSourceProfileProvider', () => {
   it('should match ES|QL sources with an allowed index pattern in its query', () => {
     expect(
       logsDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createEsqlDataSource(),
         query: { esql: `from ${VALID_INDEX_PATTERN}` },
       })
@@ -42,12 +43,14 @@ describe('logsDataSourceProfileProvider', () => {
   it('should NOT match ES|QL sources with a mixed or not allowed index pattern in its query', () => {
     expect(
       logsDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createEsqlDataSource(),
         query: { esql: `from ${INVALID_INDEX_PATTERN}` },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       logsDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createEsqlDataSource(),
         query: { esql: `from ${MIXED_INDEX_PATTERN}` },
       })
@@ -57,6 +60,7 @@ describe('logsDataSourceProfileProvider', () => {
   it('should match data view sources with an allowed index pattern', () => {
     expect(
       logsDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: VALID_INDEX_PATTERN }),
         dataView: createStubIndexPattern({ spec: { title: VALID_INDEX_PATTERN } }),
       })
@@ -66,12 +70,14 @@ describe('logsDataSourceProfileProvider', () => {
   it('should NOT match data view sources with a mixed or not allowed index pattern', () => {
     expect(
       logsDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: INVALID_INDEX_PATTERN }),
         dataView: createStubIndexPattern({ spec: { title: INVALID_INDEX_PATTERN } }),
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       logsDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: MIXED_INDEX_PATTERN }),
         dataView: createStubIndexPattern({ spec: { title: MIXED_INDEX_PATTERN } }),
       })
