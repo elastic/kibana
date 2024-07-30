@@ -759,7 +759,6 @@ describe('validation logic', () => {
       // ]);
     });
 
-    // @TODO fix tests
     describe('where', () => {
       testErrorsAndWarnings('from a_index | where b', ['Unknown column [b]']);
       for (const cond of ['true', 'false']) {

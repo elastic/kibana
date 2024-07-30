@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
+import { ESQLDecimalLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
 
 export const ESQL_COMMON_NUMERIC_TYPES = ['double', 'long', 'integer'] as const;
 export const ESQL_NUMERIC_DECIMAL_TYPES = [
@@ -41,7 +41,7 @@ export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
   );
 }
 
-export function isNumericDecimalType(type: unknown): type is ESQLNumericLiteralType {
+export function isNumericDecimalType(type: unknown): type is ESQLDecimalLiteral {
   return (
     typeof type === 'string' &&
     ESQL_NUMERIC_DECIMAL_TYPES.includes(type as (typeof ESQL_NUMERIC_DECIMAL_TYPES)[number])

@@ -178,8 +178,6 @@ export type ESQLLiteral =
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
-  | ESQLKeywordLiteral
-  | ESQLTextLiteral
   | ESQLParamLiteral<string>;
 
 // Exporting here to prevent TypeScript error TS4058
@@ -215,20 +213,6 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'string';
-  value: string;
-}
-
-// @internal
-export interface ESQLKeywordLiteral extends ESQLAstBaseItem {
-  type: 'literal';
-  literalType: 'keyword';
-  value: string;
-}
-
-// @internal
-export interface ESQLTextLiteral extends ESQLAstBaseItem {
-  type: 'literal';
-  literalType: 'text';
   value: string;
 }
 

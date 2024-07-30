@@ -186,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
               log.info(
                 `creating a index "${index}" with mapping...\n${JSON.stringify(config.fields)}`
               );
-              const fieldsExcludincCounterType = config.fields.filter(
+              const fieldsExcludingCounterType = config.fields.filter(
                 // ES|QL supports counter_integer, counter_long, counter_double, date_period, etc.
                 // but they are not types suitable for Elasticsearch indices
                 (c: { type: string }) => !c.type.startsWith('counter_') && c.type !== 'date_period'
@@ -194,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
               await es.indices.create(
                 createIndexRequest(
                   index,
-                  /unsupported/.test(index) ? config.unsupported_field : fieldsExcludincCounterType,
+                  /unsupported/.test(index) ? config.unsupported_field : fieldsExcludingCounterType,
                   stringFieldType,
                   numberFieldType
                 ),

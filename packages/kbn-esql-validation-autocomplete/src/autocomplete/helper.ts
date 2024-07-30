@@ -81,7 +81,7 @@ export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinit
   }));
 }
 
-export function getSupportedTypesForFunction(
+export function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
   previousType: string
 ) {

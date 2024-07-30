@@ -265,13 +265,7 @@ describe('autocomplete.suggest', () => {
       test('on space after expression right hand side operand', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [
-          // ...getFieldNamesByType('double'),
-
-          ',',
-          '|',
-          // ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }),
-        ]);
+        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '|']);
       });
     });
   });

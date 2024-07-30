@@ -142,9 +142,8 @@ function generateImplicitDateCastingTestsForFunction(
   const allSignaturesWithDateParams = definition.signatures.filter((signature) =>
     signature.params.some(
       (param, i) =>
-        param.type === 'date' ||
-        (param.type === 'date_period' &&
-          !definition.signatures.some((def) => isStringType(getParamAtPosition(def, i)?.type))) // don't count parameters that already accept a string
+        (param.type === 'date' || param.type === 'date_period') &&
+        !definition.signatures.some((def) => isStringType(getParamAtPosition(def, i)?.type)) // don't count parameters that already accept a string
     )
   );
 

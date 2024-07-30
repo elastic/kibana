@@ -38,7 +38,6 @@ import type {
   ESQLNumericLiteralType,
   FunctionSubtype,
   ESQLNumericLiteral,
-  ESQLParamLiteral,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -167,20 +166,15 @@ export function createLiteral(
     location: getPosition(node.symbol),
     incomplete: isMissingText(text),
   };
-  if (['decimal', 'integer', 'number'].includes(type)) {
+  if (type === 'decimal' || type === 'integer') {
     return {
       ...partialLiteral,
-      literalType: type as ESQLNumericLiteralType,
+      literalType: type,
       value: Number(text),
       paramType: 'number',
     } as ESQLNumericLiteral<'decimal'> | ESQLNumericLiteral<'integer'>;
   } else if (type === 'param') {
-    return {
-      ...partialLiteral,
-      literalType: type,
-      value: text,
-      paramType: 'string',
-    } as ESQLParamLiteral<string>;
+    throw new Error('Should never happen');
   }
   return {
     ...partialLiteral,

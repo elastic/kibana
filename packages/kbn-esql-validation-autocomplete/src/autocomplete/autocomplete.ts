@@ -89,7 +89,7 @@ import {
   getParamAtPosition,
   getQueryForFields,
   getSourcesFromCommands,
-  getSupportedTypesForFunction,
+  getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
 } from './helper';
@@ -1007,7 +1007,7 @@ async function getBuiltinFunctionNextArgument(
         suggestions.push(listCompleteItem);
       } else {
         const finalType = nestedType || nodeArgType || 'any';
-        const supportedTypes = getSupportedTypesForFunction(fnDef, finalType);
+        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR

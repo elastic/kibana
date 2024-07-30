@@ -895,17 +895,7 @@ describe('autocomplete', () => {
           'time_interval',
         ]),
       ]);
-      testSuggestions('from a | eval a = 1 day + 2 ', [
-        ',',
-        '|',
-        // ...dateSuggestions,
-        // ',',
-        // '|',
-        // '+ $0',
-        // '- $0',
-        // 'IS NOT NULL',
-        // 'IS NULL',
-      ]);
+      testSuggestions('from a | eval a = 1 day + 2 ', [',', '|']);
       testSuggestions(
         'from a | eval 1 day + 2 ',
         [
