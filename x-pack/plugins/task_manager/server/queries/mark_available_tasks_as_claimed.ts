@@ -157,8 +157,9 @@ export function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombi
   return [sortByPriority, SortByRunAtAndRetryAt];
 }
 
-// claimSort() is used to sort tasks returned from a claimer
-// should align with getClaimSort() above
+// claimSort() is used to sort tasks returned from a claimer by priority and date.
+// Kept here so it should align with getClaimSort() above.
+// Returns a copy of the tasks passed in.
 export function claimSort(
   definitions: TaskTypeDictionary,
   tasks: ConcreteTaskInstance[]
@@ -166,23 +167,36 @@ export function claimSort(
   const priorityMap: Record<string, TaskPriority> = {};
   tasks.forEach((task) => {
     const taskType = task.taskType;
-    const priority = definitions.get(taskType)?.priority || TaskPriority.Normal;
+    const priority = getPriority(definitions, taskType);
     priorityMap[taskType] = priority;
   });
 
-  return tasks.sort(compare);
+  return tasks.slice().sort(compare);
 
   function compare(a: ConcreteTaskInstance, b: ConcreteTaskInstance) {
-    const priorityA = priorityMap[a.taskType] || TaskPriority.Normal;
-    const priorityB = priorityMap[b.taskType] || TaskPriority.Normal;
+    // sort by priority, descending
+    const priorityA = priorityMap[a.taskType] ?? TaskPriority.Normal;
+    const priorityB = priorityMap[b.taskType] ?? TaskPriority.Normal;
+
     if (priorityA > priorityB) return -1;
     if (priorityA < priorityB) return 1;
 
-    const runA = a.runAt?.valueOf() || a.retryAt?.valueOf() || 0;
-    const runB = b.runAt?.valueOf() || b.retryAt?.valueOf() || 0;
+    // then sort by retry/runAt, ascending
+    const runA = a.retryAt?.valueOf() ?? a.runAt.valueOf() ?? 0;
+    const runB = b.retryAt?.valueOf() ?? b.runAt.valueOf() ?? 0;
 
-    return runA - runB;
+    if (runA < runB) return -1;
+    if (runA > runB) return 1;
+
+    return 0;
   }
+}
+
+function getPriority(definitions: TaskTypeDictionary, taskType: string): TaskPriority {
+  if (definitions.has(taskType)) {
+    return definitions.get(taskType).priority ?? TaskPriority.Normal;
+  }
+  return TaskPriority.Normal;
 }
 
 export interface UpdateFieldsAndMarkAsFailedOpts {
