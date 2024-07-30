@@ -19,7 +19,10 @@ import { OtelLogsPanel } from './quickstart_flows/otel_logs';
 import { AutoDetectPanel } from './quickstart_flows/auto_detect';
 import { KubernetesPanel } from './quickstart_flows/kubernetes';
 import { BackButton } from './shared/back_button';
-import { HeaderSection } from './header/header_section';
+import { Header } from './header/header_section';
+import { OtelHeader } from './header/otel_header';
+import { KubernetesHeader } from './header/kubernetes_header';
+import { AutoDetectHeader } from './header/auto_detect_header';
 
 const queryClient = new QueryClient();
 
@@ -37,27 +40,32 @@ export function ObservabilityOnboardingFlow() {
           padding-top: 0px !important;
         `}
       >
-        <HeaderSection pathname={pathname} />
         <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
           <Routes>
             <Route path="/auto-detect">
+              <AutoDetectHeader />
               <AutoDetectPanel />
             </Route>
             <Route path="/systemLogs">
+              <Header />
               <BackButton />
               <SystemLogsPanel />
             </Route>
             <Route path="/customLogs">
+              <Header />
               <BackButton />
               <CustomLogsPanel />
             </Route>
             <Route path="/kubernetes">
+              <KubernetesHeader />
               <KubernetesPanel />
             </Route>
             <Route path="/otel-logs">
+              <OtelHeader />
               <OtelLogsPanel />
             </Route>
             <Route>
+              <Header />
               <OnboardingFlowForm />
             </Route>
           </Routes>

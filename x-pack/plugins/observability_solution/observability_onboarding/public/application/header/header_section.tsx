@@ -8,20 +8,9 @@
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { Header } from './header';
 import backgroundImageUrl from './background.svg';
-import { CustomHeaderSection } from './custom_header';
-import { customHeaderProps } from './constants';
 
-interface Props {
-  pathname: string;
-}
-
-export function HeaderSection({ pathname }: Props) {
-  const customProps = customHeaderProps(pathname);
-  if (customProps) {
-    return <CustomHeaderSection {...customProps} />;
-  }
+export function Header() {
   return (
     <EuiPageTemplate.Section
       paddingSize="xl"
