@@ -24,6 +24,9 @@ import { filter, map, startWith, Subject } from 'rxjs';
  * @private
  */
 export interface FeatureFlagsSetupDeps {
+  /**
+   * Used to read the flag overrides set up in the configuration file.
+   */
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
