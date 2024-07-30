@@ -51,7 +51,7 @@ const App = () => {
 
 ## Implementation Details
 
-Internally the favorites list is backed by a saved object. A saved object of type "favorite" is created for each user (user profile id) and space (space id) combination when a user for the first time favorites an object. The saved object contains a list of favorite object ids grouped by favorite type.
+Internally the favorites list is backed by a saved object. A saved object of type "favorite" is created for each user (user profile id) and space (space id) combination when a user for the first time favorites an object. The saved object contains a list of favorite objects.
 
 ```
 {
@@ -60,10 +60,20 @@ Internally the favorites list is backed by a saved object. A saved object of typ
   "_source": {
     "favorite": {
       "userId": "u_profile_id",
-      "favorites": {
-        "dashboard": [{id: "favorite-dashboard-id-1"}, {id: "favorite-dashboard-id-2"}],
-        "visualization": [{id: "favorite-visualization-id-1"}],
-      }
+      "favorites": [
+        {
+          "id": "object_id_1",
+          "type": "dashboard"
+        },
+        {
+          "id": "object_id_2",
+          "type": "dashboard"
+        },
+        {
+          "id": "object_id_3",
+          "type": "visualization"
+        }
+      ]
     },
     "type": "favorite",
     "references": [],

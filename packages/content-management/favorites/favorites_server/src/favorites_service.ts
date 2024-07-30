@@ -23,9 +23,9 @@ export class FavoritesService {
   public async getFavorites({ type }: { type: string }): Promise<{ favoriteIds: string[] }> {
     const favoritesSavedObject = await this.getFavoritesSavedObject();
 
-    const favoriteIds = (favoritesSavedObject?.attributes?.favorites?.[type] ?? []).map(
-      (favorite) => favorite.id
-    );
+    const favoriteIds = (favoritesSavedObject?.attributes?.favorites ?? [])
+      .filter((favorite) => favorite.type === type)
+      .map((favorite) => favorite.id);
 
     return { favoriteIds };
   }
@@ -44,7 +44,7 @@ export class FavoritesService {
         favoritesSavedObjectType.name,
         {
           userId: this.userId,
-          favorites: {},
+          favorites: [],
         },
         {
           id: this.userId,
@@ -54,19 +54,15 @@ export class FavoritesService {
     }
 
     const newFavoritesState = [
-      ...(favoritesSavedObject.attributes.favorites[type] ?? []).filter(
-        (favorite) => favorite.id !== id
-      ),
-      { id },
+      ...(favoritesSavedObject.attributes.favorites ?? []).filter((favorite) => favorite.id !== id),
+      { id, type },
     ];
 
     await this.deps.savedObjectClient.update(
       favoritesSavedObjectType.name,
       favoritesSavedObject.id,
       {
-        favorites: {
-          [type]: newFavoritesState,
-        },
+        favorites: newFavoritesState,
       },
       {
         version: favoritesSavedObject.version,
@@ -90,7 +86,7 @@ export class FavoritesService {
       return { favoriteIds: [] };
     }
 
-    const newFavoritesState = (favoritesSavedObject.attributes.favorites[type] ?? []).filter(
+    const newFavoritesState = (favoritesSavedObject.attributes.favorites ?? []).filter(
       (favorite) => favorite.id !== id
     );
 
@@ -98,9 +94,7 @@ export class FavoritesService {
       favoritesSavedObjectType.name,
       favoritesSavedObject.id,
       {
-        favorites: {
-          [type]: newFavoritesState,
-        },
+        favorites: newFavoritesState,
       },
       {
         version: favoritesSavedObject.version,
