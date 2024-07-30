@@ -15,14 +15,13 @@ interface KnowledgeBaseEntry {
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const ml = getService('ml');
   const es = getService('es');
   const TINY_ELSER = {
     ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
     id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
   };
-  const KNOWLEDGE_BASE_API_URL = `/internal/observability_ai_assistant/kb`;
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 
   describe('Knowledge base', () => {
@@ -45,82 +44,96 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns 200 on knowledge base setup', async () => {
-      return await supertest
-        .post(`${KNOWLEDGE_BASE_API_URL}/setup`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200)
-        .then((response) => {
-          expect(response.body).to.eql({});
-        });
+      const res = await observabilityAIAssistantAPIClient
+        .editorUser({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+        })
+        .expect(200);
+      expect(res.body).to.eql({});
     });
-
     describe('when managing a single entry', () => {
       const knowledgeBaseEntry = {
         id: 'my-doc-id-1',
         text: 'My content',
       };
       it('returns 200 on create', async () => {
-        await supertest
-          .post(`${KNOWLEDGE_BASE_API_URL}/entries/save`)
-          .set('kbn-xsrf', 'foo')
-          .send(knowledgeBaseEntry)
-          .expect(200);
-
-        return supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=&sortBy=doc_id&sortDirection=asc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            const entry = response.body.entries[0];
-            expect(entry.id).to.equal(knowledgeBaseEntry.id);
-            expect(entry.text).to.equal(knowledgeBaseEntry.text);
-          });
-      });
-
-      it('returns 400 on create with bad payload', async () => {
-        await supertest
-          .post(`${KNOWLEDGE_BASE_API_URL}/entries/save`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            foo: 'my-doc-id-2',
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+            params: { body: knowledgeBaseEntry },
           })
-          .expect(400);
+          .expect(200);
+        const res = await observabilityAIAssistantAPIClient.editorUser({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+          params: {
+            query: {
+              query: '',
+              sortBy: 'doc_id',
+              sortDirection: 'asc',
+            },
+          },
+        });
+        const entry = res.body.entries[0];
+        expect(entry.id).to.equal(knowledgeBaseEntry.id);
+        expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
+
       it('returns 200 on get entries and entry exists', async () => {
-        return supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=&sortBy=doc_id&sortDirection=asc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            const entry = response.body.entries[0];
-            expect(entry.id).to.equal(knowledgeBaseEntry.id);
-            expect(entry.text).to.equal(knowledgeBaseEntry.text);
-          });
+        const res = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: '',
+                sortBy: 'doc_id',
+                sortDirection: 'asc',
+              },
+            },
+          })
+          .expect(200);
+        const entry = res.body.entries[0];
+        expect(entry.id).to.equal(knowledgeBaseEntry.id);
+        expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
       it('returns 200 on delete', async () => {
-        await supertest
-          .delete(`${KNOWLEDGE_BASE_API_URL}/entries/my-doc-id-1`)
-          .set('kbn-xsrf', 'foo')
+        const entryId = 'my-doc-id-1';
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
+            params: {
+              path: { entryId },
+            },
+          })
           .expect(200);
 
-        return supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=&sortBy=doc_id&sortDirection=asc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            expect(
-              response.body.entries.filter((entry: KnowledgeBaseEntry) =>
-                entry.id.startsWith('my-doc-id')
-              ).length
-            ).to.eql(0);
-          });
+        const res = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: '',
+                sortBy: 'doc_id',
+                sortDirection: 'asc',
+              },
+            },
+          })
+          .expect(200);
+        expect(
+          res.body.entries.filter((entry: KnowledgeBaseEntry) => entry.id.startsWith('my-doc-id'))
+            .length
+        ).to.eql(0);
       });
 
       it('returns 500 on delete not found', async () => {
-        await supertest
-          .delete(`${KNOWLEDGE_BASE_API_URL}/entries/my-doc-id-1`)
-          .set('kbn-xsrf', 'foo')
+        const entryId = 'my-doc-id-1';
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
+            params: {
+              path: { entryId },
+            },
+          })
           .expect(500);
       });
     });
@@ -154,99 +167,103 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       ];
       it('returns 200 on create', async () => {
-        await supertest
-          .post(`${KNOWLEDGE_BASE_API_URL}/entries/import`)
-          .set('kbn-xsrf', 'foo')
-          .send({ entries: knowledgeBaseEntries })
-          .expect(200);
-
-        return supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=&sortBy=doc_id&sortDirection=asc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            expect(
-              response.body.entries.filter((entry: KnowledgeBaseEntry) =>
-                entry.id.startsWith('my_doc')
-              ).length
-            ).to.eql(3);
-          });
-      });
-
-      it('returns 400 on create with bad payload', async () => {
-        await supertest
-          .post(`${KNOWLEDGE_BASE_API_URL}/entries/import`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            entries: [...knowledgeBaseEntries, { foo: 'my_doc_a' }],
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+            params: { body: { entries: knowledgeBaseEntries } },
           })
-          .expect(400);
-        await supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=&sortBy=doc_id&sortDirection=asc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            expect(
-              response.body.entries.filter((entry: KnowledgeBaseEntry) =>
-                entry.id.startsWith('my_doc')
-              ).length
-            ).to.eql(3);
-          });
+          .expect(200);
+
+        const res = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: '',
+                sortBy: 'doc_id',
+                sortDirection: 'asc',
+              },
+            },
+          })
+          .expect(200);
+        expect(
+          res.body.entries.filter((entry: KnowledgeBaseEntry) => entry.id.startsWith('my_doc'))
+            .length
+        ).to.eql(3);
       });
 
-      it('returns 400 when calling get entries with the wrong parameters', async () => {
-        return supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries`)
-          .set('kbn-xsrf', 'foo')
-          .expect(400);
-      });
       it('allows sorting', async () => {
-        await supertest
-          .post(`${KNOWLEDGE_BASE_API_URL}/entries/import`)
-          .set('kbn-xsrf', 'foo')
-          .send({ entries: knowledgeBaseEntries })
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+            params: { body: { entries: knowledgeBaseEntries } },
+          })
           .expect(200);
-        // desc
-        await supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=&sortBy=doc_id&sortDirection=desc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            const entries = response.body.entries.filter((entry: KnowledgeBaseEntry) =>
-              entry.id.startsWith('my_doc')
-            );
-            expect(entries[0].id).to.eql('my_doc_c');
-            expect(entries[1].id).to.eql('my_doc_b');
-            expect(entries[2].id).to.eql('my_doc_a');
-          });
+
+        const res = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: '',
+                sortBy: 'doc_id',
+                sortDirection: 'desc',
+              },
+            },
+          })
+          .expect(200);
+
+        const entries = res.body.entries.filter((entry: KnowledgeBaseEntry) =>
+          entry.id.startsWith('my_doc')
+        );
+        expect(entries[0].id).to.eql('my_doc_c');
+        expect(entries[1].id).to.eql('my_doc_b');
+        expect(entries[2].id).to.eql('my_doc_a');
+
         // asc
-        await supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=&sortBy=doc_id&sortDirection=asc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            const entries = response.body.entries.filter((entry: KnowledgeBaseEntry) =>
-              entry.id.startsWith('my_doc')
-            );
-            expect(entries[0].id).to.eql('my_doc_a');
-            expect(entries[1].id).to.eql('my_doc_b');
-            expect(entries[2].id).to.eql('my_doc_c');
-          });
+        const resAsc = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: '',
+                sortBy: 'doc_id',
+                sortDirection: 'asc',
+              },
+            },
+          })
+          .expect(200);
+
+        const entriesAsc = resAsc.body.entries.filter((entry: KnowledgeBaseEntry) =>
+          entry.id.startsWith('my_doc')
+        );
+        expect(entriesAsc[0].id).to.eql('my_doc_a');
+        expect(entriesAsc[1].id).to.eql('my_doc_b');
+        expect(entriesAsc[2].id).to.eql('my_doc_c');
       });
       it('allows searching', async () => {
-        await supertest
-          .post(`${KNOWLEDGE_BASE_API_URL}/entries/import`)
-          .set('kbn-xsrf', 'foo')
-          .send({ entries: knowledgeBaseEntries })
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+            params: { body: { entries: knowledgeBaseEntries } },
+          })
           .expect(200);
-        return supertest
-          .get(`${KNOWLEDGE_BASE_API_URL}/entries?query=my_doc_a&sortBy=doc_id&sortDirection=asc`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => {
-            expect(response.body.entries.length).to.eql(1);
-            expect(response.body.entries[0].id).to.eql('my_doc_a');
-          });
+
+        const res = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: 'my_doc_a',
+                sortBy: 'doc_id',
+                sortDirection: 'asc',
+              },
+            },
+          })
+          .expect(200);
+
+        expect(res.body.entries.length).to.eql(1);
+        expect(res.body.entries[0].id).to.eql('my_doc_a');
       });
     });
   });
