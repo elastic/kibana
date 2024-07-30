@@ -40,7 +40,7 @@ export type PatternAnalysisSharedComponent = FC<PatternAnalysisProps>;
 export interface PatternAnalysisProps {
   dataViewId: string;
   timeRange: TimeRange;
-  fieldName: string;
+  fieldName: string | undefined;
   minimumTimeRangeOption: MinimumTimeRangeOption;
   randomSamplerMode: RandomSamplerOption;
   randomSamplerProbability: RandomSamplerProbability;

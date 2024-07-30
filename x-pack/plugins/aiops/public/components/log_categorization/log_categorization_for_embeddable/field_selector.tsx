@@ -17,8 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToken,
-  EuiCallOut,
-  EuiSpacer,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +25,7 @@ interface Props {
   fields: DataViewField[];
   selectedField: DataViewField | null;
   setSelectedField: (field: DataViewField) => void;
+  WarningComponent?: FC;
 }
 
 export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedField }) => {
@@ -63,7 +62,12 @@ export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedFie
   );
 };
 
-export const FieldSelector: FC<Props> = ({ fields, selectedField, setSelectedField }) => {
+export const FieldSelector: FC<Props> = ({
+  fields,
+  selectedField,
+  setSelectedField,
+  WarningComponent,
+}) => {
   const fieldOptions = useMemo(
     () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
     [fields]
@@ -78,32 +82,7 @@ export const FieldSelector: FC<Props> = ({ fields, selectedField, setSelectedFie
 
   return (
     <>
-      {fields.length === 0 ? (
-        <>
-          <EuiCallOut
-            size="s"
-            title={i18n.translate(
-              'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title',
-              {
-                defaultMessage: 'The selected data view does not contain any text fields.',
-              }
-            )}
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
-                {
-                  defaultMessage:
-                    'Pattern analysis detection can only be run on data views with a text field.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      ) : null}
+      {WarningComponent !== undefined ? <WarningComponent /> : null}
 
       <EuiFormRow fullWidth data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow" label={label}>
         <EuiSuperSelect

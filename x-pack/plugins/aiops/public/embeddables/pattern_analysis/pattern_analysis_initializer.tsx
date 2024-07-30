@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
+  EuiCallOut,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -225,6 +226,7 @@ export const FormControls: FC<{
   } = useAiopsAppContext();
   const [fields, setFields] = useState<DataViewField[]>([]);
   const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
+  const [isDataViewTimeBased, setIsDataViewTimeBased] = useState(true);
 
   const randomSampler = useMemo(() => {
     return new RandomSampler({
@@ -243,6 +245,11 @@ export const FormControls: FC<{
   useEffect(
     function initFields() {
       dataViews.get(dataViewId).then((dataView) => {
+        const isTimeBased = dataView.isTimeBased();
+        setIsDataViewTimeBased(isTimeBased);
+        if (isTimeBased === false) {
+          return;
+        }
         const { dataViewFields, messageField } = getMessageField(dataView);
         setFields(dataViewFields);
         const field = dataViewFields.find((f) => f.name === formInput.fieldName);
@@ -305,6 +312,13 @@ export const FormControls: FC<{
         fields={fields}
         selectedField={selectedField}
         setSelectedField={setSelectedField}
+        WarningComponent={
+          isDataViewTimeBased === false
+            ? TimeFieldWarning
+            : fields.length === 0
+            ? TextFieldWarning
+            : undefined
+        }
       />
 
       <EuiSpacer />
@@ -325,6 +339,64 @@ export const FormControls: FC<{
         displayProbability={false}
         compressed={true}
       />
+    </>
+  );
+};
+
+const TextFieldWarning = () => {
+  return (
+    <>
+      <EuiCallOut
+        size="s"
+        title={i18n.translate(
+          'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title',
+          {
+            defaultMessage: 'The selected data view does not contain any text fields.',
+          }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
+            {
+              defaultMessage:
+                'Pattern analysis detection can only be run on data views with a text field.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
+};
+
+const TimeFieldWarning = () => {
+  return (
+    <>
+      <EuiCallOut
+        size="s"
+        title={i18n.translate(
+          'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title',
+          {
+            defaultMessage: 'The selected data view does not contain a time field.',
+          }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title.description',
+            {
+              defaultMessage:
+                'Pattern analysis detection can only be run on data views with a time field.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
     </>
   );
 };
