@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiButton, EuiComboBox, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useMlKibana } from '../application/contexts/kibana';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
@@ -43,6 +43,7 @@ export interface JobSelectorControlProps {
    * Available options to select. By default suggest all existing jobs.
    */
   options?: Array<EuiComboBoxOptionOption<string>>;
+  shouldUseDropdownJobCreate?: boolean;
 }
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
@@ -55,6 +56,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   allowSelectAll = false,
   createJobUrl,
   options: defaultOptions,
+  shouldUseDropdownJobCreate = false,
 }) => {
   const {
     services: {
@@ -200,7 +202,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createJobUrl]);
 
-  return (
+  return selectedOptions.length || shouldUseDropdownJobCreate ? (
     <EuiFormRow
       data-test-subj="mlAnomalyJobSelectionControls"
       fullWidth
@@ -225,5 +227,31 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         isInvalid={!!errors?.length}
       />
     </EuiFormRow>
+  ) : (
+    <EuiEmptyPrompt
+      titleSize="xxs"
+      iconType="warning"
+      title={
+        <h4>
+          <FormattedMessage
+            id="xpack.ml.embeddables.jobSelector.noJobsFoundTitle"
+            defaultMessage="No anomaly detection jobs found"
+          />
+        </h4>
+      }
+      body={
+        <EuiButton
+          fill
+          color="primary"
+          onClick={async () => await navigateToUrl(createJobUrl!)}
+          disabled={createJobUrl === undefined}
+        >
+          <FormattedMessage
+            id="xpack.ml.embeddables.jobSelector.createJobButtonLabel"
+            defaultMessage="Create job"
+          />
+        </EuiButton>
+      }
+    />
   );
 };
