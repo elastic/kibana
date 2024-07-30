@@ -18,24 +18,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-
 import { dashboardsLight } from '@kbn/shared-svg';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibana } from '../../../../../context/kibana_context/use_kibana';
 import { useLocalStorage } from '../../../../../hooks/use_local_storage';
 import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
 import { EntityInventoryAddDataParams } from '../../../../../services/telemetry';
 import {
-  AddApmAgent,
+  AddApmData,
   AssociateServiceLogs,
   CollectServiceLogs,
 } from '../../../../shared/add_data_buttons/buttons';
 
 export function NoEntitiesEmptyState() {
-  const { core } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { basePath } = core.http;
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.uiNewExperienceCallout',
     false
@@ -92,8 +88,8 @@ export function NoEntitiesEmptyState() {
           actions={
             <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
               <EuiFlexGroup direction="row" gutterSize="xs">
-                <AddApmAgent
-                  basePath={basePath}
+                <AddApmData
+                  data-test-subj="apmAddDataEmptyState"
                   onClick={() => {
                     reportButtonClick('add_apm_agent');
                   }}
@@ -104,7 +100,6 @@ export function NoEntitiesEmptyState() {
                   }}
                 />
                 <CollectServiceLogs
-                  basePath={basePath}
                   onClick={() => {
                     reportButtonClick('collect_new_service_logs');
                   }}
