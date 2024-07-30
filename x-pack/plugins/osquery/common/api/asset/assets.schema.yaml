@@ -5,25 +5,43 @@ info:
 paths:
   /internal/osquery/assets:
     get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ReadAssetsStatus
       summary: Get assets
       parameters:
-          - $ref: './assets_status.schema.yaml#/components/parameters/AssetsStatusRequestQueryParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './assets_status.schema.yaml#/components/schemas/AssetsRequestQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './assets_status.schema.yaml#/components/schemas/SuccessResponse'
+                type: object
+                properties: {}
+                # Define properties for the success response if needed
   /internal/osquery/assets/update:
     post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: UpdateAssetsStatus
       summary: Update assets
       parameters:
-          - $ref: './assets_status.schema.yaml#/components/parameters/AssetsStatusRequestQueryParameter'
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './assets_status.schema.yaml#/components/schemas/AssetsRequestQuery'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: './assets_status.schema.yaml#/components/schemas/SuccessResponse'
+                type: object
+                properties: {}
+                # Define properties for the success response if needed

@@ -57,7 +57,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('setup Page', () => {
@@ -113,7 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('with existing indices', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/189314
+      describe.skip('with existing indices', () => {
         before(async () => {
           await createConnector();
           await createIndex();
@@ -203,6 +203,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('has embedded console', async () => {
       await testHasEmbeddedConsole(pageObjects);
+    });
+
+    describe('connectors enabled on serverless search', () => {
+      it('has all LLM connectors', async () => {
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundLLMConnectorOptionsExists();
+      });
     });
   });
 }

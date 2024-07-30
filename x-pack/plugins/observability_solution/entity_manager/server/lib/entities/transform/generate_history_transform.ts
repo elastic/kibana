@@ -21,19 +21,50 @@ import {
   generateHistoryTransformId,
   generateHistoryIngestPipelineId,
   generateHistoryIndexName,
+  generateHistoryBackfillTransformId,
 } from '../helpers/generate_component_id';
+import { isBackfillEnabled } from '../helpers/is_backfill_enabled';
 
 export function generateHistoryTransform(
-  definition: EntityDefinition
+  definition: EntityDefinition,
+  backfill = false
 ): TransformPutTransformRequest {
+  if (backfill && !isBackfillEnabled(definition)) {
+    throw new Error(
+      'This function was called with backfill=true without history.settings.backfillSyncDelay'
+    );
+  }
+
   const filter: QueryDslQueryContainer[] = [];
 
   if (definition.filter) {
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
+  if (backfill && definition.history.settings?.backfillLookbackPeriod) {
+    filter.push({
+      range: {
+        [definition.history.timestampField]: {
+          gte: `now-${definition.history.settings?.backfillLookbackPeriod.toJSON()}`,
+        },
+      },
+    });
+  }
+
+  const syncDelay = backfill
+    ? definition.history.settings?.backfillSyncDelay
+    : definition.history.settings?.syncDelay;
+
+  const transformId = backfill
+    ? generateHistoryBackfillTransformId(definition)
+    : generateHistoryTransformId(definition);
+
+  const frequency = backfill
+    ? definition.history.settings?.backfillFrequency
+    : definition.history.settings?.frequency;
+
   return {
-    transform_id: generateHistoryTransformId(definition),
+    transform_id: transformId,
     _meta: {
       definitionVersion: definition.version,
       managed: definition.managed,
@@ -53,11 +84,11 @@ export function generateHistoryTransform(
       index: `${generateHistoryIndexName({ id: 'noop' } as EntityDefinition)}`,
       pipeline: generateHistoryIngestPipelineId(definition),
     },
-    frequency: definition.history.settings?.frequency ?? ENTITY_DEFAULT_HISTORY_FREQUENCY,
+    frequency: frequency || ENTITY_DEFAULT_HISTORY_FREQUENCY,
     sync: {
       time: {
         field: definition.history.settings?.syncField ?? definition.history.timestampField,
-        delay: definition.history.settings?.syncDelay ?? ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
+        delay: syncDelay || ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
       },
     },
     settings: {

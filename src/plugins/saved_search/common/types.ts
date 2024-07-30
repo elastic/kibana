@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type {
+  ISearchSource,
+  RefreshInterval,
+  SerializedSearchSourceFields,
+  TimeRange,
+} from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -37,7 +42,7 @@ export type VisContextUnmapped =
 /** @internal **/
 export interface SavedSearchAttributes {
   title: string;
-  sort: Array<[string, string]>;
+  sort: SortOrder[];
   columns: string[];
   description: string;
   grid: DiscoverGridSettings;
@@ -66,32 +71,10 @@ export interface SavedSearchAttributes {
 export type SortOrder = [string, string];
 
 /** @public **/
-export interface SavedSearch {
+export type SavedSearch = Partial<SavedSearchAttributes> & {
   searchSource: ISearchSource;
   id?: string;
-  title?: string;
-  sort?: SortOrder[];
-  columns?: string[];
-  description?: string;
   tags?: string[] | undefined;
-  grid?: DiscoverGridSettings;
-  hideChart?: boolean;
-  viewMode?: VIEW_MODE;
-  hideAggregatedPreview?: boolean;
-  rowHeight?: number;
-  headerRowHeight?: number;
-  isTextBasedQuery?: boolean;
-  usesAdHocDataView?: boolean;
-
-  // for restoring time range with a saved search
-  timeRestore?: boolean;
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-
-  rowsPerPage?: number;
-  sampleSize?: number;
-  breakdownField?: string;
-  visContext?: VisContextUnmapped;
 
   // Whether or not this saved search is managed by the system
   managed: boolean;
@@ -102,4 +85,9 @@ export interface SavedSearch {
     aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
-}
+};
+
+/** @internal **/
+export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
+  serializedSearchSource?: SerializedSearchSourceFields;
+};
