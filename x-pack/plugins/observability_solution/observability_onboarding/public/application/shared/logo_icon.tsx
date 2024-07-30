@@ -68,45 +68,33 @@ function useIconForLogo(logo?: SupportedLogo): string | undefined {
   }
 }
 
-function toAvatarSize(size?: EuiIconProps['size']): EuiAvatarProps['size'] {
-  switch (size) {
-    case 's':
-      return 's';
-    case 'm':
-      return 'm';
-    case 'l':
-      return 'l';
-    case 'xl':
-      return 'xl';
-    default:
-      return 'xl';
-  }
-}
+type LogoIconSizeProp = EuiIconProps['size'] | EuiAvatarProps['size'] | undefined;
 
-export function LogoIcon({
-  logo,
-  euiIconType,
-  isAvatar,
-  size,
-  className,
-}: {
+export interface LogoIconProps {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   isAvatar?: boolean;
-  size?: EuiIconProps['size'];
+  size: LogoIconSizeProp;
   className?: string;
-}) {
+}
+
+function isAvatarSize(size: LogoIconSizeProp): size is EuiAvatarProps['size'] {
+  return size !== 'original' && size !== 'xxl';
+}
+
+export function LogoIcon({ logo, euiIconType, isAvatar, size, className }: LogoIconProps) {
   const iconType = useIconForLogo(logo);
-  if (euiIconType && isAvatar)
+  if (euiIconType && isAvatar && isAvatarSize(size)) {
     return (
       <EuiAvatar
         color="subdued"
         iconType={euiIconType}
         name="logoIcon"
-        size={toAvatarSize(size)}
+        size={size}
         className={className}
       />
     );
+  }
   if (iconType || euiIconType) {
     return <EuiIcon type={euiIconType ?? iconType!} size={size} className={className} />;
   }
