@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-config-server-internal",
-        "id": "def-common.coreDeprecationProvider",
+        "id": "def-server.coreDeprecationProvider",
         "type": "Function",
         "tags": [],
         "label": "coreDeprecationProvider",
@@ -46,7 +38,7 @@
       },
       {
         "parentPluginId": "@kbn/core-config-server-internal",
-        "id": "def-common.ensureValidConfiguration",
+        "id": "def-server.ensureValidConfiguration",
         "type": "Function",
         "tags": [
           "private"
@@ -61,9 +53,9 @@
           ", params: ",
           {
             "pluginId": "@kbn/core-config-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreConfigServerInternalPluginApi",
-            "section": "def-common.EnsureValidConfigurationParameters",
+            "section": "def-server.EnsureValidConfigurationParameters",
             "text": "EnsureValidConfigurationParameters"
           },
           ") => Promise<void>"
@@ -74,7 +66,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-config-server-internal",
-            "id": "def-common.ensureValidConfiguration.$1",
+            "id": "def-server.ensureValidConfiguration.$1",
             "type": "Object",
             "tags": [],
             "label": "configService",
@@ -91,7 +83,7 @@
           },
           {
             "parentPluginId": "@kbn/core-config-server-internal",
-            "id": "def-common.ensureValidConfiguration.$2",
+            "id": "def-server.ensureValidConfiguration.$2",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -101,9 +93,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-config-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreConfigServerInternalPluginApi",
-                "section": "def-common.EnsureValidConfigurationParameters",
+                "section": "def-server.EnsureValidConfigurationParameters",
                 "text": "EnsureValidConfigurationParameters"
               }
             ],
@@ -120,7 +112,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-config-server-internal",
-        "id": "def-common.EnsureValidConfigurationParameters",
+        "id": "def-server.EnsureValidConfigurationParameters",
         "type": "Interface",
         "tags": [
           "private"
@@ -132,9 +124,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-config-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreConfigServerInternalPluginApi",
-            "section": "def-common.EnsureValidConfigurationParameters",
+            "section": "def-server.EnsureValidConfigurationParameters",
             "text": "EnsureValidConfigurationParameters"
           },
           " extends ",
@@ -146,7 +138,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-config-server-internal",
-            "id": "def-common.EnsureValidConfigurationParameters.stripUnknownKeys",
+            "id": "def-server.EnsureValidConfigurationParameters.stripUnknownKeys",
             "type": "CompoundType",
             "tags": [],
             "label": "stripUnknownKeys",
@@ -164,6 +156,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

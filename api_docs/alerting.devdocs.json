@@ -2817,9 +2817,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -2839,9 +2839,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2865,9 +2865,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -2902,9 +2902,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3740,9 +3740,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -3760,9 +3760,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-server.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -3780,9 +3780,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
+                "section": "def-server.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               }
             ],
@@ -3968,7 +3968,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+              "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; findLazy: (search: string, size?: number) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              "[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5421,9 +5429,9 @@
           "; getAuditLogger: () => ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditLogger",
+            "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
           " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
@@ -7945,9 +7953,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-server.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -7989,9 +7997,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -11559,9 +11567,9 @@
           "[]; } & Omit<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsResolveResponse",
+            "section": "def-server.SavedObjectsResolveResponse",
             "text": "SavedObjectsResolveResponse"
           },
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"

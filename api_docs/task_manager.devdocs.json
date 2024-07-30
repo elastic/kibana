@@ -28,9 +28,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -79,9 +79,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -121,9 +121,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -165,9 +165,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -230,14 +230,16 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, docLinks, }: ",
+              "({ savedObjects, elasticsearch, executionContext, docLinks }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
+              ", { cloud, serverless }: ",
+              "TaskManagerPluginStart",
               ") => ",
               {
                 "pluginId": "taskManager",
@@ -256,16 +258,31 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n    docLinks,\n  }",
+                "label": "{ savedObjects, elasticsearch, executionContext, docLinks }",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
+                ],
+                "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.TaskManagerPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ cloud, serverless }",
+                "description": [],
+                "signature": [
+                  "TaskManagerPluginStart"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
