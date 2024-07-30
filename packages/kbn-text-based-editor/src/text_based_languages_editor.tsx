@@ -469,7 +469,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               abortController
             ).result;
             const columns =
-              table?.columns.map((c) => ({ name: c.name, type: c.meta.esType ?? 'unknown' })) || [];
+              table?.columns
+                .map((c) => ({ name: c.name, type: c.meta.esType ?? 'unsupported' }))
+                .filter((c) => c.type !== 'unsupported') || [];
             return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
